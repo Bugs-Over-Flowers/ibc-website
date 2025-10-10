@@ -40,3 +40,11 @@
 #
 #     - script: "hello.go"
 #       runner: go run
+
+pre-commit:
+  commands:
+    check-code:
+      run: npm run check-code
+    update-index:
+      run: git update-index --again
+
