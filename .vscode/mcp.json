@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=rpdourwztdpwdebggkkc"
+    },
+    "figma": {
+      "url": "http://127.0.0.1:3845/mcp",
+      "type": "http"
+    }
+  }
+}
