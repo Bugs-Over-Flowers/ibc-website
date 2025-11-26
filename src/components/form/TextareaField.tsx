@@ -2,7 +2,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { FieldInfo } from "./FieldInfo";
+import { FieldErrors } from "./FieldErrors";
 
 interface TextareaFieldProps {
   label?: string;
@@ -35,7 +35,7 @@ export function TextareaField({
       {description && (
         <p className="text-muted-foreground text-sm">{description}</p>
       )}
-      <FieldInfo />
+      <FieldErrors />
     </div>
   );
 }

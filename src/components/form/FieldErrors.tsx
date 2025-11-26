@@ -1,6 +1,6 @@
 import { useFieldContext } from "@/hooks/_formHooks";
 
-export function FieldInfo() {
+export function FieldErrors() {
   const field = useFieldContext();
   return (
     <>

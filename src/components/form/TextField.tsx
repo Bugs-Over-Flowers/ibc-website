@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { FieldInfo } from "./FieldInfo";
+import { FieldErrors } from "./FieldErrors";
 
 interface TextFieldProps {
   label?: string;
@@ -36,7 +36,7 @@ export function TextField({
       {description && (
         <p className="text-muted-foreground text-sm">{description}</p>
       )}
-      <FieldInfo />
+      <FieldErrors />
     </div>
   );
 }

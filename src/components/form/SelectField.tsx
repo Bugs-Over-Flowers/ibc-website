@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { FieldInfo } from "./FieldInfo";
+import { FieldErrors } from "./FieldErrors";
 
 interface SelectFieldProps {
   label?: string;
@@ -47,7 +47,7 @@ export function SelectField({
       {description && (
         <p className="text-muted-foreground text-sm">{description}</p>
       )}
-      <FieldInfo />
+      <FieldErrors />
     </div>
   );
 }

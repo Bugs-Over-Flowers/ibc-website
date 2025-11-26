@@ -1,4 +1,4 @@
-export { FieldInfo } from "./FieldInfo";
+export { FieldErrors } from "./FieldErrors";
 export { NumberField } from "./NumberField";
 export { SelectField } from "./SelectField";
 export { TextareaField } from "./TextareaField";

@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { FieldInfo } from "./FieldInfo";
+import { FieldInfo } from "./FieldErrors";
 
 interface NumberFieldProps {
   label?: string;
