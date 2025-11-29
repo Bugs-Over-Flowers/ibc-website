@@ -5,7 +5,7 @@ export const phoneSchema = z
   .string()
   .regex(/^(\+63|0)?9\d{9}$/, "Invalid Philippine phone number");
 
-export const emailSchema = z.string().email("Invalid email address");
+export const emailSchema = z.email("Invalid email address");
 
 export const requiredString = z.string().min(1, "Required");
 

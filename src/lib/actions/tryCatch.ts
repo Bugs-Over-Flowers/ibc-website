@@ -1,11 +1,14 @@
-type Result<T> = { data: T; error: null } | { data: null; error: Error };
+import type { ServerActionResult } from "./types";
 
-async function tryCatch<T>(promise: Promise<T>): Promise<Result<T>> {
+async function tryCatch<T>(
+  promise: Promise<T>
+): Promise<ServerActionResult<T, string>> {
   try {
     const data = await promise;
-    return { data, error: null };
+    return [null, data];
   } catch (error) {
-    return { data: null, error: error as Error };
+    const message = error instanceof Error ? error.message : String(error);
+    return [message, null];
   }
 }
 

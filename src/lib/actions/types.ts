@@ -1,8 +1,10 @@
+export type ServerActionSuccess<T> = [null, T];
+export type ServerActionError<E> = [E, null];
 
-type ServerActionSuccess<T> = { success: true; data: T };
-type ServerActionError = { success: false; error: string };
-export type ServerActionResult<T> = ServerActionSuccess<T> | ServerActionError;
+export type ServerActionResult<T, E = string> =
+  | ServerActionError<E>
+  | ServerActionSuccess<T>;
 
-export type ServerAction<TInput extends unknown[], TOutput> = (
+export type ServerAction<TInput extends unknown[], TOutput, TError = string> = (
   ...args: TInput
-) => Promise<ServerActionResult<TOutput>>;
+) => Promise<ServerActionResult<TOutput, TError>>;

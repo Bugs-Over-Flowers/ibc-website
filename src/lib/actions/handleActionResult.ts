@@ -8,28 +8,26 @@ interface HandleActionOptions<T> {
   errorToast?: Parameters<typeof toast.error>;
 }
 
-function handleActionResult<T>(
-  result: ServerActionResult<T>,
+function handleActionResult<T, E = string>(
+  result: ServerActionResult<T, E>,
   options: HandleActionOptions<T>
-) {
+): T | null {
   const { onSuccess, onError, successToast, errorToast } = options;
+  const [error, data] = result;
 
-  if (result.success) {
-    if (onSuccess) {
-      onSuccess(result.data);
-    }
+  if (error === null) {
+    onSuccess?.(data as T);
     if (successToast) {
-      console.log("Success:", successToast[0]);
       toast.success(...successToast);
     }
+    return data;
   } else {
-    if (onError) {
-      onError(result.error);
-    }
+    const message = typeof error === "string" ? error : String(error);
+    onError?.(message);
     if (errorToast) {
-      console.error("Error:", result.error);
       toast.error(...errorToast);
     }
+    return null;
   }
 }
 
