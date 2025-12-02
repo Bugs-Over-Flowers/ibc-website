@@ -1,15 +1,16 @@
 import { useFieldContext } from "@/hooks/_formHooks";
+import { FieldError } from "../ui/field";
 
 export function FieldErrors() {
   const field = useFieldContext();
+
   return (
     <>
       {field.state.meta.isTouched && field.state.meta.errors.length ? (
-        <p className="text-destructive text-sm font-medium">
-          {field.state.meta.errors
-            .map((err) => (typeof err === "string" ? err : err?.message))
-            .join(", ")}
-        </p>
+        <FieldError
+          className="text-destructive text-sm font-medium"
+          errors={field.state.meta.errors}
+        />
       ) : null}
     </>
   );

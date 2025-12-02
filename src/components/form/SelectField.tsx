@@ -1,4 +1,3 @@
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -8,6 +7,7 @@ import {
 } from "@/components/ui/select";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
+import { Field, FieldDescription, FieldLabel } from "../ui/field";
 import { FieldErrors } from "./FieldErrors";
 
 interface SelectFieldProps {
@@ -18,7 +18,7 @@ interface SelectFieldProps {
   placeholder?: string;
 }
 
-export function SelectField({
+function SelectField({
   label,
   description,
   className,
@@ -27,8 +27,8 @@ export function SelectField({
 }: SelectFieldProps) {
   const field = useFieldContext<string>();
   return (
-    <div className={cn("grid gap-2", className)}>
-      {label && <Label htmlFor={field.name}>{label}</Label>}
+    <Field className={cn("grid gap-2", className)}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Select
         value={field.state.value}
         onValueChange={(value) => field.handleChange(value)}
@@ -44,10 +44,10 @@ export function SelectField({
           ))}
         </SelectContent>
       </Select>
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
+      {description && <FieldDescription>{description}</FieldDescription>}
       <FieldErrors />
-    </div>
+    </Field>
   );
 }
+
+export default SelectField;

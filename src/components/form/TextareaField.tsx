@@ -1,7 +1,7 @@
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
+import { Field, FieldDescription, FieldLabel } from "../ui/field";
 import { FieldErrors } from "./FieldErrors";
 
 interface TextareaFieldProps {
@@ -12,7 +12,7 @@ interface TextareaFieldProps {
   rows?: number;
 }
 
-export function TextareaField({
+function TextareaField({
   label,
   description,
   className,
@@ -21,8 +21,8 @@ export function TextareaField({
 }: TextareaFieldProps) {
   const field = useFieldContext<string>();
   return (
-    <div className={cn("grid gap-2", className)}>
-      {label && <Label htmlFor={field.name}>{label}</Label>}
+    <Field className={cn("grid gap-2", className)}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Textarea
         id={field.name}
         name={field.name}
@@ -32,10 +32,9 @@ export function TextareaField({
         placeholder={placeholder}
         rows={rows}
       />
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
+      {description && <FieldDescription>{description}</FieldDescription>}
       <FieldErrors />
-    </div>
+    </Field>
   );
 }
+export default TextareaField;

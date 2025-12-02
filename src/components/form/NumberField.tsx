@@ -1,8 +1,8 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { FieldInfo } from "./FieldErrors";
+import { Field, FieldDescription, FieldLabel } from "../ui/field";
+import { FieldErrors } from "./FieldErrors";
 
 interface NumberFieldProps {
   label?: string;
@@ -14,7 +14,7 @@ interface NumberFieldProps {
   step?: number;
 }
 
-export function NumberField({
+function NumberField({
   label,
   description,
   className,
@@ -25,8 +25,8 @@ export function NumberField({
 }: NumberFieldProps) {
   const field = useFieldContext<number>();
   return (
-    <div className={cn("grid gap-2", className)}>
-      {label && <Label htmlFor={field.name}>{label}</Label>}
+    <Field className={cn("grid gap-2", className)}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
         id={field.name}
         name={field.name}
@@ -39,10 +39,9 @@ export function NumberField({
         max={max}
         step={step}
       />
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
-      <FieldInfo />
-    </div>
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldErrors />
+    </Field>
   );
 }
+export default NumberField;

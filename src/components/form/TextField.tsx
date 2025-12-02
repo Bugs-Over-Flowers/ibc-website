@@ -1,8 +1,8 @@
 import type * as React from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
+import { Field, FieldDescription, FieldLabel } from "../ui/field";
 import { FieldErrors } from "./FieldErrors";
 
 interface TextFieldProps {
@@ -13,7 +13,7 @@ interface TextFieldProps {
   type?: React.HTMLInputTypeAttribute;
 }
 
-export function TextField({
+function TextField({
   label,
   description,
   className,
@@ -22,8 +22,8 @@ export function TextField({
 }: TextFieldProps) {
   const field = useFieldContext<string>();
   return (
-    <div className={cn("grid gap-2", className)}>
-      {label && <Label htmlFor={field.name}>{label}</Label>}
+    <Field className={cn("grid gap-2", className)}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
         id={field.name}
         name={field.name}
@@ -33,10 +33,10 @@ export function TextField({
         placeholder={placeholder}
         type={type}
       />
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
+      {description && <FieldDescription>{description}</FieldDescription>}
       <FieldErrors />
-    </div>
+    </Field>
   );
 }
+
+export default TextField;
