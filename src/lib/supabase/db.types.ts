@@ -14,6 +14,153 @@ export type Database = {
   }
   public: {
     Tables: {
+      Application: {
+        Row: {
+          applicationDate: string
+          applicationId: string
+          applicationType: Database["public"]["Enums"]["ApplicationType"]
+          companyAddress: string
+          companyName: string
+          emailAddress: string
+          faxNumber: string
+          landline: string
+          logoImageURL: string
+          memberId: string | null
+          mobileNumber: string
+          paymentMethod: Database["public"]["Enums"]["PaymentMethod"]
+          sectorId: number
+          websiteURL: string
+        }
+        Insert: {
+          applicationDate?: string
+          applicationId?: string
+          applicationType: Database["public"]["Enums"]["ApplicationType"]
+          companyAddress: string
+          companyName: string
+          emailAddress: string
+          faxNumber: string
+          landline: string
+          logoImageURL: string
+          memberId?: string | null
+          mobileNumber: string
+          paymentMethod: Database["public"]["Enums"]["PaymentMethod"]
+          sectorId: number
+          websiteURL: string
+        }
+        Update: {
+          applicationDate?: string
+          applicationId?: string
+          applicationType?: Database["public"]["Enums"]["ApplicationType"]
+          companyAddress?: string
+          companyName?: string
+          emailAddress?: string
+          faxNumber?: string
+          landline?: string
+          logoImageURL?: string
+          memberId?: string | null
+          mobileNumber?: string
+          paymentMethod?: Database["public"]["Enums"]["PaymentMethod"]
+          sectorId?: number
+          websiteURL?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Application_sectorId_fkey"
+            columns: ["sectorId"]
+            isOneToOne: false
+            referencedRelation: "Sector"
+            referencedColumns: ["sectorId"]
+          },
+        ]
+      }
+      ApplicationMember: {
+        Row: {
+          applicationId: string
+          applicationMemberId: string
+          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"]
+          birthdate: string
+          companyDesignation: string
+          emailAddress: string
+          faxNumber: string
+          fullName: string
+          landline: string
+          mailingAddress: string
+          mobileNumber: string
+          nationality: string
+          sex: string
+        }
+        Insert: {
+          applicationId: string
+          applicationMemberId?: string
+          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"]
+          birthdate: string
+          companyDesignation: string
+          emailAddress: string
+          faxNumber: string
+          fullName: string
+          landline: string
+          mailingAddress: string
+          mobileNumber: string
+          nationality: string
+          sex: string
+        }
+        Update: {
+          applicationId?: string
+          applicationMemberId?: string
+          applicationMemberType?: Database["public"]["Enums"]["ApplicationMemberType"]
+          birthdate?: string
+          companyDesignation?: string
+          emailAddress?: string
+          faxNumber?: string
+          fullName?: string
+          landline?: string
+          mailingAddress?: string
+          mobileNumber?: string
+          nationality?: string
+          sex?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ApplicationMember_applicationId_fkey"
+            columns: ["applicationId"]
+            isOneToOne: false
+            referencedRelation: "Application"
+            referencedColumns: ["applicationId"]
+          },
+        ]
+      }
+      BusinessMember: {
+        Row: {
+          joinDate: string
+          logoImageURL: string
+          memberId: number
+          sectorId: number
+          websiteURL: string
+        }
+        Insert: {
+          joinDate: string
+          logoImageURL: string
+          memberId?: number
+          sectorId: number
+          websiteURL: string
+        }
+        Update: {
+          joinDate?: string
+          logoImageURL?: string
+          memberId?: number
+          sectorId?: number
+          websiteURL?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "BusinessMember_sectorId_fkey"
+            columns: ["sectorId"]
+            isOneToOne: false
+            referencedRelation: "Sector"
+            referencedColumns: ["sectorId"]
+          },
+        ]
+      }
       CheckIn: {
         Row: {
           date: string
@@ -107,21 +254,31 @@ export type Database = {
       }
       ProofImage: {
         Row: {
+          applicationId: string | null
           proofImageId: string
           registrationId: string | null
           url: string
         }
         Insert: {
+          applicationId?: string | null
           proofImageId?: string
           registrationId?: string | null
           url: string
         }
         Update: {
+          applicationId?: string | null
           proofImageId?: string
           registrationId?: string | null
           url?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ProofImage_applicationId_fkey"
+            columns: ["applicationId"]
+            isOneToOne: false
+            referencedRelation: "Application"
+            referencedColumns: ["applicationId"]
+          },
           {
             foreignKeyName: "ProofImage_registrationId_fkey"
             columns: ["registrationId"]
