@@ -1,8 +1,8 @@
-import type { ServerActionResult } from "./types";
+import type { ServerFunctionResult } from "./types";
 
 async function tryCatch<T>(
-  promise: Promise<T>
-): Promise<ServerActionResult<T, string>> {
+  promise: Promise<T>,
+): Promise<ServerFunctionResult<T, string>> {
   try {
     const data = await promise;
     return [null, data];

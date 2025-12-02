@@ -1,5 +1,7 @@
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import {
+  FormDatePicker,
+  FormDateRangePicker,
   NumberField,
   SelectField,
   TextareaField,
@@ -17,6 +19,8 @@ export const { useAppForm, withForm } = createFormHook({
     NumberField,
     SelectField,
     TextareaField,
+    FormDatePicker,
+    FormDateRangePicker,
   },
   formComponents: {},
 });
