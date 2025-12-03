@@ -6,7 +6,7 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   // To be implemented
-  return { children };
+  return <>{children}</>;
 };
 
 export default AdminLayout;
