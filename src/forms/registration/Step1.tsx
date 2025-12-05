@@ -56,11 +56,9 @@ const Step1 = ({ members }: Step1Props) => {
         <f.AppField name="member">
           {(field) => (
             <FieldSet>
-              <FieldLabel>
-                <FieldTitle>
-                  <h3>Affiliation</h3>
-                </FieldTitle>
-              </FieldLabel>
+              <FieldTitle>
+                <h3>Affiliation</h3>
+              </FieldTitle>
               <FieldDescription>Are you a member of IBC?</FieldDescription>
               <RadioGroup
                 defaultValue="member"
