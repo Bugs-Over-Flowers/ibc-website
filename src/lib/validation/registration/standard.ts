@@ -6,12 +6,12 @@ export const StandardRegistrationStep1Schema = z
     member: z
       .union([z.literal("member"), z.literal("nonmember")])
       .default("member"),
-    nonMemberName: z.optional(z.string()),
-    businessMemberId: z.optional(z.string()),
+    nonMemberName: z.string(),
+    businessMemberId: z.string(),
   })
   .superRefine((data, ctx) => {
     if (data.member === "member") {
-      if (!data.businessMemberId) {
+      if (data.businessMemberId === "") {
         ctx.addIssue({
           code: "custom",
           message: "Business member is required",
@@ -19,7 +19,7 @@ export const StandardRegistrationStep1Schema = z
         });
       }
     } else {
-      if (!data.nonMemberName) {
+      if (data.nonMemberName === "") {
         ctx.addIssue({
           code: "custom",
           message: "Name is required",
