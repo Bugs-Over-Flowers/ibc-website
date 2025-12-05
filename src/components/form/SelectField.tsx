@@ -25,8 +25,8 @@ function SelectField({
   placeholder,
 }: SelectFieldProps) {
   const field = useFieldContext<string>();
-  const isInvalid =
-    field.state.meta.isTouched && field.state.meta.errors.length > 0;
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
   return (
     <Field data-invalid={isInvalid} className={cn("grid gap-2", className)}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}

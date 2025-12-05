@@ -19,8 +19,7 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
   className,
 }: FormDatePickerProps) => {
   const field = useFieldContext<Date | undefined>();
-  const isInvalid =
-    field.state.meta.isTouched && field.state.meta.errors.length > 0;
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
   const [open, setOpen] = useState(false);
   return (
     <Field data-invalid={isInvalid}>
