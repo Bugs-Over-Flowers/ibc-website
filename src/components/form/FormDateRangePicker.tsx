@@ -1,9 +1,8 @@
 import type { DateRange } from "react-day-picker";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { Calendar } from "../ui/calendar";
-import { Field, FieldDescription } from "../ui/field";
+import { Field, FieldDescription, FieldError } from "../ui/field";
 import { Label } from "../ui/label";
-import { FieldErrors } from "./FieldErrors";
 
 interface FormDateRangePickerProps {
   label?: string;
@@ -29,7 +28,7 @@ const FormDateRangePicker: React.FC<FormDateRangePickerProps> = ({
         className={className}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldErrors />
+      <FieldError errors={field.state.meta.errors} />
     </Field>
   );
 };

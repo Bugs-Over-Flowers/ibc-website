@@ -1,8 +1,7 @@
 import { Textarea } from "@/components/ui/textarea";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { Field, FieldDescription, FieldLabel } from "../ui/field";
-import { FieldErrors } from "./FieldErrors";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
 interface TextareaFieldProps {
   label?: string;
@@ -33,7 +32,7 @@ function TextareaField({
         rows={rows}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldErrors />
+      <FieldError errors={field.state.meta.errors} />
     </Field>
   );
 }

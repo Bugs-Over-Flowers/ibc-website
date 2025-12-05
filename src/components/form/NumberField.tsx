@@ -1,8 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { Field, FieldDescription, FieldLabel } from "../ui/field";
-import { FieldErrors } from "./FieldErrors";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
 interface NumberFieldProps {
   label?: string;
@@ -40,7 +39,7 @@ function NumberField({
         step={step}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldErrors />
+      <FieldError errors={field.state.meta.errors} />
     </Field>
   );
 }

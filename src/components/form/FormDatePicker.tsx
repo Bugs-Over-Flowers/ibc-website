@@ -3,10 +3,9 @@ import { useState } from "react";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
-import { Field, FieldDescription } from "../ui/field";
+import { Field, FieldDescription, FieldError } from "../ui/field";
 import { Label } from "../ui/label";
 import { Popover, PopoverTrigger } from "../ui/popover";
-import { FieldErrors } from "./FieldErrors";
 
 interface FormDatePickerProps {
   label?: string;
@@ -47,7 +46,7 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
         />
       </Popover>
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldErrors />
+      <FieldError errors={field.state.meta.errors} />
     </Field>
   );
 };

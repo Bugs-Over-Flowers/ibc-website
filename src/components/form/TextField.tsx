@@ -2,8 +2,7 @@ import type * as React from "react";
 import { Input } from "@/components/ui/input";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { Field, FieldDescription, FieldLabel } from "../ui/field";
-import { FieldErrors } from "./FieldErrors";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
 interface TextFieldProps {
   label?: string;
@@ -11,6 +10,7 @@ interface TextFieldProps {
   className?: string;
   placeholder?: string;
   type?: React.HTMLInputTypeAttribute;
+  disabled?: boolean;
 }
 
 function TextField({
@@ -19,6 +19,7 @@ function TextField({
   className,
   placeholder,
   type = "text",
+  disabled,
 }: TextFieldProps) {
   const field = useFieldContext<string>();
   return (
@@ -32,9 +33,12 @@ function TextField({
         onChange={(e) => field.handleChange(e.target.value)}
         placeholder={placeholder}
         type={type}
+        disabled={disabled}
+        autoComplete="off"
+        autoCapitalize="on"
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldErrors />
+      <FieldError errors={field.state.meta.errors} />
     </Field>
   );
 }
