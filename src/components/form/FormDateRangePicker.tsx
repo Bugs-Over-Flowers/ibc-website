@@ -1,7 +1,7 @@
 import type { DateRange } from "react-day-picker";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { Calendar } from "../ui/calendar";
-import { Field, FieldDescription, FieldError } from "../ui/field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 import { Label } from "../ui/label";
 
 interface FormDateRangePickerProps {
@@ -16,9 +16,11 @@ const FormDateRangePicker: React.FC<FormDateRangePickerProps> = ({
   className,
 }: FormDateRangePickerProps) => {
   const field = useFieldContext<DateRange | undefined>();
+  const isInvalid =
+    field.state.meta.isTouched && field.state.meta.errors.length > 0;
   return (
-    <Field>
-      {label && <Label>{label}</Label>}
+    <Field data-invalid={isInvalid}>
+      {label && <FieldLabel>{label}</FieldLabel>}
       <Calendar
         mode="range"
         defaultMonth={new Date(Date.now())}
@@ -26,6 +28,7 @@ const FormDateRangePicker: React.FC<FormDateRangePickerProps> = ({
         onSelect={(v) => field.handleChange(v)}
         numberOfMonths={2}
         className={className}
+        data-invalid={isInvalid}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />

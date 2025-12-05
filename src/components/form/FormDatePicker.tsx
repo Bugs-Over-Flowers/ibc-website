@@ -19,9 +19,11 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
   className,
 }: FormDatePickerProps) => {
   const field = useFieldContext<Date | undefined>();
+  const isInvalid =
+    field.state.meta.isTouched && field.state.meta.errors.length > 0;
   const [open, setOpen] = useState(false);
   return (
-    <Field>
+    <Field data-invalid={isInvalid}>
       {label && <Label>{label}</Label>}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -43,6 +45,7 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
           }}
           numberOfMonths={2}
           className={className}
+          data-invalid={isInvalid}
         />
       </Popover>
       {description && <FieldDescription>{description}</FieldDescription>}

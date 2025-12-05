@@ -37,6 +37,7 @@ function TextField({
         disabled={disabled}
         autoComplete="off"
         autoCapitalize="on"
+        data-invalid={isInvalid}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />
