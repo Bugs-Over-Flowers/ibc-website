@@ -10,7 +10,11 @@ export default function FormButtons({ onBack, onNext }: FormButtonsProps) {
   const step = useRegistrationStore((s) => s.step);
   return (
     <div className="flex justify-between">
-      {step > 1 && <Button onClick={onBack}> Back</Button>}
+      {step > 1 && (
+        <Button onClick={onBack} type="button">
+          Back
+        </Button>
+      )}
       {step < MAX_STEPS && (
         <Button onClick={onNext}>
           {step === MAX_STEPS ? "Submit" : "Next"}
