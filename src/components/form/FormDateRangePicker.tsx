@@ -2,7 +2,6 @@ import type { DateRange } from "react-day-picker";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { Calendar } from "../ui/calendar";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
-import { Label } from "../ui/label";
 
 interface FormDateRangePickerProps {
   label?: string;
@@ -16,8 +15,8 @@ const FormDateRangePicker: React.FC<FormDateRangePickerProps> = ({
   className,
 }: FormDateRangePickerProps) => {
   const field = useFieldContext<DateRange | undefined>();
-  const isInvalid =
-    field.state.meta.isTouched && field.state.meta.errors.length > 0;
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
   return (
     <Field data-invalid={isInvalid}>
       {label && <FieldLabel>{label}</FieldLabel>}
