@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Anaheim } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css?url";
 import { Toaster } from "@/components/ui/sonner";
 
-const anaheim = Anaheim({
-  variable: "--font-anaheim",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
-      <body className={`${anaheim.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased`}>
         <Toaster position="top-right" richColors />
         {children}
       </body>
