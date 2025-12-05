@@ -196,6 +196,7 @@ export type Database = {
           eventStartDate: string | null;
           eventTitle: string;
           eventType: Database["public"]["Enums"]["EventType"] | null;
+          registrationFee: number;
           venue: string | null;
         };
         Insert: {
@@ -206,6 +207,7 @@ export type Database = {
           eventStartDate?: string | null;
           eventTitle: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          registrationFee?: number;
           venue?: string | null;
         };
         Update: {
@@ -216,6 +218,7 @@ export type Database = {
           eventStartDate?: string | null;
           eventTitle?: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          registrationFee?: number;
           venue?: string | null;
         };
         Relationships: [];

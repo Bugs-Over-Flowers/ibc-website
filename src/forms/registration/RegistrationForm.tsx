@@ -18,7 +18,7 @@ export default function RegistrationForm({ members }: RegistrationFormProps) {
     return <div>Loading Registration Form</div>;
   }
   return (
-    <main>
+    <main className="pb-10">
       {step === 1 ? (
         <Step1 members={members} />
       ) : step === 2 ? (

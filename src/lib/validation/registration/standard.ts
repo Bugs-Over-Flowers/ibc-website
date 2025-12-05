@@ -79,10 +79,10 @@ export type StandardRegistrationStep2Schema = z.infer<
 export const StandardRegistrationStep3Schema = z
   .object({
     paymentMethod: z.union([z.literal("online"), z.literal("onsite")]),
-    paymentProofs: z.array(z.url()).optional(),
+    paymentProof: z.string().optional(),
   })
-  .superRefine(({ paymentMethod, paymentProofs }, ctx) => {
-    if (paymentMethod === "online" && paymentProofs?.length === 0) {
+  .superRefine(({ paymentMethod, paymentProof }, ctx) => {
+    if (paymentMethod === "online" && !paymentProof) {
       // add error if there is no proofs
       ctx.addIssue({
         code: "custom",
@@ -93,11 +93,11 @@ export const StandardRegistrationStep3Schema = z
 
     if (
       paymentMethod === "onsite" &&
-      paymentProofs &&
-      paymentProofs?.length > 0
+      paymentProof &&
+      paymentProof?.length > 0
     ) {
       // remove payment proofs
-      ctx.value.paymentProofs = [];
+      ctx.value.paymentProof = "";
     }
   });
 

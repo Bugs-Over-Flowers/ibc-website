@@ -22,7 +22,8 @@ export const getRegistrationEventDetails = async (
        eventHeaderUrl,
        eventStartDate,
        eventEndDate,
-       eventType
+       eventType,
+       registrationFee
        `,
     )
     .eq("eventId", eventId)
