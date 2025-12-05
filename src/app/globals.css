@@ -196,6 +196,10 @@ a {
   @apply text-primary underline;
 }
 
+.no-underline {
+  text-decoration: none;
+}
+
 body {
   @apply bg-background text-foreground font-sans;
 }

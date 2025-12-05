@@ -1,5 +1,10 @@
+import { Navbar } from "@/components/navbar/appNavbar";
+
 export default function Page() {
   return (
-    <div>page</div>
-  )
+    <>
+      <Navbar />
+      <div>page 1</div>
+    </>
+  );
 }
