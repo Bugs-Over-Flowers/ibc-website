@@ -39,10 +39,38 @@ export const RegistrantDetailsSchema = z.object({
   email: z.email(),
 });
 
-export const StandardRegistrationStep2Schema = z.object({
-  principalRegistrant: RegistrantDetailsSchema,
-  otherRegistrants: z.array(RegistrantDetailsSchema).optional(),
-});
+export const StandardRegistrationStep2Schema = z
+  .object({
+    principalRegistrant: RegistrantDetailsSchema,
+    otherRegistrants: z.optional(z.array(RegistrantDetailsSchema)),
+  })
+  .superRefine((data, ctx) => {
+    const seen = new Map<string, number>();
+
+    // Add principal registrant to the map first with index -1 to indicate it's the principal
+    const principalKey = `${data.principalRegistrant.firstName.toLowerCase()}-${data.principalRegistrant.lastName.toLowerCase()}`;
+    seen.set(principalKey, -1);
+
+    if (data.otherRegistrants && data.otherRegistrants.length > 0) {
+      data.otherRegistrants.forEach((registrant, index) => {
+        const key = `${registrant.firstName.toLowerCase()}-${registrant.lastName.toLowerCase()}`;
+        if (seen.has(key)) {
+          // biome-ignore lint/style/noNonNullAssertion: seen.has(key) run
+          const duplicateOfIndex = seen.get(key)!;
+          const duplicateOfLabel =
+            duplicateOfIndex === -1
+              ? "Principal Registrant"
+              : `Participant ${duplicateOfIndex + 2}`;
+          ctx.addIssue({
+            code: "custom",
+            message: `There is a duplicate registrant with the same first name and last name (${duplicateOfLabel} and Participant ${index + 2})`,
+            path: ["otherRegistrants", index],
+          });
+        }
+        seen.set(key, index);
+      });
+    }
+  });
 
 export type StandardRegistrationStep2Schema = z.infer<
   typeof StandardRegistrationStep2Schema
