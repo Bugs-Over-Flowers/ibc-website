@@ -32,6 +32,8 @@ const useRegistrationStore = create<
       registrationData: {
         step1: {
           member: "member",
+          businessMemberId: "",
+          nonMemberName: "",
         },
         step2: {
           principalRegistrant: {
