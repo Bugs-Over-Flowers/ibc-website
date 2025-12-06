@@ -99,24 +99,11 @@ export type StandardRegistrationStep3Schema = z.infer<
   typeof StandardRegistrationStep3Schema
 >;
 
-export const StandardRegistrationStep4Schema = z
-  .object({
-    termsAndConditions: z.boolean(),
-  })
-  .refine((data) => {
-    if (!data.termsAndConditions) {
-      return Promise.reject(
-        new z.ZodError([
-          {
-            code: "custom",
-            message: "You must agree to the terms and conditions.",
-            path: ["termsAndConditions"],
-          },
-        ]),
-      );
-    }
-    return Promise.resolve();
-  });
+export const StandardRegistrationStep4Schema = z.object({
+  termsAndConditions: z.boolean().refine((val) => val, {
+    error: "You must agree to the terms and conditions.",
+  }),
+});
 
 export type StandardRegistrationStep4Schema = z.infer<
   typeof StandardRegistrationStep4Schema
@@ -126,6 +113,7 @@ export const StandardRegistrationSchema = z.object({
   step1: StandardRegistrationStep1Schema,
   step2: StandardRegistrationStep2Schema,
   step3: StandardRegistrationStep3Schema,
+  step4: StandardRegistrationStep4Schema,
 });
 
 export type StandardRegistrationSchema = z.infer<

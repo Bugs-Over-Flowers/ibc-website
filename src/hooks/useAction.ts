@@ -8,27 +8,46 @@ interface UseActionOptions<TOutput> {
   onError?: (error: string) => void;
 }
 
-export function useAction<TInput, TOutput>(
-  action: ServerFunction<[TInput], TOutput>,
+/**
+ * Hook for executing server actions with loading states and error handling.
+ *
+ * @example
+ * // With input
+ * const { execute, isPending } = useAction(tryCatch(createItem), {
+ *   onSuccess: (data) => router.push(`/items/${data.id}`),
+ *   onError: (error) => toast.error(error),
+ * });
+ * execute({ name: "New Item" });
+ *
+ * @example
+ * // Without input
+ * const { execute, isPending } = useAction(tryCatch(refreshData));
+ * execute();
+ */
+export function useAction<TInput extends unknown[], TOutput>(
+  action: ServerFunction<TInput, TOutput>,
   options: UseActionOptions<TOutput> = {},
 ) {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<TOutput | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  async function execute(input: TInput) {
+  function execute(...args: TInput) {
     setError(null);
+    setData(null);
 
     startTransition(async () => {
-      const res = await action(input);
-      if (res[0] !== null) {
-        setError(res[0]);
-        options.onError?.(res[0]);
+      const res = await action(...args);
+
+      const [error, data] = res;
+      if (error !== null) {
+        setError(error);
+        options.onError?.(error);
         return;
       }
 
-      setData(res[1]);
-      options.onSuccess?.(res[1]);
+      setData(data);
+      options.onSuccess?.(data);
     });
   }
 

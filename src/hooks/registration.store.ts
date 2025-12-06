@@ -46,6 +46,9 @@ const useRegistrationStore = create<
         step3: {
           paymentMethod: "online",
         },
+        step4: {
+          termsAndConditions: false,
+        },
       },
       setStep: (step: number) => set({ step }),
       setEventDetails: (eventDetails: RegistrationStoreEventDetails | null) =>

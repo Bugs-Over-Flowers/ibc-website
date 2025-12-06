@@ -3,7 +3,11 @@ import { CircleAlert } from "lucide-react";
 import Image from "next/image";
 import type { FormEvent } from "react";
 import FormButtons from "@/components/FormButtons";
+import TermsAndConditions from "@/components/TermsAndConditions";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldError } from "@/components/ui/field";
 import {
   Item,
   ItemContent,
@@ -13,6 +17,7 @@ import {
   ItemSeparator,
   ItemTitle,
 } from "@/components/ui/item";
+import { Label } from "@/components/ui/label";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import useRegistrationStore from "@/hooks/registration.store";
 import { useRegistrationStep4 } from "@/hooks/useRegistrationStep4";
@@ -153,7 +158,51 @@ export default function Step4({ members }: Step4Props) {
           </ItemContent>
         </Item>
       </ItemGroup>
-
+      <f.AppField name="termsAndConditions">
+        {(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid;
+          return (
+            <div>
+              <Field orientation="horizontal">
+                <Checkbox
+                  name={field.name}
+                  id={field.name}
+                  checked={field.state.value}
+                  onCheckedChange={(checked) =>
+                    field.handleChange(checked === true)
+                  }
+                  aria-invalid={isInvalid}
+                />
+                <div className="flex gap-1">
+                  <Label htmlFor={field.name}>I have read the </Label>
+                  <TermsAndConditions
+                    triggerOverride={
+                      <button
+                        className="text-medium text-sm hover:underline"
+                        type="button"
+                      >
+                        Terms and Conditions
+                      </button>
+                    }
+                    customAcceptButton={(closeTermsAndConditions) => (
+                      <Button
+                        onClick={() => {
+                          field.handleChange(true);
+                          closeTermsAndConditions();
+                        }}
+                      >
+                        Accept
+                      </Button>
+                    )}
+                  />
+                </div>
+                <FieldError errors={field.state.meta.errors} />
+              </Field>
+            </div>
+          );
+        }}
+      </f.AppField>
       <FormButtons onNext={onNext} onBack={() => setStep(3)} />
     </form>
   );
