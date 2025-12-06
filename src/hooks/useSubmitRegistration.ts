@@ -3,10 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/client";
 import { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
-import {
-  submitRegistration,
-  submitRegistrationRPC,
-} from "@/server/registration/mutations";
+import { submitRegistrationRPC } from "@/server/registration/mutations";
 import useRegistrationStore from "./registration.store";
 import { useAction } from "./useAction";
 
@@ -56,7 +53,7 @@ export const useSubmitRegistration = () => {
           step2: parsedRegistrationData.step2,
           step3: {
             paymentMethod: "online",
-            paymentProofId: `${data.path}`,
+            path: `${data.path}.${step3.paymentProof.type.split("/")[1]}`,
           },
           step4: parsedRegistrationData.step4,
         });

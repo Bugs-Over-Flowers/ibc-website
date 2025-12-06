@@ -270,21 +270,21 @@ export type Database = {
       ProofImage: {
         Row: {
           applicationId: string | null;
+          path: string;
           proofImageId: string;
           registrationId: string | null;
-          url: string;
         };
         Insert: {
           applicationId?: string | null;
+          path: string;
           proofImageId?: string;
           registrationId?: string | null;
-          url: string;
         };
         Update: {
           applicationId?: string | null;
+          path?: string;
           proofImageId?: string;
           registrationId?: string | null;
-          url?: string;
         };
         Relationships: [
           {
@@ -369,7 +369,7 @@ export type Database = {
           p_non_member_name?: string;
           p_other_registrants?: Json;
           p_payment_method?: string;
-          p_payment_proof_id?: string;
+          p_payment_path?: string;
           p_principal_registrant?: Json;
         };
         Returns: Json;

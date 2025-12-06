@@ -123,7 +123,7 @@ export const ServerRegistrationSchema = z.object({
   step3: z.discriminatedUnion("paymentMethod", [
     z.object({
       paymentMethod: z.literal("online"),
-      paymentProofId: z.string(),
+      path: z.string(),
     }),
     z.object({
       paymentMethod: z.literal("onsite"),
