@@ -166,7 +166,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: Antic, ui-sans-serif, sans-serif, system-ui;
+  --font-sans: var(--font-inter);
   --font-mono: JetBrains Mono, Courier New, monospace;
   --font-serif: Signifier, Georgia, serif;
 
