@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { treeifyError, type ZodError, type ZodSchema } from "zod";
+import { treeifyError, type ZodError, type ZodType } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -90,7 +90,7 @@ export function zodErrorToFieldErrors(error: ZodError) {
  * });
  * ```
  */
-export function zodValidator<T>(schema: ZodSchema<T>) {
+export function zodValidator<T>(schema: ZodType<T>) {
   return ({ value }: { value: T }) => {
     const result = schema.safeParse(value);
     if (!result.success) {
