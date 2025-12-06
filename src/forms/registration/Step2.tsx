@@ -117,7 +117,6 @@ export default function Step2() {
         {(field) => {
           const otherRegistrantsCount = field.state.value?.length ?? 0;
           const canAddMore = otherRegistrantsCount < MAX_OTHER_PARTICIPANTS;
-          const totalParticipants = 1 + otherRegistrantsCount;
 
           return (
             <div className="space-y-4">
