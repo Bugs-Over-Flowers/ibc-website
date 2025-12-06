@@ -7,6 +7,7 @@ import {
   TextareaField,
   TextField,
 } from "@/components/form";
+import FormCheckBox from "@/components/form/FormCheckBox";
 import SubmitButton from "@/components/form/SubmitButton";
 
 export const { useFormContext, useFieldContext, formContext, fieldContext } =
@@ -22,6 +23,7 @@ export const { useAppForm, withForm } = createFormHook({
     TextareaField,
     FormDatePicker,
     FormDateRangePicker,
+    FormCheckBox,
   },
   formComponents: {
     SubmitButton,
