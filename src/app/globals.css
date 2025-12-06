@@ -35,7 +35,7 @@
   --sidebar-accent-foreground: oklch(0.4813 0.0664 218.1202);
   --sidebar-border: oklch(0.6073 0.0715 211.5066);
   --sidebar-ring: oklch(0.6809 0.0907 177.5429);
-  --font-sans: Anaheim, ui-sans-serif, sans-serif, system-ui;
+  --font-sans: Inter, ui-sans-serif, sans-serif, system-ui;
   --font-serif: serif;
   --font-mono: monospace;
   --radius: 0.5rem;
