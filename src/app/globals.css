@@ -250,7 +250,7 @@
   height: 2px;
   bottom: 0;
   left: 0;
-  background-color: oklch(var(--primary));
+  background-color: var(--primary);
   transition: transform 0.25s ease-out;
 }
 
@@ -267,6 +267,10 @@
 }
 
 .hover-underline-animation.center::after {
+  transform-origin: bottom center;
+}
+
+.hover-underline-animation.center:hover::after {
   transform-origin: bottom center;
 }
 

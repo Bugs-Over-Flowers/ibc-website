@@ -1,10 +1,10 @@
-import Navbar from "@/components/navbar/appNavbar";
 import Footer from "@/components/navbar/Footer";
+import Header from "@/components/navbar/Header";
 
 export default function Page() {
   return (
     <>
-      <Navbar />
+      <Header />
       <div>page 1</div>
       <Footer />
     </>

@@ -19,7 +19,7 @@ const navLinks = [
   { title: "CONTACT", href: "/contact" },
 ];
 
-export default function Navbar() {
+export default function Header() {
   return (
     <NavigationMenu className="w-full border-b bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
@@ -54,7 +54,7 @@ export default function Navbar() {
               </NavigationMenuItem>
             ))}
 
-            <Button variant="default" className="ml-4 font-bold text-md">
+            <Button variant="default" className="ml-4 font-medium text-md">
               <span className="sr-only">SIGN IN</span>
               SIGN IN
             </Button>
