@@ -1,6 +1,6 @@
-import { Banknote } from "lucide-react";
+import { Banknote, CreditCard, Users } from "lucide-react";
 import Image from "next/image";
-import { Activity, type FormEvent, useRef } from "react";
+import { Activity, type FormEvent } from "react";
 import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import FormButtons from "@/components/FormButtons";
 import { Button } from "@/components/ui/button";
@@ -9,21 +9,31 @@ import {
   Field,
   FieldContent,
   FieldDescription,
+  FieldError,
   FieldLabel,
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Item, ItemContent, ItemHeader, ItemTitle } from "@/components/ui/item";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dropzone,
+  DropzoneContent,
+  DropzoneEmptyState,
+} from "@/components/ui/shadcn-io/dropzone";
+import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import useRegistrationStore from "@/hooks/registration.store";
 import { useRegistrationStep3 } from "@/hooks/useRegistrationStep3";
 import { StandardRegistrationStep3Schema } from "@/lib/validation/registration/standard";
 
+const BANK_DETAILS = {
+  bankName: "BPI",
+  accountName: "Iloilo Business Club",
+  accountNumber: "00023291387",
+} as const;
+
 export default function Step3() {
   const f = useRegistrationStep3();
-  // const registrationData = useRegistrationStore((s) => s.registrationData);
-  // const eventDetails = useRegistrationStore((s) => s.eventDetails);
 
   const setRegistrationData = useRegistrationStore(
     (s) => s.setRegistrationData,
@@ -44,9 +54,6 @@ export default function Step3() {
     }
     f.handleSubmit({ nextStep: true });
   };
-
-  const paymentProofRef = useRef<HTMLInputElement | null>(null);
-
   return (
     <form onSubmit={onNext} className="space-y-4">
       <Item>
@@ -66,10 +73,20 @@ export default function Step3() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <f.AppField name="paymentMethod">
+          <f.AppField
+            name="paymentMethod"
+            listeners={{
+              onChange: () => {
+                if (!f.getFieldValue("paymentProof")) {
+                  f.resetField("paymentProof");
+                }
+              },
+            }}
+          >
             {(field) => {
               return (
                 <FieldSet>
+                  <FieldLabel>Payment Method</FieldLabel>
                   <RadioGroup
                     defaultValue="online"
                     value={field.state.value}
@@ -78,21 +95,17 @@ export default function Step3() {
                         StandardRegistrationStep3Schema.shape.paymentMethod.safeParse(
                           value,
                         );
-
-                      console.log(result.error);
-
                       if (!result.success) {
                         return;
                       }
-
                       field.handleChange(result.data);
                     }}
                   >
                     <FieldLabel htmlFor="online">
                       <Field orientation={"horizontal"}>
                         <FieldContent>
-                          <FieldTitle>
-                            <h4>Pay Online (BPI only)</h4>
+                          <FieldTitle className="font-semibold">
+                            <CreditCard /> Pay Online (BPI only)
                           </FieldTitle>
                           <FieldDescription>
                             Pay online through BPI, and submit proof of
@@ -111,8 +124,8 @@ export default function Step3() {
                     <FieldLabel htmlFor="onsite">
                       <Field orientation={"horizontal"}>
                         <FieldContent>
-                          <FieldTitle>
-                            <h4>Pay Onsite (on event)</h4>
+                          <FieldTitle className="font-semibold">
+                            <Users /> Pay Onsite (on event)
                           </FieldTitle>
                           <FieldDescription>
                             Pay in person at the event venue
@@ -137,62 +150,76 @@ export default function Step3() {
       <f.Subscribe selector={(s) => s.values.paymentMethod}>
         {(paymentMethod) => (
           <Activity mode={paymentMethod === "online" ? "visible" : "hidden"}>
-            <Card>
-              <CardContent>
-                <f.AppField name="paymentProof">
-                  {(field) => {
-                    console.log(field.state.value);
-                    return (
-                      <>
-                        <BankTransferDetails />
-                        <Field>
-                          <FieldLabel htmlFor="upload proof">
-                            Upload Proof of Payment
-                          </FieldLabel>
-                          <FieldContent>
-                            <Input
-                              name="upload proof"
-                              ref={paymentProofRef}
-                              type="file"
-                              accept=".jpg,.jpeg,.png,.pdf"
-                              onBlur={field.handleBlur}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const proofURL = URL.createObjectURL(file);
-                                  field.handleChange(proofURL);
-                                }
+            <f.AppField name="paymentProof">
+              {(field) => {
+                const localImageUrl =
+                  field.state.value && URL.createObjectURL(field.state.value);
+
+                return (
+                  <Card>
+                    <CardContent className="flex flex-col items-center space-y-3">
+                      <BankTransferDetails />
+                      <Field data-invalid={!field.state.meta.isValid}>
+                        <FieldLabel htmlFor="upload proof">
+                          Upload Proof of Payment
+                        </FieldLabel>
+                        <FieldContent className="space-y-3">
+                          <Dropzone
+                            maxSize={1024 * 1024 * 10}
+                            accept={{
+                              "image/*": [],
+                            }}
+                            onDrop={(files) => {
+                              if (files[0]) {
+                                field.handleChange(files[0]);
+                              }
+                            }}
+                            maxFiles={1}
+                            onError={console.error}
+                            src={
+                              field.state.value
+                                ? [field.state.value]
+                                : undefined
+                            }
+                          >
+                            <DropzoneEmptyState />
+
+                            <DropzoneContent />
+                          </Dropzone>
+
+                          {field.state.value && (
+                            <Button
+                              onClick={() => {
+                                field.handleChange(undefined);
                               }}
-                            />
-                            {field.state.value && (
-                              <Button
-                                onClick={() => {
-                                  if (paymentProofRef.current) {
-                                    paymentProofRef.current.value = "";
-                                  }
-                                  field.handleChange("");
-                                }}
-                                type="button"
-                              >
-                                Remove File
-                              </Button>
-                            )}
-                          </FieldContent>
-                        </Field>
-                        {field.state.value && field.state.value !== "" && (
+                              type="button"
+                            >
+                              Remove File
+                            </Button>
+                          )}
+                        </FieldContent>
+                        <FieldError errors={field.state.meta.errors} />
+                      </Field>
+
+                      {localImageUrl && (
+                        <ImageZoom>
                           <Image
-                            src={field.state.value}
-                            alt="Payment Proof"
-                            width={100}
-                            height={100}
+                            src={localImageUrl}
+                            alt="Image Preview"
+                            width={400}
+                            height={200}
+                            className="object-contain"
                           />
-                        )}
-                      </>
-                    );
-                  }}
-                </f.AppField>
-              </CardContent>
-            </Card>
+                          <div className="text-neutral-400 text-sm text-center">
+                            click image to zoom
+                          </div>
+                        </ImageZoom>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              }}
+            </f.AppField>
           </Activity>
         )}
       </f.Subscribe>
@@ -204,11 +231,12 @@ export default function Step3() {
 function PaymentDetails() {
   const registrationData = useRegistrationStore((s) => s.registrationData);
   const eventDetails = useRegistrationStore((s) => s.eventDetails);
+
   const totalPayment = () => {
     const baseFee = eventDetails?.registrationFee || 0;
     const otherRegistrants = registrationData?.step2?.otherRegistrants || [];
     const total = baseFee + otherRegistrants.length * baseFee;
-    return total;
+    return total.toFixed(2);
   };
 
   return (
@@ -237,7 +265,12 @@ function BankTransferDetails() {
   return (
     <>
       <h4>Bank Transfer Details</h4>
-      <Image src={IBCBPIQRCode} width={100} height={100} alt="qr code" />
+      <div className="relative  h-40 w-40">
+        <Image src={IBCBPIQRCode} alt="qr code" fill className="object-fill" />
+      </div>
+      <div>
+        {BANK_DETAILS.bankName} - {BANK_DETAILS.accountNumber}
+      </div>
     </>
   );
 }

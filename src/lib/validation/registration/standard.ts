@@ -12,6 +12,7 @@ export const StandardRegistrationStep1Schema = z
   .superRefine((data, ctx) => {
     if (data.member === "member") {
       if (data.businessMemberId === "") {
+        // require business member id if member
         ctx.addIssue({
           code: "custom",
           message: "Business member is required",
@@ -20,6 +21,7 @@ export const StandardRegistrationStep1Schema = z
       }
     } else {
       if (data.nonMemberName === "") {
+        // require name if non-member
         ctx.addIssue({
           code: "custom",
           message: "Name is required",
@@ -51,6 +53,7 @@ export const StandardRegistrationStep2Schema = z
     const principalKey = `${data.principalRegistrant.firstName.toLowerCase()}-${data.principalRegistrant.lastName.toLowerCase()}`;
     seen.set(principalKey, -1);
 
+    // check if there is a possible duplicate person inputted
     if (data.otherRegistrants && data.otherRegistrants.length > 0) {
       data.otherRegistrants.forEach((registrant, index) => {
         const key = `${registrant.firstName.toLowerCase()}-${registrant.lastName.toLowerCase()}`;
@@ -79,25 +82,16 @@ export type StandardRegistrationStep2Schema = z.infer<
 export const StandardRegistrationStep3Schema = z
   .object({
     paymentMethod: z.union([z.literal("online"), z.literal("onsite")]),
-    paymentProof: z.string().optional(),
+    paymentProof: z.file().optional(),
   })
   .superRefine(({ paymentMethod, paymentProof }, ctx) => {
     if (paymentMethod === "online" && !paymentProof) {
-      // add error if there is no proofs
+      // add error if there is no proof
       ctx.addIssue({
         code: "custom",
-        message: "Payment proofs are required",
-        path: ["paymentProofs"],
+        message: "Payment proof is required when paying online.",
+        path: ["paymentProof"],
       });
-    }
-
-    if (
-      paymentMethod === "onsite" &&
-      paymentProof &&
-      paymentProof?.length > 0
-    ) {
-      // remove payment proofs
-      ctx.value.paymentProof = "";
     }
   });
 

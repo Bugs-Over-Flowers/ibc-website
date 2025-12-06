@@ -65,6 +65,26 @@ const useRegistrationStore = create<
     }),
     {
       name: "registration-storage",
+      partialize: (state) => {
+        const { registrationData, ...rest } = state;
+
+        // Exclude paymentProof from step3
+        const sanitizedRegistrationData = registrationData
+          ? {
+              ...registrationData,
+              step3: registrationData.step3
+                ? {
+                    paymentMethod: registrationData.step3.paymentMethod,
+                  }
+                : undefined,
+            }
+          : null;
+
+        return {
+          ...rest,
+          registrationData: sanitizedRegistrationData,
+        };
+      },
     },
   ),
 );

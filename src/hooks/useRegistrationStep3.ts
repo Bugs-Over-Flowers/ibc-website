@@ -1,5 +1,5 @@
 import type { FormSubmitMeta } from "@/lib/types/FormSubmitMeta";
-import { zodErrorToFieldErrors } from "@/lib/utils";
+import { zodValidator } from "@/lib/utils";
 import { StandardRegistrationStep3Schema } from "@/lib/validation/registration/standard";
 import { useAppForm } from "./_formHooks";
 import useRegistrationStore from "./registration.store";
@@ -17,27 +17,24 @@ export const useRegistrationStep3 = () => {
   const defaultRegistrationDataStep3 = useRegistrationStore(
     (s) => s.registrationData?.step3,
   );
+
   const f = useAppForm({
-    defaultValues: defaultRegistrationDataStep3,
+    defaultValues: {
+      paymentMethod: "online" as const,
+      paymentProof: undefined,
+      ...defaultRegistrationDataStep3,
+    },
     validators: {
-      onSubmit: ({ value }) => {
-        const { error } = StandardRegistrationStep3Schema.safeParse(value);
-
-        if (error) {
-          const fields = zodErrorToFieldErrors(error);
-
-          return { fields };
-        }
-      },
+      onSubmit: zodValidator(StandardRegistrationStep3Schema),
     },
     onSubmitMeta: defaultMeta,
     onSubmit: async ({ value, meta }) => {
       const refinedValue = StandardRegistrationStep3Schema.parse(value);
 
       if (meta.nextStep) {
-        setStep(3);
+        setStep(4);
       } else {
-        setStep(1);
+        setStep(2);
       }
 
       setRegistrationData({
@@ -45,5 +42,6 @@ export const useRegistrationStep3 = () => {
       });
     },
   });
+
   return f;
 };
