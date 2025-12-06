@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import type { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
 import type { getRegistrationEventDetails } from "@/server/registration/queries";
 
-export const MAX_STEPS = 4;
+export const MAX_STEPS = 5;
 export type RegistrationStoreEventDetails = Awaited<
   ReturnType<typeof getRegistrationEventDetails>
 >;

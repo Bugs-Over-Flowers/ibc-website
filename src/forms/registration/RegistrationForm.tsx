@@ -26,7 +26,7 @@ export default function RegistrationForm({ members }: RegistrationFormProps) {
       ) : step === 3 ? (
         <Step3 />
       ) : (
-        <Step4 />
+        <Step4 members={members} />
       )}
     </main>
   );

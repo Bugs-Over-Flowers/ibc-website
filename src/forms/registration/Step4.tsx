@@ -1,4 +1,7 @@
 import { formatDate } from "date-fns";
+import { CircleAlert } from "lucide-react";
+import Image from "next/image";
+import type { FormEvent } from "react";
 import FormButtons from "@/components/FormButtons";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -6,28 +9,54 @@ import {
   ItemContent,
   ItemDescription,
   ItemGroup,
+  ItemMedia,
   ItemSeparator,
   ItemTitle,
 } from "@/components/ui/item";
+import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import useRegistrationStore from "@/hooks/registration.store";
+import { useRegistrationStep4 } from "@/hooks/useRegistrationStep4";
+import type { getAllMembers } from "@/server/members/queries";
 
-export default function Step4() {
+interface Step4Props {
+  members: Awaited<ReturnType<typeof getAllMembers>>;
+}
+
+export default function Step4({ members }: Step4Props) {
+  const f = useRegistrationStep4();
   const setStep = useRegistrationStore((s) => s.setStep);
   const registrationData = useRegistrationStore((s) => s.registrationData);
   const eventDetails = useRegistrationStore((s) => s.eventDetails);
 
+  const { businessMemberId, nonMemberName, member } =
+    registrationData?.step1 || {};
   const { principalRegistrant, otherRegistrants } =
     registrationData?.step2 || {};
 
-  const { paymentMethod } = registrationData?.step3 || {};
+  const { paymentMethod, paymentProof } = registrationData?.step3 || {};
+
+  const paymentProofUrl = paymentProof
+    ? URL.createObjectURL(paymentProof)
+    : null;
+  const memberName = members.find(
+    (m) => m.businessMemberId === businessMemberId,
+  )?.businessName;
+
+  const onNext = (e?: FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    f.handleSubmit({ nextStep: true });
+  };
 
   return (
-    <div className="space-y-3">
+    <form className="space-y-3" onSubmit={onNext}>
       <div>
         <h2>Confirm Registration</h2>
         <p>Please review your registration details below:</p>
       </div>
-      <ItemGroup>
+      <ItemGroup className="space-y-3">
         <Item variant={"outline"}>
           <ItemContent className="flex flex-col gap-3">
             <ItemTitle>Event</ItemTitle>
@@ -41,14 +70,17 @@ export default function Step4() {
             </div>
             <ItemSeparator />
             <div>
-              <ItemTitle>People</ItemTitle>
-              <div>
-                Total people under this registration:{" "}
-                {1 + (otherRegistrants?.length ?? 0)}
+              <ItemTitle>Participant Information</ItemTitle>
+              <h4>{member === "member" ? memberName : nonMemberName}</h4>
+              <ItemSeparator />
+              <div className="py-3">
+                <span className="font-semibold">
+                  {1 + (otherRegistrants?.length ?? 0)} Participants{" "}
+                </span>
+                to Register
               </div>
               <div className="py-2">
                 <div className="font-semibold">Participant 1</div>
-
                 <div>
                   {principalRegistrant?.firstName}{" "}
                   {principalRegistrant?.lastName}
@@ -79,14 +111,50 @@ export default function Step4() {
                   <Badge variant={"secondary"}>{paymentMethod}</Badge>
                 </div>
               </div>
+              {paymentProofUrl && (
+                <div className="pt-5 flex flex-col w-full gap-3">
+                  <div> Proof of Payment</div>
+                  <ImageZoom>
+                    <Image
+                      src={paymentProofUrl}
+                      alt="Payment Proof"
+                      width={200}
+                      height={150}
+                      className="rounded-md self-center justify-self-center"
+                    />
+                  </ImageZoom>
+                </div>
+              )}
             </div>
           </ItemContent>
         </Item>
-        <Item>
-          <ItemContent></ItemContent>
+        <Item variant={"outline"} className="h-max">
+          <ItemMedia>
+            <CircleAlert />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>Note</ItemTitle>
+            <ItemDescription>
+              {paymentMethod === "online" ? (
+                <>
+                  Your payment is pending for approval. Once you confirm your
+                  registration, the admin will review your payment and approve
+                  it. You may receive an email notification once your payment is
+                  declined.
+                </>
+              ) : (
+                <>
+                  Please ensure to be able to settle the full payment before the
+                  event. You may opt to pay on the event proper or on the IBC
+                  Office.
+                </>
+              )}
+            </ItemDescription>
+          </ItemContent>
         </Item>
       </ItemGroup>
-      <FormButtons onNext={() => setStep(5)} onBack={() => setStep(3)} />
-    </div>
+
+      <FormButtons onNext={onNext} onBack={() => setStep(3)} />
+    </form>
   );
 }
