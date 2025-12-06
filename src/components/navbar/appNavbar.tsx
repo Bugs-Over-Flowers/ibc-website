@@ -10,6 +10,15 @@ import Image from "next/image";
 import NextLink from "next/link";
 import { Button } from "@/components/ui/button";
 
+const navLinks = [
+  { title: "HOME", href: "/" },
+  { title: "ABOUT", href: "/about" },
+  { title: "EVENTS", href: "/events" },
+  { title: "MEMEBERS", href: "/members" },
+  { title: "NETWORK", href: "/network" },
+  { title: "CONTACT", href: "/contact" },
+];
+
 export default function Navbar() {
   return (
     <NavigationMenu className="w-full border-b bg-white">
@@ -32,75 +41,22 @@ export default function Navbar() {
 
         <div className="hidden md:block">
           <NavigationMenuList className="ml-10 flex items-baseline space-x-4">
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <NextLink
-                  href="/"
-                  className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium no-underline"
-                >
-                  Home
-                </NextLink>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
+            {navLinks.map(({ title, href }) => (
+              <NavigationMenuItem key={title}>
+                <NavigationMenuLink asChild>
+                  <NextLink
+                    href={href as any}
+                    className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-md font-medium no-underline hover-underline-animation center"
+                  >
+                    {title}
+                  </NextLink>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
 
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <NextLink
-                  href="/about"
-                  className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium no-underline"
-                >
-                  About
-                </NextLink>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <NextLink
-                  href="/events"
-                  className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium no-underline"
-                >
-                  Events
-                </NextLink>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <NextLink
-                  href="/members"
-                  className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium no-underline"
-                >
-                  Members
-                </NextLink>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <NextLink
-                  href="/network"
-                  className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium no-underline"
-                >
-                  Network
-                </NextLink>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <NextLink
-                  href="/contact"
-                  className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium no-underline"
-                >
-                  Contact
-                </NextLink>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-
-            <Button variant="default" className="ml-4">
-              <span className="sr-only">Log In</span>
-              Log In
+            <Button variant="default" className="ml-4 font-bold text-md">
+              <span className="sr-only">SIGN IN</span>
+              SIGN IN
             </Button>
           </NavigationMenuList>
         </div>
