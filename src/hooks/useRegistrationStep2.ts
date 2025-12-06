@@ -19,15 +19,7 @@ export const useRegistrationStep2 = () => {
     (s) => s.registrationData?.step2,
   );
   const f = useAppForm({
-    defaultValues: {
-      principalRegistrant: {
-        email: "",
-        contactNumber: "",
-        firstName: "",
-        lastName: "",
-      },
-      ...defaultRegistrationDataStep2,
-    },
+    defaultValues: defaultRegistrationDataStep2,
     validators: {
       onSubmit: ({ value }) => {
         const { error } = StandardRegistrationStep2Schema.safeParse(value);

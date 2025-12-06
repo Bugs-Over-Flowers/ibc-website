@@ -12,7 +12,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
 import { useRegistrationStep1 } from "@/hooks/useRegistrationStep1";
-import { StandardRegistrationStep1Schema } from "@/lib/validation/registration/standard";
+import { MemberTypeEnum } from "@/lib/validation/utils";
 import type { getAllMembers } from "@/server/members/queries";
 
 interface Step1Props {
@@ -46,9 +46,14 @@ const Step1 = ({ members }: Step1Props) => {
     [members],
   );
 
-  const memberName = members.find(
-    (m) => m.businessMemberId === f.state.values.businessMemberId,
-  )?.businessName;
+  const memberName = useMemo(() => {
+    const values = f.state.values;
+    if (values.member === "member") {
+      return members.find((m) => m.businessMemberId === values.businessMemberId)
+        ?.businessName;
+    }
+    return "";
+  }, [members, f.state.values]);
 
   return (
     <form onSubmit={onNext} className="space-y-3">
@@ -64,16 +69,16 @@ const Step1 = ({ members }: Step1Props) => {
                 defaultValue="member"
                 value={field.state.value}
                 onValueChange={(value) => {
-                  const result =
-                    StandardRegistrationStep1Schema.shape.member.safeParse(
-                      value,
-                    );
+                  console.log(value);
 
-                  if (!result.success) {
+                  const parsedMemberValue = MemberTypeEnum.safeParse(value);
+
+                  if (!parsedMemberValue.success) {
+                    console.log(parsedMemberValue.error);
                     return;
                   }
 
-                  field.handleChange(result.data);
+                  field.handleChange(parsedMemberValue.data);
                 }}
               >
                 <FieldLabel htmlFor="member">

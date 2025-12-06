@@ -11,7 +11,7 @@ export type RegistrationStoreEventDetails = Awaited<
 interface RegistrationStore {
   step: number;
   eventDetails: RegistrationStoreEventDetails | null;
-  registrationData: Partial<StandardRegistrationSchema> | null;
+  registrationData: StandardRegistrationSchema;
 }
 
 interface RegistrationStoreActions {
@@ -42,9 +42,11 @@ const useRegistrationStore = create<
             firstName: "",
             lastName: "",
           },
+          otherRegistrants: [],
         },
         step3: {
-          paymentMethod: "online",
+          paymentMethod: "onsite",
+          paymentProof: undefined,
         },
         step4: {
           termsAndConditions: false,
@@ -59,7 +61,7 @@ const useRegistrationStore = create<
         set((state) => ({
           registrationData:
             registrationData === null
-              ? null
+              ? state.registrationData
               : {
                   ...state.registrationData,
                   ...registrationData,

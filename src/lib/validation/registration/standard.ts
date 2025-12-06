@@ -1,35 +1,17 @@
 import z from "zod";
-import { phoneSchema } from "../utils";
+import { MemberTypeEnum, PaymentMethodEnum, phoneSchema } from "../utils";
 
-export const StandardRegistrationStep1Schema = z
-  .object({
-    member: z
-      .union([z.literal("member"), z.literal("nonmember")])
-      .default("member"),
-    nonMemberName: z.string(),
-    businessMemberId: z.string(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.member === "member") {
-      if (data.businessMemberId === "") {
-        // require business member id if member
-        ctx.addIssue({
-          code: "custom",
-          message: "Business member is required",
-          path: ["businessMemberId"],
-        });
-      }
-    } else {
-      if (data.nonMemberName === "") {
-        // require name if non-member
-        ctx.addIssue({
-          code: "custom",
-          message: "Name is required",
-          path: ["nonMemberName"],
-        });
-      }
-    }
-  });
+export const StandardRegistrationStep1Schema = z.discriminatedUnion("member", [
+  z.object({
+    member: z.literal(MemberTypeEnum.enum.member),
+    businessMemberId: z.string().min(1),
+  }),
+  z.object({
+    member: z.literal(MemberTypeEnum.enum.nonmember),
+    nonMemberName: z.string().min(2).max(100),
+  }),
+]);
+
 export type StandardRegistrationStep1Schema = z.infer<
   typeof StandardRegistrationStep1Schema
 >;
@@ -44,56 +26,69 @@ export const RegistrantDetailsSchema = z.object({
 export const StandardRegistrationStep2Schema = z
   .object({
     principalRegistrant: RegistrantDetailsSchema,
-    otherRegistrants: z.optional(z.array(RegistrantDetailsSchema)),
+    otherRegistrants: z.array(RegistrantDetailsSchema).default([]),
   })
   .superRefine((data, ctx) => {
+    // Logic remains mostly the same, just slightly cleaner map usage
     const seen = new Map<string, number>();
 
-    // Add principal registrant to the map first with index -1 to indicate it's the principal
-    const principalKey = `${data.principalRegistrant.firstName.toLowerCase()}-${data.principalRegistrant.lastName.toLowerCase()}`;
-    seen.set(principalKey, -1);
+    // Helper to generate key
+    const getKey = (f: string, l: string) =>
+      `${f.toLowerCase()}-${l.toLowerCase()}`;
 
-    // check if there is a possible duplicate person inputted
-    if (data.otherRegistrants && data.otherRegistrants.length > 0) {
-      data.otherRegistrants.forEach((registrant, index) => {
-        const key = `${registrant.firstName.toLowerCase()}-${registrant.lastName.toLowerCase()}`;
-        if (seen.has(key)) {
-          // biome-ignore lint/style/noNonNullAssertion: seen.has(key) run
-          const duplicateOfIndex = seen.get(key)!;
-          const duplicateOfLabel =
-            duplicateOfIndex === -1
-              ? "Principal Registrant"
-              : `Participant ${duplicateOfIndex + 2}`;
-          ctx.addIssue({
-            code: "custom",
-            message: `There is a duplicate registrant with the same first name and last name (${duplicateOfLabel} and Participant ${index + 2})`,
-            path: ["otherRegistrants", index],
-          });
-        }
+    // Add principal
+    const pKey = getKey(
+      data.principalRegistrant.firstName,
+      data.principalRegistrant.lastName,
+    );
+    seen.set(pKey, -1);
+
+    data.otherRegistrants.forEach((registrant, index) => {
+      const key = getKey(registrant.firstName, registrant.lastName);
+
+      if (seen.has(key)) {
+        // biome-ignore lint/style/noNonNullAssertion: seen.has(key) run
+        const duplicateIndex = seen.get(key)!;
+        const duplicateLabel =
+          duplicateIndex === -1
+            ? "Principal Registrant"
+            : `Participant ${duplicateIndex + 2}`; // +2 because 0-index + principal
+
+        ctx.addIssue({
+          code: "custom",
+          message: `Duplicate registrant: ${registrant.firstName} ${registrant.lastName} is already listed as ${duplicateLabel}`,
+          path: ["otherRegistrants", index],
+        });
+      } else {
         seen.set(key, index);
-      });
-    }
+      }
+    });
   });
 
 export type StandardRegistrationStep2Schema = z.infer<
   typeof StandardRegistrationStep2Schema
 >;
 
-export const StandardRegistrationStep3Schema = z
-  .object({
-    paymentMethod: z.union([z.literal("online"), z.literal("onsite")]),
-    paymentProof: z.file().optional(),
-  })
-  .superRefine(({ paymentMethod, paymentProof }, ctx) => {
-    if (paymentMethod === "online" && !paymentProof) {
-      // add error if there is no proof
-      ctx.addIssue({
-        code: "custom",
-        message: "Payment proof is required when paying online.",
+export const StandardRegistrationStep3Schema = z.discriminatedUnion(
+  "paymentMethod",
+  [
+    z
+      .object({
+        paymentMethod: z.literal(PaymentMethodEnum.enum.online),
+        paymentProof: z
+          .file()
+          .max(1024 * 1024 * 5)
+          .optional(),
+      })
+      .refine((data) => data.paymentProof !== undefined, {
+        message: "Payment proof is required for online payment.",
         path: ["paymentProof"],
-      });
-    }
-  });
+      }),
+    z.object({
+      paymentMethod: z.literal(PaymentMethodEnum.enum.onsite),
+    }),
+  ],
+);
 
 export type StandardRegistrationStep3Schema = z.infer<
   typeof StandardRegistrationStep3Schema
@@ -119,3 +114,21 @@ export const StandardRegistrationSchema = z.object({
 export type StandardRegistrationSchema = z.infer<
   typeof StandardRegistrationSchema
 >;
+
+export const ServerRegistrationSchema = z.object({
+  eventId: z.uuid(),
+  step1: StandardRegistrationStep1Schema,
+  step2: StandardRegistrationStep2Schema,
+  step4: StandardRegistrationStep4Schema,
+  step3: z.discriminatedUnion("paymentMethod", [
+    z.object({
+      paymentMethod: z.literal("online"),
+      paymentProofId: z.string(),
+    }),
+    z.object({
+      paymentMethod: z.literal("onsite"),
+    }),
+  ]),
+});
+
+export type ServerRegistrationSchema = z.infer<typeof ServerRegistrationSchema>;

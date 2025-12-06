@@ -1,7 +1,7 @@
 import { formatDate } from "date-fns";
 import { CircleAlert } from "lucide-react";
 import Image from "next/image";
-import type { FormEvent } from "react";
+import { type FormEvent, useMemo } from "react";
 import FormButtons from "@/components/FormButtons";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { Badge } from "@/components/ui/badge";
@@ -33,19 +33,26 @@ export default function Step4({ members }: Step4Props) {
   const registrationData = useRegistrationStore((s) => s.registrationData);
   const eventDetails = useRegistrationStore((s) => s.eventDetails);
 
-  const { businessMemberId, nonMemberName, member } =
-    registrationData?.step1 || {};
-  const { principalRegistrant, otherRegistrants } =
-    registrationData?.step2 || {};
+  const step1Data = useRegistrationStore((s) => s.registrationData.step1);
 
-  const { paymentMethod, paymentProof } = registrationData?.step3 || {};
+  const {
+    step3,
+    step2: { principalRegistrant, otherRegistrants },
+  } = registrationData;
 
-  const paymentProofUrl = paymentProof
-    ? URL.createObjectURL(paymentProof)
-    : null;
-  const memberName = members.find(
-    (m) => m.businessMemberId === businessMemberId,
-  )?.businessName;
+  const paymentProofUrl =
+    step3.paymentMethod === "online" && step3.paymentProof
+      ? URL.createObjectURL(step3.paymentProof)
+      : null;
+
+  const memberName = useMemo(() => {
+    if (step1Data.member === "member") {
+      return members.find(
+        (m) => m.businessMemberId === step1Data.businessMemberId,
+      )?.businessName;
+    }
+    return "";
+  }, [members, step1Data]);
 
   const onNext = (e?: FormEvent) => {
     if (e) {
@@ -59,7 +66,7 @@ export default function Step4({ members }: Step4Props) {
     <form className="space-y-3" onSubmit={onNext}>
       <div>
         <h2>Confirm Registration</h2>
-        <p>Please review your registration details below:</p>
+        <p>Please review your registration details below</p>
       </div>
       <ItemGroup className="space-y-3">
         <Item variant={"outline"}>
@@ -76,14 +83,17 @@ export default function Step4({ members }: Step4Props) {
             <ItemSeparator />
             <div>
               <ItemTitle>Participant Information</ItemTitle>
-              <h4>{member === "member" ? memberName : nonMemberName}</h4>
-              <ItemSeparator />
-              <div className="py-3">
+              <h4>
+                {step1Data.member === "member"
+                  ? memberName
+                  : step1Data.nonMemberName}
+              </h4>
+              <Badge className="my-3">
                 <span className="font-semibold">
                   {1 + (otherRegistrants?.length ?? 0)} Participants{" "}
                 </span>
                 to Register
-              </div>
+              </Badge>
               <div className="py-2">
                 <div className="font-semibold">Participant 1</div>
                 <div>
@@ -113,7 +123,7 @@ export default function Step4({ members }: Step4Props) {
               <div className="flex justify-between">
                 <div>Payment Method</div>
                 <div>
-                  <Badge variant={"secondary"}>{paymentMethod}</Badge>
+                  <Badge variant={"secondary"}>{step3.paymentMethod}</Badge>
                 </div>
               </div>
               {paymentProofUrl && (
@@ -140,7 +150,7 @@ export default function Step4({ members }: Step4Props) {
           <ItemContent>
             <ItemTitle>Note</ItemTitle>
             <ItemDescription>
-              {paymentMethod === "online" ? (
+              {step3.paymentMethod === "online" ? (
                 <>
                   Your payment is pending for approval. Once you confirm your
                   registration, the admin will review your payment and approve
@@ -174,31 +184,33 @@ export default function Step4({ members }: Step4Props) {
                   }
                   aria-invalid={isInvalid}
                 />
-                <div className="flex gap-1">
-                  <Label htmlFor={field.name}>I have read the </Label>
-                  <TermsAndConditions
-                    triggerOverride={
-                      <button
-                        className="text-medium text-sm hover:underline"
-                        type="button"
-                      >
-                        Terms and Conditions
-                      </button>
-                    }
-                    customAcceptButton={(closeTermsAndConditions) => (
-                      <Button
-                        onClick={() => {
-                          field.handleChange(true);
-                          closeTermsAndConditions();
-                        }}
-                      >
-                        Accept
-                      </Button>
-                    )}
-                  />
-                </div>
+                <Label htmlFor={field.name}>
+                  I have read the Terms and Conditions.{" "}
+                </Label>
                 <FieldError errors={field.state.meta.errors} />
               </Field>
+              <div className="pt-2">
+                <TermsAndConditions
+                  triggerOverride={
+                    <button
+                      className="text-medium text-sm hover:underline"
+                      type="button"
+                    >
+                      Read Terms and Conditions here
+                    </button>
+                  }
+                  customAcceptButton={(closeTermsAndConditions) => (
+                    <Button
+                      onClick={() => {
+                        field.handleChange(true);
+                        closeTermsAndConditions();
+                      }}
+                    >
+                      Accept
+                    </Button>
+                  )}
+                />
+              </div>
             </div>
           );
         }}

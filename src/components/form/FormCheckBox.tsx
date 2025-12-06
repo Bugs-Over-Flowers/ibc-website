@@ -1,6 +1,6 @@
 import { useFieldContext } from "@/hooks/_formHooks";
 import { Checkbox } from "../ui/checkbox";
-import { Field, FieldContent, FieldLabel } from "../ui/field";
+import { Field, FieldLabel } from "../ui/field";
 
 interface FormCheckBoxProps {
   orientation?: "horizontal" | "vertical" | "responsive";

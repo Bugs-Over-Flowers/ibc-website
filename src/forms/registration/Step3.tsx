@@ -24,7 +24,8 @@ import {
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import useRegistrationStore from "@/hooks/registration.store";
 import { useRegistrationStep3 } from "@/hooks/useRegistrationStep3";
-import { StandardRegistrationStep3Schema } from "@/lib/validation/registration/standard";
+import type { StandardRegistrationStep3Schema } from "@/lib/validation/registration/standard";
+import { PaymentMethodEnum } from "@/lib/validation/utils";
 
 const BANK_DETAILS = {
   bankName: "BPI",
@@ -91,14 +92,12 @@ export default function Step3() {
                     defaultValue="online"
                     value={field.state.value}
                     onValueChange={(value) => {
-                      const result =
-                        StandardRegistrationStep3Schema.shape.paymentMethod.safeParse(
-                          value,
-                        );
-                      if (!result.success) {
+                      const parsedPaymentMethodValue =
+                        PaymentMethodEnum.safeParse(value);
+                      if (!parsedPaymentMethodValue.success) {
                         return;
                       }
-                      field.handleChange(result.data);
+                      field.handleChange(parsedPaymentMethodValue.data);
                     }}
                   >
                     <FieldLabel htmlFor="online">

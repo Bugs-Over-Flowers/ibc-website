@@ -19,11 +19,7 @@ export const useRegistrationStep3 = () => {
   );
 
   const f = useAppForm({
-    defaultValues: {
-      paymentMethod: "online" as const,
-      paymentProof: undefined,
-      ...defaultRegistrationDataStep3,
-    },
+    defaultValues: defaultRegistrationDataStep3,
     validators: {
       onSubmit: zodValidator(StandardRegistrationStep3Schema),
     },

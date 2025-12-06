@@ -1,13 +1,11 @@
 import { toast } from "sonner";
-import tryCatch from "@/lib/server/tryCatch";
 import {
   StandardRegistrationSchema,
   StandardRegistrationStep4Schema,
 } from "@/lib/validation/registration/standard";
-import { submitRegistration } from "@/server/registration/mutations";
 import { useAppForm } from "./_formHooks";
 import useRegistrationStore from "./registration.store";
-import { useAction } from "./useAction";
+import { useSubmitRegistration } from "./useSubmitRegistration";
 
 const defaultValues: StandardRegistrationStep4Schema = {
   termsAndConditions: false,
@@ -18,15 +16,7 @@ export const useRegistrationStep4 = () => {
     (s) => s.setRegistrationData,
   );
 
-  const { execute } = useAction(tryCatch(submitRegistration), {
-    onError: (error) => {
-      toast.error(`Failed to submit registration: ${error}`);
-    },
-    onSuccess: () => {
-      toast.success("Registration submitted successfully!");
-    },
-  });
-
+  const { execute: submitRegistration } = useSubmitRegistration();
   const f = useAppForm({
     defaultValues,
     validators: {
@@ -50,7 +40,7 @@ export const useRegistrationStep4 = () => {
         return;
       }
 
-      execute(refinedRegistrationData.data);
+      submitRegistration();
     },
   });
 
