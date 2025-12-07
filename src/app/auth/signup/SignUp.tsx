@@ -9,7 +9,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
-import { useSignUp } from "@/hooks/useSignUp";
+import { useSignUp } from "@/hooks/auth/useSignUp";
 
 export const SignUpForm = () => {
   const form = useSignUp();

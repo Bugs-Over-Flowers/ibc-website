@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAction } from "@/hooks/useAction";
-import { loginVerifyMfa } from "@/lib/server/mfa";
+import { loginVerifyMfa } from "@/server/auth/mutations/mfa";
 
 export function MfaVerifyForm() {
   const router = useRouter();

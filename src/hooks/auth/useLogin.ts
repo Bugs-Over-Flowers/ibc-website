@@ -1,9 +1,9 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { login } from "@/lib/server/login";
 import { zodValidator } from "@/lib/utils";
 import { LoginSchema } from "@/lib/validation/authentication/login";
-import { useAppForm } from "./_formHooks";
+import { login } from "@/server/auth/mutations/login";
+import { useAppForm } from "../_formHooks";
 
 export const useLogin = () => {
   const router = useRouter();

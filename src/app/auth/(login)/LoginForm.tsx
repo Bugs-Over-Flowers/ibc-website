@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import SubmitButton from "@/components/form/SubmitButton";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,7 +10,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
-import { useLogin } from "@/hooks/useLogin";
+import { useLogin } from "@/hooks/auth/useLogin";
 
 export const LoginForm = () => {
   const form = useLogin();
@@ -24,45 +25,40 @@ export const LoginForm = () => {
 
   return (
     <Card className="w-full max-w-[400px]">
-      <CardHeader>Login</CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <CardHeader>Login</CardHeader>
+        <CardContent>
           <FieldGroup>
             <form.AppField name="email">
               {(field) => (
-                <FieldSet>
-                  <FieldLabel>Email</FieldLabel>
-                  <field.TextField type="email" placeholder="Enter Email" />
-                </FieldSet>
+                <field.TextField
+                  type="email"
+                  placeholder="Enter Email"
+                  label="Email"
+                />
               )}
             </form.AppField>
             <form.AppField name="password">
               {(field) => (
-                <FieldSet>
-                  <FieldLabel>Password</FieldLabel>
-                  <field.TextField
-                    type="password"
-                    placeholder="Enter Password"
-                  />
-                </FieldSet>
+                <field.TextField
+                  type="password"
+                  placeholder="Enter Password"
+                  label="Password"
+                />
               )}
             </form.AppField>
           </FieldGroup>
-        </form>
-      </CardContent>
-      <CardFooter>
-        <form.Subscribe selector={(state) => state.isSubmitting}>
-          {(isSubmitting) => (
-            <Button
-              onClick={handleSubmit}
+        </CardContent>
+        <CardFooter>
+          <form.AppForm>
+            <form.SubmitButton
+              isSubmittingLabel="Logging in"
+              label="Login"
               className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Logging in..." : "Login"}
-            </Button>
-          )}
-        </form.Subscribe>
-      </CardFooter>
+            />
+          </form.AppForm>
+        </CardFooter>
+      </form>
     </Card>
   );
 };

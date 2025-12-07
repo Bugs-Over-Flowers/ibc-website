@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { useAction } from "@/hooks/useAction";
-import { enrollMfa, verifyMfa } from "@/lib/server/mfa";
+import { enrollMfa, verifyMfa } from "@/server/auth/mutations/mfa";
 
 export function MfaSetupForm() {
   const router = useRouter();
