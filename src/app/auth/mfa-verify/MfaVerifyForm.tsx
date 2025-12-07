@@ -28,6 +28,13 @@ export function MfaVerifyForm() {
     },
     onError: (error) => {
       toast.error(error);
+      if (
+        error.includes("Bearer token") ||
+        error.includes("not logged in") ||
+        error.includes("User from sub claim in JWT does not exist")
+      ) {
+        router.push("/auth");
+      }
     },
   });
 

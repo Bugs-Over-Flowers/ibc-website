@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   // if "next" is in param, use it as the redirect URL
-  const next = searchParams.get("next") ?? "/admin/mfa-setup";
+  const next = searchParams.get("next") ?? "/auth/mfa-setup";
 
   if (code) {
     const supabase = await createActionClient();
@@ -16,5 +16,5 @@ export async function GET(request: Request) {
   }
 
   // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/admin?error=auth_code_error`);
+  return NextResponse.redirect(`${origin}/auth?error=auth_code_error`);
 }

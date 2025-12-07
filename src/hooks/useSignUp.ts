@@ -26,10 +26,10 @@ export const useSignUp = () => {
 
       if (data?.sessionCreated) {
         toast.success("Sign up successful!");
-        router.push("/admin/mfa-setup");
+        router.push("/auth/mfa-setup");
       } else {
         toast.success("Sign up successful! Please check your email.");
-        router.push("/admin/signup/verify-email");
+        router.push("/auth/signup/verify-email");
       }
     },
   });

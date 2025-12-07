@@ -38,7 +38,7 @@ export function MfaSetupForm() {
           error.includes("not logged in") ||
           error.includes("User from sub claim in JWT does not exist")
         ) {
-          router.push("/admin");
+          router.push("/auth");
         }
       },
     },

@@ -24,10 +24,9 @@ export const useLogin = () => {
       }
 
       if (data?.mfaRequired) {
-        router.push("/admin/mfa-verify");
+        router.push("/auth/mfa-verify");
       } else {
-        toast.success("Logged in successfully");
-        router.push("/admin/dashboard");
+        router.push("/auth/mfa-setup");
       }
     },
   });

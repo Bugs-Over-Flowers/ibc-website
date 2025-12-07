@@ -22,7 +22,7 @@ export default function VerifyEmailPage() {
       // Check immediately
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-        router.push("/admin/mfa-setup");
+        router.push("/auth/mfa-setup");
         return;
       }
 
@@ -31,7 +31,7 @@ export default function VerifyEmailPage() {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === "SIGNED_IN" || session) {
-          router.push("/admin/mfa-setup");
+          router.push("/auth/mfa-setup");
         }
       });
 
@@ -39,7 +39,7 @@ export default function VerifyEmailPage() {
       const interval = setInterval(async () => {
         const { data } = await supabase.auth.getSession();
         if (data.session) {
-          router.push("/admin/mfa-setup");
+          router.push("/auth/mfa-setup");
         }
       }, 3000);
 

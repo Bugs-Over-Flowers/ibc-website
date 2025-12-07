@@ -30,5 +30,10 @@ export const signup: ServerFunction<
     return [error.message, null];
   }
 
+  if (data.session && !data.user?.confirmed_at) {
+    await supabase.auth.signOut();
+    return [null, { sessionCreated: false }];
+  }
+
   return [null, { sessionCreated: !!data.session }];
 };
