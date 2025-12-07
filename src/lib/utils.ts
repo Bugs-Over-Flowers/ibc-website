@@ -94,6 +94,7 @@ export function zodValidator<T>(schema: ZodType<T>) {
   return ({ value }: { value: T }) => {
     const result = schema.safeParse(value);
     if (!result.success) {
+      console.error("Validation failed", result.error);
       return { fields: zodErrorToFieldErrors(result.error) };
     }
     return undefined;
