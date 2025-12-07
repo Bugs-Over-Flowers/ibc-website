@@ -1,15 +1,13 @@
 import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import type { Database } from "@/lib/supabase/db.types";
+import { Tables } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
-
-type Event = Database["public"]["Tables"]["Event"]["Row"];
 
 export const getEventById = async (
   requestCookies: RequestCookie[],
-  id: string,
-): Promise<Event> => {
+  { id }: { id: string },
+) => {
   "use cache";
   const supabase = await createClient(requestCookies);
 
@@ -28,9 +26,7 @@ export const getEventById = async (
   return data;
 };
 
-export const getAllEvents = async (
-  requestCookies: RequestCookie[],
-): Promise<Event[]> => {
+export const getAllEvents = async (requestCookies: RequestCookie[]) => {
   "use cache";
 
   const supabase = await createClient(requestCookies);
