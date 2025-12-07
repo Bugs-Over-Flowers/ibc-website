@@ -23,8 +23,11 @@ export function Footer({ onNavigate }: FooterProps) {
       href: "https://www.facebook.com/iloilobusinessclub",
       label: "Facebook",
     },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
+    {
+      icon: Linkedin,
+      href: "https://www.linkedin.com/company/iloilo-business-club-inc",
+      label: "LinkedIn",
+    },
   ];
 
   return (
