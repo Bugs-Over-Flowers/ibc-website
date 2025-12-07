@@ -33,18 +33,23 @@ export const StandardRegistrationStep2Schema = z
     const seen = new Map<string, number>();
 
     // Helper to generate key
-    const getKey = (f: string, l: string) =>
-      `${f.toLowerCase()}-${l.toLowerCase()}`;
+    const getKey = (f: string, l: string, e: string) =>
+      `${f.toLowerCase()}-${l.toLowerCase()}-${e.toLowerCase()}`;
 
     // Add principal
     const pKey = getKey(
       data.principalRegistrant.firstName,
       data.principalRegistrant.lastName,
+      data.principalRegistrant.email,
     );
     seen.set(pKey, -1);
 
     data.otherRegistrants.forEach((registrant, index) => {
-      const key = getKey(registrant.firstName, registrant.lastName);
+      const key = getKey(
+        registrant.firstName,
+        registrant.lastName,
+        registrant.email,
+      );
 
       if (seen.has(key)) {
         // biome-ignore lint/style/noNonNullAssertion: seen.has(key) run
@@ -56,7 +61,7 @@ export const StandardRegistrationStep2Schema = z
 
         ctx.addIssue({
           code: "custom",
-          message: `Duplicate registrant: ${registrant.firstName} ${registrant.lastName} is already listed as ${duplicateLabel}`,
+          message: `Duplicate registrant: ${registrant.firstName} ${registrant.lastName}, ${registrant.email} is already listed as ${duplicateLabel}`,
           path: ["otherRegistrants", index],
         });
       } else {
