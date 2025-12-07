@@ -1,95 +1,120 @@
-import { MailIcon, MapPinIcon, PhoneIcon } from "lucide-react";
+"use client";
+
+import { Facebook, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
+import { motion } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 
-const quickLinks = [
-  { title: "Home", href: "/" },
-  { title: "About", href: "/about" },
-  { title: "Events", href: "/events" },
-  { title: "Members", href: "/members" },
-  { title: "Network", href: "/network" },
-  { title: "Contact", href: "/contact" },
-] as const;
+interface FooterProps {
+  onNavigate?: (page: string) => void;
+}
 
-const Footer = () => {
+export function Footer({ onNavigate }: FooterProps) {
+  const quickLinks = [
+    { name: "Home", href: "#home" },
+    { name: "About", href: "#about" },
+    { name: "Members", href: "#members" },
+    { name: "Events", href: "#events" },
+  ];
+
+  const socialLinks = [
+    {
+      icon: Facebook,
+      href: "https://www.facebook.com/iloilobusinessclub",
+      label: "Facebook",
+    },
+    { icon: Twitter, href: "#", label: "Twitter" },
+    { icon: Linkedin, href: "#", label: "LinkedIn" },
+  ];
+
   return (
-    <footer className="border-t bg-muted">
-      <div className="max-w-(--breakpoint-xl) mx-auto">
-        <div className="py-12 grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-10 px-6 xl:px-0">
-          {/* Logo and Tagline */}
+    <footer id="contact" className="bg-sidebar-foreground/90 text-white py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <div>
-            <Link href="/" className="flex items-center gap-2 no-underline">
+            <div className="flex items-center gap-3 mb-4">
               <Image
                 src="/logo/ibc-logo-2.png"
-                alt="Iloilo Business Club"
-                width={50}
-                height={50}
-                className="object-contain"
+                alt="IBC Logo"
+                width={48}
+                height={56}
+                className="h-14 w-auto brightness-0 invert"
               />
-              <span className="text-xl font-bold text-foreground">
-                Iloilo Business Club
-              </span>
-            </Link>
-            <p className="mt-4 text-muted-foreground">
+              <h3 className="text-2xl font-bold">Iloilo Business Club</h3>
+            </div>
+            <p className="text-white/70 mb-6 leading-relaxed">
               Sustaining the Momentum for Progress since 1990.
             </p>
+            <div className="flex gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border text-muted border-white/20 flex items-center justify-center hover:bg-white hover:text-foreground transition-all"
+                  aria-label={social.label}
+                >
+                  <social.icon className="w-5 h-5" />
+                </a>
+              ))}
+            </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links Column */}
           <div>
-            <h6 className="font-medium text-foreground">Quick Links</h6>
-            <ul className="mt-6 space-y-4">
-              {quickLinks.map(({ title, href }) => (
-                <li key={title}>
-                  <Link
-                    href={href}
-                    className="text-muted-foreground hover:text-foreground no-underline hover-underline-animation"
+            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-3">
+              {quickLinks.map((link) => (
+                <li key={link.name}>
+                  <a
+                    href={link.href}
+                    className="text-white/70 hover:text-primary transition-colors"
                   >
-                    {title}
-                  </Link>
+                    {link.name}
+                  </a>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact Info Column */}
           <div>
-            <h6 className="font-medium text-foreground">Contact Info</h6>
-            <ul className="mt-6 space-y-4 text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <MapPinIcon className="h-5 w-5 mt-0.5 shrink-0" />
-                <span>
+            <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
+                <span className="text-white/70">
                   GF Rm. 105-B Maryville Bldg., Marymart Mall, Delgado St.,
                   Iloilo City 5000
                 </span>
               </li>
-              <li className="flex items-center gap-2">
-                <PhoneIcon className="h-5 w-5 shrink-0" />
-                <span>(033) 337 - 8341</span>
+              <li className="flex items-center gap-3">
+                <Phone className="w-5 h-5 text-muted-foreground" />
+                <span className="text-white/70">(033) 337 - 8341</span>
               </li>
-              <li className="flex items-center gap-2">
-                <MailIcon className="h-5 w-5 shrink-0" />
-                <a
-                  href="mailto:iloilobusinessclub1990@gmail.com"
-                  className="text-muted-foreground hover:text-foreground no-underline"
-                >
+              <li className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-muted-foreground" />
+                <span className="text-white/70">
                   iloilobusinessclub1990@gmail.com
-                </a>
+                </span>
               </li>
             </ul>
           </div>
-        </div>
-        <Separator />
-        <div className="py-8 flex items-center justify-center px-6 xl:px-0">
-          {/* Copyright */}
-          <span className="text-muted-foreground text-sm">
-            © 2025 Iloilo Business Club. All rights reserved.
-          </span>
+        </motion.div>
+
+        <Separator className="bg-white/20 mb-8" />
+
+        <div className="text-center text-white/60">
+          <p>&copy; 2025 Iloilo Business Club. All rights reserved.</p>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}
