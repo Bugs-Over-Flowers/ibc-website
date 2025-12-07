@@ -53,8 +53,8 @@ export default function VerifyEmailPage() {
   }, [router]);
 
   return (
-    <div className="flex justify-center items-center h-screen w-full">
-      <Card className="w-[400px]">
+    <div className="flex justify-center items-center h-screen w-full p-4">
+      <Card className="w-full max-w-[400px]">
         <CardHeader>
           <CardTitle>Check your email</CardTitle>
           <CardDescription>

@@ -44,7 +44,7 @@ export function MfaVerifyForm() {
   };
 
   return (
-    <Card className="w-[400px]">
+    <Card className="w-full max-w-[400px]">
       <CardHeader>
         <CardTitle>Two-Factor Authentication</CardTitle>
         <CardDescription>

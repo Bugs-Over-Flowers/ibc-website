@@ -80,7 +80,7 @@ export function MfaSetupForm() {
   }
 
   return (
-    <Card className="w-[400px]">
+    <Card className="w-full max-w-[400px]">
       <CardHeader>
         <CardTitle>Setup Multi-Factor Authentication</CardTitle>
         <CardDescription>
