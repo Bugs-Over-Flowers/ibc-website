@@ -30,7 +30,7 @@ function TextField({
       <Input
         id={field.name}
         name={field.name}
-        value={field.state.value}
+        value={field.state.value ?? ""}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         placeholder={placeholder}

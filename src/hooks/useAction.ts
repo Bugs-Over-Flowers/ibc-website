@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { ServerFunction } from "@/lib/server/types";
 
 interface UseActionOptions<TOutput> {
@@ -8,28 +8,47 @@ interface UseActionOptions<TOutput> {
   onError?: (error: string) => void;
 }
 
-export function useAction<TInput, TOutput>(
-  action: ServerFunction<[TInput], TOutput>,
+/**
+ * Hook for executing server actions with loading states and error handling.
+ *
+ * @example
+ * // With input
+ * const { execute, isPending } = useAction(tryCatch(createItem), {
+ *   onSuccess: (data) => router.push(`/items/${data.id}`),
+ *   onError: (error) => toast.error(error),
+ * });
+ * execute({ name: "New Item" });
+ *
+ * @example
+ * // Without input
+ * const { execute, isPending } = useAction(tryCatch(refreshData));
+ * execute();
+ */
+export function useAction<TInput extends unknown[], TOutput>(
+  action: ServerFunction<TInput, TOutput>,
   options: UseActionOptions<TOutput> = {},
 ) {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<TOutput | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  async function execute(input: TInput) {
+  async function execute(...args: TInput) {
     setError(null);
+    setData(null);
+    setIsPending(true);
 
-    startTransition(async () => {
-      const res = await action(input);
-      if (res[0] !== null) {
-        setError(res[0]);
-        options.onError?.(res[0]);
-        return;
-      }
+    const res = await action(...args);
 
-      setData(res[1]);
-      options.onSuccess?.(res[1]);
-    });
+    const [error, data] = res;
+    if (error !== null) {
+      setError(error);
+      options.onError?.(error);
+      return;
+    }
+
+    setData(data);
+    options.onSuccess?.(data);
+    setIsPending(false);
   }
 
   function reset() {
@@ -41,7 +60,7 @@ export function useAction<TInput, TOutput>(
     execute,
     data,
     error,
-    isPending,
     reset,
+    isPending,
   };
 }

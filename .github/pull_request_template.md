@@ -20,14 +20,6 @@
 
 <!-- If applicable, add screenshots or screen recordings to demonstrate the UI changes. -->
 
-## 🧪 How to Test
-
-<!-- Please describe the steps to verify the changes. -->
-
-1. Go to '...'
-2. Click on '...'
-3. Verify that '...'
-
 ## ⚠️ Concerns / Known Issues
 
 <!-- Are there any edge cases, unfinished parts, or specific things the reviewer should look out for? -->
@@ -35,5 +27,4 @@
 ## ✅ Checklist
 
 - [ ] I have performed a self-review of my code.
-- [ ] I have verified that my Server Actions return the `[error, data]` tuple format.
 - [ ] I have checked for mobile responsiveness.
