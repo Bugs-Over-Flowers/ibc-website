@@ -31,7 +31,7 @@ function NumberField({
       <Input
         id={field.name}
         name={field.name}
-        value={field.state.value}
+        value={field.state.value ?? ""}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(Number(e.target.value))}
         placeholder={placeholder}

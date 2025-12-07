@@ -196,7 +196,9 @@ export type Database = {
           eventStartDate: string | null;
           eventTitle: string;
           eventType: Database["public"]["Enums"]["EventType"] | null;
+          publishedAt: string | null;
           registrationFee: number;
+          updatedAt: string | null;
           venue: string | null;
         };
         Insert: {
@@ -207,7 +209,9 @@ export type Database = {
           eventStartDate?: string | null;
           eventTitle: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          publishedAt?: string | null;
           registrationFee?: number;
+          updatedAt?: string | null;
           venue?: string | null;
         };
         Update: {
@@ -218,7 +222,9 @@ export type Database = {
           eventStartDate?: string | null;
           eventTitle?: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          publishedAt?: string | null;
           registrationFee?: number;
+          updatedAt?: string | null;
           venue?: string | null;
         };
         Relationships: [];
@@ -228,6 +234,7 @@ export type Database = {
           contactNumber: string;
           email: string;
           firstName: string;
+          isPrincipal: boolean;
           lastName: string;
           participantId: string;
           registrationId: string;
@@ -236,6 +243,7 @@ export type Database = {
           contactNumber: string;
           email: string;
           firstName: string;
+          isPrincipal?: boolean;
           lastName: string;
           participantId?: string;
           registrationId: string;
@@ -244,6 +252,7 @@ export type Database = {
           contactNumber?: string;
           email?: string;
           firstName?: string;
+          isPrincipal?: boolean;
           lastName?: string;
           participantId?: string;
           registrationId?: string;
@@ -261,21 +270,21 @@ export type Database = {
       ProofImage: {
         Row: {
           applicationId: string | null;
+          path: string;
           proofImageId: string;
           registrationId: string | null;
-          url: string;
         };
         Insert: {
           applicationId?: string | null;
+          path: string;
           proofImageId?: string;
           registrationId?: string | null;
-          url: string;
         };
         Update: {
           applicationId?: string | null;
+          path?: string;
           proofImageId?: string;
           registrationId?: string | null;
-          url?: string;
         };
         Relationships: [
           {
@@ -352,7 +361,19 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      submit_event_registration: {
+        Args: {
+          p_business_member_id?: string;
+          p_event_id: string;
+          p_member_type: string;
+          p_non_member_name?: string;
+          p_other_registrants?: Json;
+          p_payment_method?: string;
+          p_payment_path?: string;
+          p_principal_registrant?: Json;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       ApplicationMemberType: "corporate" | "personal";
