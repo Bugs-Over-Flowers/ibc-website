@@ -3,10 +3,10 @@ import "server-only";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import type { ServerFunctionResult } from "@/lib/server/types";
-import type { Database } from "@/lib/supabase/db.types";
+import type { Database, Tables } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
-type Event = Database["public"]["Tables"]["Event"]["Row"];
+type Event = Tables<"Event">;
 
 export async function getFeaturedEvents(): Promise<
   ServerFunctionResult<Event[]>

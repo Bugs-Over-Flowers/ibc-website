@@ -24,6 +24,7 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
   const cycleCountRef = useRef(0);
 
   const upcomingEvents = events;
+  const hasEvents = upcomingEvents.length > 0;
 
   const handleNavigate = useCallback(
     (page: string, params?: { eventId?: string }) => {
@@ -37,17 +38,26 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
   );
 
   useEffect(() => {
-    if (showWelcome) {
+    if (showWelcome && !isPaused) {
       const welcomeTimer = setTimeout(() => {
         setShowWelcome(false);
         cycleCountRef.current = 0;
       }, 10000);
       return () => clearTimeout(welcomeTimer);
     }
-  }, [showWelcome]);
+  }, [showWelcome, isPaused]);
 
   useEffect(() => {
-    if (!showWelcome && upcomingEvents.length > 0 && !isPaused) {
+    if (!showWelcome && !hasEvents && !isPaused) {
+      const fallbackTimer = setTimeout(() => {
+        setShowWelcome(true);
+      }, 10000);
+      return () => clearTimeout(fallbackTimer);
+    }
+  }, [showWelcome, hasEvents, isPaused]);
+
+  useEffect(() => {
+    if (!showWelcome && hasEvents && !isPaused) {
       const eventTimer = setInterval(() => {
         setCurrentEventIndex((prev) => {
           const nextIndex = (prev + 1) % upcomingEvents.length;
@@ -71,7 +81,7 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
       }, 7000);
       return () => clearInterval(eventTimer);
     }
-  }, [showWelcome, upcomingEvents.length, isPaused]);
+  }, [showWelcome, hasEvents, upcomingEvents.length, isPaused]);
 
   const nextEvent = useCallback(() => {
     if (upcomingEvents.length > 0) {
