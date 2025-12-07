@@ -20,7 +20,7 @@ export function NoEventsFallback({ onNavigate }: NoEventsFallbackProps) {
       className="absolute inset-0"
     >
       <Image
-        src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1920&q=80"
+        src="/images/backgrounds/bg-2.jpg"
         alt="Business professionals networking"
         fill
         className="object-cover"
