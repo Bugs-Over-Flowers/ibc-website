@@ -90,7 +90,8 @@ Use `useAppForm` from `@/hooks/_formHooks` with registered field components.
 
 import { useRouter } from "next/navigation";
 import { useAppForm } from "@/hooks/_formHooks";
-import { createItem } from "@/app/items/actions";
+import tryCatch from "@/lib/server/tryCatch";
+import { createItem } from "@/server/items/mutations";
 import { z } from "zod";
 
 const CreateItemFormSchema = z.object({
@@ -107,7 +108,7 @@ export function CreateItemForm() {
       onSubmit: CreateItemFormSchema,
     },
     onSubmit: async ({ value }) => {
-      const [error, data] = await createItem(value);
+      const [error, data] = await tryCatch(createItem(value));
 
       if (error) {
         form.setErrorMap({ onSubmit: error });
@@ -188,7 +189,7 @@ export default MyField;
 
 ### Types
 
-All server functions return a tuple `[error, data]` using these types from `@/lib/server/types`:
+Server functions use the `[error, data]` tuple pattern via these types from `@/lib/server/types`:
 
 ```ts
 type ServerFunctionResult<T, E = string> =
@@ -202,6 +203,8 @@ type ServerFunction<TArgs extends unknown[], TResult, TError = string> = (
 
 ### Writing Server Functions
 
+Server actions can **throw errors freely**. Use `tryCatch` on the client to convert them to tuples. Or simply, create a tryCatch boundary where it is called.
+
 **Use `"use server"` for mutations:**
 
 ```ts
@@ -210,7 +213,6 @@ type ServerFunction<TArgs extends unknown[], TResult, TError = string> = (
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import type { ServerFunction } from "@/lib/server/types";
 
 const createItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -218,34 +220,27 @@ const createItemSchema = z.object({
 });
 
 type CreateItemInput = z.infer<typeof createItemSchema>;
-type CreateItemOutput = { id: string };
 
-export const createItem: ServerFunction<
-  [CreateItemInput],
-  CreateItemOutput
-> = async (input) => {
-  // 1. Validate input
-  const parsed = createItemSchema.safeParse(input);
-  if (!parsed.success) {
-    return [parsed.error.issues[0].message, null];
-  }
+export async function createItem(input: CreateItemInput) {
+  // 1. Validate input (throws on failure)
+  const parsed = createItemSchema.parse(input);
 
   // 2. Perform mutation
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("items")
-    .insert(parsed.data)
+    .insert(parsed)
     .select("id")
     .single();
 
   if (error) {
-    return [error.message, null];
+    throw new Error(error.message);
   }
 
-  // 3. Revalidate and return
+  // 3. Revalidate and return if needed
   revalidatePath("/items");
-  return [null, { id: data.id }];
-};
+  return { id: data.id };
+}
 ```
 
 **Use `import "server-only"` for data fetching:**
@@ -254,31 +249,18 @@ export const createItem: ServerFunction<
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import type { ServerFunctionResult } from "@/lib/server/types";
 
 type Item = { id: string; name: string };
 
-export async function getItems(): Promise<ServerFunctionResult<Item[]>> {
+export async function getItems(): Promise<Item[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("items").select("*");
 
   if (error) {
-    return [error.message, null];
+    throw new Error(error.message);
   }
 
-  return [null, data];
-}
-```
-
-### Alternative Function Syntax
-
-If you prefer `function` declarations over `const`:
-
-```ts
-export async function createItem(
-  input: CreateItemInput,
-): Promise<ServerFunctionResult<CreateItemOutput>> {
-  // same body
+  return data;
 }
 ```
 
@@ -286,21 +268,59 @@ export async function createItem(
 
 ## Client-Side Action Handling
 
+### `tryCatch` Utility
+
+The `tryCatch` utility from `@/lib/server/tryCatch` converts throwing functions/promises into `[error, data]` tuples. It supports two usage patterns:
+
+**1. Wrap a function** (for use with `useAction`):
+
+```ts
+import tryCatch from "@/lib/server/tryCatch";
+import { useAction } from "@/hooks/useAction";
+import { createItem } from "@/server/items/mutations";
+
+// tryCatch wraps the function, converting thrown errors to tuples
+const { execute } = useAction(tryCatch(createItem), {
+  onSuccess: (data) => console.log(data),
+  onError: (error) => console.error(error),
+});
+
+execute({ name: "New Item" });
+```
+
+**2. Wrap a promise** (for inline use):
+
+```ts
+import tryCatch from "@/lib/server/tryCatch";
+import { createItem } from "@/server/items/mutations";
+
+// tryCatch wraps the promise directly
+const [error, data] = await tryCatch(createItem(input));
+
+if (error) {
+  toast.error(error);
+  return;
+}
+
+console.log(data);
+```
+
 ### `useAction` Hook
 
-For button-triggered mutations (not form submissions):
+For button-triggered mutations (not form submissions). Use with `tryCatch` to wrap server actions that throw:
 
 ```tsx
 "use client";
 
 import { useRouter } from "next/navigation";
 import { useAction } from "@/hooks/useAction";
-import { deleteItem } from "@/app/items/actions";
+import tryCatch from "@/lib/server/tryCatch";
+import { deleteItem } from "@/server/items/mutations";
 
 export function DeleteButton({ id }: { id: string }) {
   const router = useRouter();
 
-  const { execute, isPending, error } = useAction(deleteItem, {
+  const { execute, isPending, error } = useAction(tryCatch(deleteItem), {
     onSuccess: () => router.push("/items"),
     onError: (err) => console.error(err),
   });
@@ -315,35 +335,19 @@ export function DeleteButton({ id }: { id: string }) {
 
 **`useAction` returns:**
 
-| Property    | Type                      | Description                     |
-| ----------- | ------------------------- | ------------------------------- |
-| `execute`   | `(input: TInput) => void` | Triggers the action             |
-| `isPending` | `boolean`                 | Loading state via useTransition |
-| `data`      | `TOutput \| null`         | Success result                  |
-| `error`     | `string \| null`          | Error message                   |
-| `reset`     | `() => void`              | Clears data and error           |
-
-### `tryCatch` Utility
-
-Wraps any promise into the `[error, data]` tuple format:
-
-```ts
-// Inside a function
-const [error, response] = await tryCatch(someServerAction(someParam));
-
-if (error) {
-  // Handle error
-}
-// Handle response
-
-// `response` is typed correctly here
-```
+| Property    | Type                        | Description                     |
+| ----------- | --------------------------- | ------------------------------- |
+| `execute`   | `(...args: TInput) => void` | Triggers the action             |
+| `isPending` | `boolean`                   | Loading state via useTransition |
+| `data`      | `TOutput \| null`           | Success result                  |
+| `error`     | `string \| null`            | Error message                   |
+| `reset`     | `() => void`                | Clears data and error           |
 
 ---
 
 ## Supabase
 
-### Server Client
+### Server-side Supabase Client
 
 Always use the server client from `@/lib/supabase/server`:
 
@@ -360,7 +364,7 @@ const { data, error } = await supabase.from("table").select("*");
 - ❌ Never import in `"use client"` components
 - The client is already typed with your `Database` types from `db.types.ts`
 
-### Client Client
+### Client-side Supabase Client
 
 Always use the client client from `@/lib/supabase/client`:
 
@@ -450,7 +454,9 @@ async function ItemsList() {
 }
 ```
 
-you may also opt to use `loading.tsx`
+- You may also opt to use `loading.tsx`
+- For a page with multiple queries, you may use `await Promise.all([query1(), query2()])`
+- Revalidate and return if needed
 
 ### Error Boundaries
 

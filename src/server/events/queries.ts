@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import type { ServerFunctionResult } from "@/lib/server/types";
 import type { Database } from "@/lib/supabase/db.types";
@@ -32,18 +33,42 @@ export async function getFeaturedEvents(): Promise<
   return [null, data];
 }
 
-export async function getAllEvents(): Promise<ServerFunctionResult<Event[]>> {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
+export const getEventById = async (
+  requestCookies: RequestCookie[],
+  { id }: { id: string },
+) => {
+  "use cache";
+  const supabase = await createClient(requestCookies);
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("Event")
     .select("*")
-    .order("eventStartDate", { ascending: true });
+    .eq("eventId", id)
+    .maybeSingle()
+    .throwOnError();
 
-  if (error) {
-    return [error.message, null];
+  if (!data) {
+    console.log("No event");
+    throw new Error("No event found");
   }
 
-  return [null, data];
-}
+  return data;
+};
+
+export const getAllEvents = async (requestCookies: RequestCookie[]) => {
+  "use cache";
+
+  const supabase = await createClient(requestCookies);
+  const { data } = await supabase
+    .from("Event")
+    .select("*")
+    .order("eventStartDate", { ascending: false })
+    .throwOnError();
+
+  if (!data) {
+    console.log("No events");
+    throw new Error("No events found");
+  }
+
+  return data;
+};

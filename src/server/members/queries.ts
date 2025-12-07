@@ -1,16 +1,18 @@
-import type { ServerFunctionResult } from "@/lib/server/types";
-import type { Database } from "@/lib/supabase/db.types";
-import { createClient } from "@/lib/supabase/server";
 import "server-only";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { cache } from "react";
+import { createClient } from "@/lib/supabase/server";
 
-type GetAllMembersOutput =
-  Database["public"]["Tables"]["BusinessMember"]["Row"][];
+export const getAllMembers = cache(async (cookieStore: RequestCookie[]) => {
+  const supabase = await createClient(cookieStore);
+  const { data } = await supabase
+    .from("BusinessMember")
+    .select("businessMemberId, businessName")
+    .order("businessName")
+    .throwOnError();
 
-export const getAllMembers = async (): Promise<
-  ServerFunctionResult<GetAllMembersOutput>
-> => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("BusinessMember").select("*");
-  if (error) return [error.message, null];
-  return [null, data];
-};
+  if (!data) {
+    throw new Error("Failed to fetch members");
+  }
+  return data;
+});
