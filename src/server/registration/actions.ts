@@ -3,6 +3,10 @@
 import { createActionClient } from "@/lib/supabase/server";
 import { ServerRegistrationSchema } from "@/lib/validation/registration/standard";
 
+interface SubmitRegistrationResponse {
+  registrationId: string;
+  message: string;
+}
 export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   const parsedData = ServerRegistrationSchema.parse(data);
 
@@ -39,5 +43,5 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   }
 
   console.log(rpcResults);
-  return "Registered Successfully!";
+  return rpcResults as unknown as SubmitRegistrationResponse;
 };
