@@ -34,16 +34,40 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Do not run code between createServerClient and
-  // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
+  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  // IMPORTANT: If you remove getClaims() and you use server-side rendering
+  // IMPORTANT: If you remove getUser() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
-  const { data } = await supabase.auth.getClaims();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  const user = data?.claims;
+  console.log("User: ", user);
 
-  console.log("User claims: ", user);
+  if (error?.message === "User from sub claim in JWT does not exist") {
+    // Clear the invalid session
+    await supabase.auth.signOut();
+
+    // If already on the login page, just proceed to allow the cookie clearing to take effect
+    if (request.nextUrl.pathname === "/admin") {
+      return supabaseResponse;
+    }
+
+    // Redirect to login
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin";
+    const redirectResponse = NextResponse.redirect(url);
+
+    // Copy cookies from supabaseResponse to ensure the session is cleared
+    const cookiesToSet = supabaseResponse.cookies.getAll();
+    cookiesToSet.forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+    });
+
+    return redirectResponse;
+  }
 
   // if (
   //   !user &&

@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +33,11 @@ export function MfaSetupForm() {
       },
       onError: (error) => {
         toast.error(error);
-        if (error.includes("Bearer token") || error.includes("not logged in")) {
+        if (
+          error.includes("Bearer token") ||
+          error.includes("not logged in") ||
+          error.includes("User from sub claim in JWT does not exist")
+        ) {
           router.push("/admin");
         }
       },
@@ -54,9 +57,13 @@ export function MfaSetupForm() {
     },
   );
 
+  const hasEnrolled = useRef(false);
+
   useEffect(() => {
-    executeEnroll(undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!hasEnrolled.current) {
+      hasEnrolled.current = true;
+      executeEnroll(undefined);
+    }
   }, [executeEnroll]);
 
   const handleVerify = () => {
@@ -83,13 +90,13 @@ export function MfaSetupForm() {
       <CardContent className="space-y-4">
         {qrCode && (
           <div className="flex justify-center">
-            <Image
+            {/* biome-ignore lint/a11y/useAltText: <explanation> */}
+            <img
               src={qrCode}
               alt="MFA QR Code"
               width={192}
               height={192}
               className="size-48"
-              unoptimized
             />
           </div>
         )}

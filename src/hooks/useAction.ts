@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import type { ServerFunction } from "@/lib/server/types";
 
 interface UseActionOptions<TOutput> {
@@ -16,26 +16,34 @@ export function useAction<TInput, TOutput>(
   const [data, setData] = useState<TOutput | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  async function execute(input: TInput) {
-    setError(null);
+  // Keep options in a ref so we can use the latest version in execute
+  // without needing to include it in the dependency array
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
-    startTransition(async () => {
-      const res = await action(input);
-      if (res[0] !== null) {
-        setError(res[0]);
-        options.onError?.(res[0]);
-        return;
-      }
+  const execute = useCallback(
+    async (input: TInput) => {
+      setError(null);
 
-      setData(res[1]);
-      options.onSuccess?.(res[1]);
-    });
-  }
+      startTransition(async () => {
+        const res = await action(input);
+        if (res[0] !== null) {
+          setError(res[0]);
+          optionsRef.current.onError?.(res[0]);
+          return;
+        }
 
-  function reset() {
+        setData(res[1]);
+        optionsRef.current.onSuccess?.(res[1]);
+      });
+    },
+    [action],
+  );
+
+  const reset = useCallback(() => {
     setError(null);
     setData(null);
-  }
+  }, []);
 
   return {
     execute,

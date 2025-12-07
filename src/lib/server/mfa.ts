@@ -19,6 +19,15 @@ export const enrollMfa: ServerFunction<
 > = async () => {
   const supabase = await createActionClient();
 
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user?.email) {
+    return ["Could not retrieve user details", null];
+  }
+
   const { data: factors, error: listError } =
     await supabase.auth.mfa.listFactors();
 
@@ -26,18 +35,17 @@ export const enrollMfa: ServerFunction<
     return [listError.message, null];
   }
 
-  // Unenroll any unverified factors to prevent duplicates/errors on refresh
-  const unverifiedFactors = factors.all.filter(
-    (f) => f.factor_type === "totp" && f.status === "unverified",
-  );
+  // Unenroll ALL TOTP factors (verified or unverified) to prevent duplicates
+  // and allow resetting MFA if the user is on the setup page.
+  const totpFactors = factors.all.filter((f) => f.factor_type === "totp");
 
-  for (const factor of unverifiedFactors) {
+  for (const factor of totpFactors) {
     await supabase.auth.mfa.unenroll({ factorId: factor.id });
   }
 
   const { data, error } = await supabase.auth.mfa.enroll({
     factorType: "totp",
-    friendlyName: "IBC Admin",
+    friendlyName: `IBC Admin (${user.email})`,
   });
 
   if (error) {
