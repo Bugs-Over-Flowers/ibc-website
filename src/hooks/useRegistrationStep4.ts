@@ -11,13 +11,15 @@ const defaultValues: StandardRegistrationStep4Schema = {
   termsAndConditions: false,
 };
 export const useRegistrationStep4 = () => {
-  const registrationData = useRegistrationStore((s) => s.registrationData);
+  const registrationData = useRegistrationStore(
+    (state) => state.registrationData,
+  );
   const setRegistrationData = useRegistrationStore(
-    (s) => s.setRegistrationData,
+    (state) => state.setRegistrationData,
   );
 
   const { execute: submitRegistration } = useSubmitRegistration();
-  const f = useAppForm({
+  const form = useAppForm({
     defaultValues,
     validators: {
       onSubmit: StandardRegistrationStep4Schema,
@@ -26,6 +28,7 @@ export const useRegistrationStep4 = () => {
       console.log(value);
       const refinedValue = StandardRegistrationStep4Schema.parse(value);
 
+      // handle save data to store
       setRegistrationData({
         step4: refinedValue,
       });
@@ -40,9 +43,9 @@ export const useRegistrationStep4 = () => {
         return;
       }
 
-      submitRegistration();
+      await submitRegistration();
     },
   });
 
-  return f;
+  return form;
 };

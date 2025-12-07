@@ -1,14 +1,22 @@
+import { Building, CircleAlert } from "lucide-react";
 import { type FormEvent, useMemo } from "react";
 import FormButtons from "@/components/FormButtons";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
   FieldContent,
   FieldDescription,
-  FieldGroup,
   FieldLabel,
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
 import { useRegistrationStep1 } from "@/hooks/useRegistrationStep1";
@@ -20,13 +28,8 @@ interface Step1Props {
 }
 
 const Step1 = ({ members }: Step1Props) => {
-  const eventDetails = useRegistrationStore((s) => s.eventDetails);
-  const f = useRegistrationStep1();
-
-  const onBack = async () => {
-    // Implement back button logic here
-    f.handleSubmit({ nextStep: false });
-  };
+  const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const form = useRegistrationStep1();
 
   const onNext = async (e?: FormEvent) => {
     // Implement next button logic here
@@ -34,7 +37,7 @@ const Step1 = ({ members }: Step1Props) => {
       e.preventDefault();
       e.stopPropagation();
     }
-    f.handleSubmit({ nextStep: true });
+    form.handleSubmit({ nextStep: true });
   };
 
   const membersOptions = useMemo(
@@ -47,103 +50,142 @@ const Step1 = ({ members }: Step1Props) => {
   );
 
   const memberName = useMemo(() => {
-    const values = f.state.values;
+    const values = form.state.values;
     if (values.member === "member") {
       return members.find((m) => m.businessMemberId === values.businessMemberId)
         ?.businessName;
     }
     return "";
-  }, [members, f.state.values]);
+  }, [members, form.state.values]);
 
   return (
     <form onSubmit={onNext} className="space-y-3">
-      <FieldGroup>
-        <f.AppField name="member">
-          {(field) => (
-            <FieldSet>
-              <FieldTitle>
-                <h3>Affiliation</h3>
-              </FieldTitle>
-              <FieldDescription>Are you a member of IBC?</FieldDescription>
-              <RadioGroup
-                defaultValue="member"
-                value={field.state.value}
-                onValueChange={(value) => {
-                  console.log(value);
+      {/* Step 1 Title */}
+      <Item>
+        <ItemContent>
+          <div className="flex items-center gap-2">
+            <Building size={18} />
+            <ItemTitle>Affiliation</ItemTitle>
+          </div>
+          <ItemDescription>
+            Please identify your affiliation with the organization.
+          </ItemDescription>
+        </ItemContent>
+      </Item>
 
-                  const parsedMemberValue = MemberTypeEnum.safeParse(value);
+      <Card>
+        <CardContent>
+          <form.AppField name="member">
+            {(field) => (
+              <FieldSet>
+                <RadioGroup
+                  defaultValue="member"
+                  value={field.state.value}
+                  onValueChange={(value) => {
+                    const parsedMemberValue = MemberTypeEnum.safeParse(value);
 
-                  if (!parsedMemberValue.success) {
-                    console.log(parsedMemberValue.error);
-                    return;
-                  }
+                    if (!parsedMemberValue.success) return;
+                    if (parsedMemberValue.data === "member") {
+                      form.setFieldValue("businessMemberId", "");
+                    } else if (parsedMemberValue.data === "nonmember") {
+                      form.setFieldValue("nonMemberName", "");
+                    }
 
-                  field.handleChange(parsedMemberValue.data);
-                }}
-              >
-                <FieldLabel htmlFor="member">
-                  <Field orientation={"horizontal"}>
-                    <FieldContent>
-                      <FieldTitle>Member</FieldTitle>
-                      <FieldDescription>I am a member of IBC.</FieldDescription>
-                      {field.state.value === "member" && (
-                        <f.AppField name="businessMemberId">
-                          {(field) => (
-                            <field.SelectField
-                              placeholder={memberName ?? "Select Member"}
-                              options={membersOptions}
-                            />
-                          )}
-                        </f.AppField>
-                      )}
-                    </FieldContent>
-                    <RadioGroupItem
-                      value="member"
-                      id="member"
-                      variant={"noIcon"}
-                    />
-                  </Field>
-                </FieldLabel>
-                <FieldLabel htmlFor="nonmember">
-                  <Field orientation={"horizontal"}>
-                    <FieldContent>
-                      <FieldTitle>Non-member</FieldTitle>
-                      <FieldDescription>
-                        I am not a member of IBC.
-                      </FieldDescription>
-                      {eventDetails?.eventType === "private" && (
+                    field.handleChange(parsedMemberValue.data);
+                  }}
+                >
+                  {/* Member Select */}
+                  <FieldLabel htmlFor="member">
+                    <Field orientation={"horizontal"}>
+                      <FieldContent>
+                        <FieldTitle>Member</FieldTitle>
                         <FieldDescription>
-                          This event is private only. Only members of IBC are
-                          allowed to attend this event.
+                          I am a member of IBC.
                         </FieldDescription>
-                      )}
-                      {field.state.value === "nonmember" &&
-                        eventDetails?.eventType === "public" && (
-                          <f.AppField name="nonMemberName">
+                        {field.state.value === "member" && (
+                          <form.AppField name="businessMemberId">
                             {(field) => (
-                              <field.TextField
-                                placeholder="Enter your Organization / Company Name"
-                                label="Affiliation"
+                              <field.SelectField
+                                placeholder={
+                                  memberName !== ""
+                                    ? memberName
+                                    : "Select Member"
+                                }
+                                options={membersOptions}
                               />
                             )}
-                          </f.AppField>
+                          </form.AppField>
                         )}
-                    </FieldContent>
-                    {eventDetails?.eventType === "public" && (
+                      </FieldContent>
                       <RadioGroupItem
-                        value="nonmember"
-                        id="nonmember"
+                        value="member"
+                        id="member"
                         variant={"noIcon"}
                       />
-                    )}
-                  </Field>
-                </FieldLabel>
-              </RadioGroup>
-            </FieldSet>
-          )}
-        </f.AppField>
-      </FieldGroup>
-      <FormButtons onBack={onBack} onNext={onNext} />
+                    </Field>
+                  </FieldLabel>
+
+                  {/* Nonmember Select*/}
+                  <FieldLabel htmlFor="nonmember">
+                    <Field orientation={"horizontal"}>
+                      <FieldContent>
+                        <FieldTitle>Non-member</FieldTitle>
+                        <FieldDescription>
+                          I am not a member of IBC.
+                        </FieldDescription>
+                        {eventDetails?.eventType === "private" && (
+                          <FieldDescription>
+                            This event is private only. Only members of IBC are
+                            allowed to attend this event.
+                          </FieldDescription>
+                        )}
+                        {field.state.value === "nonmember" &&
+                          eventDetails?.eventType === "public" && (
+                            <form.AppField name="nonMemberName">
+                              {(field) => (
+                                <field.TextField
+                                  placeholder="Enter your Organization / Company Name"
+                                  label="Affiliation"
+                                />
+                              )}
+                            </form.AppField>
+                          )}
+                      </FieldContent>
+                      {eventDetails?.eventType === "public" && (
+                        <RadioGroupItem
+                          value="nonmember"
+                          id="nonmember"
+                          variant={"noIcon"}
+                        />
+                      )}
+                    </Field>
+                  </FieldLabel>
+                </RadioGroup>
+              </FieldSet>
+            )}
+          </form.AppField>
+        </CardContent>
+      </Card>
+
+      <Item variant={"outline"}>
+        <ItemMedia>
+          <CircleAlert />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>Note</ItemTitle>
+          <ItemDescription>
+            In case you can&apos;t find your organization / business /
+            affiliation, please contact us.
+          </ItemDescription>
+        </ItemContent>
+      </Item>
+
+      <FormButtons
+        onBack={() => {
+          console.log("No Back button for step 1");
+        }}
+        onNext={onNext}
+      />
     </form>
   );
 };

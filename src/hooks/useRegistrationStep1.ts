@@ -9,16 +9,16 @@ const defaultMeta: FormSubmitMeta = {
 };
 
 export const useRegistrationStep1 = () => {
-  const setStep = useRegistrationStore((s) => s.setStep);
+  const setStep = useRegistrationStore((state) => state.setStep);
   const setRegistrationData = useRegistrationStore(
-    (s) => s.setRegistrationData,
+    (state) => state.setRegistrationData,
   );
 
   const defaultRegistrationDataStep1 = useRegistrationStore(
-    (s) => s.registrationData?.step1,
+    (state) => state.registrationData?.step1,
   );
 
-  const f = useAppForm({
+  const form = useAppForm({
     defaultValues: {
       ...defaultRegistrationDataStep1,
     },
@@ -42,5 +42,5 @@ export const useRegistrationStep1 = () => {
     },
   });
 
-  return f;
+  return form;
 };

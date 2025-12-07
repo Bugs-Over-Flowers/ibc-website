@@ -10,15 +10,15 @@ const defaultMeta: FormSubmitMeta = {
 };
 
 export const useRegistrationStep2 = () => {
-  const setStep = useRegistrationStore((s) => s.setStep);
+  const setStep = useRegistrationStore((state) => state.setStep);
   const setRegistrationData = useRegistrationStore(
-    (s) => s.setRegistrationData,
+    (state) => state.setRegistrationData,
   );
 
   const defaultRegistrationDataStep2 = useRegistrationStore(
-    (s) => s.registrationData?.step2,
+    (state) => state.registrationData?.step2,
   );
-  const f = useAppForm({
+  const form = useAppForm({
     defaultValues: defaultRegistrationDataStep2,
     validators: {
       onSubmit: ({ value }) => {
@@ -54,10 +54,11 @@ export const useRegistrationStep2 = () => {
         setStep(1);
       }
 
+      // handle save data to store
       setRegistrationData({
         step2: refinedValue,
       });
     },
   });
-  return f;
+  return form;
 };

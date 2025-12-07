@@ -4,7 +4,13 @@ import { Activity, type FormEvent } from "react";
 import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import FormButtons from "@/components/FormButtons";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Field,
   FieldContent,
@@ -14,7 +20,7 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
-import { Item, ItemContent, ItemHeader, ItemTitle } from "@/components/ui/item";
+import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dropzone,
@@ -34,17 +40,17 @@ const BANK_DETAILS = {
 } as const;
 
 export default function Step3() {
-  const f = useRegistrationStep3();
+  const form = useRegistrationStep3();
 
   const setRegistrationData = useRegistrationStore(
-    (s) => s.setRegistrationData,
+    (state) => state.setRegistrationData,
   );
 
-  const setStep = useRegistrationStore((s) => s.setStep);
+  const setStep = useRegistrationStore((state) => state.setStep);
   const onBack = async () => {
     setStep(2);
     setRegistrationData({
-      step3: f.state.values,
+      step3: form.state.values,
     });
   };
 
@@ -53,17 +59,16 @@ export default function Step3() {
       e.preventDefault();
       e.stopPropagation();
     }
-    f.handleSubmit({ nextStep: true });
+    form.handleSubmit({ nextStep: true });
   };
   return (
     <form onSubmit={onNext} className="space-y-4">
       <Item>
-        <ItemHeader>
-          <ItemTitle>
-            <Banknote /> Payment Information
-          </ItemTitle>
-        </ItemHeader>
-        <ItemContent className="flex flex-col items-end w-full">
+        <ItemContent className="space-y-5">
+          <div className="flex items-center gap-2">
+            <Banknote size={20} />
+            <ItemTitle>Payment Information</ItemTitle>
+          </div>
           <PaymentDetails />
         </ItemContent>
       </Item>
@@ -72,14 +77,18 @@ export default function Step3() {
           <CardTitle>
             <h4>Select a Payment Method</h4>
           </CardTitle>
+          <CardDescription>
+            Choose a payment method that you prefer. Currently, we only support
+            BPI payments and onsite payments.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <f.AppField
+          <form.AppField
             name="paymentMethod"
             listeners={{
               onChange: () => {
-                if (!f.getFieldValue("paymentProof")) {
-                  f.resetField("paymentProof");
+                if (!form.getFieldValue("paymentProof")) {
+                  form.resetField("paymentProof");
                 }
               },
             }}
@@ -107,8 +116,7 @@ export default function Step3() {
                             <CreditCard /> Pay Online (BPI only)
                           </FieldTitle>
                           <FieldDescription>
-                            Pay online through BPI, and submit proof of
-                            payment/s
+                            Pay online through BPI and submit a proof of payment
                           </FieldDescription>
                           <RadioGroupItem
                             value={
@@ -124,10 +132,10 @@ export default function Step3() {
                       <Field orientation={"horizontal"}>
                         <FieldContent>
                           <FieldTitle className="font-semibold">
-                            <Users /> Pay Onsite (on event)
+                            <Users /> Pay Onsite (On Event)
                           </FieldTitle>
                           <FieldDescription>
-                            Pay in person at the event venue
+                            Pay in person at the event
                           </FieldDescription>
                           <RadioGroupItem
                             value={
@@ -143,13 +151,13 @@ export default function Step3() {
                 </FieldSet>
               );
             }}
-          </f.AppField>
+          </form.AppField>
         </CardContent>
       </Card>
-      <f.Subscribe selector={(s) => s.values.paymentMethod}>
+      <form.Subscribe selector={(state) => state.values.paymentMethod}>
         {(paymentMethod) => (
           <Activity mode={paymentMethod === "online" ? "visible" : "hidden"}>
-            <f.AppField name="paymentProof">
+            <form.AppField name="paymentProof">
               {(field) => {
                 const localImageUrl =
                   field.state.value && URL.createObjectURL(field.state.value);
@@ -218,10 +226,10 @@ export default function Step3() {
                   </Card>
                 );
               }}
-            </f.AppField>
+            </form.AppField>
           </Activity>
         )}
-      </f.Subscribe>
+      </form.Subscribe>
       <FormButtons onNext={onNext} onBack={onBack} />
     </form>
   );
@@ -239,7 +247,7 @@ function PaymentDetails() {
   };
 
   return (
-    <>
+    <div>
       <div className="flex justify-between w-full">
         <div>Registration Fee per head</div>
         <div>₱ {eventDetails?.registrationFee}</div>
@@ -256,7 +264,7 @@ function PaymentDetails() {
         <div>Total Amount</div>
         <div>₱ {totalPayment()}</div>
       </div>
-    </>
+    </div>
   );
 }
 

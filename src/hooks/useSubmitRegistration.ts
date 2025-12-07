@@ -8,8 +8,10 @@ import useRegistrationStore from "./registration.store";
 import { useAction } from "./useAction";
 
 export const useSubmitRegistration = () => {
-  const registrationData = useRegistrationStore((s) => s.registrationData);
-  const eventDetails = useRegistrationStore((s) => s.eventDetails);
+  const registrationData = useRegistrationStore(
+    (state) => state.registrationData,
+  );
+  const eventDetails = useRegistrationStore((state) => state.eventDetails);
   return useAction(
     tryCatch(async () => {
       // validate the registration data;

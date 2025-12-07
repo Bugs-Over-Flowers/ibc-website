@@ -9,16 +9,16 @@ const defaultMeta: FormSubmitMeta = {
 };
 
 export const useRegistrationStep3 = () => {
-  const setStep = useRegistrationStore((s) => s.setStep);
+  const setStep = useRegistrationStore((state) => state.setStep);
   const setRegistrationData = useRegistrationStore(
-    (s) => s.setRegistrationData,
+    (state) => state.setRegistrationData,
   );
 
   const defaultRegistrationDataStep3 = useRegistrationStore(
-    (s) => s.registrationData?.step3,
+    (state) => state.registrationData?.step3,
   );
 
-  const f = useAppForm({
+  const form = useAppForm({
     defaultValues: defaultRegistrationDataStep3,
     validators: {
       onSubmit: zodValidator(StandardRegistrationStep3Schema),
@@ -33,11 +33,12 @@ export const useRegistrationStep3 = () => {
         setStep(2);
       }
 
+      // handle save data to store
       setRegistrationData({
         step3: refinedValue,
       });
     },
   });
 
-  return f;
+  return form;
 };
