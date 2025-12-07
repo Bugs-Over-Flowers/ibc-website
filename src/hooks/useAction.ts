@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, useTransition } from "react";
+import { useState } from "react";
 import type { ServerFunction } from "@/lib/server/types";
 
 interface UseActionOptions<TOutput> {
@@ -8,48 +8,59 @@ interface UseActionOptions<TOutput> {
   onError?: (error: string) => void;
 }
 
-export function useAction<TInput, TOutput>(
-  action: ServerFunction<[TInput], TOutput>,
+/**
+ * Hook for executing server actions with loading states and error handling.
+ *
+ * @example
+ * // With input
+ * const { execute, isPending } = useAction(tryCatch(createItem), {
+ *   onSuccess: (data) => router.push(`/items/${data.id}`),
+ *   onError: (error) => toast.error(error),
+ * });
+ * execute({ name: "New Item" });
+ *
+ * @example
+ * // Without input
+ * const { execute, isPending } = useAction(tryCatch(refreshData));
+ * execute();
+ */
+export function useAction<TInput extends unknown[], TOutput>(
+  action: ServerFunction<TInput, TOutput>,
   options: UseActionOptions<TOutput> = {},
 ) {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<TOutput | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  // Keep options in a ref so we can use the latest version in execute
-  // without needing to include it in the dependency array
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
-
-  const execute = useCallback(
-    async (input: TInput) => {
-      setError(null);
-
-      startTransition(async () => {
-        const res = await action(input);
-        if (res[0] !== null) {
-          setError(res[0]);
-          optionsRef.current.onError?.(res[0]);
-          return;
-        }
-
-        setData(res[1]);
-        optionsRef.current.onSuccess?.(res[1]);
-      });
-    },
-    [action],
-  );
-
-  const reset = useCallback(() => {
+  async function execute(...args: TInput) {
     setError(null);
     setData(null);
-  }, []);
+    setIsPending(true);
+
+    const res = await action(...args);
+
+    const [error, data] = res;
+    if (error !== null) {
+      setError(error);
+      options.onError?.(error);
+      return;
+    }
+
+    setData(data);
+    options.onSuccess?.(data);
+    setIsPending(false);
+  }
+
+  function reset() {
+    setError(null);
+    setData(null);
+  }
 
   return {
     execute,
     data,
     error,
-    isPending,
     reset,
+    isPending,
   };
 }

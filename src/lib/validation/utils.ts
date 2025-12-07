@@ -11,3 +11,7 @@ export const telefaxSchema = z
 export const landlineSchema = z
   .string()
   .regex(/^0\d{4}-\d{4}$/, "Invalid landline number");
+
+export const MemberTypeEnum = z.enum(["member", "nonmember"]);
+
+export const PaymentMethodEnum = z.enum(["online", "onsite"]);
