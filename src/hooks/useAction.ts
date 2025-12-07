@@ -43,12 +43,13 @@ export function useAction<TInput extends unknown[], TOutput>(
     if (error !== null) {
       setError(error);
       options.onError?.(error);
-      return;
+      return [error, data];
     }
 
     setData(data);
     options.onSuccess?.(data);
     setIsPending(false);
+    return [error, data];
   }
 
   function reset() {
