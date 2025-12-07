@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   StandardRegistrationSchema,
@@ -5,12 +6,15 @@ import {
 } from "@/lib/validation/registration/standard";
 import { useAppForm } from "./_formHooks";
 import useRegistrationStore from "./registration.store";
+import { useSendRegistrationEmail } from "./useSendRegistrationEmail";
 import { useSubmitRegistration } from "./useSubmitRegistration";
 
 const defaultValues: StandardRegistrationStep4Schema = {
   termsAndConditions: false,
 };
 export const useRegistrationStep4 = () => {
+  const router = useRouter();
+
   const registrationData = useRegistrationStore(
     (state) => state.registrationData,
   );
@@ -18,7 +22,10 @@ export const useRegistrationStep4 = () => {
     (state) => state.setRegistrationData,
   );
 
+  const eventDetails = useRegistrationStore((state) => state.eventDetails);
+
   const { execute: submitRegistration } = useSubmitRegistration();
+  const { execute: sendEmail } = useSendRegistrationEmail();
   const form = useAppForm({
     defaultValues,
     validators: {
@@ -43,7 +50,21 @@ export const useRegistrationStep4 = () => {
         return;
       }
 
-      await submitRegistration();
+      // registration
+      const res = await submitRegistration();
+      const [submitRegistrationError, _1] = res;
+      if (submitRegistrationError) return;
+
+      // email sending
+      const [sendEmailError, _2] = await sendEmail();
+      if (sendEmailError) return;
+
+      // redirect
+      if (!eventDetails?.eventId) {
+        router.push("/registration");
+        return;
+      }
+      router.push(`/registration/success`);
     },
   });
 

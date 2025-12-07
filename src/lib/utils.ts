@@ -100,3 +100,15 @@ export function zodValidator<T>(schema: ZodType<T>) {
     return undefined;
   };
 }
+
+export const getEnv = (key: string) => {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Missing environment variable: ${key}`);
+  }
+  return value;
+};
+
+export const delay = async (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
