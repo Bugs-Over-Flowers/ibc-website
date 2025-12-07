@@ -12,6 +12,7 @@ interface RegistrationStore {
   step: number;
   eventDetails: RegistrationStoreEventDetails | null;
   registrationData: StandardRegistrationSchema;
+  createdRegistrationId?: string;
 }
 
 interface RegistrationStoreActions {
@@ -20,6 +21,7 @@ interface RegistrationStoreActions {
   setRegistrationData: (
     registrationData: Partial<StandardRegistrationSchema> | null,
   ) => void;
+  setCreatedRegistrationId: (id: string) => void;
 }
 
 const useRegistrationStore = create<
@@ -67,6 +69,8 @@ const useRegistrationStore = create<
                   ...registrationData,
                 },
         })),
+      setCreatedRegistrationId: (id: string) =>
+        set({ createdRegistrationId: id }),
     }),
     {
       name: "registration-storage",
