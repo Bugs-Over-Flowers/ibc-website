@@ -28,26 +28,39 @@ src/
 │   ├── _formHooks.ts   # TanStack Form context setup
 │   └── useAction.ts    # Server action hook for buttons
 ├─── lib/
+│   ├── qr              # QR code generation functions
+│   ├── resend          # Email resend library
 │   ├── server/         # Server Function types, tryCatch utility
 │   ├── supabase/       # Supabase library
-│   └── validation/     # Zod schemas with reusable helpers
+│   ├── types/          # Type definitions for shared data
+│   ├── validation/     # Zod schemas for forms and general validation of data types
+│   ├── constants.ts    # Constants for shared data
+│   ├── utils.ts        # Utility functions for queries and actions
 └── server/
     ├── members/        # Member feature related business logic
-    │   ├── queries.ts
-    │   └── actions.ts
+    │   ├── queries/
+    │   └── actions/
     ├── events/         # Event feature related business logic
-    │   ├── queries.ts
-    │   └── actions.ts
-    └── registration/   # Registration feature related business logic
-        ├── queries.ts
-        ├── actions.ts
-        └── utils.ts    # Utility functions for queries and actions
+    │   ├── queries/
+    │   └── actions/
+    ├── registration/   # Registration feature related business logic
+    │   ├── queries/
+    │   ├── actions/
+    │   ├── utils.ts
+    └── [other features / business logic]
 ```
 
 Component placement:
 
-- Route-specific components → `app/[route]/components/`
+- Route-specific components → `app/[route]/_components/`
 - Reusable components → `src/components/`
+- Keep forms under `src/forms`
+
+Server logic placement:
+
+- Feature-specific server logic → `src/server/[feature]/`
+- Shared server logic → `src/server/utils.ts`
+- Add utils under feature-specific if needed.
 
 ---
 
@@ -105,10 +118,10 @@ export function CreateItemForm() {
   const form = useAppForm({
     defaultValues: { name: "", email: "" },
     validation: {
-      onSubmit: CreateItemFormSchema,
+      onSubmit: CreateItemFormSchema, // or use zodValidator(CreateItemFormSchema)
     },
     onSubmit: async ({ value }) => {
-      const [error, data] = await tryCatch(createItem(value));
+      const { error, data } = await tryCatch(createItem(value));
 
       if (error) {
         form.setErrorMap({ onSubmit: error });
@@ -141,6 +154,12 @@ export function CreateItemForm() {
           </button>
         )}
       </form.Subscribe>
+      <form.AppForm>
+        <form.SubmitButton
+          label={"Submit"}
+          isSubmittingLabel={"Submitting..."}
+        />
+      </form.AppForm>
     </form>
   );
 }
@@ -151,7 +170,8 @@ export function CreateItemForm() {
 1. Create component in `src/components/form/` using `useFieldContext<T>()`
 2. Include `<FieldErrors />` for validation display
 3. Export from `src/components/form/index.ts`
-4. Register in `src/hooks/_formHooks.ts` under `fieldComponents`
+4. Include `data-invalid` and `aria-invalid` attributes on necessary elements (see shadcn documentation) [documentation](https://ui.shadcn.com/docs/components)
+5. Register in `src/hooks/_formHooks.ts` under `fieldComponents`
 
 **Field component template:**
 
@@ -170,12 +190,18 @@ interface MyFieldProps {
 function MyField({ label, description, className }: MyFieldProps) {
   const field = useFieldContext<string>();
 
+  const isInvalid = field.state.meta.touched && !field.state.meta.isValid;
+
   return (
-    <Field className={cn("grid gap-2", className)}>
+    <Field
+      className={cn("grid gap-2", className)}
+      data-invalid={isInvalid}
+      aria-invalid={isInvalid}
+    >
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       {/* Your input component here */}
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldErrors />
+      <FieldErrors errors={field.state.meta.errors} />
     </Field>
   );
 }
@@ -189,23 +215,33 @@ export default MyField;
 
 ### Types
 
-Server functions use the `[error, data]` tuple pattern via these types from `@/lib/server/types`:
+`@/lib/server/types`:
 
 ```ts
-type ServerFunctionResult<T, E = string> =
-  | readonly [error: E, data: null] // Error case
-  | readonly [error: null, data: T]; // Success case
+type ServerFunctionSuccess<T> = { success: true; data: T };
+type ServerFunctionError<E> = { success: false; error: E };
 
-type ServerFunction<TArgs extends unknown[], TResult, TError = string> = (
-  ...args: TArgs
-) => Promise<ServerFunctionResult<TResult, TError>>;
+type ServerFunctionResult<T, E = Error | string> =
+  | ServerFunctionError<E>
+  | ServerFunctionSuccess<T>;
+
+type ServerFunction<
+  TInput extends unknown[],
+  TOutput,
+  TError = Error | string,
+> = (...args: TInput) => Promise<ServerFunctionResult<TOutput, TError>>;
 ```
+
+These are used for the return type of the `tryCatch` utility function. The result is a discriminated union based on the `success` property:
+
+- `{ success: true, data: T }` - Success case with typed data
+- `{ success: false, error: E }` - Error case with error object
 
 ### Writing Server Functions
 
-Server actions can **throw errors freely**. Use `tryCatch` on the client to convert them to tuples. Or simply, create a tryCatch boundary where it is called.
+Server actions can **throw errors freely**, or utilize the `ServerFunction` type. Use `tryCatch` on the client to handle server actions that throw errors. Or simply, create a tryCatch boundary where it is called.
 
-**Use `"use server"` for mutations:**
+**Use `"use server"` for server actions under the `/actions` folders:**
 
 ```ts
 "use server";
@@ -243,17 +279,18 @@ export async function createItem(input: CreateItemInput) {
 }
 ```
 
-**Use `import "server-only"` for data fetching:**
+**Use `import "server-only"` for data fetching under the `/queries` folder:**
 
 ```ts
 import "server-only";
-
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 type Item = { id: string; name: string };
 
 export async function getItems(): Promise<Item[]> {
-  const supabase = await createClient();
+  const cookieStore = await cookies();
+  const supabase = await createClient(cookieStore.getAll());
   const { data, error } = await supabase.from("items").select("*");
 
   if (error) {
@@ -295,9 +332,9 @@ import tryCatch from "@/lib/server/tryCatch";
 import { createItem } from "@/server/items/mutations";
 
 // tryCatch wraps the promise directly
-const [error, data] = await tryCatch(createItem(input));
+const { error, data, success } = await tryCatch(createItem(input));
 
-if (error) {
+if (!success) {
   toast.error(error);
   return;
 }
@@ -322,7 +359,7 @@ export function DeleteButton({ id }: { id: string }) {
 
   const { execute, isPending, error } = useAction(tryCatch(deleteItem), {
     onSuccess: () => router.push("/items"),
-    onError: (err) => console.error(err),
+    onError: (err) => toast.error(err.message),
   });
 
   return (
@@ -335,34 +372,89 @@ export function DeleteButton({ id }: { id: string }) {
 
 **`useAction` returns:**
 
-| Property    | Type                        | Description                     |
-| ----------- | --------------------------- | ------------------------------- |
-| `execute`   | `(...args: TInput) => void` | Triggers the action             |
-| `isPending` | `boolean`                   | Loading state via useTransition |
-| `data`      | `TOutput \| null`           | Success result                  |
-| `error`     | `string \| null`            | Error message                   |
-| `reset`     | `() => void`                | Clears data and error           |
+| Property    | Type                                                                 | Description           |
+| ----------- | -------------------------------------------------------------------- | --------------------- |
+| `execute`   | `(...args: TInput) => Promise<ServerFunctionResult<TOutput, Error>>` | Triggers the action   |
+| `isPending` | `boolean`                                                            | Loading state         |
+| `data`      | `TOutput \| null`                                                    | Success result        |
+| `error`     | `Error \| null`                                                      | Error object          |
+| `reset`     | `() => void`                                                         | Clears data and error |
 
 ---
 
 ## Supabase
 
-### Server-side Supabase Client
+### Server-side Supabase Clients
 
-Always use the server client from `@/lib/supabase/server`:
+There are **two** server-side clients in `@/lib/supabase/server`:
+
+#### `createClient(requestCookies)` - For Cached Queries
+
+Use this in `"use cache"` functions or cached Server Components. Requires passing cookies from the page level:
 
 ```ts
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
-const supabase = await createClient();
-const { data, error } = await supabase.from("table").select("*");
+// In page.tsx
+const cookieStore = await cookies();
+const data = await getCachedData(cookieStore.getAll());
+
+// In query file with "use cache"
+export async function getCachedData(requestCookies: RequestCookie[]) {
+  "use cache";
+  const supabase = await createClient(requestCookies);
+  const { data, error } = await supabase.from("table").select("*");
+  // ...
+}
+```
+
+If the query requires dynamic fetching, you may opt to get the cookies on the query itself:
+
+```ts
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
+
+export async function getDynamicData() {
+  const cookieStore = await cookies();
+  const supabase = await createClient(cookieStore.getAll());
+  const { data, error } = await supabase.from("table").select("*");
+  // ...
+}
 ```
 
 **Rules:**
 
-- ✅ Use in Server Components, Server Actions, Route Handlers
+- ✅ Use in cached queries (`"use cache"`)
+- ❌ Cannot set cookies (read-only)
+- ❌ Never use for mutations
+
+#### `createActionClient()` - For Server Actions & Mutations
+
+Use this in Server Actions where cookie mutation is needed (e.g., auth token refresh):
+
+```ts
+import { createActionClient } from "@/lib/supabase/server";
+
+export async function updateItem(data: FormData) {
+  "use server";
+  const supabase = await createActionClient();
+  const { data, error } = await supabase
+    .from("table")
+    .update(data)
+    .eq("id", id);
+  // ...
+}
+```
+
+**Rules:**
+
+- ✅ Use in Server Actions (`"use server"`)
+- ✅ Can set cookies (auth token refresh)
+- ❌ Do NOT use inside `"use cache"` functions
 - ❌ Never import in `"use client"` components
-- The client is already typed with your `Database` types from `db.types.ts`
+
+Both clients are typed with your `Database` types from `db.types.ts`.
 
 ### Client-side Supabase Client
 
@@ -454,13 +546,132 @@ async function ItemsList() {
 }
 ```
 
+### Loading States in Client Components
+
+```tsx
+// page.tsx
+import { Suspense } from "react";
+
+export default function Page() {
+  return (
+    <Suspense fallback={<ItemsSkeleton />}>
+      <ItemsList />
+    </Suspense>
+  );
+}
+
+// Items.tsx
+("use client");
+import { getItems } from "@/lib/data";
+import { use } from "react";
+
+function ItemsList() {
+  const [error, items] = use(getItems);
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  return items.map((item) => <ItemCard key={item.id} item={item} />);
+}
+```
+
 - You may also opt to use `loading.tsx`
 - For a page with multiple queries, you may use `await Promise.all([query1(), query2()])`
 - Revalidate and return if needed
+- In cases where client side reactivity is needed, use `use` hook from `react` library. It allows you to await promises in the client. see [https://react.dev/reference/react/use](https://react.dev/reference/react/use) for more information.
 
-### Error Boundaries
+### Caching Components / Data
 
-For client component errors, wrap in error boundaries. For server function errors, handle the `[error, data]` tuple explicitly.
+Use the "use cache" directive inside query functions, inside react server components,
+or on top of the file to cache data. Add a cacheLife() and a cacheTag() if needed.
+
+```tsx
+// page.tsx -- cached file
+"use cache";
+
+export default function GetItems({ searchParams }: PageProps<"/">) {
+  const items = await getItems(searchParams);
+
+  return items.map((item) => <ItemCard key={item.id} item={item} />);
+}
+
+// page.tsx -- cached component
+export default function GetItems({ searchParams }: PageProps<"/">) {
+  "use cache";
+  // cacheLife("default")
+  // cacheTag("items")
+  const items = await getItems(searchParams);
+
+  return items.map((item) => <ItemCard key={item.id} item={item} />);
+}
+
+// getItems.ts
+import "server-only";
+
+export async function getItems(
+  requestCookies: RequestCookie[],
+  searchParams: SearchParams,
+) {
+  "use cache";
+  const supabase = await createClient(requestCookies);
+
+  const { data: items } = await supabase
+    .from("items")
+    .select("*")
+    .eq("status", "active");
+
+  return items.map((item) => ({
+    ...item,
+    createdAt: new Date(item.createdAt),
+  }));
+}
+```
+
+In most cases, the file cannot be cached due to supabase's
+requirement of the cookies for SSR for fetching data, which requires
+to be resolved on a higher component / function.
+
+```tsx
+import { cookies } from "next/headers";
+
+export default async function GetItems({ searchParams }: PageProps<"/">) {
+  // get cookies from the component
+  const cookieStore = await cookies();
+
+  // then pass the cookies to the getItems function
+  const items = await getItems(cookieStore.getAll(), searchParams);
+
+  return items.map((item) => <ItemCard key={item.id} item={item} />);
+}
+
+// getItems.ts
+import "server-only";
+
+export async function getItems(
+  requestCookies: RequestCookie[],
+  searchParams: SearchParams,
+) {
+  "use cache";
+  const supabase = await createClient(requestCookies);
+
+  const { data: items } = await supabase
+    .from("items")
+    .select("*")
+    .eq("status", "active");
+
+  return items.map((item) => ({
+    ...item,
+    createdAt: new Date(item.createdAt),
+  }));
+}
+```
+
+- cacheLife will be used to set the cache duration in seconds
+- cacheTag will be used to set a certain tag for the cache, which can be used to invalidate the cache.
+
+For more details, see [Next.js caching](https://nextjs.org/docs/app/building-your-application/caching),
+[CacheComponents](https://nextjs.org/docs/app/getting-started/cache-components)
 
 ### Toast Notifications
 
