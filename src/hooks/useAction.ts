@@ -1,44 +1,54 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import type { toast } from "sonner";
-import handleActionResult from "@/lib/actions/handleActionResult";
-import type { ServerAction } from "@/lib/actions/types";
+import { useState } from "react";
+import type { ServerFunction } from "@/lib/server/types";
 
 interface UseActionOptions<TOutput> {
   onSuccess?: (data: TOutput) => void;
   onError?: (error: string) => void;
-  successToast?: Parameters<typeof toast.success>;
-  errorToast?: Parameters<typeof toast.error>;
 }
 
-export function useAction<TInput, TOutput>(
-  action: ServerAction<[TInput], TOutput>,
-  options: UseActionOptions<TOutput> = {}
+/**
+ * Hook for executing server actions with loading states and error handling.
+ *
+ * @example
+ * // With input
+ * const { execute, isPending } = useAction(tryCatch(createItem), {
+ *   onSuccess: (data) => router.push(`/items/${data.id}`),
+ *   onError: (error) => toast.error(error),
+ * });
+ * execute({ name: "New Item" });
+ *
+ * @example
+ * // Without input
+ * const { execute, isPending } = useAction(tryCatch(refreshData));
+ * execute();
+ */
+export function useAction<TInput extends unknown[], TOutput>(
+  action: ServerFunction<TInput, TOutput>,
+  options: UseActionOptions<TOutput> = {},
 ) {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<TOutput | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  async function execute(input: TInput) {
+  async function execute(...args: TInput) {
     setError(null);
+    setData(null);
+    setIsPending(true);
 
-    startTransition(async () => {
-      const result = await action(input);
+    const res = await action(...args);
 
-      handleActionResult(result, {
-        onSuccess: (resultData) => {
-          setData(resultData);
-          options.onSuccess?.(resultData);
-        },
-        onError: (err) => {
-          setError(err);
-          options.onError?.(err);
-        },
-        successToast: options.successToast,
-        errorToast: options.errorToast,
-      });
-    });
+    const [error, data] = res;
+    if (error !== null) {
+      setError(error);
+      options.onError?.(error);
+      return;
+    }
+
+    setData(data);
+    options.onSuccess?.(data);
+    setIsPending(false);
   }
 
   function reset() {
@@ -50,7 +60,7 @@ export function useAction<TInput, TOutput>(
     execute,
     data,
     error,
-    isPending,
     reset,
+    isPending,
   };
 }
