@@ -1,59 +1,51 @@
 import type { ServerFunction, ServerFunctionResult } from "./types";
 
-/**
- * Utility for converting throwing functions/promises into `[error, data]` tuples.
- *
- * Supports two usage patterns:
- *
- * 1. **Wrap a function** (for use with `useAction`):
- * ```ts
- * const { execute } = useAction(tryCatch(createItem), {
- *   onSuccess: (data) => console.log(data),
- * });
- * execute({ name: "New Item" });
- * ```
- *
- * 2. **Wrap a promise** (for inline use):
- * ```ts
- * const [error, data] = await tryCatch(createItem(input));
- * if (error) {
- *   console.error(error);
- *   return;
- * }
- * console.log(data);
- * ```
- */
+function toError(error: unknown): Error {
+  if (error instanceof Error) {
+    return error;
+  }
+  if (typeof error === "string") {
+    return new Error(error);
+  }
+  return new Error(String(error));
+}
+
 function tryCatch<TInput extends unknown[], TOutput>(
   fn: (...args: TInput) => Promise<TOutput>,
-): ServerFunction<TInput, TOutput>;
+): ServerFunction<TInput, TOutput, Error>;
 
 function tryCatch<TOutput>(
   promise: Promise<TOutput>,
-): Promise<ServerFunctionResult<TOutput>>;
+): Promise<ServerFunctionResult<TOutput, Error>>;
 
-function tryCatch<TInput extends unknown[], TOutput>(
+function tryCatch<TInput extends unknown[], TOutput = string>(
   fnOrPromise: ((...args: TInput) => Promise<TOutput>) | Promise<TOutput>,
-): ServerFunction<TInput, TOutput> | Promise<ServerFunctionResult<TOutput>> {
-  // If it's a promise, wrap it directly
-  if (fnOrPromise instanceof Promise) {
-    return fnOrPromise
-      .then((data): ServerFunctionResult<TOutput> => [null, data])
-      .catch((error): ServerFunctionResult<TOutput> => {
-        const message = error instanceof Error ? error.message : String(error);
-        return [message, null];
-      });
+):
+  | ServerFunction<TInput, TOutput, Error>
+  | Promise<ServerFunctionResult<TOutput, Error>> {
+  if (typeof fnOrPromise === "function") {
+    return async (
+      ...args: TInput
+    ): Promise<ServerFunctionResult<TOutput, Error>> => {
+      try {
+        const result = await fnOrPromise(...args);
+        return { success: true, data: result };
+      } catch (error) {
+        return { success: false, error: toError(error) };
+      }
+    };
+  } else {
+    return fnOrPromise.then(
+      (data): ServerFunctionResult<TOutput, Error> => ({
+        success: true,
+        data,
+      }),
+      (error): ServerFunctionResult<TOutput, Error> => ({
+        success: false,
+        error: toError(error),
+      }),
+    );
   }
-
-  // If it's a function, return a wrapped function
-  return async (...args: TInput): Promise<ServerFunctionResult<TOutput>> => {
-    try {
-      const data = await fnOrPromise(...args);
-      return [null, data];
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return [message, null];
-    }
-  };
 }
 
 export default tryCatch;
