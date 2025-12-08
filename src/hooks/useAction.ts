@@ -5,7 +5,7 @@ import type { ServerFunction } from "@/lib/server/types";
 
 interface UseActionOptions<TOutput> {
   onSuccess?: (data: TOutput) => void;
-  onError?: (error: string) => void;
+  onError?: (error: Error) => void;
 }
 
 /**
@@ -15,7 +15,7 @@ interface UseActionOptions<TOutput> {
  * // With input
  * const { execute, isPending } = useAction(tryCatch(createItem), {
  *   onSuccess: (data) => router.push(`/items/${data.id}`),
- *   onError: (error) => toast.error(error),
+ *   onError: (error) => toast.error(error.message),
  * });
  * execute({ name: "New Item" });
  *
@@ -25,10 +25,10 @@ interface UseActionOptions<TOutput> {
  * execute();
  */
 export function useAction<TInput extends unknown[], TOutput>(
-  action: ServerFunction<TInput, TOutput>,
+  action: ServerFunction<TInput, TOutput, Error>,
   options: UseActionOptions<TOutput> = {},
 ) {
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [data, setData] = useState<TOutput | null>(null);
   const [isPending, setIsPending] = useState(false);
 
@@ -39,16 +39,17 @@ export function useAction<TInput extends unknown[], TOutput>(
 
     const res = await action(...args);
 
-    const [error, data] = res;
-    if (error !== null) {
-      setError(error);
-      options.onError?.(error);
-      return;
+    if (!res.success) {
+      setError(res.error);
+      options.onError?.(res.error);
+      setIsPending(false);
+      return res;
     }
 
-    setData(data);
-    options.onSuccess?.(data);
+    setData(res.data);
+    options.onSuccess?.(res.data);
     setIsPending(false);
+    return res;
   }
 
   function reset() {
