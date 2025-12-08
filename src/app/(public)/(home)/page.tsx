@@ -1,12 +1,11 @@
 import { Suspense } from "react";
 import { Footer } from "@/components/navbar/Footer";
 import { Header } from "@/components/navbar/Header";
-import { FeaturedEventsHero } from "./components/FeaturedEventsHero";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FeaturedEventsHero } from "./_components/FeaturedEventsHero";
 
 function HeroSkeleton() {
-  return (
-    <div className="h-screen min-h-[700px] max-h-[950px] w-full animate-pulse bg-muted" />
-  );
+  return <Skeleton className="h-screen min-h-[700px] max-h-[950px] w-full" />;
 }
 
 export default function Page() {
