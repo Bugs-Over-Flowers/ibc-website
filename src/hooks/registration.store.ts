@@ -33,7 +33,7 @@ const useRegistrationStore = create<
       eventDetails: null,
       registrationData: {
         step1: {
-          member: "member",
+          member: "nonmember",
           businessMemberId: "",
           nonMemberName: "",
         },

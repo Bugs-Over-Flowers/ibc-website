@@ -84,12 +84,15 @@ const Step1 = ({ members }: Step1Props) => {
                   onValueChange={(value) => {
                     const parsedMemberValue = MemberTypeEnum.safeParse(value);
 
+                    console.log(parsedMemberValue);
                     if (!parsedMemberValue.success) return;
                     if (parsedMemberValue.data === "member") {
                       form.setFieldValue("businessMemberId", "");
                     } else if (parsedMemberValue.data === "nonmember") {
                       form.setFieldValue("nonMemberName", "");
                     }
+
+                    console.log(parsedMemberValue.data);
 
                     field.handleChange(parsedMemberValue.data);
                   }}

@@ -19,9 +19,7 @@ export const useRegistrationStep1 = () => {
   );
 
   const form = useAppForm({
-    defaultValues: {
-      ...defaultRegistrationDataStep1,
-    },
+    defaultValues: defaultRegistrationDataStep1,
     validators: {
       onSubmit: zodValidator(StandardRegistrationStep1Schema),
     },

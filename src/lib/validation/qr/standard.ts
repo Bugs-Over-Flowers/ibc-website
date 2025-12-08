@@ -1,5 +1,5 @@
 import z from "zod";
-import { decryptRegistrationQR } from "@/server/attendance/actions/actions";
+import { decryptRegistrationQR } from "@/server/attendance/actions/decryptRegistrationQR";
 import { encryptRegistrationQR } from "@/server/attendance/actions/encryptRegistrationQR";
 
 export const RegistrationCheckInQRCodeDecodedSchema = z.object({

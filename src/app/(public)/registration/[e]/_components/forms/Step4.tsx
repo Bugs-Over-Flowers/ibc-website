@@ -214,6 +214,7 @@ export default function Step4({ members }: Step4Props) {
                   onCheckedChange={(checked) =>
                     field.handleChange(checked === true)
                   }
+                  onBlur={field.handleBlur}
                   aria-invalid={isInvalid}
                 />
                 <Label htmlFor={field.name}>

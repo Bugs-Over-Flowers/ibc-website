@@ -1,5 +1,6 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { zodValidator } from "@/lib/utils";
 import {
   StandardRegistrationSchema,
   StandardRegistrationStep4Schema,
@@ -9,9 +10,6 @@ import useRegistrationStore from "./registration.store";
 import { useSendRegistrationEmail } from "./useSendRegistrationEmail";
 import { useSubmitRegistration } from "./useSubmitRegistration";
 
-const defaultValues: StandardRegistrationStep4Schema = {
-  termsAndConditions: false,
-};
 export const useRegistrationStep4 = () => {
   const router = useRouter();
 
@@ -27,12 +25,11 @@ export const useRegistrationStep4 = () => {
   const { execute: submitRegistration } = useSubmitRegistration();
   const { execute: sendEmail } = useSendRegistrationEmail();
   const form = useAppForm({
-    defaultValues,
+    defaultValues: registrationData.step4,
     validators: {
-      onSubmit: StandardRegistrationStep4Schema,
+      onSubmit: zodValidator(StandardRegistrationStep4Schema),
     },
     onSubmit: async ({ value }) => {
-      console.log(value);
       const refinedValue = StandardRegistrationStep4Schema.parse(value);
 
       // handle save data to store
@@ -40,10 +37,13 @@ export const useRegistrationStep4 = () => {
         step4: refinedValue,
       });
 
-      const refinedRegistrationData =
-        StandardRegistrationSchema.safeParse(registrationData);
+      const refinedRegistrationData = StandardRegistrationSchema.safeParse({
+        ...registrationData,
+        step4: refinedValue,
+      });
 
       if (!refinedRegistrationData.success) {
+        console.error(refinedRegistrationData.error);
         toast.error(
           `Invalid registration data. Please check your previous inputs.`,
         );
@@ -52,16 +52,16 @@ export const useRegistrationStep4 = () => {
 
       // registration
       const res = await submitRegistration();
-      const [submitRegistrationError, _1] = res;
-      if (submitRegistrationError) return;
+      const [submitRegistrationError, registrationId] = res;
+      if (submitRegistrationError || !registrationId) return;
 
       // email sending
-      const [sendEmailError, _2] = await sendEmail();
+      const [sendEmailError, _2] = await sendEmail(registrationId);
       if (sendEmailError) return;
 
       // redirect
       if (!eventDetails?.eventId) {
-        router.push("/registration");
+        router.push("/events");
         return;
       }
       router.push(`/registration/success`);

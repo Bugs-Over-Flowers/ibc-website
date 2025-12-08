@@ -2,7 +2,6 @@ import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/client";
-import { delay } from "@/lib/utils";
 import { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
 import { submitRegistrationRPC } from "@/server/registration/actions";
 import useRegistrationStore from "./registration.store";
@@ -81,6 +80,7 @@ export const useSubmitRegistration = () => {
         returnedRegistrationId = registrationId;
       }
       setCreatedRegistrationId(returnedRegistrationId);
+      return returnedRegistrationId;
     }),
     {
       onSuccess: () => {

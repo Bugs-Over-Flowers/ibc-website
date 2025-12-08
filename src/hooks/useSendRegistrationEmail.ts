@@ -11,12 +11,9 @@ export const useSendRegistrationEmail = () => {
   const registrationData = useRegistrationStore(
     (state) => state.registrationData,
   );
-  const registrationId = useRegistrationStore(
-    (state) => state.createdRegistrationId,
-  );
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
   return useAction(
-    tryCatch(async () => {
+    tryCatch(async (registrationId: string) => {
       // check for eventId
       if (!eventDetails?.eventId) {
         throw new Error("Event ID is missing");

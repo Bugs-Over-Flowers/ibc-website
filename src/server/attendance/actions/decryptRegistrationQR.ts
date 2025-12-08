@@ -1,9 +1,11 @@
+"use server";
+
 import * as jose from "jose";
 import {
   RegistrationCheckInQRCodeDecodedSchema,
   RegistrationCheckInQRCodeEncodedSchema,
 } from "@/lib/validation/qr/standard";
-import { getDecodedQRSecret } from "../queries";
+import { getDecodedQRSecret } from "../queries/getDecodedQRSecret";
 export const decryptRegistrationQR = async (encodedString: string) => {
   // validate the input data
   const parsedData = RegistrationCheckInQRCodeEncodedSchema.parse({
