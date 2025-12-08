@@ -1,5 +1,5 @@
-export type ServerFunctionSuccess<T> = { success: true; data: T };
-export type ServerFunctionError<E> = { success: false; error: E };
+export type ServerFunctionSuccess<T> = { success: true; data: T; error: null };
+export type ServerFunctionError<E> = { success: false; error: E; data: null };
 
 export type ServerFunctionResult<T, E = Error | string> =
   | ServerFunctionError<E>

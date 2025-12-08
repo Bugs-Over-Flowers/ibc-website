@@ -1,51 +1,39 @@
 import type { ServerFunction, ServerFunctionResult } from "./types";
 
-function toError(error: unknown): Error {
-  if (error instanceof Error) {
-    return error;
-  }
-  if (typeof error === "string") {
-    return new Error(error);
-  }
-  return new Error(String(error));
-}
-
 function tryCatch<TInput extends unknown[], TOutput>(
   fn: (...args: TInput) => Promise<TOutput>,
 ): ServerFunction<TInput, TOutput, Error>;
 
 function tryCatch<TOutput>(
   promise: Promise<TOutput>,
-): Promise<ServerFunctionResult<TOutput, Error>>;
+): Promise<ServerFunctionResult<TOutput>>;
 
-function tryCatch<TInput extends unknown[], TOutput = string>(
+function tryCatch<TInput extends unknown[], TOutput>(
   fnOrPromise: ((...args: TInput) => Promise<TOutput>) | Promise<TOutput>,
-):
-  | ServerFunction<TInput, TOutput, Error>
-  | Promise<ServerFunctionResult<TOutput, Error>> {
-  if (typeof fnOrPromise === "function") {
-    return async (
-      ...args: TInput
-    ): Promise<ServerFunctionResult<TOutput, Error>> => {
-      try {
-        const result = await fnOrPromise(...args);
-        return { success: true, data: result };
-      } catch (error) {
-        return { success: false, error: toError(error) };
-      }
-    };
-  } else {
-    return fnOrPromise.then(
-      (data): ServerFunctionResult<TOutput, Error> => ({
-        success: true,
-        data,
-      }),
-      (error): ServerFunctionResult<TOutput, Error> => ({
-        success: false,
-        error: toError(error),
-      }),
-    );
+): ServerFunction<TInput, TOutput> | Promise<ServerFunctionResult<TOutput>> {
+  const handleSuccess = (data: TOutput): ServerFunctionResult<TOutput> => ({
+    success: true,
+    data,
+    error: null,
+  });
+
+  const handleError = (error: unknown): ServerFunctionResult<TOutput> => {
+    const message = error instanceof Error ? error.message : String(error);
+    return { success: false, data: null, error: message };
+  };
+
+  if (fnOrPromise instanceof Promise) {
+    return fnOrPromise.then(handleSuccess).catch(handleError);
   }
+
+  return async (...args: TInput) => {
+    try {
+      const data = await fnOrPromise(...args);
+      return handleSuccess(data);
+    } catch (error) {
+      return handleError(error);
+    }
+  };
 }
 
 export default tryCatch;
