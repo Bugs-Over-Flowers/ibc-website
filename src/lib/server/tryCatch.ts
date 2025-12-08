@@ -8,7 +8,7 @@ function tryCatch<TOutput>(
   promise: Promise<TOutput>,
 ): Promise<ServerFunctionResult<TOutput, string>>;
 
-function tryCatch<TInput extends unknown[], TOutput = string>(
+function tryCatch<TInput extends unknown[], TOutput>(
   fnOrPromise: ((...args: TInput) => Promise<TOutput>) | Promise<TOutput>,
 ):
   | ServerFunction<TInput, TOutput, string>
