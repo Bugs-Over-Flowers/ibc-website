@@ -24,12 +24,12 @@ export function Header({ onNavigate }: HeaderProps) {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Events", href: "#events" },
-    { name: "Members", href: "#members" },
-    { name: "Network", href: "#network" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/" },
+    { name: "About", href: "/about" },
+    { name: "Events", href: "/events" },
+    { name: "Members", href: "/members" },
+    { name: "Network", href: "/network" },
+    { name: "Contact", href: "/contact" },
   ];
 
   return (
