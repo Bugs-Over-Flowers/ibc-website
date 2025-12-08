@@ -51,12 +51,11 @@ export const useRegistrationStep4 = () => {
       }
 
       // registration
-      const res = await submitRegistration();
-      const [submitRegistrationError, registrationId] = res;
-      if (submitRegistrationError || !registrationId) return;
+      const { data: registrationId } = await submitRegistration();
+      if (!registrationId) return;
 
       // email sending
-      const [sendEmailError, _2] = await sendEmail(registrationId);
+      const { error: sendEmailError } = await sendEmail(registrationId);
       if (sendEmailError) return;
 
       // redirect

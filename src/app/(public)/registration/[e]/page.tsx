@@ -1,7 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import RegistrationForm from "@/app/(public)/registration/[e]/_components/forms/RegistrationForm";
 import { Button } from "@/components/ui/button";
@@ -30,15 +29,19 @@ interface RegistrationPageProps {
 async function RegistrationPage({ params }: RegistrationPageProps) {
   const { e } = await params;
   const requestCookies = (await cookies()).getAll();
-  const [registrationEventDetailsMessage, eventData] = await tryCatch(
+  const {
+    error: registrationEventDetailsMessage,
+    data: eventData,
+    success: registrationEventDetailsSuccess,
+  } = await tryCatch(
     getRegistrationEventDetails(requestCookies, { eventId: e }),
   );
 
-  const [getAllMembersMessage, members] = await tryCatch(
+  const { data: members, success: getAllMembersSuccess } = await tryCatch(
     getAllMembers(requestCookies),
   );
 
-  if (registrationEventDetailsMessage || getAllMembersMessage) {
+  if (!registrationEventDetailsSuccess || !getAllMembersSuccess) {
     return (
       <div className="flex flex-col gap-3 text-center items-center justify-center">
         {registrationEventDetailsMessage}
@@ -49,7 +52,8 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
     );
   }
 
-  if (eventData?.eventType === null) {
+  // Handle if event is draft
+  if (eventData.eventType === null) {
     return (
       <div className="flex flex-col gap-3 text-center items-center justify-center">
         <p>
@@ -61,10 +65,6 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
         </Link>
       </div>
     );
-  }
-
-  if (!eventData || !members) {
-    throw redirect("/");
   }
 
   return (
