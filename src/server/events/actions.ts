@@ -1,0 +1,88 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import type { ServerFunction } from "@/lib/server/types";
+import type { Database } from "@/lib/supabase/db.types";
+import { createAdminClient } from "@/lib/supabase/server";
+
+const createEventServerSchema = z.object({
+  eventTitle: z.string().min(5),
+  description: z.string(),
+  eventStartDate: z.coerce.date(),
+  eventEndDate: z.coerce.date(),
+  venue: z.string().min(5),
+  registrationFee: z.number().min(0),
+  eventType: z.string(),
+  eventImage: z.array(z.instanceof(File)).min(1),
+});
+
+export type CreateEventInput = z.input<typeof createEventServerSchema>;
+
+export const createEvent: ServerFunction<
+  [CreateEventInput],
+  { eventId: string }
+> = async (input) => {
+  console.log("Server Action createEvent received:", input);
+  const result = createEventServerSchema.safeParse(input);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error.issues[0].message,
+      data: null,
+    };
+  }
+
+  const data = result.data;
+  const supabase = await createAdminClient();
+
+  const file = data.eventImage[0];
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Math.random()
+    .toString(36)
+    .substring(2)}_${Date.now()}.${fileExt}`;
+  const filePath = `event-headers/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("headerImage")
+    .upload(filePath, file);
+
+  if (uploadError) {
+    return {
+      success: false,
+      error: `Image upload: ${uploadError.message}`,
+      data: null,
+    };
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("headerImage").getPublicUrl(filePath);
+
+  const { data: eventData, error: insertError } = await supabase
+    .from("Event")
+    .insert({
+      eventTitle: data.eventTitle,
+      description: data.description,
+      eventStartDate: data.eventStartDate.toISOString(),
+      eventEndDate: data.eventEndDate.toISOString(),
+      venue: data.venue,
+      registrationFee: data.registrationFee,
+      eventType: data.eventType as Database["public"]["Enums"]["EventType"],
+      eventHeaderUrl: publicUrl,
+    })
+    .select("eventId")
+    .single();
+
+  if (insertError) {
+    return {
+      success: false,
+      error: `Database error ${insertError.message}`,
+      data: null,
+    };
+  }
+
+  revalidatePath("/admin/dashboard");
+  return { success: true, data: { eventId: eventData.eventId }, error: null };
+};
