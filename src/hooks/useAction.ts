@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { ServerFunction } from "@/lib/server/types";
 
 interface UseActionOptions<TOutput> {
@@ -30,25 +30,25 @@ export function useAction<TInput extends unknown[], TOutput>(
 ) {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<TOutput | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  function execute(...args: TInput) {
+  async function execute(...args: TInput) {
     setError(null);
     setData(null);
+    setIsPending(true);
 
-    startTransition(async () => {
-      const res = await action(...args);
+    const res = await action(...args);
 
-      const [error, data] = res;
-      if (error !== null) {
-        setError(error);
-        options.onError?.(error);
-        return;
-      }
+    const [error, data] = res;
+    if (error !== null) {
+      setError(error);
+      options.onError?.(error);
+      return;
+    }
 
-      setData(data);
-      options.onSuccess?.(data);
-    });
+    setData(data);
+    options.onSuccess?.(data);
+    setIsPending(false);
   }
 
   function reset() {
@@ -60,7 +60,7 @@ export function useAction<TInput extends unknown[], TOutput>(
     execute,
     data,
     error,
-    isPending,
     reset,
+    isPending,
   };
 }
