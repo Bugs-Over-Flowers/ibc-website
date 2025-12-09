@@ -11,10 +11,10 @@ interface FooterProps {
 
 export function Footer({ onNavigate }: FooterProps) {
   const quickLinks = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Members", href: "#members" },
-    { name: "Events", href: "#events" },
+    { name: "Home", href: "/" },
+    { name: "About", href: "/about" },
+    { name: "Members", href: "/members" },
+    { name: "Events", href: "/events" },
   ];
 
   const socialLinks = [
