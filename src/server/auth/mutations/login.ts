@@ -6,22 +6,31 @@ import { LoginSchema } from "@/lib/validation/authentication/login";
 
 export const login: ServerFunction<
   [LoginSchema],
-  { mfaRequired: boolean }
+  { mfaRequired: boolean; emailVerified: boolean }
 > = async (input) => {
   const parsed = LoginSchema.safeParse(input);
 
   if (!parsed.success) {
-    return [parsed.error.issues[0].message, null];
+    return {
+      success: false,
+      error: parsed.error.issues[0].message,
+      data: null,
+    };
   }
 
   const supabase = await createActionClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
   });
 
   if (error) {
-    return [error.message, null];
+    return { success: false, error: error.message, data: null };
+  }
+
+  if (data.user && !data.user.confirmed_at) {
+    await supabase.auth.signOut();
+    return { success: false, error: "Email not verified", data: null };
   }
 
   // Check if user has any verified MFA factors
@@ -29,12 +38,16 @@ export const login: ServerFunction<
     await supabase.auth.mfa.listFactors();
 
   if (factorsError) {
-    return [factorsError.message, null];
+    return { success: false, error: factorsError.message, data: null };
   }
 
   const hasVerifiedFactor = factors.all.some(
     (factor) => factor.status === "verified" && factor.factor_type === "totp",
   );
 
-  return [null, { mfaRequired: hasVerifiedFactor }];
+  return {
+    success: true,
+    data: { mfaRequired: hasVerifiedFactor, emailVerified: true },
+    error: null,
+  };
 };

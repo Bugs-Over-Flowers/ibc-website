@@ -8,8 +8,8 @@ export const logout: ServerFunction<[undefined], boolean> = async () => {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    return [error.message, null];
+    return { success: false, error: error.message, data: null };
   }
 
-  return [null, true];
+  return { success: true, data: true, error: null };
 };

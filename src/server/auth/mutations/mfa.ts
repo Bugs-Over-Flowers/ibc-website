@@ -25,14 +25,18 @@ export const enrollMfa: ServerFunction<
   } = await supabase.auth.getUser();
 
   if (userError || !user?.email) {
-    return ["Could not retrieve user details", null];
+    return {
+      success: false,
+      error: "Could not retrieve user details",
+      data: null,
+    };
   }
 
   const { data: factors, error: listError } =
     await supabase.auth.mfa.listFactors();
 
   if (listError) {
-    return [listError.message, null];
+    return { success: false, error: listError.message, data: null };
   }
 
   // Unenroll ALL TOTP factors (verified or unverified) to prevent duplicates
@@ -49,10 +53,10 @@ export const enrollMfa: ServerFunction<
   });
 
   if (error) {
-    return [error.message, null];
+    return { success: false, error: error.message, data: null };
   }
 
-  return [null, data];
+  return { success: true, data, error: null };
 };
 
 export const verifyMfa: ServerFunction<
@@ -67,11 +71,11 @@ export const verifyMfa: ServerFunction<
     });
 
   if (challengeError) {
-    return [challengeError.message, null];
+    return { success: false, error: challengeError.message, data: null };
   }
 
   if (!challengeData) {
-    return ["Failed to create challenge", null];
+    return { success: false, error: "Failed to create challenge", data: null };
   }
 
   const { error: verifyError } = await supabase.auth.mfa.verify({
@@ -81,10 +85,10 @@ export const verifyMfa: ServerFunction<
   });
 
   if (verifyError) {
-    return [verifyError.message, null];
+    return { success: false, error: verifyError.message, data: null };
   }
 
-  return [null, { success: true }];
+  return { success: true, data: { success: true }, error: null };
 };
 
 export const loginVerifyMfa: ServerFunction<
@@ -97,7 +101,7 @@ export const loginVerifyMfa: ServerFunction<
     await supabase.auth.mfa.listFactors();
 
   if (factorsError) {
-    return [factorsError.message, null];
+    return { success: false, error: factorsError.message, data: null };
   }
 
   const totpFactor = factors.all.find(
@@ -105,7 +109,11 @@ export const loginVerifyMfa: ServerFunction<
   );
 
   if (!totpFactor) {
-    return ["No verified MFA factor found", null];
+    return {
+      success: false,
+      error: "No verified MFA factor found",
+      data: null,
+    };
   }
 
   const { data: challengeData, error: challengeError } =
@@ -114,7 +122,7 @@ export const loginVerifyMfa: ServerFunction<
     });
 
   if (challengeError) {
-    return [challengeError.message, null];
+    return { success: false, error: challengeError.message, data: null };
   }
 
   const { error: verifyError } = await supabase.auth.mfa.verify({
@@ -124,8 +132,8 @@ export const loginVerifyMfa: ServerFunction<
   });
 
   if (verifyError) {
-    return [verifyError.message, null];
+    return { success: false, error: verifyError.message, data: null };
   }
 
-  return [null, { success: true }];
+  return { success: true, data: { success: true }, error: null };
 };

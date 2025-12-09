@@ -12,7 +12,11 @@ export const signup: ServerFunction<
   const parsed = SignupSchema.safeParse(input);
 
   if (!parsed.success) {
-    return [parsed.error.issues[0].message, null];
+    return {
+      success: false,
+      error: parsed.error.issues[0].message,
+      data: null,
+    };
   }
 
   const supabase = await createActionClient();
@@ -27,13 +31,17 @@ export const signup: ServerFunction<
   });
 
   if (error) {
-    return [error.message, null];
+    return { success: false, error: error.message, data: null };
   }
 
   if (data.session && !data.user?.confirmed_at) {
     await supabase.auth.signOut();
-    return [null, { sessionCreated: false }];
+    return { success: true, data: { sessionCreated: false }, error: null };
   }
 
-  return [null, { sessionCreated: !!data.session }];
+  return {
+    success: true,
+    data: { sessionCreated: !!data.session },
+    error: null,
+  };
 };

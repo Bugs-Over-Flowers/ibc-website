@@ -16,10 +16,23 @@ export const useLogin = () => {
       onSubmit: zodValidator(LoginSchema),
     },
     onSubmit: async ({ value }) => {
-      const [error, data] = await login(value);
+      const res = await login(value);
 
-      if (error) {
-        toast.error(error);
+      if (!res.success) {
+        toast.error(
+          res.error instanceof Error
+            ? res.error.message
+            : (res.error as string),
+        );
+        return;
+      }
+
+      const data = res.data;
+
+      if (!data?.emailVerified) {
+        toast.error("Please verify your email address.");
+        // Cast to any to avoid stale type error for the new route
+        router.push("/auth/signup/verify-email" as any);
         return;
       }
 

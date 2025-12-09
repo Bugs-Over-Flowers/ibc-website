@@ -17,12 +17,14 @@ export const useSignUp = () => {
       onSubmit: zodValidator(SignupSchema),
     },
     onSubmit: async ({ value }) => {
-      const [error, data] = await signup(value);
+      const res = await signup(value);
 
-      if (error) {
-        toast.error(error);
+      if (!res.success) {
+        toast.error(res.error);
         return;
       }
+
+      const data = res.data;
 
       if (data?.sessionCreated) {
         toast.success("Sign up successful!");
