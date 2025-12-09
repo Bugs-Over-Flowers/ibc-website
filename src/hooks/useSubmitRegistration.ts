@@ -8,22 +8,19 @@ import useRegistrationStore from "./registration.store";
 import { useAction } from "./useAction";
 
 export const useSubmitRegistration = () => {
-  const registrationData = useRegistrationStore(
-    (state) => state.registrationData,
-  );
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
 
   const setCreatedRegistrationId = useRegistrationStore(
     (state) => state.setCreatedRegistrationId,
   );
   return useAction(
-    tryCatch(async () => {
+    tryCatch(async (fullRegistrationData: StandardRegistrationSchema) => {
       // validate the registration data;
       const {
         data: parsedRegistrationData,
         error,
         success,
-      } = StandardRegistrationSchema.safeParse(registrationData);
+      } = StandardRegistrationSchema.safeParse(fullRegistrationData);
 
       if (!success) {
         console.error(error);

@@ -51,7 +51,9 @@ export const useRegistrationStep4 = () => {
       }
 
       // registration
-      const { data: registrationId } = await submitRegistration();
+      const { data: registrationId } = await submitRegistration(
+        refinedRegistrationData.data,
+      );
       if (!registrationId) return;
 
       // email sending
