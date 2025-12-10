@@ -1,30 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
+import type { z } from "zod";
 import type { ServerFunction } from "@/lib/server/types";
 import type { Database } from "@/lib/supabase/db.types";
 import { createAdminClient } from "@/lib/supabase/server";
+import createEventSchema from "@/lib/validation/event/createEventSchema";
 
-const createEventServerSchema = z.object({
-  eventTitle: z.string().min(5),
-  description: z.string(),
-  eventStartDate: z.coerce.date(),
-  eventEndDate: z.coerce.date(),
-  venue: z.string().min(5),
-  registrationFee: z.number().min(0),
-  eventType: z.string(),
-  eventImage: z.array(z.instanceof(File)).min(1),
-});
-
-export type CreateEventInput = z.input<typeof createEventServerSchema>;
+export type CreateEventInput = z.input<typeof createEventSchema>;
 
 export const createEvent: ServerFunction<
   [CreateEventInput],
   { eventId: string }
 > = async (input) => {
   console.log("Server Action createEvent received:", input);
-  const result = createEventServerSchema.safeParse(input);
+  const result = createEventSchema.safeParse(input);
 
   if (!result.success) {
     return {
@@ -38,7 +28,18 @@ export const createEvent: ServerFunction<
   const supabase = await createAdminClient();
 
   const file = data.eventImage[0];
-  const fileExt = file.name.split(".").pop();
+  const fileExt = file.name.split(".").pop()?.toLowerCase();
+  const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+
+  if (!fileExt || !allowedExtensions.includes(fileExt)) {
+    return {
+      success: false,
+      error:
+        "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
+      data: null,
+    };
+  }
+
   const fileName = `${Math.random()
     .toString(36)
     .substring(2)}_${Date.now()}.${fileExt}`;
@@ -76,9 +77,12 @@ export const createEvent: ServerFunction<
     .single();
 
   if (insertError) {
+    // Cleanup: delete the uploaded image if database insertion fails
+    await supabase.storage.from("headerImage").remove([filePath]);
+
     return {
       success: false,
-      error: `Database error ${insertError.message}`,
+      error: `Database error: ${insertError.message}`,
       data: null,
     };
   }

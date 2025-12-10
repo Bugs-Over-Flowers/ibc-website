@@ -2,7 +2,7 @@ import type { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { Field, FieldDescription, FieldLabel } from "../ui/field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
 interface ImageFieldProps {
   label?: string;
@@ -38,6 +38,7 @@ function ImageField({
         className="cursor-pointer"
       />
       {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError errors={field.state.meta.errors} />
       {/* We don't render value directly in file input as it's uncontrolled for security */}
     </Field>
   );

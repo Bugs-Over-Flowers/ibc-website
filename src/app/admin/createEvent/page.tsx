@@ -2,24 +2,9 @@
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { toast } from "sonner";
-import z from "zod";
 import { formContext, useAppForm } from "@/hooks/_formHooks";
+import createEventSchema from "@/lib/validation/event/createEventSchema";
 import { createEvent } from "@/server/events/actions";
-
-const createEventSchema = z.object({
-  eventTitle: z.string().min(5, "Title must atleast be 5 characters"),
-  description: z.string(),
-  eventStartDate: z
-    .string()
-    .pipe(z.coerce.date({ message: "Event start date is required" })),
-  eventEndDate: z
-    .string()
-    .pipe(z.coerce.date({ message: "event end date is required" })),
-  venue: z.string().min(5, "Venue must atleast be 5 characters"),
-  registrationFee: z.number().min(0, "Must atleast greater than 0"),
-  eventType: z.string().min(1, "Please select event visibility"),
-  eventImage: z.array(z.instanceof(File)).min(1, "Atleast 1 image is required"),
-});
 
 function CreateEventForm() {
   const router = useRouter();
@@ -54,7 +39,7 @@ function CreateEventForm() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto py-10">
+    <div className="max-w-2xl mx-auto py-10 px-4 sm:px-0">
       <button type="button" onClick={() => router.push("/admin/dashboard")}>
         Back to events
       </button>
@@ -86,14 +71,14 @@ function CreateEventForm() {
 
             <form.AppField name="description">
               {(field) => (
-                <field.TextField
+                <field.TextareaField
                   label="Description"
                   placeholder="Enter event description"
                 />
               )}
             </form.AppField>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <form.AppField name="eventStartDate">
                 {(field) => (
                   <field.TextField
@@ -122,7 +107,7 @@ function CreateEventForm() {
               )}
             </form.AppField>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <form.AppField name="registrationFee">
                 {(field) => <field.NumberField label="Registration Fee * " />}
               </form.AppField>
@@ -131,6 +116,7 @@ function CreateEventForm() {
                 {(field) => (
                   <field.SelectField
                     label="Event Type *"
+                    placeholder="Select event type"
                     options={[
                       { label: "Public", value: "public" },
                       { label: "Private", value: "private" },
@@ -146,7 +132,7 @@ function CreateEventForm() {
                   label="Event Image *"
                   description="Upload an image for the event banner"
                   multiple
-                  maxFiles={5}
+                  maxFiles={3}
                 />
               )}
             </form.AppField>

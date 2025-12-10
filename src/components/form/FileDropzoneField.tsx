@@ -1,6 +1,6 @@
 import { UploadCloud, X } from "lucide-react";
 import Image from "next/image";
-import type * as React from "react";
+import * as React from "react";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -17,6 +17,59 @@ interface FileDropzoneFieldProps {
   maxFiles?: number;
   maxSize?: number;
 }
+
+const FilePreview = ({
+  file,
+  onRemove,
+}: {
+  file: File;
+  onRemove: () => void;
+}) => {
+  const [preview, setPreview] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+
+  return (
+    <div className="relative group">
+      <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-background">
+        {preview ? (
+          <ImageZoom className="h-full w-full">
+            <Image
+              src={preview}
+              alt={file.name}
+              fill
+              unoptimized
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </ImageZoom>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-muted">
+            <UploadCloud className="h-6 w-6 animate-pulse text-muted-foreground" />
+          </div>
+        )}
+      </div>
+      <Button
+        type="button"
+        variant="destructive"
+        size="icon"
+        className="absolute -right-2 -top-2 h-6 w-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100 z-10"
+        onClick={onRemove}
+      >
+        <X className="h-3 w-3" />
+      </Button>
+      <p className="mt-1 truncate text-xs text-muted-foreground px-1">
+        {file.name}
+      </p>
+    </div>
+  );
+};
 
 function FileDropzoneField({
   label,
@@ -77,31 +130,11 @@ function FileDropzoneField({
       {files.length > 0 && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 mt-4">
           {files.map((file, index) => (
-            <div key={`${file.name}-${index}`} className="relative group">
-              <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-background">
-                <ImageZoom>
-                  <Image
-                    src={URL.createObjectURL(file)}
-                    alt={file.name}
-                    fill
-                    unoptimized
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                </ImageZoom>
-              </div>
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute -right-2 -top-2 h-6 w-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100 z-10"
-                onClick={() => removeFile(index)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-              <p className="mt-1 truncate text-xs text-muted-foreground px-1">
-                {file.name}
-              </p>
-            </div>
+            <FilePreview
+              key={`${file.name}-${index}`}
+              file={file}
+              onRemove={() => removeFile(index)}
+            />
           ))}
         </div>
       )}
