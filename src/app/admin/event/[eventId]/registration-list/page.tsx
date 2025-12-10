@@ -24,7 +24,7 @@ export default function RegistrationPageWrapper({
   searchParams,
 }: pageProps) {
   return (
-    <main className="p-5 md:p-10 flex flex-col gap-4">
+    <main className="flex flex-col gap-4 p-5 md:p-10">
       <Suspense
         fallback={
           <Link href={`/admin/events` as Route}>
@@ -53,7 +53,7 @@ export default function RegistrationPageWrapper({
 async function BackButton({ params }: { params: pageProps["params"] }) {
   const { eventId } = await params;
   return (
-    <Link href={`/admin/event/${eventId}` as Route} className="w-max">
+    <Link className="w-max" href={`/admin/event/${eventId}` as Route}>
       <Button>Back to Event Page</Button>
     </Link>
   );
@@ -79,9 +79,9 @@ async function RegistrationListStats({ params, searchParams }: pageProps) {
 
   return (
     <RegistrationStatsComponent
+      pending={pending}
       total={total}
       verified={verified}
-      pending={pending}
     />
   );
 }

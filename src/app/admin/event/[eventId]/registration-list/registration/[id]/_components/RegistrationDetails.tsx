@@ -25,7 +25,7 @@ export default function RegistrationDetails(details: RegistrationPage) {
   const otherParticipants = details.participants.filter((p) => !p.isPrincipal);
 
   return (
-    <main className="p-5 md:p-10 space-y-2">
+    <main className="space-y-2 p-5 md:p-10">
       <Button onClick={() => router.back()}>Back</Button>
       <Card>
         <CardContent>
@@ -48,7 +48,7 @@ export default function RegistrationDetails(details: RegistrationPage) {
             Registered: {formatDate(details.registrationDate, "MMMM dd, yyyy")}
           </div>
           <CardDescription>
-            <table className="border-spacing-3 border-separate">
+            <table className="border-separate border-spacing-3">
               <tbody>
                 <tr>
                   <td>
@@ -80,7 +80,7 @@ export default function RegistrationDetails(details: RegistrationPage) {
               <div>{principalRegistrant.email}</div>
             </CardContent>
           </Card>
-          <div className="pt-4 py-2">Other People</div>
+          <div className="py-2 pt-4">Other People</div>
           <div className="space-y-2">
             {otherParticipants.map((participant, idx) => (
               <Card key={participant.participantId}>

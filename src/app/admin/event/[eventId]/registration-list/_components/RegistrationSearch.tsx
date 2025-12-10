@@ -36,10 +36,10 @@ export default function RegistrationSearch() {
 
   return (
     <Card className="md:h-32">
-      <CardContent className="flex md:flex-row flex-col w-full gap-10">
+      <CardContent className="flex w-full flex-col gap-10 md:flex-row">
         <div className="w-full">
           <div>Search Registration</div>
-          <form className="flex gap-2 items-end" onSubmit={handleSubmit}>
+          <form className="flex items-end gap-2" onSubmit={handleSubmit}>
             <form.AppField name="searchQuery">
               {(field) => (
                 <field.TextField
@@ -49,15 +49,15 @@ export default function RegistrationSearch() {
               )}
             </form.AppField>
             <form.AppForm>
-              <form.SubmitButton label="Search" isSubmittingLabel="Searching" />
+              <form.SubmitButton isSubmittingLabel="Searching" label="Search" />
             </form.AppForm>
           </form>
         </div>
         <div className="w-full">
           <div> Payment Status</div>
           <Select
-            value={searchParams.get("paymentStatus") || "all"}
             onValueChange={setFilter}
+            value={searchParams.get("paymentStatus") || "all"}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select Payment Status" />

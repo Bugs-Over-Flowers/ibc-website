@@ -14,7 +14,7 @@ export default function RegistrationListStats({
   pending,
 }: RegistrationListStatsProps) {
   return (
-    <div className="w-full flex justify-between flex-col md:flex-row gap-2 md:gap-4">
+    <div className="flex w-full flex-col justify-between gap-2 md:flex-row md:gap-4">
       {[
         {
           label: "Total Registrations",
@@ -35,13 +35,13 @@ export default function RegistrationListStats({
           icon: <Clock />,
         },
       ].map(({ label, data, className, icon }) => (
-        <Card key={label} className="h-36 w-full">
-          <CardContent className="flex flex-col h-full justify-between">
-            <div className="flex gap-2 items-center">
+        <Card className="h-36 w-full" key={label}>
+          <CardContent className="flex h-full flex-col justify-between">
+            <div className="flex items-center gap-2">
               {icon}
-              <h3 className="text-lg font-medium">{label}</h3>
+              <h3 className="font-medium text-lg">{label}</h3>
             </div>
-            <p className={cn("text-lg font-medium", className)}>{data}</p>
+            <p className={cn("font-medium text-lg", className)}>{data}</p>
           </CardContent>
         </Card>
       ))}

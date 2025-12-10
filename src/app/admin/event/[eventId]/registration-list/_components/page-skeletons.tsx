@@ -17,7 +17,7 @@ import {
  */
 export function RegistrationListStatsSkeleton() {
   return (
-    <div className="w-full flex justify-between flex-col md:flex-row gap-2 md:gap-4">
+    <div className="flex w-full flex-col justify-between gap-2 md:flex-row md:gap-4">
       {[
         {
           label: "Total Registrations",
@@ -27,14 +27,14 @@ export function RegistrationListStatsSkeleton() {
         { label: "Verified Registrations", icon: <CheckCircle /> },
         { label: "Pending Registrations", icon: <Clock /> },
       ].map(({ label, icon }) => (
-        <Card key={label} className="h-36 w-full">
-          <CardContent className="flex flex-col h-full justify-between">
-            <div className="flex gap-2 items-center">
+        <Card className="h-36 w-full" key={label}>
+          <CardContent className="flex h-full flex-col justify-between">
+            <div className="flex items-center gap-2">
               {icon}
-              <h3 className="text-lg font-medium">{label}</h3>
+              <h3 className="font-medium text-lg">{label}</h3>
             </div>
             <div>
-              <Spinner className="text-lg font-medium" />
+              <Spinner className="font-medium text-lg" />
             </div>
           </CardContent>
         </Card>
