@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Constants } from "../supabase/db.types";
 
 export const phoneSchema = z
   .string()
@@ -15,3 +16,5 @@ export const landlineSchema = z
 export const MemberTypeEnum = z.enum(["member", "nonmember"]);
 
 export const PaymentMethodEnum = z.enum(["online", "onsite"]);
+
+export const PaymentStatusEnum = z.enum(Constants.public.Enums.PaymentStatus);

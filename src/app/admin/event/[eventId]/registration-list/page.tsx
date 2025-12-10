@@ -15,7 +15,7 @@ import {
   RegistrationListTableSkeleton,
 } from "./_components/page-skeletons";
 import RegistrationList from "./_components/RegistrationList";
-import RegistrationSearch from "./_components/RegistrationSearch";
+import RegistrationSearchAndFilter from "./_components/RegistrationSearchAndFilter";
 import RegistrationStatsComponent from "./_components/RegistrationStatsComponent";
 
 type pageProps = PageProps<"/admin/event/[eventId]/registration-list">;
@@ -40,7 +40,7 @@ export default function RegistrationPageWrapper({
       <Suspense
         fallback={<Skeleton className="h-32 rounded-xl bg-neutral-200" />}
       >
-        <RegistrationSearch />
+        <RegistrationSearchAndFilter />
       </Suspense>
 
       <Suspense fallback={<RegistrationListTableSkeleton />}>
@@ -61,13 +61,14 @@ async function BackButton({ params }: { params: pageProps["params"] }) {
 
 async function RegistrationListStats({ params, searchParams }: pageProps) {
   const { eventId } = await params;
-  const { affiliation } = await searchParams;
+  const { affiliation, paymentStatus } = await searchParams;
 
   const cookieStore = await cookies();
   const registrationList = await tryCatch(
     getRegistrationListStats(cookieStore.getAll(), {
       eventId,
       affiliation: parseStringParam(affiliation),
+      paymentStatus: parseStringParam(paymentStatus),
     }),
   );
 
@@ -88,13 +89,14 @@ async function RegistrationListStats({ params, searchParams }: pageProps) {
 
 async function RegistrationListTable({ params, searchParams }: pageProps) {
   const { eventId } = await params;
-  const { affiliation } = await searchParams;
+  const { affiliation, paymentStatus } = await searchParams;
   const cookieStore = await cookies();
 
   const registrationList = await tryCatch(
     getRegistrationList(cookieStore.getAll(), {
       eventId,
       affiliation: parseStringParam(affiliation),
+      paymentStatus: parseStringParam(paymentStatus),
     }),
   );
 

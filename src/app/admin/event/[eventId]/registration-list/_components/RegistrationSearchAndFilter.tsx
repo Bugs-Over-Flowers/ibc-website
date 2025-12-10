@@ -3,7 +3,6 @@
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-
 import {
   Select,
   SelectContent,
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useSearchForm } from "../_hooks/useSearchForm";
 
-export default function RegistrationSearch() {
+export default function RegistrationSearchAndFilter() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathName = usePathname();
@@ -25,7 +24,11 @@ export default function RegistrationSearch() {
   const setFilter = (filter: "verified" | "pending" | "all") => {
     const params = new URLSearchParams(searchParams.toString());
 
-    params.set("paymentStatus", filter || "");
+    if (filter === "all") {
+      params.delete("paymentStatus");
+    } else {
+      params.set("paymentStatus", filter || "");
+    }
     router.push(`${pathName}?${params.toString()}` as Route);
   };
 
@@ -43,8 +46,8 @@ export default function RegistrationSearch() {
             <form.AppField name="searchQuery">
               {(field) => (
                 <field.TextField
-                  className="bg-neutral-200"
-                  placeholder="Enter an affiliation"
+                  className="rounded-md border border-neutral-300 bg-neutral-100"
+                  placeholder="Enter an affiliation, name, or email"
                 />
               )}
             </form.AppField>
@@ -59,7 +62,7 @@ export default function RegistrationSearch() {
             onValueChange={setFilter}
             value={searchParams.get("paymentStatus") || "all"}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full rounded-md bg-neutral-100 ring-1 ring-neutral-300">
               <SelectValue placeholder="Select Payment Status" />
             </SelectTrigger>
             <SelectContent>

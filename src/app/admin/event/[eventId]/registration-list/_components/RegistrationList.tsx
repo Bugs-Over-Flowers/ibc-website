@@ -89,6 +89,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
           eventId: row.original.eventId,
           registrationId: row.original.registrationId,
         }}
+        isDetailsPage={false}
       />
     ),
   },

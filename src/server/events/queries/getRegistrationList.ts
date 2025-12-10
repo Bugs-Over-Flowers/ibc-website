@@ -7,15 +7,17 @@ import {
   RegistrationListRPCSchema,
   RegistrationListStatsSchema,
 } from "@/lib/validation/registration/registration-list";
+import { PaymentStatusEnum } from "@/lib/validation/utils";
 
 interface GetRegistrationListParams {
   eventId: string;
   affiliation?: string;
+  paymentStatus?: string;
 }
 
 export const getRegistrationList = async (
   requestCookies: RequestCookie[],
-  { eventId, affiliation }: GetRegistrationListParams,
+  { eventId, affiliation, paymentStatus }: GetRegistrationListParams,
 ): Promise<RegistrationItem[]> => {
   "use cache";
   cacheLife("seconds");
@@ -26,6 +28,9 @@ export const getRegistrationList = async (
     .rpc("get_registration_list", {
       p_event_id: eventId,
       p_search_text: affiliation,
+      p_payment_status: paymentStatus
+        ? PaymentStatusEnum.parse(paymentStatus)
+        : undefined,
     })
     .throwOnError();
 
@@ -34,7 +39,7 @@ export const getRegistrationList = async (
 
 export const getRegistrationListStats = async (
   requestCookies: RequestCookie[],
-  { eventId, affiliation }: GetRegistrationListParams,
+  { eventId, affiliation, paymentStatus }: GetRegistrationListParams,
 ): Promise<{
   total: number;
   verified: number;
@@ -48,7 +53,10 @@ export const getRegistrationListStats = async (
   const { data } = await supabase
     .rpc("get_registration_stats", {
       p_event_id: eventId,
-      p_affiliation: affiliation,
+      p_search_text: affiliation,
+      p_payment_status: paymentStatus
+        ? PaymentStatusEnum.parse(paymentStatus)
+        : undefined,
     })
     .throwOnError();
 

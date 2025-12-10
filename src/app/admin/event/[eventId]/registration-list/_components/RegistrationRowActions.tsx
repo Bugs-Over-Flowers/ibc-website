@@ -23,10 +23,12 @@ interface RegistrationRowActionsProps {
     eventId: string;
     paymentStatus: Enums<"PaymentStatus">;
   };
+  isDetailsPage: boolean;
 }
 
 export default function RegistrationRowActions({
   data,
+  isDetailsPage,
 }: RegistrationRowActionsProps) {
   const router = useRouter();
   return (
@@ -36,16 +38,19 @@ export default function RegistrationRowActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem
-          onSelect={() =>
-            router.push(
-              `/admin/event/${data.eventId}/registration-list/registration/${data.registrationId}` as Route,
-            )
-          }
-        >
-          <ChevronRight />
-          View Details
-        </DropdownMenuItem>
+
+        {!isDetailsPage && (
+          <DropdownMenuItem
+            onSelect={() =>
+              router.push(
+                `/admin/event/${data.eventId}/registration-list/registration/${data.registrationId}` as Route,
+              )
+            }
+          >
+            <ChevronRight />
+            View Details
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuItem>
           <QrCodeIcon />
