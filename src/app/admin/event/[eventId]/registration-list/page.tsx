@@ -18,11 +18,12 @@ import RegistrationList from "./_components/RegistrationList";
 import RegistrationSearchAndFilter from "./_components/RegistrationSearchAndFilter";
 import RegistrationStatsComponent from "./_components/RegistrationStatsComponent";
 
-type pageProps = PageProps<"/admin/event/[eventId]/registration-list">;
+type RegistrationListPageProps =
+  PageProps<"/admin/event/[eventId]/registration-list">;
 export default function RegistrationPageWrapper({
   params,
   searchParams,
-}: pageProps) {
+}: RegistrationListPageProps) {
   return (
     <main className="flex flex-col gap-4 p-5 md:p-10">
       <Suspense
@@ -50,7 +51,11 @@ export default function RegistrationPageWrapper({
   );
 }
 
-async function BackButton({ params }: { params: pageProps["params"] }) {
+async function BackButton({
+  params,
+}: {
+  params: RegistrationListPageProps["params"];
+}) {
   const { eventId } = await params;
   return (
     <Link className="w-max" href={`/admin/event/${eventId}` as Route}>
@@ -59,7 +64,10 @@ async function BackButton({ params }: { params: pageProps["params"] }) {
   );
 }
 
-async function RegistrationListStats({ params, searchParams }: pageProps) {
+async function RegistrationListStats({
+  params,
+  searchParams,
+}: RegistrationListPageProps) {
   const { eventId } = await params;
   const { q, paymentStatus } = await searchParams;
 
@@ -87,7 +95,10 @@ async function RegistrationListStats({ params, searchParams }: pageProps) {
   );
 }
 
-async function RegistrationListTable({ params, searchParams }: pageProps) {
+async function RegistrationListTable({
+  params,
+  searchParams,
+}: RegistrationListPageProps) {
   const { eventId } = await params;
   const { q, paymentStatus } = await searchParams;
   const cookieStore = await cookies();

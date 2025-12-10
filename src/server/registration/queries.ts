@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
 import { RegistrationPageSchema } from "@/lib/validation/registration/registration-list";
@@ -32,7 +34,6 @@ export const getRegistrationEventDetails = async (
     .throwOnError();
 
   if (!data) {
-    console.log("No event");
     throw new Error("No event found");
   }
 
@@ -67,7 +68,6 @@ export const getRegistrationData = async (
     .throwOnError();
 
   if (!data) {
-    console.log("No registration");
     throw new Error("No registration found");
   }
 

@@ -9,7 +9,7 @@ export const useSearchForm = () => {
   const pathName = usePathname();
   const form = useAppForm({
     defaultValues: {
-      searchQuery: searchParams.get("affiliation") || "",
+      searchQuery: searchParams.get("q") || "",
     },
     onSubmit: ({ value }) => {
       const params = setParamsOrDelete(

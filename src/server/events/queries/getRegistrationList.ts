@@ -1,7 +1,8 @@
+import "server-only";
+
+import { cacheLife, cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
-import "server-only";
-import { cacheLife, cacheTag } from "next/cache";
 import {
   type RegistrationItem,
   RegistrationListRPCSchema,
@@ -21,7 +22,7 @@ export const getRegistrationList = async (
 ): Promise<RegistrationItem[]> => {
   "use cache";
   cacheLife("seconds");
-  cacheTag("registration-list-stats");
+  cacheTag("registration-list");
   const supabase = await createClient(requestCookies);
 
   const query = await supabase
@@ -47,7 +48,7 @@ export const getRegistrationListStats = async (
 }> => {
   "use cache";
   cacheLife("seconds");
-  cacheTag("registration-list-stats");
+  cacheTag("registration-list");
   const supabase = await createClient(requestCookies);
 
   const { data } = await supabase

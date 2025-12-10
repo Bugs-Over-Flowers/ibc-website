@@ -3,12 +3,12 @@ import { Suspense } from "react";
 import { getRegistrationData } from "@/server/registration/queries";
 import RegistrationDetails from "./_components/RegistrationDetails";
 
-type params =
+type RegistrationPageParams =
   PageProps<"/admin/event/[eventId]/registration-list/registration/[id]">["params"];
 export default function RegistrationDetailsPageWrapper({
   params,
 }: {
-  params: params;
+  params: RegistrationPageParams;
 }) {
   return (
     <Suspense>
@@ -17,7 +17,11 @@ export default function RegistrationDetailsPageWrapper({
   );
 }
 
-async function RegistrationDetailsPage({ params }: { params: params }) {
+async function RegistrationDetailsPage({
+  params,
+}: {
+  params: RegistrationPageParams;
+}) {
   const { id } = await params;
   const cookieStore = await cookies();
 

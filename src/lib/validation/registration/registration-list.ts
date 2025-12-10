@@ -91,6 +91,7 @@ export const RegistrationPageSchema = RegistrationDataBaseSchema.pick({
   paymentMethod: true,
   paymentImagePath: true,
 }).extend({
+  isMember: z.boolean(),
   event: z.object({ eventId: z.uuid(), eventTitle: z.string() }),
   participants: z.array(ParticipantSchema),
 });

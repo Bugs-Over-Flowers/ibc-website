@@ -96,8 +96,8 @@ export default function RegistrationSearchAndFilter() {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Fruits</SelectLabel>
-                  {["verified", "pending", "all"].map((status) => (
+                  <SelectLabel>Payment Status</SelectLabel>
+                  {["all", "verified", "pending"].map((status) => (
                     <SelectItem key={status} value={status}>
                       {status}
                     </SelectItem>
