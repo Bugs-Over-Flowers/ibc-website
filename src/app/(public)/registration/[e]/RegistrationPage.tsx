@@ -33,9 +33,9 @@ const RegistrationPage = async ({ params }: RegistrationPageProps) => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 w-full h-full">
+    <div className="flex h-full w-full flex-col gap-4 md:flex-row">
       <RegistrationInformation {...eventData} />
-      <div className="flex flex-col gap-4 w-full h-full p-5">
+      <div className="flex h-full w-full flex-col gap-4 p-5">
         <Link href={"/events"}>
           <Button variant={"ghost"}>
             <ChevronLeft />
