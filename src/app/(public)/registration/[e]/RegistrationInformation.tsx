@@ -23,7 +23,7 @@ const RegistrationInformation = (
     setInitialEventDetails();
   }, []);
   return (
-    <div className="p-3 space-y-5 md:w-96">
+    <div className="space-y-5 p-3 md:w-96">
       <Card>
         <CardContent className="flex-col items-start">
           <CardTitle>{eventDetails?.eventTitle}</CardTitle>

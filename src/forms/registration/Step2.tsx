@@ -106,7 +106,7 @@ export default function Step2() {
       {/* Principal Registrant */}
       <Card>
         <CardContent>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 pb-3">
+          <div className="flex flex-col gap-2 pb-3 md:flex-row md:items-center md:justify-between">
             <CardTitle>
               <h3>Principal Registrant</h3>
             </CardTitle>
@@ -122,7 +122,7 @@ export default function Step2() {
       </Card>
 
       {/* Other Registrants */}
-      <form.AppField name="otherRegistrants" mode="array">
+      <form.AppField mode="array" name="otherRegistrants">
         {(field) => {
           const otherRegistrantsCount = field.state.value?.length ?? 0;
           const canAddMore = otherRegistrantsCount < MAX_OTHER_PARTICIPANTS;
@@ -140,7 +140,7 @@ export default function Step2() {
                   // biome-ignore lint/suspicious/noArrayIndexKey: getting index is okay, handled by tanstack form
                   <Card key={idx}>
                     <CardContent>
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 pb-3 items-start">
+                      <div className="flex flex-col items-start gap-2 pb-3 md:flex-row md:items-center md:justify-between">
                         <FieldTitle>
                           <h3>Participant {idx + 2}</h3>
                         </FieldTitle>
@@ -148,11 +148,11 @@ export default function Step2() {
                           <RemoveParticipantDialog idx={idx} />
                         ) : (
                           <Button
-                            variant="ghost"
-                            size="sm"
-                            type="button"
                             className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => field.removeValue(idx)}
+                            size="sm"
+                            type="button"
+                            variant="ghost"
                           >
                             <Trash2 className="mr-1 h-4 w-4" />
                             Remove
@@ -171,11 +171,11 @@ export default function Step2() {
               })}
 
               <Button
-                variant="outline"
-                type="button"
                 className="w-full"
                 disabled={!canAddMore}
                 onClick={() => field.pushValue({ ...EMPTY_REGISTRANT })}
+                type="button"
+                variant="outline"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 {canAddMore
@@ -187,7 +187,7 @@ export default function Step2() {
         }}
       </form.AppField>
 
-      <FormButtons onNext={onNext} onBack={onBack} />
+      <FormButtons onBack={onBack} onNext={onNext} />
     </form>
   );
 }
@@ -219,8 +219,8 @@ function ParticipantFields({ form, index }: ParticipantFieldsProps) {
         {(field) => (
           <field.TextField
             label="Email"
-            type="email"
             placeholder="juan@example.com"
+            type="email"
           />
         )}
       </form.AppField>
@@ -239,10 +239,10 @@ function RemoveParticipantDialog({ idx }: { idx: number }) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button
-          variant="ghost"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
           size="sm"
           type="button"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          variant="ghost"
         >
           <Trash2 className="mr-1 h-4 w-4" />
           Remove
@@ -259,8 +259,8 @@ function RemoveParticipantDialog({ idx }: { idx: number }) {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => field.removeValue(idx)}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => field.removeValue(idx)}
           >
             Remove
           </AlertDialogAction>

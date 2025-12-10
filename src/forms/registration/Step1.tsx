@@ -59,7 +59,7 @@ const Step1 = ({ members }: Step1Props) => {
   }, [members, form.state.values]);
 
   return (
-    <form onSubmit={onNext} className="space-y-3">
+    <form className="space-y-3" onSubmit={onNext}>
       {/* Step 1 Title */}
       <Item>
         <ItemContent>
@@ -80,7 +80,6 @@ const Step1 = ({ members }: Step1Props) => {
               <FieldSet>
                 <RadioGroup
                   defaultValue="member"
-                  value={field.state.value}
                   onValueChange={(value) => {
                     const parsedMemberValue = MemberTypeEnum.safeParse(value);
 
@@ -93,6 +92,7 @@ const Step1 = ({ members }: Step1Props) => {
 
                     field.handleChange(parsedMemberValue.data);
                   }}
+                  value={field.state.value}
                 >
                   {/* Member Select */}
                   <FieldLabel htmlFor="member">
@@ -106,20 +106,20 @@ const Step1 = ({ members }: Step1Props) => {
                           <form.AppField name="businessMemberId">
                             {(field) => (
                               <field.SelectField
+                                options={membersOptions}
                                 placeholder={
                                   memberName !== ""
                                     ? memberName
                                     : "Select Member"
                                 }
-                                options={membersOptions}
                               />
                             )}
                           </form.AppField>
                         )}
                       </FieldContent>
                       <RadioGroupItem
-                        value="member"
                         id="member"
+                        value="member"
                         variant={"noIcon"}
                       />
                     </Field>
@@ -144,8 +144,8 @@ const Step1 = ({ members }: Step1Props) => {
                             <form.AppField name="nonMemberName">
                               {(field) => (
                                 <field.TextField
-                                  placeholder="Enter your Organization / Company Name"
                                   label="Affiliation"
+                                  placeholder="Enter your Organization / Company Name"
                                 />
                               )}
                             </form.AppField>
@@ -153,8 +153,8 @@ const Step1 = ({ members }: Step1Props) => {
                       </FieldContent>
                       {eventDetails?.eventType === "public" && (
                         <RadioGroupItem
-                          value="nonmember"
                           id="nonmember"
+                          value="nonmember"
                           variant={"noIcon"}
                         />
                       )}

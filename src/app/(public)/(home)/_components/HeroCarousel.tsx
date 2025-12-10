@@ -109,8 +109,8 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
 
   return (
     <section
+      className="relative h-screen max-h-[950px] min-h-[700px] overflow-hidden"
       id="home"
-      className="relative h-screen min-h-[700px] max-h-[950px] overflow-hidden"
     >
       <section
         aria-label="Hero carousel"
@@ -120,21 +120,21 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
       />
       <FloatingParticles />
 
-      <AnimatePresence mode="wait" custom={direction}>
+      <AnimatePresence custom={direction} mode="wait">
         {showWelcome ? (
           <WelcomeSection key="welcome" onNavigate={handleNavigate} />
         ) : upcomingEvents.length > 0 ? (
           <EventSlide
-            key={`event-${currentEventIndex}`}
-            event={upcomingEvents[currentEventIndex]}
-            direction={direction}
             currentIndex={currentEventIndex}
-            totalEvents={upcomingEvents.length}
+            direction={direction}
+            event={upcomingEvents[currentEventIndex]}
             isPaused={isPaused}
-            onNavigate={handleNavigate}
-            onPrev={prevEvent}
-            onNext={nextEvent}
+            key={`event-${currentEventIndex}`}
             onGoTo={goToEvent}
+            onNavigate={handleNavigate}
+            onNext={nextEvent}
+            onPrev={prevEvent}
+            totalEvents={upcomingEvents.length}
           />
         ) : (
           <NoEventsFallback key="no-events" onNavigate={handleNavigate} />

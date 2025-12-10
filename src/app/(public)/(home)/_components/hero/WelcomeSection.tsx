@@ -28,28 +28,28 @@ const stats = [
 export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
   return (
     <motion.div
-      key="welcome"
-      initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.02 }}
-      transition={{ duration: 0.8 }}
       className="absolute inset-0"
+      exit={{ opacity: 0, scale: 1.02 }}
+      initial={{ opacity: 0 }}
+      key="welcome"
+      transition={{ duration: 0.8 }}
     >
       <FloatingParticles />
 
       {/* Background Image with Ken Burns effect */}
       <motion.div
-        className="absolute inset-0 w-full h-full"
-        initial={{ scale: 1 }}
         animate={{ scale: 1.08 }}
+        className="absolute inset-0 h-full w-full"
+        initial={{ scale: 1 }}
         transition={{ duration: 25, ease: "linear" }}
       >
         <Image
-          src="/images/backgrounds/bg-1.jpg"
           alt="Business professionals networking"
-          fill
           className="object-cover"
+          fill
           priority
+          src="/images/backgrounds/bg-1.jpg"
         />
       </motion.div>
 
@@ -59,11 +59,11 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
       {/* Decorative Gradient Orbs */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[100px]"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3],
           }}
+          className="absolute top-1/4 right-1/4 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[100px]"
           transition={{
             duration: 10,
             repeat: Number.POSITIVE_INFINITY,
@@ -71,11 +71,11 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
           }}
         />
         <motion.div
-          className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-accent/20 rounded-full blur-[80px]"
           animate={{
             scale: [1.2, 1, 1.2],
             opacity: [0.2, 0.4, 0.2],
           }}
+          className="absolute bottom-1/4 left-1/4 h-[400px] w-[400px] rounded-full bg-accent/20 blur-[80px]"
           transition={{
             duration: 10,
             repeat: Number.POSITIVE_INFINITY,
@@ -86,70 +86,70 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
       </div>
 
       {/* Main Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
+      <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+        <div className="grid w-full items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left Content */}
           <motion.div className="text-primary-foreground">
             {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-5 py-2.5 backdrop-blur-md"
+              initial={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 rounded-full px-5 py-2.5 mb-8"
             >
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium tracking-wide">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="font-medium text-sm tracking-wide">
                 Established 1990
               </span>
             </motion.div>
 
             <motion.h1
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] mb-6"
-              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
+              className="mb-6 font-bold text-4xl leading-[1.1] sm:text-5xl lg:text-6xl xl:text-7xl"
+              initial={{ opacity: 0, y: 30 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <span className="block text-balance mb-2 text-md font-medium">
+              <span className="mb-2 block text-balance font-medium text-md">
                 Welcome to
               </span>
               <div className="-space-y-2">
-                <span className="block bg-linear-to-r from-primary via-accent to-secondary text-md bg-clip-text text-transparent pb-0">
+                <span className="block bg-linear-to-r from-primary via-accent to-secondary bg-clip-text pb-0 text-md text-transparent">
                   Iloilo
                 </span>
-                <span className="block bg-linear-to-r from-primary via-accent to-secondary text-md bg-clip-text text-transparent pb-2">
+                <span className="block bg-linear-to-r from-primary via-accent to-secondary bg-clip-text pb-2 text-md text-transparent">
                   Business Club
                 </span>
               </div>
             </motion.h1>
 
             <motion.p
-              className="text-lg sm:text-xl lg:text-2xl text-primary-foreground/80 mb-10 max-w-xl text-pretty leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              className="mb-10 max-w-xl text-pretty text-lg text-primary-foreground/80 leading-relaxed sm:text-xl lg:text-2xl"
+              initial={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
               Sustaining the Momentum for Progress.
             </motion.p>
 
             <motion.div
-              className="flex gap-4 flex-wrap"
-              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              className="flex flex-wrap gap-4"
+              initial={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.8, delay: 0.7 }}
             >
               <Button
+                className="h-13 rounded-full bg-primary px-8 font-semibold text-base text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105 hover:bg-primary/90 hover:shadow-primary/40 hover:shadow-xl"
                 onClick={() => onNavigate("about")}
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 h-13 text-base font-semibold shadow-lg shadow-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40 hover:scale-105"
               >
                 Discover More
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button
+                className="h-13 rounded-full border-primary-foreground/30 bg-primary-foreground/10 px-8 font-semibold text-base text-primary-foreground backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-primary-foreground/50 hover:bg-primary-foreground/20"
                 onClick={() => onNavigate("membership-application")}
-                variant="outline"
                 size="lg"
-                className="rounded-full px-8 h-13 text-base font-semibold bg-primary-foreground/10 backdrop-blur-md border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 hover:border-primary-foreground/50 transition-all duration-300 hover:scale-105"
+                variant="outline"
               >
                 Become a Member
               </Button>
@@ -158,30 +158,30 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
 
           {/* Right Content - Stats Cards */}
           <motion.div
-            className="hidden lg:grid grid-cols-2 gap-5"
-            initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
+            className="hidden grid-cols-2 gap-5 lg:grid"
+            initial={{ opacity: 0, x: 50 }}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
             {stats.map((stat, index) => (
               <motion.div
-                key={stat.label}
-                className="bg-primary-foreground/10 backdrop-blur-lg border border-primary-foreground/15 rounded-2xl p-6 hover:bg-primary-foreground/15 transition-all duration-300 group"
-                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                className="group rounded-2xl border border-primary-foreground/15 bg-primary-foreground/10 p-6 backdrop-blur-lg transition-all duration-300 hover:bg-primary-foreground/15"
+                initial={{ opacity: 0, y: 20 }}
+                key={stat.label}
                 transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
                 whileHover={{ scale: 1.03, y: -4 }}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="bg-primary/20 p-2.5 rounded-xl group-hover:bg-primary/30 transition-colors">
-                    <stat.icon className="w-5 h-5 text-primary" />
+                <div className="mb-3 flex items-start justify-between">
+                  <div className="rounded-xl bg-primary/20 p-2.5 transition-colors group-hover:bg-primary/30">
+                    <stat.icon className="h-5 w-5 text-primary" />
                   </div>
                 </div>
-                <div className="text-4xl font-bold text-primary-foreground mb-1">
+                <div className="mb-1 font-bold text-4xl text-primary-foreground">
                   <AnimatedNumber value={stat.number} />
                   <span className="text-primary">{stat.suffix}</span>
                 </div>
-                <div className="text-sm text-primary-foreground/70 font-medium">
+                <div className="font-medium text-primary-foreground/70 text-sm">
                   {stat.label}
                 </div>
               </motion.div>
@@ -192,22 +192,22 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
 
       {/* Scroll Indicator */}
       <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
-        initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        className="-translate-x-1/2 absolute bottom-10 left-1/2 flex flex-col items-center gap-3"
+        initial={{ opacity: 0 }}
         transition={{ delay: 1.5 }}
       >
-        <span className="text-primary-foreground/60 text-sm font-medium tracking-wide">
+        <span className="font-medium text-primary-foreground/60 text-sm tracking-wide">
           Scroll to explore
         </span>
         <motion.div
-          className="w-7 h-11 border-2 border-primary-foreground/30 rounded-full flex justify-center pt-2"
           animate={{ y: [0, 5, 0] }}
+          className="flex h-11 w-7 justify-center rounded-full border-2 border-primary-foreground/30 pt-2"
           transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
         >
           <motion.div
-            className="w-1.5 h-1.5 bg-primary rounded-full"
             animate={{ y: [0, 14, 0], opacity: [1, 0.3, 1] }}
+            className="h-1.5 w-1.5 rounded-full bg-primary"
             transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
           />
         </motion.div>
