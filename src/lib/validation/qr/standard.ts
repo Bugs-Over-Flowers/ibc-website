@@ -28,20 +28,19 @@ export const RegistrationCheckInQRCodec = z.codec(
     },
     encode: async (data) => {
       const encodedString = await encryptRegistrationQR(data);
-
       return encodedString;
     },
   },
 );
 
 export const DecodedRegistrationCheckInCodec = z.codec(
-  RegistrationCheckInQRCodeDecodedSchema,
   z.string(),
+  RegistrationCheckInQRCodeDecodedSchema,
   {
-    decode: (obj) => {
+    encode: (obj) => {
       return `IBC-${obj.eventId}-|rid:${obj.registrationId}-|em:${obj.email}`;
     },
-    encode: (ibcString) => {
+    decode: (ibcString) => {
       const [eventId, registrationId, email] = ibcString.split("-|");
       return {
         eventId: eventId.split("-")[1],

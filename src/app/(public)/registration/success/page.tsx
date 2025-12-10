@@ -3,23 +3,27 @@ import Link from "next/link";
 import { Suspense } from "react";
 import CenterSpinner from "@/components/CenterSpinner";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import QRCodeItem from "./QRCodeItem";
+import EventDetails from "./_components/EventDetails";
 
 export default function SuccessPageWrapper() {
   return (
-    <Suspense fallback={<CenterSpinner className="size-10" />}>
-      <SuccessPage />
-    </Suspense>
+    <main className="h-screen">
+      <Suspense fallback={<CenterSpinner className="size-10" />}>
+        <SuccessPage />
+      </Suspense>
+    </main>
   );
 }
 
 async function SuccessPage() {
-  const cookieStore = (await cookies()).get("recentQRData");
+  const cookieStore = await cookies();
+  const recentQRData = cookieStore.get("recentQRData")?.value;
 
-  if (!cookieStore || !cookieStore.value) {
+  if (!recentQRData) {
     return (
-      <main className="p-5 flex items-center justify-center flex-col h-screen bg-gray-100 space-y-5">
+      <main className="flex h-screen flex-col items-center justify-center space-y-5 bg-gray-100 p-5">
         <h1>No registration yet</h1>
         <div>
           You have not registered recently (for the past 7 days). Please
@@ -32,13 +36,21 @@ async function SuccessPage() {
     );
   }
   return (
-    <main>
+    <main className="h-full p-5 md:p-10">
       <h1>Registration Successful!</h1>
-      <div className="relative w-50 h-50">
-        <Suspense fallback={<Skeleton />}>
-          <QRCodeItem encodedRegistrationData={cookieStore.value} />
-        </Suspense>
-      </div>
+
+      <Suspense
+        fallback={
+          <div className="h-full pt-5 pb-5 md:pb-10">
+            <Skeleton className="min-h-full rounded-xl bg-neutral-300" />
+          </div>
+        }
+      >
+        <EventDetails
+          cookieStore={cookieStore.getAll()}
+          encodedRegistrationQRData={recentQRData}
+        />
+      </Suspense>
     </main>
   );
 }
