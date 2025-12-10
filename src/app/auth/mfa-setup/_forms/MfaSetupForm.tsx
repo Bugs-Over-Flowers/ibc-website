@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -92,8 +93,7 @@ export function MfaSetupForm() {
       <CardContent className="space-y-4">
         {qrCode && (
           <div className="flex justify-center">
-            {/* biome-ignore lint/a11y/useAltText: <explanation> */}
-            <img
+            <Image
               alt="MFA QR Code"
               className="size-48"
               height={192}
