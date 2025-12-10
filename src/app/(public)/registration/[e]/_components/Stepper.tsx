@@ -28,19 +28,19 @@ export default function Stepper() {
 
   return (
     <div className="flex flex-col">
-      <div className="md:block hidden w-full">
+      <div className="hidden w-full md:block">
         {STEPS.map((s, index) => (
           <div
-            key={s.title}
             className={cn(
-              "flex items-center gap-3 mb-4 last:mb-0 py-1 px-2 w-full",
-              step === index + 1 && "border border-primary rounded-md",
+              "mb-4 flex w-full items-center gap-3 px-2 py-1 last:mb-0",
+              step === index + 1 && "rounded-md border border-primary",
             )}
+            key={s.title}
           >
             {/*Step Number*/}
             <div
               className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center border-2",
+                "flex h-8 w-8 items-center justify-center rounded-full border-2",
                 step === index + 1
                   ? "bg-primary text-primary-foreground"
                   : "border-neutral-400 bg-white",
@@ -56,7 +56,7 @@ export default function Stepper() {
           </div>
         ))}
       </div>
-      <div className="md:hidden block space-y-2">
+      <div className="block space-y-2 md:hidden">
         <div>Step {step} of 4</div>
         <Progress value={(step / 4) * 100} />
         <div>{STEPS[step - 1].title}</div>

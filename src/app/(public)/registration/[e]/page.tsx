@@ -14,7 +14,7 @@ type RegistrationRouteProps = PageProps<"/registration/[e]">;
 
 export default function Page({ params }: RegistrationRouteProps) {
   return (
-    <main className="p-5 h-screen w-full flex items-center justify-center">
+    <main className="flex h-screen w-full items-center justify-center p-5">
       <Suspense fallback={<Spinner />}>
         <RegistrationPage params={params} />
       </Suspense>
@@ -43,7 +43,7 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
 
   if (!registrationEventDetailsSuccess || !getAllMembersSuccess) {
     return (
-      <div className="flex flex-col gap-3 text-center items-center justify-center">
+      <div className="flex flex-col items-center justify-center gap-3 text-center">
         {registrationEventDetailsMessage}
         <Link href={"/events"}>
           <Button>Return to Events</Button>
@@ -55,7 +55,7 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
   // Handle if event is draft
   if (eventData.eventType === null) {
     return (
-      <div className="flex flex-col gap-3 text-center items-center justify-center">
+      <div className="flex flex-col items-center justify-center gap-3 text-center">
         <p>
           Event is still not yet available for registration. Please come back
           later.
@@ -68,9 +68,9 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 w-full h-full">
+    <div className="flex h-full w-full flex-col gap-4 md:flex-row">
       <RegistrationInformation {...eventData} />
-      <div className="flex flex-col gap-4 w-full h-full p-5">
+      <div className="flex h-full w-full flex-col gap-4 p-5">
         <Link href={"/events"}>
           <Button variant={"ghost"}>
             <ChevronLeft />

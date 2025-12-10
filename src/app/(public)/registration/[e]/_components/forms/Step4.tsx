@@ -146,14 +146,14 @@ export default function Step4({ members }: Step4Props) {
             </div>
           </div>
           {paymentProofUrl && (
-            <div className="pt-5 flex flex-col w-full gap-3">
+            <div className="flex w-full flex-col gap-3 pt-5">
               <div> Proof of Payment</div>
               <Image
-                src={paymentProofUrl}
                 alt="Payment Proof"
-                width={200}
+                className="self-center justify-self-center rounded-md"
                 height={150}
-                className="rounded-md self-center justify-self-center"
+                src={paymentProofUrl}
+                width={200}
               />
             </div>
           )}
@@ -208,14 +208,14 @@ export default function Step4({ members }: Step4Props) {
             <div className="py-3">
               <Field orientation="horizontal">
                 <Checkbox
-                  name={field.name}
-                  id={field.name}
+                  aria-invalid={isInvalid}
                   checked={field.state.value}
+                  id={field.name}
+                  name={field.name}
+                  onBlur={field.handleBlur}
                   onCheckedChange={(checked) =>
                     field.handleChange(checked === true)
                   }
-                  onBlur={field.handleBlur}
-                  aria-invalid={isInvalid}
                 />
                 <Label htmlFor={field.name}>
                   I have read the Terms and Conditions.{" "}
@@ -224,14 +224,6 @@ export default function Step4({ members }: Step4Props) {
               </Field>
               <div className="pt-2">
                 <TermsAndConditions
-                  triggerOverride={
-                    <button
-                      className="text-medium text-sm hover:underline"
-                      type="button"
-                    >
-                      Read Terms and Conditions here
-                    </button>
-                  }
                   customAcceptButton={(closeTermsAndConditions) => (
                     <Button
                       onClick={() => {
@@ -242,6 +234,14 @@ export default function Step4({ members }: Step4Props) {
                       Accept
                     </Button>
                   )}
+                  triggerOverride={
+                    <button
+                      className="text-medium text-sm hover:underline"
+                      type="button"
+                    >
+                      Read Terms and Conditions here
+                    </button>
+                  }
                 />
               </div>
             </div>
@@ -252,8 +252,8 @@ export default function Step4({ members }: Step4Props) {
         {(isSubmitting) => (
           <div className="flex justify-end">
             <FormButtons
-              onNext={onNext}
               onBack={() => setStep(3)}
+              onNext={onNext}
               submitting={isSubmitting}
             />
           </div>

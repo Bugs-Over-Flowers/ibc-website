@@ -9,5 +9,5 @@ export default async function QRCodeItem({
   encodedRegistrationData,
 }: QRCodeItemProps) {
   const imageURL = await generateQRDataUrl(encodedRegistrationData);
-  return <Image src={imageURL} alt="QR Code" fill />;
+  return <Image alt="QR Code" fill src={imageURL} />;
 }
