@@ -1,6 +1,6 @@
 "use client";
 
-import { Facebook, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
+import { Facebook, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
