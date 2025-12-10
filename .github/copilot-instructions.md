@@ -53,12 +53,15 @@ src/
 Component placement:
 
 - Route-specific components → `app/[route]/_components/`
-- Reusable components → `src/components/`
-- Keep forms under `src/forms`
+- Include forms under `app/[route]/components/forms/`
+- Route-specific hooks under `app/[route]/_hooks/`
+- Keep global / reusable components → `src/components/`
 
 Server logic placement:
 
 - Feature-specific server logic → `src/server/[feature]/`
+- mutations (POST, PUT, DELETE) → `src/server/[feature]/mutations/<filename>.ts`
+- queries (GET) → `src/server/[feature]/queries/<filename>.ts`
 - Shared server logic → `src/server/utils.ts`
 - Add utils under feature-specific if needed.
 
