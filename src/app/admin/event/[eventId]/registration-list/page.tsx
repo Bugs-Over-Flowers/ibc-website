@@ -61,13 +61,13 @@ async function BackButton({ params }: { params: pageProps["params"] }) {
 
 async function RegistrationListStats({ params, searchParams }: pageProps) {
   const { eventId } = await params;
-  const { affiliation, paymentStatus } = await searchParams;
+  const { q, paymentStatus } = await searchParams;
 
   const cookieStore = await cookies();
   const registrationList = await tryCatch(
     getRegistrationListStats(cookieStore.getAll(), {
       eventId,
-      affiliation: parseStringParam(affiliation),
+      searchString: parseStringParam(q),
       paymentStatus: parseStringParam(paymentStatus),
     }),
   );
@@ -89,13 +89,13 @@ async function RegistrationListStats({ params, searchParams }: pageProps) {
 
 async function RegistrationListTable({ params, searchParams }: pageProps) {
   const { eventId } = await params;
-  const { affiliation, paymentStatus } = await searchParams;
+  const { q, paymentStatus } = await searchParams;
   const cookieStore = await cookies();
 
   const registrationList = await tryCatch(
     getRegistrationList(cookieStore.getAll(), {
       eventId,
-      affiliation: parseStringParam(affiliation),
+      searchString: parseStringParam(q),
       paymentStatus: parseStringParam(paymentStatus),
     }),
   );

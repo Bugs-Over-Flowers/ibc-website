@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAppForm } from "@/hooks/_formHooks";
+import { setParamsOrDelete } from "@/lib/utils";
 
 export const useSearchForm = () => {
   const searchParams = useSearchParams();
@@ -11,14 +12,12 @@ export const useSearchForm = () => {
       searchQuery: searchParams.get("affiliation") || "",
     },
     onSubmit: ({ value }) => {
-      const params = new URLSearchParams(searchParams.toString());
-      const query = value.searchQuery !== "" ? value.searchQuery : null;
-
-      if (query === null) {
-        params.delete("affiliation");
-      } else {
-        params.set("affiliation", query);
-      }
+      const params = setParamsOrDelete(
+        "q",
+        value.searchQuery,
+        [],
+        searchParams,
+      );
 
       router.push(`${pathName}?${params.toString()}` as Route);
     },
