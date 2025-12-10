@@ -94,11 +94,11 @@ export function MfaSetupForm() {
           <div className="flex justify-center">
             {/* biome-ignore lint/a11y/useAltText: <explanation> */}
             <img
-              src={qrCode}
               alt="MFA QR Code"
-              width={192}
-              height={192}
               className="size-48"
+              height={192}
+              src={qrCode}
+              width={192}
             />
           </div>
         )}
@@ -106,18 +106,18 @@ export function MfaSetupForm() {
           <Label htmlFor="code">Verification Code</Label>
           <Input
             id="code"
+            maxLength={6}
+            onChange={(e) => setCode(e.target.value)}
             placeholder="Enter 6-digit code"
             value={code}
-            onChange={(e) => setCode(e.target.value)}
-            maxLength={6}
           />
         </div>
       </CardContent>
       <CardFooter>
         <Button
           className="w-full"
-          onClick={handleVerify}
           disabled={isVerifying || !code || !factorId}
+          onClick={handleVerify}
         >
           {isVerifying ? "Verifying..." : "Verify and Enable"}
         </Button>

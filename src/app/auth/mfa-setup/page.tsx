@@ -2,7 +2,7 @@ import { MfaSetupForm } from "./_forms/MfaSetupForm";
 
 export default function MfaSetupPage() {
   return (
-    <div className="flex justify-center items-center h-screen w-full p-4">
+    <div className="flex h-screen w-full items-center justify-center p-4">
       <MfaSetupForm />
     </div>
   );

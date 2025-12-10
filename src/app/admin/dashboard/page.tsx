@@ -15,12 +15,12 @@ export default function Page() {
 
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="font-bold text-2xl">Dashboard</h1>
         <Button
-          variant="outline"
-          onClick={() => execute(undefined)}
           disabled={isPending}
+          onClick={() => execute(undefined)}
+          variant="outline"
         >
           {isPending ? "Logging out..." : "Logout"}
         </Button>

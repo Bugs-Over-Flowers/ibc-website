@@ -17,8 +17,8 @@ export default function SubmitButton({
     <form.Subscribe selector={(s) => [s.isSubmitting, s.isValid]}>
       {([isSubmitting, isValid]) => (
         <Button
-          disabled={isSubmitting || !isValid}
           className={className}
+          disabled={isSubmitting || !isValid}
           type="submit"
         >
           {isSubmitting ? isSubmittingLabel : label}

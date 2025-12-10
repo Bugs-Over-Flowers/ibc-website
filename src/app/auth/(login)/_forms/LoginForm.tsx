@@ -1,15 +1,13 @@
 "use client";
 
 import type React from "react";
-import SubmitButton from "@/components/form/SubmitButton";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import { useLogin } from "@/hooks/auth/useLogin";
 
 export const LoginForm = () => {
@@ -25,25 +23,25 @@ export const LoginForm = () => {
 
   return (
     <Card className="w-full max-w-[400px]">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit}>
         <CardHeader>Login</CardHeader>
         <CardContent>
           <FieldGroup>
             <form.AppField name="email">
               {(field) => (
                 <field.TextField
-                  type="email"
-                  placeholder="Enter Email"
                   label="Email"
+                  placeholder="Enter Email"
+                  type="email"
                 />
               )}
             </form.AppField>
             <form.AppField name="password">
               {(field) => (
                 <field.TextField
-                  type="password"
-                  placeholder="Enter Password"
                   label="Password"
+                  placeholder="Enter Password"
+                  type="password"
                 />
               )}
             </form.AppField>
@@ -52,9 +50,9 @@ export const LoginForm = () => {
         <CardFooter>
           <form.AppForm>
             <form.SubmitButton
+              className="w-full"
               isSubmittingLabel="Logging in"
               label="Login"
-              className="w-full"
             />
           </form.AppForm>
         </CardFooter>

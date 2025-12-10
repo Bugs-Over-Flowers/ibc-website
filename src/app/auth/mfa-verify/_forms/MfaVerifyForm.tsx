@@ -57,23 +57,23 @@ export function MfaVerifyForm() {
           <Label htmlFor="code">Verification Code</Label>
           <Input
             id="code"
-            placeholder="Enter 6-digit code"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
             maxLength={6}
+            onChange={(e) => setCode(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleVerify();
               }
             }}
+            placeholder="Enter 6-digit code"
+            value={code}
           />
         </div>
       </CardContent>
       <CardFooter>
         <Button
           className="w-full"
-          onClick={handleVerify}
           disabled={isPending || !code}
+          onClick={handleVerify}
         >
           {isPending ? "Verifying..." : "Verify"}
         </Button>
