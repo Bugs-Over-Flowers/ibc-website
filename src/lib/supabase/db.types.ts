@@ -333,6 +333,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "Registration_businessMemberId_fkey";
+            columns: ["businessMemberId"];
+            isOneToOne: false;
+            referencedRelation: "BusinessMember";
+            referencedColumns: ["businessMemberId"];
+          },
+          {
             foreignKeyName: "Registration_eventId_fkey";
             columns: ["eventId"];
             isOneToOne: false;
@@ -361,6 +368,26 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      get_registration_list: {
+        Args: { p_event_id: string; p_search_text?: string };
+        Returns: Database["public"]["CompositeTypes"]["registration_list_item"][];
+        SetofOptions: {
+          from: "*";
+          to: "registration_list_item";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      get_registration_stats: {
+        Args: { p_affiliation?: string; p_event_id: string };
+        Returns: Database["public"]["CompositeTypes"]["registration_stats"];
+        SetofOptions: {
+          from: "*";
+          to: "registration_stats";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       submit_event_registration: {
         Args: {
           p_business_member_id?: string;
@@ -383,7 +410,24 @@ export type Database = {
       PaymentStatus: "pending" | "verified";
     };
     CompositeTypes: {
-      [_ in never]: never;
+      registration_list_item: {
+        event_id: string | null;
+        registration_id: string | null;
+        affiliation: string | null;
+        registration_date: string | null;
+        payment_status: string | null;
+        payment_method: string | null;
+        payment_image_path: string | null;
+        business_member_id: string | null;
+        business_name: string | null;
+        is_member: boolean | null;
+        principal_participant: Json | null;
+      };
+      registration_stats: {
+        total: number | null;
+        verified: number | null;
+        pending: number | null;
+      };
     };
   };
 };

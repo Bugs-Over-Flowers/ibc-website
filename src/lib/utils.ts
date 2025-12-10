@@ -100,3 +100,12 @@ export function zodValidator<T>(schema: ZodType<T>) {
     return undefined;
   };
 }
+
+export function parseStringParam(
+  param: string | string[] | undefined,
+): string | undefined {
+  if (Array.isArray(param)) {
+    return param[0]; // Returns the first occurrence
+  }
+  return param;
+}
