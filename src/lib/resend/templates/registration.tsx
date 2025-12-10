@@ -64,15 +64,15 @@ export default function StandardRegistrationConfirmationTemplate({
             <Row align="center">
               <Container className="text-center">
                 <Img
-                  src={eventDetails.eventHeaderUrl}
                   alt={eventDetails.eventTitle}
-                  width="100%"
+                  src={eventDetails.eventHeaderUrl}
                   style={{ maxWidth: "448px", margin: "0 auto" }}
+                  width="100%"
                 />
               </Container>
             </Row>
             <Row>
-              <Text className="text-3xl text-center">
+              <Text className="text-center text-3xl">
                 You have successfully registered for
                 <br />
                 <strong>{eventDetails.eventTitle}</strong>!
@@ -87,11 +87,11 @@ export default function StandardRegistrationConfirmationTemplate({
             <Row className="text-center">
               {/** biome-ignore lint/performance/noImgElement: using react-email */}
               <img
-                src="cid:qrCodeCID"
                 alt="Check-in QR Code"
-                width="300"
                 height="300"
+                src="cid:qrCodeCID"
                 style={{ maxWidth: "448px", margin: "0 auto" }}
+                width="300"
               />
             </Row>
             <Row className="text-center">
@@ -109,11 +109,11 @@ export default function StandardRegistrationConfirmationTemplate({
                     otherParticipants.length > 0 &&
                     otherParticipants.map((participant, index) => (
                       <li
+                        className="text-start"
                         key={`participant-${
                           // biome-ignore lint/suspicious/noArrayIndexKey: It's okay
                           index
                         }`}
-                        className="text-start"
                       >
                         {participant.fullName} - {participant.email}
                       </li>
