@@ -1,9 +1,9 @@
 import { toast } from "sonner";
+import { useAppForm } from "@/hooks/_formHooks";
+import useRegistrationStore from "@/hooks/registration.store";
 import type { FormSubmitMeta } from "@/lib/types/FormSubmitMeta";
 import { zodErrorToFieldErrors } from "@/lib/utils";
 import { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
-import { useAppForm } from "./_formHooks";
-import useRegistrationStore from "./registration.store";
 
 const defaultMeta: FormSubmitMeta = {
   nextStep: false,

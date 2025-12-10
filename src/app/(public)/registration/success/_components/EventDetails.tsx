@@ -93,7 +93,7 @@ export default async function EventDetails({
           <div>
             <QRDownloader
               affiliation={data.affiliation}
-              name={data.name}
+              email={data.email}
               registrationId={data.registrationDetails?.registrationId}
             >
               <div className="relative size-30 md:size-50">

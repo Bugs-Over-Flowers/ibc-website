@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Suspense } from "react";
 import CenterSpinner from "@/components/CenterSpinner";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import EventDetails from "./_components/EventDetails";
 

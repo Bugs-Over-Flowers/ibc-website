@@ -1,12 +1,12 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAppForm } from "@/hooks/_formHooks";
+import useRegistrationStore from "@/hooks/registration.store";
 import { zodValidator } from "@/lib/utils";
 import {
   StandardRegistrationSchema,
   StandardRegistrationStep4Schema,
 } from "@/lib/validation/registration/standard";
-import { useAppForm } from "./_formHooks";
-import useRegistrationStore from "./registration.store";
 import { useSendRegistrationEmail } from "./useSendRegistrationEmail";
 import { useSubmitRegistration } from "./useSubmitRegistration";
 
@@ -43,7 +43,6 @@ export const useRegistrationStep4 = () => {
       });
 
       if (!refinedRegistrationData.success) {
-        console.error(refinedRegistrationData.error);
         toast.error(
           `Invalid registration data. Please check your previous inputs.`,
         );

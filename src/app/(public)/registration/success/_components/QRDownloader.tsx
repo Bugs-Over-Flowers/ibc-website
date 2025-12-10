@@ -22,13 +22,13 @@ interface QRDownloaderProps {
   registrationId: string;
   children: React.ReactNode;
   affiliation: string;
-  name: string;
+  email: string;
 }
 
 export default function QRDownloader({
   registrationId,
   affiliation,
-  name,
+  email,
   children,
 }: QRDownloaderProps) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -68,9 +68,9 @@ export default function QRDownloader({
               <pre className="text-[8px]">{registrationId}</pre>
               <div className="flex flex-col items-center">
                 <div className="pt-2 font-semibold text-lg capitalize">
-                  {name}
+                  {affiliation}
                 </div>
-                <div>{affiliation}</div>
+                <div>{email}</div>
               </div>
             </div>
           </CardContent>

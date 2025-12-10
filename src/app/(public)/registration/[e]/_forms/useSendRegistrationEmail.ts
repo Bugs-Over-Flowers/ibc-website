@@ -1,11 +1,11 @@
 import { toast } from "sonner";
+import useRegistrationStore from "@/hooks/registration.store";
+import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import { RegistrationCheckInQRCodeDecodedSchema } from "@/lib/validation/qr/standard";
 import { setCookieData } from "@/server/actions.utils";
 import { encryptRegistrationQR } from "@/server/attendance/actions/encryptRegistrationQR";
 import { sendRegistrationConfirmationEmail } from "@/server/emails/actions/sendRegistrationConfirmationEmail";
-import useRegistrationStore from "./registration.store";
-import { useAction } from "./useAction";
 
 export const useSendRegistrationEmail = () => {
   const registrationData = useRegistrationStore(
@@ -52,6 +52,7 @@ export const useSendRegistrationEmail = () => {
 
       await sendRegistrationConfirmationEmail({
         selfName,
+        registrationId: data.registrationId,
         eventDetails,
         toEmail: data.email,
         encodedQRData,

@@ -1,11 +1,11 @@
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
+import useRegistrationStore from "@/hooks/registration.store";
+import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/client";
 import { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
 import { submitRegistrationRPC } from "@/server/registration/actions";
-import useRegistrationStore from "./registration.store";
-import { useAction } from "./useAction";
 
 export const useSubmitRegistration = () => {
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
