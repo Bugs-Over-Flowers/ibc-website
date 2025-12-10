@@ -62,7 +62,7 @@ export default function Step3() {
     form.handleSubmit({ nextStep: true });
   };
   return (
-    <form onSubmit={onNext} className="space-y-4">
+    <form className="space-y-4" onSubmit={onNext}>
       <Item>
         <ItemContent className="space-y-5">
           <div className="flex items-center gap-2">
@@ -84,7 +84,6 @@ export default function Step3() {
         </CardHeader>
         <CardContent>
           <form.AppField
-            name="paymentMethod"
             listeners={{
               onChange: () => {
                 if (!form.getFieldValue("paymentProof")) {
@@ -92,6 +91,7 @@ export default function Step3() {
                 }
               },
             }}
+            name="paymentMethod"
           >
             {(field) => {
               return (
@@ -99,7 +99,6 @@ export default function Step3() {
                   <FieldLabel>Payment Method</FieldLabel>
                   <RadioGroup
                     defaultValue="online"
-                    value={field.state.value}
                     onValueChange={(value) => {
                       const parsedPaymentMethodValue =
                         PaymentMethodEnum.safeParse(value);
@@ -108,6 +107,7 @@ export default function Step3() {
                       }
                       field.handleChange(parsedPaymentMethodValue.data);
                     }}
+                    value={field.state.value}
                   >
                     <FieldLabel htmlFor="online">
                       <Field orientation={"horizontal"}>
@@ -119,11 +119,11 @@ export default function Step3() {
                             Pay online through BPI and submit a proof of payment
                           </FieldDescription>
                           <RadioGroupItem
+                            id="online"
                             value={
                               "online" as StandardRegistrationStep3Schema["paymentMethod"]
                             }
                             variant={"noIcon"}
-                            id="online"
                           />
                         </FieldContent>
                       </Field>
@@ -138,11 +138,11 @@ export default function Step3() {
                             Pay in person at the event
                           </FieldDescription>
                           <RadioGroupItem
+                            id="onsite"
                             value={
                               "onsite" as StandardRegistrationStep3Schema["paymentMethod"]
                             }
                             variant={"noIcon"}
-                            id="onsite"
                           />
                         </FieldContent>
                       </Field>
@@ -172,16 +172,16 @@ export default function Step3() {
                         </FieldLabel>
                         <FieldContent className="space-y-3">
                           <Dropzone
-                            maxSize={1024 * 1024 * 10}
                             accept={{
                               "image/*": [],
                             }}
+                            maxFiles={1}
+                            maxSize={1024 * 1024 * 10}
                             onDrop={(files) => {
                               if (files[0]) {
                                 field.handleChange(files[0]);
                               }
                             }}
-                            maxFiles={1}
                             onError={console.error}
                             src={
                               field.state.value
@@ -211,13 +211,13 @@ export default function Step3() {
                       {localImageUrl && (
                         <ImageZoom>
                           <Image
-                            src={localImageUrl}
                             alt="Image Preview"
-                            width={400}
-                            height={200}
                             className="object-contain"
+                            height={200}
+                            src={localImageUrl}
+                            width={400}
                           />
-                          <div className="text-neutral-400 text-sm text-center">
+                          <div className="text-center text-neutral-400 text-sm">
                             click image to zoom
                           </div>
                         </ImageZoom>
@@ -230,7 +230,7 @@ export default function Step3() {
           </Activity>
         )}
       </form.Subscribe>
-      <FormButtons onNext={onNext} onBack={onBack} />
+      <FormButtons onBack={onBack} onNext={onNext} />
     </form>
   );
 }
@@ -248,11 +248,11 @@ function PaymentDetails() {
 
   return (
     <div>
-      <div className="flex justify-between w-full">
+      <div className="flex w-full justify-between">
         <div>Registration Fee per head</div>
         <div>₱ {eventDetails?.registrationFee}</div>
       </div>
-      <div className="flex justify-between w-full">
+      <div className="flex w-full justify-between">
         <div>Total Number of Participants</div>
         <div>
           {registrationData?.step2?.otherRegistrants?.length
@@ -260,7 +260,7 @@ function PaymentDetails() {
             : 1}
         </div>
       </div>
-      <div className="flex justify-between w-full text-xl font-semibold">
+      <div className="flex w-full justify-between font-semibold text-xl">
         <div>Total Amount</div>
         <div>₱ {totalPayment()}</div>
       </div>
@@ -272,8 +272,8 @@ function BankTransferDetails() {
   return (
     <>
       <h4>Bank Transfer Details</h4>
-      <div className="relative  h-40 w-40">
-        <Image src={IBCBPIQRCode} alt="qr code" fill className="object-fill" />
+      <div className="relative h-40 w-40">
+        <Image alt="qr code" className="object-fill" fill src={IBCBPIQRCode} />
       </div>
       <div>
         {BANK_DETAILS.bankName} - {BANK_DETAILS.accountNumber}

@@ -28,11 +28,11 @@ function SelectField({
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
-    <Field data-invalid={isInvalid} className={cn("grid gap-2", className)}>
+    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Select
-        value={field.state.value ?? ""}
         onValueChange={(value) => field.handleChange(value)}
+        value={field.state.value ?? ""}
       >
         <SelectTrigger id={field.name}>
           <SelectValue placeholder={placeholder} />

@@ -4,7 +4,7 @@ import RegistrationPage from "./RegistrationPage";
 
 const Page = ({ params }: PageProps<"/registration/[e]">) => {
   return (
-    <main className="p-5 h-screen w-full flex items-center justify-center">
+    <main className="flex h-screen w-full items-center justify-center p-5">
       <Suspense fallback={<Spinner />}>
         <RegistrationPage params={params} />
       </Suspense>

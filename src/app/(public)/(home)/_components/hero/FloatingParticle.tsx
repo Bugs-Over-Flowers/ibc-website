@@ -26,20 +26,20 @@ export function FloatingParticles() {
   }, [id]);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {particles.map((particle) => (
         <motion.div
-          key={particle.id}
-          className="absolute w-1 h-1 bg-primary/30 rounded-full"
+          animate={{
+            y: "-10%",
+            opacity: [0, 0.6, 0],
+          }}
+          className="absolute h-1 w-1 rounded-full bg-primary/30"
           initial={{
             x: `${particle.x}%`,
             y: "110%",
             opacity: 0,
           }}
-          animate={{
-            y: "-10%",
-            opacity: [0, 0.6, 0],
-          }}
+          key={particle.id}
           transition={{
             duration: particle.duration,
             repeat: Number.POSITIVE_INFINITY,
