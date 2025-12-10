@@ -1,4 +1,4 @@
-import { MfaVerifyForm } from "./MfaVerifyForm";
+import { MfaVerifyForm } from "./_forms/MfaVerifyForm";
 
 export default function MfaVerifyPage() {
   return (

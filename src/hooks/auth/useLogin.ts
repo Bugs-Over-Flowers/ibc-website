@@ -29,13 +29,6 @@ export const useLogin = () => {
 
       const data = res.data;
 
-      if (!data?.emailVerified) {
-        toast.error("Please verify your email address.");
-        // Cast to any to avoid stale type error for the new route
-        router.push("/auth/signup/verify-email" as any);
-        return;
-      }
-
       if (data?.mfaRequired) {
         router.push("/auth/mfa-verify");
       } else {

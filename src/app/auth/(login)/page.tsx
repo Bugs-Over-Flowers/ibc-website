@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import { LoginForm } from "./LoginForm";
+import { LoginForm } from "./_forms/LoginForm";
 
 export default function Admin() {
   return (

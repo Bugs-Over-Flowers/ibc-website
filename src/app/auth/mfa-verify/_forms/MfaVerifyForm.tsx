@@ -27,11 +27,12 @@ export function MfaVerifyForm() {
       router.push("/admin/dashboard");
     },
     onError: (error) => {
-      toast.error(error);
+      const errorMessage = error instanceof Error ? error.message : error;
+      toast.error(errorMessage);
       if (
-        error.includes("Bearer token") ||
-        error.includes("not logged in") ||
-        error.includes("User from sub claim in JWT does not exist")
+        errorMessage.includes("Bearer token") ||
+        errorMessage.includes("not logged in") ||
+        errorMessage.includes("User from sub claim in JWT does not exist")
       ) {
         router.push("/auth");
       }
