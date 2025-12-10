@@ -20,7 +20,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { getSuccessPageData } from "@/server/registration/queries";
+import { getSuccessPageData } from "@/server/registration/queries/getSuccessPageData";
 import QRCodeItem from "./QRCodeItem";
 import QRDownloader from "./QRDownloader";
 

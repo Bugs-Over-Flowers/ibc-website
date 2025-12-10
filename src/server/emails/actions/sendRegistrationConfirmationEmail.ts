@@ -1,7 +1,6 @@
 "use server";
 
 import { Resend } from "resend";
-import { da } from "zod/v4/locales";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import StandardRegistrationConfirmationTemplate from "@/lib/resend/templates/registration";
@@ -32,12 +31,11 @@ export const sendRegistrationConfirmationEmail = async ({
   selfName,
   otherParticipants,
 }: SendRegistrationConfirmationEmailProps) => {
-  const supabase = await createActionClient();
   const qrBuffer = await generateQRBuffer(encodedQRData);
 
   const { error } = await resend.emails.send({
     to: toEmail,
-    from: "Acme <onboarding@resend.dev>",
+    from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
     subject: `Registration Confirmation for ${eventDetails.eventTitle}`,
     react: StandardRegistrationConfirmationTemplate({
       email: toEmail,
@@ -58,36 +56,30 @@ export const sendRegistrationConfirmationEmail = async ({
   });
 
   if (error) {
-    // delete the registration
-    //
-    // TODO: Implement deletion of image as well
-    //
-    const { data } = await supabase
-      .from("Registration")
-      .delete()
-      .eq("registrationId", registrationId)
-      .select(`
-      	registrationId
-      `)
-      .single()
-      .throwOnError();
+    const supabase = await createActionClient();
 
-    // delete image from storage
-
-    // get payment proof path
-
+    // Get payment proof path FIRST (before deleting registration)
     const { data: paymentProof } = await supabase
       .from("ProofImage")
-      .select(`path`)
-      .eq("registrationId", data.registrationId)
+      .select("path")
+      .eq("registrationId", registrationId)
       .maybeSingle()
       .throwOnError();
 
+    // Delete the registration (this may cascade delete ProofImage row)
+    await supabase
+      .from("Registration")
+      .delete()
+      .eq("registrationId", registrationId)
+      .throwOnError();
+
+    // Delete image file from storage
     if (paymentProof) {
       await supabase.storage.from("paymentProofs").remove([paymentProof.path]);
     }
 
-    throw new Error(`Failed to send email.`);
+    throw new Error(`Failed to send email:${error.message}`);
   }
+
   return "success";
 };
