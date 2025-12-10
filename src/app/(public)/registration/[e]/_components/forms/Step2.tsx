@@ -35,8 +35,8 @@ import {
 } from "@/components/ui/item";
 import { useFieldContext } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
-import { useRegistrationStep2 } from "@/hooks/useRegistrationStep2";
 import type { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
+import { useRegistrationStep2 } from "../../_hooks/useRegistrationStep2";
 
 const MAX_OTHER_PARTICIPANTS = 9;
 

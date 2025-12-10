@@ -5,7 +5,7 @@ import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/client";
 import { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
-import { submitRegistrationRPC } from "@/server/registration/actions";
+import { submitRegistrationRPC } from "@/server/registration/actions/submitRegistrationRPC";
 
 export const useSubmitRegistration = () => {
   const eventDetails = useRegistrationStore((state) => state.eventDetails);

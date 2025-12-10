@@ -29,9 +29,9 @@ import {
 } from "@/components/ui/shadcn-io/dropzone";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import useRegistrationStore from "@/hooks/registration.store";
-import { useRegistrationStep3 } from "@/hooks/useRegistrationStep3";
 import type { StandardRegistrationStep3Schema } from "@/lib/validation/registration/standard";
 import { PaymentMethodEnum } from "@/lib/validation/utils";
+import { useRegistrationStep3 } from "../../_hooks/useRegistrationStep3";
 
 const BANK_DETAILS = {
   bankName: "BPI",

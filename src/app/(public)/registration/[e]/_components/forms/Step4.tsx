@@ -19,8 +19,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import useRegistrationStore from "@/hooks/registration.store";
-import { useRegistrationStep4 } from "@/hooks/useRegistrationStep4";
 import type { getAllMembers } from "@/server/members/queries";
+import { useRegistrationStep4 } from "../../_hooks/useRegistrationStep4";
 
 interface Step4Props {
   members: Awaited<ReturnType<typeof getAllMembers>>;

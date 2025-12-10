@@ -3,8 +3,8 @@
 import { format } from "date-fns";
 import { useEffect, useEffectEvent } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import type { RegistrationStoreEventDetails } from "../../../../../hooks/registration.store";
-import useRegistrationStore from "../../../../../hooks/registration.store";
+import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
+import useRegistrationStore from "@/hooks/registration.store";
 import Stepper from "./Stepper";
 
 const RegistrationInformation = (

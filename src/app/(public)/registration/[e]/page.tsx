@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import tryCatch from "@/lib/server/tryCatch";
 import { getAllMembers } from "@/server/members/queries";
-import { getRegistrationEventDetails } from "@/server/registration/queries";
+import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
 import RegistrationInformation from "./_components/RegistrationInformation";
 
 type RegistrationRouteProps = PageProps<"/registration/[e]">;

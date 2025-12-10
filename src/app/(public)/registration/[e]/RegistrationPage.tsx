@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import tryCatch from "@/lib/server/tryCatch";
 import { getAllMembers } from "@/server/members/queries";
-import { getRegistrationEventDetails } from "@/server/registration/queries";
+import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
 import RegistrationForm from "./_components/forms/RegistrationForm";
 import RegistrationInformation from "./_components/RegistrationInformation";
 
