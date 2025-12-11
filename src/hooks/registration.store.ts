@@ -22,38 +22,39 @@ interface RegistrationStoreActions {
     registrationData: Partial<StandardRegistrationSchema> | null,
   ) => void;
   setCreatedRegistrationId: (id: string) => void;
+  resetStore: () => void;
 }
+const initialState: RegistrationStore = {
+  step: 1,
+  registrationData: {
+    step1: {
+      member: "nonmember",
+      nonMemberName: "",
+    },
+    step2: {
+      registrant: {
+        email: "",
+        contactNumber: "",
+        firstName: "",
+        lastName: "",
+      },
+      otherParticipants: [],
+    },
+    step3: {
+      paymentMethod: "onsite",
+    },
+    step4: {
+      termsAndConditions: false,
+    },
+  },
+};
 
 const useRegistrationStore = create<
   RegistrationStore & RegistrationStoreActions
 >()(
   persist(
     (set) => ({
-      step: 1,
-      eventDetails: null,
-      registrationData: {
-        step1: {
-          member: "nonmember",
-          businessMemberId: "",
-          nonMemberName: "",
-        },
-        step2: {
-          principalRegistrant: {
-            email: "",
-            contactNumber: "",
-            firstName: "",
-            lastName: "",
-          },
-          otherRegistrants: [],
-        },
-        step3: {
-          paymentMethod: "onsite",
-          paymentProof: undefined,
-        },
-        step4: {
-          termsAndConditions: false,
-        },
-      },
+      ...initialState,
       setStep: (step: number) => set({ step }),
       setEventDetails: (eventDetails: RegistrationStoreEventDetails | null) =>
         set({ eventDetails }),
@@ -71,6 +72,7 @@ const useRegistrationStore = create<
         })),
       setCreatedRegistrationId: (id: string) =>
         set({ createdRegistrationId: id }),
+      resetStore: () => set((state) => ({ ...initialState, state })),
     }),
     {
       name: "registration-storage",

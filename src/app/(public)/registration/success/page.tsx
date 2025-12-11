@@ -5,6 +5,7 @@ import CenterSpinner from "@/components/CenterSpinner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import EventDetails from "./_components/EventDetails";
+import ResetRegistrationWrapper from "./_components/ResetRegistrationWrapper";
 
 export default function SuccessPageWrapper() {
   return (
@@ -35,21 +36,23 @@ async function SuccessPage() {
     );
   }
   return (
-    <main className="h-full p-5 md:p-10">
-      <h1>Registration Successful!</h1>
+    <ResetRegistrationWrapper>
+      <main className="h-full p-5 md:p-10">
+        <h1>Registration Successful!</h1>
 
-      <Suspense
-        fallback={
-          <div className="h-full pt-5 pb-5 md:pb-10">
-            <Skeleton className="min-h-full rounded-xl bg-neutral-300" />
-          </div>
-        }
-      >
-        <EventDetails
-          cookieStore={cookieStore.getAll()}
-          encodedRegistrationQRData={recentQRData}
-        />
-      </Suspense>
-    </main>
+        <Suspense
+          fallback={
+            <div className="h-full pt-5 pb-5 md:pb-10">
+              <Skeleton className="min-h-full rounded-xl bg-neutral-300" />
+            </div>
+          }
+        >
+          <EventDetails
+            cookieStore={cookieStore.getAll()}
+            encodedRegistrationQRData={recentQRData}
+          />
+        </Suspense>
+      </main>
+    </ResetRegistrationWrapper>
   );
 }

@@ -241,8 +241,8 @@ function PaymentDetails() {
 
   const totalPayment = () => {
     const baseFee = eventDetails?.registrationFee || 0;
-    const otherRegistrants = registrationData?.step2?.otherRegistrants || [];
-    const total = baseFee + otherRegistrants.length * baseFee;
+    const otherParticipants = registrationData?.step2?.otherParticipants || [];
+    const total = baseFee + otherParticipants.length * baseFee;
     return total.toFixed(2);
   };
 
@@ -255,8 +255,8 @@ function PaymentDetails() {
       <div className="flex w-full justify-between">
         <div>Total Number of Participants</div>
         <div>
-          {registrationData?.step2?.otherRegistrants?.length
-            ? registrationData.step2.otherRegistrants.length + 1
+          {registrationData?.step2?.otherParticipants?.length
+            ? registrationData.step2.otherParticipants.length + 1
             : 1}
         </div>
       </div>

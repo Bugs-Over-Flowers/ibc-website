@@ -40,7 +40,7 @@ export default function Step4({ members }: Step4Props) {
 
   const {
     step3,
-    step2: { principalRegistrant, otherRegistrants },
+    step2: { registrant, otherParticipants },
   } = registrationData;
 
   const paymentProofUrl =
@@ -100,7 +100,7 @@ export default function Step4({ members }: Step4Props) {
             </div>
             <Badge className="my-3">
               <span className="font-semibold">
-                {1 + (otherRegistrants?.length ?? 0)} Participants
+                {1 + (otherParticipants?.length ?? 0)} Participants
               </span>
             </Badge>
           </div>
@@ -110,20 +110,19 @@ export default function Step4({ members }: Step4Props) {
               <Item variant={"muted"}>
                 <ItemContent>
                   <div>
-                    {principalRegistrant?.firstName}{" "}
-                    {principalRegistrant?.lastName}
+                    {registrant?.firstName} {registrant?.lastName}
                   </div>
-                  <div>{principalRegistrant?.email}</div>
+                  <div>{registrant?.email}</div>
                 </ItemContent>
               </Item>
             </div>
 
             {/* Other Participants */}
-            {otherRegistrants && otherRegistrants.length > 0 && (
+            {otherParticipants && otherParticipants.length > 0 && (
               <>
                 <div className="pt-3">Other People:</div>
                 <div className="space-y-3">
-                  {otherRegistrants?.map((person) => (
+                  {otherParticipants?.map((person) => (
                     <Item key={person.firstName} variant={"outline"}>
                       <ItemContent>
                         {person.firstName} {person.lastName}
@@ -164,13 +163,13 @@ export default function Step4({ members }: Step4Props) {
             </div>
             <div className="flex justify-between">
               <div className="text-sm">Total People</div>
-              <div>{otherRegistrants.length + 1}</div>
+              <div>{otherParticipants.length + 1}</div>
             </div>
             <div className="flex justify-between">
               <div className="text-sm">Total Amount</div>
               <div>
                 {(eventDetails?.registrationFee ?? 0) *
-                  (otherRegistrants.length + 1)}
+                  (otherParticipants.length + 1)}
               </div>
             </div>
           </div>

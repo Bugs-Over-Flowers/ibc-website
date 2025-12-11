@@ -32,7 +32,7 @@ export const useSendRegistrationEmail = () => {
       // validate the email, registration id, and event id
       const { data, error: validationError } =
         RegistrationCheckInQRCodeDecodedSchema.safeParse({
-          email: registrationData.step2.principalRegistrant.email,
+          email: registrationData.step2.registrant.email,
           registrationId: registrationId,
           eventId: eventDetails.eventId,
         });
@@ -48,7 +48,7 @@ export const useSendRegistrationEmail = () => {
       // set cookies for qrdata
       await setCookieData("recentQRData", encodedQRData);
 
-      const selfName = `${registrationData.step2.principalRegistrant.firstName} ${registrationData.step2.principalRegistrant.lastName}`;
+      const selfName = `${registrationData.step2.registrant.firstName} ${registrationData.step2.registrant.lastName}`;
 
       await sendRegistrationConfirmationEmail({
         selfName,
@@ -56,8 +56,8 @@ export const useSendRegistrationEmail = () => {
         eventDetails,
         toEmail: data.email,
         encodedQRData,
-        otherParticipants: registrationData.step2.otherRegistrants
-          ? registrationData.step2.otherRegistrants.map((participant) => ({
+        otherParticipants: registrationData.step2.otherParticipants
+          ? registrationData.step2.otherParticipants.map((participant) => ({
               fullName: `${participant.firstName} ${participant.lastName}`,
               email: participant.email,
             }))

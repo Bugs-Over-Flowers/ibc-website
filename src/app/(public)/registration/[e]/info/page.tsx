@@ -138,9 +138,7 @@ async function InfoPage({
               />
             </div>
           )}
-          <CardTitle className="pt-3">
-            <h3>{data.eventTitle}</h3>
-          </CardTitle>
+          <CardTitle className="pt-3 text-xl">{data.eventTitle}</CardTitle>
           <CardDescription className="flex items-center gap-2">
             <CalendarDays />
             {dateDisplay}
@@ -154,7 +152,7 @@ async function InfoPage({
         <CardContent>
           <h3>Registration Steps</h3>
 
-          <div className="gap-4 py-5 md:grid md:grid-flow-col md:grid-rows-3">
+          <div className="grid gap-4 py-5 md:grid md:grid-flow-col md:grid-rows-3">
             {steps.map((step, index) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: Just for rendering static items
               <div className="flex gap-4" key={index}>

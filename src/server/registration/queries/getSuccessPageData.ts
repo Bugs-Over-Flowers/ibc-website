@@ -38,7 +38,7 @@ export const getSuccessPageData = async (
     .maybeSingle()
     .throwOnError();
 
-  const { data: principalRegistrant } = await supabase
+  const { data: registrant } = await supabase
     .from("Participant")
     .select("firstName, lastName")
     .eq("registrationId", decodedRegistrationQRData.registrationId)
@@ -50,10 +50,10 @@ export const getSuccessPageData = async (
   console.log("ALL DATA: ", {
     registeredEvent,
     registrationDetails,
-    principalRegistrant,
+    registrant,
   });
 
-  if (!registeredEvent || !registrationDetails || !principalRegistrant) {
+  if (!registeredEvent || !registrationDetails || !registrant) {
     throw new Error("No event found");
   }
 
@@ -65,7 +65,7 @@ export const getSuccessPageData = async (
     registeredEvent,
     registrationDetails,
     email: decodedRegistrationQRData.email,
-    name: `${principalRegistrant.firstName} ${principalRegistrant.lastName}`,
+    name: `${registrant.firstName} ${registrant.lastName}`,
     // biome-ignore lint/style/noNonNullAssertion: secret
     affiliation: affiliation!,
   };

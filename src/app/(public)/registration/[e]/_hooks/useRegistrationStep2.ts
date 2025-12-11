@@ -27,16 +27,16 @@ export const useRegistrationStep2 = () => {
         if (error) {
           const fields = zodErrorToFieldErrors(error);
           Object.keys(fields).forEach((key) => {
-            const principalRegistrantFields = [
+            const registrantFields = [
               "email",
               "contactNumber",
               "firstName",
               "lastName",
             ];
-            const isPrincipalRegistrantField = principalRegistrantFields.some(
-              (field) => key.endsWith(field),
+            const isRegistrantField = registrantFields.some((field) =>
+              key.endsWith(field),
             );
-            if (!isPrincipalRegistrantField) {
+            if (!isRegistrantField) {
               toast.error(fields[key].message);
             }
           });
