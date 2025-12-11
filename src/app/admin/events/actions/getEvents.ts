@@ -8,8 +8,6 @@ export async function getEvents(
   requestCookies: RequestCookie[],
   { search, sort, status }: { search?: string; sort?: string; status?: string },
 ) {
-  "use cache";
-
   const supabase = await createClient(requestCookies);
 
   let query = supabase.from("Event").select(`

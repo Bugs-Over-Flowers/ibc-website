@@ -1,6 +1,14 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function EventFilters() {
   const router = useRouter();
@@ -15,38 +23,48 @@ export default function EventFilters() {
   }
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col gap-4 sm:flex-row">
       {/* Search */}
-      <input
+      <Input
         defaultValue={searchParams.get("search") || ""}
         placeholder="Search title or venue..."
         onChange={(e) => updateFilters("search", e.target.value)}
-        className="border p-2 rounded"
+        className="sm:flex-1"
       />
 
       {/* Sort */}
-      <select
+      <Select
         defaultValue={searchParams.get("sort") || "date-asc"}
-        onChange={(e) => updateFilters("sort", e.target.value)}
-        className="border p-2 rounded"
+        onValueChange={(value) => updateFilters("sort", value)}
       >
-        <option value="date-asc">Date ↑</option>
-        <option value="date-desc">Date ↓</option>
-        <option value="title-asc">Title A → Z</option>
-        <option value="title-desc">Title Z → A</option>
-      </select>
+        <SelectTrigger className="sm:w-40">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="date-asc">Date ↑</SelectItem>
+          <SelectItem value="date-desc">Date ↓</SelectItem>
+          <SelectItem value="title-asc">Title A → Z</SelectItem>
+          <SelectItem value="title-desc">Title Z → A</SelectItem>
+        </SelectContent>
+      </Select>
 
       {/* Status filter */}
-      <select
-        defaultValue={searchParams.get("status") || ""}
-        onChange={(e) => updateFilters("status", e.target.value)}
-        className="border p-2 rounded"
+      <Select
+        defaultValue={searchParams.get("status") || "all"}
+        onValueChange={(value) =>
+          updateFilters("status", value === "all" ? "" : value)
+        }
       >
-        <option value="">All</option>
-        <option value="draft">Draft</option>
-        <option value="published">Published</option>
-        <option value="finished">Finished</option>
-      </select>
+        <SelectTrigger className="sm:w-40">
+          <SelectValue placeholder="All" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All</SelectItem>
+          <SelectItem value="draft">Draft</SelectItem>
+          <SelectItem value="published">Published</SelectItem>
+          <SelectItem value="finished">Finished</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

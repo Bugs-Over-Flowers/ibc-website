@@ -35,10 +35,19 @@ async function EventsPage({
   });
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Events</h1>
+    <div className="space-y-6 px-2">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Events Management</h1>
+        <div className="text-sm text-gray-500">
+          {events.length} events found
+        </div>
+      </div>
+
       <EventFilters />
       <EventTable events={events} />
     </div>
   );
 }
+
+// export const dynamic = "force-dynamic";
+// export const revalidate = 0;
