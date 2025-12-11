@@ -15,7 +15,7 @@ export function EventsCTA() {
           viewport={{ once: true }}
           className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl ring-1 ring-white/50 p-8 md:p-12 text-center"
         >
-          <h2 className="text-3xl font-bold text-[#2E2A6E] mb-4">
+          <h2 className="text-3xl font-bold text-foreground mb-4">
             Want to Host an Event?
           </h2>
           <p className="text-foreground/70 mb-6 max-w-2xl mx-auto">
@@ -27,7 +27,7 @@ export function EventsCTA() {
             <Button
               asChild
               size="lg"
-              className="bg-primary hover:bg-primary/90 shadow-lg"
+              className="bg-primary hover:bg-primary/90 shadow-lg rounded-xl"
             >
               <Link href="/contact">Contact Us</Link>
             </Button>
@@ -35,7 +35,7 @@ export function EventsCTA() {
               asChild
               size="lg"
               variant="outline"
-              className="border-2 border-[#2E2A6E]/50 text-[#2E2A6E] hover:bg-[#2E2A6E]/5 bg-transparent"
+              className="rounded-xl hover:text-primary shadow-lg"
             >
               <Link href="/about">Learn More About IBC</Link>
             </Button>
