@@ -97,7 +97,7 @@ export function MfaSetupForm() {
               alt="MFA QR Code"
               className="size-48"
               height={192}
-              src={qrCode}
+              src={qrCode.trimEnd()}
               width={192}
             />
           </div>
