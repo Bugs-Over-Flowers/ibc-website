@@ -15,7 +15,7 @@ interface UseActionOptions<TOutput, TError = Error | string> {
  * // With input
  * const { execute, isPending } = useAction(tryCatch(createItem), {
  *   onSuccess: (data) => router.push(`/items/${data.id}`),
- *   onError: (error) => toast.error(error.message),
+ *   onError: (error) => toast.error(error),
  * });
  * execute({ name: "New Item" });
  *
