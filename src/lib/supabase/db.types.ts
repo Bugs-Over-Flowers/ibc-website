@@ -369,7 +369,11 @@ export type Database = {
     };
     Functions: {
       get_registration_list: {
-        Args: { p_event_id: string; p_search_text?: string };
+        Args: {
+          p_event_id: string;
+          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
+          p_search_text?: string;
+        };
         Returns: Database["public"]["CompositeTypes"]["registration_list_item"][];
         SetofOptions: {
           from: "*";
@@ -379,7 +383,11 @@ export type Database = {
         };
       };
       get_registration_stats: {
-        Args: { p_affiliation?: string; p_event_id: string };
+        Args: {
+          p_event_id: string;
+          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
+          p_search_text?: string;
+        };
         Returns: Database["public"]["CompositeTypes"]["registration_stats"];
         SetofOptions: {
           from: "*";
@@ -394,10 +402,10 @@ export type Database = {
           p_event_id: string;
           p_member_type: string;
           p_non_member_name?: string;
-          p_other_registrants?: Json;
+          p_other_participants?: Json;
           p_payment_method?: string;
           p_payment_path?: string;
-          p_principal_registrant?: Json;
+          p_registrant?: Json;
         };
         Returns: Json;
       };

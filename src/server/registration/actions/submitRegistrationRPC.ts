@@ -3,12 +3,16 @@
 import { createActionClient } from "@/lib/supabase/server";
 import { ServerRegistrationSchema } from "@/lib/validation/registration/standard";
 
+interface SubmitRegistrationResponse {
+  registrationId: string;
+  message: string;
+}
 export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   const parsedData = ServerRegistrationSchema.parse(data);
 
   console.log("Full registration data:", parsedData);
 
-  console.log("other registrants:", parsedData.step2.otherRegistrants);
+  console.log("other registrants:", parsedData.step2.otherParticipants);
 
   const supabase = await createActionClient();
 
@@ -19,10 +23,10 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
       p_event_id: eventId,
       p_business_member_id:
         step1.member === "member" ? step1.businessMemberId : undefined,
-      p_principal_registrant: step2.principalRegistrant,
+      p_registrant: step2.registrant,
       p_payment_path: step3.paymentMethod === "online" ? step3.path : undefined,
       p_payment_method: step3.paymentMethod,
-      p_other_registrants: step2.otherRegistrants,
+      p_other_participants: step2.otherParticipants,
       p_non_member_name:
         step1.member === "nonmember" ? step1.nonMemberName : undefined,
       p_member_type: step1.member,
@@ -39,5 +43,5 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   }
 
   console.log(rpcResults);
-  return "Registered Successfully!";
+  return rpcResults as unknown as SubmitRegistrationResponse;
 };

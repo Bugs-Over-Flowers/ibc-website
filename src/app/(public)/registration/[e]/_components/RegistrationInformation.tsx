@@ -3,15 +3,17 @@
 import { format } from "date-fns";
 import { useEffect, useEffectEvent } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import type { RegistrationStoreEventDetails } from "../../../../hooks/registration.store";
-import useRegistrationStore from "../../../../hooks/registration.store";
+import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
+import useRegistrationStore from "@/hooks/registration.store";
 import Stepper from "./Stepper";
 
 const RegistrationInformation = (
   initialEventDetails: RegistrationStoreEventDetails,
 ) => {
-  const eventDetails = useRegistrationStore((s) => s.eventDetails);
-  const setEventDetails = useRegistrationStore((s) => s.setEventDetails);
+  const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const setEventDetails = useRegistrationStore(
+    (state) => state.setEventDetails,
+  );
 
   const setInitialEventDetails = useEffectEvent(() => {
     if (initialEventDetails && !eventDetails) {

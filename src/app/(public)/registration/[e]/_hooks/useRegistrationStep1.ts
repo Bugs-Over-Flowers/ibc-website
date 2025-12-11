@@ -1,8 +1,8 @@
+import { useAppForm } from "@/hooks/_formHooks";
+import useRegistrationStore from "@/hooks/registration.store";
 import type { FormSubmitMeta } from "@/lib/types/FormSubmitMeta";
 import { zodValidator } from "@/lib/utils";
 import { StandardRegistrationStep1Schema } from "@/lib/validation/registration/standard";
-import { useAppForm } from "./_formHooks";
-import useRegistrationStore from "./registration.store";
 
 const defaultMeta: FormSubmitMeta = {
   nextStep: false,
@@ -19,9 +19,7 @@ export const useRegistrationStep1 = () => {
   );
 
   const form = useAppForm({
-    defaultValues: {
-      ...defaultRegistrationDataStep1,
-    },
+    defaultValues: defaultRegistrationDataStep1,
     validators: {
       onSubmit: zodValidator(StandardRegistrationStep1Schema),
     },

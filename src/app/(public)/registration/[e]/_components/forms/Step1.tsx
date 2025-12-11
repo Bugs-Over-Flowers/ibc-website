@@ -19,9 +19,9 @@ import {
 } from "@/components/ui/item";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
-import { useRegistrationStep1 } from "@/hooks/useRegistrationStep1";
 import { MemberTypeEnum } from "@/lib/validation/utils";
 import type { getAllMembers } from "@/server/members/queries";
+import { useRegistrationStep1 } from "../../_hooks/useRegistrationStep1";
 
 interface Step1Props {
   members: Awaited<ReturnType<typeof getAllMembers>>;

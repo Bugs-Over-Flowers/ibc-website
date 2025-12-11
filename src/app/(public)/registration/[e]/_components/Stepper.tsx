@@ -1,8 +1,8 @@
 "use client";
 import { Progress } from "@/components/ui/progress";
+import useRegistrationStore from "@/hooks/registration.store";
 import type Step from "@/lib/types/Step";
 import { cn } from "@/lib/utils";
-import useRegistrationStore from "../../../../hooks/registration.store";
 
 const STEPS: Step[] = [
   {

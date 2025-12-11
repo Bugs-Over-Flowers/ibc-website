@@ -1,9 +1,9 @@
 import { toast } from "sonner";
+import { useAppForm } from "@/hooks/_formHooks";
+import useRegistrationStore from "@/hooks/registration.store";
 import type { FormSubmitMeta } from "@/lib/types/FormSubmitMeta";
 import { zodErrorToFieldErrors } from "@/lib/utils";
 import { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
-import { useAppForm } from "./_formHooks";
-import useRegistrationStore from "./registration.store";
 
 const defaultMeta: FormSubmitMeta = {
   nextStep: false,
@@ -27,16 +27,16 @@ export const useRegistrationStep2 = () => {
         if (error) {
           const fields = zodErrorToFieldErrors(error);
           Object.keys(fields).forEach((key) => {
-            const principalRegistrantFields = [
+            const registrantFields = [
               "email",
               "contactNumber",
               "firstName",
               "lastName",
             ];
-            const isPrincipalRegistrantField = principalRegistrantFields.some(
-              (field) => key.endsWith(field),
+            const isRegistrantField = registrantFields.some((field) =>
+              key.endsWith(field),
             );
-            if (!isPrincipalRegistrantField) {
+            if (!isRegistrantField) {
               toast.error(fields[key].message);
             }
           });

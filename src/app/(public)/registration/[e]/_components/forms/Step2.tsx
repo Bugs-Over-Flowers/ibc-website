@@ -21,11 +21,7 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  FieldDescription,
-  FieldGroup,
-  FieldTitle,
-} from "@/components/ui/field";
+import { FieldGroup, FieldTitle } from "@/components/ui/field";
 import {
   Item,
   ItemContent,
@@ -35,8 +31,8 @@ import {
 } from "@/components/ui/item";
 import { useFieldContext } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
-import { useRegistrationStep2 } from "@/hooks/useRegistrationStep2";
 import type { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
+import { useRegistrationStep2 } from "../../_hooks/useRegistrationStep2";
 
 const MAX_OTHER_PARTICIPANTS = 9;
 
@@ -79,8 +75,8 @@ export default function Step2() {
               <ItemTitle>Participants</ItemTitle>
             </div>
             <ItemDescription>
-              You may register up to {MAX_OTHER_PARTICIPANTS + 1} participants
-              (including yourself)
+              You may register up to a maxiumum of {MAX_OTHER_PARTICIPANTS + 1}{" "}
+              participants (including yourself)
             </ItemDescription>
           </ItemContent>
         </Item>
@@ -91,11 +87,11 @@ export default function Step2() {
             <ItemTitle>Total Participants</ItemTitle>
             <span className="font-medium">
               <form.Subscribe
-                selector={(s) => s.values.otherRegistrants?.length ?? 0}
+                selector={(s) => s.values.otherParticipants?.length ?? 0}
               >
-                {(otherRegistrantsCount) => (
+                {(otherParticipantsCount) => (
                   <>
-                    {otherRegistrantsCount + 1} / {MAX_OTHER_PARTICIPANTS + 1}
+                    {otherParticipantsCount + 1} / {MAX_OTHER_PARTICIPANTS + 1}
                   </>
                 )}
               </form.Subscribe>
@@ -103,18 +99,18 @@ export default function Step2() {
           </ItemContent>
         </Item>
       </ItemGroup>
-      {/* Principal Registrant */}
+      {/* Registrant */}
       <Card>
         <CardContent>
           <div className="flex flex-col gap-2 pb-3 md:flex-row md:items-center md:justify-between">
             <CardTitle>
-              <h3>Principal Registrant</h3>
+              <h3>Registrant</h3>
             </CardTitle>
             <Badge>You</Badge>
           </div>
           <FieldGroup>
             <CardDescription>
-              Please provide your information as the main registrant.
+              Please provide your information as the registrant.
             </CardDescription>
             <ParticipantFields form={form} />
           </FieldGroup>
@@ -122,10 +118,10 @@ export default function Step2() {
       </Card>
 
       {/* Other Registrants */}
-      <form.AppField mode="array" name="otherRegistrants">
+      <form.AppField mode="array" name="otherParticipants">
         {(field) => {
-          const otherRegistrantsCount = field.state.value?.length ?? 0;
-          const canAddMore = otherRegistrantsCount < MAX_OTHER_PARTICIPANTS;
+          const otherParticipantsCount = field.state.value?.length ?? 0;
+          const canAddMore = otherParticipantsCount < MAX_OTHER_PARTICIPANTS;
 
           return (
             <div className="space-y-4">
@@ -160,9 +156,6 @@ export default function Step2() {
                         )}
                       </div>
                       <FieldGroup>
-                        <FieldDescription>
-                          Please provide the participant&apos;s information.
-                        </FieldDescription>
                         <ParticipantFields form={form} index={idx} />
                       </FieldGroup>
                     </CardContent>
@@ -193,8 +186,8 @@ export default function Step2() {
 }
 
 type Step2FieldName =
-  | `principalRegistrant.${keyof StandardRegistrationStep2Schema["principalRegistrant"]}`
-  | `otherRegistrants[${number}].${keyof NonNullable<StandardRegistrationStep2Schema["otherRegistrants"]>[number]}`;
+  | `registrant.${keyof StandardRegistrationStep2Schema["registrant"]}`
+  | `otherParticipants[${number}].${keyof NonNullable<StandardRegistrationStep2Schema["otherParticipants"]>[number]}`;
 
 interface ParticipantFieldsProps {
   form: ReturnType<typeof useRegistrationStep2>;
@@ -203,7 +196,7 @@ interface ParticipantFieldsProps {
 
 function ParticipantFields({ form, index }: ParticipantFieldsProps) {
   const prefix =
-    index === undefined ? "principalRegistrant" : `otherRegistrants[${index}]`;
+    index === undefined ? "registrant" : `otherParticipants[${index}]`;
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
