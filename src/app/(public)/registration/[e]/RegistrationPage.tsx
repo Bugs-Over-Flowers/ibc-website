@@ -3,11 +3,11 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import RegistrationForm from "@/forms/registration/RegistrationForm";
 import tryCatch from "@/lib/server/tryCatch";
 import { getAllMembers } from "@/server/members/queries";
-import { getRegistrationEventDetails } from "@/server/registration/queries";
-import RegistrationInformation from "./RegistrationInformation";
+import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
+import RegistrationForm from "./_components/forms/RegistrationForm";
+import RegistrationInformation from "./_components/RegistrationInformation";
 
 interface RegistrationPageProps {
   params: Promise<{ e: string }>;
@@ -16,11 +16,10 @@ interface RegistrationPageProps {
 const RegistrationPage = async ({ params }: RegistrationPageProps) => {
   const { e } = await params;
   const requestCookies = (await cookies()).getAll();
-  const [registrationEventDetailsMessage, eventData] = await tryCatch(
-    getRegistrationEventDetails(requestCookies, { eventId: e }),
-  );
+  const { error: registrationEventDetailsMessage, data: eventData } =
+    await tryCatch(getRegistrationEventDetails(requestCookies, { eventId: e }));
 
-  const [getAllMembersMessage, members] = await tryCatch(
+  const { error: getAllMembersMessage, data: members } = await tryCatch(
     getAllMembers(requestCookies),
   );
 
@@ -33,9 +32,9 @@ const RegistrationPage = async ({ params }: RegistrationPageProps) => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 w-full h-full">
+    <div className="flex h-full w-full flex-col gap-4 md:flex-row">
       <RegistrationInformation {...eventData} />
-      <div className="flex flex-col gap-4 w-full h-full p-5">
+      <div className="flex h-full w-full flex-col gap-4 p-5">
         <Link href={"/events"}>
           <Button variant={"ghost"}>
             <ChevronLeft />

@@ -3,9 +3,9 @@
 import { useState } from "react";
 import type { ServerFunction } from "@/lib/server/types";
 
-interface UseActionOptions<TOutput> {
+interface UseActionOptions<TOutput, TError = Error | string> {
   onSuccess?: (data: TOutput) => void;
-  onError?: (error: string) => void;
+  onError?: (error: TError) => void;
 }
 
 /**
@@ -24,11 +24,15 @@ interface UseActionOptions<TOutput> {
  * const { execute, isPending } = useAction(tryCatch(refreshData));
  * execute();
  */
-export function useAction<TInput extends unknown[], TOutput>(
-  action: ServerFunction<TInput, TOutput>,
-  options: UseActionOptions<TOutput> = {},
+export function useAction<
+  TInput extends unknown[],
+  TOutput,
+  TError = Error | string,
+>(
+  action: ServerFunction<TInput, TOutput, TError>,
+  options: UseActionOptions<TOutput, TError> = {},
 ) {
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<TError | null>(null);
   const [data, setData] = useState<TOutput | null>(null);
   const [isPending, setIsPending] = useState(false);
 
@@ -39,16 +43,17 @@ export function useAction<TInput extends unknown[], TOutput>(
 
     const res = await action(...args);
 
-    const [error, data] = res;
-    if (error !== null) {
-      setError(error);
-      options.onError?.(error);
-      return;
+    if (!res.success) {
+      setError(res.error);
+      options.onError?.(res.error);
+      setIsPending(false);
+      return res;
     }
 
-    setData(data);
-    options.onSuccess?.(data);
+    setData(res.data);
+    options.onSuccess?.(res.data);
     setIsPending(false);
+    return res;
   }
 
   function reset() {
