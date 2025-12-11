@@ -12,7 +12,7 @@ const createEventSchema = z
       .pipe(z.coerce.date({ message: "event end date is required" })),
     venue: z.string().min(5, "Venue must atleast be 5 characters"),
     registrationFee: z.number().min(0, "Must atleast be atleast 0"),
-    eventType: z.string().min(1, "Please select event visibility"),
+    eventType: z.enum(["public", "private"]).nullable(),
     eventImage: z
       .array(z.instanceof(File))
       .min(1, "At least 1 image is required"),

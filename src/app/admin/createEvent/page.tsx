@@ -1,7 +1,14 @@
 "use client";
+import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { formContext, useAppForm } from "@/hooks/_formHooks";
 import createEventSchema from "@/lib/validation/event/createEventSchema";
 import { createEvent } from "@/server/events/actions";
@@ -16,7 +23,7 @@ function CreateEventForm() {
       eventEndDate: "",
       venue: "",
       registrationFee: 0,
-      eventType: "",
+      eventType: null as "public" | "private" | null,
       eventImage: [] as File[],
     },
 
@@ -33,7 +40,12 @@ function CreateEventForm() {
         return;
       }
 
-      toast.success("Event created successfully!");
+      const message =
+        value.eventType === null
+          ? "Saved event as draft"
+          : "Event created successfully!";
+
+      toast.success(message);
       router.push("/admin/dashboard");
     },
   });
@@ -107,41 +119,71 @@ function CreateEventForm() {
               )}
             </form.AppField>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <form.AppField name="registrationFee">
-                {(field) => <field.NumberField label="Registration Fee * " />}
-              </form.AppField>
-
-              <form.AppField name="eventType">
-                {(field) => (
-                  <field.SelectField
-                    label="Event Type *"
-                    placeholder="Select event type"
-                    options={[
-                      { label: "Public", value: "public" },
-                      { label: "Private", value: "private" },
-                    ]}
-                  />
-                )}
-              </form.AppField>
-            </div>
+            <form.AppField name="registrationFee">
+              {(field) => <field.NumberField label="Registration Fee * " />}
+            </form.AppField>
 
             <form.AppField name="eventImage">
               {(field) => (
                 <field.FileDropzoneField
                   label="Event Image *"
                   description="Upload an image for the event banner"
-                  multiple
-                  maxFiles={3}
+                  maxFiles={1}
                 />
               )}
             </form.AppField>
 
-            <div className="flex justify-end">
-              <form.SubmitButton
-                label="Create Event"
-                isSubmittingLabel="Creating..."
-              />
+            <div className="flex justify-end gap-4">
+              <form.Subscribe selector={(state) => state.isSubmitting}>
+                {(isSubmitting) => (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isSubmitting}
+                      onClick={() => {
+                        form.setFieldValue("eventType", null);
+                        form.handleSubmit();
+                      }}
+                    >
+                      Save as Draft
+                    </Button>
+
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button disabled={isSubmitting}>
+                          {isSubmitting ? "Creating..." : "Create Event"}
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40 p-0" align="end">
+                        <div className="flex flex-col">
+                          <Button
+                            variant="ghost"
+                            className="justify-start rounded-none"
+                            onClick={() => {
+                              form.setFieldValue("eventType", "public");
+                              form.handleSubmit();
+                            }}
+                          >
+                            Public Event
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="justify-start rounded-none"
+                            onClick={() => {
+                              form.setFieldValue("eventType", "private");
+                              form.handleSubmit();
+                            }}
+                          >
+                            Private Event
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </>
+                )}
+              </form.Subscribe>
             </div>
           </form>
         </formContext.Provider>

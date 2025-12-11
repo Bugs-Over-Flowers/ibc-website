@@ -70,7 +70,9 @@ export const createEvent: ServerFunction<
       eventEndDate: data.eventEndDate.toISOString(),
       venue: data.venue,
       registrationFee: data.registrationFee,
-      eventType: data.eventType as Database["public"]["Enums"]["EventType"],
+      eventType: data.eventType as
+        | Database["public"]["Enums"]["EventType"]
+        | null,
       eventHeaderUrl: publicUrl,
     })
     .select("eventId")
