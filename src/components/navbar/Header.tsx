@@ -131,21 +131,10 @@ export function Header({ onNavigate }: { onNavigate: (page: string) => void }) {
                     {link.name}
                   </a>
                 ))}
-                <div className="flex flex-col gap-3 pt-4 border-t border-border/50">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      onNavigate("admin-login");
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full justify-start"
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Button>
+                <div className="flex flex-col gap-3 border-border/50 border-t pt-4">
                   <Button
                     onClick={() => {
-                      onNavigate("membership-application");
+                      // onNavigate("membership-application");
                       setIsMobileMenuOpen(false);
                     }}
                     className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
