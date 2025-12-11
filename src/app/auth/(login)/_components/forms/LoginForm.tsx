@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useLogin } from "@/app/auth/(login)/_hooks/useLogin";
 import {
   Card,
   CardContent,
@@ -8,7 +9,6 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
-import { useLogin } from "@/hooks/auth/useLogin";
 
 export const LoginForm = () => {
   const form = useLogin();

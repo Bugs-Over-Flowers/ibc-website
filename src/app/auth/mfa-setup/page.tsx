@@ -1,4 +1,4 @@
-import { MfaSetupForm } from "./_forms/MfaSetupForm";
+import { MfaSetupForm } from "./_components/forms/MfaSetupForm";
 
 export default function MfaSetupPage() {
   return (
