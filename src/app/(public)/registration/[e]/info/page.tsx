@@ -1,4 +1,12 @@
-import { AlertCircle } from "lucide-react";
+import { formatDate } from "date-fns";
+import {
+  CalendarDays,
+  CheckCircle,
+  CreditCard,
+  QrCode,
+  User,
+  Users,
+} from "lucide-react";
 import type { Route } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
@@ -10,13 +18,12 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import tryCatch from "@/lib/server/tryCatch";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
 
@@ -48,64 +55,134 @@ async function InfoPage({
     return <div>{registrationEventDetailsMessage}</div>;
   }
 
+  if (data.eventType === null) {
+    return (
+      <div>This event is still not available. Please come back later.</div>
+    );
+  }
+
+  if (
+    !data.eventStartDate ||
+    !data.description ||
+    !data.eventHeaderUrl ||
+    !data.eventEndDate ||
+    !data.venue
+  ) {
+    return <div>Error loading event.</div>;
+  }
+
+  const formattedStartDate = formatDate(
+    new Date(data.eventStartDate),
+    "dd MMM yyyy",
+  );
+  const formattedEndDate = formatDate(
+    new Date(data.eventEndDate),
+    "dd MMM yyyy",
+  );
+
+  const dateDisplay =
+    formattedStartDate === formattedEndDate
+      ? formattedStartDate
+      : `${formattedStartDate} - ${formattedEndDate}`;
+
+  const steps = [
+    {
+      icon: User,
+      title: "Step 1: Your Details",
+      description: "Input your personal details and membership status.",
+    },
+    {
+      icon: Users,
+      title: "Step 2: Participants",
+      description:
+        "Register up to 10 people (including yourself) in a single transaction.",
+    },
+    {
+      icon: CreditCard,
+      title: "Step 3: Payment",
+      description: (
+        <>
+          Pay via <strong>BPI / ONLINE</strong> or <strong>ONSITE</strong>.
+          Online payments require uploading a proof of payment for verification.
+        </>
+      ),
+    },
+    {
+      icon: CheckCircle,
+      title: "Step 4: Confirmation",
+      description:
+        "Review your information to ensure all details are correct before submitting.",
+    },
+    {
+      icon: QrCode,
+      title: "Step 5: Get QR Code",
+      description:
+        "Receive your check-in QR code instantly on the success page and via email.",
+    },
+  ];
+
   return (
     <div className="p-10">
       <Card>
         <CardHeader>
+          <Link href={`/events/${e}` as Route}>
+            <Button>Back to Event</Button>
+          </Link>
           {data.eventHeaderUrl && (
-            <ImageZoom className="relative h-96 rounded-md">
+            <div className="relative h-96 overflow-hidden rounded-md">
               <Image
                 alt={data.eventTitle}
                 className="object-cover"
                 fill
                 src={data.eventHeaderUrl}
               />
-            </ImageZoom>
+            </div>
           )}
           <CardTitle className="pt-3">
             <h3>{data.eventTitle}</h3>
           </CardTitle>
+          <CardDescription className="flex items-center gap-2">
+            <CalendarDays />
+            {dateDisplay}
+          </CardDescription>
         </CardHeader>
         <Separator />
         <CardContent className="space-y-2">
           <div>{data.description}</div>
-          <Item variant={"outline"}>
-            <ItemContent>
-              <ItemTitle> Registration Steps</ItemTitle>
-              <div>
-                <ol>
-                  <li>Step 1: Input your details: membership status</li>
-                  <li>
-                    Step 2: Input the people you want to register. Up to 10
-                    people only including yourself.
-                  </li>
-                  <li>
-                    Step 3: Pay the registration fee. Currently we have{" "}
-                    <strong>BPI / ONLINE</strong> and <strong>ONSITE</strong>{" "}
-                    payment methods available. When choosing ONLINE, you will
-                    need to provide a proof of payment that will be subject for
-                    verification.
-                  </li>
-                  <li>
-                    Step 4: Confirm your registration. Ensure that your details
-                    are correct.
-                  </li>
-                  <li>
-                    Step 5: You will receive a QR Code that will be used for
-                    check-in during the event. You will also receive this on
-                    your email.
-                  </li>
-                </ol>
+        </CardContent>
+        <Separator />
+        <CardContent>
+          <h3>Registration Steps</h3>
+
+          <div className="space-y-6 py-5">
+            {steps.map((step, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: Just for rendering static items
+              <div className="flex gap-4" key={index}>
+                <div className="flex-none">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <step.icon className="h-5 w-5" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-medium text-sm leading-none">
+                    {step.title}
+                  </h4>
+                  <div className="text-muted-foreground text-sm">
+                    {step.description}
+                  </div>
+                </div>
               </div>
-            </ItemContent>
-          </Item>
+            ))}
+          </div>
+
           <TermsAndConditions
             triggerOverride={
-              <Button variant={"ghost"}>See Terms and Conditions here.</Button>
+              <Button className="px-0 text-blue-600" variant={"link"}>
+                See Terms and Conditions here
+              </Button>
             }
           />
         </CardContent>
-        <Separator />
         <CardFooter>
           <CardAction>
             <Link href={`/registration/${e}/` as Route}>
