@@ -3,7 +3,6 @@
 import { LogIn, Menu } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -11,11 +10,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const router = useRouter();
-
-  function onNavigate(path: string) {
-    // router.push(`/${path}`);
-  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -127,20 +121,9 @@ export function Header() {
                 ))}
                 <div className="flex flex-col gap-3 border-border/50 border-t pt-4">
                   <Button
-                    className="w-full justify-start"
-                    onClick={() => {
-                      onNavigate("admin-login");
-                      setIsMobileMenuOpen(false);
-                    }}
-                    variant="outline"
-                  >
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Sign In
-                  </Button>
-                  <Button
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                     onClick={() => {
-                      onNavigate("membership-application");
+                      // onNavigate("membership-application");
                       setIsMobileMenuOpen(false);
                     }}
                   >
