@@ -4,21 +4,14 @@ import { Header } from "@/components/navbar/Header";
 import { EventsCTA } from "./_components/EventsCTA";
 import { EventsHero } from "./_components/EventsHero";
 import EventsListSection from "./_components/EventsListSection";
+import EventLoadingPage from "./loading";
 
 async function EventsPage() {
-  console.log("[EventsPage] Rendering Events Page");
-
   return (
     <main className="min-h-screen bg-background">
       <Header />
       <EventsHero />
-      <Suspense
-        fallback={
-          <div className="py-12 text-center text-muted-foreground">
-            Loading events...
-          </div>
-        }
-      >
+      <Suspense fallback={<EventLoadingPage />}>
         <EventsListSection />
       </Suspense>
       <EventsCTA />

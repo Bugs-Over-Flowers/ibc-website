@@ -5,8 +5,8 @@ import { Header } from "@/components/navbar/Header";
 import { getEventById } from "@/server/events/queries";
 import { EventDetailsContent } from "../_components/EventDetailsContent";
 import { EventDetailsHero } from "../_components/EventDetailsHero";
-import { EventNotFound } from "../_components/EventNotFound";
 import EventPageDetailsLoading from "./loading";
+import NotFound from "./not-found";
 
 export default async function EventDetailsPage({
   params,
@@ -20,10 +20,7 @@ export default async function EventDetailsPage({
     () => null,
   );
 
-  console.log("[EventDetailsPage] eventId:", eventId);
-  console.log("[EventDetailsPage] event:", event);
-
-  if (!event) return <EventNotFound />;
+  if (!event) return <NotFound />;
 
   return (
     <main className="min-h-screen bg-background">

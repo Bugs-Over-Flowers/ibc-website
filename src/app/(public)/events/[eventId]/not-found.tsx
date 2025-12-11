@@ -5,10 +5,10 @@ import { Footer } from "@/components/navbar/Footer";
 import { Header } from "@/components/navbar/Header";
 import { Button } from "@/components/ui/button";
 
-export function EventNotFound() {
+export default function NotFound() {
   return (
     <main className="min-h-screen bg-background">
-      <Header onNavigate={() => {}} />
+      <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <Link href="/events">
           <Button

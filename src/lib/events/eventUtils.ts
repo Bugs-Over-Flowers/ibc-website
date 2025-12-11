@@ -1,3 +1,7 @@
+import type { Tables } from "@/lib/supabase/db.types";
+
+type Event = Tables<"Event">;
+
 export type EventStatus = "upcoming" | "ongoing" | "past";
 
 export const formatDate = (dateString: string | null) => {
@@ -42,6 +46,22 @@ export const getEventStatus = (
   const start = new Date(startDate);
   const end = endDate ? new Date(endDate) : start;
 
+  end.setHours(23, 59, 59, 999);
+
+  if (now < start) return "upcoming";
+  if (now >= start && now <= end) return "ongoing";
+  return "past";
+};
+
+export const getEventCategory = (
+  event: Event,
+): "ongoing" | "upcoming" | "past" => {
+  if (!event.eventStartDate) return "upcoming";
+  const now = new Date();
+  const start = new Date(event.eventStartDate);
+  const end = event.eventEndDate
+    ? new Date(event.eventEndDate)
+    : new Date(start);
   end.setHours(23, 59, 59, 999);
 
   if (now < start) return "upcoming";

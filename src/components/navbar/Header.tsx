@@ -71,10 +71,7 @@ export function Header() {
               </a>
             ))}
             <div className="flex items-center gap-3 ml-2">
-              <Button
-                onClick={() => onNavigate("membership-application")}
-                className="bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm border border-white/20 shadow-lg"
-              >
+              <Button className="bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm border border-white/20 shadow-lg">
                 Join Now
               </Button>
             </div>

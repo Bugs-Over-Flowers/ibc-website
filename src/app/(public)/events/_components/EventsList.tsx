@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Calendar } from "lucide-react";
 import { useMemo, useState } from "react";
 import { staggerContainer } from "@/components/animations/stagger";
+import { getEventCategory } from "@/lib/events/eventUtils";
 import type { Tables } from "@/lib/supabase/db.types";
 import { EventCard } from "./EventCard";
 import { EventsSearch } from "./EventSearch";
@@ -12,20 +13,6 @@ import { FeaturedEventList } from "./FeaturedEventList";
 type Event = Tables<"Event">;
 
 type FilterOption = "all" | "upcoming" | "past";
-
-const getEventCategory = (event: Event): "ongoing" | "upcoming" | "past" => {
-  if (!event.eventStartDate) return "upcoming";
-  const now = new Date();
-  const start = new Date(event.eventStartDate);
-  const end = event.eventEndDate
-    ? new Date(event.eventEndDate)
-    : new Date(start);
-  end.setHours(23, 59, 59, 999);
-
-  if (now < start) return "upcoming";
-  if (now >= start && now <= end) return "ongoing";
-  return "past";
-};
 
 interface EventsListProps {
   events: Event[];
@@ -137,15 +124,6 @@ export function EventsList({ events }: EventsListProps) {
       />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Search Bar with Dropdown Filter */}
-        <div className="mb-12">
-          <EventsSearch
-            onSearch={setSearchQuery}
-            onFilterChange={setFilter}
-            currentFilter={filter}
-          />
-        </div>
-
         {ongoingEvents.length > 0 && (
           <FeaturedEventList events={ongoingEvents} />
         )}
@@ -165,7 +143,13 @@ export function EventsList({ events }: EventsListProps) {
                 : "Explore All Events"}
           </h2>
         </motion.div>
-
+        <div className="mb-12">
+          <EventsSearch
+            onSearch={setSearchQuery}
+            onFilterChange={setFilter}
+            currentFilter={filter}
+          />
+        </div>
         {/* Events Grid */}
         {filteredEvents.length === 0 ? (
           <EmptyState />
