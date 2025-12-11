@@ -5,16 +5,12 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 
-interface FooterProps {
-  onNavigate?: (page: string) => void;
-}
-
-export function Footer({ onNavigate }: FooterProps) {
+export function Footer() {
   const quickLinks = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Members", href: "#members" },
-    { name: "Events", href: "#events" },
+    { name: "Home", href: "/home" },
+    { name: "About", href: "/about" },
+    { name: "Members", href: "/members" },
+    { name: "Events", href: "/events" },
   ];
 
   const socialLinks = [

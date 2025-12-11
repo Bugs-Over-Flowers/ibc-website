@@ -9,12 +9,9 @@ function HeroSkeleton() {
 }
 
 export default function Page() {
-  const handleNavigate = (page: string, params?: { eventId?: string }) => {
-    console.log("Navigate to:", page, params);
-  };
   return (
     <main className="min-h-screen bg-background">
-      <Header onNavigate={handleNavigate} />
+      <Header />
       <Suspense fallback={<HeroSkeleton />}>
         <FeaturedEventsHero />
       </Suspense>
