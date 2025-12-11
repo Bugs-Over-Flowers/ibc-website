@@ -154,7 +154,7 @@ async function InfoPage({
         <CardContent>
           <h3>Registration Steps</h3>
 
-          <div className="space-y-6 py-5">
+          <div className="gap-4 py-5 md:grid md:grid-flow-col md:grid-rows-3">
             {steps.map((step, index) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: Just for rendering static items
               <div className="flex gap-4" key={index}>
