@@ -17,8 +17,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} font-sans antialiased`}
         suppressHydrationWarning
+        className={`${inter.variable} font-sans antialiased`}
       >
         <Toaster position="top-right" richColors />
         {children}

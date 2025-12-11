@@ -1,13 +1,17 @@
 "use client";
 
-import { Facebook, Linkedin, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 
-export function Footer() {
+interface FooterProps {
+  onNavigate?: (page: string) => void;
+}
+
+export function Footer({ onNavigate }: FooterProps) {
   const quickLinks = [
-    { name: "Home", href: "/home" },
+    { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Members", href: "/members" },
     { name: "Events", href: "/events" },
@@ -27,40 +31,40 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-sidebar-foreground/90 py-16 text-white" id="contact">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <footer id="contact" className="bg-sidebar-foreground/90 text-white py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-3"
+          className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12"
           initial={{ opacity: 0, y: 30 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
           whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
         >
           <div>
-            <div className="mb-4 flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-4">
               <Image
-                alt="IBC Logo"
-                className="h-14 w-auto brightness-0 invert"
-                height={56}
                 src="/logo/ibc-logo-2.png"
+                alt="IBC Logo"
                 width={48}
+                height={56}
+                className="h-14 w-auto brightness-0 invert"
               />
-              <h3 className="font-bold text-2xl">Iloilo Business Club</h3>
+              <h3 className="text-2xl font-bold">Iloilo Business Club</h3>
             </div>
-            <p className="mb-6 text-white/70 leading-relaxed">
+            <p className="text-white/70 mb-6 leading-relaxed">
               Sustaining the Momentum for Progress since 1990.
             </p>
             <div className="flex gap-3">
               {socialLinks.map((social) => (
                 <a
-                  aria-label={social.label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-muted backdrop-blur-sm transition-all hover:bg-white hover:text-foreground"
-                  href={social.href}
                   key={social.label}
-                  rel="noopener noreferrer"
+                  href={social.href}
                   target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border text-muted border-white/20 flex items-center justify-center hover:bg-white hover:text-foreground transition-all"
+                  aria-label={social.label}
                 >
-                  <social.icon className="h-5 w-5" />
+                  <social.icon className="w-5 h-5" />
                 </a>
               ))}
             </div>
@@ -68,13 +72,13 @@ export function Footer() {
 
           {/* Quick Links Column */}
           <div>
-            <h4 className="mb-4 font-semibold text-lg">Quick Links</h4>
+            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.name}>
                   <a
-                    className="text-white/70 transition-colors hover:text-primary"
                     href={link.href}
+                    className="text-white/70 hover:text-primary transition-colors"
                   >
                     {link.name}
                   </a>
@@ -85,21 +89,21 @@ export function Footer() {
 
           {/* Contact Info Column */}
           <div>
-            <h4 className="mb-4 font-semibold text-lg">Contact Info</h4>
+            <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+                <MapPin className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
                 <span className="text-white/70">
                   GF Rm. 105-B Maryville Bldg., Marymart Mall, Delgado St.,
                   Iloilo City 5000
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-muted-foreground" />
+                <Phone className="w-5 h-5 text-muted-foreground" />
                 <span className="text-white/70">(033) 337 - 8341</span>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-muted-foreground" />
+                <Mail className="w-5 h-5 text-muted-foreground" />
                 <span className="text-white/70">
                   iloilobusinessclub1990@gmail.com
                 </span>
@@ -108,7 +112,7 @@ export function Footer() {
           </div>
         </motion.div>
 
-        <Separator className="mb-8 bg-white/20" />
+        <Separator className="bg-white/20 mb-8" />
 
         <div className="text-center text-white/60">
           <p>&copy; 2025 Iloilo Business Club. All rights reserved.</p>

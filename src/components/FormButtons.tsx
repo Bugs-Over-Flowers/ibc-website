@@ -14,8 +14,8 @@ export default function FormButtons({
 }: FormButtonsProps) {
   const step = useRegistrationStore((s) => s.step);
   return (
-    <div className="flex w-full flex-row-reverse justify-between">
-      <Button disabled={submitting} onClick={onNext}>
+    <div className="flex justify-between w-full flex-row-reverse">
+      <Button onClick={onNext} disabled={submitting}>
         {submitting ? "Submitting..." : step === MAX_STEPS ? "Submit" : "Next"}
       </Button>
       {step > 1 && (

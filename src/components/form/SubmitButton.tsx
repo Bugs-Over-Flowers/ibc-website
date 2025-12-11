@@ -4,23 +4,17 @@ import { Button } from "../ui/button";
 interface SubmitButtonProps {
   label: string;
   isSubmittingLabel: string;
-  className?: string;
 }
 
 export default function SubmitButton({
   label,
   isSubmittingLabel,
-  className,
 }: SubmitButtonProps) {
   const form = useFormContext();
   return (
     <form.Subscribe selector={(s) => [s.isSubmitting, s.isValid]}>
       {([isSubmitting, isValid]) => (
-        <Button
-          className={className}
-          disabled={isSubmitting || !isValid}
-          type="submit"
-        >
+        <Button disabled={isSubmitting || !isValid}>
           {isSubmitting ? isSubmittingLabel : label}
         </Button>
       )}

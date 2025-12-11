@@ -34,54 +34,27 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+  // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  // IMPORTANT: If you remove getUser() and you use server-side rendering
+  // IMPORTANT: If you remove getClaims() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getClaims();
 
-  if (error?.message === "User from sub claim in JWT does not exist") {
-    // Clear the invalid session
-    await supabase.auth.signOut();
+  const user = data?.claims;
 
-    // If already on the login page, just proceed to allow the cookie clearing to take effect
-    if (request.nextUrl.pathname === "/auth") {
-      return supabaseResponse;
-    }
+  console.log("User claims: ", user);
 
-    // Redirect to login
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth";
-    const redirectResponse = NextResponse.redirect(url);
-
-    // Copy cookies from supabaseResponse to ensure the session is cleared
-    const cookiesToSet = supabaseResponse.cookies.getAll();
-    cookiesToSet.forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
-    });
-
-    return redirectResponse;
-  }
-
-  if (!user) {
-    // Protect admin routes
-    if (request.nextUrl.pathname.startsWith("/admin")) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/auth";
-      return NextResponse.redirect(url);
-    }
-
-    // Protect MFA routes (require session)
-    if (request.nextUrl.pathname.startsWith("/auth/mfa")) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/auth";
-      return NextResponse.redirect(url);
-    }
-  }
+  // if (
+  //   !user &&
+  //   !request.nextUrl.pathname.startsWith("/login") &&
+  //   !request.nextUrl.pathname.startsWith("/auth")
+  // ) {
+  //   // no user, potentially respond by redirecting the user to the login page
+  //   const url = request.nextUrl.clone();
+  //   url.pathname = "/login";
+  //   return NextResponse.redirect(url);
+  // }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:

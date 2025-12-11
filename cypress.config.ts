@@ -2,7 +2,7 @@ import { defineConfig } from "cypress";
 
 export default defineConfig({
   e2e: {
-    setupNodeEvents(_on, _config) {},
+    setupNodeEvents(on, config) {},
   },
 
   experimentalWebKitSupport: true,

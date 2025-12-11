@@ -25,8 +25,8 @@ export const RegistrantDetailsSchema = z.object({
 
 export const StandardRegistrationStep2Schema = z
   .object({
-    registrant: RegistrantDetailsSchema,
-    otherParticipants: z.array(RegistrantDetailsSchema).default([]),
+    principalRegistrant: RegistrantDetailsSchema,
+    otherRegistrants: z.array(RegistrantDetailsSchema).default([]),
   })
   .superRefine((data, ctx) => {
     // Logic remains mostly the same, just slightly cleaner map usage
@@ -38,17 +38,17 @@ export const StandardRegistrationStep2Schema = z
 
     // Add principal
     const pKey = getKey(
-      data.registrant.firstName,
-      data.registrant.lastName,
-      data.registrant.email,
+      data.principalRegistrant.firstName,
+      data.principalRegistrant.lastName,
+      data.principalRegistrant.email,
     );
     seen.set(pKey, -1);
 
-    data.otherParticipants.forEach((participant, index) => {
+    data.otherRegistrants.forEach((registrant, index) => {
       const key = getKey(
-        participant.firstName,
-        participant.lastName,
-        participant.email,
+        registrant.firstName,
+        registrant.lastName,
+        registrant.email,
       );
 
       if (seen.has(key)) {
@@ -61,8 +61,8 @@ export const StandardRegistrationStep2Schema = z
 
         ctx.addIssue({
           code: "custom",
-          message: `Duplicate registrant: ${participant.firstName} ${participant.lastName}, ${participant.email} is already listed as ${duplicateLabel}`,
-          path: ["otherParticipants", index],
+          message: `Duplicate registrant: ${registrant.firstName} ${registrant.lastName}, ${registrant.email} is already listed as ${duplicateLabel}`,
+          path: ["otherRegistrants", index],
         });
       } else {
         seen.set(key, index);

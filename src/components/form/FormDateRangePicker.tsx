@@ -21,13 +21,13 @@ const FormDateRangePicker: React.FC<FormDateRangePickerProps> = ({
     <Field data-invalid={isInvalid}>
       {label && <FieldLabel>{label}</FieldLabel>}
       <Calendar
+        mode="range"
+        defaultMonth={new Date(Date.now())}
+        selected={field.state.value}
+        onSelect={(v) => field.handleChange(v)}
+        numberOfMonths={2}
         className={className}
         data-invalid={isInvalid}
-        defaultMonth={new Date(Date.now())}
-        mode="range"
-        numberOfMonths={2}
-        onSelect={(v) => field.handleChange(v)}
-        selected={field.state.value}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />

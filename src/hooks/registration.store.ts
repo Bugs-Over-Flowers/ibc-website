@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
-import type { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
+import type { getRegistrationEventDetails } from "@/server/registration/queries";
 
 export const MAX_STEPS = 4;
 export type RegistrationStoreEventDetails = Awaited<
@@ -12,7 +12,6 @@ interface RegistrationStore {
   step: number;
   eventDetails: RegistrationStoreEventDetails | null;
   registrationData: StandardRegistrationSchema;
-  createdRegistrationId?: string;
 }
 
 interface RegistrationStoreActions {
@@ -21,41 +20,38 @@ interface RegistrationStoreActions {
   setRegistrationData: (
     registrationData: Partial<StandardRegistrationSchema> | null,
   ) => void;
-  setCreatedRegistrationId: (id: string) => void;
-  resetStore: () => void;
 }
-const initialState: RegistrationStore = {
-  step: 1,
-  eventDetails: null,
-  registrationData: {
-    step1: {
-      member: "nonmember",
-      nonMemberName: "",
-    },
-    step2: {
-      registrant: {
-        email: "",
-        contactNumber: "",
-        firstName: "",
-        lastName: "",
-      },
-      otherParticipants: [],
-    },
-    step3: {
-      paymentMethod: "onsite",
-    },
-    step4: {
-      termsAndConditions: false,
-    },
-  },
-};
 
 const useRegistrationStore = create<
   RegistrationStore & RegistrationStoreActions
 >()(
   persist(
     (set) => ({
-      ...initialState,
+      step: 1,
+      eventDetails: null,
+      registrationData: {
+        step1: {
+          member: "member",
+          businessMemberId: "",
+          nonMemberName: "",
+        },
+        step2: {
+          principalRegistrant: {
+            email: "",
+            contactNumber: "",
+            firstName: "",
+            lastName: "",
+          },
+          otherRegistrants: [],
+        },
+        step3: {
+          paymentMethod: "onsite",
+          paymentProof: undefined,
+        },
+        step4: {
+          termsAndConditions: false,
+        },
+      },
       setStep: (step: number) => set({ step }),
       setEventDetails: (eventDetails: RegistrationStoreEventDetails | null) =>
         set({ eventDetails }),
@@ -71,10 +67,6 @@ const useRegistrationStore = create<
                   ...registrationData,
                 },
         })),
-      setCreatedRegistrationId: (id: string) =>
-        set({ createdRegistrationId: id }),
-      resetStore: () =>
-        set((state) => ({ ...initialState, eventDetails: state.eventDetails })),
     }),
     {
       name: "registration-storage",

@@ -15,14 +15,14 @@ export default function FormCheckBox({
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
-    <Field className="w-max" data-invalid={isInvalid} orientation={orientation}>
+    <Field data-invalid={isInvalid} orientation={orientation} className="w-max">
       <Checkbox
-        aria-invalid={isInvalid}
-        checked={field.state.value}
         id={field.name}
         name={field.name}
+        checked={field.state.value}
         onBlur={field.handleBlur}
         onCheckedChange={(checked) => field.handleChange(checked === true)}
+        aria-invalid={isInvalid}
       />
       <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
     </Field>

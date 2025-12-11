@@ -26,20 +26,20 @@ function NumberField({
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
-    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
+    <Field data-invalid={isInvalid} className={cn("grid gap-2", className)}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
-        data-invalid={isInvalid}
         id={field.name}
-        max={max}
-        min={min}
         name={field.name}
+        value={field.state.value ?? ""}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(Number(e.target.value))}
         placeholder={placeholder}
-        step={step}
         type="number"
-        value={field.state.value ?? ""}
+        min={min}
+        max={max}
+        step={step}
+        data-invalid={isInvalid}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />

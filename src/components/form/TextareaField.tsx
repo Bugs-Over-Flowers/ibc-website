@@ -22,17 +22,17 @@ function TextareaField({
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
-    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
+    <Field data-invalid={isInvalid} className={cn("grid gap-2", className)}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Textarea
-        data-invalid={isInvalid}
         id={field.name}
         name={field.name}
+        value={field.state.value ?? ""}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        value={field.state.value ?? ""}
+        data-invalid={isInvalid}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />

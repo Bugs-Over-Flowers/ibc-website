@@ -28,17 +28,17 @@ function TextField({
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
-        autoCapitalize="on"
-        autoComplete="off"
-        data-invalid={isInvalid}
-        disabled={disabled}
         id={field.name}
         name={field.name}
+        value={field.state.value ?? ""}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         placeholder={placeholder}
         type={type}
-        value={field.state.value ?? ""}
+        disabled={disabled}
+        autoComplete="off"
+        autoCapitalize="on"
+        data-invalid={isInvalid}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />

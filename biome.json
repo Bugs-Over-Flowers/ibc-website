@@ -13,7 +13,7 @@
       "!.next",
       "!dist",
       "!build",
-      "!**/src/components/ui"
+      "!components/ui"
     ]
   },
   "css": {
@@ -39,13 +39,6 @@
       "recommended": true,
       "suspicious": {
         "noUnknownAtRules": "off"
-      },
-      "nursery": {
-        "useSortedClasses": {
-          "level": "on",
-          "fix": "safe",
-          "options": { "functions": ["clsx", "cva", "tw", "tw.*"] }
-        }
       }
     },
     "domains": {
@@ -56,7 +49,6 @@
   "assist": {
     "actions": {
       "source": {
-        "useSortedAttributes": "on",
         "organizeImports": "on"
       }
     }
