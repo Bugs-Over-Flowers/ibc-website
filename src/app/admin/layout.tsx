@@ -1,12 +1,38 @@
-import type { ReactNode } from "react";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { AdminSidebar } from "./_components/sidebar/sidebar";
+import "@/app/globals.css";
 
-interface AdminLayoutProps {
-  children: ReactNode;
-}
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
 
-const AdminLayout = ({ children }: AdminLayoutProps) => {
-  // To be implemented
-  return <>{children}</>;
+export const metadata: Metadata = {
+  title: "Admin Dashboard",
+  description: "Administration dashboard",
 };
 
-export default AdminLayout;
+export default function AdminLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        <div className="flex min-h-screen bg-gray-50">
+          {/* Sidebar - fixed width */}
+          <div className="w-64">
+            <AdminSidebar />
+          </div>
+
+          {/* Main content */}
+          <main className="flex-1 overflow-auto">
+            <div className="p-6">{children}</div>
+          </main>
+        </div>
+      </body>
+    </html>
+  );
+}
