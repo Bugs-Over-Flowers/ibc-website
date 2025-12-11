@@ -270,19 +270,19 @@ export type Database = {
       ProofImage: {
         Row: {
           applicationId: string | null;
-          path: string;
+          imageUrl: string;
           proofImageId: string;
           registrationId: string | null;
         };
         Insert: {
           applicationId?: string | null;
-          path: string;
+          imageUrl: string;
           proofImageId?: string;
           registrationId?: string | null;
         };
         Update: {
           applicationId?: string | null;
-          path?: string;
+          imageUrl?: string;
           proofImageId?: string;
           registrationId?: string | null;
         };
@@ -406,6 +406,20 @@ export type Database = {
           p_payment_method?: string;
           p_payment_path?: string;
           p_registrant?: Json;
+        };
+        Returns: Json;
+      };
+      update_event_details: {
+        Args: {
+          p_description: string;
+          p_end_date: string;
+          p_event_header_url: string;
+          p_event_id: string;
+          p_event_type: string;
+          p_registration_fee: number;
+          p_start_date: string;
+          p_title: string;
+          p_venue: string;
         };
         Returns: Json;
       };
