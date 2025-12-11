@@ -404,8 +404,22 @@ export type Database = {
           p_non_member_name?: string;
           p_other_participants?: Json;
           p_payment_method?: string;
-          p_payment_path?: string;
+          p_payment_proof_url?: string;
           p_registrant?: Json;
+        };
+        Returns: Json;
+      };
+      update_event_details: {
+        Args: {
+          p_description: string;
+          p_end_date: string;
+          p_event_header_url: string;
+          p_event_id: string;
+          p_event_type: string;
+          p_registration_fee: number;
+          p_start_date: string;
+          p_title: string;
+          p_venue: string;
         };
         Returns: Json;
       };

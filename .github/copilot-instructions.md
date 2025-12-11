@@ -53,7 +53,7 @@ src/
 Component placement:
 
 - Route-specific components → `app/[route]/_components/`
-- Include forms under `app/[route]/components/forms/`
+- Include forms under `app/[route]/_components/forms/`
 - Route-specific hooks under `app/[route]/_hooks/`
 - Keep global / reusable components → `src/components/`
 

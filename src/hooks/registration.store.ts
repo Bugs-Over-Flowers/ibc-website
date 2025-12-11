@@ -33,13 +33,13 @@ const initialState: RegistrationStore = {
       nonMemberName: "",
     },
     step2: {
-      principalRegistrant: {
+      registrant: {
         email: "",
         contactNumber: "",
         firstName: "",
         lastName: "",
       },
-      otherRegistrants: [],
+      otherParticipants: [],
     },
     step3: {
       paymentMethod: "onsite",
