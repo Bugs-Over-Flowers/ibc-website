@@ -14,10 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// omg donut pattern
-//
-// import * as React from 'react';
-
 interface QRDownloaderProps {
   registrationId: string;
   children: React.ReactNode;

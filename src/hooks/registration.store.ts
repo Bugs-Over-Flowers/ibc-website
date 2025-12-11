@@ -26,19 +26,20 @@ interface RegistrationStoreActions {
 }
 const initialState: RegistrationStore = {
   step: 1,
+  eventDetails: null,
   registrationData: {
     step1: {
       member: "nonmember",
       nonMemberName: "",
     },
     step2: {
-      registrant: {
+      principalRegistrant: {
         email: "",
         contactNumber: "",
         firstName: "",
         lastName: "",
       },
-      otherParticipants: [],
+      otherRegistrants: [],
     },
     step3: {
       paymentMethod: "onsite",
@@ -72,7 +73,8 @@ const useRegistrationStore = create<
         })),
       setCreatedRegistrationId: (id: string) =>
         set({ createdRegistrationId: id }),
-      resetStore: () => set((state) => ({ ...initialState, state })),
+      resetStore: () =>
+        set((state) => ({ ...initialState, eventDetails: state.eventDetails })),
     }),
     {
       name: "registration-storage",

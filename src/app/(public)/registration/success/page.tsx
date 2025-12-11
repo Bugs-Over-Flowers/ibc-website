@@ -26,7 +26,7 @@ async function SuccessPage() {
       <main className="flex h-screen flex-col items-center justify-center space-y-5 bg-gray-100 p-5">
         <h1>No registration yet</h1>
         <div>
-          You have not registered recently (for the past 7 days). Please
+          You have not registered recently (for the past 14 days). Please
           register first.
         </div>
         <Link href={"/events"}>

@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
 import { RegistrationCheckInQRCodec } from "@/lib/validation/qr/standard";
@@ -17,7 +19,6 @@ export const getSuccessPageData = async (
 
   const supabase = await createClient(requestCookies);
 
-  console.log(decodedRegistrationQRData);
   const { data: registeredEvent } = await supabase
     .from("Event")
     .select("eventId, eventTitle, eventStartDate")
@@ -47,12 +48,6 @@ export const getSuccessPageData = async (
     .maybeSingle()
     .throwOnError();
 
-  console.log("ALL DATA: ", {
-    registeredEvent,
-    registrationDetails,
-    registrant,
-  });
-
   if (!registeredEvent || !registrationDetails || !registrant) {
     throw new Error("No event found");
   }
@@ -66,7 +61,7 @@ export const getSuccessPageData = async (
     registrationDetails,
     email: decodedRegistrationQRData.email,
     name: `${registrant.firstName} ${registrant.lastName}`,
-    // biome-ignore lint/style/noNonNullAssertion: secret
+    // biome-ignore lint/style/noNonNullAssertion: affiliation will be not null at this point
     affiliation: affiliation!,
   };
 };

@@ -76,7 +76,7 @@ export default async function EventDetails({
                 <br />- You have paid{" "}
                 <strong>{data.registrationDetails?.paymentMethod}. </strong>
                 {renderPaymentMethodText}.
-                <br />- If you have any questions, please contact us at .
+                <br />- If you have any questions, please contact us.
               </ItemDescription>
             </ItemContent>
           </Item>
