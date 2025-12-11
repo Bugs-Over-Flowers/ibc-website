@@ -64,18 +64,22 @@ export default function RegistrationSearchAndFilter() {
                     placeholder="Enter an affiliation, name, or email"
                     value={field.state.value}
                   />
-                  <InputGroupAddon align="inline-end">
-                    <InputGroupButton
-                      className="rounded-full"
-                      onClick={() => {
-                        field.handleChange("");
-                        form.handleSubmit();
-                      }}
-                      size={"icon-xs"}
-                    >
-                      <X />
-                    </InputGroupButton>
-                  </InputGroupAddon>
+                  {field.state.value !== "" && (
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupButton
+                        className="rounded-full"
+                        onClick={() => {
+                          if (field.state.value !== null) {
+                            field.handleChange("");
+                            form.handleSubmit();
+                          }
+                        }}
+                        size={"icon-xs"}
+                      >
+                        <X />
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  )}
                 </InputGroup>
               )}
             </form.AppField>
@@ -106,15 +110,17 @@ export default function RegistrationSearchAndFilter() {
               </SelectContent>
             </Select>
             <InputGroupAddon align="inline-end" className="pl-2">
-              <InputGroupButton
-                className="rounded-full"
-                onClick={() => {
-                  setFilter("all");
-                }}
-                size={"icon-xs"}
-              >
-                <X />
-              </InputGroupButton>
+              {searchParams.get("paymentStatus") === "all" && (
+                <InputGroupButton
+                  className="rounded-full"
+                  onClick={() => {
+                    setFilter("all");
+                  }}
+                  size={"icon-xs"}
+                >
+                  <X />
+                </InputGroupButton>
+              )}
             </InputGroupAddon>
           </InputGroup>
         </div>

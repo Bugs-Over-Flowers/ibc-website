@@ -2,7 +2,6 @@ import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
-import { RegistrationPageSchema } from "@/lib/validation/registration/registration-list";
 
 interface GetRegistrationEventDetailsParams {
   eventId: string;
@@ -55,7 +54,7 @@ export const getRegistrationData = async (
     .from("Registration")
     .select(
       `registrationId,
-       event:Event(eventId, eventTitle),
+       event:Event(eventId, eventTitle, eventType),
        paymentMethod,
        paymentStatus,
        registrationDate,
@@ -76,8 +75,8 @@ export const getRegistrationData = async (
     : data.nonMemberName;
 
   const mappedData = {
-    isMember: !!data.businessMember,
     ...data,
+    isMember: !!data.businessMember,
     affiliation,
   };
 
@@ -96,11 +95,12 @@ export const getRegistrationData = async (
     .maybeSingle()
     .throwOnError();
 
-  const parsedMappedData = RegistrationPageSchema.parse({
+  return {
     ...mappedData,
+    registrant: participants.filter(
+      (participant) => participant.isPrincipal,
+    )[0],
     participants,
     paymentImagePath: proofOfPayment?.path ?? null,
-  });
-
-  return parsedMappedData;
+  };
 };

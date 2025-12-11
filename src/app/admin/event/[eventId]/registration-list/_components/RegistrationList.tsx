@@ -38,10 +38,10 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
     },
   },
   {
-    accessorKey: "principalParticipant",
-    header: "Registered By",
+    accessorKey: "registrant",
+    header: "Participant",
     cell: ({ row }) => {
-      const { email, firstName, lastName } = row.original.principalParticipant;
+      const { email, firstName, lastName } = row.original.registrant;
       return (
         <>
           {firstName} {lastName} ({email})
@@ -85,7 +85,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
       <RegistrationRowActions
         data={{
           paymentStatus: row.original.paymentStatus,
-          email: row.original.principalParticipant.email,
+          email: row.original.registrant.email,
           eventId: row.original.eventId,
           registrationId: row.original.registrationId,
         }}

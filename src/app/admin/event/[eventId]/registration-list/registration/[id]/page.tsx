@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
-import { getRegistrationData } from "@/server/registration/queries";
+import tryCatch from "@/lib/server/tryCatch";
+import { getRegistrationData } from "@/server/registration/queries/getRegistrationEventDetails";
 import RegistrationDetails from "./_components/RegistrationDetails";
 
 type RegistrationPageParams =
@@ -25,9 +26,24 @@ async function RegistrationDetailsPage({
   const { id } = await params;
   const cookieStore = await cookies();
 
-  const registration = await getRegistrationData(cookieStore.getAll(), {
-    registrationId: id,
-  });
+  const {
+    data: registration,
+    success,
+    error,
+  } = await tryCatch(
+    getRegistrationData(cookieStore.getAll(), {
+      registrationId: id,
+    }),
+  );
 
-  return <RegistrationDetails {...registration} />;
+  if (!success) {
+    return <div>{error}</div>;
+  }
+  if (registration.event.eventType === null) {
+    return (
+      <div>This event is still not available. Please come back later.</div>
+    );
+  }
+
+  return <RegistrationDetails details={registration} />;
 }
