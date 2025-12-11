@@ -368,16 +368,58 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      get_registration_list: {
+        Args: {
+          p_event_id: string;
+          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
+          p_search_text?: string;
+        };
+        Returns: Database["public"]["CompositeTypes"]["registration_list_item"][];
+        SetofOptions: {
+          from: "*";
+          to: "registration_list_item";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      get_registration_stats: {
+        Args: {
+          p_event_id: string;
+          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
+          p_search_text?: string;
+        };
+        Returns: Database["public"]["CompositeTypes"]["registration_stats"];
+        SetofOptions: {
+          from: "*";
+          to: "registration_stats";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       submit_event_registration: {
         Args: {
           p_business_member_id?: string;
           p_event_id: string;
           p_member_type: string;
           p_non_member_name?: string;
-          p_other_registrants?: Json;
+          p_other_participants?: Json;
           p_payment_method?: string;
-          p_payment_path?: string;
-          p_principal_registrant?: Json;
+          p_payment_proof_url?: string;
+          p_registrant?: Json;
+        };
+        Returns: Json;
+      };
+      update_event_details: {
+        Args: {
+          p_description: string;
+          p_end_date: string;
+          p_event_header_url: string;
+          p_event_id: string;
+          p_event_type: string;
+          p_registration_fee: number;
+          p_start_date: string;
+          p_title: string;
+          p_venue: string;
         };
         Returns: Json;
       };
@@ -390,7 +432,24 @@ export type Database = {
       PaymentStatus: "pending" | "verified";
     };
     CompositeTypes: {
-      [_ in never]: never;
+      registration_list_item: {
+        event_id: string | null;
+        registration_id: string | null;
+        affiliation: string | null;
+        registration_date: string | null;
+        payment_status: string | null;
+        payment_method: string | null;
+        payment_image_path: string | null;
+        business_member_id: string | null;
+        business_name: string | null;
+        is_member: boolean | null;
+        principal_participant: Json | null;
+      };
+      registration_stats: {
+        total: number | null;
+        verified: number | null;
+        pending: number | null;
+      };
     };
   };
 };
