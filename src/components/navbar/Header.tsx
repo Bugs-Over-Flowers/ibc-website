@@ -7,11 +7,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-interface HeaderProps {
-  onNavigate: (page: string) => void;
-}
-
-export function Header({ onNavigate }: HeaderProps) {
+export function Header({ onNavigate }: { onNavigate: (page: string) => void }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 

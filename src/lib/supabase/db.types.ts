@@ -189,6 +189,7 @@ export type Database = {
       };
       Event: {
         Row: {
+          status: string;
           description: string | null;
           eventEndDate: string | null;
           eventHeaderUrl: string | null;
