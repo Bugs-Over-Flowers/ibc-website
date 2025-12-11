@@ -402,10 +402,10 @@ export type Database = {
           p_event_id: string;
           p_member_type: string;
           p_non_member_name?: string;
-          p_other_registrants?: Json;
+          p_other_participants?: Json;
           p_payment_method?: string;
           p_payment_path?: string;
-          p_principal_registrant?: Json;
+          p_registrant?: Json;
         };
         Returns: Json;
       };

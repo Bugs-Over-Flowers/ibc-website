@@ -127,3 +127,22 @@ export function setParamsOrDelete(
 
   return params.toString();
 }
+export const getEnv = (key: string) => {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Missing environment variable: ${key}`);
+  }
+  return value;
+};
+
+/**
+ *  Delays execution for the specified number of milliseconds.
+ * Can be used to simulate network latency, other asynchronous operations,
+ * or for animation purposes.
+ *
+ * @param ms - The number of milliseconds to delay
+ * @returns A promise that resolves after the specified delay
+ */
+export const delay = async (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};

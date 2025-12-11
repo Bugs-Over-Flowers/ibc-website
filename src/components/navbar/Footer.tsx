@@ -1,20 +1,18 @@
 "use client";
 
-import { Facebook, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
+import { Facebook, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 
-interface FooterProps {
-  onNavigate?: (page: string) => void;
-}
+// hi bes remove ko lang anay ang onNavigate -wends
 
-export function Footer({ onNavigate }: FooterProps) {
+export function Footer() {
   const quickLinks = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Members", href: "/members" },
-    { name: "Events", href: "/events" },
+    { name: "Home", href: "#home" },
+    { name: "About", href: "#about" },
+    { name: "Members", href: "#members" },
+    { name: "Events", href: "#events" },
   ];
 
   const socialLinks = [
