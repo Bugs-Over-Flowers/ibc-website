@@ -24,7 +24,7 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
   return (
     <Field data-invalid={isInvalid}>
       {label && <Label>{label}</Label>}
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover onOpenChange={setOpen} open={open}>
         <PopoverTrigger asChild>
           <Button>
             {field.state.value
@@ -34,17 +34,17 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
           </Button>
         </PopoverTrigger>
         <Calendar
-          mode="single"
           captionLayout="dropdown"
+          className={className}
+          data-invalid={isInvalid}
           defaultMonth={new Date(Date.now())}
-          selected={field.state.value}
+          mode="single"
+          numberOfMonths={2}
           onSelect={(date) => {
             field.handleChange(date);
             setOpen(false);
           }}
-          numberOfMonths={2}
-          className={className}
-          data-invalid={isInvalid}
+          selected={field.state.value}
         />
       </Popover>
       {description && <FieldDescription>{description}</FieldDescription>}

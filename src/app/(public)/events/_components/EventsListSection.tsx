@@ -1,13 +1,13 @@
 import { cookies } from "next/headers";
 import tryCatch from "@/lib/server/tryCatch";
-import { getAllEvents } from "@/server/events/queries";
+import { getAllEvents } from "@/server/events/queries/getEventById";
 import { EventsList } from "./EventsList";
 
 export default async function EventsListSection() {
-  const [error, events] = await tryCatch(
+  const { error, data: events } = await tryCatch(
     getAllEvents((await cookies()).getAll()),
   );
-  console.log("[EventsListSection] Error fetching events:");
+  console.log("[EventsListSection] Error fetching events:", error);
 
   if (error || !events) {
     return (

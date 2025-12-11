@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "./ui/button";
 import {
@@ -25,7 +27,7 @@ export default function TermsAndConditions({
   const handleClose = () => setIsOpen(false);
 
   return (
-    <Dialog open={isOpen} onOpenChange={(isOpen) => setIsOpen(isOpen)}>
+    <Dialog onOpenChange={(isOpen) => setIsOpen(isOpen)} open={isOpen}>
       <DialogTrigger asChild={triggerOverride !== undefined}>
         {triggerOverride || <>Terms and Conditions</>}
       </DialogTrigger>

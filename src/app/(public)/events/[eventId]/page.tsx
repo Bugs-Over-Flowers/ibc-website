@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { Footer } from "@/components/navbar/Footer";
 import { Header } from "@/components/navbar/Header";
-import { getEventById } from "@/server/events/queries";
+import { getEventById } from "@/server/events/queries/getEventById";
 import { EventDetailsContent } from "../_components/EventDetailsContent";
 import { EventDetailsHero } from "../_components/EventDetailsHero";
 import EventPageDetailsLoading from "./loading";
