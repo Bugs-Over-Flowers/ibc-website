@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Calendar } from "lucide-react";
 import { useMemo, useState } from "react";
-import { staggerContainer } from "@/components/animations/stagger";
+import { staggerContainer } from "@/lib/animations/stagger";
 import { getEventCategory } from "@/lib/events/eventUtils";
 import type { Tables } from "@/lib/supabase/db.types";
 import { EventCard } from "./EventCard";
@@ -76,13 +76,13 @@ export function EventsList({ events }: EventsListProps) {
 
   const EmptyState = () => (
     <motion.div
-      initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="text-center py-16 col-span-full"
+      className="col-span-full py-16 text-center"
+      initial={{ opacity: 0 }}
     >
-      <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-12 shadow-lg ring-1 ring-white/50 max-w-md mx-auto">
-        <Calendar className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-foreground mb-2">
+      <div className="mx-auto max-w-md rounded-2xl bg-white/60 p-12 shadow-lg ring-1 ring-white/50 backdrop-blur-xl">
+        <Calendar className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50" />
+        <h3 className="mb-2 font-bold text-foreground text-xl">
           No Events Found
         </h3>
         <p className="text-muted-foreground">
@@ -95,14 +95,14 @@ export function EventsList({ events }: EventsListProps) {
   );
 
   return (
-    <section className="py-12 relative overflow-hidden">
+    <section className="relative overflow-hidden py-12">
       {/* Background Blur Orbs */}
       <motion.div
-        className="absolute top-1/4 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px]"
         animate={{
           scale: [1, 1.1, 1],
           opacity: [0.05, 0.1, 0.05],
         }}
+        className="absolute top-1/4 left-0 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[120px]"
         transition={{
           duration: 8,
           repeat: Number.POSITIVE_INFINITY,
@@ -110,11 +110,11 @@ export function EventsList({ events }: EventsListProps) {
         }}
       />
       <motion.div
-        className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px]"
         animate={{
           scale: [1, 1.15, 1],
           opacity: [0.05, 0.12, 0.05],
         }}
+        className="absolute right-0 bottom-1/4 h-[500px] w-[500px] rounded-full bg-accent/10 blur-[120px]"
         transition={{
           duration: 10,
           repeat: Number.POSITIVE_INFINITY,
@@ -123,19 +123,19 @@ export function EventsList({ events }: EventsListProps) {
         }}
       />
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {ongoingEvents.length > 0 && (
           <FeaturedEventList events={ongoingEvents} />
         )}
 
         {/* Section Header for Other Events */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          className="mb-10 text-center"
+          initial={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-center mb-10"
         >
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+          <h2 className="font-bold text-2xl text-foreground md:text-3xl">
             {filter === "upcoming"
               ? "Upcoming Events"
               : filter === "past"
@@ -145,9 +145,9 @@ export function EventsList({ events }: EventsListProps) {
         </motion.div>
         <div className="mb-12">
           <EventsSearch
-            onSearch={setSearchQuery}
-            onFilterChange={setFilter}
             currentFilter={filter}
+            onFilterChange={setFilter}
+            onSearch={setSearchQuery}
           />
         </div>
         {/* Events Grid */}
@@ -155,13 +155,13 @@ export function EventsList({ events }: EventsListProps) {
           <EmptyState />
         ) : (
           <motion.div
-            initial="hidden"
             animate="visible"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+            initial="hidden"
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {filteredEvents.map((event) => (
-              <EventCard key={event.eventId} event={event} />
+              <EventCard event={event} key={event.eventId} />
             ))}
           </motion.div>
         )}

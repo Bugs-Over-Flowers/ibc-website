@@ -11,9 +11,9 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { slideVariants } from "@/components/animations/slide";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { slideVariants } from "@/lib/animations/slide";
 import { formatDate } from "@/lib/events/eventUtils";
 import type { Tables } from "@/lib/supabase/db.types";
 
@@ -63,85 +63,85 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
       className="mb-16"
+      initial={{ opacity: 0, y: 30 }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      <div className="bg-linear-to-br from-primary/5 via-accent/5 to-transparent rounded-3xl p-6 md:p-8 relative overflow-hidden">
-        <AnimatePresence initial={false} custom={direction} mode="wait">
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-primary/5 via-accent/5 to-transparent p-6 md:p-8">
+        <AnimatePresence custom={direction} initial={false} mode="wait">
           <motion.div
-            key={currentIndex}
-            custom={direction}
-            variants={slideVariants}
-            initial="enter"
             animate="center"
+            className="flex flex-col items-center gap-8 lg:flex-row"
+            custom={direction}
             exit="exit"
+            initial="enter"
+            key={currentIndex}
             transition={{
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 },
             }}
-            className="flex flex-col lg:flex-row gap-8 items-center"
+            variants={slideVariants}
           >
-            <div className="relative w-full lg:w-1/2 aspect-4/3 rounded-2xl overflow-hidden shadow-xl">
+            <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl shadow-xl lg:w-1/2">
               <Image
+                alt={currentEvent.eventTitle}
+                className="object-cover"
+                fill
                 src={
                   currentEvent.eventHeaderUrl ||
                   "/placeholder.svg?height=400&width=600&query=business+conference+event"
                 }
-                alt={currentEvent.eventTitle}
-                fill
-                className="object-cover"
               />
             </div>
 
-            <div className="flex-1 w-full lg:w-1/2">
-              <div className="flex items-center gap-3 mb-4">
+            <div className="w-full flex-1 lg:w-1/2">
+              <div className="mb-4 flex items-center gap-3">
                 <Badge className="bg-primary text-primary-foreground shadow-lg">
-                  <span className="relative flex h-2 w-2 mr-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                  <span className="relative mr-1.5 flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
                   </span>
                   Happening Now
                 </Badge>
-                <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4" />
+                <span className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                  <Calendar className="h-4 w-4" />
                   {formatDate(currentEvent.eventStartDate)}
                 </span>
               </div>
 
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4 leading-tight">
+              <h2 className="mb-4 font-bold text-2xl text-foreground leading-tight md:text-3xl lg:text-4xl">
                 {currentEvent.eventTitle}
               </h2>
 
               {currentEvent.description && (
-                <p className="text-muted-foreground mb-6 leading-relaxed line-clamp-3 text-base md:text-lg">
+                <p className="mb-6 line-clamp-3 text-base text-muted-foreground leading-relaxed md:text-lg">
                   {currentEvent.description}
                 </p>
               )}
 
-              <div className="flex items-center gap-2 text-muted-foreground mb-6">
-                <MapPin className="w-4 h-4 text-primary" />
+              <div className="mb-6 flex items-center gap-2 text-muted-foreground">
+                <MapPin className="h-4 w-4 text-primary" />
                 <span>{currentEvent.venue || "Venue TBA"}</span>
               </div>
 
               <div className="flex gap-4">
                 <Button
                   asChild
+                  className="rounded-full bg-foreground px-8 text-background hover:bg-foreground/90"
                   size="lg"
-                  className="bg-foreground hover:bg-foreground/90 text-background rounded-full px-8"
                 >
                   <Link href={`/events/${currentEvent.eventId}`}>
                     View Event
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button
+                  className="rounded-full px-8"
                   size="lg"
                   variant="outline"
-                  className="rounded-full px-8"
                 >
                   Register Now
                 </Button>
@@ -153,34 +153,34 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
         {hasMultipleEvents && (
           <>
             <button
-              type="button"
-              onClick={handlePrev}
-              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur-sm hover:bg-white rounded-full p-2 shadow-lg transition-all"
               aria-label="Previous event"
+              className="-translate-y-1/2 absolute top-1/2 left-2 z-10 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:left-4"
+              onClick={handlePrev}
+              type="button"
             >
-              <ChevronLeft className="w-5 h-5 text-foreground" />
+              <ChevronLeft className="h-5 w-5 text-foreground" />
             </button>
             <button
-              type="button"
-              onClick={handleNext}
-              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur-sm hover:bg-white rounded-full p-2 shadow-lg transition-all"
               aria-label="Next event"
+              className="-translate-y-1/2 absolute top-1/2 right-2 z-10 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:right-4"
+              onClick={handleNext}
+              type="button"
             >
-              <ChevronRight className="w-5 h-5 text-foreground" />
+              <ChevronRight className="h-5 w-5 text-foreground" />
             </button>
 
-            <div className="flex justify-center gap-2 mt-6">
+            <div className="mt-6 flex justify-center gap-2">
               {events.map((event, index) => (
                 <button
-                  type="button"
-                  key={`event-dot-${event.eventId}`}
-                  onClick={() => handleDotClick(index)}
+                  aria-label={`Go to event ${index + 1}`}
                   className={`h-2 rounded-full transition-all duration-300 ${
                     index === currentIndex
                       ? "w-8 bg-primary"
                       : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
                   }`}
-                  aria-label={`Go to event ${index + 1}`}
+                  key={`event-dot-${event.eventId}`}
+                  onClick={() => handleDotClick(index)}
+                  type="button"
                 />
               ))}
             </div>

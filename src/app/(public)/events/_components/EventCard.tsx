@@ -16,7 +16,7 @@ import type { Tables } from "@/lib/supabase/db.types";
 
 type Event = Tables<"Event">;
 
-import { fadeInUp } from "@/components/animations/fade";
+import { fadeInUp } from "@/lib/animations/fade";
 
 interface EventCardProps {
   event: Event;
@@ -38,65 +38,65 @@ export function EventCard({ event }: EventCardProps) {
 
   return (
     <motion.div
-      variants={fadeInUp}
-      className="group h-full flex w-full max-w-[400px] mx-auto rounded-xl"
+      className="group mx-auto flex h-full w-full max-w-[400px] rounded-xl"
       onClick={() => router.push(`/events/${event.eventId}`)}
-      role="button"
-      tabIndex={0}
-      style={{ cursor: "pointer" }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           router.push(`/events/${event.eventId}`);
         }
       }}
+      role="button"
+      style={{ cursor: "pointer" }}
+      tabIndex={0}
+      variants={fadeInUp}
     >
-      <Card className="bg-white/80 backdrop-blur-xl py-0 rounded-2xl shadow-lg ring-1 ring-border/50 overflow-hidden hover:shadow-xl hover:ring-primary/20 transition-all duration-300 flex flex-col h-full min-h-[480px] w-full">
+      <Card className="flex h-full min-h-[480px] w-full flex-col overflow-hidden rounded-2xl bg-white/80 py-0 shadow-lg ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300 hover:shadow-xl hover:ring-primary/20">
         {/* Image */}
         <div className="relative aspect-4/3 overflow-hidden">
           <Image
+            alt={event.eventTitle}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
             src={
               event.eventHeaderUrl ||
               "/placeholder.svg?height=300&width=400&query=business+event"
             }
-            alt={event.eventTitle}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           {/* Status Badge */}
           <div className="absolute top-3 left-3">
             {status === "ongoing" && (
               <Badge className="bg-primary text-primary-foreground shadow-lg">
-                <span className="relative flex h-2 w-2 mr-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                <span className="relative mr-1.5 flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
                 </span>
                 Ongoing
               </Badge>
             )}
             {status === "upcoming" && (
               <Badge
+                className="bg-destructive/90 text-white shadow-lg backdrop-blur-sm"
                 variant="secondary"
-                className="bg-destructive/90 backdrop-blur-sm text-white shadow-lg"
               >
                 Upcoming
               </Badge>
             )}
             {status === "past" && (
               <Badge
+                className="border-muted bg-muted/80 text-muted-foreground shadow-lg backdrop-blur-sm"
                 variant="outline"
-                className="bg-muted/80 backdrop-blur-sm text-muted-foreground border-muted shadow-lg"
               >
                 Past Event
               </Badge>
             )}
           </div>
           {/* Registration Fee Badge */}
-          <div className="absolute bottom-3 right-3">
+          <div className="absolute right-3 bottom-3">
             <Badge
               className={
                 event.registrationFee === 0
-                  ? "bg-primary/90 text-primary-foreground shadow-md px-3 py-1 text-xs font-semibold"
-                  : "bg-muted/80 text-foreground shadow-md px-3 py-1 text-xs font-semibold"
+                  ? "bg-primary/90 px-3 py-1 font-semibold text-primary-foreground text-xs shadow-md"
+                  : "bg-muted/80 px-3 py-1 font-semibold text-foreground text-xs shadow-md"
               }
             >
               {event.registrationFee === 0
@@ -105,55 +105,55 @@ export function EventCard({ event }: EventCardProps) {
             </Badge>
           </div>
         </div>
-        <CardContent className="p-5 flex flex-col flex-1">
+        <CardContent className="flex flex-1 flex-col p-5">
           {/* Title */}
-          <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors leading-tight">
+          <h3 className="mb-2 line-clamp-2 font-bold text-foreground text-lg leading-tight transition-colors group-hover:text-primary">
             {event.eventTitle}
           </h3>
           {/* Description */}
           {event.description && (
-            <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">
+            <p className="mb-4 line-clamp-2 text-muted-foreground text-sm leading-relaxed">
               {event.description}
             </p>
           )}
 
           {/* Meta Info */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+          <div className="mb-3 flex items-center gap-4 text-muted-foreground text-sm">
             <span className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-primary" />
+              <Calendar className="h-4 w-4 text-primary" />
               {formatDate(event.eventStartDate)}
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+          <div className="mb-4 flex items-center gap-4 text-muted-foreground text-sm">
             <span className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-primary" />
+              <Clock className="h-4 w-4 text-primary" />
               {formatTime(event.eventStartDate, event.eventEndDate) ||
                 "Time TBA"}
             </span>
           </div>
           {/* Action Buttons at Bottom */}
-          <div className="flex flex-col gap-2 mt-auto">
+          <div className="mt-auto flex flex-col gap-2">
             {status !== "past" && (
               <Button
-                variant="default"
-                className="w-full border-primary rounded-xl transition-all"
+                className="w-full rounded-xl border-primary transition-all"
                 onClick={handleRegisterClick}
                 tabIndex={0}
                 type="button"
+                variant="default"
               >
                 Register Now
               </Button>
             )}
             <Button
-              variant="outline"
-              className="w-full rounded-xl text-primary hover:text-primary-foreground transition-all bg "
-              tabIndex={0}
-              type="button"
+              className="bg w-full rounded-xl text-primary transition-all hover:text-primary-foreground"
               onClick={(e) => {
                 e.stopPropagation();
                 router.push(`/events/${event.eventId}`);
               }}
+              tabIndex={0}
+              type="button"
+              variant="outline"
             >
               Read more
             </Button>

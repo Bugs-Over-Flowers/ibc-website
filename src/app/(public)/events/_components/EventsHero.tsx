@@ -2,38 +2,38 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { fadeInUp } from "@/components/animations/fade";
-import { staggerContainer } from "@/components/animations/stagger";
+import { fadeInUp } from "@/lib/animations/fade";
+import { staggerContainer } from "@/lib/animations/stagger";
 
 export function EventsHero() {
   return (
-    <section className="relative pt-32 pb-16 overflow-hidden min-h-[60vh] flex items-center">
+    <section className="relative flex min-h-[60vh] items-center overflow-hidden pt-32 pb-16">
       {/* Static Background Image */}
       <motion.div
-        initial={{ opacity: 0, scale: 1.1 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
         className="absolute inset-0"
+        initial={{ opacity: 0, scale: 1.1 }}
+        transition={{ duration: 1.2, ease: "easeInOut" }}
       >
         <Image
-          src="https://picsum.photos/seed/picsum/200/300"
           alt="Events background"
-          fill
           className="object-cover"
+          fill
           priority
+          src="https://picsum.photos/seed/picsum/200/300"
         />
         <div className="absolute inset-0 bg-linear-to-b from-[#2E2A6E]/70 via-[#2E2A6E]/50" />
       </motion.div>
 
       {/* Animated Blur Orbs */}
       <motion.div
-        className="absolute top-20 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[100px]"
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.2, 0.35, 0.2],
           x: [0, 30, 0],
           y: [0, -20, 0],
         }}
+        className="absolute top-20 right-0 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[100px]"
         transition={{
           duration: 8,
           repeat: Number.POSITIVE_INFINITY,
@@ -42,22 +42,22 @@ export function EventsHero() {
       />
 
       {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial="hidden"
           animate="visible"
+          className="mx-auto max-w-3xl text-center"
+          initial="hidden"
           variants={staggerContainer}
-          className="text-center max-w-3xl mx-auto"
         >
           <motion.h1
+            className="mb-6 font-bold text-4xl text-white drop-shadow-lg md:text-5xl lg:text-6xl"
             variants={fadeInUp}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-lg"
           >
             IBC Events
           </motion.h1>
           <motion.p
+            className="text-lg text-white/90 leading-relaxed drop-shadow-md"
             variants={fadeInUp}
-            className="text-white/90 text-lg leading-relaxed drop-shadow-md"
           >
             Discover upcoming events, seminars, and networking opportunities
             organized by the Iloilo Business Club. Connect with fellow business

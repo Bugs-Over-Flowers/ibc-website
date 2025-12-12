@@ -13,10 +13,10 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { fadeInUp } from "@/components/animations/fade";
-import { staggerContainer } from "@/components/animations/stagger";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { fadeInUp } from "@/lib/animations/fade";
+import { staggerContainer } from "@/lib/animations/stagger";
 import type { Tables } from "@/lib/supabase/db.types";
 
 type Event = Tables<"Event">;
@@ -37,22 +37,22 @@ export default function EventRegistrationCard({
 
   return (
     <motion.div
-      initial="hidden"
       animate="visible"
-      variants={staggerContainer}
       className="lg:col-span-2"
+      initial="hidden"
+      variants={staggerContainer}
     >
       <motion.div variants={fadeInUp}>
-        <Card className="sticky top-24 border-0 bg-card/80 backdrop-blur-xl shadow-lg ring-1 ring-border/50 rounded-2xl">
-          <CardContent className="p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
+        <Card className="sticky top-24 rounded-2xl border-0 bg-card/80 shadow-lg ring-1 ring-border/50 backdrop-blur-xl">
+          <CardContent className="rounded-2xl p-6">
+            <h3 className="mb-4 font-semibold text-foreground text-lg">
               Registration
             </h3>
 
             {/* Registration Fee */}
-            <div className="flex items-center justify-between py-3 border-b border-border">
+            <div className="flex items-center justify-between border-border border-b py-3">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Banknote className="w-4 h-4" />
+                <Banknote className="h-4 w-4" />
                 <span className="text-md">Registration Fee</span>
               </div>
               <span className="font-bold text-foreground text-lg">
@@ -63,9 +63,9 @@ export default function EventRegistrationCard({
             </div>
 
             {/* Available Slots */}
-            <div className="flex items-center justify-between py-3 border-b border-border">
+            <div className="flex items-center justify-between border-border border-b py-3">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Users className="w-4 h-4" />
+                <Users className="h-4 w-4" />
                 <span className="text-sm">Available Slots</span>
               </div>
               <span className="font-medium text-primary">Open</span>
@@ -74,26 +74,26 @@ export default function EventRegistrationCard({
             {/* Action Buttons */}
             <div className="mt-6 space-y-3">
               <Button
+                className="h-12 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
                 size="lg"
-                className="w-full bg-primary rounded-2xl hover:bg-primary/90 text-primary-foreground h-12 font-semibold"
               >
                 Register for This Event
               </Button>
 
               <Button
+                className="h-12 w-full rounded-2xl border-border bg-transparent text-foreground hover:bg-accent"
                 size="lg"
                 variant="outline"
-                className="w-full rounded-2xl border-border hover:bg-accent h-12 text-foreground bg-transparent"
               >
-                <MessageSquare className="w-4 h-4 mr-2" />
+                <MessageSquare className="mr-2 h-4 w-4" />
                 Submit Feedback
               </Button>
             </div>
 
             {/* Share Section */}
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
-                <Share2 className="w-4 h-4" />
+            <div className="mt-6 border-border border-t pt-6">
+              <p className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
+                <Share2 className="h-4 w-4" />
                 Share this event
               </p>
               <div className="flex gap-2">
@@ -103,28 +103,28 @@ export default function EventRegistrationCard({
                   { icon: Linkedin, label: "LinkedIn" },
                 ].map(({ icon: Icon, label }) => (
                   <Button
+                    aria-label={`Share on ${label}`}
+                    className="flex-1 rounded-lg bg-muted p-2.5 transition-colors hover:bg-accent"
                     key={label}
+                    size="icon"
                     type="button"
                     variant="ghost"
-                    size="icon"
-                    className="flex-1 p-2.5 bg-muted hover:bg-accent rounded-lg transition-colors"
-                    aria-label={`Share on ${label}`}
                   >
-                    <Icon className="w-4 h-4 text-foreground mx-auto" />
+                    <Icon className="mx-auto h-4 w-4 text-foreground" />
                   </Button>
                 ))}
                 <Button
-                  type="button"
-                  onClick={handleCopyLink}
-                  variant="ghost"
-                  size="icon"
-                  className="flex-1 p-2.5 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
                   aria-label="Copy link"
+                  className="flex-1 rounded-lg bg-primary/10 p-2.5 transition-colors hover:bg-primary/20"
+                  onClick={handleCopyLink}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
                 >
                   {copied ? (
-                    <Check className="w-4 h-4 text-primary mx-auto" />
+                    <Check className="mx-auto h-4 w-4 text-primary" />
                   ) : (
-                    <Copy className="w-4 h-4 text-primary mx-auto" />
+                    <Copy className="mx-auto h-4 w-4 text-primary" />
                   )}
                 </Button>
               </div>

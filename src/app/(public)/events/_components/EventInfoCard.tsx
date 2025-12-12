@@ -7,10 +7,10 @@ import type { Tables } from "@/lib/supabase/db.types";
 type Event = Tables<"Event">;
 
 import { Calendar, Clock, MapPin, Sparkles } from "lucide-react";
-import { fadeInUp } from "@/components/animations/fade";
-import { staggerContainer } from "@/components/animations/stagger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { fadeInUp } from "@/lib/animations/fade";
+import { staggerContainer } from "@/lib/animations/stagger";
 import { formatDate, formatTime } from "@/lib/events/eventUtils";
 
 interface EventInfoCardProps {
@@ -30,37 +30,37 @@ export function EventInfoCard({ event }: EventInfoCardProps) {
 
   return (
     <motion.div
-      initial="hidden"
       animate="visible"
+      className="space-y-6 lg:col-span-3"
+      initial="hidden"
       variants={staggerContainer}
-      className="lg:col-span-3 space-y-6"
     >
       {/* Title and Badge */}
       <motion.div variants={fadeInUp}>
-        <div className="flex flex-wrap items-center gap-2 mb-3">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           {ongoing && (
-            <Badge className="bg-primary text-primary-foreground border-0 text-xs">
-              <Sparkles className="w-3 h-3 mr-1" />
+            <Badge className="border-0 bg-primary text-primary-foreground text-xs">
+              <Sparkles className="mr-1 h-3 w-3" />
               Happening Now
             </Badge>
           )}
         </div>
 
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight">
+        <h1 className="font-bold text-2xl text-foreground leading-tight sm:text-3xl md:text-4xl">
           {event.eventTitle}
         </h1>
       </motion.div>
 
-      <motion.div variants={fadeInUp} className="flex flex-col gap-3">
+      <motion.div className="flex flex-col gap-3" variants={fadeInUp}>
         {/* Location */}
         <div className="flex items-center gap-3 text-muted-foreground">
-          <MapPin className="w-5 h-5 text-primary" />
+          <MapPin className="h-5 w-5 text-primary" />
           <span className="text-foreground">{event.venue || "TBA"}</span>
         </div>
 
         {/* Date */}
         <div className="flex items-center gap-3 text-muted-foreground">
-          <Calendar className="w-5 h-5 text-primary" />
+          <Calendar className="h-5 w-5 text-primary" />
           <span className="text-foreground">
             {formatDate(event.eventStartDate)} -{" "}
             {formatDate(event.eventEndDate)}
@@ -69,7 +69,7 @@ export function EventInfoCard({ event }: EventInfoCardProps) {
 
         {/* Time */}
         <div className="flex items-center gap-3 text-muted-foreground">
-          <Clock className="w-5 h-5 text-primary" />
+          <Clock className="h-5 w-5 text-primary" />
           <span className="text-foreground">
             {formatTime(event.eventStartDate, event.eventEndDate)}
           </span>
@@ -87,11 +87,11 @@ export function EventInfoCard({ event }: EventInfoCardProps) {
         </p>
         {event.description && event.description.length > 300 && (
           <Button
+            className="mt-2 px-2 font-medium text-primary text-sm transition-colors hover:text-primary/80"
+            onClick={() => setExpanded(!expanded)}
+            size="sm"
             type="button"
             variant="ghost"
-            size="sm"
-            onClick={() => setExpanded(!expanded)}
-            className="text-primary hover:text-primary/80 font-medium text-sm mt-2 transition-colors px-2"
           >
             {expanded ? "Show Less" : "Read More"}
           </Button>
