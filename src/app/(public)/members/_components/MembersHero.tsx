@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { fadeInUp } from "@/lib/animations/fade";
+import { staggerContainer } from "@/lib/animations/stagger";
 // import { fadeInUp } from "@/components/animations/fade";
 // import { staggerContainer } from "@/components/animations/stagger";
 
@@ -22,7 +24,9 @@ export function MembersHero() {
           priority
           src="/images/backgrounds/bg-4.jpg"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-[#2E2A6E]/70 via-[#2E2A6E]/50" />
+        {/* New gradient overlay */}
+        <div className="absolute inset-0 bg-linear-to-br from-foreground/95 via-foreground/85 to-primary/40" />
+        {/* Existing blue overlay */}
       </motion.div>
 
       {/* Animated Blur Orbs */}
@@ -46,18 +50,18 @@ export function MembersHero() {
         <motion.div
           animate="visible"
           className="mx-auto max-w-3xl text-center"
-          // variants={staggerContainer}
           initial="hidden"
+          variants={staggerContainer}
         >
           <motion.h1
-            // variants={fadeInUp}
             className="mb-6 font-bold text-4xl text-white drop-shadow-lg md:text-5xl lg:text-6xl"
+            variants={fadeInUp}
           >
             IBC Members
           </motion.h1>
           <motion.p
-            // variants={fadeInUp}
             className="text-lg text-white/90 leading-relaxed drop-shadow-md"
+            variants={fadeInUp}
           >
             Meet the Iloilo Business Club members, discover their stories, and
             connect with the region's top business leaders and organizations.
