@@ -71,11 +71,8 @@ export function Header() {
               </a>
             ))}
             <div className="ml-2 flex items-center gap-3">
-              <Button
-                asChild
-                className="border border-white/20 bg-primary/90 text-primary-foreground shadow-lg backdrop-blur-sm hover:bg-primary"
-              >
-                <a href="/membership-application">Join Now</a>
+              <Button className="border border-white/20 bg-primary/90 text-primary-foreground shadow-lg backdrop-blur-sm hover:bg-primary">
+                Join Now
               </Button>
             </div>
           </div>
