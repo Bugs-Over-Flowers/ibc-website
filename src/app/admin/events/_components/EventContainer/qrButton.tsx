@@ -5,7 +5,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 interface QrButtonProps {
   eventId: string;
-  onAction?: () => void;
+  onAction: () => void;
 }
 
 export default function QrButton({ eventId, onAction }: QrButtonProps) {

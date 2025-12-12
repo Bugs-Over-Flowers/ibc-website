@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
 import { getEvents } from "@/server/events/actions/getAllEvents";
-import EventFilters from "./eventFilters";
-import EventTable from "./eventTable";
+import EventFilters from "./EventFilters";
+import EventTable from "./EventTable";
 
 interface SearchParams {
-  search?: string;
-  sort?: string;
-  status?: string;
+  search: string;
+  sort: string;
+  status: string;
 }
 
 export default async function EventsContents({

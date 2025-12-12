@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import type { EventWithStatus } from "../../types/event";
-import EventActionsDropdown from "./eventActionsDropdown";
+import EventActionsDropdown from "./EventActionsDropdown";
 
 interface EventRowProps {
   event: EventWithStatus;

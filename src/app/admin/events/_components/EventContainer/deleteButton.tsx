@@ -5,25 +5,12 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import tryCatch from "@/lib/server/tryCatch";
 import { deleteEvents } from "../../../../../server/events/actions/deleteEvents";
 
 interface DeleteButtonProps {
   id: string;
-  onAction?: () => void;
-}
-
-async function tryCatch<T>(
-  promise: Promise<T>,
-): Promise<
-  | { success: true; data: T; error: null }
-  | { success: false; data: null; error: unknown }
-> {
-  try {
-    const data = await promise;
-    return { success: true, data, error: null };
-  } catch (error) {
-    return { success: false, data: null, error };
-  }
+  onAction: () => void;
 }
 
 export default function DeleteButton({ id, onAction }: DeleteButtonProps) {
@@ -47,16 +34,8 @@ export default function DeleteButton({ id, onAction }: DeleteButtonProps) {
 
         let errorMessage = "Failed to delete event";
 
-        if (result.error instanceof Error) {
-          errorMessage = result.error.message;
-        } else if (typeof result.error === "string") {
+        if (result.error) {
           errorMessage = result.error;
-        } else if (
-          result.error &&
-          typeof result.error === "object" &&
-          "message" in result.error
-        ) {
-          errorMessage = String(result.error.message);
         }
 
         toast.error(errorMessage);

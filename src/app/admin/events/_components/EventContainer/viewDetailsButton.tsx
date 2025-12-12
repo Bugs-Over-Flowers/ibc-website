@@ -5,7 +5,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 interface ViewDetailsButtonProps {
   eventId: string;
-  onAction?: () => void;
+  onAction: () => void;
 }
 
 export default function ViewDetailsButton({

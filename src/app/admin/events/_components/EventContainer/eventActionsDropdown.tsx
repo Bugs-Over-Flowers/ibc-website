@@ -8,9 +8,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import DeleteButton from "./deleteButton";
-import QrButton from "./qrButton";
-import ViewDetailsButton from "./viewDetailsButton";
+import DeleteButton from "./DeleteButton";
+import QrButton from "./QrButton";
+import ViewDetailsButton from "./ViewDetailsButton";
 
 interface EventActionsDropdownProps {
   eventId: string;

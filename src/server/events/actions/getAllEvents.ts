@@ -4,9 +4,9 @@ import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
 import { getEventStatus } from "./helpers";
 
-export async function getEvents(
+export async function getAllEvents(
   requestCookies: RequestCookie[],
-  { search, sort, status }: { search?: string; sort?: string; status?: string },
+  { search, sort, status }: { search: string; sort: string; status: string },
 ) {
   const supabase = await createClient(requestCookies);
 

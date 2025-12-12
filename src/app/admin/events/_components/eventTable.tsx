@@ -7,8 +7,8 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import type { EventWithStatus } from "../types/event";
-import CreateEventButton from "./createEventButton";
-import EventRow from "./EventContainer/eventRow";
+import CreateEventButton from "./CreateEventButton";
+import EventRow from "./EventContainer/EventRow";
 
 interface EventTableProps {
   events: EventWithStatus[];
