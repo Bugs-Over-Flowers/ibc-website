@@ -49,7 +49,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
           className="object-cover"
           fill
           priority
-          src="/images/backgrounds/bg-1.jpg"
+          src="/images/backgrounds/iloilo-2.jpg"
         />
       </motion.div>
 
