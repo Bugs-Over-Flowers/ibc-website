@@ -32,17 +32,15 @@ export default function EventActionsDropdown({
       <DropdownMenuTrigger asChild>
         <button
           aria-label="Event actions"
-          className="rounded-md p-2 transition-colors hover:bg-gray-100"
+          className="rounded-full p-2 transition-colors hover:bg-gray-100 md:rounded-md"
           type="button"
         >
           <MoreVertical size={20} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-56 md:w-48" sideOffset={10}>
         <ViewDetailsButton eventId={eventId} onAction={handleAction} />
-
         <QrButton eventId={eventId} onAction={handleAction} />
-
         {status === "draft" && (
           <>
             <DropdownMenuSeparator />

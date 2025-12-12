@@ -25,15 +25,29 @@ export default async function EventsContents({
 
   return (
     <div className="select-none space-y-6 px-2">
-      <div className="flex items-center justify-between">
-        <h1 className="font-bold text-3xl text-gray-900">Events Management</h1>
-        <div className="text-gray-500 text-sm">
-          {events.length} events found
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h1 className="font-bold text-2xl text-gray-900 md:text-3xl">
+            Events Management
+          </h1>
+          <p className="mt-1 text-gray-500 text-sm">
+            Manage and organize your events
+          </p>
+        </div>
+        <div className="rounded-lg bg-gray-50 px-4 py-3 md:px-5 md:py-3">
+          <div className="font-medium text-gray-500 text-sm md:text-base">
+            {events.length} event{events.length !== 1 ? "s" : ""} found
+          </div>
         </div>
       </div>
 
-      <EventFilters />
-      <EventTable events={events} />
+      <div className="rounded-lg border bg-white p-4 md:p-6">
+        <EventFilters />
+      </div>
+
+      <div className="rounded-lg border bg-white p-4 md:border-0 md:p-0">
+        <EventTable events={events} />
+      </div>
     </div>
   );
 }

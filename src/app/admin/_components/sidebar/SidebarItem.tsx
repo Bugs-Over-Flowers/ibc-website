@@ -1,3 +1,5 @@
+"use client";
+
 import type { LucideIcon } from "lucide-react";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -8,6 +10,7 @@ interface SidebarItemProps {
   href: string;
   isActive: boolean;
   variant?: "default" | "destructive";
+  onNavigate?: () => void;
 }
 
 export function SidebarItem({

@@ -39,7 +39,11 @@ const menuItems = [
   },
 ];
 
-export function AdminSidebarMenu() {
+interface AdminSidebarMenuProps {
+  onNavigate?: () => void;
+}
+
+export function AdminSidebarMenu({ onNavigate }: AdminSidebarMenuProps) {
   const pathname = usePathname();
 
   return (
@@ -57,6 +61,7 @@ export function AdminSidebarMenu() {
               icon={item.icon}
               isActive={isActive}
               key={item.title}
+              onNavigate={onNavigate}
               title={item.title}
             />
           );

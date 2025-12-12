@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Empty,
   EmptyContent,
@@ -34,10 +36,16 @@ export default function EventTable({ events }: EventTableProps) {
   }
 
   return (
-    <div className="w-full space-y-4">
-      {events.map((ev) => (
-        <EventRow event={ev} key={ev.eventId} />
-      ))}
+    <div className="w-full space-y-4 md:space-y-6">
+      <div className="rounded-lg bg-blue-50 px-3 py-2 font-medium text-blue-700 text-sm md:hidden">
+        {events.length} event{events.length !== 1 ? "s" : ""}
+      </div>
+
+      <div className="space-y-4 md:space-y-6">
+        {events.map((ev) => (
+          <EventRow event={ev} key={ev.eventId} />
+        ))}
+      </div>
     </div>
   );
 }
