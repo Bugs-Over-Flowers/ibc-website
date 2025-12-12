@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,9 +11,10 @@ export const getRegistrationEventDetails = async (
   { eventId }: GetRegistrationEventDetailsParams,
 ) => {
   "use cache";
+  cacheLife("seconds");
 
   const supabase = await createClient(requestCookies);
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("Event")
     .select(
       `eventId,
@@ -27,9 +29,12 @@ export const getRegistrationEventDetails = async (
        `,
     )
     .eq("eventId", eventId)
-    .maybeSingle()
-    .throwOnError();
+    .maybeSingle();
 
+  if (error && error.code === "22P02") {
+    console.log("Invalid eventId");
+    throw new Error("Invalid event. Please return to the events page");
+  }
   if (!data) {
     console.log("No event");
     throw new Error("No event found");
