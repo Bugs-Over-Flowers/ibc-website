@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import tryCatch from "@/lib/server/tryCatch";
-import { getRegistrationData } from "@/server/registration/queries/getRegistrationEventDetails";
+import { getRegistrationData } from "@/server/registration/queries/getRegistrationData";
 import RegistrationDetails from "./_components/RegistrationDetails";
 
 type RegistrationPageParams =
@@ -45,5 +45,7 @@ async function RegistrationDetailsPage({
     );
   }
 
-  return <RegistrationDetails details={registration} />;
+  console.log(registration.signedUrl);
+
+  return <RegistrationDetails data={registration} />;
 }

@@ -404,7 +404,7 @@ export type Database = {
           p_non_member_name?: string;
           p_other_participants?: Json;
           p_payment_method?: string;
-          p_payment_proof_url?: string;
+          p_payment_path?: string;
           p_registrant?: Json;
         };
         Returns: Json;
@@ -443,7 +443,7 @@ export type Database = {
         business_member_id: string | null;
         business_name: string | null;
         is_member: boolean | null;
-        principal_participant: Json | null;
+        registrant: Json | null;
       };
       registration_stats: {
         total: number | null;

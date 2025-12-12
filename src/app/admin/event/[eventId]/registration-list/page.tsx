@@ -4,19 +4,18 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TabsContent } from "@/components/ui/tabs";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
 import {
   getRegistrationList,
   getRegistrationListStats,
 } from "@/server/events/queries/getRegistrationList";
-import {
-  RegistrationListStatsSkeleton,
-  RegistrationListTableSkeleton,
-} from "./_components/page-skeletons";
-import RegistrationList from "./_components/RegistrationList";
-import RegistrationSearchAndFilter from "./_components/RegistrationSearchAndFilter";
-import RegistrationStatsComponent from "./_components/RegistrationStatsComponent";
+import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
+import RegistrationTabs from "./_components/RegistrationsTabs";
+import RegistrationList from "./_components/registrations/RegistrationList";
+import RegistrationSearchAndFilter from "./_components/registrations/RegistrationSearchAndFilter";
+import RegistrationStatsComponent from "./_components/registrations/RegistrationStatsComponent";
 
 type RegistrationListPageProps =
   PageProps<"/admin/event/[eventId]/registration-list">;
@@ -35,18 +34,32 @@ export default function RegistrationPageWrapper({
       >
         <BackButton params={params} />
       </Suspense>
-      <Suspense fallback={<RegistrationListStatsSkeleton />}>
-        <RegistrationListStats params={params} searchParams={searchParams} />
-      </Suspense>
-      <Suspense
-        fallback={<Skeleton className="h-32 rounded-xl bg-neutral-200" />}
-      >
-        <RegistrationSearchAndFilter />
-      </Suspense>
+      <RegistrationTabs>
+        <TabsContent className="flex flex-col gap-4" value="registrations">
+          <Suspense fallback={<StatsSkeleton />}>
+            <RegistrationListStats
+              params={params}
+              searchParams={searchParams}
+            />
+          </Suspense>
+          <Suspense
+            fallback={<Skeleton className="h-32 rounded-xl bg-neutral-200" />}
+          >
+            <RegistrationSearchAndFilter />
+          </Suspense>
 
-      <Suspense fallback={<RegistrationListTableSkeleton />}>
-        <RegistrationListTable params={params} searchParams={searchParams} />
-      </Suspense>
+          <Suspense fallback={<TableSkeleton />}>
+            <RegistrationListTable
+              params={params}
+              searchParams={searchParams}
+            />
+          </Suspense>
+        </TabsContent>
+        <TabsContent
+          className="flex flex-col gap-4"
+          value="registrations"
+        ></TabsContent>
+      </RegistrationTabs>
     </main>
   );
 }

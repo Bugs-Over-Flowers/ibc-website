@@ -15,7 +15,7 @@ import {
  *
  * Skeletons
  */
-export function RegistrationListStatsSkeleton() {
+export function StatsSkeleton() {
   return (
     <div className="flex w-full flex-col justify-between gap-2 md:flex-row md:gap-4">
       {[
@@ -43,7 +43,7 @@ export function RegistrationListStatsSkeleton() {
   );
 }
 
-export function RegistrationListTableSkeleton() {
+export function TableSkeleton() {
   return (
     <div className="rounded-md border">
       <Table>

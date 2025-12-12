@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cacheLife, cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,6 +13,8 @@ export const getRegistrationEventDetails = async (
   { eventId }: GetRegistrationEventDetailsParams,
 ) => {
   "use cache";
+  cacheLife("seconds");
+  cacheTag("getRegistrationEventDetails");
 
   const supabase = await createClient(requestCookies);
   const { data } = await supabase
@@ -37,70 +40,4 @@ export const getRegistrationEventDetails = async (
   }
 
   return data;
-};
-
-export const getRegistrationData = async (
-  requestCookies: RequestCookie[],
-  {
-    registrationId,
-  }: {
-    registrationId: string;
-  },
-) => {
-  "use cache";
-
-  const supabase = await createClient(requestCookies);
-  const { data } = await supabase
-    .from("Registration")
-    .select(
-      `registrationId,
-       event:Event(eventId, eventTitle, eventType),
-       paymentMethod,
-       paymentStatus,
-       registrationDate,
-       businessMember:BusinessMember(businessMemberId, businessName),
-       nonMemberName
-       `,
-    )
-    .eq("registrationId", registrationId)
-    .single()
-    .throwOnError();
-
-  if (!data) {
-    throw new Error("No registration found");
-  }
-
-  const affiliation = data.businessMember
-    ? data.businessMember.businessName
-    : data.nonMemberName;
-
-  const mappedData = {
-    ...data,
-    isMember: !!data.businessMember,
-    affiliation,
-  };
-
-  // get people under the registration
-  const { data: participants } = await supabase
-    .from("Participant")
-    .select()
-    .eq("registrationId", registrationId)
-    .throwOnError();
-
-  // get proof of payment under registration
-  const { data: proofOfPayment } = await supabase
-    .from("ProofImage")
-    .select(`path`)
-    .eq("registrationId", registrationId)
-    .maybeSingle()
-    .throwOnError();
-
-  return {
-    ...mappedData,
-    registrant: participants.filter(
-      (participant) => participant.isPrincipal,
-    )[0],
-    participants,
-    paymentImagePath: proofOfPayment?.path ?? null,
-  };
 };

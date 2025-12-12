@@ -24,7 +24,7 @@ export const RegistrationDataBaseSchema = z.object({
   paymentStatus: z.enum(PaymentStatus),
   paymentMethod: z.enum(PaymentMethod),
   paymentImagePath: z.string().nullable(),
-  principalParticipant: ParticipantSchema.extend({
+  registrant: ParticipantSchema.extend({
     isPrincipal: z.literal(true),
   }),
 });
@@ -55,7 +55,7 @@ export const RegistrationListRPCSchema = z
     business_member_id: z.uuid().nullable(),
     business_name: z.string().nullable(),
     is_member: z.boolean(),
-    principal_participant: ParticipantSchema.extend({
+    registrant: ParticipantSchema.extend({
       isPrincipal: z.literal(true),
     }),
   })
@@ -72,7 +72,7 @@ export const RegistrationListRPCSchema = z
         businessMemberId: val.business_member_id,
         businessName: val.business_name,
         isMember: val.is_member,
-        principalParticipant: val.principal_participant,
+        registrant: val.registrant,
       }),
     ),
   );

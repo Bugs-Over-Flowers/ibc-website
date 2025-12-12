@@ -11,7 +11,6 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,14 +21,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import type { getRegistrationData } from "@/server/registration/queries/getRegistrationEventDetails";
-import RegistrationRowActions from "../../../_components/RegistrationRowActions";
+import type { getRegistrationData } from "@/server/registration/queries/getRegistrationData";
+import RegistrationRowActions from "../../../_components/registrations/RegistrationRowActions";
+import OnlinePaymentSection from "./OnlinePaymentSection";
+import ParticipantCard from "./ParticipantCard";
 
-export default function RegistrationDetails({
-  details,
+export default function Registrationdata({
+  data,
 }: {
-  details: Awaited<ReturnType<typeof getRegistrationData>>;
+  data: Awaited<ReturnType<typeof getRegistrationData>>;
 }) {
   const router = useRouter();
 
@@ -63,13 +63,13 @@ export default function RegistrationDetails({
           </Button>
           <div>
             <h1 className="font-bold text-2xl tracking-tight">
-              Registration Details
+              Registration data
             </h1>
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <Calendar className="h-3.5 w-3.5" />
               <span>
                 Registered on{" "}
-                {format(new Date(details.registrationDate), "MMMM dd, yyyy")}
+                {format(new Date(data.registrationDate), "MMMM dd, yyyy")}
               </span>
             </div>
           </div>
@@ -77,10 +77,11 @@ export default function RegistrationDetails({
         <div className="flex items-center gap-2">
           <RegistrationRowActions
             data={{
-              email: details.registrant.email,
-              eventId: details.event.eventId,
-              registrationId: details.registrationId,
-              paymentStatus: details.paymentStatus,
+              email: data.registrant.email,
+              eventId: data.event.eventId,
+              registrationId: data.registrationId,
+              paymentStatus: data.paymentStatus,
+              proofOfPaymentImageURL: data.signedUrl,
             }}
             isDetailsPage
           />
@@ -103,34 +104,20 @@ export default function RegistrationDetails({
                 <p className="font-medium text-muted-foreground text-sm">
                   Event
                 </p>
-                <p className="font-medium">{details.event.eventTitle}</p>
+                <p className="font-medium">{data.event.eventTitle}</p>
               </div>
               <div className="space-y-1">
                 <p className="font-medium text-muted-foreground text-sm">
                   Affiliation
                 </p>
-                <p className="font-medium">{details.affiliation || "N/A"}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="font-medium text-muted-foreground text-sm">
-                  Payment Status
-                </p>
-                <Badge
-                  className={cn(
-                    "capitalize",
-                    getStatusColor(details.paymentStatus),
-                  )}
-                  variant="outline"
-                >
-                  {details.paymentStatus}
-                </Badge>
+                <p className="font-medium">{data.affiliation}</p>
               </div>
               <div className="space-y-1">
                 <p className="font-medium text-muted-foreground text-sm">
                   Registration ID
                 </p>
                 <p className="break-all font-mono text-muted-foreground text-xs">
-                  {details.registrationId}
+                  {data.registrationId}
                 </p>
               </div>
             </CardContent>
@@ -143,19 +130,26 @@ export default function RegistrationDetails({
                 <Users className="h-5 w-5" />
                 Participants
                 <Badge className="ml-2" variant="secondary">
-                  {details.participants.length}
+                  {data.otherParticipants.length + 1}
                 </Badge>
               </h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              {details.participants.map((participant) => (
+              <ParticipantCard
+                contactNumber={data.registrant.contactNumber}
+                email={data.registrant.email}
+                fullName={`${data.registrant.firstName} ${data.registrant.lastName}`}
+                key={data.registrant.participantId}
+                registrant={data.registrant.isPrincipal}
+              />
+              {data.otherParticipants.map((participant) => (
                 <ParticipantCard
                   contactNumber={participant.contactNumber}
                   email={participant.email}
                   fullName={`${participant.firstName} ${participant.lastName}`}
-                  isPrincipal={participant.isPrincipal}
                   key={participant.participantId}
+                  registrant={participant.isPrincipal}
                 />
               ))}
             </div>
@@ -177,15 +171,15 @@ export default function RegistrationDetails({
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
-                  {details.registrant.firstName[0]}
-                  {details.registrant.lastName[0]}
+                  {data.registrant.firstName[0]}
+                  {data.registrant.lastName[0]}
                 </div>
                 <div>
                   <p className="font-medium leading-none">
-                    {details.registrant.firstName} {details.registrant.lastName}
+                    {data.registrant.firstName} {data.registrant.lastName}
                   </p>
                   <p className="mt-1 text-muted-foreground text-sm">
-                    Principal Registrant
+                    Registrant
                   </p>
                 </div>
               </div>
@@ -195,86 +189,48 @@ export default function RegistrationDetails({
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <a
                     className="truncate hover:underline"
-                    href={`mailto:${details.registrant.email}`}
+                    href={`mailto:${data.registrant.email}`}
                   >
-                    {details.registrant.email}
+                    {data.registrant.email}
                   </a>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <a
                     className="hover:underline"
-                    href={`tel:${details.registrant.contactNumber}`}
+                    href={`tel:${data.registrant.contactNumber}`}
                   >
-                    {details.registrant.contactNumber}
+                    {data.registrant.contactNumber}
                   </a>
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Payment Details Section*/}
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-2">
+                Payment Method
+                <span>
+                  <Badge> {data.paymentMethod}</Badge>
+                </span>
+              </div>
+              {data.signedUrl && data.signedUrl !== "" && (
+                <OnlinePaymentSection
+                  getStatusColor={getStatusColor}
+                  paymentStatus={data.paymentStatus}
+                  proofImageURL={data.signedUrl}
+                  registrationId={data.registrationId}
+                />
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </main>
-  );
-}
-
-interface ParticipantCardProps {
-  fullName: string;
-  email: string;
-  contactNumber: string;
-  isPrincipal?: boolean;
-}
-
-function ParticipantCard({
-  fullName,
-  email,
-  contactNumber,
-  isPrincipal,
-}: ParticipantCardProps) {
-  return (
-    <Card
-      className={cn(
-        "transition-all hover:shadow-sm",
-        isPrincipal && "border-primary/50 bg-primary/5",
-      )}
-    >
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full font-bold text-xs",
-                isPrincipal
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground",
-              )}
-            >
-              {fullName
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </div>
-            <div>
-              <CardTitle className="text-base">{fullName}</CardTitle>
-              {isPrincipal && (
-                <p className="font-medium text-primary text-xs">Principal</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-2 text-sm">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Mail className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">{email}</span>
-        </div>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Phone className="h-3.5 w-3.5 shrink-0" />
-          <span>{contactNumber}</span>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

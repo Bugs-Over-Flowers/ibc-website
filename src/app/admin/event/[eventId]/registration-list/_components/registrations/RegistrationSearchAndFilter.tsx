@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { setParamsOrDelete } from "@/lib/utils";
-import { useSearchForm } from "../_hooks/useSearchForm";
+import { useSearchForm } from "../../_hooks/useSearchForm";
 
 export default function RegistrationSearchAndFilter() {
   const searchParams = useSearchParams();
