@@ -219,14 +219,16 @@ export default function Registrationdata({
                   <Badge> {data.paymentMethod}</Badge>
                 </span>
               </div>
-              {data.signedUrl && data.signedUrl !== "" && (
-                <OnlinePaymentSection
-                  getStatusColor={getStatusColor}
-                  paymentStatus={data.paymentStatus}
-                  proofImageURL={data.signedUrl}
-                  registrationId={data.registrationId}
-                />
-              )}
+              {data.signedUrl &&
+                typeof data.signedUrl === "string" &&
+                data.signedUrl.trim() !== "" && (
+                  <OnlinePaymentSection
+                    getStatusColor={getStatusColor}
+                    paymentStatus={data.paymentStatus}
+                    proofImageURL={data.signedUrl.trim()}
+                    registrationId={data.registrationId}
+                  />
+                )}
             </CardContent>
           </Card>
         </div>

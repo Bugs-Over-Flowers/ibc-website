@@ -1,6 +1,6 @@
 "use client";
+
 import type { ColumnDef } from "@tanstack/react-table";
-import type * as React from "react";
 import { DataTable } from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -95,12 +95,10 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   },
 ];
 
-const RegistrationList: React.FC<RegistrationListProps> = ({
+export default function RegistrationList({
   registrationList,
-}: RegistrationListProps) => {
+}: RegistrationListProps) {
   return (
     <DataTable columns={registrationListColumns} data={registrationList} />
   );
-};
-
-export default RegistrationList;
+}

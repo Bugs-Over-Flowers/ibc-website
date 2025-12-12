@@ -62,7 +62,9 @@ export default function RegistrationRowActions({
       </DropdownMenu>
       <QRCodeDialog
         email={data.email}
+        eventId={data.eventId}
         open={qrcodeDialog}
+        registrationId={data.registrationId}
         setOpen={setQrcodeDialog}
       />
     </>

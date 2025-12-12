@@ -6,10 +6,10 @@ interface RegistrationTabsProps {
 
 export default function RegistrationTabs({ children }: RegistrationTabsProps) {
   return (
-    <Tabs defaultValue="participants">
+    <Tabs defaultValue="registrations">
       <TabsList>
-        <TabsTrigger value="participants">Participants</TabsTrigger>
         <TabsTrigger value="registrations">Registrations</TabsTrigger>
+        <TabsTrigger value="participants">Participants</TabsTrigger>
       </TabsList>
       {children}
     </Tabs>

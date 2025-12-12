@@ -1,24 +1,19 @@
 import type { Route } from "next";
-import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
-import tryCatch from "@/lib/server/tryCatch";
-import { parseStringParam } from "@/lib/utils";
-import {
-  getRegistrationList,
-  getRegistrationListStats,
-} from "@/server/events/queries/getRegistrationList";
+import BackButton from "./_components/BackButton";
 import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
+import RegistrationListStats from "./_components/RegistrationListStats";
 import RegistrationTabs from "./_components/RegistrationsTabs";
-import RegistrationList from "./_components/registrations/RegistrationList";
+import RegistrationListTable from "./_components/registrations/RegistrationListTable";
 import RegistrationSearchAndFilter from "./_components/registrations/RegistrationSearchAndFilter";
-import RegistrationStatsComponent from "./_components/registrations/RegistrationStatsComponent";
 
 type RegistrationListPageProps =
   PageProps<"/admin/event/[eventId]/registration-list">;
+
 export default function RegistrationPageWrapper({
   params,
   searchParams,
@@ -62,70 +57,4 @@ export default function RegistrationPageWrapper({
       </RegistrationTabs>
     </main>
   );
-}
-
-async function BackButton({
-  params,
-}: {
-  params: RegistrationListPageProps["params"];
-}) {
-  const { eventId } = await params;
-  return (
-    <Link className="w-max" href={`/admin/event/${eventId}` as Route}>
-      <Button>Back to Event Page</Button>
-    </Link>
-  );
-}
-
-async function RegistrationListStats({
-  params,
-  searchParams,
-}: RegistrationListPageProps) {
-  const { eventId } = await params;
-  const { q, paymentStatus } = await searchParams;
-
-  const cookieStore = await cookies();
-  const registrationList = await tryCatch(
-    getRegistrationListStats(cookieStore.getAll(), {
-      eventId,
-      searchString: parseStringParam(q),
-      paymentStatus: parseStringParam(paymentStatus),
-    }),
-  );
-
-  if (!registrationList.success) {
-    return <div>Error: {registrationList.error}</div>;
-  }
-
-  const { total, verified, pending } = registrationList.data;
-
-  return (
-    <RegistrationStatsComponent
-      pending={pending}
-      total={total}
-      verified={verified}
-    />
-  );
-}
-
-async function RegistrationListTable({
-  params,
-  searchParams,
-}: RegistrationListPageProps) {
-  const { eventId } = await params;
-  const { q, paymentStatus } = await searchParams;
-  const cookieStore = await cookies();
-
-  const registrationList = await tryCatch(
-    getRegistrationList(cookieStore.getAll(), {
-      eventId,
-      searchString: parseStringParam(q),
-      paymentStatus: parseStringParam(paymentStatus),
-    }),
-  );
-
-  if (!registrationList.success) {
-    return <div>Error: {registrationList.error}</div>;
-  }
-  return <RegistrationList registrationList={registrationList.data} />;
 }

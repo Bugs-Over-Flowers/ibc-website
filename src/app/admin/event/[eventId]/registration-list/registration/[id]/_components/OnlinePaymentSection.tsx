@@ -22,6 +22,12 @@ export default function OnlinePaymentSection({
   proofImageURL,
   registrationId,
 }: OnlinePaymentSectionProps) {
+  // Early validation - ensure URL is valid before any rendering
+  const validProofImageURL =
+    proofImageURL && typeof proofImageURL === "string"
+      ? proofImageURL.trim()
+      : null;
+
   const {
     execute: verify,
     optimistic: optimisticPaymentStatus,
@@ -36,7 +42,7 @@ export default function OnlinePaymentSection({
     },
   });
   const hasProofImage = Boolean(
-    proofImageURL && proofImageURL.trim().length > 0,
+    validProofImageURL && validProofImageURL.length > 0,
   );
 
   return (
@@ -48,7 +54,7 @@ export default function OnlinePaymentSection({
               alt="Proof of Payment Image"
               className="object-contain"
               fill
-              src={(proofImageURL as string).trim()}
+              src={validProofImageURL as string}
             />
           </ImageZoom>
           <div className="text-neutral-600">click on the image to zoom in</div>
