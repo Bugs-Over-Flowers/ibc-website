@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import EventsContents from "./_components/eventsContents";
+import EventsContents from "./_components/EventsContents";
 
 interface SearchParams {
   search?: string;

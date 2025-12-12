@@ -6,7 +6,7 @@ import { getEventStatus } from "./helpers";
 
 export async function getAllEvents(
   requestCookies: RequestCookie[],
-  { search, sort, status }: { search: string; sort: string; status: string },
+  { search, sort, status }: { search?: string; sort?: string; status?: string },
 ) {
   const supabase = await createClient(requestCookies);
 

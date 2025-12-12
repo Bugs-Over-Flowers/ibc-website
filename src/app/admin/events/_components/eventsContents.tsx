@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
-import { getEvents } from "@/server/events/actions/getAllEvents";
+import { getAllEvents } from "@/server/events/actions/getAllEvents";
 import EventFilters from "./EventFilters";
 import EventTable from "./EventTable";
 
 interface SearchParams {
-  search: string;
-  sort: string;
-  status: string;
+  search?: string;
+  sort?: string;
+  status?: string;
 }
 
 export default async function EventsContents({
@@ -17,7 +17,7 @@ export default async function EventsContents({
   const sp = await searchParams;
   const cookieStore = await cookies();
 
-  const events = await getEvents(cookieStore.getAll(), {
+  const events = await getAllEvents(cookieStore.getAll(), {
     search: sp.search,
     sort: sp.sort,
     status: sp.status,

@@ -2,11 +2,11 @@
 
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 import { toast } from "sonner";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { deleteEvents } from "../../../../../server/events/actions/deleteEvents";
+import { deleteEvents } from "@/server/events/actions/deleteEvents";
 
 interface DeleteButtonProps {
   id: string;
@@ -14,8 +14,19 @@ interface DeleteButtonProps {
 }
 
 export default function DeleteButton({ id, onAction }: DeleteButtonProps) {
-  const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const deleteAction = tryCatch(deleteEvents);
+
+  const { execute, isPending } = useAction(deleteAction, {
+    onSuccess: () => {
+      router.refresh();
+      toast.success("Event deleted successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to delete event", error);
+      toast.error(typeof error === "string" ? error : "Failed to delete event");
+    },
+  });
 
   const handleDelete = async () => {
     if (onAction) onAction();
@@ -23,24 +34,7 @@ export default function DeleteButton({ id, onAction }: DeleteButtonProps) {
       return;
     }
 
-    startTransition(async () => {
-      const result = await tryCatch(deleteEvents(id));
-
-      if (result.success) {
-        router.refresh();
-        toast.success("Event deleted successfully");
-      } else {
-        console.error("Failed to delete event", result.error);
-
-        let errorMessage = "Failed to delete event";
-
-        if (result.error) {
-          errorMessage = result.error;
-        }
-
-        toast.error(errorMessage);
-      }
-    });
+    execute(id);
   };
 
   return (
