@@ -69,6 +69,11 @@ const formatDateRange = (startDate: string | null, endDate: string | null) => {
   return `${startFormatted} - ${endFormatted}`;
 };
 
+function truncate(str: string, max: number) {
+  if (!str) return "";
+  return str.length > max ? str.slice(0, max - 1) + "…" : str;
+}
+
 export function EventSlide({
   event,
   direction,
@@ -118,7 +123,7 @@ export function EventSlide({
       <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
         <motion.div
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-2xl"
+          className="w-full max-w-5xl text-left md:max-w-6xl md:text-left lg:max-w-7xl xl:max-w-[90vw]"
           initial={{ opacity: 0, y: 30 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
@@ -141,8 +146,10 @@ export function EventSlide({
           {/* Event Title */}
           <motion.h2
             animate={{ opacity: 1, y: 0 }}
-            className="mb-5 text-balance font-bold text-3xl text-primary-foreground leading-tight sm:text-4xl lg:text-5xl xl:text-6xl"
+            className="mb-5 line-clamp-2 text-balance font-bold text-primary-foreground text-xl leading-tight sm:text-3xl lg:text-4xl xl:text-5xl"
             initial={{ opacity: 0, y: 20 }}
+            style={{ wordBreak: "break-word", hyphens: "auto" }}
+            title={event.eventTitle}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             {event.eventTitle}
@@ -151,8 +158,10 @@ export function EventSlide({
           {/* Event Description */}
           <motion.p
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 line-clamp-3 text-pretty text-base text-primary-foreground/80 leading-relaxed sm:text-lg lg:text-xl"
+            className="mb-8 line-clamp-3 text-pretty text-primary-foreground/80 text-sm leading-relaxed sm:text-base lg:text-lg xl:text-xl"
             initial={{ opacity: 0, y: 20 }}
+            style={{ wordBreak: "break-word", hyphens: "auto" }}
+            title={event.description || "Join us for this exciting event!"}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
             {event.description || "Join us for this exciting event!"}
