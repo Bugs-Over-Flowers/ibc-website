@@ -19,17 +19,17 @@ export default function EventFilters() {
     const params = new URLSearchParams(searchParams.toString());
     if (value) params.set(key, value);
     else params.delete(key);
-    router.push(`${pathname}?${params.toString()}` as any);
+    router.push(`${pathname}?${params.toString()}`);
   }
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row">
       {/* Search */}
       <Input
-        defaultValue={searchParams.get("search") || ""}
-        placeholder="Search title or venue..."
-        onChange={(e) => updateFilters("search", e.target.value)}
         className="sm:flex-1"
+        defaultValue={searchParams.get("search") || ""}
+        onChange={(e) => updateFilters("search", e.target.value)}
+        placeholder="Search title or venue..."
       />
 
       {/* Sort */}

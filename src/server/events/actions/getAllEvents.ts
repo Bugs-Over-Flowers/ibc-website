@@ -10,19 +10,7 @@ export async function getEvents(
 ) {
   const supabase = await createClient(requestCookies);
 
-  let query = supabase.from("Event").select(`
-    eventId,
-    eventTitle,
-    eventHeaderUrl,
-    description,
-    eventStartDate,
-    eventEndDate,
-    venue,
-    eventType,
-    registrationFee,
-    updatedAt,
-    publishedAt
-  `);
+  let query = supabase.from("Event").select(`*`);
 
   if (search && search.trim().length > 0) {
     query = query.or(`eventTitle.ilike.%${search}%, venue.ilike.%${search}%`);
