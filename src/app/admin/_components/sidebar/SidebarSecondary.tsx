@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Settings } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { SidebarGroup, SidebarMenu } from "@/components/ui/sidebar";
 import { SidebarItem } from "./SidebarItem";
@@ -14,7 +14,7 @@ const secondaryItems = [
   {
     title: "Logout",
     icon: LogOut,
-    href: "/logout",
+    href: "/auth",
     variant: "destructive" as const,
   },
 ];
