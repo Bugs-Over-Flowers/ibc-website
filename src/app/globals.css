@@ -281,3 +281,19 @@
 .hover-underline-animation.right:hover::after {
   transform-origin: bottom right;
 }
+
+@media (max-width: 768px) {
+  .mobile-header {
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-content {
+    transition: padding-top 0.3s ease;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+}
