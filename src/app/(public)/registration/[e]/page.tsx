@@ -1,4 +1,5 @@
 import { ChevronLeft } from "lucide-react";
+import type { Route } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -6,7 +7,7 @@ import RegistrationForm from "@/app/(public)/registration/[e]/_components/forms/
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import tryCatch from "@/lib/server/tryCatch";
-import { getAllMembers } from "@/server/members/queries";
+import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
 import RegistrationInformation from "./_components/RegistrationInformation";
 
@@ -71,12 +72,19 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
     <div className="flex h-full w-full flex-col gap-4 md:flex-row">
       <RegistrationInformation {...eventData} />
       <div className="flex h-full w-full flex-col gap-4 p-5">
-        <Link href={"/events"}>
-          <Button variant={"ghost"}>
-            <ChevronLeft />
-            Back to Event
-          </Button>
-        </Link>
+        <div className="flex items-center justify-between gap-2">
+          <Link href={"/events"}>
+            <Button variant={"ghost"}>
+              <ChevronLeft />
+              Back to Event
+            </Button>
+          </Link>
+
+          <Link href={`/registration/${e}/info` as Route}>
+            <Button variant={"outline"}>Back to Info</Button>
+          </Link>
+        </div>
+
         <RegistrationForm members={members} />
       </div>
     </div>

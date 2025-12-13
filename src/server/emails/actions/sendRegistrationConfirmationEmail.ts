@@ -3,7 +3,7 @@
 import { Resend } from "resend";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
-import StandardRegistrationConfirmationTemplate from "@/lib/resend/templates/registration";
+import StandardRegistrationConfirmationTemplate from "@/lib/resend/templates/Registration";
 import { createActionClient } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
