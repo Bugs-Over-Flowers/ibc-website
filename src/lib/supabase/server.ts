@@ -92,3 +92,26 @@ export async function createActionClient() {
     },
   });
 }
+
+/**
+ * Creates a Supabase client with the Service Role key to bypass RLS.
+ * Use this ONLY for admin actions or server-side logic that requires full access.
+ * NEVER expose this client to the client-side.
+ */
+export async function createAdminClient() {
+  const supabase_url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabase_service_role_key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabase_url || !supabase_service_role_key) {
+    throw new Error("Missing Supabase environment variables for admin client");
+  }
+
+  return createServerClient<Database>(supabase_url, supabase_service_role_key, {
+    cookies: {
+      getAll() {
+        return [];
+      },
+      setAll() {},
+    },
+  });
+}

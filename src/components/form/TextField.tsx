@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
 interface TextFieldProps {
-  label?: string;
+  label?: React.ReactNode;
   description?: string;
   className?: string;
   placeholder?: string;
