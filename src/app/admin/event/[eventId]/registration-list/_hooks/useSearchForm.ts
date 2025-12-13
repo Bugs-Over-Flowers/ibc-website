@@ -1,6 +1,6 @@
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useAppForm } from "@/hooks/_formHooks";
 import { setParamsOrDelete } from "@/lib/utils";
 
@@ -10,16 +10,6 @@ interface UseSearchFormOptions {
   scope: SearchFormScope;
 }
 
-/**
- * Debounced URL search param updater.
- *
- * - Avoids triggering a navigation on every blur/interaction.
- * - Avoids redundant pushes when params haven't changed.
- * - Supports namespaced params:
- *   - registrations: reg_q
- *   - participants: part_q
- *   - shared: q
- */
 export const useSearchForm = (options: UseSearchFormOptions) => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -43,7 +33,7 @@ export const useSearchForm = (options: UseSearchFormOptions) => {
         searchParams,
       );
 
-      router.push(`${pathName}?${params.toString()}` as Route);
+      router.replace(`${pathName}?${params.toString()}` as Route);
     },
   });
 

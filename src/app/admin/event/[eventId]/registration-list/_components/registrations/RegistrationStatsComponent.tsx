@@ -14,7 +14,7 @@ export default function RegistrationListStats({
   pending,
 }: RegistrationListStatsProps) {
   return (
-    <div className="flex w-full flex-col justify-between gap-2 md:flex-row md:gap-4">
+    <div className="flex w-full flex-col justify-between gap-2 md:gap-4 lg:flex-row">
       {[
         {
           label: "Total Registrations",

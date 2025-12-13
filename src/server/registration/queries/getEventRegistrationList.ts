@@ -16,7 +16,7 @@ interface GetRegistrationListParams {
   paymentStatus?: string;
 }
 
-export const getRegistrationList = async (
+export const getEventRegistrationList = async (
   requestCookies: RequestCookie[],
   { eventId, searchString, paymentStatus }: GetRegistrationListParams,
 ): Promise<RegistrationItem[]> => {
@@ -38,7 +38,7 @@ export const getRegistrationList = async (
   return RegistrationListRPCSchema.array().parse(query.data);
 };
 
-export const getRegistrationListStats = async (
+export const getEventRegistrationListStats = async (
   requestCookies: RequestCookie[],
   { eventId, searchString, paymentStatus }: GetRegistrationListParams,
 ): Promise<{

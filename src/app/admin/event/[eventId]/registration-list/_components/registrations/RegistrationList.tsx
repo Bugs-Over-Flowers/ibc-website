@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
-import { getRegistrationList } from "@/server/events/queries/getRegistrationList";
+import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import RegistrationListTable from "./RegistrationListTable";
 
 type RegistrationListPageProps =
@@ -16,7 +16,7 @@ export default async function RegistrationList({
   const cookieStore = await cookies();
 
   const registrationList = await tryCatch(
-    getRegistrationList(cookieStore.getAll(), {
+    getEventRegistrationList(cookieStore.getAll(), {
       eventId,
       searchString: parseStringParam(reg_q),
       paymentStatus: parseStringParam(reg_paymentStatus),

@@ -7,12 +7,10 @@ import { TabsContent } from "@/components/ui/tabs";
 import BackButton from "./_components/BackButton";
 import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
 import ParticipantList from "./_components/participants/ParticipantList";
-import { participantListColumns } from "./_components/participants/ParticipantListTable";
 import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";
-import RegistrationListStats from "./_components/RegistrationListStats";
 import RegistrationTabs from "./_components/RegistrationsTabs";
 import RegistrationList from "./_components/registrations/RegistrationList";
-import { registrationListColumns } from "./_components/registrations/RegistrationListTable";
+import RegistrationListStats from "./_components/registrations/RegistrationListStats";
 import RegistrationsSearchAndFilter from "./_components/registrations/RegistrationsSearchAndFilter";
 
 type RegistrationListPageProps =
@@ -51,21 +49,20 @@ export default function RegistrationPageWrapper({
           </Suspense>
 
           {/* Table */}
-          <Suspense
-            fallback={<TableSkeleton columns={registrationListColumns} />}
-          >
+          <Suspense fallback={<TableSkeleton columns={5} />}>
             <RegistrationList params={params} searchParams={searchParams} />
           </Suspense>
         </TabsContent>
         <TabsContent className="flex flex-col gap-4" value="participants">
-          <Suspense>
+          {/* Search and Filter*/}
+          <Suspense
+            fallback={<Skeleton className="h-32 rounded-xl bg-neutral-200" />}
+          >
             <ParticipantsSearchAndFilter />
           </Suspense>
 
-          {/* Table */}
-          <Suspense
-            fallback={<TableSkeleton columns={participantListColumns} />}
-          >
+          {/* Table and export */}
+          <Suspense fallback={<TableSkeleton columns={5} />}>
             <ParticipantList params={params} searchParams={searchParams} />
           </Suspense>
         </TabsContent>

@@ -1,4 +1,4 @@
-import type { ColumnDef } from "@tanstack/react-table";
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: Rendering static items only */
 import { CheckCircle, Clock, Users2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,83 +40,34 @@ export function StatsSkeleton() {
   );
 }
 
-interface TableSkeletonProps<TData = unknown> {
-  columns: ColumnDef<TData>[];
-  rowCount?: number;
+interface TableSkeletonProps {
+  columns: number;
 }
 
-export function TableSkeleton<TData = unknown>({
-  columns,
-  rowCount = 5,
-}: TableSkeletonProps<TData>) {
-  // Extract headers and generate unique keys from column definitions
-  const columnInfo = columns.map((col, idx) => {
-    let header = "";
-    if (typeof col.header === "string") {
-      header = col.header;
-    } else if ("accessorKey" in col && typeof col.accessorKey === "string") {
-      header = col.accessorKey;
-    } else if ("id" in col && typeof col.id === "string") {
-      header = col.id;
-    }
-
-    const colKey =
-      ("accessorKey" in col && typeof col.accessorKey === "string"
-        ? col.accessorKey
-        : undefined) ||
-      ("id" in col && typeof col.id === "string" ? col.id : undefined) ||
-      `skeleton-col-${idx}`;
-
-    return { header, col, colKey };
-  });
-
-  // Determine if a column is likely an actions column (for styling)
-  const isActionsColumn = (col: ColumnDef<TData>, header: string) => {
-    return (
-      header.toLowerCase() === "actions" ||
-      ("id" in col && col.id === "actions") ||
-      ("accessorKey" in col && col.accessorKey === "actions")
-    );
-  };
-
+export function TableSkeleton({ columns }: TableSkeletonProps) {
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            {columnInfo.map(({ header, col, colKey }) => {
-              const isActions = isActionsColumn(col, header);
-              return (
-                <TableHead
-                  className={isActions ? "w-[50px]" : undefined}
-                  key={colKey}
-                >
-                  {header || <Skeleton className="h-4 w-20" />}
-                </TableHead>
-              );
-            })}
+            {Array.from({ length: columns }).map((_, index) => (
+              <TableHead key={index}>Column {index + 1}</TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: rowCount }, (_, rowIndex) => {
-            const rowKey = `skeleton-row-${rowIndex}`;
-            return (
-              <TableRow key={rowKey}>
-                {columnInfo.map(({ col, colKey, header }) => {
-                  const isActions = isActionsColumn(col, header);
-                  return (
-                    <TableCell key={`${rowKey}-${colKey}`}>
-                      {isActions ? (
-                        <Skeleton className="h-8 w-8 rounded-md" />
-                      ) : (
-                        <Skeleton className="h-4 w-32" />
-                      )}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            );
-          })}
+          {Array.from({ length: 5 }).map((_, index) => (
+            <TableRow key={index}>
+              {Array.from({ length: columns }).map((_, index) => (
+                <TableCell key={index}>
+                  <Skeleton className="h-4 w-32" />
+                </TableCell>
+              ))}
+              <TableCell>
+                <Skeleton className="h-4 w-32" />
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>

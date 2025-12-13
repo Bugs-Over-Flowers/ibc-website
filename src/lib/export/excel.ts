@@ -116,7 +116,7 @@ export async function exportToExcel<TData extends Record<string, unknown>>(
           // Handle date strings (ISO format)
           if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
             const date = new Date(value);
-            if (!isNaN(date.getTime())) {
+            if (!Number.isNaN(date.getTime())) {
               return date.toLocaleDateString();
             }
           }

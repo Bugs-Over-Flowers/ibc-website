@@ -1,8 +1,6 @@
 "use client";
 
 import { X } from "lucide-react";
-import type { Route } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   InputGroup,
@@ -19,31 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { setParamsOrDelete } from "@/lib/utils";
 import { useSearchForm } from "../../_hooks/useSearchForm";
+import useSetFilter from "../../_hooks/useSetFilter";
 
 export default function RegistrationSearchAndFilter() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathName = usePathname();
-
   const form = useSearchForm({ scope: "registrations" });
 
-  const setFilter = (filter: "verified" | "pending" | "all") => {
-    const params = setParamsOrDelete(
-      "reg_paymentStatus",
-      filter,
-      ["all"],
-      searchParams,
-    );
-
-    const nextUrl = `${pathName}?${params.toString()}` as Route;
-    const currentUrl = `${pathName}?${searchParams.toString()}` as Route;
-
-    if (nextUrl !== currentUrl) {
-      router.push(nextUrl);
-    }
-  };
+  const { filter, setFilter } = useSetFilter({ scope: "registrations" });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -96,10 +76,7 @@ export default function RegistrationSearchAndFilter() {
         <div className="w-full">
           <div> Payment Status</div>
           <InputGroup className="w-full rounded-md bg-neutral-100 ring-1 ring-neutral-300">
-            <Select
-              onValueChange={setFilter}
-              value={searchParams.get("reg_paymentStatus") || "all"}
-            >
+            <Select onValueChange={setFilter} value={filter}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Payment Status" />
               </SelectTrigger>

@@ -5,6 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -23,6 +24,7 @@ export default function ParticipantRowActions({
         <MoreHorizontal />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuItem
           onSelect={() =>
             router.push(
@@ -31,7 +33,7 @@ export default function ParticipantRowActions({
           }
         >
           <ChevronRight />
-          View Details
+          View Registration Details
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

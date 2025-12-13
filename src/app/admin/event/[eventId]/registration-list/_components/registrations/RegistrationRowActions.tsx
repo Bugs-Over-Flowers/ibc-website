@@ -50,7 +50,7 @@ export default function RegistrationRowActions({
               }
             >
               <ChevronRight />
-              View Details
+              View Registration Details
             </DropdownMenuItem>
           )}
 
