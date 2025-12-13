@@ -1,6 +1,6 @@
 "use client";
 import useRegistrationStore from "@/hooks/registration.store";
-import type { getAllMembers } from "@/server/members/queries";
+import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";

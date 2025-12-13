@@ -19,7 +19,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import useRegistrationStore from "@/hooks/registration.store";
-import type { getAllMembers } from "@/server/members/queries";
+import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep4 } from "../../_hooks/useRegistrationStep4";
 
 interface Step4Props {
