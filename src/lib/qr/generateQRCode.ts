@@ -1,6 +1,7 @@
 import QRcode from "qrcode";
+import { cache } from "react";
 
-export const generateQRDataUrl = async (data: string) => {
+export const generateQRDataUrl = cache(async (data: string) => {
   const qrData = QRcode.toDataURL(data, {
     margin: 2,
     errorCorrectionLevel: "H",
@@ -11,7 +12,7 @@ export const generateQRDataUrl = async (data: string) => {
   });
 
   return qrData;
-};
+});
 
 export async function generateQRBuffer(data: string) {
   // Generate QR code as Buffer

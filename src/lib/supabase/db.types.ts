@@ -82,8 +82,9 @@ export type Database = {
           companyDesignation: string;
           emailAddress: string;
           faxNumber: string;
-          fullName: string;
+          firstName: string;
           landline: string;
+          lastName: string;
           mailingAddress: string;
           mobileNumber: string;
           nationality: string;
@@ -97,8 +98,9 @@ export type Database = {
           companyDesignation: string;
           emailAddress: string;
           faxNumber: string;
-          fullName: string;
+          firstName: string;
           landline: string;
+          lastName: string;
           mailingAddress: string;
           mobileNumber: string;
           nationality: string;
@@ -112,8 +114,9 @@ export type Database = {
           companyDesignation?: string;
           emailAddress?: string;
           faxNumber?: string;
-          fullName?: string;
+          firstName?: string;
           landline?: string;
+          lastName?: string;
           mailingAddress?: string;
           mobileNumber?: string;
           nationality?: string;
@@ -189,7 +192,6 @@ export type Database = {
       };
       Event: {
         Row: {
-          status: string;
           description: string | null;
           eventEndDate: string | null;
           eventHeaderUrl: string | null;
@@ -369,6 +371,20 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      get_event_participant_list: {
+        Args: {
+          p_event_id: string;
+          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
+          p_search_text?: string;
+        };
+        Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
+        SetofOptions: {
+          from: "*";
+          to: "participant_list_item";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       get_registration_list: {
         Args: {
           p_event_id: string;
@@ -405,8 +421,18 @@ export type Database = {
           p_non_member_name?: string;
           p_other_participants?: Json;
           p_payment_method?: string;
-          p_payment_proof_url?: string;
+          p_payment_path?: string;
           p_registrant?: Json;
+        };
+        Returns: Json;
+      };
+      submit_membership_application: {
+        Args: {
+          p_application_type: string;
+          p_company_details: Json;
+          p_payment_method: string;
+          p_payment_proof_url?: string;
+          p_representatives: Json;
         };
         Returns: Json;
       };
@@ -433,6 +459,17 @@ export type Database = {
       PaymentStatus: "pending" | "verified";
     };
     CompositeTypes: {
+      participant_list_item: {
+        participant_id: string | null;
+        first_name: string | null;
+        last_name: string | null;
+        email: string | null;
+        contact_number: string | null;
+        affiliation: string | null;
+        payment_status: Database["public"]["Enums"]["PaymentStatus"] | null;
+        registration_date: string | null;
+        registration_id: string | null;
+      };
       registration_list_item: {
         event_id: string | null;
         registration_id: string | null;
@@ -444,7 +481,7 @@ export type Database = {
         business_member_id: string | null;
         business_name: string | null;
         is_member: boolean | null;
-        principal_participant: Json | null;
+        registrant: Json | null;
       };
       registration_stats: {
         total: number | null;
