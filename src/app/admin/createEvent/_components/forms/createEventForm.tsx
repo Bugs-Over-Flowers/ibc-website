@@ -102,6 +102,14 @@ export function CreateEventForm() {
                   <>
                     <Button
                       disabled={isSubmitting}
+                      onClick={() => router.push("/admin/dashboard")}
+                      type="button"
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      disabled={isSubmitting}
                       onClick={() => {
                         form.setFieldValue("eventType", null);
                         form.handleSubmit();
