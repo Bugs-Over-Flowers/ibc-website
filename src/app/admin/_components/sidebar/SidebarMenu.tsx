@@ -41,9 +41,13 @@ const menuItems = [
 
 interface AdminSidebarMenuProps {
   onNavigate?: () => void;
+  collapsed?: boolean;
 }
 
-export function AdminSidebarMenu({ onNavigate }: AdminSidebarMenuProps) {
+export function AdminSidebarMenu({
+  onNavigate,
+  collapsed,
+}: AdminSidebarMenuProps) {
   const pathname = usePathname();
 
   return (
@@ -57,6 +61,7 @@ export function AdminSidebarMenu({ onNavigate }: AdminSidebarMenuProps) {
 
           return (
             <SidebarItem
+              collapsed={collapsed}
               href={item.href}
               icon={item.icon}
               isActive={isActive}
