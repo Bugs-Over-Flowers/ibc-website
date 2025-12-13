@@ -1,17 +1,13 @@
 "use client";
 
-import { LogIn, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-interface HeaderProps {
-  onNavigate: (page: string) => void;
-}
-
-export function Header({ onNavigate }: HeaderProps) {
+export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -75,22 +71,7 @@ export function Header({ onNavigate }: HeaderProps) {
               </a>
             ))}
             <div className="ml-2 flex items-center gap-3">
-              <Button
-                className={`font-medium text-sm ${
-                  isScrolled
-                    ? "text-foreground/80 hover:bg-primary/10 hover:text-primary"
-                    : "text-white/90 hover:bg-white/10 hover:text-white"
-                }`}
-                onClick={() => onNavigate("admin-login")}
-                variant="ghost"
-              >
-                <LogIn className="mr-2 h-4 w-4" />
-                Sign In
-              </Button>
-              <Button
-                className="border border-white/20 bg-primary/90 text-primary-foreground shadow-lg backdrop-blur-sm hover:bg-primary"
-                onClick={() => onNavigate("membership-application")}
-              >
+              <Button className="border border-white/20 bg-primary/90 text-primary-foreground shadow-lg backdrop-blur-sm hover:bg-primary">
                 Join Now
               </Button>
             </div>
@@ -137,20 +118,9 @@ export function Header({ onNavigate }: HeaderProps) {
                 ))}
                 <div className="flex flex-col gap-3 border-border/50 border-t pt-4">
                   <Button
-                    className="w-full justify-start"
-                    onClick={() => {
-                      onNavigate("admin-login");
-                      setIsMobileMenuOpen(false);
-                    }}
-                    variant="outline"
-                  >
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Sign In
-                  </Button>
-                  <Button
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                     onClick={() => {
-                      onNavigate("membership-application");
+                      // onNavigate("membership-application");
                       setIsMobileMenuOpen(false);
                     }}
                   >

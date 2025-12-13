@@ -26,6 +26,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import tryCatch from "@/lib/server/tryCatch";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
+import EmptySection from "../_components/EmptySection";
 
 type InformationPageProps = PageProps<"/registration/[e]/info">;
 export default function InfoPageWrapper({ params }: InformationPageProps) {
@@ -52,7 +53,7 @@ async function InfoPage({
   );
 
   if (!success) {
-    return <div>{registrationEventDetailsMessage}</div>;
+    return <EmptySection message={registrationEventDetailsMessage} />;
   }
 
   if (data.eventType === null) {
