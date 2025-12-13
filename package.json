@@ -68,6 +68,7 @@
     "@types/node": "^25.0.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "babel-plugin-react-compiler": "^1.0.0",
     "cypress": "^15.7.1",
     "lefthook": "^2.0.11",
     "react-email": "5.0.8",
