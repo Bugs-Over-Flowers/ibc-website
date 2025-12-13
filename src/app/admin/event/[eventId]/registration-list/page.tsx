@@ -6,10 +6,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
 import BackButton from "./_components/BackButton";
 import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
+import ParticipantList from "./_components/participants/ParticipantList";
+import { participantListColumns } from "./_components/participants/ParticipantListTable";
+import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";
 import RegistrationListStats from "./_components/RegistrationListStats";
 import RegistrationTabs from "./_components/RegistrationsTabs";
-import RegistrationListTable from "./_components/registrations/RegistrationListTable";
-import RegistrationSearchAndFilter from "./_components/registrations/RegistrationSearchAndFilter";
+import RegistrationList from "./_components/registrations/RegistrationList";
+import { registrationListColumns } from "./_components/registrations/RegistrationListTable";
+import RegistrationsSearchAndFilter from "./_components/registrations/RegistrationsSearchAndFilter";
 
 type RegistrationListPageProps =
   PageProps<"/admin/event/[eventId]/registration-list">;
@@ -31,29 +35,40 @@ export default function RegistrationPageWrapper({
       </Suspense>
       <RegistrationTabs>
         <TabsContent className="flex flex-col gap-4" value="registrations">
+          {/* Stats */}
           <Suspense fallback={<StatsSkeleton />}>
             <RegistrationListStats
               params={params}
               searchParams={searchParams}
             />
           </Suspense>
+
+          {/* Search and Filter */}
           <Suspense
             fallback={<Skeleton className="h-32 rounded-xl bg-neutral-200" />}
           >
-            <RegistrationSearchAndFilter />
+            <RegistrationsSearchAndFilter />
           </Suspense>
 
-          <Suspense fallback={<TableSkeleton />}>
-            <RegistrationListTable
-              params={params}
-              searchParams={searchParams}
-            />
+          {/* Table */}
+          <Suspense
+            fallback={<TableSkeleton columns={registrationListColumns} />}
+          >
+            <RegistrationList params={params} searchParams={searchParams} />
           </Suspense>
         </TabsContent>
-        <TabsContent
-          className="flex flex-col gap-4"
-          value="registrations"
-        ></TabsContent>
+        <TabsContent className="flex flex-col gap-4" value="participants">
+          <Suspense>
+            <ParticipantsSearchAndFilter />
+          </Suspense>
+
+          {/* Table */}
+          <Suspense
+            fallback={<TableSkeleton columns={participantListColumns} />}
+          >
+            <ParticipantList params={params} searchParams={searchParams} />
+          </Suspense>
+        </TabsContent>
       </RegistrationTabs>
     </main>
   );

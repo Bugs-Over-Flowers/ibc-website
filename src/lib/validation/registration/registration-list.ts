@@ -1,20 +1,12 @@
 import { z } from "zod";
 import { Constants, type Enums } from "@/lib/supabase/db.types";
+import { ParticipantSchema } from "../participant/participant-list";
 
 //
 // Registration List Table Schemas
 //
 const PaymentMethod = Constants.public.Enums.PaymentMethod;
 const PaymentStatus = Constants.public.Enums.PaymentStatus;
-
-export const ParticipantSchema = z.object({
-  participantId: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
-  email: z.email(),
-  contactNumber: z.string(),
-  isPrincipal: z.boolean(),
-});
 
 export const RegistrationDataBaseSchema = z.object({
   eventId: z.string(),

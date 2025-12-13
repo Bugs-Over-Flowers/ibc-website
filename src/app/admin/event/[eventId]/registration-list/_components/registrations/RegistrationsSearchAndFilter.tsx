@@ -27,16 +27,22 @@ export default function RegistrationSearchAndFilter() {
   const router = useRouter();
   const pathName = usePathname();
 
-  const form = useSearchForm();
+  const form = useSearchForm({ scope: "registrations" });
 
   const setFilter = (filter: "verified" | "pending" | "all") => {
     const params = setParamsOrDelete(
-      "paymentStatus",
+      "reg_paymentStatus",
       filter,
       ["all"],
       searchParams,
     );
-    router.push(`${pathName}?${params.toString()}` as Route);
+
+    const nextUrl = `${pathName}?${params.toString()}` as Route;
+    const currentUrl = `${pathName}?${searchParams.toString()}` as Route;
+
+    if (nextUrl !== currentUrl) {
+      router.push(nextUrl);
+    }
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -58,7 +64,6 @@ export default function RegistrationSearchAndFilter() {
                     autoComplete="off"
                     onBlur={() => {
                       field.handleBlur();
-                      form.handleSubmit();
                     }}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="Enter an affiliation, name, or email"
@@ -93,7 +98,7 @@ export default function RegistrationSearchAndFilter() {
           <InputGroup className="w-full rounded-md bg-neutral-100 ring-1 ring-neutral-300">
             <Select
               onValueChange={setFilter}
-              value={searchParams.get("paymentStatus") || "all"}
+              value={searchParams.get("reg_paymentStatus") || "all"}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Payment Status" />
@@ -109,19 +114,6 @@ export default function RegistrationSearchAndFilter() {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <InputGroupAddon align="inline-end" className="pl-2">
-              {searchParams.get("paymentStatus") === "all" && (
-                <InputGroupButton
-                  className="rounded-full"
-                  onClick={() => {
-                    setFilter("all");
-                  }}
-                  size={"icon-xs"}
-                >
-                  <X />
-                </InputGroupButton>
-              )}
-            </InputGroupAddon>
           </InputGroup>
         </div>
       </CardContent>
