@@ -23,7 +23,6 @@ export function SidebarItem({
   isActive,
   variant = "default",
   onNavigate,
-  collapsed = false,
 }: SidebarItemProps) {
   const router = useRouter();
   const isDestructive = variant === "destructive";
