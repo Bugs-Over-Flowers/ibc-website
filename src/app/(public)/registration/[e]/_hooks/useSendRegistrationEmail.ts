@@ -6,6 +6,7 @@ import { RegistrationCheckInQRCodeDecodedSchema } from "@/lib/validation/qr/stan
 import { setCookieData } from "@/server/actions.utils";
 import { encryptRegistrationQR } from "@/server/attendance/actions/encryptRegistrationQR";
 import { sendRegistrationConfirmationEmail } from "@/server/emails/actions/sendRegistrationConfirmationEmail";
+import { deleteRegistration } from "@/server/registration/actions/deleteRegistration";
 
 export const useSendRegistrationEmail = () => {
   const registrationData = useRegistrationStore(
@@ -50,26 +51,35 @@ export const useSendRegistrationEmail = () => {
 
       const selfName = `${registrationData.step2.registrant.firstName} ${registrationData.step2.registrant.lastName}`;
 
-      await sendRegistrationConfirmationEmail({
-        selfName,
-        registrationId: data.registrationId,
-        eventDetails,
-        toEmail: data.email,
-        encodedQRData,
-        otherParticipants: registrationData.step2.otherParticipants
-          ? registrationData.step2.otherParticipants.map((participant) => ({
-              fullName: `${participant.firstName} ${participant.lastName}`,
-              email: participant.email,
-            }))
-          : [],
-      });
+      const { error } = await tryCatch(
+        sendRegistrationConfirmationEmail({
+          selfName,
+          registrationId: data.registrationId,
+          eventDetails,
+          toEmail: data.email,
+          encodedQRData,
+          otherParticipants: registrationData.step2.otherParticipants
+            ? registrationData.step2.otherParticipants.map((participant) => ({
+                fullName: `${participant.firstName} ${participant.lastName}`,
+                email: participant.email,
+              }))
+            : [],
+        }),
+      );
+
+      if (error) {
+        console.error(error);
+        await deleteRegistration(registrationId);
+        throw new Error(error);
+      }
     }),
     {
       onSuccess: () => {
         toast.success("Email sent successfully!");
       },
-      onError: (error) => {
+      onError: async (error) => {
         toast.error(`Email sending failed: ${error}`);
+        // attempt to remove the registration
       },
     },
   );

@@ -4,13 +4,14 @@ import { Resend } from "resend";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import StandardRegistrationConfirmationTemplate from "@/lib/resend/templates/Registration";
-import { createActionClient } from "@/lib/supabase/server";
+import tryCatch from "@/lib/server/tryCatch";
+import { deleteRegistration } from "@/server/registration/actions/deleteRegistration";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface SendRegistrationConfirmationEmailProps {
   toEmail: string;
-  registrationId: string;
+  registrationId: string; // might need later for token
   eventDetails: Pick<
     RegistrationStoreEventDetails,
     "eventTitle" | "eventEndDate" | "eventHeaderUrl" | "eventStartDate"
@@ -55,29 +56,16 @@ export const sendRegistrationConfirmationEmail = async ({
     ],
   });
 
+  console.error("ERROR: ", error);
+
   if (error) {
-    const supabase = await createActionClient();
+    // const { error: deleteRegistrationError } = await tryCatch(
+    //   deleteRegistration(registrationId),
+    // );
 
-    // Get payment proof path FIRST (before deleting registration)
-    const { data: paymentProof } = await supabase
-      .from("ProofImage")
-      .select("path")
-      .eq("registrationId", registrationId)
-      .maybeSingle()
-      .throwOnError();
-
-    // Delete the registration (this may cascade delete ProofImage row)
-    await supabase
-      .from("Registration")
-      .delete()
-      .eq("registrationId", registrationId)
-      .throwOnError();
-
-    // Delete image file from storage
-    if (paymentProof) {
-      await supabase.storage.from("paymentProofs").remove([paymentProof.path]);
-    }
-
+    // if (deleteRegistrationError) {
+    //   console.error("Delete registration failed:", deleteRegistrationError);
+    // }
     throw new Error(`Failed to send email:${error.message}`);
   }
 
