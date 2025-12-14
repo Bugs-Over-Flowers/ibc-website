@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
-// import { fadeInUp } from "@/components/animations/fade";
-// import { staggerContainer } from "@/components/animations/stagger";
 
 export function MembersHero() {
   return (
