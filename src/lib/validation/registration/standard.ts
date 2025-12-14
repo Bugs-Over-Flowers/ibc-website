@@ -1,4 +1,5 @@
 import z from "zod";
+import { titleCase } from "@/lib/utils";
 import { MemberTypeEnum, PaymentMethodEnum, phoneSchema } from "../utils";
 
 export const StandardRegistrationStep1Schema = z.discriminatedUnion("member", [
@@ -16,12 +17,18 @@ export type StandardRegistrationStep1Schema = z.infer<
   typeof StandardRegistrationStep1Schema
 >;
 
-export const RegistrantDetailsSchema = z.object({
-  firstName: z.string().min(2).max(100),
-  lastName: z.string().min(2).max(100),
-  contactNumber: phoneSchema,
-  email: z.email(),
-});
+export const RegistrantDetailsSchema = z
+  .object({
+    firstName: z.string().min(2).max(100),
+    lastName: z.string().min(2).max(100),
+    contactNumber: phoneSchema,
+    email: z.email().trim(),
+  })
+  .transform((data) => ({
+    ...data,
+    firstName: titleCase(data.firstName).trim(),
+    lastName: titleCase(data.lastName).trim(),
+  }));
 
 export const StandardRegistrationStep2Schema = z
   .object({

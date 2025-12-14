@@ -120,3 +120,18 @@ export const getEnv = (key: string) => {
 export const delay = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+/**
+ * Converts a string to title case.
+ *
+ * @param str - The string to convert
+ * @returns The string in title case
+ */
+export const titleCase = (str: string) => {
+  return str
+    .toLowerCase()
+    .replace(
+      /(^|[\s-])([a-z])/g,
+      (_, space, letter) => space + letter.toUpperCase(),
+    );
+};
