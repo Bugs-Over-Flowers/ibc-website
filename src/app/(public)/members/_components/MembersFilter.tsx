@@ -19,12 +19,17 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
+interface SectorOption {
+  label: string;
+  value: string;
+}
+
 interface MembersFilterProps {
   searchQuery: string;
   setSearchQuery: (v: string) => void;
   filterSector: string;
   setFilterSector: (v: string) => void;
-  sectors: string[];
+  sectors: SectorOption[];
   filteredCount: number;
 }
 export default function MembersFilter({
@@ -37,10 +42,13 @@ export default function MembersFilter({
 }: MembersFilterProps) {
   const [open, setOpen] = React.useState(false);
 
+  const allSectorsOption: SectorOption = { label: "All Sectors", value: "" };
+  const sectorOptions = [allSectorsOption, ...sectors];
+
   const selectedLabel =
-    filterSector === "all"
-      ? "All Sectors"
-      : sectors.find((s) => s === filterSector) || "Select sector...";
+    sectorOptions.find((s) => s.value === filterSector)?.label ||
+    sectorOptions[0]?.label ||
+    "Select sector...";
 
   return (
     <section className="border-border border-b bg-background px-4 py-8">
@@ -85,63 +93,34 @@ export default function MembersFilter({
                     </CommandEmpty>
                     <CommandGroup className="rounded bg-white px-1 py-1 text-foreground">
                       <div className="mb-1">
-                        <CommandItem
-                          className={cn(
-                            "wrap-break-word max-w-[200px] cursor-pointer whitespace-normal rounded-lg px-3 py-2 transition-colors hover:bg-primary/50",
-                            filterSector === "all"
-                              ? "bg-accent text-foreground"
-                              : "",
-                          )}
-                          key="all"
-                          onSelect={() => {
-                            setFilterSector("all");
-                            setOpen(false);
-                          }}
-                          value="all"
-                        >
-                          <span className="wrap-break-word block max-w-[160px] whitespace-normal">
-                            All Sectors
-                          </span>
-                          <Check
-                            className={cn(
-                              "ml-auto h-4 w-4 text-primary",
-                              filterSector === "all"
-                                ? "opacity-100"
-                                : "opacity-0",
-                            )}
-                          />
-                        </CommandItem>
-                      </div>
-                      <hr className="my-2 border-border/30" />
-                      <div className="space-y-1">
-                        {sectors.map((sector, idx) => (
-                          <React.Fragment key={sector}>
+                        {sectorOptions.map((sector, idx) => (
+                          <React.Fragment key={sector.value}>
                             <CommandItem
                               className={cn(
                                 "wrap-break-word max-w-[200px] cursor-pointer whitespace-normal rounded-lg px-3 py-2 transition-colors hover:bg-primary/50",
-                                filterSector === sector
+                                filterSector === sector.value
                                   ? "bg-accent text-accent-foreground"
                                   : "",
                               )}
                               onSelect={() => {
-                                setFilterSector(sector);
+                                setFilterSector(sector.value);
                                 setOpen(false);
                               }}
-                              value={sector}
+                              value={sector.value}
                             >
                               <span className="wrap-break-word block max-w-[160px] whitespace-normal">
-                                {sector}
+                                {sector.label}
                               </span>
                               <Check
                                 className={cn(
                                   "ml-auto h-4 w-4 text-primary",
-                                  filterSector === sector
+                                  filterSector === sector.value
                                     ? "opacity-100"
                                     : "opacity-0",
                                 )}
                               />
                             </CommandItem>
-                            {idx < sectors.length - 1 && (
+                            {idx < sectorOptions.length - 1 && (
                               <hr className="my-1 border-border/30" />
                             )}
                           </React.Fragment>

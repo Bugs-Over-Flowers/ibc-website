@@ -27,7 +27,10 @@ export default function MembersList({ members, sectors }: MembersListProps) {
         member.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         member.sector.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesSector =
-        filterSector === "all" || member.sector === filterSector;
+        !filterSector ||
+        filterSector === "all" ||
+        member.sector.trim().toLowerCase() ===
+          filterSector.trim().toLowerCase();
       return matchesSearch && matchesSector;
     });
   }, [searchQuery, filterSector, members]);
@@ -59,7 +62,7 @@ export default function MembersList({ members, sectors }: MembersListProps) {
           filteredCount={filteredMembers.length}
           filterSector={filterSector}
           searchQuery={searchQuery}
-          sectors={sectors}
+          sectors={sectors.map((sector) => ({ label: sector, value: sector }))}
           setFilterSector={setFilterSector}
           setSearchQuery={setSearchQuery}
         />
