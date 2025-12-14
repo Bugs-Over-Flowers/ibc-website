@@ -7,10 +7,7 @@ import { AdminSidebarSecondary } from "./SidebarSecondary";
 
 export function AdminSidebar() {
   return (
-    <Sidebar
-      className="sidebar-custom h-screen border-r bg-white"
-      collapsible="icon"
-    >
+    <Sidebar className="sidebar-custom h-screen border-r bg-white">
       <AdminSidebarHeader />
       <SidebarContent className="px-3 py-4">
         <AdminSidebarMenu />
