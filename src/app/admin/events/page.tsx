@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import EventsSkeleton from "./_components/EventSkeleton/EventsSkeleton";
 import EventsContents from "./_components/EventsContents";
 
 interface SearchParams {
@@ -9,7 +10,7 @@ interface SearchParams {
 
 export default function Page(props: { searchParams: Promise<SearchParams> }) {
   return (
-    <Suspense fallback={<div>Loading events...</div>}>
+    <Suspense fallback={<EventsSkeleton />}>
       <EventsContents {...props} />
     </Suspense>
   );

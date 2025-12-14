@@ -297,3 +297,11 @@
     overflow-x: hidden;
   }
 }
+
+.sidebar-custom {
+  --sidebar-width-icon: 4rem;
+}
+
+.sidebar-custom[data-state="collapsed"] {
+  width: var(--sidebar-width-icon, 4rem);
+}
