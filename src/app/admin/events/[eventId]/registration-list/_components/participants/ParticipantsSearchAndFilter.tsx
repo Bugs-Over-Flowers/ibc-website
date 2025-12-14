@@ -1,9 +1,6 @@
 "use client";
 
 import { X } from "lucide-react";
-import type { Route } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   InputGroup,
@@ -20,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { setParamsOrDelete } from "@/lib/utils";
 import { useSearchForm } from "../../_hooks/useSearchForm";
 import useSetFilter from "../../_hooks/useSetFilter";
 
