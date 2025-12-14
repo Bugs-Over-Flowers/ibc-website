@@ -6,7 +6,7 @@ import { staggerContainer } from "@/lib/animations/stagger";
 
 const boardMembers = [
   { name: "Juan Jose Jamora III", role: "Chairman Emeritus", featured: true },
-  { name: "Ma. Luisa Segovia", role: "President" },
+  { name: "Ma. Luisa Segovia", role: "President", featured: true },
   { name: "Herminio Maravilla", role: "Chairman" },
   { name: "Jose Paolo Treñas", role: "Vice President" },
   { name: "Allen Son Tan", role: "Corporate Secretary" },
@@ -64,24 +64,27 @@ export default function AboutBoard() {
             Iloilo Business Club.
           </motion.p>
         </motion.div>
-        {/* Chairman Emeritus - Featured */}
+        {/* Chairman Emeritus and President - Featured */}
         <motion.div
-          className="mb-12 flex justify-center"
+          className="mb-12 flex flex-wrap justify-center gap-8"
           initial={{ opacity: 0, y: 20 }}
           viewport={{ once: true }}
           whileInView={{ opacity: 1, y: 0 }}
         >
-          <div className="rounded-3xl bg-white/60 p-8 text-center shadow-xl ring-1 ring-white/50 backdrop-blur-xl">
-            <div className="mx-auto mb-4 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-primary/30 to-[#2E2A6E]/30 shadow-lg ring-4 ring-white/50">
-              <Users className="h-16 w-16 text-primary" />
+          {[boardMembers[0], boardMembers[1]].map((member) => (
+            <div
+              className="min-w-[260px] rounded-3xl bg-white/60 p-8 text-center shadow-xl ring-1 ring-white/50 backdrop-blur-xl"
+              key={member.name}
+            >
+              <div className="mx-auto mb-4 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-primary/30 to-[#2E2A6E]/30 shadow-lg ring-4 ring-white/50">
+                <Users className="h-16 w-16 text-primary" />
+              </div>
+              <h3 className="mb-1 font-bold text-[#2E2A6E] text-xl">
+                {member.name}
+              </h3>
+              <p className="font-medium text-primary italic">{member.role}</p>
             </div>
-            <h3 className="mb-1 font-bold text-[#2E2A6E] text-xl">
-              {boardMembers[0].name}
-            </h3>
-            <p className="font-medium text-primary italic">
-              {boardMembers[0].role}
-            </p>
-          </div>
+          ))}
         </motion.div>
         {/* Other Board Members */}
         <motion.div
@@ -91,7 +94,34 @@ export default function AboutBoard() {
           viewport={{ once: true, margin: "-100px" }}
           whileInView="visible"
         >
-          {boardMembers.slice(1).map((member) => (
+          {boardMembers.slice(2, 7).map((member) => (
+            <motion.div
+              className="group text-center"
+              key={member.name}
+              variants={fadeInUp}
+            >
+              <div className="rounded-2xl bg-white/50 p-4 shadow-md ring-1 ring-white/40 backdrop-blur-sm transition-all duration-300 hover:bg-white/70 hover:shadow-lg">
+                <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-primary/15 to-[#2E2A6E]/15 ring-2 ring-white/50 transition-all group-hover:ring-primary/30">
+                  <Users className="h-10 w-10 text-[#2E2A6E]/60" />
+                </div>
+                <h3 className="mb-1 font-semibold text-[#2E2A6E] text-sm">
+                  {member.name}
+                </h3>
+                <p className="text-foreground/60 text-xs italic">
+                  {member.role}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+        <motion.div
+          className="mb-16 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4"
+          initial="hidden"
+          variants={staggerContainer}
+          viewport={{ once: true, margin: "-100px" }}
+          whileInView="visible"
+        >
+          {boardMembers.slice(7).map((member) => (
             <motion.div
               className="group text-center"
               key={member.name}

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export default function AboutCTA() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#2E2A6E] via-[#2E2A6E] to-[#1a1745] py-20 text-white">
+    <section className="relative overflow-hidden bg-linear-to-br from-[#2E2A6E] via-[#2E2A6E] to-[#1a1745] py-20 text-white">
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]" />
       <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-white/5 blur-[100px]" />
