@@ -1,3 +1,25 @@
-export default function Page() {
-  return <div>page</div>;
+import { Footer } from "@/components/navbar/Footer";
+import { Header } from "@/components/navbar/Header";
+import AboutBoard from "./_components/AboutBoard";
+import AboutCTA from "./_components/AboutCTA";
+import AboutGoals from "./_components/AboutGoals";
+import { AboutHero } from "./_components/AboutHero";
+import AboutThrusts from "./_components/AboutThrusts";
+import AboutVisionMission from "./_components/AboutVisionMission";
+
+async function AboutPage() {
+  return (
+    <main className="min-h-screen bg-background">
+      <Header />
+      <AboutHero />
+      <AboutVisionMission />
+      <AboutGoals />
+      <AboutThrusts />
+      <AboutBoard />
+      <AboutCTA />
+      <Footer />
+    </main>
+  );
 }
+
+export default AboutPage;
