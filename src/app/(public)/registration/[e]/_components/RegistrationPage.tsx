@@ -4,10 +4,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import tryCatch from "@/lib/server/tryCatch";
-import { getAllMembers } from "@/server/members/queries";
+import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
-import RegistrationForm from "./_components/forms/RegistrationForm";
-import RegistrationInformation from "./_components/RegistrationInformation";
+import RegistrationForm from "./forms/RegistrationForm";
+import RegistrationInformation from "./RegistrationInformation";
 
 interface RegistrationPageProps {
   params: Promise<{ e: string }>;

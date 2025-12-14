@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import createEventSchema from "@/lib/validation/event/createEventSchema";
-import { createEvent } from "@/server/events/actions";
+import { draftEvent } from "@/server/events/actions/draftEvent";
+import { publishEvent } from "@/server/events/actions/publishEvent";
 
 export const useCreateEventForm = () => {
   const router = useRouter();
@@ -26,7 +27,11 @@ export const useCreateEventForm = () => {
 
     onSubmit: async ({ value }) => {
       console.log("Submitting form to server...", value);
-      const result = await createEvent(value);
+
+      const result =
+        value.eventType === null
+          ? await draftEvent(value)
+          : await publishEvent(value);
 
       if (!result.success) {
         toast.error(result.error as string);

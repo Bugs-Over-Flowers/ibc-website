@@ -20,7 +20,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
 import { MemberTypeEnum } from "@/lib/validation/utils";
-import type { getAllMembers } from "@/server/members/queries";
+import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep1 } from "../../_hooks/useRegistrationStep1";
 
 interface Step1Props {

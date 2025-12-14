@@ -3,17 +3,16 @@
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import type { ServerFunction } from "@/lib/server/types";
-import type { Database } from "@/lib/supabase/db.types";
 import { createAdminClient } from "@/lib/supabase/server";
 import createEventSchema from "@/lib/validation/event/createEventSchema";
 
 export type CreateEventInput = z.input<typeof createEventSchema>;
 
-export const createEvent: ServerFunction<
+export const draftEvent: ServerFunction<
   [CreateEventInput],
   { eventId: string }
 > = async (input) => {
-  console.log("Server Action createEvent received:", input);
+  console.log("Server Action draftEvent received:", input);
   const result = createEventSchema.safeParse(input);
 
   if (!result.success) {
@@ -70,9 +69,7 @@ export const createEvent: ServerFunction<
       eventEndDate: data.eventEndDate.toISOString(),
       venue: data.venue,
       registrationFee: data.registrationFee,
-      eventType: data.eventType as
-        | Database["public"]["Enums"]["EventType"]
-        | null,
+      eventType: null, // Force eventType to null for drafts
       eventHeaderUrl: publicUrl,
     })
     .select("eventId")
