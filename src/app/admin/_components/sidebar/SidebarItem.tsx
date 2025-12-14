@@ -1,6 +1,8 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +13,7 @@ interface SidebarItemProps {
   isActive: boolean;
   variant?: "default" | "destructive";
   onNavigate?: () => void;
+  collapsed?: boolean;
 }
 
 export function SidebarItem({
@@ -19,15 +22,23 @@ export function SidebarItem({
   href,
   isActive,
   variant = "default",
+  onNavigate,
 }: SidebarItemProps) {
+  const router = useRouter();
   const isDestructive = variant === "destructive";
+
+  const handleClick = () => {
+    if (onNavigate) {
+      onNavigate();
+    }
+    router.push(href as Route);
+  };
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        asChild
         className={cn(
-          "h-12 transition-colors",
+          "h-12 w-full justify-start transition-colors transition-padding",
           isDestructive
             ? "text-red-600 hover:bg-red-50 hover:text-red-700"
             : "hover:bg-gray-100",
@@ -36,23 +47,19 @@ export function SidebarItem({
             "bg-primary/10 text-primary hover:bg-primary/20",
         )}
         isActive={isActive}
+        onClick={handleClick}
       >
-        <a
-          className="flex items-center gap-3 rounded-md px-3 py-2.5"
-          href={href}
-        >
-          <Icon
-            className={cn(
-              "h-5 w-5",
-              isDestructive
-                ? "text-red-600"
-                : isActive
-                  ? "text-primary"
-                  : "text-gray-500",
-            )}
-          />
-          <span className="font-medium">{title}</span>
-        </a>
+        <Icon
+          className={cn(
+            "h-5 w-5",
+            isDestructive
+              ? "text-red-600"
+              : isActive
+                ? "text-primary"
+                : "text-gray-500",
+          )}
+        />
+        <span className="font-medium">{title}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
