@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
+import type { ReadonlyURLSearchParams } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import { treeifyError, type ZodError, type ZodType } from "zod";
 
@@ -101,6 +102,31 @@ export function zodValidator<T>(schema: ZodType<T>) {
   };
 }
 
+export function parseStringParam(
+  param: string | string[] | undefined,
+): string | undefined {
+  if (Array.isArray(param)) {
+    return param[0]; // Returns the first occurrence
+  }
+  return param;
+}
+
+export function setParamsOrDelete(
+  param: string,
+  value: string | undefined,
+  undefinedValues: string[],
+  searchParams: ReadonlyURLSearchParams,
+) {
+  const params = new URLSearchParams(searchParams.toString());
+
+  if (value === undefined || value === "" || undefinedValues.includes(value)) {
+    params.delete(param);
+  } else {
+    params.set(param, value);
+  }
+
+  return params.toString();
+}
 export const getEnv = (key: string) => {
   const value = process.env[key];
   if (!value) {
@@ -119,4 +145,19 @@ export const getEnv = (key: string) => {
  */
 export const delay = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+/**
+ * Converts a string to title case.
+ *
+ * @param str - The string to convert
+ * @returns The string in title case
+ */
+export const titleCase = (str: string) => {
+  return str
+    .toLowerCase()
+    .replace(
+      /(^|[\s-])([a-z])/g,
+      (_, space, letter) => space + letter.toUpperCase(),
+    );
 };

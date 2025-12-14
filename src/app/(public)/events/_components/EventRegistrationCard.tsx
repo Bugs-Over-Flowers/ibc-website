@@ -12,6 +12,9 @@ import {
   Twitter,
   Users,
 } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,6 +31,8 @@ interface EventRegistrationCardProps {
 export default function EventRegistrationCard({
   event,
 }: EventRegistrationCardProps) {
+  const { eventId } = useParams<{ eventId: string }>();
+
   const [copied, setCopied] = useState(false);
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -73,12 +78,14 @@ export default function EventRegistrationCard({
 
             {/* Action Buttons */}
             <div className="mt-6 space-y-3">
-              <Button
-                className="h-12 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
-                size="lg"
-              >
-                Register for This Event
-              </Button>
+              <Link href={`/registration/${eventId}/info` as Route}>
+                <Button
+                  className="h-12 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
+                  size="lg"
+                >
+                  Register for This Event
+                </Button>
+              </Link>
 
               <Button
                 className="h-12 w-full rounded-2xl border-border bg-transparent text-foreground hover:bg-accent"
