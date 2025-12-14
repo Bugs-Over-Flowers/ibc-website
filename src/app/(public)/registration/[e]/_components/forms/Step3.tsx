@@ -36,7 +36,7 @@ import { useRegistrationStep3 } from "../../_hooks/useRegistrationStep3";
 const BANK_DETAILS = {
   bankName: "BPI",
   accountName: "Iloilo Business Club",
-  accountNumber: "00023291387",
+  accountNumber: "000XXXXXXXX",
 } as const;
 
 export default function Step3() {
@@ -173,7 +173,9 @@ export default function Step3() {
                         <FieldContent className="space-y-3">
                           <Dropzone
                             accept={{
-                              "image/*": [],
+                              "image/png": [".png"],
+                              "image/jpeg": [".jpg"],
+                              "image/jpg": [".jpg"],
                             }}
                             maxFiles={1}
                             maxSize={1024 * 1024 * 10}
@@ -239,18 +241,20 @@ function PaymentDetails() {
   const registrationData = useRegistrationStore((s) => s.registrationData);
   const eventDetails = useRegistrationStore((s) => s.eventDetails);
 
-  const totalPayment = () => {
-    const baseFee = eventDetails?.registrationFee || 0;
-    const otherParticipants = registrationData?.step2?.otherParticipants || [];
-    const total = baseFee + otherParticipants.length * baseFee;
-    return total.toFixed(2);
-  };
+  const baseFee = eventDetails?.registrationFee || 0;
+  const otherParticipants = registrationData?.step2?.otherParticipants || [];
+  const total = baseFee + otherParticipants.length * baseFee;
 
   return (
     <div>
       <div className="flex w-full justify-between">
         <div>Registration Fee per head</div>
-        <div>₱ {eventDetails?.registrationFee}</div>
+        <div>
+          {Intl.NumberFormat("en-US", {
+            currency: "PHP",
+            style: "currency",
+          }).format(baseFee)}
+        </div>
       </div>
       <div className="flex w-full justify-between">
         <div>Total Number of Participants</div>
@@ -262,7 +266,12 @@ function PaymentDetails() {
       </div>
       <div className="flex w-full justify-between font-semibold text-xl">
         <div>Total Amount</div>
-        <div>₱ {totalPayment()}</div>
+        <div>
+          {Intl.NumberFormat("en-US", {
+            currency: "PHP",
+            style: "currency",
+          }).format(total)}
+        </div>
       </div>
     </div>
   );
