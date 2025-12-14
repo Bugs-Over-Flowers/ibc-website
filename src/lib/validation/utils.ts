@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Constants } from "../supabase/db.types";
 
 export const phoneSchema = z
   .string()
@@ -16,6 +17,7 @@ export const MemberTypeEnum = z.enum(["member", "nonmember"]);
 
 export const PaymentMethodEnum = z.enum(["online", "onsite"]);
 
+export const PaymentStatusEnum = z.enum(Constants.public.Enums.PaymentStatus);
 export const Base64_32BitString = z
   .string()
   .regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/, {
