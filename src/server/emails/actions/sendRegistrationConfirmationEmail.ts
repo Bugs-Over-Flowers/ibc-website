@@ -4,19 +4,16 @@ import { Resend } from "resend";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import StandardRegistrationConfirmationTemplate from "@/lib/resend/templates/Registration";
-import tryCatch from "@/lib/server/tryCatch";
-import { deleteRegistration } from "@/server/registration/actions/deleteRegistration";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface SendRegistrationConfirmationEmailProps {
   toEmail: string;
-  registrationId: string; // might need later for token
   eventDetails: Pick<
     RegistrationStoreEventDetails,
     "eventTitle" | "eventEndDate" | "eventHeaderUrl" | "eventStartDate"
   >;
-  encodedQRData: string;
+  identifier: string;
   selfName: string;
   otherParticipants: {
     fullName: string;
@@ -27,12 +24,11 @@ interface SendRegistrationConfirmationEmailProps {
 export const sendRegistrationConfirmationEmail = async ({
   toEmail,
   eventDetails,
-  registrationId,
-  encodedQRData,
+  identifier,
   selfName,
   otherParticipants,
 }: SendRegistrationConfirmationEmailProps) => {
-  const qrBuffer = await generateQRBuffer(encodedQRData);
+  const qrBuffer = await generateQRBuffer(identifier);
 
   const { error } = await resend.emails.send({
     to: toEmail,
@@ -56,16 +52,7 @@ export const sendRegistrationConfirmationEmail = async ({
     ],
   });
 
-  console.error("ERROR: ", error);
-
   if (error) {
-    // const { error: deleteRegistrationError } = await tryCatch(
-    //   deleteRegistration(registrationId),
-    // );
-
-    // if (deleteRegistrationError) {
-    //   console.error("Delete registration failed:", deleteRegistrationError);
-    // }
     throw new Error(`Failed to send email:${error.message}`);
   }
 
