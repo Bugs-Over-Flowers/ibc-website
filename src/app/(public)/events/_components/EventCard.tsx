@@ -22,6 +22,7 @@ interface EventCardProps {
   event: Event;
 }
 
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 
 export function EventCard({ event }: EventCardProps) {
@@ -33,16 +34,17 @@ export function EventCard({ event }: EventCardProps) {
     e.stopPropagation();
     e.preventDefault();
     // TODO: Replace with actual registration logic or navigation
-    // router.push(`/events/${event.eventId}/register`);
+    router.push(`/registration/${event.eventId}/info`);
   };
 
   return (
     <motion.div
+      animate={{ opacity: 1, y: 0 }}
       className="group mx-auto flex h-full w-full max-w-[400px] rounded-xl"
-      onClick={() => router.push(`/events/${event.eventId}`)}
+      onClick={() => router.push(`/events/${event.eventId}` as Route)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
-          router.push(`/events/${event.eventId}`);
+          router.push(`/events/${event.eventId}` as Route);
         }
       }}
       role="button"

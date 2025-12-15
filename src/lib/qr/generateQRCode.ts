@@ -1,5 +1,4 @@
 import QRcode from "qrcode";
-
 export const generateQRDataUrl = async (data: string) => {
   const qrData = QRcode.toDataURL(data, {
     margin: 2,

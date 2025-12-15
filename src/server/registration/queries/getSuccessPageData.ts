@@ -2,29 +2,26 @@ import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
-import { RegistrationCheckInQRCodec } from "@/lib/validation/qr/standard";
+import { RegistrationIdentifier } from "@/lib/validation/qr/standard";
 
 export const getSuccessPageData = async (
   requestCookies: RequestCookie[],
   {
-    encodedRegistrationQRData,
+    registrationIdentifier,
   }: {
-    encodedRegistrationQRData: string;
+    registrationIdentifier: string;
   },
 ) => {
-  const decodedRegistrationQRData =
-    await RegistrationCheckInQRCodec.decodeAsync({
-      encodedString: encodedRegistrationQRData,
-    });
+  // validate the registration identifier
+  const parsedIdentifier = RegistrationIdentifier.safeParse(
+    registrationIdentifier,
+  );
 
+  if (parsedIdentifier.error) {
+    console.error(parsedIdentifier.error);
+    throw new Error("Unable to parse the identifier");
+  }
   const supabase = await createClient(requestCookies);
-
-  const { data: registeredEvent } = await supabase
-    .from("Event")
-    .select("eventId, eventTitle, eventStartDate")
-    .eq("eventId", decodedRegistrationQRData.eventId)
-    .maybeSingle()
-    .throwOnError();
 
   const { data: registrationDetails } = await supabase
     .from("Registration")
@@ -33,22 +30,31 @@ export const getSuccessPageData = async (
     	paymentMethod,
      	registrationId,
       businessMemberId(businessName),
-      nonMemberName
+      nonMemberName,
+      registeredEvent:Event(
+      	eventId,
+       	eventTitle,
+        eventStartDate
+      )
       `)
-    .eq("registrationId", decodedRegistrationQRData.registrationId)
+    .eq("identifier", registrationIdentifier)
     .maybeSingle()
     .throwOnError();
 
+  if (!registrationDetails) {
+    throw new Error("No event found");
+  }
+
   const { data: registrant } = await supabase
     .from("Participant")
-    .select("firstName, lastName")
-    .eq("registrationId", decodedRegistrationQRData.registrationId)
+    .select("firstName, lastName, email")
+    .eq("registrationId", registrationDetails.registrationId)
     .eq("isPrincipal", true)
 
     .maybeSingle()
     .throwOnError();
 
-  if (!registeredEvent || !registrationDetails || !registrant) {
+  if (!registrationDetails || !registrant) {
     throw new Error("No event found");
   }
 
@@ -57,9 +63,9 @@ export const getSuccessPageData = async (
     : registrationDetails.nonMemberName;
 
   return {
-    registeredEvent,
+    registeredEvent: registrationDetails.registeredEvent,
     registrationDetails,
-    email: decodedRegistrationQRData.email,
+    email: registrant.email,
     name: `${registrant.firstName} ${registrant.lastName}`,
     // biome-ignore lint/style/noNonNullAssertion: affiliation will be not null at this point
     affiliation: affiliation!,

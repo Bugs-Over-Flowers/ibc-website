@@ -2,7 +2,6 @@
 
 import { Calendar, DollarSign, MapPin } from "lucide-react";
 import Image from "next/image";
-import { Separator } from "@/components/ui/separator";
 import type { EventWithStatus } from "../../types/event";
 import EventActionsDropdown from "./EventActionsDropdown";
 
