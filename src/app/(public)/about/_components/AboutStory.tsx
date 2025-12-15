@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
 
@@ -21,7 +22,7 @@ export default function AboutStory() {
             whileInView="visible"
           >
             <motion.h2
-              className="mb-4 font-bold text-3xl text-[#2E2A6E]"
+              className="mb-4 font-bold text-3xl text-foreground"
               variants={fadeInUp}
             >
               Our Story
@@ -45,12 +46,12 @@ IBC's commitment is to promote the City and the Province of Iloilo as a tourist 
             whileInView={{ opacity: 1, scale: 1 }}
           >
             <div className="relative h-[400px] overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/20">
-              {/* <Image
-                src="/business-meeting-conference-professional-executive.jpg"
+              <Image
                 alt="IBC Business Meeting"
-                fill
                 className="object-cover"
-              /> */}
+                fill
+                src="/images/backgrounds/bg-about.jpg"
+              />
               <div className="absolute inset-0 bg-linear-to-t from-[#2E2A6E]/50 to-transparent" />
             </div>
             <motion.div
@@ -60,7 +61,7 @@ IBC's commitment is to promote the City and the Province of Iloilo as a tourist 
               viewport={{ once: true }}
               whileInView={{ opacity: 1, x: 0 }}
             >
-              <p className="font-bold text-4xl text-primary">80+</p>
+              <p className="font-bold text-4xl text-primary">20+</p>
               <p className="text-foreground/70 text-sm">Senior Executives</p>
             </motion.div>
             <motion.div
