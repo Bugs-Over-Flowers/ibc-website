@@ -2,10 +2,10 @@ import { toast } from "sonner";
 import useRegistrationStore from "@/hooks/registration.store";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { RegistrationCheckInQRCodeDecodedSchema } from "@/lib/validation/qr/standard";
+
 import { setCookieData } from "@/server/actions.utils";
-import { encryptRegistrationQR } from "@/server/attendance/actions/encryptRegistrationQR";
 import { sendRegistrationConfirmationEmail } from "@/server/emails/actions/sendRegistrationConfirmationEmail";
+import { deleteRegistration } from "@/server/registration/actions/deleteRegistration";
 
 export const useSendRegistrationEmail = () => {
   const registrationData = useRegistrationStore(
@@ -13,7 +13,7 @@ export const useSendRegistrationEmail = () => {
   );
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
   return useAction(
-    tryCatch(async (registrationId: string) => {
+    tryCatch(async (registrationId: string, identifier: string) => {
       // check for eventId
       if (!eventDetails?.eventId) {
         throw new Error("Event ID is missing");
@@ -29,47 +29,39 @@ export const useSendRegistrationEmail = () => {
         throw new Error("Registration ID is missing");
       }
 
-      // validate the email, registration id, and event id
-      const { data, error: validationError } =
-        RegistrationCheckInQRCodeDecodedSchema.safeParse({
-          email: registrationData.step2.registrant.email,
-          registrationId: registrationId,
-          eventId: eventDetails.eventId,
-        });
-
-      if (validationError) {
-        throw new Error("Invalid data for sending registration email");
-      }
-
-      // generate a new qrcode data
-      const { encodedString: encodedQRData } =
-        await encryptRegistrationQR(data);
-
       // set cookies for qrdata
-      await setCookieData("recentQRData", encodedQRData);
+      await setCookieData("recentQRData", identifier);
 
       const selfName = `${registrationData.step2.registrant.firstName} ${registrationData.step2.registrant.lastName}`;
 
-      await sendRegistrationConfirmationEmail({
-        selfName,
-        registrationId: data.registrationId,
-        eventDetails,
-        toEmail: data.email,
-        encodedQRData,
-        otherParticipants: registrationData.step2.otherParticipants
-          ? registrationData.step2.otherParticipants.map((participant) => ({
-              fullName: `${participant.firstName} ${participant.lastName}`,
-              email: participant.email,
-            }))
-          : [],
-      });
+      const { error } = await tryCatch(
+        sendRegistrationConfirmationEmail({
+          selfName,
+          eventDetails,
+          toEmail: registrationData.step2.registrant.email,
+          identifier,
+          otherParticipants: registrationData.step2.otherParticipants
+            ? registrationData.step2.otherParticipants.map((participant) => ({
+                fullName: `${participant.firstName} ${participant.lastName}`,
+                email: participant.email,
+              }))
+            : [],
+        }),
+      );
+
+      if (error) {
+        console.error(error);
+        await deleteRegistration(registrationId);
+        throw new Error(error);
+      }
     }),
     {
       onSuccess: () => {
         toast.success("Email sent successfully!");
       },
-      onError: (error) => {
+      onError: async (error) => {
         toast.error(`Email sending failed: ${error}`);
+        // attempt to remove the registration
       },
     },
   );

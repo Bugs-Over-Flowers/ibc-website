@@ -3,19 +3,21 @@ import z from "zod";
 import { useAppForm } from "@/hooks/_formHooks";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { RegistrationCheckInQRCodeDecodedSchema } from "@/lib/validation/qr/standard";
-import { encryptRegistrationQR } from "@/server/attendance/actions/encryptRegistrationQR";
 import { resendQRCode } from "@/server/emails/actions/resendQRCode";
+
+interface UseResendEmailProps {
+  email: string;
+  registrationId: string;
+  eventId: string;
+  registrationIdentifier: string;
+}
 
 export const useResendEmail = ({
   email,
   registrationId,
+  registrationIdentifier,
   eventId,
-}: {
-  email: string;
-  registrationId: string;
-  eventId: string;
-}) => {
+}: UseResendEmailProps) => {
   const { execute } = useAction(tryCatch(resendQRCode), {
     onSuccess: () => {
       toast.success("QR code has been resent");
@@ -35,25 +37,10 @@ export const useResendEmail = ({
       }),
     },
     onSubmit: async ({ value }) => {
-      const formData = RegistrationCheckInQRCodeDecodedSchema.safeParse({
-        eventId,
-        registrationId,
-        email: value.email,
-      });
-
-      if (!formData.success) {
-        toast.error("Invalid QR code");
-        return;
-      }
-
       // encode QR Code
-      const { encodedString: encodedQRData } = await encryptRegistrationQR(
-        formData.data,
-      );
-
       await execute({
-        toEmail: formData.data.email,
-        encodedQRData,
+        toEmail: value.email,
+        qrData: registrationIdentifier,
         registrationId,
         eventId,
       });

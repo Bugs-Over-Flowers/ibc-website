@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Constants } from "../supabase/db.types";
+import { RegistrationIdentifier } from "./qr/standard";
 
 export const phoneSchema = z
   .string()
@@ -23,3 +24,8 @@ export const Base64_32BitString = z
   .regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/, {
     error: "Invalid base64 string",
   });
+
+export const createRegistrationIdentifier = () => {
+  const token = crypto.randomUUID();
+  return RegistrationIdentifier.parse(`ibc-reg-${token.slice(0, 8)}`);
+};

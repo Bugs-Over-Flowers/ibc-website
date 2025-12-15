@@ -15,15 +15,21 @@ const RegistrationInformation = (
     (state) => state.setEventDetails,
   );
 
-  const setInitialEventDetails = useEffectEvent(() => {
-    if (initialEventDetails && !eventDetails) {
-      setEventDetails(initialEventDetails);
-    }
-  });
+  const setInitialEventDetails = useEffectEvent(
+    (initialEventDetails: RegistrationStoreEventDetails) => {
+      if (initialEventDetails && !eventDetails) {
+        setEventDetails(initialEventDetails);
+      }
+
+      if (initialEventDetails.eventId !== eventDetails?.eventId) {
+        setEventDetails(initialEventDetails);
+      }
+    },
+  );
 
   useEffect(() => {
-    setInitialEventDetails();
-  }, []);
+    setInitialEventDetails(initialEventDetails);
+  }, [initialEventDetails]);
   return (
     <div className="space-y-5 p-3 md:w-96">
       <Card>

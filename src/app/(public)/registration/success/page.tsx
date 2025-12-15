@@ -49,7 +49,7 @@ async function SuccessPage() {
         >
           <EventDetails
             cookieStore={cookieStore.getAll()}
-            encodedRegistrationQRData={recentQRData}
+            registrationIdentifier={recentQRData}
           />
         </Suspense>
       </main>
