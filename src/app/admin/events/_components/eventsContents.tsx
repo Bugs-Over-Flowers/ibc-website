@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getAllEvents } from "@/server/events/actions/getAllEvents";
+import { getAllEvents } from "@/server/events/queries/getAllEvents";
 import EventFilters from "./EventFilters";
 import EventTable from "./EventTable";
 
