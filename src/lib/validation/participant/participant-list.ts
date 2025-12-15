@@ -27,7 +27,6 @@ export const ParticipantListItemSchema = ParticipantSchema.pick({
 export type ParticipantListItem = z.infer<typeof ParticipantListItemSchema>;
 
 // Data from RPC
-
 export const ParticipantListRPCSchema = z
   .object({
     participant_id: z.string(),

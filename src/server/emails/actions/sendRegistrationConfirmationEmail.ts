@@ -45,7 +45,7 @@ export const sendRegistrationConfirmationEmail = async ({
     }),
     attachments: [
       {
-        filename: "qrCode.png",
+        filename: `${identifier}.png`,
         content: qrBuffer,
         contentId: "qrCodeCID",
       },

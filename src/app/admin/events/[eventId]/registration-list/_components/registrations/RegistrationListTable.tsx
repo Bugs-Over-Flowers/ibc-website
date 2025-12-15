@@ -84,6 +84,8 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
     cell: ({ row }) => (
       <RegistrationRowActions
         data={{
+          affiliation: row.original.affiliation,
+          registrationIdentifier: row.original.registrationIdentifer,
           paymentStatus: row.original.paymentStatus,
           email: row.original.registrant.email,
           eventId: row.original.eventId,

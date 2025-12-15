@@ -528,6 +528,7 @@ export type Database = {
         business_name: string | null;
         is_member: boolean | null;
         registrant: Json | null;
+        registration_identifier: string | null;
       };
       registration_stats: {
         total: number | null;

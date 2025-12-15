@@ -77,6 +77,8 @@ export default function Registrationdata({
         <div className="flex items-center gap-2">
           <RegistrationRowActions
             data={{
+              affiliation: data.affiliation,
+              registrationIdentifier: data.registrationIdentifier,
               email: data.registrant.email,
               eventId: data.event.eventId,
               registrationId: data.registrationId,
@@ -88,8 +90,8 @@ export default function Registrationdata({
         </div>
       </div>
 
+      {/* Main Info Column */}
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Main Info Column */}
         <div className="space-y-6 md:col-span-2">
           {/* Event & Registration Info Card */}
           <Card>
