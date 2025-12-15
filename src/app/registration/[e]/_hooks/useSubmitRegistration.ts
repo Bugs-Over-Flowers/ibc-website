@@ -35,6 +35,7 @@ export const useSubmitRegistration = () => {
       const { step3 } = parsedRegistrationData;
 
       let returnedRegistrationId = "";
+      let returnedRegistrationIdentifier = "";
 
       // handle uploading the proof of payment
       // If online payment method is selected and payment proof is provided
@@ -52,7 +53,10 @@ export const useSubmitRegistration = () => {
         }
 
         // handle the mutation logic
-        const { registrationId } = await submitRegistrationRPC({
+        const {
+          rpcResults: { registrationId },
+          identifier,
+        } = await submitRegistrationRPC({
           eventId: eventDetails?.eventId,
           step1: parsedRegistrationData.step1,
           step2: parsedRegistrationData.step2,
@@ -63,9 +67,13 @@ export const useSubmitRegistration = () => {
           step4: parsedRegistrationData.step4,
         });
         returnedRegistrationId = registrationId;
+        returnedRegistrationIdentifier = identifier;
       } else {
         // If payment method is not online or payment proof is not provided
-        const { registrationId } = await submitRegistrationRPC({
+        const {
+          rpcResults: { registrationId },
+          identifier,
+        } = await submitRegistrationRPC({
           eventId: eventDetails?.eventId,
           step1: parsedRegistrationData.step1,
           step2: parsedRegistrationData.step2,
@@ -75,9 +83,14 @@ export const useSubmitRegistration = () => {
           step4: parsedRegistrationData.step4,
         });
         returnedRegistrationId = registrationId;
+        returnedRegistrationIdentifier = identifier;
       }
       setCreatedRegistrationId(returnedRegistrationId);
-      return returnedRegistrationId;
+
+      if (!returnedRegistrationId || !returnedRegistrationIdentifier) {
+        throw new Error("Failed to create registration");
+      }
+      return { returnedRegistrationId, returnedRegistrationIdentifier };
     }),
     {
       onSuccess: () => {

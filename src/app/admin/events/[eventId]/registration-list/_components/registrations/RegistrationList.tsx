@@ -5,7 +5,7 @@ import { getEventRegistrationList } from "@/server/registration/queries/getEvent
 import RegistrationListTable from "./RegistrationListTable";
 
 type RegistrationListPageProps =
-  PageProps<"/admin/event/[eventId]/registration-list">;
+  PageProps<"/admin/events/[eventId]/registration-list">;
 
 export default async function RegistrationList({
   params,

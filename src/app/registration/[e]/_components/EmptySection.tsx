@@ -1,6 +1,5 @@
 import { CircleAlert } from "lucide-react";
 import Link from "next/link";
-import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Empty,

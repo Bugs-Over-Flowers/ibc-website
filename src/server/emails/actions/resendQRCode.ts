@@ -11,16 +11,17 @@ interface SendRegistrationConfirmationEmailProps {
   toEmail: string;
   registrationId: string;
   eventId: string;
-  encodedQRData: string;
+  qrData: string;
 }
 
 export const resendQRCode = async ({
   toEmail,
   registrationId,
   eventId,
-  encodedQRData,
+  qrData,
 }: SendRegistrationConfirmationEmailProps) => {
-  const qrBuffer = await generateQRBuffer(encodedQRData);
+  const qrBuffer = await generateQRBuffer(qrData);
+
   const supabase = await createActionClient();
 
   // get event details
@@ -78,7 +79,7 @@ export const resendQRCode = async ({
     }),
     attachments: [
       {
-        filename: "qrCode.png",
+        filename: `${qrData}.png`,
         content: qrBuffer,
         contentId: "qrCodeCID",
       },
@@ -90,9 +91,9 @@ export const resendQRCode = async ({
     throw new Error("Failed to send email");
   }
 
-  // change the email if does not match participant email
-
   console.log(registrantDetails.email, ", ", toEmail);
+
+  // change the email if does not match participant email
   if (toEmail !== registrantDetails.email) {
     await supabase
       .from("Participant")

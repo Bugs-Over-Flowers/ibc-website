@@ -3,7 +3,7 @@ import type { Route } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
-import RegistrationForm from "@/app/(public)/registration/[e]/_components/forms/RegistrationForm";
+import RegistrationForm from "@/app/registration/[e]/_components/forms/RegistrationForm";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import tryCatch from "@/lib/server/tryCatch";

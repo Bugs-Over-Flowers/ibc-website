@@ -24,7 +24,8 @@ export const getRegistrationData = async (
        paymentStatus,
        registrationDate,
        businessMember:BusinessMember(businessMemberId, businessName),
-       nonMemberName
+       nonMemberName,
+       identifier
        `,
     )
     .eq("registrationId", registrationId)
@@ -39,10 +40,15 @@ export const getRegistrationData = async (
     ? data.businessMember.businessName
     : data.nonMemberName;
 
+  if (!affiliation) {
+    throw new Error("Cannot find affiliation");
+  }
+
   const mappedData = {
     ...data,
     isMember: !!data.businessMember,
     affiliation,
+    registrationIdentifier: data.identifier,
   };
 
   if (!affiliation) {
