@@ -4,44 +4,31 @@ import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { name: "Home", path: "/" },
-  { name: "About", path: "/about" },
-  { name: "Events", path: "/events" },
-  { name: "Members", path: "/members" },
-  { name: "Networks", path: "/networks" },
-  { name: "Contact", path: "/contact" },
+  { name: "HOME", path: "/" },
+  { name: "ABOUT", path: "/about" },
+  { name: "EVENTS", path: "/events" },
+  { name: "MEMBERS", path: "/members" },
+  { name: "NETWORKS", path: "/networks" },
+  { name: "CONTACT", path: "/contact" },
 ];
 
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
     <motion.header
       animate={{ y: 0 }}
-      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "border-border border-b bg-background/95 shadow-soft backdrop-blur-xl"
-          : "bg-transparent"
-      }`}
+      className="fixed top-0 right-0 left-0 z-50 border-border bg-sidebar shadow-soft backdrop-blur-xl transition-all duration-300"
       initial={{ y: -100 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-4 md:h-20">
+      <div className="mx-auto max-w-7xl px-3 sm:px-5 lg:px-7">
+        <div className="flex h-16 items-center justify-between gap-3 md:h-20">
           {/* Logo */}
           <Link className="flex min-w-0 items-center gap-3" href="/">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center md:h-12 md:w-12">
@@ -55,12 +42,8 @@ export function Header() {
                 width={48}
               />
             </div>
-            <span
-              className={`truncate font-semibold text-lg transition-colors md:text-xl ${
-                isScrolled ? "text-foreground" : "text-secondary-foreground"
-              }`}
-            >
-              Iloilo Business Club
+            <span className="truncate font-bold text-foreground transition-colors md:text-xl">
+              ILOILO BUSINESS CLUB, INC.
             </span>
           </Link>
 
@@ -68,12 +51,8 @@ export function Header() {
           <nav className="hidden items-center gap-2 lg:flex xl:gap-6">
             {navLinks.map((link) => (
               <a
-                className={`rounded-md px-3 py-2 font-medium text-sm transition-colors hover:text-primary ${
-                  pathname === link.path
-                    ? "text-primary"
-                    : isScrolled
-                      ? "text-foreground/80"
-                      : "text-secondary-foreground/90"
+                className={`rounded-md px-3 py-2 font-semibold text-sm transition-colors hover:text-primary ${
+                  pathname === link.path ? "text-primary" : "text-foreground/80"
                 }`}
                 href={link.path}
                 key={link.name}
@@ -83,9 +62,9 @@ export function Header() {
             ))}
             <Button
               asChild
-              className="ml-2 h-auto min-w-[110px] rounded-full bg-primary px-5 py-2 text-primary-foreground shadow-lg hover:bg-primary/90"
+              className="ml-2 h-auto min-w-[110px] rounded-full bg-primary px-5 py-1 font-semibold text-md text-primary-foreground shadow-lg hover:bg-primary/90"
             >
-              <Link href="/contact">Join Now</Link>
+              <Link href="/contact">JOIN NOW</Link>
             </Button>
           </nav>
 
@@ -93,11 +72,7 @@ export function Header() {
           <Button
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             asChild
-            className={`rounded-lg p-2 transition-colors lg:hidden ${
-              isScrolled
-                ? "text-foreground hover:bg-muted"
-                : "text-secondary-foreground hover:bg-secondary-foreground/10"
-            }`}
+            className="rounded-lg p-2 text-foreground transition-colors hover:bg-muted lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}

@@ -69,9 +69,9 @@ const formatDateRange = (startDate: string | null, endDate: string | null) => {
   return `${startFormatted} - ${endFormatted}`;
 };
 
-function truncate(str: string, max: number) {
+function _truncate(str: string, max: number) {
   if (!str) return "";
-  return str.length > max ? str.slice(0, max - 1) + "…" : str;
+  return str.length > max ? `${str.slice(0, max - 1)}…` : str;
 }
 
 export function EventSlide({
@@ -116,7 +116,7 @@ export function EventSlide({
       </motion.div>
 
       {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-linear-to-r from-foreground/95 via-foreground/70 to-foreground/20" />
+      <div className="absolute inset-0 bg-linear-to-r from-foreground/75 via-foreground/50 to-foreground/20" />
       <div className="absolute inset-0 bg-linear-to-t from-foreground/70 via-transparent to-foreground/30" />
 
       {/* Content */}
@@ -138,7 +138,7 @@ export function EventSlide({
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex h-3 w-3 rounded-full bg-primary"></span>
             </span>
-            <span className="rounded-full border border-primary/30 bg-primary/20 px-5 py-2 font-semibold text-primary text-sm tracking-wide backdrop-blur-md">
+            <span className="rounded-full border border-primary/30 bg-primary/10 px-5 py-2 font-semibold text-primary text-sm tracking-wide backdrop-blur-md">
               Upcoming Event
             </span>
           </motion.div>
@@ -221,7 +221,7 @@ export function EventSlide({
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button
-              className="h-13 rounded-full border-primary-foreground/30 bg-primary-foreground/10 px-8 font-semibold text-base text-primary-foreground backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-primary-foreground/50 hover:bg-primary-foreground/20"
+              className="h-13 rounded-full border-primary-foreground/30 bg-primary-foreground/10 px-8 font-semibold text-base text-primary-foreground backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-primary-foreground/50 hover:bg-primary-foreground/20 hover:text-none"
               onClick={() => onNavigate("public-events")}
               size="lg"
               type="button"
