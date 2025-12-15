@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 type RegistrationListPageProps =
-  PageProps<"/admin/event/[eventId]/registration-list">;
+  PageProps<"/admin/events/[eventId]/registration-list">;
 export default async function BackButton({
   params,
 }: {

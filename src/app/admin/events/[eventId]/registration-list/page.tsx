@@ -14,7 +14,7 @@ import RegistrationListStats from "./_components/registrations/RegistrationListS
 import RegistrationsSearchAndFilter from "./_components/registrations/RegistrationsSearchAndFilter";
 
 type RegistrationListPageProps =
-  PageProps<"/admin/event/[eventId]/registration-list">;
+  PageProps<"/admin/events/[eventId]/registration-list">;
 
 export default function RegistrationPageWrapper({
   params,

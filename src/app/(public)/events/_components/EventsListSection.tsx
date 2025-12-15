@@ -7,7 +7,6 @@ export default async function EventsListSection() {
   const { error, data: events } = await tryCatch(
     getAllEvents((await cookies()).getAll()),
   );
-  console.log("[EventsListSection] Error fetching events:", error);
 
   if (error || !events) {
     return (

@@ -5,7 +5,7 @@ import { getRegistrationData } from "@/server/registration/queries/getRegistrati
 import RegistrationDetails from "./_components/RegistrationDetails";
 
 type RegistrationPageParams =
-  PageProps<"/admin/event/[eventId]/registration-list/registration/[id]">["params"];
+  PageProps<"/admin/events/[eventId]/registration-list/registration/[id]">["params"];
 export default function RegistrationDetailsPageWrapper({
   params,
 }: {
