@@ -1,7 +1,5 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
-import { Footer } from "@/components/navbar/Footer";
-import { Header } from "@/components/navbar/Header";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { EventDetailsContent } from "../_components/EventDetailsContent";
 import { EventDetailsHero } from "../_components/EventDetailsHero";
@@ -23,13 +21,11 @@ export default async function EventDetailsPage({
   if (!event) return <NotFound />;
 
   return (
-    <main className="min-h-screen bg-background">
-      <Header />
+    <>
       <EventDetailsHero event={event} />
       <Suspense fallback={<EventPageDetailsLoading />}>
         <EventDetailsContent event={event} />
       </Suspense>
-      <Footer />
-    </main>
+    </>
   );
 }
