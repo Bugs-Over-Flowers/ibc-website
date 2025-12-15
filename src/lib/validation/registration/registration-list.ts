@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Constants, type Enums } from "@/lib/supabase/db.types";
 import { ParticipantSchema } from "../participant/participant-list";
+import { RegistrationIdentifier } from "../qr/standard";
 
 //
 // Registration List Table Schemas
@@ -19,6 +20,7 @@ export const RegistrationDataBaseSchema = z.object({
   registrant: ParticipantSchema.extend({
     isPrincipal: z.literal(true),
   }),
+  registrationIdentifer: RegistrationIdentifier,
 });
 
 export const RegistrationItemSchema = z.discriminatedUnion("isMember", [
@@ -50,6 +52,7 @@ export const RegistrationListRPCSchema = z
     registrant: ParticipantSchema.extend({
       isPrincipal: z.literal(true),
     }),
+    registration_identifier: RegistrationIdentifier,
   })
   .pipe(
     z.transform((val) =>
@@ -65,6 +68,7 @@ export const RegistrationListRPCSchema = z
         businessName: val.business_name,
         isMember: val.is_member,
         registrant: val.registrant,
+        registrationIdentifer: val.registration_identifier,
       }),
     ),
   );

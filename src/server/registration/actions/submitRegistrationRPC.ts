@@ -2,6 +2,7 @@
 
 import { createActionClient } from "@/lib/supabase/server";
 import { ServerRegistrationSchema } from "@/lib/validation/registration/standard";
+import { createRegistrationIdentifier } from "@/lib/validation/utils";
 
 interface SubmitRegistrationResponse {
   registrationId: string;
@@ -10,11 +11,9 @@ interface SubmitRegistrationResponse {
 export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   const parsedData = ServerRegistrationSchema.parse(data);
 
-  console.log("Full registration data:", parsedData);
-
-  console.log("other registrants:", parsedData.step2.otherParticipants);
-
   const supabase = await createActionClient();
+
+  const registrationIdentifier = createRegistrationIdentifier();
 
   const { step1, step3, eventId, step2 } = parsedData;
   const { data: rpcResults, error } = await supabase.rpc(
@@ -30,18 +29,19 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
       p_non_member_name:
         step1.member === "nonmember" ? step1.nonMemberName : undefined,
       p_member_type: step1.member,
+      p_identifier: registrationIdentifier,
     },
   );
 
   if (error) {
-    console.error(error);
     throw new Error("Failed to submit event registration");
   }
 
   if (!rpcResults) {
     throw new Error("No data returned from registration");
   }
-
-  console.log(rpcResults);
-  return rpcResults as unknown as SubmitRegistrationResponse;
+  return {
+    rpcResults: rpcResults as unknown as SubmitRegistrationResponse,
+    identifier: registrationIdentifier,
+  };
 };

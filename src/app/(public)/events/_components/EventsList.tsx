@@ -76,7 +76,7 @@ export function EventsList({ events }: EventsListProps) {
 
   const EmptyState = () => (
     <motion.div
-      animate={{ opacity: 1 }}
+      animate={{ opacity: 1, y: 0 }}
       className="col-span-full py-16 text-center"
       initial={{ opacity: 0 }}
     >

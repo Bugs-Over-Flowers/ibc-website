@@ -4,18 +4,16 @@ import { Resend } from "resend";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import StandardRegistrationConfirmationTemplate from "@/lib/resend/templates/Registration";
-import { createActionClient } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface SendRegistrationConfirmationEmailProps {
   toEmail: string;
-  registrationId: string;
   eventDetails: Pick<
     RegistrationStoreEventDetails,
     "eventTitle" | "eventEndDate" | "eventHeaderUrl" | "eventStartDate"
   >;
-  encodedQRData: string;
+  identifier: string;
   selfName: string;
   otherParticipants: {
     fullName: string;
@@ -26,12 +24,11 @@ interface SendRegistrationConfirmationEmailProps {
 export const sendRegistrationConfirmationEmail = async ({
   toEmail,
   eventDetails,
-  registrationId,
-  encodedQRData,
+  identifier,
   selfName,
   otherParticipants,
 }: SendRegistrationConfirmationEmailProps) => {
-  const qrBuffer = await generateQRBuffer(encodedQRData);
+  const qrBuffer = await generateQRBuffer(identifier);
 
   const { error } = await resend.emails.send({
     to: toEmail,
@@ -48,7 +45,7 @@ export const sendRegistrationConfirmationEmail = async ({
     }),
     attachments: [
       {
-        filename: "qrCode.png",
+        filename: `${identifier}.png`,
         content: qrBuffer,
         contentId: "qrCodeCID",
       },
@@ -56,28 +53,6 @@ export const sendRegistrationConfirmationEmail = async ({
   });
 
   if (error) {
-    const supabase = await createActionClient();
-
-    // Get payment proof path FIRST (before deleting registration)
-    const { data: paymentProof } = await supabase
-      .from("ProofImage")
-      .select("path")
-      .eq("registrationId", registrationId)
-      .maybeSingle()
-      .throwOnError();
-
-    // Delete the registration (this may cascade delete ProofImage row)
-    await supabase
-      .from("Registration")
-      .delete()
-      .eq("registrationId", registrationId)
-      .throwOnError();
-
-    // Delete image file from storage
-    if (paymentProof) {
-      await supabase.storage.from("paymentProofs").remove([paymentProof.path]);
-    }
-
     throw new Error(`Failed to send email:${error.message}`);
   }
 
