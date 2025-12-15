@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           applicationDate: string;
           applicationId: string;
+          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           companyAddress: string;
           companyName: string;
@@ -28,12 +29,14 @@ export type Database = {
           memberId: string | null;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
+          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           sectorId: number;
           websiteURL: string;
         };
         Insert: {
           applicationDate?: string;
           applicationId?: string;
+          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           companyAddress: string;
           companyName: string;
@@ -44,12 +47,14 @@ export type Database = {
           memberId?: string | null;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
+          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           sectorId: number;
           websiteURL: string;
         };
         Update: {
           applicationDate?: string;
           applicationId?: string;
+          applicationMemberType?: Database["public"]["Enums"]["ApplicationMemberType"];
           applicationType?: Database["public"]["Enums"]["ApplicationType"];
           companyAddress?: string;
           companyName?: string;
@@ -60,6 +65,7 @@ export type Database = {
           memberId?: string | null;
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
+          paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           sectorId?: number;
           websiteURL?: string;
         };
@@ -77,9 +83,9 @@ export type Database = {
         Row: {
           applicationId: string;
           applicationMemberId: string;
-          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           birthdate: string;
           companyDesignation: string;
+          companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
           faxNumber: string;
           firstName: string;
@@ -93,9 +99,9 @@ export type Database = {
         Insert: {
           applicationId: string;
           applicationMemberId?: string;
-          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           birthdate: string;
           companyDesignation: string;
+          companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
           faxNumber: string;
           firstName: string;
@@ -109,9 +115,9 @@ export type Database = {
         Update: {
           applicationId?: string;
           applicationMemberId?: string;
-          applicationMemberType?: Database["public"]["Enums"]["ApplicationMemberType"];
           birthdate?: string;
           companyDesignation?: string;
+          companyMemberType?: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress?: string;
           faxNumber?: string;
           firstName?: string;
@@ -458,6 +464,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      publish_event: { Args: { p_event_id: string }; Returns: undefined };
       submit_event_registration: {
         Args: {
           p_business_member_id?: string;
@@ -500,6 +507,7 @@ export type Database = {
     Enums: {
       ApplicationMemberType: "corporate" | "personal";
       ApplicationType: "newMember" | "updating" | "renewal";
+      CompanyMemberType: "principal" | "alternate";
       EventType: "public" | "private";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
@@ -664,6 +672,7 @@ export const Constants = {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],
       ApplicationType: ["newMember", "updating", "renewal"],
+      CompanyMemberType: ["principal", "alternate"],
       EventType: ["public", "private"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],
