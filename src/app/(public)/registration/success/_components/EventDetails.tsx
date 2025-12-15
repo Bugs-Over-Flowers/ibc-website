@@ -3,6 +3,7 @@ import { CircleAlert } from "lucide-react";
 import type { Route } from "next";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import Link from "next/link";
+import QRDownloader from "@/components/qr/QRDownloader";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,7 +23,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { getSuccessPageData } from "@/server/registration/queries/getSuccessPageData";
 import QRCodeItem from "./QRCodeItem";
-import QRDownloader from "./QRDownloader";
 
 interface EventDetailsProps {
   cookieStore: RequestCookie[];

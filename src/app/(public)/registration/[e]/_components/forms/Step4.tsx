@@ -19,7 +19,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import useRegistrationStore from "@/hooks/registration.store";
-import type { getAllMembers } from "@/server/members/queries";
+import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep4 } from "../../_hooks/useRegistrationStep4";
 
 interface Step4Props {
@@ -136,6 +136,8 @@ export default function Step4({ members }: Step4Props) {
         </CardContent>
 
         <Separator />
+
+        {/* Payment Section */}
         <CardContent className="space-y-4">
           <h4>Payment</h4>
           <div className="flex justify-between">
@@ -159,7 +161,12 @@ export default function Step4({ members }: Step4Props) {
           <div className="space-y-2">
             <div className="flex justify-between">
               <div className="text-sm">Registration Fee</div>
-              <div>{eventDetails?.registrationFee ?? 0}</div>
+              <div>
+                {Intl.NumberFormat("en-US", {
+                  currency: "PHP",
+                  style: "currency",
+                }).format(eventDetails?.registrationFee ?? 0)}
+              </div>
             </div>
             <div className="flex justify-between">
               <div className="text-sm">Total People</div>
@@ -168,8 +175,13 @@ export default function Step4({ members }: Step4Props) {
             <div className="flex justify-between">
               <div className="text-sm">Total Amount</div>
               <div>
-                {(eventDetails?.registrationFee ?? 0) *
-                  (otherParticipants.length + 1)}
+                {Intl.NumberFormat("en-US", {
+                  currency: "PHP",
+                  style: "currency",
+                }).format(
+                  (eventDetails?.registrationFee ?? 0) *
+                    (otherParticipants.length + 1),
+                )}
               </div>
             </div>
           </div>

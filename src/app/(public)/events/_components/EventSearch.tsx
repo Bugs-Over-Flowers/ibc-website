@@ -45,32 +45,32 @@ export function EventsSearch({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      className="mx-auto w-full max-w-3xl"
+      initial={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="w-full max-w-3xl mx-auto"
     >
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
         {/* Search Input */}
         <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-foreground " />
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <Search className="h-5 w-5 text-foreground" />
           </div>
           <Input
-            type="text"
-            placeholder="Search events..."
-            value={query}
+            className="rounded-xl border-border/50 bg-white/80 py-6 pr-12 pl-12 text-base shadow-lg ring-1 ring-white/30 backdrop-blur-xl transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/30"
             onChange={(e) => handleSearch(e.target.value)}
-            className="pl-12 pr-12 py-6 text-base bg-white/80 backdrop-blur-xl border-border/50 ring-1 ring-white/30 shadow-lg rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+            placeholder="Search events..."
+            type="text"
+            value={query}
           />
           {query && (
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={clearSearch}
               className="absolute inset-y-0 right-2 my-auto h-8 w-8 hover:bg-muted/50"
+              onClick={clearSearch}
+              size="icon"
+              variant="ghost"
             >
-              <X className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+              <X className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
             </Button>
           )}
         </div>
@@ -79,38 +79,38 @@ export function EventsSearch({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
+              className="h-[52px] min-w-[140px] justify-between rounded-xl border-border/50 bg-white/80 px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
               variant="outline"
-              className="h-[52px] px-5 bg-white/80 backdrop-blur-xl border-border/50 ring-1 ring-white/30 shadow-lg rounded-xl hover:bg-white/90 min-w-[140px] justify-between"
             >
               {filterLabels[currentFilter]}
-              <ChevronDown className="h-4 w-4 ml-2 text-muted-foreground" />
+              <ChevronDown className="ml-2 h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-[140px] bg-white/95 backdrop-blur-xl border-border/50 shadow-xl rounded-xl"
+            className="w-[140px] rounded-xl border-border/50 bg-white/95 shadow-xl backdrop-blur-xl"
           >
             <DropdownMenuItem
-              onClick={() => onFilterChange("all")}
               className={
                 currentFilter === "all" ? "bg-primary/10 text-primary" : ""
               }
+              onClick={() => onFilterChange("all")}
             >
               All Events
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => onFilterChange("upcoming")}
               className={
                 currentFilter === "upcoming" ? "bg-primary/10 text-primary" : ""
               }
+              onClick={() => onFilterChange("upcoming")}
             >
               Upcoming
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => onFilterChange("past")}
               className={
                 currentFilter === "past" ? "bg-primary/10 text-primary" : ""
               }
+              onClick={() => onFilterChange("past")}
             >
               Past Events
             </DropdownMenuItem>
