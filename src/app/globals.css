@@ -180,6 +180,7 @@
   --shadow-blur: var(--shadow-blur);
   --shadow-opacity: var(--shadow-opacity);
   --color-shadow-color: var(--shadow-color);
+  --navbar-padding: 4rem;
 }
 
 @layer base {
