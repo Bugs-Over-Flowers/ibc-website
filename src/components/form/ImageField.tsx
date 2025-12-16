@@ -26,16 +26,16 @@ function ImageField({
   };
 
   return (
-    <Field data-invalid={isInvalid} className={cn("grid gap-2", className)}>
+    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
-        id={field.name}
-        type="file"
         accept="image/*"
-        multiple={multiple}
-        onChange={handleChange}
-        onBlur={field.handleBlur}
         className="cursor-pointer"
+        id={field.name}
+        multiple={multiple}
+        onBlur={field.handleBlur}
+        onChange={handleChange}
+        type="file"
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />

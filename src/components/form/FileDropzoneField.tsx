@@ -37,16 +37,16 @@ const FilePreview = ({
   }, [file]);
 
   return (
-    <div className="relative group">
+    <div className="group relative">
       <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-background">
         {preview ? (
           <ImageZoom className="h-full w-full">
             <Image
-              src={preview}
               alt={file.name}
-              fill
-              unoptimized
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              src={preview}
+              unoptimized
             />
           </ImageZoom>
         ) : (
@@ -56,15 +56,15 @@ const FilePreview = ({
         )}
       </div>
       <Button
+        className="-right-2 -top-2 absolute z-10 h-6 w-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+        onClick={onRemove}
+        size="icon"
         type="button"
         variant="destructive"
-        size="icon"
-        className="absolute -right-2 -top-2 h-6 w-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100 z-10"
-        onClick={onRemove}
       >
         <X className="h-3 w-3" />
       </Button>
-      <p className="mt-1 truncate text-xs text-muted-foreground px-1">
+      <p className="mt-1 truncate px-1 text-muted-foreground text-xs">
         {file.name}
       </p>
     </div>
@@ -103,22 +103,22 @@ function FileDropzoneField({
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
 
       <Dropzone
-        onDrop={handleDrop}
         accept={accept}
+        className="w-full border-dashed bg-background transition-colors hover:bg-muted/50"
         maxFiles={maxFiles}
         maxSize={maxSize}
+        onDrop={handleDrop}
         src={files}
-        className="w-full bg-background border-dashed hover:bg-muted/50 transition-colors"
       >
         <div className="flex flex-col items-center justify-center gap-4 py-4">
           <div className="rounded-full bg-muted p-4">
             <UploadCloud className="h-8 w-8 text-muted-foreground" />
           </div>
           <div className="flex flex-col items-center gap-1 text-center">
-            <span className="text-sm font-medium">
+            <span className="font-medium text-sm">
               Drag & drop files here or click to upload
             </span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {multiple
                 ? "You can upload multiple files"
                 : "Single file upload"}
@@ -128,11 +128,11 @@ function FileDropzoneField({
       </Dropzone>
 
       {files.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 mt-4">
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {files.map((file, index) => (
             <FilePreview
-              key={`${file.name}-${index}`}
               file={file}
+              key={`${file.name}-${index}`}
               onRemove={() => removeFile(index)}
             />
           ))}

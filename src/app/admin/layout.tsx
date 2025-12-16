@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ClientOnlyTooltip } from "./_components/ClientOnlyTooltip";
 import { AdminSidebar } from "./_components/sidebar/AdminSidebar";

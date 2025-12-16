@@ -450,6 +450,16 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      get_registration_list_checkin: {
+        Args: { p_identifier: string; p_today?: string };
+        Returns: Database["public"]["CompositeTypes"]["registration_details_result"];
+        SetofOptions: {
+          from: "*";
+          to: "registration_details_result";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       get_registration_stats: {
         Args: {
           p_event_id: string;
@@ -464,6 +474,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      publish_event: { Args: { p_event_id: string }; Returns: undefined };
       submit_event_registration: {
         Args: {
           p_business_member_id?: string;
@@ -478,22 +489,28 @@ export type Database = {
         };
         Returns: Json;
       };
-      submit_membership_application: {
-        Args: {
-          p_application_type: string;
-          p_company_details: Json;
-          p_payment_method: string;
-          p_payment_proof_url?: string;
-          p_representatives: Json;
-        };
-        Returns: Json;
-      };
-      publish_event: {
-        Args: {
-          p_event_id: string;
-        };
-        Returns: undefined;
-      };
+      submit_membership_application:
+        | {
+            Args: {
+              p_application_member_type: string;
+              p_application_type: string;
+              p_company_details: Json;
+              p_payment_method: string;
+              p_payment_proof_url?: string;
+              p_representatives: Json;
+            };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_application_type: string;
+              p_company_details: Json;
+              p_payment_method: string;
+              p_payment_proof_url?: string;
+              p_representatives: Json;
+            };
+            Returns: Json;
+          };
       update_event_details: {
         Args: {
           p_description: string;
@@ -528,6 +545,14 @@ export type Database = {
         payment_status: Database["public"]["Enums"]["PaymentStatus"] | null;
         registration_date: string | null;
         registration_id: string | null;
+      };
+      registration_details_result: {
+        registration_details: Json | null;
+        event_details: Json | null;
+        check_in_list: Json | null;
+        event_days: Json | null;
+        all_is_checked_in: boolean | null;
+        is_event_day: boolean | null;
       };
       registration_list_item: {
         event_id: string | null;
