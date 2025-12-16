@@ -5,7 +5,7 @@ import AboutStory from "./_components/AboutStory";
 import { AboutThrusts } from "./_components/AboutThrusts";
 import { AboutVisionMission } from "./_components/AboutVisionMission";
 
-export function AboutPage() {
+export default function AboutPage() {
   return (
     <main className="min-h-screen bg-background">
       <AboutHero />
