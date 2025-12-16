@@ -1,8 +1,16 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { formatDate } from "date-fns";
+import {
+  ArrowDownAZ,
+  ArrowUpZA,
+  CalendarArrowDown,
+  CalendarArrowUp,
+} from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -19,7 +27,21 @@ interface RegistrationListProps {
 export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   {
     accessorKey: "affiliation",
-    header: "Affiliation",
+    header: ({ column }) => {
+      return (
+        <Button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          variant={"ghost"}
+        >
+          Affiliation
+          {column.getIsSorted() === "asc" ? (
+            <ArrowUpZA />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowDownAZ />
+          ) : null}
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const data = row.original;
 
@@ -39,7 +61,21 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   },
   {
     accessorKey: "registrant",
-    header: "Participant",
+    header: ({ column }) => {
+      return (
+        <Button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          variant={"ghost"}
+        >
+          Registrant
+          {column.getIsSorted() === "asc" ? (
+            <ArrowUpZA />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowDownAZ />
+          ) : null}
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const { email, firstName, lastName } = row.original.registrant;
       return (
@@ -51,10 +87,26 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   },
   {
     accessorKey: "registrationDate",
-    header: "Registration Date",
+    header: ({ column }) => {
+      return (
+        <Button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          variant={"ghost"}
+        >
+          Registration Date
+          {column.getIsSorted() === "asc" ? (
+            <CalendarArrowDown />
+          ) : column.getIsSorted() === "desc" ? (
+            <CalendarArrowUp />
+          ) : (
+            ""
+          )}
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const { registrationDate } = row.original;
-      return <>{new Date(registrationDate).toLocaleDateString()}</>;
+      return <>{formatDate(registrationDate, "MMM d, h:mm aaa")}</>;
     },
   },
   {
@@ -79,6 +131,11 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
     cell: ({ row }) => <Badge>{row.getValue("paymentMethod")}</Badge>,
   },
   {
+    accessorKey: "people",
+    header: "People",
+    cell: ({ row }) => <>{row.getValue("people")}</>,
+  },
+  {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => (
@@ -88,7 +145,6 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
           registrationIdentifier: row.original.registrationIdentifer,
           paymentStatus: row.original.paymentStatus,
           email: row.original.registrant.email,
-          eventId: row.original.eventId,
           registrationId: row.original.registrationId,
         }}
         isDetailsPage={false}
