@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 import { getAllEvents } from "@/server/events/queries/getAllEvents";
 import EventFilters from "./EventFilters";
 import EventTable from "./EventTable";
@@ -42,7 +43,11 @@ export default async function EventsContents({
       </div>
 
       <div className="rounded-lg border bg-background p-4 md:p-6">
-        <EventFilters />
+        <Suspense
+          fallback={<div className="h-12 animate-pulse rounded bg-muted" />}
+        >
+          <EventFilters />
+        </Suspense>
       </div>
 
       <div className="rounded-lg border bg-background p-4 md:border-0 md:p-0">
