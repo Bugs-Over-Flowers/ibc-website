@@ -1,6 +1,7 @@
 "use client";
 
 import { MoreVertical } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -22,9 +23,14 @@ export default function EventActionsDropdown({
   status,
 }: EventActionsDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   const handleAction = () => {
     setIsOpen(false);
+  };
+
+  const handleEventDetails = () => {
+    router.push(`/admin/events/${eventId}`);
   };
 
   return (
@@ -39,7 +45,7 @@ export default function EventActionsDropdown({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 md:w-48" sideOffset={10}>
-        <ViewDetailsButton eventId={eventId} onAction={handleAction} />
+        <ViewDetailsButton eventId={eventId} onAction={handleEventDetails} />
         <QrButton eventId={eventId} onAction={handleAction} />
         {status === "draft" && (
           <>
