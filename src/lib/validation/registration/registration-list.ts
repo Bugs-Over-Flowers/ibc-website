@@ -74,10 +74,13 @@ export const RegistrationListRPCSchema = z
   );
 
 export const RegistrationListStatsSchema = z.object({
-  total: z.number().min(0),
-  verified: z.number().min(0),
-  pending: z.number().min(0),
+  totalRegistrations: z.number().min(0),
+  verifiedRegistrations: z.number().min(0),
+  pendingRegistrations: z.number().min(0),
+  totalParticipants: z.number().min(0),
 });
+
+export type RegistrationListStats = z.infer<typeof RegistrationListStatsSchema>;
 
 export const RegistrationPageSchema = RegistrationDataBaseSchema.pick({
   registrationId: true,

@@ -461,11 +461,7 @@ export type Database = {
         };
       };
       get_registration_stats: {
-        Args: {
-          p_event_id: string;
-          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
-          p_search_text?: string;
-        };
+        Args: { p_event_id: string };
         Returns: Database["public"]["CompositeTypes"]["registration_stats"];
         SetofOptions: {
           from: "*";
@@ -569,9 +565,10 @@ export type Database = {
         registration_identifier: string | null;
       };
       registration_stats: {
-        total: number | null;
-        verified: number | null;
-        pending: number | null;
+        totalRegistrations: number | null;
+        verifiedRegistrations: number | null;
+        pendingRegistrations: number | null;
+        totalParticipants: number | null;
       };
     };
   };
