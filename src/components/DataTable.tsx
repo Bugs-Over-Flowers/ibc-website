@@ -5,6 +5,7 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  type Table as TableType,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -24,12 +25,14 @@ interface DataTableProps<TData, TValue> {
     position: "top" | "bottom";
     render: React.ReactNode;
   };
+  children?: (table: TableType<TData>) => React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   paginationControls,
+  children,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -93,6 +96,7 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       {paginationControls?.position === "bottom" && paginationControls.render}
+      {children?.(table)}
     </div>
   );
 }
