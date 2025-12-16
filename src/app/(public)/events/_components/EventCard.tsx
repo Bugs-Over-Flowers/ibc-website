@@ -33,8 +33,7 @@ export function EventCard({ event }: EventCardProps) {
   const handleRegisterClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    // TODO: Replace with actual registration logic or navigation
-    router.push(`/registration/${event.eventId}/info`);
+    router.push(`/registration/${event.eventId}/info` as Route);
   };
 
   return (
