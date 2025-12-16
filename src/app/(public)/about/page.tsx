@@ -5,7 +5,7 @@ import AboutStory from "./_components/AboutStory";
 import { AboutThrusts } from "./_components/AboutThrusts";
 import { AboutVisionMission } from "./_components/AboutVisionMission";
 
-async function AboutPage() {
+export function AboutPage() {
   return (
     <main className="min-h-screen bg-background">
       <AboutHero />
@@ -17,5 +17,3 @@ async function AboutPage() {
     </main>
   );
 }
-
-export default AboutPage;
