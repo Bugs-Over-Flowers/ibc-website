@@ -13,7 +13,7 @@ export default function EventRow({ event }: EventRowProps) {
   const imageUrl = event.eventHeaderUrl?.trim();
 
   return (
-    <article className="flex flex-col items-start gap-4 overflow-hidden rounded-lg border bg-white p-4 shadow-sm md:flex-row md:items-center">
+    <article className="flex flex-col items-start gap-4 overflow-hidden rounded-lg border bg-background p-4 shadow-sm md:flex-row md:items-center">
       <div className="relative h-48 w-full shrink-0 md:h-58 md:w-58">
         {imageUrl ? (
           <Image
@@ -26,12 +26,12 @@ export default function EventRow({ event }: EventRowProps) {
             width={192}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center rounded bg-gray-100 text-gray-400 text-xs">
+          <div className="flex h-full w-full items-center justify-center rounded bg-background text-muted-foreground text-xs">
             No image
           </div>
         )}
         <div className="absolute top-2 left-2">
-          <span className="rounded-full bg-black px-2 py-1 text-white text-xs capitalize">
+          <span className="rounded-full bg-foreground px-2 py-1 text-background text-xs capitalize">
             {event.computedStatus}
           </span>
         </div>
@@ -40,21 +40,21 @@ export default function EventRow({ event }: EventRowProps) {
       <div className="flex w-full flex-1 flex-col gap-3">
         <div className="flex h-36 flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span className="whitespace-nowrap rounded-xl bg-gray-200 px-2 py-1 font-semibold text-gray-700 text-xs capitalize">
+            <span className="whitespace-nowrap rounded-xl bg-muted px-2 py-1 font-semibold text-foreground text-xs capitalize">
               {event.eventType}
             </span>
           </div>
           <h3 className="line-clamp-2 font-semibold text-lg md:text-xl">
             {event.eventTitle}
           </h3>
-          <p className="line-clamp-2 text-gray-600 text-sm md:line-clamp-2">
+          <p className="line-clamp-2 text-muted-foreground text-sm md:line-clamp-2">
             {event.description}
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 border-t pt-2 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-gray-500 text-xs">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <MapPin size={12} />
               <span>Venue</span>
             </div>
@@ -62,7 +62,7 @@ export default function EventRow({ event }: EventRowProps) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-gray-500 text-xs">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <Calendar size={12} />
               <span>Dates</span>
             </div>
@@ -76,7 +76,7 @@ export default function EventRow({ event }: EventRowProps) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-gray-500 text-xs">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <DollarSign size={12} />
               <span>Fee</span>
             </div>
