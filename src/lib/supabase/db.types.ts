@@ -436,6 +436,12 @@ export type Database = {
         };
         Returns: Json;
       };
+      publish_event: {
+        Args: {
+          p_event_id: string;
+        };
+        Returns: undefined;
+      };
       update_event_details: {
         Args: {
           p_description: string;
