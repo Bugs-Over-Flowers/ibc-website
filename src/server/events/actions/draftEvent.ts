@@ -3,17 +3,17 @@
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import type { ServerFunction } from "@/lib/server/types";
-import { createAdminClient } from "@/lib/supabase/server";
-import createEventSchema from "@/lib/validation/event/createEventSchema";
+import { createActionClient } from "@/lib/supabase/server";
+import { draftEventServerSchema } from "@/lib/validation/event/createEventSchema";
 
-export type CreateEventInput = z.input<typeof createEventSchema>;
+export type CreateEventInput = z.input<typeof draftEventServerSchema>;
 
 export const draftEvent: ServerFunction<
   [CreateEventInput],
   { eventId: string }
 > = async (input) => {
   console.log("Server Action draftEvent received:", input);
-  const result = createEventSchema.safeParse(input);
+  const result = draftEventServerSchema.safeParse(input);
 
   if (!result.success) {
     return {
@@ -24,41 +24,7 @@ export const draftEvent: ServerFunction<
   }
 
   const data = result.data;
-  const supabase = await createAdminClient();
-
-  const file = data.eventImage[0];
-  const fileExt = file.name.split(".").pop()?.toLowerCase();
-  const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
-
-  if (!fileExt || !allowedExtensions.includes(fileExt)) {
-    return {
-      success: false,
-      error:
-        "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
-      data: null,
-    };
-  }
-
-  const fileName = `${Math.random()
-    .toString(36)
-    .substring(2)}_${Date.now()}.${fileExt}`;
-  const filePath = `event-headers/${fileName}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("headerImage")
-    .upload(filePath, file);
-
-  if (uploadError) {
-    return {
-      success: false,
-      error: `Image upload: ${uploadError.message}`,
-      data: null,
-    };
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("headerImage").getPublicUrl(filePath);
+  const supabase = await createActionClient();
 
   const { data: eventData, error: insertError } = await supabase
     .from("Event")
@@ -70,15 +36,12 @@ export const draftEvent: ServerFunction<
       venue: data.venue,
       registrationFee: data.registrationFee,
       eventType: null, // Force eventType to null for drafts
-      eventHeaderUrl: publicUrl,
+      eventHeaderUrl: data.eventImage,
     })
     .select("eventId")
     .single();
 
   if (insertError) {
-    // Cleanup: delete the uploaded image if database insertion fails
-    await supabase.storage.from("headerImage").remove([filePath]);
-
     return {
       success: false,
       error: `Database error: ${insertError.message}`,

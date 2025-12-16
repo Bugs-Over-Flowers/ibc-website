@@ -102,7 +102,7 @@ export function CreateEventForm() {
                   <>
                     <Button
                       disabled={isSubmitting}
-                      onClick={() => router.push("/admin/dashboard")}
+                      onClick={() => router.push("/admin/events")}
                       type="button"
                       variant="outline"
                     >
