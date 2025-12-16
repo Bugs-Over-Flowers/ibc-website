@@ -34,5 +34,7 @@ export const getEventRegistrationList = async (
     })
     .throwOnError();
 
+  console.log(query.data);
+
   return RegistrationListRPCSchema.array().parse(query.data);
 };

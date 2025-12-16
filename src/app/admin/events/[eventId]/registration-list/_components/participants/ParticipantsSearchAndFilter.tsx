@@ -31,7 +31,7 @@ export default function ParticipantsSearchAndFilter() {
 
   return (
     <Card>
-      <CardContent className="flex w-full flex-col gap-10 md:flex-row">
+      <CardContent className="flex w-full flex-col gap-10 lg:flex-row">
         <div className="w-full">
           <div>Search Participant</div>
 
@@ -73,7 +73,7 @@ export default function ParticipantsSearchAndFilter() {
             </form.AppForm>
           </form>
         </div>
-        <div className="w-full">
+        <div className="md:w-full">
           <div> Payment Status</div>
           <InputGroup className="w-full rounded-md bg-neutral-100 ring-1 ring-neutral-300">
             <Select onValueChange={setFilter} value={filter}>

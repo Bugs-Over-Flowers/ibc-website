@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import tryCatch from "@/lib/server/tryCatch";
-import { getRegistrationStats } from "@/server/registration/queries/getRegistrationStats";
-import RegistrationStatsComponent from "../RegistrationStatsComponent";
+import { getRegistrationListStats } from "@/server/registration/queries/getRegistrationListStats";
+import RegistrationStatsComponent from "./RegistrationStatsComponent";
 
 type RegistrationListPageProps =
   PageProps<"/admin/events/[eventId]/registration-list">;
@@ -14,7 +14,7 @@ export default async function RegistrationListStats({
 
   const cookieStore = await cookies();
   const registrationList = await tryCatch(
-    getRegistrationStats(cookieStore.getAll(), {
+    getRegistrationListStats(cookieStore.getAll(), {
       eventId,
     }),
   );

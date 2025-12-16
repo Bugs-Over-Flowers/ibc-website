@@ -1,8 +1,9 @@
+import { cacheLife } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
 import { RegistrationListStatsSchema } from "@/lib/validation/registration/registration-list";
 
-export const getRegistrationStats = async (
+export const getRegistrationListStats = async (
   requestCookies: RequestCookie[],
   {
     eventId,
@@ -10,10 +11,13 @@ export const getRegistrationStats = async (
     eventId: string;
   },
 ) => {
+  "use cache";
+  cacheLife("seconds");
+
   const supabase = await createClient(requestCookies);
 
   const { data } = await supabase
-    .rpc("get_registration_stats", {
+    .rpc("get_registration_list_stats", {
       p_event_id: eventId,
     })
     .throwOnError();

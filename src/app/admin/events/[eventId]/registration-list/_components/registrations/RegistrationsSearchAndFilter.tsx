@@ -31,8 +31,8 @@ export default function RegistrationSearchAndFilter() {
   };
 
   return (
-    <Card className="md:h-32">
-      <CardContent className="flex w-full flex-col gap-10 md:flex-row">
+    <Card>
+      <CardContent className="flex w-full flex-col gap-10 lg:flex-row">
         <div className="w-full">
           <div>Search Registration</div>
           <form className="flex items-end gap-2" onSubmit={handleSubmit}>

@@ -460,7 +460,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      get_registration_stats: {
+      get_registration_list_stats: {
         Args: { p_event_id: string };
         Returns: Database["public"]["CompositeTypes"]["registration_stats"];
         SetofOptions: {
@@ -551,17 +551,16 @@ export type Database = {
         is_event_day: boolean | null;
       };
       registration_list_item: {
-        event_id: string | null;
         registration_id: string | null;
         affiliation: string | null;
         registration_date: string | null;
-        payment_status: string | null;
-        payment_method: string | null;
-        payment_image_path: string | null;
+        payment_status: Database["public"]["Enums"]["PaymentStatus"] | null;
+        payment_method: Database["public"]["Enums"]["PaymentMethod"] | null;
         business_member_id: string | null;
         business_name: string | null;
         is_member: boolean | null;
         registrant: Json | null;
+        people: number | null;
         registration_identifier: string | null;
       };
       registration_stats: {

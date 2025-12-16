@@ -10,7 +10,7 @@ export default function RegistrationListStats({
   verifiedRegistrations,
 }: RegistrationListStatsProps) {
   return (
-    <div className="flex w-full flex-col justify-between gap-2 py-3 md:gap-4 lg:flex-row">
+    <div className="flex w-full flex-col justify-between gap-2 md:gap-4 lg:flex-row">
       {[
         {
           label: "Total Registrations",
