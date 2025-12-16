@@ -1,137 +1,117 @@
 "use client";
-
-import { Menu } from "lucide-react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
+const navLinks = [
+  { name: "HOME", path: "/" },
+  { name: "ABOUT", path: "/about" },
+  { name: "EVENTS", path: "/events" },
+  { name: "MEMBERS", path: "/members" },
+  { name: "NETWORKS", path: "/networks" },
+  { name: "CONTACT", path: "/contact" },
+];
 
 export function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Events", href: "/events" },
-    { name: "Members", href: "/members" },
-    { name: "Network", href: "/network" },
-    { name: "Contact", href: "/contact" },
-  ];
+  const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <motion.nav
+    <motion.header
       animate={{ y: 0 }}
-      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "border-white/20 border-b bg-white/70 shadow-lg backdrop-blur-xl"
-          : "bg-white/10 backdrop-blur-md"
-      }`}
+      className="fixed top-0 right-0 left-0 z-50 border-border bg-sidebar shadow-soft backdrop-blur-xl transition-all duration-300"
       initial={{ y: -100 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between md:h-20">
-          <a className="flex items-center gap-3" href="#home">
-            <Image
-              alt="IBC Logo"
-              className="h-10 w-auto md:h-12"
-              height={48}
-              src="/logo/ibc-logo-2.png"
-              width={40}
-            />
-            <span
-              className={`font-semibold text-lg transition-colors md:text-xl ${
-                isScrolled ? "text-[#2E2A6E]" : "text-white"
-              }`}
-            >
-              Iloilo Business Club
+      <div className="mx-auto max-w-7xl px-3 sm:px-5 lg:px-7">
+        <div className="flex h-16 items-center justify-between gap-3 md:h-20">
+          {/* Logo */}
+          <Link className="flex min-w-0 items-center gap-3" href="/">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center md:h-12 md:w-12">
+              <Image
+                alt="IBC Logo"
+                className="h-10 w-10 object-contain md:h-12 md:w-12"
+                height={48}
+                priority
+                src="/logo/ibc-logo-2.png"
+                unoptimized={false}
+                width={48}
+              />
+            </div>
+            <span className="truncate font-bold text-foreground transition-colors md:text-xl">
+              ILOILO BUSINESS CLUB, INC.
             </span>
-          </a>
+          </Link>
 
-          <div className="hidden items-center gap-6 text-decora lg:flex">
+          {/* Desktop Navigation */}
+          <nav className="hidden items-center gap-2 lg:flex xl:gap-6">
             {navLinks.map((link) => (
               <a
-                className={`font-medium text-sm transition-colors hover:text-primary ${
-                  isScrolled ? "text-foreground/80" : "text-white/90"
+                className={`rounded-md px-3 py-2 font-semibold text-sm transition-colors hover:text-primary ${
+                  pathname === link.path ? "text-primary" : "text-foreground/80"
                 }`}
-                href={link.href}
+                href={link.path}
                 key={link.name}
               >
                 {link.name}
               </a>
             ))}
-            <div className="ml-2 flex items-center gap-3">
-              <Button className="border border-white/20 bg-primary/90 text-primary-foreground shadow-lg backdrop-blur-sm hover:bg-primary">
-                Join Now
-              </Button>
-            </div>
-          </div>
-
-          <Sheet onOpenChange={setIsMobileMenuOpen} open={isMobileMenuOpen}>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button
-                className={`${
-                  isScrolled ? "text-foreground" : "text-white"
-                } border border-white/20 bg-white/10 backdrop-blur-sm`}
-                size="icon"
-                variant="ghost"
-              >
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent
-              className="w-[300px] border-white/20 border-l bg-white/80 backdrop-blur-xl"
-              side="right"
+            <Button
+              asChild
+              className="ml-2 h-auto min-w-[110px] rounded-full bg-primary px-5 py-1 font-semibold text-md text-primary-foreground shadow-lg hover:bg-primary/90"
             >
-              <div className="mb-8 flex items-center gap-3">
-                <Image
-                  alt="IBC Logo"
-                  className="h-8 w-auto"
-                  height={40}
-                  src="/images/ibc-logo-2.png"
-                  width={32}
-                />
-                <span className="font-semibold text-[#2E2A6E] text-lg">
-                  IBC
-                </span>
-              </div>
-              <div className="flex flex-col gap-6">
-                {navLinks.map((link) => (
-                  <a
-                    className="font-medium text-foreground text-lg transition-colors hover:text-primary"
-                    href={link.href}
-                    key={link.name}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {link.name}
-                  </a>
-                ))}
-                <div className="flex flex-col gap-3 border-border/50 border-t pt-4">
-                  <Button
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                    onClick={() => {
-                      // onNavigate("membership-application");
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    Join Now
-                  </Button>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              <Link href="/contact">JOIN NOW</Link>
+            </Button>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <Button
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            asChild
+            className="rounded-lg p-2 text-foreground transition-colors hover:bg-muted lg:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </Button>
         </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <motion.nav
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-2 rounded-b-xl border-border border-t bg-background/95 py-4 shadow-md backdrop-blur-xl lg:hidden"
+            initial={{ opacity: 0, y: -20 }}
+          >
+            <div className="flex flex-col gap-1 px-2">
+              {navLinks.map((link) => (
+                <a
+                  className={`rounded-lg px-4 py-3 font-medium transition-colors ${
+                    location.pathname === link.path
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                  href={link.path}
+                  key={link.name}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </a>
+              ))}
+              <div className="px-2 pt-2">
+                <Button asChild className="w-full rounded-full px-0 py-3">
+                  <a href="/contact" onClick={() => setMobileMenuOpen(false)}>
+                    Join Now
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </motion.nav>
+        )}
       </div>
-    </motion.nav>
+    </motion.header>
   );
 }

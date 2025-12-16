@@ -27,7 +27,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-sidebar-foreground/90 py-16 text-white" id="contact">
+    <footer className="bg-secondary py-16 text-white" id="contact">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-3"
@@ -88,18 +88,18 @@ export function Footer() {
             <h4 className="mb-4 font-semibold text-lg">Contact Info</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-muted" />
                 <span className="text-white/70">
                   GF Rm. 105-B Maryville Bldg., Marymart Mall, Delgado St.,
                   Iloilo City 5000
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-muted-foreground" />
+                <Phone className="h-5 w-5 text-muted" />
                 <span className="text-white/70">(033) 337 - 8341</span>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-muted-foreground" />
+                <Mail className="h-5 w-5 text-muted" />
                 <span className="text-white/70">
                   iloilobusinessclub1990@gmail.com
                 </span>

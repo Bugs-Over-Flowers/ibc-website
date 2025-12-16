@@ -5,7 +5,7 @@ import {
   Award,
   Building2,
   Calendar,
-  Sparkles,
+  Lightbulb,
   Users,
 } from "lucide-react";
 import { motion } from "motion/react";
@@ -19,10 +19,10 @@ interface WelcomeSectionProps {
 }
 
 const stats = [
-  { number: 35, label: "Years of Excellence", suffix: "+", icon: Award },
-  { number: 500, label: "Business Members", suffix: "+", icon: Users },
-  { number: 100, label: "Annual Events", suffix: "+", icon: Calendar },
-  { number: 50, label: "Industry Partners", suffix: "+", icon: Building2 },
+  { number: 30, label: "Years of Excellence", suffix: "+", icon: Award },
+  { number: 90, label: "Business Members", suffix: "+", icon: Users },
+  { number: 50, label: "Annual Events", suffix: "+", icon: Calendar },
+  { number: 20, label: "Industry Partners", suffix: "+", icon: Building2 },
 ];
 
 export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
@@ -49,12 +49,12 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
           className="object-cover"
           fill
           priority
-          src="/images/backgrounds/bg-1.jpg"
+          src="/images/backgrounds/iloilo-2.jpg"
         />
       </motion.div>
 
       {/* Gradient Overlay with brand colors */}
-      <div className="absolute inset-0 bg-linear-to-br from-foreground/95 via-foreground/85 to-primary/40" />
+      <div className="absolute inset-0 bg-linear-to-br from-secondary/85 via-secondary/75 to-primary/30" />
 
       {/* Decorative Gradient Orbs */}
       <div className="absolute inset-0 overflow-hidden">
@@ -97,7 +97,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
               initial={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Sparkles className="h-4 w-4 text-primary" />
+              <Lightbulb className="h-4 w-4 text-primary" />
               <span className="font-medium text-sm tracking-wide">
                 Established 1990
               </span>
@@ -113,11 +113,8 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
                 Welcome to
               </span>
               <div className="-space-y-2">
-                <span className="block bg-linear-to-r from-primary via-accent to-secondary bg-clip-text pb-0 text-md text-transparent">
-                  Iloilo
-                </span>
-                <span className="block bg-linear-to-r from-primary via-accent to-secondary bg-clip-text pb-2 text-md text-transparent">
-                  Business Club
+                <span className="block text-balance bg-linear-to-r from-chart-1 via-primary to-chart-2 bg-clip-text text-transparent">
+                  Iloilo Business Club
                 </span>
               </div>
             </motion.h1>
@@ -146,7 +143,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button
-                className="h-13 rounded-full border-primary-foreground/30 bg-primary-foreground/10 px-8 font-semibold text-base text-primary-foreground backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-primary-foreground/50 hover:bg-primary-foreground/20"
+                className="h-13 rounded-full border-primary-foreground/30 bg-primary-foreground/10 px-8 font-semibold text-base text-primary-foreground backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-primary-foreground/50 hover:bg-primary-foreground/20 hover:text-none"
                 onClick={() => onNavigate("membership-application")}
                 size="lg"
                 variant="outline"
