@@ -15,14 +15,14 @@ import {
 } from "@/components/ui/select";
 
 interface QRDownloaderProps {
-  registrationId: string;
+  registrationIdentifier: string;
   children: React.ReactNode;
   affiliation: string;
   email: string;
 }
 
 export default function QRDownloader({
-  registrationId,
+  registrationIdentifier,
   affiliation,
   email,
   children,
@@ -33,7 +33,7 @@ export default function QRDownloader({
 
   const print = useReactToPrint({
     contentRef: ref,
-    documentTitle: `${registrationId}.pdf`,
+    documentTitle: `${registrationIdentifier}.pdf`,
   });
 
   const downloadImage = async () => {
@@ -44,7 +44,7 @@ export default function QRDownloader({
     if (as === "image") {
       const url = await toPng(ref.current);
       const link = document.createElement("a");
-      link.download = `${registrationId}.png`;
+      link.download = `${registrationIdentifier}.png`;
       link.href = url;
       link.click();
       return;
@@ -61,7 +61,7 @@ export default function QRDownloader({
           <CardContent className="flex flex-col items-center gap-3">
             {children}
             <div className="">
-              <pre className="text-[8px]">{registrationId}</pre>
+              <pre className="text-[8px]">{registrationIdentifier}</pre>
               <div className="flex flex-col items-center">
                 <div className="pt-2 font-semibold text-lg capitalize">
                   {affiliation}

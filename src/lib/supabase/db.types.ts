@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           applicationDate: string;
           applicationId: string;
+          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           companyAddress: string;
           companyName: string;
@@ -28,12 +29,14 @@ export type Database = {
           memberId: string | null;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
+          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           sectorId: number;
           websiteURL: string;
         };
         Insert: {
           applicationDate?: string;
           applicationId?: string;
+          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           companyAddress: string;
           companyName: string;
@@ -44,12 +47,14 @@ export type Database = {
           memberId?: string | null;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
+          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           sectorId: number;
           websiteURL: string;
         };
         Update: {
           applicationDate?: string;
           applicationId?: string;
+          applicationMemberType?: Database["public"]["Enums"]["ApplicationMemberType"];
           applicationType?: Database["public"]["Enums"]["ApplicationType"];
           companyAddress?: string;
           companyName?: string;
@@ -60,6 +65,7 @@ export type Database = {
           memberId?: string | null;
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
+          paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           sectorId?: number;
           websiteURL?: string;
         };
@@ -77,9 +83,9 @@ export type Database = {
         Row: {
           applicationId: string;
           applicationMemberId: string;
-          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           birthdate: string;
           companyDesignation: string;
+          companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
           faxNumber: string;
           firstName: string;
@@ -93,9 +99,9 @@ export type Database = {
         Insert: {
           applicationId: string;
           applicationMemberId?: string;
-          applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           birthdate: string;
           companyDesignation: string;
+          companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
           faxNumber: string;
           firstName: string;
@@ -109,9 +115,9 @@ export type Database = {
         Update: {
           applicationId?: string;
           applicationMemberId?: string;
-          applicationMemberType?: Database["public"]["Enums"]["ApplicationMemberType"];
           birthdate?: string;
           companyDesignation?: string;
+          companyMemberType?: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress?: string;
           faxNumber?: string;
           firstName?: string;
@@ -169,18 +175,31 @@ export type Database = {
       };
       CheckIn: {
         Row: {
+          checkInId: string;
           date: string;
+          eventDayId: string;
           participantId: string;
         };
         Insert: {
+          checkInId?: string;
           date?: string;
+          eventDayId?: string;
           participantId?: string;
         };
         Update: {
+          checkInId?: string;
           date?: string;
+          eventDayId?: string;
           participantId?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "CheckIn_eventDayId_fkey";
+            columns: ["eventDayId"];
+            isOneToOne: false;
+            referencedRelation: "EventDay";
+            referencedColumns: ["eventDayId"];
+          },
           {
             foreignKeyName: "CheckIn_participantId_fkey";
             columns: ["participantId"];
@@ -231,6 +250,35 @@ export type Database = {
           venue?: string | null;
         };
         Relationships: [];
+      };
+      EventDay: {
+        Row: {
+          eventDate: string;
+          eventDayId: string;
+          eventId: string;
+          label: string;
+        };
+        Insert: {
+          eventDate: string;
+          eventDayId?: string;
+          eventId: string;
+          label: string;
+        };
+        Update: {
+          eventDate?: string;
+          eventDayId?: string;
+          eventId?: string;
+          label?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "EventDay_eventId_fkey";
+            columns: ["eventId"];
+            isOneToOne: false;
+            referencedRelation: "Event";
+            referencedColumns: ["eventId"];
+          },
+        ];
       };
       Participant: {
         Row: {
@@ -310,6 +358,7 @@ export type Database = {
         Row: {
           businessMemberId: string | null;
           eventId: string;
+          identifier: string;
           nonMemberName: string | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
@@ -319,6 +368,7 @@ export type Database = {
         Insert: {
           businessMemberId?: string | null;
           eventId: string;
+          identifier: string;
           nonMemberName?: string | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
@@ -328,6 +378,7 @@ export type Database = {
         Update: {
           businessMemberId?: string | null;
           eventId?: string;
+          identifier?: string;
           nonMemberName?: string | null;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
@@ -413,10 +464,12 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      publish_event: { Args: { p_event_id: string }; Returns: undefined };
       submit_event_registration: {
         Args: {
           p_business_member_id?: string;
           p_event_id: string;
+          p_identifier: string;
           p_member_type: string;
           p_non_member_name?: string;
           p_other_participants?: Json;
@@ -460,6 +513,7 @@ export type Database = {
     Enums: {
       ApplicationMemberType: "corporate" | "personal";
       ApplicationType: "newMember" | "updating" | "renewal";
+      CompanyMemberType: "principal" | "alternate";
       EventType: "public" | "private";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
@@ -488,6 +542,7 @@ export type Database = {
         business_name: string | null;
         is_member: boolean | null;
         registrant: Json | null;
+        registration_identifier: string | null;
       };
       registration_stats: {
         total: number | null;
@@ -623,6 +678,7 @@ export const Constants = {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],
       ApplicationType: ["newMember", "updating", "renewal"],
+      CompanyMemberType: ["principal", "alternate"],
       EventType: ["public", "private"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],

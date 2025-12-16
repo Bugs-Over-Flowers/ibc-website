@@ -15,11 +15,13 @@ import QRCodeDialog from "./QRCodeDialog";
 
 interface RegistrationRowActionsProps {
   data: {
+    registrationIdentifier: string;
     registrationId: string;
     email: string;
     eventId: string;
     paymentStatus: Enums<"PaymentStatus">;
     proofOfPaymentImageURL?: string;
+    affiliation: string;
   };
   isDetailsPage: boolean;
 }
@@ -45,7 +47,7 @@ export default function RegistrationRowActions({
             <DropdownMenuItem
               onSelect={() =>
                 router.push(
-                  `/admin/event/${data.eventId}/registration-list/registration/${data.registrationId}` as Route,
+                  `/admin/events/${data.eventId}/registration-list/registration/${data.registrationId}` as Route,
                 )
               }
             >
@@ -61,10 +63,12 @@ export default function RegistrationRowActions({
         </DropdownMenuContent>
       </DropdownMenu>
       <QRCodeDialog
+        affiliation={data.affiliation}
         email={data.email}
         eventId={data.eventId}
         open={qrcodeDialog}
         registrationId={data.registrationId}
+        registrationIdentifier={data.registrationIdentifier}
         setOpen={setQrcodeDialog}
       />
     </>

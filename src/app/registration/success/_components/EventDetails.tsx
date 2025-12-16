@@ -26,15 +26,15 @@ import QRCodeItem from "./QRCodeItem";
 
 interface EventDetailsProps {
   cookieStore: RequestCookie[];
-  encodedRegistrationQRData: string;
+  registrationIdentifier: string;
 }
 
 export default async function EventDetails({
   cookieStore,
-  encodedRegistrationQRData,
+  registrationIdentifier,
 }: EventDetailsProps) {
   const data = await getSuccessPageData(cookieStore, {
-    encodedRegistrationQRData,
+    registrationIdentifier,
   });
 
   if (
@@ -94,12 +94,10 @@ export default async function EventDetails({
             <QRDownloader
               affiliation={data.affiliation}
               email={data.email}
-              registrationId={data.registrationDetails?.registrationId}
+              registrationIdentifier={registrationIdentifier}
             >
               <div className="relative size-30 md:size-50">
-                <QRCodeItem
-                  encodedRegistrationData={encodedRegistrationQRData}
-                />
+                <QRCodeItem encodedRegistrationData={registrationIdentifier} />
               </div>
             </QRDownloader>
           </div>

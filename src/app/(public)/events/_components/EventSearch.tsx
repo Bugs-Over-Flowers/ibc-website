@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+// import { motion } from "framer-motion";
 import { ChevronDown, Search, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -44,46 +44,42 @@ export function EventsSearch({
   };
 
   return (
-    <motion.div
-      animate={{ opacity: 1, y: 0 }}
-      className="mx-auto w-full max-w-3xl"
-      initial={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-    >
-      <div className="flex flex-col gap-3 sm:flex-row">
-        {/* Search Input */}
-        <div className="relative flex-1">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-            <Search className="h-5 w-5 text-foreground" />
-          </div>
-          <Input
-            className="rounded-xl border-border/50 bg-white/80 py-6 pr-12 pl-12 text-base shadow-lg ring-1 ring-white/30 backdrop-blur-xl transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/30"
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search events..."
-            type="text"
-            value={query}
-          />
-          {query && (
-            <Button
-              className="absolute inset-y-0 right-2 my-auto h-8 w-8 hover:bg-muted/50"
-              onClick={clearSearch}
-              size="icon"
-              variant="ghost"
-            >
-              <X className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
-            </Button>
-          )}
-        </div>
-
-        {/* Filter Dropdown */}
+    <div className="mb-4 flex flex-col gap-4 sm:flex-row">
+      {/* Search Bar */}
+      <div className="relative flex-1">
+        <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-4 z-10 h-5 w-5 transform text-foreground/50 drop-shadow-md" />
+        <Input
+          className="h-[52px] justify-between rounded-xl border border-border/50 bg-white/80 px-5 pl-12 text-foreground shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90 focus:ring-2 focus:ring-primary/30"
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Search events..."
+          type="text"
+          value={query}
+        />
+        {query && (
+          <Button
+            className="absolute inset-y-0 right-2 my-auto h-8 w-8 hover:bg-muted/50"
+            onClick={clearSearch}
+            size="icon"
+            variant="ghost"
+          >
+            <X className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
+          </Button>
+        )}
+      </div>
+      {/* Filter Dropdown */}
+      <div className="w-full sm:w-64">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              className="h-[52px] min-w-[140px] justify-between rounded-xl border-border/50 bg-white/80 px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
+              aria-expanded={false}
+              className="h-[52px] w-full min-w-[140px] justify-between rounded-xl border-border/50 bg-white px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
+              role="combobox"
               variant="outline"
             >
-              {filterLabels[currentFilter]}
-              <ChevronDown className="ml-2 h-4 w-4 text-muted-foreground" />
+              <span className="block max-w-[140px] truncate text-left">
+                {filterLabels[currentFilter]}
+              </span>
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -117,6 +113,6 @@ export function EventsSearch({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </motion.div>
+    </div>
   );
 }
