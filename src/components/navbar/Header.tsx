@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "../NightModeToggle";
 
 const navLinks = [
   { name: "HOME", path: "/" },
@@ -66,6 +67,8 @@ export function Header() {
             >
               <Link href="/contact">JOIN NOW</Link>
             </Button>
+
+            <ModeToggle />
           </nav>
 
           {/* Mobile Menu Button */}
