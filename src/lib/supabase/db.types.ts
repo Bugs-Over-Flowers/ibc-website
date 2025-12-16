@@ -464,7 +464,6 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      publish_event: { Args: { p_event_id: string }; Returns: undefined };
       submit_event_registration: {
         Args: {
           p_business_member_id?: string;
