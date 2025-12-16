@@ -4,7 +4,20 @@ import { useOptimistic, useState, useTransition } from "react";
 import type { ServerFunction } from "@/lib/server/types";
 
 interface UseActionOptions<TOutput, TError = Error | string> {
+  /**
+   * Persist the state between actions.
+   * Defaults to `false`.
+   */
+  persist?: boolean;
+
+  /**
+   * Called when the action succeeds.
+   */
   onSuccess?: (data: TOutput) => void;
+
+  /**
+   * Called when the action fails.
+   */
   onError?: (error: TError) => void;
 }
 
@@ -76,7 +89,11 @@ export function useAction<
 
   async function execute(...args: TInput) {
     setError(null);
-    setData(null);
+
+    if (!options.persist) {
+      setData(null);
+    }
+
     setIsPending(true);
 
     const res = await action(...args);

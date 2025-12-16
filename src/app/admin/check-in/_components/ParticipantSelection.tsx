@@ -4,13 +4,9 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { getRegistrationIdentifierDetails } from "@/server/attendance/mutations/getRegistrationIdentifierDetails";
+import type { ParticipantCheckInItem } from "@/lib/validation/checkin/checkin-list";
 
-type ParticipantListRow = Awaited<
-  ReturnType<typeof getRegistrationIdentifierDetails>
->["data"]["participantList"][number];
-
-const columnDefs: ColumnDef<ParticipantListRow>[] = [
+const columnDefs: ColumnDef<ParticipantCheckInItem>[] = [
   {
     accessorKey: "Actions",
     enableHiding: false,
@@ -27,8 +23,8 @@ const columnDefs: ColumnDef<ParticipantListRow>[] = [
     cell: ({ row }) => (
       <Checkbox
         aria-label="Select row"
-        checked={row.getIsSelected() || row.original.checkIn}
-        disabled={row.original.checkIn}
+        checked={row.getIsSelected() || row.original.checkedIn}
+        disabled={row.original.checkedIn}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
       />
     ),
@@ -52,7 +48,7 @@ const columnDefs: ColumnDef<ParticipantListRow>[] = [
 ];
 
 interface ParticipantSelectionProps {
-  participantList: ParticipantListRow[];
+  participantList: ParticipantCheckInItem[];
   handleCheckIn: (participantIds: string[]) => Promise<void>;
   isPending: boolean;
 }
@@ -64,10 +60,14 @@ export default function ParticipantSelection({
 }: ParticipantSelectionProps) {
   return (
     <DataTable columns={columnDefs} data={participantList}>
-      {(table) => (
-        <>
+      {(table) => {
+        const disabled =
+          isPending ||
+          table.getSelectedRowModel().rows.length === 0 ||
+          participantList.every((participant) => participant.checkedIn);
+        return (
           <Button
-            disabled={isPending || table.getIsAllPageRowsSelected()}
+            disabled={disabled}
             onClick={async () => {
               await handleCheckIn(
                 table
@@ -81,8 +81,8 @@ export default function ParticipantSelection({
           >
             {isPending ? "Loading..." : "Check In"}
           </Button>
-        </>
-      )}
+        );
+      }}
     </DataTable>
   );
 }

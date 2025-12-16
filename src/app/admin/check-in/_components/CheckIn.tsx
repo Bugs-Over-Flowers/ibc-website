@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationIdentifier } from "@/lib/validation/qr/standard";
-import { getRegistrationIdentifierDetails } from "@/server/attendance/mutations/getRegistrationIdentifierDetails";
-
+import { getRegistrationListCheckInRPC } from "@/server/attendance/actions/getRegistrationListCheckInRPC";
 import { useCheckIn } from "../_hooks/useCheckIn";
 import ParticipantSelection from "./ParticipantSelection";
 import QRCamera from "./QRCamera";
@@ -16,21 +15,24 @@ import RegistrationDetails from "./RegistrationDetails";
 
 export default function CheckIn() {
   const {
-    data: registrationState,
+    data: checkInDetails,
     execute: decodeQR,
     reset: resetDecodeQR,
     isPending,
-  } = useAction(tryCatch(getRegistrationIdentifierDetails), {
+  } = useAction(tryCatch(getRegistrationListCheckInRPC), {
+    persist: true,
     onError: (error) => {
       toast.error(error);
     },
   });
 
   const {
-    optimistic: optimisticCheckIn,
+    optimistic: optimisticCheckInList,
     execute: optimisticCheckInExecute,
     isPending: optimisticCheckInIsPending,
-  } = useCheckIn(registrationState);
+  } = useCheckIn({
+    checkInList: checkInDetails?.checkInList,
+  });
 
   const reset = () => {
     resetDecodeQR();
@@ -45,7 +47,7 @@ export default function CheckIn() {
       return;
     }
 
-    if (!optimisticCheckIn || !optimisticCheckIn.data.eventDays.length) {
+    if (!checkInDetails || !checkInDetails.eventDays.length) {
       toast.error("Event not found");
       return;
     }
@@ -57,7 +59,7 @@ export default function CheckIn() {
 
     const { data } = await optimisticCheckInExecute(
       participantIds,
-      optimisticCheckIn.data.eventDays[0].eventDayId,
+      checkInDetails.eventDays[0].eventDayId,
     );
 
     if (!data) {
@@ -76,8 +78,8 @@ export default function CheckIn() {
     setIdentifier(rawValue);
     const { data } = await decodeQR(rawValue);
 
-    if (data?.message) {
-      toast.success(data.message);
+    if (data?.allIsCheckedIn) {
+      toast.success("All participants checked in");
     }
   };
   return (
@@ -85,7 +87,7 @@ export default function CheckIn() {
       <div className="flex flex-col gap-4">
         <QRCamera
           handleScan={handleScan}
-          isPaused={isPending || !!registrationState}
+          isPaused={isPending || !!checkInDetails}
         />
         {identifier !== null && (
           <Button
@@ -98,21 +100,22 @@ export default function CheckIn() {
           </Button>
         )}
       </div>
-      {optimisticCheckIn?.data && (
+      {checkInDetails && (
         <div className="w-full">
           {identifier && (
             <RegistrationDetails
-              eventTitle={optimisticCheckIn.data.eventDetails.eventTitle}
+              day={checkInDetails.eventDays[0].label}
+              eventTitle={checkInDetails.eventDetails.eventTitle}
               registrationIdentifier={identifier}
             />
           )}
-          {optimisticCheckIn.data.participantList.length > 1 && (
-            <ParticipantSelection
-              handleCheckIn={handleCheckIn}
-              isPending={optimisticCheckInIsPending}
-              participantList={optimisticCheckIn.data.participantList}
-            />
-          )}
+          <ParticipantSelection
+            handleCheckIn={handleCheckIn}
+            isPending={optimisticCheckInIsPending}
+            participantList={
+              optimisticCheckInList.checkInList ?? checkInDetails.checkInList
+            }
+          />
         </div>
       )}
     </>

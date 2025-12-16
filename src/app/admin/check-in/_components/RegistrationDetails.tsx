@@ -5,16 +5,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { RegistrationIdentifier } from "@/lib/validation/qr/standard";
 
 interface RegistrationDetailsProps {
   eventTitle: string;
   registrationIdentifier: RegistrationIdentifier;
+  day: string;
 }
 
 export default function RegistrationDetails({
   eventTitle,
   registrationIdentifier,
+  day,
 }: RegistrationDetailsProps) {
   return (
     <Dialog>
@@ -23,8 +33,22 @@ export default function RegistrationDetails({
       </DialogTrigger>
       <DialogContent>
         <DialogTitle>Details</DialogTitle>
-        <h1>{eventTitle}</h1>
-        <pre>{registrationIdentifier}</pre>
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell>Event Title</TableCell>
+              <TableCell>{eventTitle}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Registration Identifier</TableCell>
+              <TableCell>{registrationIdentifier}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Day</TableCell>
+              <TableCell>{day}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </DialogContent>
     </Dialog>
   );
