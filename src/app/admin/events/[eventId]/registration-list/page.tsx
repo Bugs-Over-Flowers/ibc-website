@@ -32,14 +32,11 @@ export default function RegistrationPageWrapper({
         <BackButton params={params} />
       </Suspense>
       <RegistrationTabs>
+        <Suspense fallback={<StatsSkeleton />}>
+          <RegistrationListStats params={params} searchParams={searchParams} />
+        </Suspense>
         <TabsContent className="flex flex-col gap-4" value="registrations">
           {/* Stats */}
-          <Suspense fallback={<StatsSkeleton />}>
-            <RegistrationListStats
-              params={params}
-              searchParams={searchParams}
-            />
-          </Suspense>
 
           {/* Search and Filter */}
           <Suspense
