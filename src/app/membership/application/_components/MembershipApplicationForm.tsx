@@ -1,7 +1,8 @@
 "use client";
 
 import { useStore } from "@tanstack/react-form";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ChevronLeft } from "lucide-react";
+import Link from "next/link";
 import { useMembershipStep1 } from "@/app/membership/application/_hooks/useMembershipStep1";
 import { useMembershipStep2 } from "@/app/membership/application/_hooks/useMembershipStep2";
 import { useMembershipStep3 } from "@/app/membership/application/_hooks/useMembershipStep3";
@@ -68,6 +69,12 @@ export function MembershipApplicationForm() {
     <div className="flex flex-col gap-8 lg:flex-row">
       {/* Sidebar / Stepper */}
       <div className="w-full space-y-6 lg:w-1/4">
+        <Link href="/">
+          <Button className="-ml-4" variant="ghost">
+            <ChevronLeft />
+            Back to Home
+          </Button>
+        </Link>
         <div className="space-y-4">
           <h2 className="font-bold text-primary text-xl">
             Iloilo Business Club
