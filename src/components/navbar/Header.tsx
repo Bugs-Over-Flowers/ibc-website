@@ -4,8 +4,9 @@ import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ModeToggle } from "../NightModeToggle";
 
 const navLinks = [
@@ -20,11 +21,24 @@ const navLinks = [
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <motion.header
       animate={{ y: 0 }}
-      className="fixed top-0 right-0 left-0 z-50 border-border bg-sidebar shadow-soft backdrop-blur-xl transition-all duration-300"
+      className={cn(
+        "fixed top-0 right-0 left-0 z-50 transition-all duration-300",
+        isScrolled
+          ? "border-border bg-card/95 shadow-lg backdrop-blur-md"
+          : "bg-transparent",
+      )}
       initial={{ y: -100 }}
       transition={{ duration: 0.5 }}
     >
@@ -43,7 +57,12 @@ export function Header() {
                 width={48}
               />
             </div>
-            <span className="truncate font-bold text-foreground transition-colors md:text-xl">
+            <span
+              className={cn(
+                "truncate font-bold transition-colors md:text-xl",
+                isScrolled ? "text-foreground" : "text-primary-foreground",
+              )}
+            >
               ILOILO BUSINESS CLUB, INC.
             </span>
           </Link>
@@ -52,9 +71,14 @@ export function Header() {
           <nav className="hidden items-center gap-2 lg:flex xl:gap-6">
             {navLinks.map((link) => (
               <a
-                className={`rounded-md px-3 py-2 font-semibold text-sm transition-colors hover:text-primary ${
-                  pathname === link.path ? "text-primary" : "text-foreground/80"
-                }`}
+                className={cn(
+                  "rounded-md px-2 py-2 font-semibold text-sm transition-colors hover:text-primary",
+                  pathname === link.path
+                    ? "text-primary"
+                    : isScrolled
+                      ? "text-foreground"
+                      : "text-primary-foreground",
+                )}
                 href={link.path}
                 key={link.name}
               >
@@ -75,10 +99,24 @@ export function Header() {
           <Button
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             asChild
-            className="rounded-lg p-2 text-foreground transition-colors hover:bg-muted lg:hidden"
+            className="rounded-lg p-2 transition-colors hover:bg-muted lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? (
+              <X
+                className={cn(
+                  "h-6 w-6",
+                  isScrolled ? "text-foreground" : "text-primary-foreground",
+                )}
+              />
+            ) : (
+              <Menu
+                className={cn(
+                  "h-6 w-6",
+                  isScrolled ? "text-foreground" : "text-primary-foreground",
+                )}
+              />
+            )}
           </Button>
         </div>
 
