@@ -32,7 +32,7 @@ export default function EventActionsDropdown({
       <DropdownMenuTrigger asChild>
         <button
           aria-label="Event actions"
-          className="rounded-full p-2 transition-colors hover:bg-gray-100 md:rounded-md"
+          className="rounded-full p-2 transition-colors hover:bg-muted md:rounded-md"
           type="button"
         >
           <MoreVertical size={20} />

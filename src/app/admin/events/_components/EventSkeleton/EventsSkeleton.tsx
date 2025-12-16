@@ -15,7 +15,7 @@ export default function EventsSkeleton() {
       </div>
 
       {/* Filters skeleton */}
-      <div className="rounded-lg border bg-white p-4 md:p-6">
+      <div className="rounded-lg border bg-background p-4 md:p-6">
         <div className="flex flex-col gap-4">
           <Skeleton className="h-10 w-full" />
           <div className="grid grid-cols-2 gap-3 md:flex md:gap-4">

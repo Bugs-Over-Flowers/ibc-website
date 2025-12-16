@@ -2,7 +2,7 @@ import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
-import { getEventStatus } from "./helpers";
+import { getEventStatus } from "../actions/helpers";
 
 export async function getAllEvents(
   requestCookies: RequestCookie[],
