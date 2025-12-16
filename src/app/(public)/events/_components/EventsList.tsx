@@ -12,7 +12,9 @@ import { FeaturedEventList } from "./FeaturedEventList";
 
 type Event = Tables<"Event">;
 
-type FilterOption = "all" | "upcoming" | "past";
+import type { EventStatus } from "@/lib/events/eventUtils";
+
+type FilterOption = "all" | EventStatus;
 
 interface EventsListProps {
   events: Event[];
@@ -145,9 +147,10 @@ export function EventsList({ events }: EventsListProps) {
         </motion.div>
         <div className="mb-12">
           <EventsSearch
-            currentFilter={filter}
-            onFilterChange={setFilter}
-            onSearch={setSearchQuery}
+            onSearchChange={setSearchQuery}
+            onStatusChange={setFilter}
+            searchQuery={searchQuery}
+            statusFilter={filter}
           />
         </div>
         {/* Events Grid */}
@@ -160,8 +163,8 @@ export function EventsList({ events }: EventsListProps) {
             initial="hidden"
             variants={staggerContainer}
           >
-            {filteredEvents.map((event) => (
-              <EventCard event={event} key={event.eventId} />
+            {filteredEvents.map((event, index) => (
+              <EventCard event={event} index={index} key={event.eventId} />
             ))}
           </motion.div>
         )}

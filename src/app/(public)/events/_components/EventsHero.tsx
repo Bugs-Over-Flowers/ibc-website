@@ -53,7 +53,7 @@ export function EventsHero() {
             className="mb-6 font-bold text-4xl text-white drop-shadow-lg md:text-5xl lg:text-6xl"
             variants={fadeInUp}
           >
-            IBC Events
+            Events and Activities{" "}
           </motion.h1>
           <motion.p
             className="text-lg text-white/90 leading-relaxed drop-shadow-md"

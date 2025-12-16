@@ -7,7 +7,6 @@ import {
   Copy,
   Facebook,
   Linkedin,
-  MessageSquare,
   Share2,
   Twitter,
   Users,
@@ -86,15 +85,6 @@ export default function EventRegistrationCard({
                   Register for This Event
                 </Button>
               </Link>
-
-              <Button
-                className="h-12 w-full rounded-2xl border-border bg-transparent text-foreground hover:bg-accent"
-                size="lg"
-                variant="outline"
-              >
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Submit Feedback
-              </Button>
             </div>
 
             {/* Share Section */}

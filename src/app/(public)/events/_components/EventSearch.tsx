@@ -1,8 +1,6 @@
 "use client";
 
-// import { motion } from "framer-motion";
-import { ChevronDown, Search, X } from "lucide-react";
-import { useState } from "react";
+import { Calendar, ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,105 +9,67 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import type { EventStatus } from "@/lib/events/eventUtils";
 
-type FilterOption = "all" | "upcoming" | "past";
-
-interface EventsSearchProps {
-  onSearch: (query: string) => void;
-  onFilterChange: (filter: FilterOption) => void;
-  currentFilter: FilterOption;
-}
-
-const filterLabels: Record<FilterOption, string> = {
-  all: "All Events",
-  upcoming: "Upcoming",
-  past: "Past Events",
+type StatusOption = {
+  value: EventStatus | "all";
+  label: string;
 };
 
+const statusFilters: StatusOption[] = [
+  { value: "all", label: "All Events" },
+  { value: "upcoming", label: "Upcoming" },
+  { value: "past", label: "Past" },
+];
+
+interface EventsSearchProps {
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  statusFilter: EventStatus | "all";
+  onStatusChange: (status: EventStatus | "all") => void;
+}
+
 export function EventsSearch({
-  onSearch,
-  onFilterChange,
-  currentFilter,
+  searchQuery,
+  onSearchChange,
+  statusFilter,
+  onStatusChange,
 }: EventsSearchProps) {
-  const [query, setQuery] = useState("");
-
-  const handleSearch = (value: string) => {
-    setQuery(value);
-    onSearch(value);
-  };
-
-  const clearSearch = () => {
-    setQuery("");
-    onSearch("");
-  };
-
   return (
-    <div className="mb-4 flex flex-col gap-4 sm:flex-row">
-      {/* Search Bar */}
-      <div className="relative flex-1">
-        <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-4 z-10 h-5 w-5 transform text-foreground/50 drop-shadow-md" />
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="relative w-full flex-1">
+        <Search className="-translate-y-1/2 absolute top-1/2 left-4 h-5 w-5 text-muted-foreground" />
         <Input
-          className="h-[52px] justify-between rounded-xl border border-border/50 bg-white/80 px-5 pl-12 text-foreground shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90 focus:ring-2 focus:ring-primary/30"
-          onChange={(e) => handleSearch(e.target.value)}
+          className="h-12 rounded-xl border-border bg-background pr-4 pl-12"
+          onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search events..."
           type="text"
-          value={query}
+          value={searchQuery}
         />
-        {query && (
-          <Button
-            className="absolute inset-y-0 right-2 my-auto h-8 w-8 hover:bg-muted/50"
-            onClick={clearSearch}
-            size="icon"
-            variant="ghost"
-          >
-            <X className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
-          </Button>
-        )}
       </div>
-      {/* Filter Dropdown */}
-      <div className="w-full sm:w-64">
+
+      <div className="flex flex-wrap gap-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              aria-expanded={false}
-              className="h-[52px] w-full min-w-[140px] justify-between rounded-xl border-border/50 bg-white px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
-              role="combobox"
+              className="h-12 w-48 min-w-[10rem] gap-2 rounded-xl bg-transparent"
               variant="outline"
             >
-              <span className="block max-w-[140px] truncate text-left">
-                {filterLabels[currentFilter]}
-              </span>
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <Calendar className="h-4 w-4" />
+              {statusFilters.find((s) => s.value === statusFilter)?.label}
+              <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-[140px] rounded-xl border-border/50 bg-white/95 shadow-xl backdrop-blur-xl"
-          >
-            <DropdownMenuItem
-              className={
-                currentFilter === "all" ? "bg-primary/10 text-primary" : ""
-              }
-              onClick={() => onFilterChange("all")}
-            >
-              All Events
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className={
-                currentFilter === "upcoming" ? "bg-primary/10 text-primary" : ""
-              }
-              onClick={() => onFilterChange("upcoming")}
-            >
-              Upcoming
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className={
-                currentFilter === "past" ? "bg-primary/10 text-primary" : ""
-              }
-              onClick={() => onFilterChange("past")}
-            >
-              Past Events
-            </DropdownMenuItem>
+          <DropdownMenuContent align="end" className="rounded-xl">
+            {statusFilters.map((status) => (
+              <DropdownMenuItem
+                className={statusFilter === status.value ? "bg-primary/10" : ""}
+                key={status.value}
+                onClick={() => onStatusChange(status.value)}
+              >
+                {status.label}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

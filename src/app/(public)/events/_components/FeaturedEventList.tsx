@@ -70,7 +70,7 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
       onMouseLeave={() => setIsPaused(false)}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-primary/5 via-accent/5 to-transparent p-6 md:p-8">
+      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary/5 via-accent/5 to-transparent p-6 md:p-8">
         <AnimatePresence custom={direction} initial={false} mode="wait">
           <motion.div
             animate="center"
@@ -130,7 +130,7 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
               <div className="flex gap-4">
                 <Button
                   asChild
-                  className="rounded-full bg-foreground px-8 text-background hover:bg-foreground/90"
+                  className="rounded-lg bg-foreground px-8 text-background hover:bg-foreground/90"
                   size="lg"
                 >
                   <Link href={`/events/${currentEvent.eventId}`}>
@@ -138,11 +138,7 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button
-                  className="rounded-full px-8"
-                  size="lg"
-                  variant="outline"
-                >
+                <Button className="rounded-lg px-8" size="lg" variant="outline">
                   Register Now
                 </Button>
               </div>

@@ -1,12 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, ClipboardList, MapPin } from "lucide-react";
 import Image from "next/image";
-// import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { getStatusBadge } from "@/components/BadgeEvents";
 import {
   formatDate,
   formatTime,
@@ -16,151 +14,97 @@ import type { Tables } from "@/lib/supabase/db.types";
 
 type Event = Tables<"Event">;
 
-import { fadeInUp } from "@/lib/animations/fade";
-
 interface EventCardProps {
   event: Event;
+  index: number;
 }
 
-import type { Route } from "next";
-import { useRouter } from "next/navigation";
-
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, index }: EventCardProps) {
   const status = getEventStatus(event.eventStartDate, event.eventEndDate);
-  const router = useRouter();
-
-  // Handler to stop click bubbling for Register Now
-  const handleRegisterClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    router.push(`/registration/${event.eventId}/info` as Route);
-  };
-
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
-      className="group mx-auto flex h-full w-full max-w-[400px] rounded-xl"
-      onClick={() => router.push(`/events/${event.eventId}` as Route)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          router.push(`/events/${event.eventId}` as Route);
-        }
-      }}
-      role="button"
-      style={{ cursor: "pointer" }}
-      tabIndex={0}
-      variants={fadeInUp}
+      initial={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5, delay: 0.1 * index }}
     >
-      <Card className="flex h-full min-h-[480px] w-full flex-col overflow-hidden rounded-2xl bg-white/80 py-0 shadow-lg ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300 hover:shadow-xl hover:ring-primary/20">
-        {/* Image */}
-        <div className="relative aspect-4/3 overflow-hidden">
-          <Image
-            alt={event.eventTitle}
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            fill
-            src={
-              event.eventHeaderUrl ||
-              "/placeholder.svg?height=300&width=400&query=business+event"
-            }
-          />
-          {/* Status Badge */}
-          <div className="absolute top-3 left-3">
-            {status === "ongoing" && (
-              <Badge className="bg-primary text-primary-foreground shadow-lg">
-                <span className="relative mr-1.5 flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
-                </span>
-                Ongoing
-              </Badge>
-            )}
-            {status === "upcoming" && (
-              <Badge
-                className="bg-destructive/90 text-white shadow-lg backdrop-blur-sm"
-                variant="secondary"
-              >
-                Upcoming
-              </Badge>
-            )}
-            {status === "past" && (
-              <Badge
-                className="border-muted bg-muted/80 text-muted-foreground shadow-lg backdrop-blur-sm"
-                variant="outline"
-              >
-                Past Event
-              </Badge>
-            )}
+      <Link className="group block h-full" href={`/events/${event.eventId}`}>
+        <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-shadow hover:shadow-lg">
+          <div className="relative aspect-16/10 overflow-hidden">
+            <Image
+              alt={event.eventTitle}
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              src={event.eventHeaderUrl || "/placeholder.svg"}
+            />
+            <div className="absolute top-4 left-4 flex gap-2">
+              {getStatusBadge(status)}
+            </div>
           </div>
-          {/* Registration Fee Badge */}
-          <div className="absolute right-3 bottom-3">
-            <Badge
-              className={
-                event.registrationFee === 0
-                  ? "bg-primary/90 px-3 py-1 font-semibold text-primary-foreground text-xs shadow-md"
-                  : "bg-muted/80 px-3 py-1 font-semibold text-foreground text-xs shadow-md"
-              }
-            >
-              {event.registrationFee === 0
-                ? "Free"
-                : `Registration Fee: ₱${event.registrationFee.toLocaleString()}`}
-            </Badge>
-          </div>
-        </div>
-        <CardContent className="flex flex-1 flex-col p-5">
-          {/* Title */}
-          <h3 className="mb-2 line-clamp-2 font-bold text-foreground text-lg leading-tight transition-colors group-hover:text-primary">
-            {event.eventTitle}
-          </h3>
-          {/* Description */}
-          {event.description && (
-            <p className="mb-4 line-clamp-2 text-muted-foreground text-sm leading-relaxed">
+
+          <div className="flex flex-1 flex-col p-6">
+            <h3 className="mb-2 line-clamp-2 font-semibold text-foreground text-lg transition-colors group-hover:text-primary">
+              {event.eventTitle}
+            </h3>
+
+            <p className="mb-4 line-clamp-2 flex-1 text-muted-foreground text-sm">
               {event.description}
             </p>
-          )}
 
-          {/* Meta Info */}
-          <div className="mb-3 flex items-center gap-4 text-muted-foreground text-sm">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4 text-primary" />
-              {formatDate(event.eventStartDate)}
-            </span>
+            <div className="space-y-2 border-border border-t pt-4">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span>{formatDate(event.eventStartDate)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <svg
+                  aria-label="Event time"
+                  className="h-4 w-4 text-primary"
+                  fill="none"
+                  role="img"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <title>Event time</title>
+                  <path
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>
+                  {formatTime
+                    ? formatTime(event.eventStartDate, event.eventEndDate) ||
+                      "Time TBA"
+                    : "Time TBA"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span className="truncate">{event.venue || "Venue TBA"}</span>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-between">
+              <span className="font-bold text-lg text-primary">
+                {event.registrationFee === 0
+                  ? "Free"
+                  : `₱${event.registrationFee.toLocaleString()}`}
+              </span>
+              {status !== "past" && (
+                <Link
+                  className="ml-auto flex w-auto items-center gap-2 rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90 hover:text-white"
+                  href={`/registration/${event.eventId}/info`}
+                  onClick={(e) => e.stopPropagation()}
+                  tabIndex={0}
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  Register Now
+                </Link>
+              )}
+            </div>
           </div>
-
-          <div className="mb-4 flex items-center gap-4 text-muted-foreground text-sm">
-            <span className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-primary" />
-              {formatTime(event.eventStartDate, event.eventEndDate) ||
-                "Time TBA"}
-            </span>
-          </div>
-          {/* Action Buttons at Bottom */}
-          <div className="mt-auto flex flex-col gap-2">
-            {status !== "past" && (
-              <Button
-                className="w-full rounded-xl border-primary transition-all"
-                onClick={handleRegisterClick}
-                tabIndex={0}
-                type="button"
-                variant="default"
-              >
-                Register Now
-              </Button>
-            )}
-            <Button
-              className="bg w-full rounded-xl text-primary transition-all hover:text-primary-foreground"
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/events/${event.eventId}`);
-              }}
-              tabIndex={0}
-              type="button"
-              variant="outline"
-            >
-              Read more
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Link>
     </motion.div>
   );
 }
