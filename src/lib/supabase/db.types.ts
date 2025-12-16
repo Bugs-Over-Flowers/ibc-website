@@ -464,7 +464,6 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      publish_event: { Args: { p_event_id: string }; Returns: undefined };
       submit_event_registration: {
         Args: {
           p_business_member_id?: string;
@@ -488,6 +487,12 @@ export type Database = {
           p_representatives: Json;
         };
         Returns: Json;
+      };
+      publish_event: {
+        Args: {
+          p_event_id: string;
+        };
+        Returns: undefined;
       };
       update_event_details: {
         Args: {
