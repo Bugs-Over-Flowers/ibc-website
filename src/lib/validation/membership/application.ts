@@ -59,9 +59,9 @@ export const MembershipApplicationStep2Schema = z
       .string({ message: "Company profile is required" })
       .min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),
-    landline: landlineSchema,
+    landline: z.string("Landline is required").min(1, "Landline is required"),
     mobileNumber: phoneSchema,
-    faxNumber: telefaxSchema,
+    faxNumber: z.string("Telefax is required").min(1, "Telefax is required"),
     logoImageURL: z.string().optional(),
     logoImage: z
       .file("Company logo is required")
@@ -126,9 +126,9 @@ export const MembershipApplicationSchema = z
     companyAddress: z.string().min(1, "Company address is required"),
     websiteURL: z.string().min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),
-    landline: landlineSchema,
+    landline: z.string("Landline is required").min(1, "Landline is required"),
     mobileNumber: phoneSchema,
-    faxNumber: telefaxSchema,
+    faxNumber: z.string("Telefax is required").min(1, "Telefax is required"),
     logoImageURL: z
       .string({ message: "Company logo is required" })
       .min(1, "Company logo is required"),
