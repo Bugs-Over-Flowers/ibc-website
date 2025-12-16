@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EventRowSkeleton() {
   return (
-    <div className="flex flex-col items-start gap-4 overflow-hidden rounded-lg border bg-white p-4 shadow-sm md:flex-row md:items-center">
+    <div className="flex flex-col items-start gap-4 overflow-hidden rounded-lg border bg-background p-4 shadow-sm md:flex-row md:items-center">
       {/* Image skeleton */}
       <div className="relative h-48 w-full shrink-0 md:h-58 md:w-58">
         <Skeleton className="h-full w-full rounded" />

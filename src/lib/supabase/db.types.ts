@@ -551,7 +551,8 @@ export type Database = {
         event_details: Json | null;
         check_in_list: Json | null;
         event_days: Json | null;
-        all_checked_in: boolean | null;
+        all_is_checked_in: boolean | null;
+        is_event_day: boolean | null;
       };
       registration_list_item: {
         event_id: string | null;

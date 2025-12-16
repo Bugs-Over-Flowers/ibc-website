@@ -1,5 +1,7 @@
+export { default as FileDropzoneField } from "./FileDropzoneField";
 export { default as FormDatePicker } from "./FormDatePicker";
 export { default as FormDateRangePicker } from "./FormDateRangePicker";
+export { default as ImageField } from "./ImageField";
 export { default as NumberField } from "./NumberField";
 export { default as SelectField } from "./SelectField";
 export { default as TextareaField } from "./TextareaField";

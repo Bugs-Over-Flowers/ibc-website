@@ -1,49 +1,47 @@
-import type * as React from "react";
+import type { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
-interface TextFieldProps {
-  label?: React.ReactNode;
+interface ImageFieldProps {
+  label?: string;
   description?: string;
   className?: string;
-  placeholder?: string;
-  type?: React.HTMLInputTypeAttribute;
-  disabled?: boolean;
+  multiple?: boolean;
 }
 
-function TextField({
+function ImageField({
   label,
   description,
   className,
-  placeholder,
-  type = "text",
-  disabled,
-}: TextFieldProps) {
-  const field = useFieldContext<string>();
+  multiple = false,
+}: ImageFieldProps) {
+  const field = useFieldContext<File[]>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    field.handleChange(files);
+  };
 
   return (
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
-        autoCapitalize="on"
-        autoComplete="off"
-        data-invalid={isInvalid}
-        disabled={disabled}
+        accept="image/*"
+        className="cursor-pointer"
         id={field.name}
-        name={field.name}
+        multiple={multiple}
         onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(e.target.value)}
-        placeholder={placeholder}
-        type={type}
-        value={field.state.value ?? ""}
+        onChange={handleChange}
+        type="file"
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />
+      {/* We don't render value directly in file input as it's uncontrolled for security */}
     </Field>
   );
 }
 
-export default TextField;
+export default ImageField;
