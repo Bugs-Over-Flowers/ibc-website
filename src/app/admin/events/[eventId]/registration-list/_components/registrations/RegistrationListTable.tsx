@@ -35,9 +35,9 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
         >
           Affiliation
           {column.getIsSorted() === "asc" ? (
-            <ArrowUpZA />
-          ) : column.getIsSorted() === "desc" ? (
             <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
           ) : null}
         </Button>
       );
@@ -61,6 +61,11 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   },
   {
     accessorKey: "registrant",
+    sortingFn: (rowA, rowB) => {
+      const aName = `${rowA.original.registrant.firstName} ${rowA.original.registrant.lastName} (${rowA.original.registrant.email})`;
+      const bName = `${rowB.original.registrant.firstName} ${rowB.original.registrant.lastName} (${rowB.original.registrant.email})`;
+      return aName.localeCompare(bName);
+    },
     header: ({ column }) => {
       return (
         <Button
@@ -69,9 +74,9 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
         >
           Registrant
           {column.getIsSorted() === "asc" ? (
-            <ArrowUpZA />
-          ) : column.getIsSorted() === "desc" ? (
             <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
           ) : null}
         </Button>
       );
@@ -87,6 +92,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   },
   {
     accessorKey: "registrationDate",
+    sortingFn: "datetime",
     header: ({ column }) => {
       return (
         <Button

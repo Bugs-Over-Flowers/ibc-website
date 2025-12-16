@@ -47,7 +47,10 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
     },
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      setSorting(updater);
+      console.log(sorting);
+    },
   });
 
   return (

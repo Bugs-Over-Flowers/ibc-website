@@ -29,9 +29,9 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
         >
           Affiliation
           {column.getIsSorted() === "asc" ? (
-            <ArrowUpZA />
-          ) : column.getIsSorted() === "desc" ? (
             <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
           ) : null}
         </Button>
       );
@@ -51,9 +51,9 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
         >
           First Name
           {column.getIsSorted() === "asc" ? (
-            <ArrowUpZA />
-          ) : column.getIsSorted() === "desc" ? (
             <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
           ) : null}
         </Button>
       );
@@ -73,9 +73,9 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
         >
           Last Name
           {column.getIsSorted() === "asc" ? (
-            <ArrowUpZA />
-          ) : column.getIsSorted() === "desc" ? (
             <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
           ) : null}
         </Button>
       );
@@ -95,9 +95,9 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
         >
           Email
           {column.getIsSorted() === "asc" ? (
-            <ArrowUpZA />
-          ) : column.getIsSorted() === "desc" ? (
             <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
           ) : null}
         </Button>
       );
@@ -126,6 +126,7 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
   },
   {
     accessorKey: "registrationDate",
+    sortingFn: "datetime",
     header: ({ column }) => {
       return (
         <Button
