@@ -4,55 +4,9 @@ import { formatDate } from "date-fns";
 import { createActionClient } from "@/lib/supabase/server";
 import { RegistrationIdentifier } from "@/lib/validation/qr/standard";
 
-type RegistrationIdentifierPartial = {
-  status: "partial";
-  message: string;
-  data: {
-    registrationDetails: {
-      registrationId: string;
-      affiliation: string;
-    };
-    eventDetails: {
-      eventTitle: string;
-      eventStartDate: string;
-      eventEndDate: string;
-      eventType: string;
-      eventId: string;
-    };
-    participantList: Array<{
-      checkIn: boolean;
-      contactNumber: string;
-      email: string;
-      firstName: string;
-      isPrincipal: boolean;
-      lastName: string;
-      participantId: string;
-      registrationId: string;
-    }>;
-    eventDays: Array<{
-      eventDayId: string;
-      eventId: string;
-      eventDate: string;
-    }>;
-    checkInList: Array<{
-      participantId: string;
-      eventDayId: string;
-    }>;
-  };
-};
-
-type RegistrationIdentifierComplete = {
-  status: "complete";
-  message: string;
-};
-
-export type RegistrationIdentifierResult =
-  | RegistrationIdentifierPartial
-  | RegistrationIdentifierComplete;
-
 export const getRegistrationIdentifierDetails = async (
   registrationIdentifier: RegistrationIdentifier,
-): Promise<RegistrationIdentifierResult> => {
+) => {
   const parsedIdentifier = RegistrationIdentifier.safeParse(
     registrationIdentifier,
   );
@@ -129,7 +83,6 @@ export const getRegistrationIdentifierDetails = async (
     throw new Error("Participant list not found");
   }
 
-  console.log(today.toLocaleDateString());
   const todayFormatted = formatDate(today.toLocaleDateString(), "yyyy-MM-dd");
 
   // get the current today
@@ -140,7 +93,6 @@ export const getRegistrationIdentifierDetails = async (
     // .eq("eventDate", todayFormatted)
     .throwOnError();
 
-  console.log(eventDays);
   if (eventDays.length === 0) {
     throw new Error("Event days not found");
   }
@@ -177,17 +129,11 @@ export const getRegistrationIdentifierDetails = async (
 
   // check if all people are checked in
   const allCheckedIn = participantListWithCheckIn.every((p) => p.checkIn);
-  if (allCheckedIn) {
-    return {
-      status: "complete",
-      message: `All participants under this registration are checked in for ${eventDetails.eventTitle}. Affiliation: ${affiliation}`,
-    };
-  }
 
-  console.log(finalData.participantList);
   return {
-    status: "partial",
-    message: "Some participants are not checked in",
+    message: allCheckedIn
+      ? `All participants under this registration are checked in for ${eventDetails.eventTitle}. Affiliation: ${affiliation}`
+      : undefined,
     data: finalData,
   };
 };

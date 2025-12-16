@@ -479,16 +479,28 @@ export type Database = {
         };
         Returns: Json;
       };
-      submit_membership_application: {
-        Args: {
-          p_application_type: string;
-          p_company_details: Json;
-          p_payment_method: string;
-          p_payment_proof_url?: string;
-          p_representatives: Json;
-        };
-        Returns: Json;
-      };
+      submit_membership_application:
+        | {
+            Args: {
+              p_application_member_type: string;
+              p_application_type: string;
+              p_company_details: Json;
+              p_payment_method: string;
+              p_payment_proof_url?: string;
+              p_representatives: Json;
+            };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_application_type: string;
+              p_company_details: Json;
+              p_payment_method: string;
+              p_payment_proof_url?: string;
+              p_representatives: Json;
+            };
+            Returns: Json;
+          };
       update_event_details: {
         Args: {
           p_description: string;

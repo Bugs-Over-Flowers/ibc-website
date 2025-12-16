@@ -8,15 +8,17 @@ import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationIdentifier } from "@/lib/validation/qr/standard";
 import { getRegistrationIdentifierDetails } from "@/server/attendance/mutations/getRegistrationIdentifierDetails";
+
+import { useCheckIn } from "../_hooks/useCheckIn";
 import ParticipantSelection from "./ParticipantSelection";
 import QRCamera from "./QRCamera";
 import RegistrationDetails from "./RegistrationDetails";
 
 export default function CheckIn() {
   const {
+    data: registrationState,
     execute: decodeQR,
-    data: res,
-    reset,
+    reset: resetDecodeQR,
     isPending,
   } = useAction(tryCatch(getRegistrationIdentifierDetails), {
     onError: (error) => {
@@ -24,9 +26,46 @@ export default function CheckIn() {
     },
   });
 
+  const {
+    optimistic: optimisticCheckIn,
+    execute: optimisticCheckInExecute,
+    isPending: optimisticCheckInIsPending,
+  } = useCheckIn(registrationState);
+
+  const reset = () => {
+    resetDecodeQR();
+  };
   const [identifier, setIdentifier] = useState<RegistrationIdentifier | null>(
     null,
   );
+
+  const handleCheckIn = async (participantIds: string[]) => {
+    if (!participantIds.length) {
+      toast.error("Please select at least one participant");
+      return;
+    }
+
+    if (!optimisticCheckIn || !optimisticCheckIn.data.eventDays.length) {
+      toast.error("Event not found");
+      return;
+    }
+
+    if (!identifier) {
+      toast.error("No identifier found");
+      return;
+    }
+
+    const { data } = await optimisticCheckInExecute(
+      participantIds,
+      optimisticCheckIn.data.eventDays[0].eventDayId,
+    );
+
+    if (!data) {
+      return;
+    }
+
+    decodeQR(identifier);
+  };
 
   const handleScan = async (codes: IDetectedBarcode[]) => {
     if (!codes.length || codes.length === 0) return;
@@ -36,16 +75,18 @@ export default function CheckIn() {
 
     setIdentifier(rawValue);
     const { data } = await decodeQR(rawValue);
-    console.log(data);
 
-    if (data?.status === "complete") {
+    if (data?.message) {
       toast.success(data.message);
     }
   };
   return (
     <>
       <div className="flex flex-col gap-4">
-        <QRCamera handleScan={handleScan} isPaused={isPending || !!res} />
+        <QRCamera
+          handleScan={handleScan}
+          isPaused={isPending || !!registrationState}
+        />
         {identifier !== null && (
           <Button
             onClick={() => {
@@ -57,18 +98,19 @@ export default function CheckIn() {
           </Button>
         )}
       </div>
-      {res && res.status === "partial" && (
+      {optimisticCheckIn?.data && (
         <div className="w-full">
           {identifier && (
             <RegistrationDetails
-              eventTitle={res?.data.eventDetails.eventTitle}
+              eventTitle={optimisticCheckIn.data.eventDetails.eventTitle}
               registrationIdentifier={identifier}
             />
           )}
-          {res?.data.participantList.length > 1 && (
+          {optimisticCheckIn.data.participantList.length > 1 && (
             <ParticipantSelection
-              eventDayId={res.data.eventDays[0].eventDayId}
-              participantList={res.data.participantList}
+              handleCheckIn={handleCheckIn}
+              isPending={optimisticCheckInIsPending}
+              participantList={optimisticCheckIn.data.participantList}
             />
           )}
         </div>
