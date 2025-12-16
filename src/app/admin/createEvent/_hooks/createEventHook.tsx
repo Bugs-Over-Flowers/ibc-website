@@ -4,15 +4,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { createClient } from "@/lib/supabase/client";
-import createEventSchema from "@/lib/validation/event/createEventSchema";
 import {
-  type CreateEventInput as DraftEventInput,
-  draftEvent,
-} from "@/server/events/actions/draftEvent";
-import {
-  type CreateEventInput as PublishEventInput,
-  publishEvent,
-} from "@/server/events/actions/publishEvent";
+  createEventSchema,
+  type DraftEventInput,
+  type PublishEventInput,
+} from "@/lib/validation/event/createEventSchema";
+import { draftEvent } from "@/server/events/actions/draftEvent";
+import { publishEvent } from "@/server/events/actions/publishEvent";
 
 export const useCreateEventForm = () => {
   const router = useRouter();

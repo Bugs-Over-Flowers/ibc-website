@@ -1,15 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { z } from "zod";
 import type { ServerFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
-import { draftEventServerSchema } from "@/lib/validation/event/createEventSchema";
-
-export type CreateEventInput = z.input<typeof draftEventServerSchema>;
+import {
+  type DraftEventInput,
+  draftEventServerSchema,
+} from "@/lib/validation/event/createEventSchema";
 
 export const draftEvent: ServerFunction<
-  [CreateEventInput],
+  [DraftEventInput],
   { eventId: string }
 > = async (input) => {
   console.log("Server Action draftEvent received:", input);

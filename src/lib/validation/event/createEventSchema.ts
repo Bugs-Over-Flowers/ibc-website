@@ -59,8 +59,9 @@ export const publishEventServerSchema = baseEventSchema
   })
   .refine(dateRefinement, dateRefinementOptions);
 
-const createEventSchema = z
+export const createEventSchema = z
   .discriminatedUnion("eventType", [draftObj, publicObj, privateObj])
   .refine(dateRefinement, dateRefinementOptions);
 
-export default createEventSchema;
+export type DraftEventInput = z.input<typeof draftEventServerSchema>;
+export type PublishEventInput = z.input<typeof publishEventServerSchema>;

@@ -1,16 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { z } from "zod";
 import type { ServerFunction } from "@/lib/server/types";
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
-import { publishEventServerSchema } from "@/lib/validation/event/createEventSchema";
-
-export type CreateEventInput = z.input<typeof publishEventServerSchema>;
+import {
+  type PublishEventInput,
+  publishEventServerSchema,
+} from "@/lib/validation/event/createEventSchema";
 
 export const publishEvent: ServerFunction<
-  [CreateEventInput],
+  [PublishEventInput],
   { eventId: string }
 > = async (input) => {
   console.log("Server Action publishEvent received:", input);
