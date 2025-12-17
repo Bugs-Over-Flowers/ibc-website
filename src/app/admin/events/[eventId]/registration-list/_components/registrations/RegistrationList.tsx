@@ -33,5 +33,10 @@ export default async function RegistrationList({
     );
   }
 
-  return <RegistrationListTable registrationList={registrationList.data} />;
+  return (
+    <div className="space-y-2">
+      <div className="h-8">{registrationList.data.length} results</div>
+      <RegistrationListTable registrationList={registrationList.data} />
+    </div>
+  );
 }

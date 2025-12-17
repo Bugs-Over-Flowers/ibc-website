@@ -174,8 +174,9 @@ export default function ParticipantListTable({
     });
   };
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
+    <div className="space-y-2">
+      <div className="flex h-8 justify-between">
+        <div>{participantList.length} results</div>
         <Button
           onClick={() => {
             handleExport(participantList);
