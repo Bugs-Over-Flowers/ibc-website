@@ -55,7 +55,7 @@ export function SidebarItem({
             isDestructive
               ? "text-red-600"
               : isActive
-                ? "text-muted-foregound"
+                ? "text-muted-background"
                 : "text-primary",
           )}
         />
