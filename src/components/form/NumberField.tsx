@@ -35,7 +35,7 @@ function NumberField({
         min={min}
         name={field.name}
         onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(Number(e.target.value))}
+        onChange={(e) => field.handleChange(e.target.valueAsNumber)}
         placeholder={placeholder}
         step={step}
         type="number"
