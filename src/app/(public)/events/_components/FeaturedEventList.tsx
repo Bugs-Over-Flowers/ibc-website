@@ -129,22 +129,27 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
 
               <div className="flex gap-4">
                 <Button
-                  asChild
                   className="rounded-full bg-foreground px-8 text-background hover:bg-foreground/90"
+                  nativeButton={false}
+                  render={
+                    <Link href={`/events/${currentEvent.eventId}`}>
+                      View Event
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  }
                   size="lg"
-                >
-                  <Link href={`/events/${currentEvent.eventId}`}>
-                    View Event
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+                />
                 <Button
                   className="rounded-full px-8"
+                  nativeButton={false}
+                  render={
+                    <Link href={`/registration/${currentEvent.eventId}/info`}>
+                      Register Now
+                    </Link>
+                  }
                   size="lg"
                   variant="outline"
-                >
-                  Register Now
-                </Button>
+                ></Button>
               </div>
             </div>
           </motion.div>
