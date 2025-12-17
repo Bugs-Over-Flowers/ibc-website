@@ -1,8 +1,6 @@
 "use client";
 
 import { MoreVertical } from "lucide-react";
-import { Route } from "next";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,18 +31,11 @@ export default function EventActionsDropdown({
   return (
     <DropdownMenu onOpenChange={setIsOpen} open={isOpen}>
       <DropdownMenuTrigger
-        render={(triggerProps) => (
-          <Button
-            aria-label="Event actions"
-            size="icon-sm"
-            variant="ghost"
-            {...triggerProps}
-          >
-            <MoreVertical size={20} />
-            <span className="sr-only">Open event actions</span>
-          </Button>
-        )}
-      />
+        aria-label="Event actions"
+        className="rounded-full p-2 transition-colors hover:bg-muted md:rounded-md"
+      >
+        <MoreVertical size={20} />
+      </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 md:w-48" sideOffset={10}>
         <ViewDetailsButton eventId={eventId} onAction={handleAction} />
         <QrButton eventId={eventId} onAction={handleAction} />
