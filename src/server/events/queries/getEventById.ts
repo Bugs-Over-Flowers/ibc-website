@@ -24,21 +24,3 @@ export const getEventById = async (
 
   return data;
 };
-
-export const getAllEvents = async (requestCookies: RequestCookie[]) => {
-  "use cache";
-
-  const supabase = await createClient(requestCookies);
-  const { data } = await supabase
-    .from("Event")
-    .select("*")
-    .order("eventStartDate", { ascending: false })
-    .throwOnError();
-
-  if (!data) {
-    console.log("No events");
-    throw new Error("No events found");
-  }
-
-  return data;
-};

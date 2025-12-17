@@ -56,7 +56,7 @@ const FilePreview = ({
         )}
       </div>
       <Button
-        className="-right-2 -top-2 absolute z-10 h-6 w-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+        className="absolute -top-2 -right-2 z-10 h-6 w-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
         onClick={onRemove}
         size="icon"
         type="button"

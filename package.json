@@ -40,6 +40,7 @@
     "react-dom": "19.2.3",
     "react-dropzone": "^14.3.8",
     "react-medium-image-zoom": "^5.4.0",
+    "react-scan": "^0.4.3",
     "react-to-print": "^3.2.0",
     "resend": "^6.6.0",
     "server-only": "^0.0.1",

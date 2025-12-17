@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
-import { getAllEvents } from "@/server/events/queries/getEventById";
+import { getAllEvents } from "@/server/events/queries/getAllEvents";
 import { HeroCarousel } from "./HeroCarousel";
 
 export async function FeaturedEventsHero() {
-  const events = await getAllEvents((await cookies()).getAll());
+  const events = await getAllEvents((await cookies()).getAll(), {});
   const now = new Date();
   const oneWeekFromNow = new Date();
   oneWeekFromNow.setDate(now.getDate() + 7);
