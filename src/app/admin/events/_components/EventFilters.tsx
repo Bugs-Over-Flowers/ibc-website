@@ -95,11 +95,11 @@ export default function EventFilters() {
               <span className="md:hidden">Sort</span>
             </div>
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date-asc">Date ↑</SelectItem>
-            <SelectItem value="date-desc">Date ↓</SelectItem>
-            <SelectItem value="title-asc">Title A → Z</SelectItem>
-            <SelectItem value="title-desc">Title Z → A</SelectItem>
+          <SelectContent className="w-auto">
+            <SelectItem value="date-asc">Date (Ascending)</SelectItem>
+            <SelectItem value="date-desc">Date (Descending)</SelectItem>
+            <SelectItem value="title-asc">Title (A → Z)</SelectItem>
+            <SelectItem value="title-desc">Title (Z → A)</SelectItem>
           </SelectContent>
         </Select>
       </div>

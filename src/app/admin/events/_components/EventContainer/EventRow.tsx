@@ -40,7 +40,11 @@ export default function EventRow({ event }: EventRowProps) {
       <div className="flex w-full flex-1 flex-col gap-3">
         <div className="flex h-36 flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span className="whitespace-nowrap rounded-xl bg-muted px-2 py-1 font-semibold text-foreground text-xs capitalize">
+            <span
+              className={`whitespace-nowrap rounded-xl ${
+                event.eventType ? "bg-muted" : ""
+              } px-2 py-1 font-semibold text-foreground text-xs capitalize`}
+            >
               {event.eventType}
             </span>
           </div>
