@@ -25,9 +25,9 @@ export default function EventDetailsSkeleton() {
         </div>
         <div className="mb-12 flex flex-col gap-4 sm:flex-row">
           <div className="relative flex-1">
-            <Skeleton className="-translate-y-1/2 absolute top-1/2 left-4 z-10 h-5 w-5 rounded-full" />
+            <Skeleton className="absolute top-1/2 left-4 z-10 h-5 w-5 -translate-y-1/2 rounded-full" />
             <Skeleton className="h-[52px] w-full rounded-xl pl-12" />
-            <Skeleton className="-translate-y-1/2 absolute top-1/2 right-2 h-8 w-8 rounded-full" />
+            <Skeleton className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-full" />
           </div>
           <div className="w-full sm:w-64">
             <Skeleton className="h-[52px] w-full rounded-xl" />

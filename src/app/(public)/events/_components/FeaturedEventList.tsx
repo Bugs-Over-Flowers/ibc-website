@@ -129,22 +129,27 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
 
               <div className="flex gap-4">
                 <Button
-                  asChild
                   className="rounded-full bg-foreground px-8 text-background hover:bg-foreground/90"
+                  nativeButton={false}
+                  render={
+                    <Link href={`/events/${currentEvent.eventId}`}>
+                      View Event
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  }
                   size="lg"
-                >
-                  <Link href={`/events/${currentEvent.eventId}`}>
-                    View Event
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+                />
                 <Button
                   className="rounded-full px-8"
+                  nativeButton={false}
+                  render={
+                    <Link href={`/registration/${currentEvent.eventId}/info`}>
+                      Register Now
+                    </Link>
+                  }
                   size="lg"
                   variant="outline"
-                >
-                  Register Now
-                </Button>
+                ></Button>
               </div>
             </div>
           </motion.div>
@@ -154,7 +159,7 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
           <>
             <button
               aria-label="Previous event"
-              className="-translate-y-1/2 absolute top-1/2 left-2 z-10 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:left-4"
+              className="absolute top-1/2 left-2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:left-4"
               onClick={handlePrev}
               type="button"
             >
@@ -162,7 +167,7 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
             </button>
             <button
               aria-label="Next event"
-              className="-translate-y-1/2 absolute top-1/2 right-2 z-10 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:right-4"
+              className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:right-4"
               onClick={handleNext}
               type="button"
             >
