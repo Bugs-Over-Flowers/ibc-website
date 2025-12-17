@@ -35,7 +35,7 @@ export default function EventFilters() {
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="relative">
-              <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-foreground" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-foreground" />
               <Input
                 autoComplete="off"
                 className="w-full border-border pl-10"

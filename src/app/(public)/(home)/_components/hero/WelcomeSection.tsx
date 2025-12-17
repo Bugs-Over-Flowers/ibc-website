@@ -193,7 +193,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
       {/* Scroll Indicator */}
       <motion.div
         animate={{ opacity: 1 }}
-        className="-translate-x-1/2 absolute bottom-10 left-1/2 flex flex-col items-center gap-3"
+        className="absolute bottom-10 left-1/2 flex -translate-x-1/2 flex-col items-center gap-3"
         initial={{ opacity: 0 }}
         transition={{ delay: 1.5 }}
       >
