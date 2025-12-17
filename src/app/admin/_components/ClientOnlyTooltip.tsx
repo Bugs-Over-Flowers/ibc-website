@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Tooltip,
@@ -8,25 +8,20 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export function ClientOnlyTooltip() {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // On server, render just the trigger without tooltip
-  if (!isClient) {
-    return <SidebarTrigger />;
-  }
-
-  // On client, render with tooltip
+function TooltipWrapper() {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <SidebarTrigger />
-      </TooltipTrigger>
+      <TooltipTrigger />
+      <SidebarTrigger />
       <TooltipContent side="right">Toggle sidebar</TooltipContent>
     </Tooltip>
+  );
+}
+
+export function ClientOnlyTooltip() {
+  return (
+    <Suspense fallback={<SidebarTrigger />}>
+      <TooltipWrapper />
+    </Suspense>
   );
 }

@@ -80,7 +80,7 @@ export default function EventRow({ event }: EventRowProps) {
               <DollarSign size={12} />
               <span>Fee</span>
             </div>
-            <p className="font-semibold text-blue-600 text-lg">
+            <p className="font-semibold text-lg text-primary">
               ₱{Number(event.registrationFee).toLocaleString()}
             </p>
           </div>
