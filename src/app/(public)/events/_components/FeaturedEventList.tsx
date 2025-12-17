@@ -154,7 +154,7 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
           <>
             <button
               aria-label="Previous event"
-              className="-translate-y-1/2 absolute top-1/2 left-2 z-10 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:left-4"
+              className="absolute top-1/2 left-2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:left-4"
               onClick={handlePrev}
               type="button"
             >
@@ -162,7 +162,7 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
             </button>
             <button
               aria-label="Next event"
-              className="-translate-y-1/2 absolute top-1/2 right-2 z-10 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:right-4"
+              className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-white md:right-4"
               onClick={handleNext}
               type="button"
             >

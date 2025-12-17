@@ -77,7 +77,7 @@ export function AboutGoals() {
             const Icon = goal.icon;
             return (
               <motion.div key={goal.title} variants={fadeInUp}>
-                <Card className="hover:-translate-y-1 group relative h-full overflow-hidden border-0 bg-white/70 shadow-xl ring-1 ring-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl">
+                <Card className="group relative h-full overflow-hidden border-0 bg-white/70 shadow-xl ring-1 ring-white/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
                   <div className="absolute top-0 right-0 left-0 h-1 bg-linear-to-r from-transparent via-primary to-transparent" />
                   <CardContent className="flex flex-col items-center p-8 text-center">
                     <div className="mb-6 flex items-center justify-center">
