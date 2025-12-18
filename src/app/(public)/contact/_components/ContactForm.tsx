@@ -184,14 +184,21 @@ export function ContactForm() {
           <div className="space-y-2">
             <Label htmlFor="inquiryType">Type of Inquiry</Label>
             <Select
-              onValueChange={(value) => setInquiryType(value ?? "")}
-              required
+              onValueChange={(value: string | null) =>
+                setInquiryType(value ?? "")
+              }
               value={inquiryType}
             >
-              <SelectTrigger className="w-full rounded-xl" id="inquiryType">
-                <SelectValue />
+              <SelectTrigger className="w-full rounded-xl">
+                {inquiryType ? (
+                  <SelectValue />
+                ) : (
+                  <span className="text-muted-foreground">
+                    Select type of inquiry
+                  </span>
+                )}
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent>
                 {inquiryTypes.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}

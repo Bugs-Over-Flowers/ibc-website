@@ -30,7 +30,7 @@ export function ContactMap() {
         </div>
         <div className="bg-background p-6">
           <h3 className="mb-2 font-semibold text-foreground">
-            Iloilo Business Club Office
+            Iloilo Business Club, Inc. Office
           </h3>
           <p className="text-muted-foreground text-sm">
             Iloilo Business Club, Inc.
