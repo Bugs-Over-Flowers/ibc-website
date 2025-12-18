@@ -55,8 +55,8 @@ export function SidebarItem({
             isDestructive
               ? "text-red-600"
               : isActive
-                ? "text-primary"
-                : "text-gray-500",
+                ? "text-muted-background"
+                : "text-primary",
           )}
         />
         <span className="font-medium">{title}</span>

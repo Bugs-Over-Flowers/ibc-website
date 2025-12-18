@@ -5,6 +5,7 @@ import {
   FormDateRangePicker,
   ImageField,
   NumberField,
+  RadioGroupField,
   SelectField,
   TextareaField,
   TextField,
@@ -28,6 +29,7 @@ export const { useAppForm, withForm } = createFormHook({
     FormCheckBox,
     ImageField,
     FileDropzoneField,
+    RadioGroupField,
   },
   formComponents: {
     SubmitButton,

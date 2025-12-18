@@ -11,7 +11,7 @@ export function AdminSidebarHeader() {
           </span>
         </div>
         <div className="flex flex-col items-start overflow-hidden">
-          <h3 className="truncate font-semibold text-gray-900 text-sm">
+          <h3 className="truncate font-semibold text-muted-foreground text-sm">
             Admin Dashboard
           </h3>
           <p className="truncate text-gray-500 text-xs">Administrator</p>

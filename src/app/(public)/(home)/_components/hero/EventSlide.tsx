@@ -239,15 +239,15 @@ export function EventSlide({
           {/* Arrow Buttons */}
           <button
             aria-label="Previous event"
-            className="-translate-y-1/2 group absolute top-1/2 left-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/10 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-primary-foreground/20 lg:left-8 lg:h-14 lg:w-14"
+            className="group absolute top-1/2 left-4 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/10 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-primary-foreground/20 lg:left-8 lg:h-14 lg:w-14"
             onClick={onPrev}
             type="button"
           >
-            <ChevronLeft className="group-hover:-translate-x-0.5 h-5 w-5 text-primary-foreground transition-transform lg:h-6 lg:w-6" />
+            <ChevronLeft className="h-5 w-5 text-primary-foreground transition-transform group-hover:-translate-x-0.5 lg:h-6 lg:w-6" />
           </button>
           <button
             aria-label="Next event"
-            className="-translate-y-1/2 group absolute top-1/2 right-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/10 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-primary-foreground/20 lg:right-8 lg:h-14 lg:w-14"
+            className="group absolute top-1/2 right-4 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/10 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-primary-foreground/20 lg:right-8 lg:h-14 lg:w-14"
             onClick={onNext}
             type="button"
           >
@@ -255,7 +255,7 @@ export function EventSlide({
           </button>
 
           {/* Progress Dots */}
-          <div className="-translate-x-1/2 absolute bottom-10 left-1/2 z-10 flex gap-3">
+          <div className="absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 gap-3">
             {Array.from({ length: totalEvents }).map((_, index) => (
               <button
                 aria-label={`Go to event ${index + 1}`}

@@ -35,11 +35,6 @@ export default async function EventsContents({
             Manage and organize your events
           </p>
         </div>
-        <div className="rounded-lg bg-background px-4 py-3 md:px-5 md:py-3">
-          <div className="font-medium text-muted-foreground text-sm md:text-base">
-            {events.length} event{events.length !== 1 ? "s" : ""} found
-          </div>
-        </div>
       </div>
 
       <div className="rounded-lg border bg-background p-4 md:p-6">

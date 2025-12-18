@@ -47,7 +47,7 @@ export function EventsSearch({
     <div className="mb-4 flex flex-col gap-4 sm:flex-row">
       {/* Search Bar */}
       <div className="relative flex-1">
-        <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-4 z-10 h-5 w-5 transform text-foreground/50 drop-shadow-md" />
+        <Search className="pointer-events-none absolute top-1/2 left-4 z-10 h-5 w-5 -translate-y-1/2 transform text-foreground/50 drop-shadow-md" />
         <Input
           className="h-[52px] justify-between rounded-xl border border-border/50 bg-white/80 px-5 pl-12 text-foreground shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90 focus:ring-2 focus:ring-primary/30"
           onChange={(e) => handleSearch(e.target.value)}
@@ -69,19 +69,22 @@ export function EventsSearch({
       {/* Filter Dropdown */}
       <div className="w-full sm:w-64">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              aria-expanded={false}
-              className="h-[52px] w-full min-w-[140px] justify-between rounded-xl border-border/50 bg-white px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
-              role="combobox"
-              variant="outline"
-            >
-              <span className="block max-w-[140px] truncate text-left">
-                {filterLabels[currentFilter]}
-              </span>
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={(triggerProps) => (
+              <Button
+                aria-expanded={false}
+                className="h-[52px] w-full min-w-[140px] justify-between rounded-xl border-border/50 bg-white px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
+                role="combobox"
+                variant="outline"
+                {...triggerProps}
+              >
+                <span className="block max-w-[140px] truncate text-left">
+                  {filterLabels[currentFilter]}
+                </span>
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            )}
+          />
           <DropdownMenuContent
             align="end"
             className="w-[140px] rounded-xl border-border/50 bg-white/95 shadow-xl backdrop-blur-xl"

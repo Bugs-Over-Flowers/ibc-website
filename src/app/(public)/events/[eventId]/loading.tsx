@@ -9,7 +9,7 @@ export default function EventPageDetailsLoading() {
         <Skeleton className="absolute inset-0 h-full w-full" />
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/20" />
         {/* Back button skeleton */}
-        <div className="-translate-x-1/2 absolute bottom-8 left-1/7 z-10 transform">
+        <div className="absolute bottom-8 left-1/7 z-10 -translate-x-1/2 transform">
           <Skeleton className="h-10 w-40 rounded-full bg-white/30" />
         </div>
       </div>
