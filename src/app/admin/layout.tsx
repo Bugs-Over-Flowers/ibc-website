@@ -1,8 +1,6 @@
 import { Suspense } from "react";
-
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ClientOnlyTooltip } from "./_components/ClientOnlyTooltip";
 import { AdminSidebar } from "./_components/sidebar/AdminSidebar";
 import { MobileHeader } from "./_components/sidebar/MobileHeader";
 import { AdminSidebarSkeleton } from "./_components/sidebar/Skeleton/AdminSidebarSkeleton";
@@ -25,12 +23,7 @@ export default function AdminLayout({
             <Suspense fallback={<MobileHeaderSkeleton />}>
               <MobileHeader />
             </Suspense>
-            <div className="p-4 md:p-6">
-              <div className="mb-4 hidden md:block">
-                <ClientOnlyTooltip />
-              </div>
-              {children}
-            </div>
+            <div className="p-4 md:p-6">{children}</div>
           </main>
         </div>
       </TooltipProvider>
