@@ -85,12 +85,11 @@ export function Header() {
                 {link.name}
               </a>
             ))}
-            <Button
-              asChild
-              className="ml-2 h-auto min-w-[110px] rounded-full bg-primary px-5 py-1 font-semibold text-md text-primary-foreground shadow-lg hover:bg-primary/90"
-            >
-              <Link href="/contact">JOIN NOW</Link>
-            </Button>
+            <Link className="ml-2" href="/contact">
+              <Button className="h-auto min-w-[110px] rounded-full bg-primary px-5 py-1 font-semibold text-md text-primary-foreground shadow-lg hover:bg-primary/90">
+                JOIN NOW
+              </Button>
+            </Link>
 
             <ModeToggle />
           </nav>
@@ -98,7 +97,6 @@ export function Header() {
           {/* Mobile Menu Button */}
           <Button
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            asChild
             className="rounded-lg p-2 transition-colors hover:bg-muted lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -143,10 +141,14 @@ export function Header() {
                 </a>
               ))}
               <div className="px-2 pt-2">
-                <Button asChild className="w-full rounded-full px-0 py-3">
-                  <a href="/contact" onClick={() => setMobileMenuOpen(false)}>
-                    Join Now
-                  </a>
+                <Button
+                  className="w-full rounded-full px-0 py-3"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    window.location.href = "/contact";
+                  }}
+                >
+                  Join Now
                 </Button>
               </div>
             </div>
