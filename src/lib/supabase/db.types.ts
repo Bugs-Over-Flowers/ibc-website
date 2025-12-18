@@ -436,6 +436,7 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      get_event_status: { Args: { p_event_id: string }; Returns: Json };
       get_registration_list: {
         Args: {
           p_event_id: string;

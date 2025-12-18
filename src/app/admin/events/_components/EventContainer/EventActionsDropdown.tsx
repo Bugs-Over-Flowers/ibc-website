@@ -1,6 +1,8 @@
 "use client";
 
 import { MoreVertical } from "lucide-react";
+import { Route } from "next";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -29,14 +31,11 @@ export default function EventActionsDropdown({
 
   return (
     <DropdownMenu onOpenChange={setIsOpen} open={isOpen}>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label="Event actions"
-          className="rounded-full p-2 transition-colors hover:bg-muted md:rounded-md"
-          type="button"
-        >
-          <MoreVertical size={20} />
-        </button>
+      <DropdownMenuTrigger
+        aria-label="Event actions"
+        className="rounded-full p-2 transition-colors hover:bg-muted md:rounded-md"
+      >
+        <MoreVertical size={20} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 md:w-48" sideOffset={10}>
         <ViewDetailsButton eventId={eventId} onAction={handleAction} />

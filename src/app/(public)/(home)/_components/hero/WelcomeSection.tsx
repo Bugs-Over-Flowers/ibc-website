@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { FloatingParticles } from "./FloatingParticle";
@@ -134,22 +135,24 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
               initial={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.8, delay: 0.7 }}
             >
-              <Button
-                className="h-13 rounded-full bg-primary px-8 font-semibold text-base text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105 hover:bg-primary/90 hover:shadow-primary/40 hover:shadow-xl"
-                onClick={() => onNavigate("about")}
-                size="lg"
-              >
-                Discover More
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button
-                className="h-13 rounded-full border-primary-foreground/30 bg-primary-foreground/10 px-8 font-semibold text-base text-primary-foreground backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-primary-foreground/50 hover:bg-primary-foreground/20 hover:text-none"
-                onClick={() => onNavigate("membership-application")}
-                size="lg"
-                variant="outline"
-              >
-                Become a Member
-              </Button>
+              <Link href="/about" scroll={false}>
+                <Button
+                  className="h-13 rounded-full bg-primary px-8 font-semibold text-base text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105 hover:bg-primary/90 hover:shadow-primary/40 hover:shadow-xl"
+                  size="lg"
+                >
+                  Discover More
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/membership/application" scroll={false}>
+                <Button
+                  className="h-13 rounded-full border-primary-foreground/30 bg-primary-foreground/10 px-8 font-semibold text-base text-primary-foreground backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-primary-foreground/50 hover:bg-primary-foreground/20"
+                  size="lg"
+                  variant="outline"
+                >
+                  Become a Member
+                </Button>
+              </Link>
             </motion.div>
           </motion.div>
 
