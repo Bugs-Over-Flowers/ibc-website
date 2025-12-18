@@ -14,12 +14,12 @@ export function ContactMap() {
         Find Us
       </h2>
       <p className="mb-8 text-muted-foreground">
-        Visit our office at Marymart Mall. We're located in the heart of Iloilo
-        City, ready to assist you with your inquiries.
+        Visit our office at Marymart Center III. We're located in the heart of
+        Iloilo City, ready to assist you with your inquiries.
       </p>
 
       <div className="overflow-hidden rounded-xl border border-border">
-        <div className="relative aspect-[4/3] bg-muted">
+        <div className="relative aspect-4/3 bg-muted">
           <iframe
             height="450"
             loading="lazy"

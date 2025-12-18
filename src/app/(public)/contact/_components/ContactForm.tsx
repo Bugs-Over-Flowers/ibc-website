@@ -28,11 +28,53 @@ const inquiryTypes = [
 export function ContactForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [inquiryType, setInquiryType] = useState("");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    company: "",
+    message: "",
+  });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!inquiryType) return;
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // Build mailto link
+    const mailto = [
+      `mailto:siaotongkj@gmail.com`,
+      `?subject=Contact Form: ${encodeURIComponent(inquiryType)}`,
+      `&body=${encodeURIComponent(
+        `First Name: ${formData.firstName}\n` +
+          `Last Name: ${formData.lastName}\n` +
+          `Email: ${formData.email}\n` +
+          `Phone: ${formData.phone}\n` +
+          `Company/Organization: ${formData.company}\n` +
+          `Type of Inquiry: ${inquiryType}\n` +
+          `Message: ${formData.message}`,
+      )}`,
+    ].join("");
+
+    window.location.href = mailto;
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      company: "",
+      message: "",
+    });
+    setInquiryType("");
     setIsLoading(false);
     setIsSubmitted(true);
   };
@@ -65,8 +107,8 @@ export function ContactForm() {
             Message Sent!
           </h3>
           <p className="mb-6 text-muted-foreground">
-            Thank you for reaching out. We'll respond to your inquiry within 1-2
-            business days.
+            Thank you for reaching out. <br />
+            We'll respond to your inquiry within 1-2 business days.
           </p>
           <Button
             className="rounded-xl"
@@ -84,8 +126,10 @@ export function ContactForm() {
               <Input
                 className="rounded-xl"
                 id="firstName"
+                onChange={handleInputChange}
                 placeholder="Juan"
                 required
+                value={formData.firstName}
               />
             </div>
             <div className="space-y-2">
@@ -93,8 +137,10 @@ export function ContactForm() {
               <Input
                 className="rounded-xl"
                 id="lastName"
+                onChange={handleInputChange}
                 placeholder="Dela Cruz"
                 required
+                value={formData.lastName}
               />
             </div>
           </div>
@@ -104,9 +150,11 @@ export function ContactForm() {
             <Input
               className="rounded-xl"
               id="email"
+              onChange={handleInputChange}
               placeholder="juan@example.com"
               required
               type="email"
+              value={formData.email}
             />
           </div>
 
@@ -115,8 +163,10 @@ export function ContactForm() {
             <Input
               className="rounded-xl"
               id="phone"
+              onChange={handleInputChange}
               placeholder="+63 912 345 6789"
               type="tel"
+              value={formData.phone}
             />
           </div>
 
@@ -125,22 +175,25 @@ export function ContactForm() {
             <Input
               className="rounded-xl"
               id="company"
+              onChange={handleInputChange}
               placeholder="Your Company Name"
+              value={formData.company}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="inquiryType">Type of Inquiry</Label>
-            <Select required>
-              <SelectTrigger className="rounded-xl" id="inquiryType">
+            <Select
+              onValueChange={(value) => setInquiryType(value ?? "")}
+              required
+              value={inquiryType}
+            >
+              <SelectTrigger className="w-full rounded-xl" id="inquiryType">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
                 {inquiryTypes.map((type) => (
-                  <SelectItem
-                    key={type}
-                    value={type.toLowerCase().replace(/\s+/g, "-")}
-                  >
+                  <SelectItem key={type} value={type}>
                     {type}
                   </SelectItem>
                 ))}
@@ -153,9 +206,11 @@ export function ContactForm() {
             <Textarea
               className="rounded-xl"
               id="message"
+              onChange={handleInputChange}
               placeholder="How can we help you?"
               required
               rows={5}
+              value={formData.message}
             />
           </div>
 

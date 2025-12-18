@@ -8,23 +8,18 @@ const contactInfo = [
     icon: MapPin,
     title: "Our Location",
     details: [
-      "Iloilo Business Park",
-      "Mandurriao, Iloilo City",
-      "5000 Philippines",
+      "Rm 105-B, G/F Maryville Bldg., Marymart Mall, Delgado Street, Iloilo City, Philippines",
     ],
   },
   {
     icon: Phone,
     title: "Phone Number",
-    details: ["+63 33 123 4567", "+63 33 765 4321"],
+    details: ["(033) 337 8341"],
   },
   {
     icon: Mail,
     title: "Email Address",
-    details: [
-      "info@iloilobusinessclub.com",
-      "membership@iloilobusinessclub.com",
-    ],
+    details: ["iloilobusinessclub1990@gmail.com"],
   },
   {
     icon: Clock,
@@ -40,7 +35,7 @@ export function ContactInfoCards() {
   return (
     <section className="py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {contactInfo.map((info, index) => (
             <motion.div
               className="rounded-xl border border-border bg-card p-6 text-center transition-all duration-300 hover:border-primary/30 hover:shadow-lg"
