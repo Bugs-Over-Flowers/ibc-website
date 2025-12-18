@@ -29,7 +29,8 @@ const initialState: RegistrationStore = {
   eventDetails: null,
   registrationData: {
     step1: {
-      member: "nonmember",
+      member: "member",
+      businessMemberId: "",
       nonMemberName: "",
     },
     step2: {
