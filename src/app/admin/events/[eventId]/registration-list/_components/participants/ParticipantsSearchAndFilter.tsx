@@ -8,17 +8,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useSearchForm } from "../../_hooks/useSearchForm";
-import useSetFilter from "../../_hooks/useSetFilter";
 
 export default function ParticipantsSearchAndFilter() {
   const form = useSearchForm({ scope: "participants" });
@@ -27,7 +17,6 @@ export default function ParticipantsSearchAndFilter() {
     event.preventDefault();
     form.handleSubmit();
   };
-  const { setFilter, filter } = useSetFilter({ scope: "participants" });
 
   return (
     <Card>
@@ -72,26 +61,6 @@ export default function ParticipantsSearchAndFilter() {
               <form.SubmitButton isSubmittingLabel="Searching" label="Search" />
             </form.AppForm>
           </form>
-        </div>
-        <div className="md:w-full">
-          <div> Payment Status</div>
-          <InputGroup className="w-full rounded-md bg-neutral-100 ring-1 ring-neutral-300">
-            <Select onValueChange={setFilter} value={filter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Payment Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Payment Status</SelectLabel>
-                  {["all", "verified", "pending"].map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </InputGroup>
         </div>
       </CardContent>
     </Card>

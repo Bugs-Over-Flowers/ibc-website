@@ -26,6 +26,11 @@ interface RegistrationListProps {
 
 export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   {
+    accessorKey: "registrationIdentifer",
+    header: "Identifier",
+    cell: ({ row }) => <pre>{row.original.registrationIdentifer}</pre>,
+  },
+  {
     accessorKey: "affiliation",
     header: ({ column }) => {
       return (

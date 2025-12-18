@@ -423,11 +423,7 @@ export type Database = {
     };
     Functions: {
       get_event_participant_list: {
-        Args: {
-          p_event_id: string;
-          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
-          p_search_text?: string;
-        };
+        Args: { p_event_id: string; p_search_text?: string };
         Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
         SetofOptions: {
           from: "*";
@@ -539,7 +535,6 @@ export type Database = {
         email: string | null;
         contact_number: string | null;
         affiliation: string | null;
-        payment_status: Database["public"]["Enums"]["PaymentStatus"] | null;
         registration_date: string | null;
         registration_id: string | null;
       };

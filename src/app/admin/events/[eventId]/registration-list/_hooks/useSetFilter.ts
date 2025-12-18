@@ -15,7 +15,6 @@ function useSetFilter(options: UseSetFilterProps) {
 
   const s_key = useMemo(() => {
     if (options.scope === "registrations") return "reg_paymentStatus";
-    if (options.scope === "participants") return "part_paymentStatus";
     return "q";
   }, [options.scope]);
 

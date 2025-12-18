@@ -115,15 +115,6 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
       return <>{contactNumber}</>;
     },
   },
-
-  {
-    accessorKey: "paymentStatus",
-    header: "Payment Status",
-    cell: ({ row }) => {
-      const { paymentStatus } = row.original;
-      return <>{paymentStatus}</>;
-    },
-  },
   {
     accessorKey: "registrationDate",
     sortingFn: "datetime",
