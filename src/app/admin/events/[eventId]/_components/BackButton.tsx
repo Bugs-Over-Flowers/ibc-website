@@ -11,7 +11,7 @@ export default async function BackButton({
 }) {
   const { eventId } = await params;
   return (
-    <Link className="w-max" href={`/admin/event/${eventId}` as Route}>
+    <Link className="w-max" href={`/admin/events/${eventId}` as Route}>
       <Button>Back to Event Page</Button>
     </Link>
   );
