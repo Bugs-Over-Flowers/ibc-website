@@ -1,38 +1,40 @@
 import { CheckCircle, Clock, Users2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-interface RegistrationListStatsProps {
-  total: number;
-  verified: number;
-  pending: number;
-}
+import type { RegistrationListStats as RegistrationListStatsProps } from "@/lib/validation/registration/registration-list";
 
 export default function RegistrationListStats({
-  total,
-  verified,
-  pending,
+  pendingRegistrations,
+  totalParticipants,
+  totalRegistrations,
+  verifiedRegistrations,
 }: RegistrationListStatsProps) {
   return (
     <div className="flex w-full flex-col justify-between gap-2 md:gap-4 lg:flex-row">
       {[
         {
           label: "Total Registrations",
-          data: total,
+          data: totalRegistrations,
           className: "text-blue-600",
           icon: <Users2 />,
         },
         {
           label: "Verified Registrations",
-          data: verified,
+          data: verifiedRegistrations,
           className: "text-green-600",
           icon: <CheckCircle />,
         },
         {
           label: "Pending Registrations",
-          data: pending,
+          data: pendingRegistrations,
           className: "text-yellow-600",
           icon: <Clock />,
+        },
+        {
+          label: "Total Participants",
+          data: totalParticipants,
+          className: "text-purple-600",
+          icon: <Users2 />,
         },
       ].map(({ label, data, className, icon }) => (
         <Card className="h-36 w-full" key={label}>

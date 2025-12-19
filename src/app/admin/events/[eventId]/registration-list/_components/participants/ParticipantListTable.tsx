@@ -1,7 +1,14 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Download } from "lucide-react";
+import { formatDate } from "date-fns";
+import {
+  ArrowDownAZ,
+  ArrowUpZA,
+  CalendarArrowDown,
+  CalendarArrowUp,
+  Download,
+} from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { exportToExcel } from "@/lib/export/excel";
@@ -15,7 +22,21 @@ interface ParticipantListProps {
 export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
   {
     accessorKey: "affiliation",
-    header: "Affiliation",
+    header: ({ column }) => {
+      return (
+        <Button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          variant={"ghost"}
+        >
+          Affiliation
+          {column.getIsSorted() === "asc" ? (
+            <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
+          ) : null}
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const { affiliation } = row.original;
       return <>{affiliation}</>;
@@ -23,7 +44,21 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
   },
   {
     accessorKey: "firstName",
-    header: "First Name",
+    header: ({ column }) => {
+      return (
+        <Button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          variant={"ghost"}
+        >
+          First Name
+          {column.getIsSorted() === "asc" ? (
+            <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
+          ) : null}
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const { firstName } = row.original;
       return <>{firstName}</>;
@@ -31,7 +66,21 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
   },
   {
     accessorKey: "lastName",
-    header: "Last Name",
+    header: ({ column }) => {
+      return (
+        <Button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          variant={"ghost"}
+        >
+          Last Name
+          {column.getIsSorted() === "asc" ? (
+            <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
+          ) : null}
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const { lastName } = row.original;
       return <>{lastName}</>;
@@ -39,7 +88,21 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: ({ column }) => {
+      return (
+        <Button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          variant={"ghost"}
+        >
+          Email
+          {column.getIsSorted() === "asc" ? (
+            <ArrowDownAZ />
+          ) : column.getIsSorted() === "desc" ? (
+            <ArrowUpZA />
+          ) : null}
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const { email } = row.original;
       return <>{email}</>;
@@ -53,21 +116,33 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
       return <>{contactNumber}</>;
     },
   },
-
-  {
-    accessorKey: "paymentStatus",
-    header: "Payment Status",
-    cell: ({ row }) => {
-      const { paymentStatus } = row.original;
-      return <>{paymentStatus}</>;
-    },
-  },
   {
     accessorKey: "registrationDate",
-    header: "Registration Date",
+    sortingFn: "datetime",
+    header: ({ column }) => {
+      return (
+        <Button
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          variant={"ghost"}
+        >
+          Registration Date
+          {column.getIsSorted() === "asc" ? (
+            <CalendarArrowDown />
+          ) : column.getIsSorted() === "desc" ? (
+            <CalendarArrowUp />
+          ) : null}
+        </Button>
+      );
+    },
     cell: ({ row }) => {
-      const { registrationDate } = row.original;
-      return <>{new Date(registrationDate).toLocaleDateString()}</>;
+      return (
+        <>
+          {formatDate(
+            new Date(row.original.registrationDate),
+            "MMM d, h:mm aaa",
+          )}
+        </>
+      );
     },
   },
   {
@@ -95,8 +170,9 @@ export default function ParticipantListTable({
     });
   };
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
+    <div className="space-y-2">
+      <div className="flex h-8 justify-between">
+        <div>{participantList.length} results</div>
         <Button
           onClick={() => {
             handleExport(participantList);
