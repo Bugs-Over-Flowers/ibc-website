@@ -28,7 +28,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   {
     accessorKey: "registrationIdentifer",
     header: "Identifier",
-    cell: ({ row }) => <pre>{row.original.registrationIdentifer}</pre>,
+    cell: ({ row }) => <pre>{row.original.registrationIdentifier}</pre>,
   },
   {
     accessorKey: "affiliation",
@@ -109,9 +109,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
             <CalendarArrowDown />
           ) : column.getIsSorted() === "desc" ? (
             <CalendarArrowUp />
-          ) : (
-            ""
-          )}
+          ) : null}
         </Button>
       );
     },
@@ -153,7 +151,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
       <RegistrationRowActions
         data={{
           affiliation: row.original.affiliation,
-          registrationIdentifier: row.original.registrationIdentifer,
+          registrationIdentifier: row.original.registrationIdentifier,
           paymentStatus: row.original.paymentStatus,
           email: row.original.registrant.email,
           registrationId: row.original.registrationId,

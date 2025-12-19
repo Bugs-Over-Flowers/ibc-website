@@ -19,10 +19,8 @@ export const getEventParticipantList = async (
 
   if (error) {
     console.error(error);
-    throw new Error(error.message);
+    throw new Error("Failed to fetch participant list");
   }
-
-  console.log(data);
 
   return ParticipantListRPCSchema.array().parse(data);
 };

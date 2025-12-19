@@ -1,6 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { formatDate } from "date-fns";
 import {
   ArrowDownAZ,
   ArrowUpZA,
@@ -129,15 +130,19 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
             <CalendarArrowDown />
           ) : column.getIsSorted() === "desc" ? (
             <CalendarArrowUp />
-          ) : (
-            ""
-          )}
+          ) : null}
         </Button>
       );
     },
     cell: ({ row }) => {
-      const { registrationDate } = row.original;
-      return <>{new Date(registrationDate).toLocaleDateString()}</>;
+      return (
+        <>
+          {formatDate(
+            new Date(row.original.registrationDate),
+            "MMM d, h:mm aaa",
+          )}
+        </>
+      );
     },
   },
   {

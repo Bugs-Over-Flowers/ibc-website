@@ -22,7 +22,7 @@ export const RegistrationDataBaseSchema = z.object({
   paymentStatus: z.enum(PaymentStatus),
   paymentMethod: z.enum(PaymentMethod),
   registrant: RegistrationListRegistrantSchema,
-  registrationIdentifer: RegistrationIdentifier,
+  registrationIdentifier: RegistrationIdentifier,
   people: z.number().min(0),
 });
 
@@ -66,7 +66,7 @@ export const RegistrationListRPCSchema = z
         businessName: val.business_name,
         isMember: val.is_member,
         registrant: val.registrant,
-        registrationIdentifer: val.registration_identifier,
+        registrationIdentifier: val.registration_identifier,
         people: val.people,
       }),
     ),
