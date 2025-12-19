@@ -1,5 +1,6 @@
 import z from "zod";
 
+// Schemas for check in page
 const RegistrationCheckInListRegistrationDetailsSchema = z.object({
   registrationId: z.string(),
   affiliation: z.string(),
@@ -69,3 +70,43 @@ export const RegistrationCheckInListRPCSchema = z
       }),
     ),
   );
+
+// Schemas for check in list
+
+const CheckInStats = z.object({
+  totalExpectedParticipants: z.number(),
+});
+
+const CheckInItemSchema = ParticipantCheckInItemSchema.pick({
+  email: true,
+  lastName: true,
+  firstName: true,
+  contactNumber: true,
+  participantId: true,
+  registrationId: true,
+}).extend({
+  checkInId: z.string(),
+  checkedInAt: z.iso.datetime({ local: true }),
+  eventDayId: z.string(),
+  affiliation: z.string(),
+});
+
+export type CheckInItem = z.infer<typeof CheckInItemSchema>;
+
+export const CheckInListEventDayDetailsSchema = ParticipantCheckInEventDay.pick(
+  {
+    label: true,
+    eventDate: true,
+    eventDayId: true,
+  },
+);
+
+export type CheckInListEventDayDetails = z.infer<
+  typeof CheckInListEventDayDetailsSchema
+>;
+
+export const CheckInListPageSchema = z.object({
+  stats: CheckInStats,
+  checkIns: CheckInItemSchema.array(),
+  eventDays: CheckInListEventDayDetailsSchema.array(),
+});
