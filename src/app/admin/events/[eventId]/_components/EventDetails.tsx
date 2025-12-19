@@ -35,15 +35,9 @@ export default async function EventDetails({
     getEventById(requestCookies, { id: eventId }),
   );
 
-  console.log("Fetching stats for eventId:", eventId);
-  console.log("Event Details:", event);
-
   const { data: stats, error: statsError } = await tryCatch(
     getEventStats(requestCookies, { eventId }),
   );
-
-  console.log("Stats result:", stats);
-  console.log("Stats error:", statsError);
 
   if (eventError || !event) {
     return (
@@ -117,7 +111,7 @@ export default async function EventDetails({
                 {event.description}
               </p>
             </div>
-            <Link href={`/admin/events/${eventId}/edit` as Route}>
+            <Link href={`/admin/events/${eventId}/edit-event` as Route}>
               <Button variant="outline">
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Event

@@ -19,6 +19,7 @@ export type Database = {
           applicationDate: string;
           applicationId: string;
           applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
+          applicationStatus: Database["public"]["Enums"]["ApplicationStatus"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           companyAddress: string;
           companyName: string;
@@ -37,6 +38,7 @@ export type Database = {
           applicationDate?: string;
           applicationId?: string;
           applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
+          applicationStatus?: Database["public"]["Enums"]["ApplicationStatus"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           companyAddress: string;
           companyName: string;
@@ -55,6 +57,7 @@ export type Database = {
           applicationDate?: string;
           applicationId?: string;
           applicationMemberType?: Database["public"]["Enums"]["ApplicationMemberType"];
+          applicationStatus?: Database["public"]["Enums"]["ApplicationStatus"];
           applicationType?: Database["public"]["Enums"]["ApplicationType"];
           companyAddress?: string;
           companyName?: string;
@@ -423,11 +426,7 @@ export type Database = {
     };
     Functions: {
       get_event_participant_list: {
-        Args: {
-          p_event_id: string;
-          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
-          p_search_text?: string;
-        };
+        Args: { p_event_id: string; p_search_text?: string };
         Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
         SetofOptions: {
           from: "*";
@@ -508,23 +507,39 @@ export type Database = {
             };
             Returns: Json;
           };
-      update_event_details: {
-        Args: {
-          p_description: string;
-          p_end_date: string;
-          p_event_header_url: string;
-          p_event_id: string;
-          p_event_type: string;
-          p_registration_fee: number;
-          p_start_date: string;
-          p_title: string;
-          p_venue: string;
-        };
-        Returns: Json;
-      };
+      update_event_details:
+        | {
+            Args: {
+              p_description?: string;
+              p_end_date?: string;
+              p_event_header_url?: string;
+              p_event_id: string;
+              p_event_type?: string;
+              p_registration_fee?: number;
+              p_start_date?: string;
+              p_title?: string;
+              p_venue?: string;
+            };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_description: string;
+              p_end_date: string;
+              p_event_header_url: string;
+              p_event_id: string;
+              p_event_type: string;
+              p_registration_fee: number;
+              p_start_date: string;
+              p_title: string;
+              p_venue: string;
+            };
+            Returns: Json;
+          };
     };
     Enums: {
       ApplicationMemberType: "corporate" | "personal";
+      ApplicationStatus: "new" | "pending" | "approved" | "rejected";
       ApplicationType: "newMember" | "updating" | "renewal";
       CompanyMemberType: "principal" | "alternate";
       EventType: "public" | "private";
@@ -539,7 +554,6 @@ export type Database = {
         email: string | null;
         contact_number: string | null;
         affiliation: string | null;
-        payment_status: Database["public"]["Enums"]["PaymentStatus"] | null;
         registration_date: string | null;
         registration_id: string | null;
       };
@@ -698,6 +712,7 @@ export const Constants = {
   public: {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],
+      ApplicationStatus: ["new", "pending", "approved", "rejected"],
       ApplicationType: ["newMember", "updating", "renewal"],
       CompanyMemberType: ["principal", "alternate"],
       EventType: ["public", "private"],

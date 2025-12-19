@@ -1,0 +1,114 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import type { ServerFunction } from "@/lib/server/types";
+import { createActionClient } from "@/lib/supabase/server";
+import {
+  type EditDraftEventInput,
+  type EditPublishedEventInput,
+  editDraftEventServerSchema,
+  editPublishedEventServerSchema,
+} from "@/lib/validation/event/editEventSchema";
+
+type UpdateEventInput = EditDraftEventInput | EditPublishedEventInput;
+
+type UpdateEventResponse = {
+  eventId: string;
+  eventType: string;
+  message: string;
+};
+
+export const updateEvent: ServerFunction<
+  [UpdateEventInput, boolean],
+  UpdateEventResponse
+> = async (input, isDraft) => {
+  // Validate based on whether it's a draft or published event
+  const schema = isDraft
+    ? editDraftEventServerSchema
+    : editPublishedEventServerSchema;
+
+  const result = schema.safeParse(input);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error.issues[0].message,
+      data: null,
+    };
+  }
+
+  const data = result.data;
+  const supabase = await createActionClient();
+
+  console.log("Updating event with data:", {
+    eventId: data.eventId,
+    title: data.eventTitle,
+    description: data.description,
+    headerUrl: data.eventHeaderUrl,
+    startDate: data.eventStartDate,
+    endDate: data.eventEndDate,
+    venue: data.venue,
+    isDraft,
+  });
+
+  // Call the database function
+  const { data: rpcResult, error: rpcError } = await supabase.rpc(
+    "update_event_details",
+    {
+      p_event_id: data.eventId,
+      p_title: data.eventTitle,
+      p_description: data.description,
+      p_event_header_url: data.eventHeaderUrl,
+      p_start_date: data.eventStartDate,
+      p_end_date: data.eventEndDate,
+      p_venue: data.venue,
+      p_event_type: isDraft
+        ? (data as EditDraftEventInput).eventType || "draft"
+        : undefined,
+      p_registration_fee: isDraft
+        ? (data as EditDraftEventInput).registrationFee
+        : undefined,
+    },
+  );
+
+  console.log("RPC Result:", rpcResult, "RPC Error:", rpcError);
+
+  if (rpcError) {
+    return {
+      success: false,
+      error: rpcError.message,
+      data: null,
+    };
+  }
+
+  // Cast the result to the expected type
+  const resultData = rpcResult as {
+    success: boolean;
+    eventId?: string;
+    eventType?: string;
+    message?: string;
+    error?: string;
+  } | null;
+
+  // Check if the RPC returned an error
+  if (resultData && !resultData.success) {
+    return {
+      success: false,
+      error: resultData.error || "Failed to update event",
+      data: null,
+    };
+  }
+
+  revalidatePath("/admin/events");
+  revalidatePath(`/admin/events/${data.eventId}`);
+
+  return {
+    success: true,
+    data: {
+      eventId: resultData?.eventId || data.eventId,
+      eventType: resultData?.eventType ?? "draft",
+      message: resultData?.message || "Event updated successfully",
+    },
+    error: null,
+  };
+};
