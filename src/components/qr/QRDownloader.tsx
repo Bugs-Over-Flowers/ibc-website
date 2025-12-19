@@ -60,7 +60,7 @@ export default function QRDownloader({
         <Card className="w-2xs bg-white text-center" ref={ref}>
           <CardContent className="flex flex-col items-center gap-3">
             {children}
-            <div className="">
+            <div className="text-neutral-900">
               <pre className="text-[8px]">{registrationIdentifier}</pre>
               <div className="flex flex-col items-center">
                 <div className="pt-2 font-semibold text-lg capitalize">
@@ -82,7 +82,7 @@ export default function QRDownloader({
               value={as as "image" | "pdf"}
             >
               <SelectTrigger>
-                <SelectValue placeholder="hello world" />
+                <SelectValue data-placeholder="hello world" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="image">image</SelectItem>
