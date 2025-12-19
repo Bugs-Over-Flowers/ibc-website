@@ -436,6 +436,7 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      get_event_status: { Args: { p_event_id: string }; Returns: Json };
       get_registration_list: {
         Args: {
           p_event_id: string;
@@ -460,12 +461,8 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      get_registration_stats: {
-        Args: {
-          p_event_id: string;
-          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
-          p_search_text?: string;
-        };
+      get_registration_list_stats: {
+        Args: { p_event_id: string };
         Returns: Database["public"]["CompositeTypes"]["registration_stats"];
         SetofOptions: {
           from: "*";
@@ -555,23 +552,23 @@ export type Database = {
         is_event_day: boolean | null;
       };
       registration_list_item: {
-        event_id: string | null;
         registration_id: string | null;
         affiliation: string | null;
         registration_date: string | null;
-        payment_status: string | null;
-        payment_method: string | null;
-        payment_image_path: string | null;
+        payment_status: Database["public"]["Enums"]["PaymentStatus"] | null;
+        payment_method: Database["public"]["Enums"]["PaymentMethod"] | null;
         business_member_id: string | null;
         business_name: string | null;
         is_member: boolean | null;
         registrant: Json | null;
+        people: number | null;
         registration_identifier: string | null;
       };
       registration_stats: {
-        total: number | null;
-        verified: number | null;
-        pending: number | null;
+        totalRegistrations: number | null;
+        verifiedRegistrations: number | null;
+        pendingRegistrations: number | null;
+        totalParticipants: number | null;
       };
     };
   };

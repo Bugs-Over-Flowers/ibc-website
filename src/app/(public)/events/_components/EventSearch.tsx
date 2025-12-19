@@ -36,9 +36,10 @@ export function EventsSearch({
   onStatusChange,
 }: EventsSearchProps) {
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div className="relative w-full flex-1">
-        <Search className="-translate-y-1/2 absolute top-1/2 left-4 h-5 w-5 text-muted-foreground" />
+    <div className="mb-4 flex flex-col gap-4 sm:flex-row">
+      {/* Search Bar */}
+      <div className="relative flex-1">
+        <Search className="pointer-events-none absolute top-1/2 left-4 z-10 h-5 w-5 -translate-y-1/2 transform text-foreground/50 drop-shadow-md" />
         <Input
           className="h-12 rounded-xl border-border bg-background pr-4 pl-12"
           onChange={(e) => onSearchChange(e.target.value)}
@@ -50,26 +51,50 @@ export function EventsSearch({
 
       <div className="flex flex-wrap gap-3">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              className="h-12 w-48 min-w-[10rem] gap-2 rounded-xl bg-transparent"
-              variant="outline"
-            >
-              <Calendar className="h-4 w-4" />
-              {statusFilters.find((s) => s.value === statusFilter)?.label}
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="rounded-xl">
-            {statusFilters.map((status) => (
-              <DropdownMenuItem
-                className={statusFilter === status.value ? "bg-primary/10" : ""}
-                key={status.value}
-                onClick={() => onStatusChange(status.value)}
+          <DropdownMenuTrigger
+            render={(triggerProps) => (
+              <Button
+                aria-expanded={false}
+                className="h-[52px] w-full min-w-[140px] justify-between rounded-xl border-border/50 bg-white px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
+                role="combobox"
+                variant="outline"
+                {...triggerProps}
               >
-                {status.label}
-              </DropdownMenuItem>
-            ))}
+                <span className="block max-w-[140px] truncate text-left">
+                  {filterLabels[currentFilter]}
+                </span>
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            )}
+          />
+          <DropdownMenuContent
+            align="end"
+            className="w-[140px] rounded-xl border-border/50 bg-white/95 shadow-xl backdrop-blur-xl"
+          >
+            <DropdownMenuItem
+              className={
+                currentFilter === "all" ? "bg-primary/10 text-primary" : ""
+              }
+              onClick={() => onFilterChange("all")}
+            >
+              All Events
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className={
+                currentFilter === "upcoming" ? "bg-primary/10 text-primary" : ""
+              }
+              onClick={() => onFilterChange("upcoming")}
+            >
+              Upcoming
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className={
+                currentFilter === "past" ? "bg-primary/10 text-primary" : ""
+              }
+              onClick={() => onFilterChange("past")}
+            >
+              Past Events
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
