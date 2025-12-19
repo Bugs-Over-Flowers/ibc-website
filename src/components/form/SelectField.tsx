@@ -31,15 +31,19 @@ function SelectField({
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Select
-        onValueChange={(value) => field.handleChange(value)}
+        onValueChange={(value) =>
+          field.handleChange(value || "Select a business")
+        }
         value={field.state.value ?? ""}
       >
         <SelectTrigger id={field.name}>
-          <SelectValue placeholder={placeholder} />
+          <SelectValue data-placeholder={placeholder}>
+            {(val) => options.find((option) => option.value === val)?.label}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
+            <SelectItem key={option.label} value={option.value}>
               {option.label}
             </SelectItem>
           ))}

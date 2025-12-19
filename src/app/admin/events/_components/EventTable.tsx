@@ -37,6 +37,11 @@ export default function EventTable({ events }: EventTableProps) {
 
   return (
     <div className="w-full space-y-4 md:space-y-6">
+      <div className="rounded-lg bg-background px-4 md:px-5">
+        <div className="font-medium text-muted-foreground text-sm md:text-base">
+          {events.length} event{events.length !== 1 ? "s" : ""} found
+        </div>
+      </div>
       <div className="space-y-4 md:space-y-6">
         {events.map((ev) => (
           <EventRow event={ev} key={ev.eventId} />
