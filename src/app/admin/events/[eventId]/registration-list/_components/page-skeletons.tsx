@@ -23,6 +23,7 @@ export function StatsSkeleton() {
         { label: "Total Registrations", icon: <Users2 /> },
         { label: "Verified Registrations", icon: <CheckCircle /> },
         { label: "Pending Registrations", icon: <Clock /> },
+        { label: "Total Participants", icon: <Users2 /> },
       ].map(({ label, icon }) => (
         <Card className="h-36 w-full" key={label}>
           <CardContent className="flex h-full flex-col justify-between">

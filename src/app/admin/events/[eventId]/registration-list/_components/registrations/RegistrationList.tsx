@@ -24,8 +24,19 @@ export default async function RegistrationList({
   );
 
   if (!registrationList.success) {
-    return <div>Error: {registrationList.error}</div>;
+    console.error(registrationList.error);
+    return (
+      <div>
+        Error: Unable to get the registration list for this event. Please
+        refresh the page.
+      </div>
+    );
   }
 
-  return <RegistrationListTable registrationList={registrationList.data} />;
+  return (
+    <div className="space-y-2">
+      <div className="h-8">{registrationList.data.length} results</div>
+      <RegistrationListTable registrationList={registrationList.data} />
+    </div>
+  );
 }

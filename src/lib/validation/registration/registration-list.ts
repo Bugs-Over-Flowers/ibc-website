@@ -9,18 +9,21 @@ import { RegistrationIdentifier } from "../qr/standard";
 const PaymentMethod = Constants.public.Enums.PaymentMethod;
 const PaymentStatus = Constants.public.Enums.PaymentStatus;
 
+const RegistrationListRegistrantSchema = ParticipantSchema.pick({
+  email: true,
+  firstName: true,
+  lastName: true,
+});
+
 export const RegistrationDataBaseSchema = z.object({
-  eventId: z.string(),
   registrationId: z.uuid(),
   affiliation: z.string(),
-  registrationDate: z.string(),
+  registrationDate: z.iso.datetime({ local: true }),
   paymentStatus: z.enum(PaymentStatus),
   paymentMethod: z.enum(PaymentMethod),
-  paymentImagePath: z.string().nullable(),
-  registrant: ParticipantSchema.extend({
-    isPrincipal: z.literal(true),
-  }),
-  registrationIdentifer: RegistrationIdentifier,
+  registrant: RegistrationListRegistrantSchema,
+  registrationIdentifier: RegistrationIdentifier,
+  people: z.number().min(0),
 });
 
 export const RegistrationItemSchema = z.discriminatedUnion("isMember", [
@@ -39,45 +42,44 @@ export type RegistrationItem = z.infer<typeof RegistrationItemSchema>;
 // Data from RPC
 export const RegistrationListRPCSchema = z
   .object({
-    event_id: z.string(),
     registration_id: z.uuid(),
     affiliation: z.string(),
-    registration_date: z.string(),
+    registration_date: z.iso.datetime({ local: true }),
     payment_status: z.string(),
     payment_method: z.string(),
-    payment_image_path: z.string().nullable(),
     business_member_id: z.uuid().nullable(),
     business_name: z.string().nullable(),
     is_member: z.boolean(),
-    registrant: ParticipantSchema.extend({
-      isPrincipal: z.literal(true),
-    }),
+    registrant: RegistrationListRegistrantSchema,
     registration_identifier: RegistrationIdentifier,
+    people: z.number().min(0),
   })
   .pipe(
     z.transform((val) =>
       RegistrationItemSchema.parse({
-        eventId: val.event_id,
         registrationId: val.registration_id,
         affiliation: val.affiliation,
         registrationDate: val.registration_date,
         paymentStatus: val.payment_status as Enums<"PaymentStatus">,
         paymentMethod: val.payment_method as Enums<"PaymentMethod">,
-        paymentImagePath: val.payment_image_path,
         businessMemberId: val.business_member_id,
         businessName: val.business_name,
         isMember: val.is_member,
         registrant: val.registrant,
-        registrationIdentifer: val.registration_identifier,
+        registrationIdentifier: val.registration_identifier,
+        people: val.people,
       }),
     ),
   );
 
 export const RegistrationListStatsSchema = z.object({
-  total: z.number().min(0),
-  verified: z.number().min(0),
-  pending: z.number().min(0),
+  totalRegistrations: z.number().min(0),
+  verifiedRegistrations: z.number().min(0),
+  pendingRegistrations: z.number().min(0),
+  totalParticipants: z.number().min(0),
 });
+
+export type RegistrationListStats = z.infer<typeof RegistrationListStatsSchema>;
 
 export const RegistrationPageSchema = RegistrationDataBaseSchema.pick({
   registrationId: true,
