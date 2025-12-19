@@ -21,7 +21,8 @@ interface EditEventFormProps {
 export function EditEventForm({ event }: EditEventFormProps) {
   const { form, router, isDraft, isFinished } = useEditEventForm({ event });
 
-  if (isFinished) {
+  // Only block editing if it's finished AND NOT a draft
+  if (isFinished && !isDraft) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-0">
         <button
