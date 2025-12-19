@@ -90,7 +90,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
         eventEndDate: value.eventEndDate,
         venue: value.venue,
         eventHeaderUrl: headerUrl || undefined,
-        eventType: value.eventType, // Always include eventType to allow switching
+        eventType: value.eventType,
         ...(isDraft && {
           registrationFee: value.registrationFee,
         }),

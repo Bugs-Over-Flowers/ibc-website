@@ -30,9 +30,13 @@ export const updateEvent: ServerFunction<
   const result = schema.safeParse(input);
 
   if (!result.success) {
+    const errorMessage = result.error.issues
+      .map((issue) => issue.message)
+      .join("; ");
+
     return {
       success: false,
-      error: result.error.issues[0].message,
+      error: errorMessage,
       data: null,
     };
   }

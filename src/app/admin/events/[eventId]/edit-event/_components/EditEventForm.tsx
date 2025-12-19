@@ -44,7 +44,7 @@ export function EditEventForm({ event }: EditEventFormProps) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-0">
+    <div className="mx-auto max-w-2xl px-4 py-10">
       <button
         className="text-muted-foreground hover:text-foreground"
         onClick={() => router.push(`/admin/events/${event.eventId}`)}
@@ -164,11 +164,12 @@ export function EditEventForm({ event }: EditEventFormProps) {
               )}
             </form.AppField>
 
-            <div className="flex justify-end gap-4">
+            <div className="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
               <form.Subscribe selector={(state) => state.isSubmitting}>
                 {(isSubmitting) => (
                   <>
                     <Button
+                      className="w-full sm:w-auto"
                       disabled={isSubmitting}
                       onClick={() =>
                         router.push(`/admin/events/${event.eventId}`)
@@ -182,8 +183,11 @@ export function EditEventForm({ event }: EditEventFormProps) {
                     {isDraft ? (
                       <>
                         <Button
+                          className="w-full sm:w-auto"
                           disabled={isSubmitting}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             form.setFieldValue("eventType", null);
                             form.handleSubmit();
                           }}
@@ -195,7 +199,10 @@ export function EditEventForm({ event }: EditEventFormProps) {
 
                         <Popover>
                           <PopoverTrigger asChild>
-                            <Button disabled={isSubmitting}>
+                            <Button
+                              className="w-full sm:w-auto"
+                              disabled={isSubmitting}
+                            >
                               {isSubmitting ? "Saving..." : "Publish Event"}
                               <ChevronDown className="ml-2 h-4 w-4" />
                             </Button>
@@ -204,7 +211,9 @@ export function EditEventForm({ event }: EditEventFormProps) {
                             <div className="flex flex-col">
                               <Button
                                 className="justify-start rounded-none"
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
                                   form.setFieldValue("eventType", "public");
                                   form.handleSubmit();
                                 }}
@@ -214,7 +223,9 @@ export function EditEventForm({ event }: EditEventFormProps) {
                               </Button>
                               <Button
                                 className="justify-start rounded-none"
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
                                   form.setFieldValue("eventType", "private");
                                   form.handleSubmit();
                                 }}
@@ -227,7 +238,11 @@ export function EditEventForm({ event }: EditEventFormProps) {
                         </Popover>
                       </>
                     ) : (
-                      <Button disabled={isSubmitting} type="submit">
+                      <Button
+                        className="w-full sm:w-auto"
+                        disabled={isSubmitting}
+                        type="submit"
+                      >
                         {isSubmitting ? "Saving..." : "Save Changes"}
                       </Button>
                     )}
