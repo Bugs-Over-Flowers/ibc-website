@@ -5,8 +5,8 @@ const baseEditEventSchema = z.object({
   eventId: z.uuid(),
   eventTitle: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().optional(),
-  eventStartDate: z.string(),
-  eventEndDate: z.string(),
+  eventStartDate: z.iso.datetime({ local: true }),
+  eventEndDate: z.iso.datetime({ local: true }),
   venue: z.string().min(1, "Venue is required"),
 });
 

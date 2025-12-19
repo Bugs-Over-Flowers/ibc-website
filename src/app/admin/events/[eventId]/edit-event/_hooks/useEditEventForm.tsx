@@ -86,8 +86,14 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
         eventId: value.eventId,
         eventTitle: value.eventTitle,
         description: value.description,
-        eventStartDate: value.eventStartDate,
-        eventEndDate: value.eventEndDate,
+        eventStartDate:
+          value.eventStartDate.length === 16
+            ? `${value.eventStartDate}:00`
+            : value.eventStartDate,
+        eventEndDate:
+          value.eventEndDate.length === 16
+            ? `${value.eventEndDate}:00`
+            : value.eventEndDate,
         venue: value.venue,
         eventHeaderUrl: headerUrl || undefined,
         eventType: value.eventType,
