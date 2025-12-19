@@ -52,31 +52,27 @@ export function EventsSearch({
           aria-label="Filter by date"
           className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-md p-2 text-foreground/60 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
           type="button"
-        ></button>
+        >
+          <Calendar className="h-5 w-5" />
+        </button>
       </div>
 
       <div className="flex flex-wrap gap-3">
         <DropdownMenu>
-          <DropdownMenuTrigger
-            render={(triggerProps) => (
-              <Button
-                aria-expanded={false}
-                className="h-[52px] w-[180px] justify-between rounded-xl border border-border/50 bg-background px-4 shadow-sm ring-1 ring-border/20 backdrop-blur-xl hover:bg-background/90"
-                role="combobox"
-                variant="outline"
-                {...triggerProps}
-              >
-                <Calendar className="h-5 w-5" />
+          <DropdownMenuTrigger>
+            <Button
+              className="h-[52px] w-[140px] justify-between rounded-xl border border-border/50 bg-background px-4 text-foreground shadow-sm ring-1 ring-border/20 backdrop-blur-xl hover:bg-background/90"
+              role="combobox"
+              variant="outline"
+            >
+              <span className="block max-w-[110px] truncate text-left">
+                {statusFilters.find((s) => s.value === statusFilter)?.label ??
+                  "All Events"}
+              </span>
 
-                <span className="block max-w-[110px] truncate text-left">
-                  {statusFilters.find((s) => s.value === statusFilter)?.label ??
-                    "All Events"}
-                </span>
-
-                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            )}
-          />
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
 
           <DropdownMenuContent
             align="end"

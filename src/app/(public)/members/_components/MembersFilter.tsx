@@ -51,7 +51,7 @@ export default function MembersFilter({
     "Select sector...";
 
   return (
-    <section className="border-border border-b bg-background px-4 py-8">
+    <section className="border-border border-b bg-background px-2 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-4 flex flex-col gap-4 sm:flex-row">
           {/* Search Bar */}

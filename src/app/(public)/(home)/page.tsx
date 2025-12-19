@@ -8,8 +8,10 @@ function HeroSkeleton() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<HeroSkeleton />}>
-      <FeaturedEventsHero />
-    </Suspense>
+    <main className="min-h-screen bg-background">
+      <Suspense fallback={<HeroSkeleton />}>
+        <FeaturedEventsHero />
+      </Suspense>
+    </main>
   );
 }
