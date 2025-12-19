@@ -8,9 +8,9 @@ import BackButton from "../_components/BackButton";
 import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
 import ParticipantList from "./_components/participants/ParticipantList";
 import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";
+import RegistrationListStats from "./_components/RegistrationListStats";
 import RegistrationTabs from "./_components/RegistrationsTabs";
 import RegistrationList from "./_components/registrations/RegistrationList";
-import RegistrationListStats from "./_components/registrations/RegistrationListStats";
 import RegistrationsSearchAndFilter from "./_components/registrations/RegistrationsSearchAndFilter";
 
 type RegistrationListPageProps =
@@ -33,9 +33,11 @@ export default function RegistrationPageWrapper({
       </Suspense>
       <RegistrationTabs>
         {/*Registration and Participant Stats*/}
-        <Suspense fallback={<StatsSkeleton />}>
-          <RegistrationListStats params={params} />
-        </Suspense>
+        <div className="py-3">
+          <Suspense fallback={<StatsSkeleton />}>
+            <RegistrationListStats params={params} />
+          </Suspense>
+        </div>
 
         <TabsContent className="flex flex-col gap-4" value="registrations">
           {/* Stats */}

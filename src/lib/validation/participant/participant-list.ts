@@ -1,6 +1,4 @@
 import { z } from "zod";
-import type { Enums } from "@/lib/supabase/db.types";
-import { PaymentStatusEnum } from "../utils";
 
 export const ParticipantSchema = z.object({
   participantId: z.string(),
@@ -19,7 +17,6 @@ export const ParticipantListItemSchema = ParticipantSchema.pick({
   contactNumber: true,
 }).extend({
   affiliation: z.string(),
-  paymentStatus: PaymentStatusEnum,
   registrationDate: z.string(),
   registrationId: z.string(),
 });
@@ -35,7 +32,6 @@ export const ParticipantListRPCSchema = z
     email: z.email(),
     contact_number: z.string(),
     affiliation: z.string(),
-    payment_status: z.string(),
     registration_date: z.string(),
     registration_id: z.string(),
   })
@@ -48,7 +44,6 @@ export const ParticipantListRPCSchema = z
         email: val.email,
         contactNumber: val.contact_number,
         affiliation: val.affiliation,
-        paymentStatus: val.payment_status as Enums<"PaymentStatus">,
         registrationDate: val.registration_date,
         registrationId: val.registration_id,
       }),
