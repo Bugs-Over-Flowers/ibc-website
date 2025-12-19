@@ -1,5 +1,5 @@
 import { Building, CircleAlert } from "lucide-react";
-import { type FormEvent, useMemo } from "react";
+import type { FormEvent } from "react";
 import FormButtons from "@/components/FormButtons";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -40,23 +40,10 @@ const Step1 = ({ members }: Step1Props) => {
     form.handleSubmit({ nextStep: true });
   };
 
-  const membersOptions = useMemo(
-    () =>
-      members.map((m) => ({
-        label: m.businessName,
-        value: m.businessMemberId,
-      })),
-    [members],
-  );
-
-  const memberName = useMemo(() => {
-    const values = form.state.values;
-    if (values.member === "member") {
-      return members.find((m) => m.businessMemberId === values.businessMemberId)
-        ?.businessName;
-    }
-    return "";
-  }, [members, form.state.values]);
+  const membersOptions = members.map((m) => ({
+    label: m.businessName,
+    value: m.businessMemberId,
+  }));
 
   return (
     <form className="space-y-3" onSubmit={onNext}>
@@ -84,10 +71,14 @@ const Step1 = ({ members }: Step1Props) => {
                     const parsedMemberValue = MemberTypeEnum.safeParse(value);
 
                     if (!parsedMemberValue.success) return;
+
+                    // Clear form-level error map when switching member type
+                    form.setErrorMap({});
+
                     if (parsedMemberValue.data === "member") {
-                      form.setFieldValue("businessMemberId", "");
-                    } else if (parsedMemberValue.data === "nonmember") {
                       form.setFieldValue("nonMemberName", "");
+                    } else if (parsedMemberValue.data === "nonmember") {
+                      form.setFieldValue("businessMemberId", "");
                     }
 
                     field.handleChange(parsedMemberValue.data);
@@ -107,11 +98,7 @@ const Step1 = ({ members }: Step1Props) => {
                             {(field) => (
                               <field.SelectField
                                 options={membersOptions}
-                                placeholder={
-                                  memberName !== ""
-                                    ? memberName
-                                    : "Select Member"
-                                }
+                                placeholder="Select your Company"
                               />
                             )}
                           </form.AppField>

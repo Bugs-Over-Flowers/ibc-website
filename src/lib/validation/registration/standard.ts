@@ -5,11 +5,16 @@ import { MemberTypeEnum, PaymentMethodEnum, phoneSchema } from "../utils";
 export const StandardRegistrationStep1Schema = z.discriminatedUnion("member", [
   z.object({
     member: z.literal(MemberTypeEnum.enum.member),
-    businessMemberId: z.string().min(1),
+    businessMemberId: z
+      .string()
+      .min(1, "Please select your company name / affiliation"),
   }),
   z.object({
     member: z.literal(MemberTypeEnum.enum.nonmember),
-    nonMemberName: z.string().min(2).max(100),
+    nonMemberName: z
+      .string()
+      .min(1, "Please input your company name / affiliation")
+      .max(100),
   }),
 ]);
 
