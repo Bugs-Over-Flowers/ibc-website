@@ -305,7 +305,7 @@ export default async function EventDetails({
               View daily attendance records and export check-in data by event
               day
             </p>
-            <Link href={`/admin/events/${eventId}/check-in` as Route}>
+            <Link href={`/admin/events/${eventId}/check-in-list` as Route}>
               <Button className="w-full" variant="outline">
                 <CheckSquare className="mr-2 h-4 w-4" />
                 View Check-in List
