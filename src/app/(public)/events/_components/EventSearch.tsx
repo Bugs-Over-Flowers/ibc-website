@@ -19,7 +19,7 @@ type StatusOption = {
 const statusFilters: StatusOption[] = [
   { value: "all", label: "All Events" },
   { value: "upcoming", label: "Upcoming" },
-  { value: "past", label: "Past" },
+  { value: "past", label: "Past Events" },
 ];
 
 interface EventsSearchProps {
@@ -41,12 +41,18 @@ export function EventsSearch({
       <div className="relative flex-1">
         <Search className="pointer-events-none absolute top-1/2 left-4 z-10 h-5 w-5 -translate-y-1/2 transform text-foreground/50 drop-shadow-md" />
         <Input
-          className="h-12 rounded-xl border-border bg-background pr-4 pl-12"
+          className="h-[52px] justify-between rounded-xl border border-border/50 bg-background px-5 pl-12 text-foreground shadow-sm ring-1 ring-border/20 backdrop-blur-xl hover:bg-background/90 focus:ring-2 focus:ring-primary/30"
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search events..."
           type="text"
           value={searchQuery}
         />
+
+        <button
+          aria-label="Filter by date"
+          className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-md p-2 text-foreground/60 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+          type="button"
+        ></button>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -55,43 +61,48 @@ export function EventsSearch({
             render={(triggerProps) => (
               <Button
                 aria-expanded={false}
-                className="h-[52px] w-full min-w-[140px] justify-between rounded-xl border-border/50 bg-white px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
+                className="h-[52px] w-[180px] justify-between rounded-xl border border-border/50 bg-background px-4 shadow-sm ring-1 ring-border/20 backdrop-blur-xl hover:bg-background/90"
                 role="combobox"
                 variant="outline"
                 {...triggerProps}
               >
-                <span className="block max-w-[140px] truncate text-left">
-                  {filterLabels[currentFilter]}
+                <Calendar className="h-5 w-5" />
+
+                <span className="block max-w-[110px] truncate text-left">
+                  {statusFilters.find((s) => s.value === statusFilter)?.label ??
+                    "All Events"}
                 </span>
+
                 <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             )}
           />
+
           <DropdownMenuContent
             align="end"
-            className="w-[140px] rounded-xl border-border/50 bg-white/95 shadow-xl backdrop-blur-xl"
+            className="w-[140px] rounded-xl border border-border/50 bg-background text-foreground shadow-sm backdrop-blur-xl"
           >
             <DropdownMenuItem
               className={
-                currentFilter === "all" ? "bg-primary/10 text-primary" : ""
+                statusFilter === "all" ? "bg-primary/10 text-primary" : ""
               }
-              onClick={() => onFilterChange("all")}
+              onClick={() => onStatusChange("all")}
             >
               All Events
             </DropdownMenuItem>
             <DropdownMenuItem
               className={
-                currentFilter === "upcoming" ? "bg-primary/10 text-primary" : ""
+                statusFilter === "upcoming" ? "bg-primary/10 text-primary" : ""
               }
-              onClick={() => onFilterChange("upcoming")}
+              onClick={() => onStatusChange("upcoming")}
             >
               Upcoming
             </DropdownMenuItem>
             <DropdownMenuItem
               className={
-                currentFilter === "past" ? "bg-primary/10 text-primary" : ""
+                statusFilter === "past" ? "bg-primary/10 text-primary" : ""
               }
-              onClick={() => onFilterChange("past")}
+              onClick={() => onStatusChange("past")}
             >
               Past Events
             </DropdownMenuItem>
