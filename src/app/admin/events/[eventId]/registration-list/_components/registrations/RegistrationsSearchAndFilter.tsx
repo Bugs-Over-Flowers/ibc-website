@@ -78,7 +78,7 @@ export default function RegistrationSearchAndFilter() {
           <InputGroup className="w-full rounded-md bg-neutral-100 ring-1 ring-neutral-300">
             <Select onValueChange={setFilter} value={filter}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Payment Status" />
+                <SelectValue data-placeholder="Select Payment Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>

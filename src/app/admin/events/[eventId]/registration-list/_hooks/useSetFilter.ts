@@ -20,11 +20,16 @@ function useSetFilter(options: UseSetFilterProps) {
 
   const [filter, updateOptimistic] = useOptimistic(
     searchParams.get(s_key) || "",
-    (_, newState: string) => (newState !== "" ? newState : "all"),
+    (_, newState: string | null) => newState ?? "all",
   );
 
-  const setFilter = (filter: string) => {
-    const params = setParamsOrDelete(s_key, filter, ["all"], searchParams);
+  const setFilter = (filter: string | null) => {
+    const params = setParamsOrDelete(
+      s_key,
+      filter || "",
+      ["all"],
+      searchParams,
+    );
 
     const nextUrl = `${pathName}?${params.toString()}` as Route;
     const currentUrl = `${pathName}?${searchParams.toString()}` as Route;
