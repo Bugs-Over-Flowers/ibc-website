@@ -10,8 +10,8 @@ export const RegistrationCheckInEventDetails = z.object({
   venue: z.string(),
   eventId: z.string(),
   eventTitle: z.string(),
-  eventStartDate: z.iso.date(),
-  eventEndDate: z.iso.date(),
+  eventStartDate: z.iso.datetime({ local: true }),
+  eventEndDate: z.iso.datetime({ local: true }),
 });
 
 export const ParticipantCheckInItemSchema = z.object({

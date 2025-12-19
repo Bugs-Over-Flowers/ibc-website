@@ -45,6 +45,11 @@ const columnDefs: ColumnDef<ParticipantCheckInItem>[] = [
     header: "contactNumber",
     accessorKey: "contactNumber",
   },
+  {
+    header: "Remarks",
+    accessorKey: "checkedIn",
+    cell: ({ row }) => {},
+  },
 ];
 
 interface ParticipantSelectionProps {
