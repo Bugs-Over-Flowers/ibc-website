@@ -21,9 +21,7 @@ export default function RegistrationDetails({
 }: RegistrationDetailsProps) {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button>View Details</Button>
-      </DialogTrigger>
+      <DialogTrigger render={<Button>View Details</Button>} />
       <DialogContent>
         <DialogTitle>Details</DialogTitle>
         <Table>
