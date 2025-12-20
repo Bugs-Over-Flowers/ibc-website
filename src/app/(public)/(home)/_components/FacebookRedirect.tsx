@@ -49,7 +49,7 @@ export function FacebookCTASection() {
                 <div className="relative">
                   <motion.div
                     animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.3, 0.5] }}
-                    className="-inset-8 absolute rounded-full bg-primary/20 blur-2xl"
+                    className="absolute -inset-8 rounded-full bg-primary/20 blur-2xl"
                     transition={{
                       duration: 4,
                       repeat: Number.POSITIVE_INFINITY,

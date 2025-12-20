@@ -286,6 +286,47 @@ export type Database = {
           },
         ];
       };
+      Interview: {
+        Row: {
+          applicationId: string;
+          createdAt: string | null;
+          interviewDate: string;
+          interviewId: string;
+          interviewVenue: string;
+          notes: string | null;
+          status: Database["public"]["Enums"]["InterviewStatus"] | null;
+          updatedAt: string | null;
+        };
+        Insert: {
+          applicationId: string;
+          createdAt?: string | null;
+          interviewDate: string;
+          interviewId?: string;
+          interviewVenue: string;
+          notes?: string | null;
+          status?: Database["public"]["Enums"]["InterviewStatus"] | null;
+          updatedAt?: string | null;
+        };
+        Update: {
+          applicationId?: string;
+          createdAt?: string | null;
+          interviewDate?: string;
+          interviewId?: string;
+          interviewVenue?: string;
+          notes?: string | null;
+          status?: Database["public"]["Enums"]["InterviewStatus"] | null;
+          updatedAt?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "Interview_applicationId_fkey";
+            columns: ["applicationId"];
+            isOneToOne: false;
+            referencedRelation: "Application";
+            referencedColumns: ["applicationId"];
+          },
+        ];
+      };
       Participant: {
         Row: {
           contactNumber: string;
@@ -532,6 +573,7 @@ export type Database = {
       ApplicationType: "newMember" | "updating" | "renewal";
       CompanyMemberType: "principal" | "alternate";
       EventType: "public" | "private";
+      InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
     };
@@ -705,6 +747,7 @@ export const Constants = {
       ApplicationType: ["newMember", "updating", "renewal"],
       CompanyMemberType: ["principal", "alternate"],
       EventType: ["public", "private"],
+      InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],
     },
