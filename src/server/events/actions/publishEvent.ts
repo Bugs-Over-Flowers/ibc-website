@@ -60,18 +60,6 @@ export const publishEvent: ServerFunction<
     };
   }
 
-  const { error: rpcError } = await supabase.rpc("publish_event", {
-    p_event_id: eventData.eventId,
-  });
-
-  if (rpcError) {
-    return {
-      success: false,
-      error: `EventDay creation error: ${rpcError.message}`,
-      data: null,
-    };
-  }
-
   revalidatePath("/admin/events");
   return { success: true, data: { eventId: eventData.eventId }, error: null };
 };

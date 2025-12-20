@@ -18,8 +18,8 @@ export const useCreateEventForm = () => {
     defaultValues: {
       eventTitle: "",
       description: "",
-      eventStartDate: "",
-      eventEndDate: "",
+      eventStartDate: undefined as Date | undefined,
+      eventEndDate: undefined as Date | undefined,
       venue: "",
       registrationFee: 0,
       eventType: null as "public" | "private" | null,
