@@ -36,10 +36,11 @@ function NumberField({
         name={field.name}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.valueAsNumber)}
+        onFocus={(e) => e.target.select()}
         placeholder={placeholder}
         step={step}
         type="number"
-        value={field.state.value ?? ""}
+        value={Number.isNaN(field.state.value) ? "" : (field.state.value ?? "")}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />
