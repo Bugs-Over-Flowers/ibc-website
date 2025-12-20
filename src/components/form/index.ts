@@ -1,4 +1,5 @@
 export { default as FileDropzoneField } from "./FileDropzoneField";
+export { default as FormCalendar } from "./FormCalendar";
 export { default as FormDatePicker } from "./FormDatePicker";
 export { default as FormDateRangePicker } from "./FormDateRangePicker";
 export { default as FormDateTimePicker } from "./FormDateTimePicker";
