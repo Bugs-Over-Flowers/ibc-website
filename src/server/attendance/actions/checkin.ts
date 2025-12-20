@@ -14,43 +14,41 @@ export const checkIn = async ({
 }: CheckInProps) => {
   const supabase = await createActionClient();
 
-  // check if eventDay exists
-  const { error: eventDayError } = await supabase
-    .from("EventDay")
-    .select(`eventDayId`)
-    .eq("eventDayId", eventDayId)
-    .maybeSingle();
-
-  if (eventDayError) {
-    throw new Error("Unable to fetch current day");
-  }
-
-  const { error: checkInError, data: checkInData } = await supabase
-    .from("CheckIn")
-    .upsert(
-      participantIds.map((participantId) => ({
-        participantId: participantId,
-        date: new Date().toLocaleString(),
-        eventDayId: eventDayId,
-        remarks: remarksMap[participantId] || null,
-      })),
-      {
-        onConflict: "participantId,eventDayId",
-        ignoreDuplicates: true,
-      },
-    )
-    .select(`Participant(firstName, lastName, participantId)`);
-
-  if (checkInError) {
-    console.error(checkInError);
-    throw new Error("Unable to check in participants");
-  }
-
-  const peopleCheckedIn = checkInData.map(
-    (data) => `${data.Participant.firstName} ${data.Participant.lastName}`,
+  const allTargetIds = Array.from(
+    new Set([...participantIds, ...Object.keys(remarksMap)]),
   );
 
+  if (allTargetIds.length === 0) {
+    throw new Error("No participants provided");
+  }
+
+  const upsertData = allTargetIds.map((id) => ({
+    participantId: id,
+    eventDayId: eventDayId,
+    remarks: remarksMap[id] ?? null,
+  }));
+
+  // upsert check-in data
+  const { data: checkInData, error: checkInError } = await supabase
+    .from("CheckIn")
+    .upsert(upsertData, {
+      onConflict: "participantId,eventDayId",
+    })
+    .select(`Participant(firstName, lastName)`);
+
+  if (checkInError) {
+    console.error("Check-in Error:", checkInError);
+    // Handle specific constraint errors or general failures
+    throw new Error(checkInError.message || "Unable to process check-ins");
+  }
+
+  const peopleProcessed =
+    checkInData?.map(
+      (d) => `${d.Participant?.firstName} ${d.Participant?.lastName}`,
+    ) || [];
+
   return {
-    message: `Checked in ${peopleCheckedIn.join(", ")}`,
+    success: true,
+    message: `${peopleProcessed.length} people checked In for this registration. Participant(s): ${peopleProcessed.join(", ")}`,
   };
 };

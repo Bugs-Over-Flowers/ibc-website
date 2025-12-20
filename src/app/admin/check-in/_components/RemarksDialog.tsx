@@ -26,7 +26,7 @@ export default function RemarksDialog({
   const form = useSetRemarks({ remarks, participantId, setOpen });
 
   const remarkValue = useCheckInStore(
-    (state) => state.remarks?.[participantId],
+    (state) => state.newRemarks?.[participantId],
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -36,7 +36,15 @@ export default function RemarksDialog({
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger
-        render={<Button>{remarkValue ? "Edit Remarks" : "Add Remarks"}</Button>}
+        render={
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            {remarkValue || remarks ? "Edit Remarks" : "Add Remarks"}
+          </Button>
+        }
       />
 
       <DialogContent>

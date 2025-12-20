@@ -1,10 +1,14 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, Row } from "@tanstack/react-table";
+import { useState } from "react";
 import { DataTable } from "@/components/DataTable";
+import { SelectableRowDataTable } from "@/components/SelectableRowDataTable";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { areRecordsEqual } from "@/lib/utils";
 import type { ParticipantCheckInItem } from "@/lib/validation/checkin/checkin-list";
+import { useCheckInStore } from "../_hooks/useCheckInStore.store";
 import RemarksDialog from "./RemarksDialog";
 
 const columnDefs: ColumnDef<ParticipantCheckInItem>[] = [
@@ -26,7 +30,7 @@ const columnDefs: ColumnDef<ParticipantCheckInItem>[] = [
         aria-label="Select row"
         checked={row.getIsSelected() || row.original.checkedIn}
         disabled={row.original.checkedIn}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onCheckedChange={(value) => row.toggleSelected(!value)}
       />
     ),
   },
@@ -72,8 +76,39 @@ export default function ParticipantSelectionTable({
   handleCheckIn,
   isPending,
 }: ParticipantSelectionTableProps) {
+  const newRemarks = useCheckInStore((state) => state.newRemarks);
+  const remarks = useCheckInStore((state) => state.remarks);
+
+  const [rowSelection, setRowSelection] = useState({});
+
+  const onCheckIn = async (participantIds: string[]) => {
+    console.log("Current remarks in store:", remarks);
+    console.log("New remarks in store:", newRemarks);
+
+    console.log("Participant IDs to check in:", participantIds);
+    handleCheckIn(participantIds);
+  };
+
+  const onRowSelectionChange = (row: Row<ParticipantCheckInItem>) => {
+    if (row.original.checkedIn) {
+      console.log("CHECKED IN PARTICIPANT - CANNOT CHANGE SELECTION");
+      return;
+    }
+    console.log(
+      "Toggling selection for participant ID:",
+      row.original.participantId,
+    );
+
+    row.toggleSelected();
+  };
   return (
-    <DataTable columns={columnDefs} data={participantList}>
+    <SelectableRowDataTable
+      columns={columnDefs}
+      customRowSelectHandler={onRowSelectionChange}
+      data={participantList}
+      onRowSelectionChange={setRowSelection}
+      rowSelection={rowSelection}
+    >
       {(table) => {
         const disabled =
           isPending ||
@@ -81,22 +116,21 @@ export default function ParticipantSelectionTable({
           participantList.every((participant) => participant.checkedIn);
         return (
           <Button
-            disabled={disabled}
-            onClick={async () => {
-              await handleCheckIn(
+            disabled={disabled && areRecordsEqual(remarks, newRemarks)}
+            onClick={() =>
+              onCheckIn(
                 table
                   .getSelectedRowModel()
-                  .rows.map((r) => r.original.participantId),
-              );
-
-              // uncheck all rows after check-in
-              table.toggleAllPageRowsSelected(false);
-            }}
+                  .rows.map((row) => row.original.participantId),
+              ).then(() => {
+                table.toggleAllPageRowsSelected(false);
+              })
+            }
           >
             {isPending ? "Loading..." : "Check In"}
           </Button>
         );
       }}
-    </DataTable>
+    </SelectableRowDataTable>
   );
 }

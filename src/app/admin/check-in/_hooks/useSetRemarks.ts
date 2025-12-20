@@ -13,7 +13,8 @@ export const useSetRemarks = ({
   participantId,
   setOpen,
 }: UseSetRemarksProps) => {
-  const updateRemarks = useCheckInStore((state) => state.updateRemarks);
+  const setNewRemarks = useCheckInStore((state) => state.setNewRemarks);
+  const fetchedRemarks = useCheckInStore((state) => state.remarks);
   const form = useAppForm({
     defaultValues: {
       remarks: remarks,
@@ -23,10 +24,15 @@ export const useSetRemarks = ({
         remarks: z.string().nullable(),
       }),
     },
-    onSubmit: async ({ value }) => {
-      updateRemarks({
+    onSubmit: ({ value }) => {
+      setNewRemarks({
         [participantId]: value.remarks,
       });
+
+      console.log("remarks set:", {
+        [participantId]: value.remarks,
+      });
+      console.log("fetched remarks:", fetchedRemarks);
       setOpen(false);
     },
   });

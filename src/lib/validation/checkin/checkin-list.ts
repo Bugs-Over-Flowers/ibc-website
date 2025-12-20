@@ -15,6 +15,7 @@ export const RegistrationCheckInEventDetails = z.object({
 });
 
 export const ParticipantCheckInItemSchema = z.object({
+  date: z.iso.datetime({ offset: true, local: true }),
   email: z.email(),
   lastName: z.string(),
   checkedIn: z.boolean(),
@@ -91,7 +92,7 @@ const CheckInItemSchema = ParticipantCheckInItemSchema.pick({
   registrationId: true,
 }).extend({
   checkInId: z.string(),
-  checkedInAt: z.iso.datetime({ local: true }),
+  checkedInAt: z.iso.datetime({ local: true, offset: true }),
   eventDayId: z.string(),
   affiliation: z.string(),
 });

@@ -1,11 +1,13 @@
 "use client";
 
 import type { IDetectedBarcode } from "@yudiel/react-qr-scanner";
-import { useState } from "react";
+import { formatDate } from "date-fns";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
+import type { ParticipantCheckInItem } from "@/lib/validation/checkin/checkin-list";
 import type { RegistrationIdentifier } from "@/lib/validation/qr/standard";
 import { getRegistrationListCheckInRPC } from "@/server/attendance/actions/getRegistrationListCheckInRPC";
 import { useCheckIn } from "../_hooks/useCheckIn";
@@ -25,10 +27,10 @@ export default function CheckIn() {
       toast.error(error);
     },
   });
+
   const setCheckInData = useCheckInStore((state) => state.setCheckInData);
   const checkInData = useCheckInStore((state) => state.checkInData);
-  const updateRemarks = useCheckInStore((state) => state.updateRemarks);
-  const remarksMap = useCheckInStore((state) => state.remarks || {});
+  const newRemarksMap = useCheckInStore((state) => state.newRemarks);
 
   const {
     optimistic: optimisticCheckInList,
@@ -46,9 +48,35 @@ export default function CheckIn() {
       remarks: {},
     });
   };
+
   const [identifier, setIdentifier] = useState<RegistrationIdentifier | null>(
     null,
   );
+
+  const eventDayToday = useMemo(() => {
+    const localToday = formatDate(new Date(), "yyyy-MM-dd");
+
+    return (
+      checkInData?.eventDays.find((day) => day.eventDate === localToday) || null
+    );
+  }, [checkInData]);
+
+  const checkInListExistingToday = (
+    participantList: ParticipantCheckInItem[],
+  ) => {
+    if (!checkInData || !eventDayToday) return [];
+
+    const dateToday = formatDate(new Date(), "yyyy-MM-dd");
+
+    return participantList.filter((participant) => {
+      if (!participant.date) return false;
+      const participantCheckInDate = formatDate(
+        new Date(participant.date),
+        "yyyy-MM-dd",
+      );
+      return participantCheckInDate === dateToday;
+    });
+  };
 
   const handleScan = async (codes: IDetectedBarcode[]) => {
     // validation
@@ -62,7 +90,7 @@ export default function CheckIn() {
     await handleDecodeData(rawValue);
   };
 
-  const handleCheckIn = async (participantIds: string[]) => {
+  const handleCheckIn = async (checkInParticipants: string[]) => {
     if (!checkInData || !checkInData.eventDays.length) {
       toast.error("Event not found");
       return;
@@ -72,15 +100,16 @@ export default function CheckIn() {
       toast.error("No identifier found");
       return;
     }
+    // get local date
 
-    if (!participantIds || participantIds.length === 0) {
-      toast.error("No participants selected");
+    if (!eventDayToday) {
+      toast.error("Today may not be an event date");
       return;
     }
 
     const { data } = await optimisticCheckInExecute({
-      participantIds,
-      remarksMap,
+      participantIds: checkInParticipants,
+      remarksMap: newRemarksMap,
       eventDayId: checkInData.eventDays[0].eventDayId,
     });
 
@@ -99,20 +128,9 @@ export default function CheckIn() {
       toast.error("No registration found for this QR code");
       return;
     }
-    if (data?.allIsCheckedIn) {
-      toast.success("All participants checked in");
-    }
+
     // setting store data
     setCheckInData(data);
-    updateRemarks(
-      data.checkInList.reduce(
-        (acc, curr) => {
-          acc[curr.participantId] = curr.remarks;
-          return acc;
-        },
-        {} as Record<string, string | null>,
-      ),
-    );
   };
   return (
     <>
@@ -134,9 +152,9 @@ export default function CheckIn() {
       </div>
       {checkInData && (
         <div className="w-full">
-          {identifier && (
+          {identifier && eventDayToday && (
             <RegistrationDetails
-              day={checkInData.eventDays[0].label}
+              day={eventDayToday.label}
               eventTitle={checkInData.eventDetails.eventTitle}
               registrationIdentifier={identifier}
             />
@@ -144,6 +162,11 @@ export default function CheckIn() {
           <ParticipantSelectionTable
             handleCheckIn={handleCheckIn}
             isPending={optimisticCheckInIsPending}
+            // participantList={
+            //   checkInListExistingToday(optimisticCheckInList.checkInList) ??
+            //   checkInListExistingToday(checkInData.checkInList)
+            // }
+
             participantList={
               optimisticCheckInList.checkInList ?? checkInData.checkInList
             }
