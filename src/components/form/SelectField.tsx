@@ -1,4 +1,3 @@
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -8,7 +7,7 @@ import {
 } from "@/components/ui/select";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { FieldErrors } from "./FieldErrors";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
 interface SelectFieldProps {
   label?: string;
@@ -18,7 +17,7 @@ interface SelectFieldProps {
   placeholder?: string;
 }
 
-export function SelectField({
+function SelectField({
   label,
   description,
   className,
@@ -26,28 +25,34 @@ export function SelectField({
   placeholder,
 }: SelectFieldProps) {
   const field = useFieldContext<string>();
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
   return (
-    <div className={cn("grid gap-2", className)}>
-      {label && <Label htmlFor={field.name}>{label}</Label>}
+    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Select
-        value={field.state.value}
-        onValueChange={(value) => field.handleChange(value)}
+        onValueChange={(value) =>
+          field.handleChange(value || "Select a business")
+        }
+        value={field.state.value ?? ""}
       >
         <SelectTrigger id={field.name}>
-          <SelectValue placeholder={placeholder} />
+          <SelectValue data-placeholder={placeholder}>
+            {(val) => options.find((option) => option.value === val)?.label}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
+            <SelectItem key={option.label} value={option.value}>
               {option.label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
-      <FieldErrors />
-    </div>
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError errors={field.state.meta.errors} />
+    </Field>
   );
 }
+
+export default SelectField;

@@ -1,42 +1,49 @@
 import type * as React from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { FieldErrors } from "./FieldErrors";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
 interface TextFieldProps {
-  label?: string;
+  label?: React.ReactNode;
   description?: string;
   className?: string;
   placeholder?: string;
   type?: React.HTMLInputTypeAttribute;
+  disabled?: boolean;
 }
 
-export function TextField({
+function TextField({
   label,
   description,
   className,
   placeholder,
   type = "text",
+  disabled,
 }: TextFieldProps) {
   const field = useFieldContext<string>();
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
   return (
-    <div className={cn("grid gap-2", className)}>
-      {label && <Label htmlFor={field.name}>{label}</Label>}
+    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
+        autoCapitalize="on"
+        autoComplete="off"
+        data-invalid={isInvalid}
+        disabled={disabled}
         id={field.name}
         name={field.name}
-        value={field.state.value}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         placeholder={placeholder}
         type={type}
+        value={field.state.value ?? ""}
       />
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
-      <FieldErrors />
-    </div>
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError errors={field.state.meta.errors} />
+    </Field>
   );
 }
+
+export default TextField;

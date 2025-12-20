@@ -1,0 +1,18 @@
+# Supabase Client Rules
+
+## Server-Side: `createClient(requestCookies)`
+- **USE** in cached queries (`"use cache"`) or Server Components
+- **REQUIRES** passing `requestCookies` from `cookies().getAll()`
+- **CANNOT** set cookies (read-only)
+- **NEVER** use for mutations
+
+## Server-Side: `createActionClient()`
+- **USE** in Server Actions (`"use server"`)
+- **CAN** set cookies (for auth token refresh)
+- **NEVER** use inside `"use cache"` functions
+- **NEVER** import in `"use client"` components
+
+## Client-Side: `createClient()`
+- **USE** from `@/lib/supabase/client`
+- **ONLY** in Client Components, React Hooks, and client-side files
+- **NEVER** import in `"use server"` components

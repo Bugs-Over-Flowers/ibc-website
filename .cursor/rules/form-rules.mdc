@@ -1,0 +1,25 @@
+# Form System Rules (TanStack Form)
+
+## Required Pattern
+- **MUST** use `useAppForm` from `@/hooks/_formHooks`
+- **MUST** use registered field components from `@/components/form`
+- Available fields: `TextField`, `NumberField`, `SelectField`, `TextareaField`, `FormDatePicker`, `FormDateRangePicker`
+
+## Form Submission Pattern
+```tsx
+onSubmit: async ({ value }) => {
+  const { error, data } = await tryCatch(serverAction(value));
+  if (error) {
+    form.setErrorMap({ onSubmit: error });
+    return;
+  }
+  // handle success
+}
+```
+
+## Adding New Field Types
+1. Create component in `src/components/form/` using `useFieldContext<T>()`
+2. **MUST** include `<FieldErrors />` for validation display
+3. Export from `src/components/form/index.ts`
+4. **MUST** include `data-invalid` and `aria-invalid` attributes on necessary elements
+5. Register in `src/hooks/_formHooks.ts` under `fieldComponents`

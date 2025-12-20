@@ -1,0 +1,16 @@
+# Server Functions Rules
+
+## Server Actions (Mutations)
+- **MUST** use `"use server"` directive
+- **MUST** be in `src/server/[feature]/mutations/` folder
+- Can throw errors freely - use `tryCatch` on client to handle
+- **MUST** validate input with Zod schemas (throws on failure)
+- **MUST** use `createActionClient()` from `@/lib/supabase/server` for Supabase
+- **MUST** call `revalidatePath()` after mutations when needed
+
+## Server Queries (Data Fetching)
+- **MUST** use `import "server-only"` directive
+- **MUST** be in `src/server/[feature]/queries/` folder
+- Can throw errors - use `tryCatch` on client to handle
+- **MUST** use `createClient(requestCookies)` from `@/lib/supabase/server` for Supabase
+- Get cookies from `next/headers` and pass to `createClient()`

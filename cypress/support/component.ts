@@ -15,8 +15,7 @@
 
 // Import commands.js using ES2015 syntax:
 import "./commands";
-// @ts-expect-error
-import '../../src/app/globals.css'
+import "../../src/app/globals.css";
 
 import { mount } from "cypress/react";
 

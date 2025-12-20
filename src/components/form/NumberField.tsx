@@ -1,8 +1,7 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { FieldInfo } from "./FieldErrors";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
 interface NumberFieldProps {
   label?: string;
@@ -14,7 +13,7 @@ interface NumberFieldProps {
   step?: number;
 }
 
-export function NumberField({
+function NumberField({
   label,
   description,
   className,
@@ -24,25 +23,28 @@ export function NumberField({
   step,
 }: NumberFieldProps) {
   const field = useFieldContext<number>();
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
   return (
-    <div className={cn("grid gap-2", className)}>
-      {label && <Label htmlFor={field.name}>{label}</Label>}
+    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
+        data-invalid={isInvalid}
         id={field.name}
-        name={field.name}
-        value={field.state.value}
-        onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(Number(e.target.value))}
-        placeholder={placeholder}
-        type="number"
-        min={min}
         max={max}
+        min={min}
+        name={field.name}
+        onBlur={field.handleBlur}
+        onChange={(e) => field.handleChange(e.target.valueAsNumber)}
+        onFocus={(e) => e.target.select()}
+        placeholder={placeholder}
         step={step}
+        type="number"
+        value={Number.isNaN(field.state.value) ? "" : (field.state.value ?? "")}
       />
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
-      <FieldInfo />
-    </div>
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError errors={field.state.meta.errors} />
+    </Field>
   );
 }
+export default NumberField;

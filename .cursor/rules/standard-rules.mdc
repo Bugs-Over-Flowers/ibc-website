@@ -1,0 +1,115 @@
+---
+alwaysApply: true
+---
+
+# IBC Website Development Rules
+
+## File Structure Rules
+
+### Component Placement
+
+- Route-specific components → `app/[route]/_components/`
+- Forms → `app/[route]/_components/forms/`
+- Route-specific hooks → `app/[route]/_hooks/`
+- Global/reusable components → `src/components/`
+
+### Server Logic Placement
+
+- Feature-specific server logic → `src/server/[feature]/`
+- Mutations (POST, PUT, DELETE) → `src/server/[feature]/mutations/<filename>.ts`
+- Queries (GET) → `src/server/[feature]/queries/<filename>.ts`
+- Shared server logic → `src/server/utils.ts`
+- Feature-specific utils → `src/server/[feature]/utils.ts`
+
+## Code Conventions
+
+### Imports & Paths
+
+- **ALWAYS** use `@/` path alias (maps to `./src/`)
+- Never use relative paths like `../../` when `@/` is available
+
+### Styling
+
+- Use `cn()` from `@/lib/utils` for conditional Tailwind classes
+- Use `cva()` from `class-variance-authority` for component variants
+- Design tokens in `globals.css` use oklch colors as CSS variables
+
+### Components
+
+- **Server Components by default** - only add `"use client"` when needed
+- shadcn/ui components use `data-slot` attributes and Radix primitives
+- Add new UI components: `bunx --bun shadcn@latest add <component>`
+
+## Client-Side Action Handling Rules
+
+### `tryCatch` Utility
+
+- **MUST** wrap server actions that throw errors
+- Use with `useAction` hook for button-triggered mutations
+- Use inline for form submissions
+- Returns `{ error, data, success }` tuple
+
+### `useAction` Hook
+
+- **ONLY** for button-triggered mutations (not form submissions)
+- **MUST** wrap server action with `tryCatch()` before passing to `useAction`
+- Returns: `{ execute, isPending, data, error, reset }`
+
+## Validation Rules
+
+### Zod Schemas
+
+- **MUST** use Zod schemas for all forms integrated with TanStack Forms
+- **MUST** import reusable schemas from `@/lib/validation/utils`:
+  - `phoneSchema` - Philippine phone: +639XXXXXXXXX or 09XXXXXXXXX
+  - `emailSchema` - Standard email validation
+
+## Caching Rules
+
+### "use cache" Directive
+
+- Use `"use cache"` inside query functions, Server Components, or at file level
+- Add `cacheLife()` for cache duration in seconds
+- Add `cacheTag()` for cache invalidation tags
+- **NOTE**: Most files cannot be cached due to Supabase cookie requirements for SSR
+- When cookies are needed, get them at page level and pass to query function
+
+## Loading States Rules
+
+### Server Components
+
+- Use `<Suspense>` with fallback components
+- Use `loading.tsx` files for route-level loading states
+- For multiple queries: `await Promise.all([query1(), query2()])`
+
+### Client Components
+
+- Use `use` hook from React for client-side promise handling
+- Use `<Suspense>` with fallback components
+- Use `loading.tsx` files for route-level loading states
+
+## Toast Notifications Rules
+
+- Use `sonner` library - `<Toaster />` is in root layout
+- Prefer `useAction`'s toast options when available
+- Manual usage: `toast.success()`, `toast.error()`, `toast.loading()`
+
+## Environment Variables Rules
+
+### Required Variables
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+## Type Safety Rules
+
+- **MUST** use generated types from `@/lib/supabase/db.types.ts`
+- Regenerate types with: `bun run gen:types`
+- Server functions use `ServerFunctionResult<T, E>` type from `@/lib/server/types`
+
+## Error Handling Rules
+
+- Server actions can throw errors freely
+- **MUST** wrap with `tryCatch` on client side
+- Check `error` property before accessing `data`
+- Use discriminated union pattern: `{ success: true, data }` or `{ success: false, error }`

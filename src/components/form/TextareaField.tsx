@@ -1,8 +1,7 @@
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
-import { FieldErrors } from "./FieldErrors";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
 interface TextareaFieldProps {
   label?: string;
@@ -12,7 +11,7 @@ interface TextareaFieldProps {
   rows?: number;
 }
 
-export function TextareaField({
+function TextareaField({
   label,
   description,
   className,
@@ -20,22 +19,24 @@ export function TextareaField({
   rows,
 }: TextareaFieldProps) {
   const field = useFieldContext<string>();
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
   return (
-    <div className={cn("grid gap-2", className)}>
-      {label && <Label htmlFor={field.name}>{label}</Label>}
+    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Textarea
+        data-invalid={isInvalid}
         id={field.name}
         name={field.name}
-        value={field.state.value}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
+        value={field.state.value ?? ""}
       />
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
-      <FieldErrors />
-    </div>
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError errors={field.state.meta.errors} />
+    </Field>
   );
 }
+export default TextareaField;
