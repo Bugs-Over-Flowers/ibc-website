@@ -5,6 +5,7 @@ import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ParticipantCheckInItem } from "@/lib/validation/checkin/checkin-list";
+import RemarksDialog from "./RemarksDialog";
 
 const columnDefs: ColumnDef<ParticipantCheckInItem>[] = [
   {
@@ -47,22 +48,30 @@ const columnDefs: ColumnDef<ParticipantCheckInItem>[] = [
   },
   {
     header: "Remarks",
-    accessorKey: "checkedIn",
-    cell: ({ row }) => {},
+    accessorKey: "remarks",
+    cell: ({ row }) => {
+      return (
+        <RemarksDialog
+          participantId={row.original.participantId}
+          participantName={`${row.original.firstName} ${row.original.lastName}`}
+          remarks={row.original.remarks}
+        />
+      );
+    },
   },
 ];
 
-interface ParticipantSelectionProps {
+interface ParticipantSelectionTableProps {
   participantList: ParticipantCheckInItem[];
   handleCheckIn: (participantIds: string[]) => Promise<void>;
   isPending: boolean;
 }
 
-export default function ParticipantSelection({
+export default function ParticipantSelectionTable({
   participantList,
   handleCheckIn,
   isPending,
-}: ParticipantSelectionProps) {
+}: ParticipantSelectionTableProps) {
   return (
     <DataTable columns={columnDefs} data={participantList}>
       {(table) => {

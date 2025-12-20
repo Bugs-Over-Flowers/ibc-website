@@ -1,7 +1,17 @@
 "use server";
 import { createActionClient } from "@/lib/supabase/server";
 
-export const checkIn = async (participantIds: string[], eventDayId: string) => {
+interface CheckInProps {
+  participantIds: string[];
+  remarksMap: Record<string, string | null>;
+  eventDayId: string;
+}
+
+export const checkIn = async ({
+  participantIds,
+  remarksMap,
+  eventDayId,
+}: CheckInProps) => {
   const supabase = await createActionClient();
 
   // check if eventDay exists
@@ -22,6 +32,7 @@ export const checkIn = async (participantIds: string[], eventDayId: string) => {
         participantId: participantId,
         date: new Date().toLocaleString(),
         eventDayId: eventDayId,
+        remarks: remarksMap[participantId] || null,
       })),
       {
         onConflict: "participantId,eventDayId",

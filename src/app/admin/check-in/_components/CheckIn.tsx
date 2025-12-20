@@ -9,13 +9,13 @@ import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationIdentifier } from "@/lib/validation/qr/standard";
 import { getRegistrationListCheckInRPC } from "@/server/attendance/actions/getRegistrationListCheckInRPC";
 import { useCheckIn } from "../_hooks/useCheckIn";
-import ParticipantSelection from "./ParticipantSelection";
+import { useCheckInStore } from "../_hooks/useCheckInStore.store";
+import ParticipantSelectionTable from "./ParticipantSelectionTable";
 import QRCamera from "./QRCamera";
 import RegistrationDetails from "./RegistrationDetails";
 
 export default function CheckIn() {
   const {
-    data: checkInDetails,
     execute: decodeQR,
     reset: resetDecodeQR,
     isPending,
@@ -25,29 +25,45 @@ export default function CheckIn() {
       toast.error(error);
     },
   });
+  const setCheckInData = useCheckInStore((state) => state.setCheckInData);
+  const checkInData = useCheckInStore((state) => state.checkInData);
+  const updateRemarks = useCheckInStore((state) => state.updateRemarks);
+  const remarksMap = useCheckInStore((state) => state.remarks || {});
 
   const {
     optimistic: optimisticCheckInList,
     execute: optimisticCheckInExecute,
     isPending: optimisticCheckInIsPending,
   } = useCheckIn({
-    checkInList: checkInDetails?.checkInList,
+    checkInList: checkInData?.checkInList,
   });
 
   const reset = () => {
     resetDecodeQR();
+    useCheckInStore.setState({
+      checkInData: null,
+      participantIds: null,
+      remarks: {},
+    });
   };
   const [identifier, setIdentifier] = useState<RegistrationIdentifier | null>(
     null,
   );
 
-  const handleCheckIn = async (participantIds: string[]) => {
-    if (!participantIds.length) {
-      toast.error("Please select at least one participant");
-      return;
-    }
+  const handleScan = async (codes: IDetectedBarcode[]) => {
+    // validation
+    if (!codes.length || codes.length === 0) return;
 
-    if (!checkInDetails || !checkInDetails.eventDays.length) {
+    const { rawValue } = codes[0];
+    if (identifier === rawValue) return;
+
+    // setting data
+    setIdentifier(rawValue);
+    await handleDecodeData(rawValue);
+  };
+
+  const handleCheckIn = async (participantIds: string[]) => {
+    if (!checkInData || !checkInData.eventDays.length) {
       toast.error("Event not found");
       return;
     }
@@ -57,37 +73,53 @@ export default function CheckIn() {
       return;
     }
 
-    const { data } = await optimisticCheckInExecute(
+    if (!participantIds || participantIds.length === 0) {
+      toast.error("No participants selected");
+      return;
+    }
+
+    const { data } = await optimisticCheckInExecute({
       participantIds,
-      checkInDetails.eventDays[0].eventDayId,
-    );
+      remarksMap,
+      eventDayId: checkInData.eventDays[0].eventDayId,
+    });
 
     if (!data) {
       return;
     }
 
-    decodeQR(identifier);
+    handleDecodeData(identifier);
   };
 
-  const handleScan = async (codes: IDetectedBarcode[]) => {
-    if (!codes.length || codes.length === 0) return;
+  const handleDecodeData = async (identifier: string) => {
+    const { data } = await decodeQR(identifier);
 
-    const { rawValue } = codes[0];
-    if (identifier === rawValue) return;
-
-    setIdentifier(rawValue);
-    const { data } = await decodeQR(rawValue);
-
+    // validation for fetching data
+    if (!data) {
+      toast.error("No registration found for this QR code");
+      return;
+    }
     if (data?.allIsCheckedIn) {
       toast.success("All participants checked in");
     }
+    // setting store data
+    setCheckInData(data);
+    updateRemarks(
+      data.checkInList.reduce(
+        (acc, curr) => {
+          acc[curr.participantId] = curr.remarks;
+          return acc;
+        },
+        {} as Record<string, string | null>,
+      ),
+    );
   };
   return (
     <>
       <div className="flex flex-col gap-4">
         <QRCamera
           handleScan={handleScan}
-          isPaused={isPending || !!checkInDetails}
+          isPaused={isPending || !!checkInData}
         />
         {identifier !== null && (
           <Button
@@ -100,20 +132,20 @@ export default function CheckIn() {
           </Button>
         )}
       </div>
-      {checkInDetails && (
+      {checkInData && (
         <div className="w-full">
           {identifier && (
             <RegistrationDetails
-              day={checkInDetails.eventDays[0].label}
-              eventTitle={checkInDetails.eventDetails.eventTitle}
+              day={checkInData.eventDays[0].label}
+              eventTitle={checkInData.eventDetails.eventTitle}
               registrationIdentifier={identifier}
             />
           )}
-          <ParticipantSelection
+          <ParticipantSelectionTable
             handleCheckIn={handleCheckIn}
             isPending={optimisticCheckInIsPending}
             participantList={
-              optimisticCheckInList.checkInList ?? checkInDetails.checkInList
+              optimisticCheckInList.checkInList ?? checkInData.checkInList
             }
           />
         </div>

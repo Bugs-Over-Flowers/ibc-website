@@ -21,8 +21,7 @@ export const useCheckIn = ({
         prev: {
           checkInList: ParticipantCheckInItem[];
         },
-        participantIds: string[],
-        _: string,
+        next,
       ) => {
         if (!prev) {
           return prev;
@@ -30,7 +29,7 @@ export const useCheckIn = ({
 
         const updatedCheckInList = prev.checkInList.map((participant) => ({
           ...participant,
-          checkedIn: participantIds.includes(participant.participantId)
+          checkedIn: next.participantIds.includes(participant.participantId)
             ? true
             : participant.checkedIn,
         }));

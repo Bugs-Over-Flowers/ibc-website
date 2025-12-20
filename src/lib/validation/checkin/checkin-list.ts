@@ -23,6 +23,7 @@ export const ParticipantCheckInItemSchema = z.object({
   contactNumber: z.string(),
   participantId: z.string(),
   registrationId: z.string(),
+  remarks: z.string().nullable(),
 });
 
 export type ParticipantCheckInItem = z.infer<
@@ -70,6 +71,10 @@ export const RegistrationCheckInListRPCSchema = z
       }),
     ),
   );
+
+export type RegistrationCheckInListRPC = z.infer<
+  typeof RegistrationCheckInListRPCSchema
+>;
 
 // Schemas for check in list
 
