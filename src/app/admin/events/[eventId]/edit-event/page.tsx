@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
-import { EditEventForm } from "./_components/EditEventForm";
+import { EditEventForm } from "./_components/forms/EditEventForm";
 
 interface EditEventPageProps {
   params: Promise<{ eventId: string }>;

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { formContext } from "@/hooks/_formHooks";
 import type { Database } from "@/lib/supabase/db.types";
-import { useEditEventForm } from "../_hooks/useEditEventForm";
+import { useEditEventForm } from "../../_hooks/useEditEventForm";
 
 type EventRow = Database["public"]["Tables"]["Event"]["Row"];
 
@@ -152,7 +152,7 @@ export function EditEventForm({ event }: EditEventFormProps) {
             <form.AppField name="eventImage">
               {(field) => (
                 <field.FileDropzoneField
-                  description="Upload a new image to replace the current one (optional)"
+                  description="Upload a new image to replace the current one (optional) (5 MB max)"
                   label="New Event Image"
                   layout="banner"
                   maxFiles={1}
