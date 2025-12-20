@@ -1,7 +1,7 @@
 import z from "zod";
 
 const baseEventSchema = z.object({
-  eventTitle: z.string().min(5, "Title must atleast be 5 characters"),
+  eventTitle: z.string().min(5, "Title must at least be 5 characters"),
   description: z.string(),
   eventStartDate: z.date({
     message: "Event start date is required",
@@ -9,8 +9,8 @@ const baseEventSchema = z.object({
   eventEndDate: z.date({
     message: "Event end date is required",
   }),
-  venue: z.string().min(5, "Venue must atleast be 5 characters"),
-  registrationFee: z.number().min(0, "Must atleast be atleast 0"),
+  venue: z.string().min(5, "Venue must   be 5 characters"),
+  registrationFee: z.number().min(0, "Must at least be at least 0"),
   eventImage: z
     .array(z.instanceof(File))
     .min(1, "At least 1 image is required"),

@@ -48,11 +48,13 @@ export default function FormCalendar({
     }
     // Preserve time if exists in current value
     const currentValue = field.state.value;
+    const newDate = new Date(date);
+
     if (currentValue) {
-      date.setHours(currentValue.getHours());
-      date.setMinutes(currentValue.getMinutes());
+      newDate.setHours(currentValue.getHours());
+      newDate.setMinutes(currentValue.getMinutes());
     }
-    field.handleChange(date);
+    field.handleChange(newDate);
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {

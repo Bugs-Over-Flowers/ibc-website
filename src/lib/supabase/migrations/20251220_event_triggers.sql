@@ -12,7 +12,8 @@ BEGIN
   END IF;
 
   -- Case 2: Event is inserted or updated with eventType = 'public' or 'private'
-  IF (NEW."eventType" IN ('public', 'private')) THEN
+  -- Ensure dates are present before generating days
+  IF (NEW."eventType" IN ('public', 'private') AND NEW."eventStartDate" IS NOT NULL AND NEW."eventEndDate" IS NOT NULL) THEN
     
     -- 1. Delete days that are outside the new range
     DELETE FROM public."EventDay"
@@ -57,5 +58,8 @@ FOR EACH ROW
 EXECUTE FUNCTION public.handle_event_days();
 
 -- 3. Add unique constraint
+ALTER TABLE public."EventDay" 
+DROP CONSTRAINT IF EXISTS "EventDay_eventId_eventDate_key";
+
 ALTER TABLE public."EventDay" 
 ADD CONSTRAINT "EventDay_eventId_eventDate_key" UNIQUE ("eventId", "eventDate");
