@@ -3,12 +3,12 @@ import z from "zod";
 const baseEventSchema = z.object({
   eventTitle: z.string().min(5, "Title must atleast be 5 characters"),
   description: z.string(),
-  eventStartDate: z
-    .string()
-    .pipe(z.coerce.date({ message: "Event start date is required" })),
-  eventEndDate: z
-    .string()
-    .pipe(z.coerce.date({ message: "event end date is required" })),
+  eventStartDate: z.date({
+    message: "Event start date is required",
+  }),
+  eventEndDate: z.date({
+    message: "Event end date is required",
+  }),
   venue: z.string().min(5, "Venue must atleast be 5 characters"),
   registrationFee: z.number().min(0, "Must atleast be atleast 0"),
   eventImage: z

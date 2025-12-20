@@ -1,6 +1,7 @@
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import {
   FileDropzoneField,
+  FormCalendar,
   FormDatePicker,
   FormDateRangePicker,
   ImageField,
@@ -24,6 +25,7 @@ export const { useAppForm, withForm } = createFormHook({
     NumberField,
     SelectField,
     TextareaField,
+    FormCalendar,
     FormDatePicker,
     FormDateRangePicker,
     FormCheckBox,

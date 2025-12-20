@@ -55,21 +55,11 @@ export function CreateEventForm() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <form.AppField name="eventStartDate">
-                {(field) => (
-                  <field.TextField
-                    label="Event Start Date *"
-                    type="datetime-local"
-                  />
-                )}
+                {(field) => <field.FormCalendar label="Event Start Date *" />}
               </form.AppField>
 
               <form.AppField name="eventEndDate">
-                {(field) => (
-                  <field.TextField
-                    label="Event End Date *"
-                    type="datetime-local"
-                  />
-                )}
+                {(field) => <field.FormCalendar label="Event End Date *" />}
               </form.AppField>
             </div>
 
