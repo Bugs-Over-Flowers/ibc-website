@@ -154,14 +154,20 @@ export function EditEventForm({ event }: EditEventFormProps) {
                 <field.FileDropzoneField
                   description="Upload a new image to replace the current one (optional)"
                   label="New Event Image"
+                  layout="banner"
                   maxFiles={1}
                 />
               )}
             </form.AppField>
 
             <div className="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
-              <form.Subscribe selector={(state) => state.isSubmitting}>
-                {(isSubmitting) => (
+              <form.Subscribe
+                selector={(state) => ({
+                  isSubmitting: state.isSubmitting,
+                  isDirty: state.isDirty,
+                })}
+              >
+                {({ isSubmitting, isDirty }) => (
                   <>
                     <Button
                       className="w-full sm:w-auto"
@@ -179,7 +185,7 @@ export function EditEventForm({ event }: EditEventFormProps) {
                       <>
                         <Button
                           className="w-full sm:w-auto"
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || !isDirty}
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -235,7 +241,7 @@ export function EditEventForm({ event }: EditEventFormProps) {
                     ) : (
                       <Button
                         className="w-full sm:w-auto"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !isDirty}
                         type="submit"
                       >
                         {isSubmitting ? "Saving..." : "Save Changes"}

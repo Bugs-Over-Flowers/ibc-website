@@ -21,5 +21,5 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
     notFound();
   }
 
-  return <EditEventForm event={event} />;
+  return <EditEventForm event={event} key={event.eventId} />;
 }
