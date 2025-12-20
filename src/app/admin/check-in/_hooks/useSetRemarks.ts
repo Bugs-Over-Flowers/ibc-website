@@ -29,10 +29,6 @@ export const useSetRemarks = ({
         [participantId]: value.remarks,
       });
 
-      console.log("remarks set:", {
-        [participantId]: value.remarks,
-      });
-      console.log("fetched remarks:", fetchedRemarks);
       setOpen(false);
     },
   });

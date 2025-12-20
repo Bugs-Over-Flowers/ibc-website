@@ -46,6 +46,7 @@ export default function CheckIn() {
       checkInData: null,
       participantIds: null,
       remarks: {},
+      newRemarks: {},
     });
   };
 
@@ -80,7 +81,7 @@ export default function CheckIn() {
 
   const handleScan = async (codes: IDetectedBarcode[]) => {
     // validation
-    if (!codes.length || codes.length === 0) return;
+    if (!codes.length) return;
 
     const { rawValue } = codes[0];
     if (identifier === rawValue) return;
@@ -110,7 +111,7 @@ export default function CheckIn() {
     const { data } = await optimisticCheckInExecute({
       participantIds: checkInParticipants,
       remarksMap: newRemarksMap,
-      eventDayId: checkInData.eventDays[0].eventDayId,
+      eventDayId: eventDayToday.eventDayId,
     });
 
     if (!data) {
@@ -162,14 +163,14 @@ export default function CheckIn() {
           <ParticipantSelectionTable
             handleCheckIn={handleCheckIn}
             isPending={optimisticCheckInIsPending}
-            // participantList={
-            //   checkInListExistingToday(optimisticCheckInList.checkInList) ??
-            //   checkInListExistingToday(checkInData.checkInList)
-            // }
-
             participantList={
-              optimisticCheckInList.checkInList ?? checkInData.checkInList
+              checkInListExistingToday(optimisticCheckInList.checkInList) ??
+              checkInListExistingToday(checkInData.checkInList)
             }
+
+            // participantList={
+            //   optimisticCheckInList.checkInList ?? checkInData.checkInList
+            // }
           />
         </div>
       )}

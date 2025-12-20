@@ -166,10 +166,24 @@ export const areRecordsEqual = <T extends Record<string, unknown>>(
   obj1: T,
   obj2: T,
 ): boolean => {
+  // Handle reference equality and simple null/undefined cases first
+  if (obj1 === obj2) return true;
+  if (!obj1 || !obj2) return false;
+  if (typeof obj1 !== "object" || typeof obj2 !== "object") return false;
+
   const keys1 = Object.keys(obj1);
   const keys2 = Object.keys(obj2);
 
   if (keys1.length !== keys2.length) return false;
 
+  // Ensure both records have the same own keys
+  const hasOwn = Object.prototype.hasOwnProperty;
+  for (const key of keys1) {
+    if (!hasOwn.call(obj2, key)) {
+      return false;
+    }
+  }
+
+  // Compare values for each key
   return keys1.every((key) => obj1[key] === obj2[key]);
 };

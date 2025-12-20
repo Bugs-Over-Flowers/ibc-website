@@ -2,7 +2,6 @@
 
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { useState } from "react";
-import { DataTable } from "@/components/DataTable";
 import { SelectableRowDataTable } from "@/components/SelectableRowDataTable";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,7 +29,7 @@ const columnDefs: ColumnDef<ParticipantCheckInItem>[] = [
         aria-label="Select row"
         checked={row.getIsSelected() || row.original.checkedIn}
         disabled={row.original.checkedIn}
-        onCheckedChange={(value) => row.toggleSelected(!value)}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
       />
     ),
   },
@@ -47,7 +46,7 @@ const columnDefs: ColumnDef<ParticipantCheckInItem>[] = [
     accessorKey: "email",
   },
   {
-    header: "contactNumber",
+    header: "Contact Number",
     accessorKey: "contactNumber",
   },
   {
@@ -82,22 +81,13 @@ export default function ParticipantSelectionTable({
   const [rowSelection, setRowSelection] = useState({});
 
   const onCheckIn = async (participantIds: string[]) => {
-    console.log("Current remarks in store:", remarks);
-    console.log("New remarks in store:", newRemarks);
-
-    console.log("Participant IDs to check in:", participantIds);
     handleCheckIn(participantIds);
   };
 
   const onRowSelectionChange = (row: Row<ParticipantCheckInItem>) => {
     if (row.original.checkedIn) {
-      console.log("CHECKED IN PARTICIPANT - CANNOT CHANGE SELECTION");
       return;
     }
-    console.log(
-      "Toggling selection for participant ID:",
-      row.original.participantId,
-    );
 
     row.toggleSelected();
   };

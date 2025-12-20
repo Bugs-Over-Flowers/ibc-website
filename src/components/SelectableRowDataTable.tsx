@@ -91,10 +91,13 @@ export function SelectableRowDataTable<TData, TValue>({
                 <TableRow
                   data-state={row.getIsSelected() && "selected"}
                   key={row.id}
-                  onClick={() =>
-                    customRowSelectHandler?.(row) ||
-                    row.getToggleSelectedHandler()
-                  }
+                  onClick={() => {
+                    if (customRowSelectHandler) {
+                      customRowSelectHandler(row);
+                    } else {
+                      row.getToggleSelectedHandler();
+                    }
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
