@@ -4,13 +4,13 @@ import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
-import BackButton from "./_components/BackButton";
+import BackButton from "../_components/BackButton";
 import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
 import ParticipantList from "./_components/participants/ParticipantList";
 import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";
+import RegistrationListStats from "./_components/RegistrationListStats";
 import RegistrationTabs from "./_components/RegistrationsTabs";
 import RegistrationList from "./_components/registrations/RegistrationList";
-import RegistrationListStats from "./_components/registrations/RegistrationListStats";
 import RegistrationsSearchAndFilter from "./_components/registrations/RegistrationsSearchAndFilter";
 
 type RegistrationListPageProps =
@@ -32,14 +32,15 @@ export default function RegistrationPageWrapper({
         <BackButton params={params} />
       </Suspense>
       <RegistrationTabs>
+        {/*Registration and Participant Stats*/}
+        <div className="py-3">
+          <Suspense fallback={<StatsSkeleton />}>
+            <RegistrationListStats params={params} />
+          </Suspense>
+        </div>
+
         <TabsContent className="flex flex-col gap-4" value="registrations">
           {/* Stats */}
-          <Suspense fallback={<StatsSkeleton />}>
-            <RegistrationListStats
-              params={params}
-              searchParams={searchParams}
-            />
-          </Suspense>
 
           {/* Search and Filter */}
           <Suspense

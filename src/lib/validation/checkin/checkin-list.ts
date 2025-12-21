@@ -1,5 +1,6 @@
 import z from "zod";
 
+// Schemas for check in page
 const RegistrationCheckInListRegistrationDetailsSchema = z.object({
   registrationId: z.string(),
   affiliation: z.string(),
@@ -9,11 +10,12 @@ export const RegistrationCheckInEventDetails = z.object({
   venue: z.string(),
   eventId: z.string(),
   eventTitle: z.string(),
-  eventStartDate: z.iso.date(),
-  eventEndDate: z.iso.date(),
+  eventStartDate: z.iso.datetime({ local: true }),
+  eventEndDate: z.iso.datetime({ local: true }),
 });
 
 export const ParticipantCheckInItemSchema = z.object({
+  date: z.iso.datetime({ offset: true, local: true }),
   email: z.email(),
   lastName: z.string(),
   checkedIn: z.boolean(),
@@ -22,6 +24,7 @@ export const ParticipantCheckInItemSchema = z.object({
   contactNumber: z.string(),
   participantId: z.string(),
   registrationId: z.string(),
+  remarks: z.string().nullable(),
 });
 
 export type ParticipantCheckInItem = z.infer<
@@ -69,3 +72,47 @@ export const RegistrationCheckInListRPCSchema = z
       }),
     ),
   );
+
+export type RegistrationCheckInListRPC = z.infer<
+  typeof RegistrationCheckInListRPCSchema
+>;
+
+// Schemas for check in list
+
+const CheckInStats = z.object({
+  totalExpectedParticipants: z.number(),
+});
+
+const CheckInItemSchema = ParticipantCheckInItemSchema.pick({
+  email: true,
+  lastName: true,
+  firstName: true,
+  contactNumber: true,
+  participantId: true,
+  registrationId: true,
+}).extend({
+  checkInId: z.string(),
+  checkedInAt: z.iso.datetime({ local: true, offset: true }),
+  eventDayId: z.string(),
+  affiliation: z.string(),
+});
+
+export type CheckInItem = z.infer<typeof CheckInItemSchema>;
+
+export const CheckInListEventDayDetailsSchema = ParticipantCheckInEventDay.pick(
+  {
+    label: true,
+    eventDate: true,
+    eventDayId: true,
+  },
+);
+
+export type CheckInListEventDayDetails = z.infer<
+  typeof CheckInListEventDayDetailsSchema
+>;
+
+export const CheckInListPageSchema = z.object({
+  stats: CheckInStats,
+  checkIns: CheckInItemSchema.array(),
+  eventDays: CheckInListEventDayDetailsSchema.array(),
+});

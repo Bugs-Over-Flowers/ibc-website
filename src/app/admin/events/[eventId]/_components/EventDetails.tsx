@@ -35,15 +35,9 @@ export default async function EventDetails({
     getEventById(requestCookies, { id: eventId }),
   );
 
-  console.log("Fetching stats for eventId:", eventId);
-  console.log("Event Details:", event);
-
   const { data: stats, error: statsError } = await tryCatch(
     getEventStats(requestCookies, { eventId }),
   );
-
-  console.log("Stats result:", stats);
-  console.log("Stats error:", statsError);
 
   if (eventError || !event) {
     return (
@@ -73,6 +67,11 @@ export default async function EventDetails({
     attended: 0,
     event_days: [],
   };
+
+  const isFinished =
+    event.eventEndDate && new Date() > new Date(event.eventEndDate);
+  const isDraft = !event.eventType;
+  const showEditButton = isDraft || !isFinished;
 
   return (
     <div className="space-y-6 p-6">
@@ -117,12 +116,14 @@ export default async function EventDetails({
                 {event.description}
               </p>
             </div>
-            <Link href={`/admin/events/${eventId}/edit` as Route}>
-              <Button variant="outline">
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Event
-              </Button>
-            </Link>
+            {showEditButton && (
+              <Link href={`/admin/events/${eventId}/edit-event` as Route}>
+                <Button variant="outline">
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Event
+                </Button>
+              </Link>
+            )}
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -305,7 +306,7 @@ export default async function EventDetails({
               View daily attendance records and export check-in data by event
               day
             </p>
-            <Link href={`/admin/events/${eventId}/check-in` as Route}>
+            <Link href={`/admin/events/${eventId}/check-in-list` as Route}>
               <Button className="w-full" variant="outline">
                 <CheckSquare className="mr-2 h-4 w-4" />
                 View Check-in List

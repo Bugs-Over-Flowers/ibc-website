@@ -19,6 +19,7 @@ export type Database = {
           applicationDate: string;
           applicationId: string;
           applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
+          applicationStatus: Database["public"]["Enums"]["ApplicationStatus"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           companyAddress: string;
           companyName: string;
@@ -37,6 +38,7 @@ export type Database = {
           applicationDate?: string;
           applicationId?: string;
           applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
+          applicationStatus?: Database["public"]["Enums"]["ApplicationStatus"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           companyAddress: string;
           companyName: string;
@@ -55,6 +57,7 @@ export type Database = {
           applicationDate?: string;
           applicationId?: string;
           applicationMemberType?: Database["public"]["Enums"]["ApplicationMemberType"];
+          applicationStatus?: Database["public"]["Enums"]["ApplicationStatus"];
           applicationType?: Database["public"]["Enums"]["ApplicationType"];
           companyAddress?: string;
           companyName?: string;
@@ -179,18 +182,21 @@ export type Database = {
           date: string;
           eventDayId: string;
           participantId: string;
+          remarks: string | null;
         };
         Insert: {
           checkInId?: string;
           date?: string;
           eventDayId?: string;
           participantId?: string;
+          remarks?: string | null;
         };
         Update: {
           checkInId?: string;
           date?: string;
           eventDayId?: string;
           participantId?: string;
+          remarks?: string | null;
         };
         Relationships: [
           {
@@ -277,6 +283,47 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "Event";
             referencedColumns: ["eventId"];
+          },
+        ];
+      };
+      Interview: {
+        Row: {
+          applicationId: string;
+          createdAt: string | null;
+          interviewDate: string;
+          interviewId: string;
+          interviewVenue: string;
+          notes: string | null;
+          status: Database["public"]["Enums"]["InterviewStatus"] | null;
+          updatedAt: string | null;
+        };
+        Insert: {
+          applicationId: string;
+          createdAt?: string | null;
+          interviewDate: string;
+          interviewId?: string;
+          interviewVenue: string;
+          notes?: string | null;
+          status?: Database["public"]["Enums"]["InterviewStatus"] | null;
+          updatedAt?: string | null;
+        };
+        Update: {
+          applicationId?: string;
+          createdAt?: string | null;
+          interviewDate?: string;
+          interviewId?: string;
+          interviewVenue?: string;
+          notes?: string | null;
+          status?: Database["public"]["Enums"]["InterviewStatus"] | null;
+          updatedAt?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "Interview_applicationId_fkey";
+            columns: ["applicationId"];
+            isOneToOne: false;
+            referencedRelation: "Application";
+            referencedColumns: ["applicationId"];
           },
         ];
       };
@@ -422,12 +469,9 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      get_event_checkin_list: { Args: { p_event_id: string }; Returns: Json };
       get_event_participant_list: {
-        Args: {
-          p_event_id: string;
-          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
-          p_search_text?: string;
-        };
+        Args: { p_event_id: string; p_search_text?: string };
         Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
         SetofOptions: {
           from: "*";
@@ -510,24 +554,26 @@ export type Database = {
           };
       update_event_details: {
         Args: {
-          p_description: string;
-          p_end_date: string;
-          p_event_header_url: string;
+          p_description?: string;
+          p_end_date?: string;
+          p_event_header_url?: string;
           p_event_id: string;
-          p_event_type: string;
-          p_registration_fee: number;
-          p_start_date: string;
-          p_title: string;
-          p_venue: string;
+          p_event_type?: string;
+          p_registration_fee?: number;
+          p_start_date?: string;
+          p_title?: string;
+          p_venue?: string;
         };
         Returns: Json;
       };
     };
     Enums: {
       ApplicationMemberType: "corporate" | "personal";
+      ApplicationStatus: "new" | "pending" | "approved" | "rejected";
       ApplicationType: "newMember" | "updating" | "renewal";
       CompanyMemberType: "principal" | "alternate";
       EventType: "public" | "private";
+      InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
     };
@@ -539,7 +585,6 @@ export type Database = {
         email: string | null;
         contact_number: string | null;
         affiliation: string | null;
-        payment_status: Database["public"]["Enums"]["PaymentStatus"] | null;
         registration_date: string | null;
         registration_id: string | null;
       };
@@ -698,9 +743,11 @@ export const Constants = {
   public: {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],
+      ApplicationStatus: ["new", "pending", "approved", "rejected"],
       ApplicationType: ["newMember", "updating", "renewal"],
       CompanyMemberType: ["principal", "alternate"],
       EventType: ["public", "private"],
+      InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],
     },

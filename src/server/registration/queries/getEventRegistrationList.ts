@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/server";
 import {
   type RegistrationItem,
   RegistrationListRPCSchema,
-  RegistrationListStatsSchema,
 } from "@/lib/validation/registration/registration-list";
 import { PaymentStatusEnum } from "@/lib/validation/utils";
 
@@ -36,30 +35,4 @@ export const getEventRegistrationList = async (
     .throwOnError();
 
   return RegistrationListRPCSchema.array().parse(query.data);
-};
-
-export const getEventRegistrationListStats = async (
-  requestCookies: RequestCookie[],
-  { eventId, searchString, paymentStatus }: GetRegistrationListParams,
-): Promise<{
-  total: number;
-  verified: number;
-  pending: number;
-}> => {
-  "use cache";
-  cacheLife("seconds");
-  cacheTag("registration-list");
-  const supabase = await createClient(requestCookies);
-
-  const { data } = await supabase
-    .rpc("get_registration_stats", {
-      p_event_id: eventId,
-      p_search_text: searchString,
-      p_payment_status: paymentStatus
-        ? PaymentStatusEnum.parse(paymentStatus)
-        : undefined,
-    })
-    .throwOnError();
-
-  return RegistrationListStatsSchema.parse(data);
 };

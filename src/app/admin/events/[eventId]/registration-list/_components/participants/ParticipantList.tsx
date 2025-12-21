@@ -11,14 +11,13 @@ export default async function ParticipantList({
   searchParams,
 }: RegistrationListPageProps) {
   const { eventId } = await params;
-  const { part_q, part_paymentStatus } = await searchParams;
+  const { part_q } = await searchParams;
   const cookieStore = await cookies();
 
   const participantList = await tryCatch(
     getEventParticipantList(cookieStore.getAll(), {
       eventId,
       searchString: parseStringParam(part_q),
-      paymentStatus: parseStringParam(part_paymentStatus),
     }),
   );
   if (!participantList.success) {
