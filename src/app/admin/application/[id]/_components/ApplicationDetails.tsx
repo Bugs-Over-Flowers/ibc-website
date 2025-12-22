@@ -1,5 +1,8 @@
+import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { getApplicationById } from "@/server/applications/queries/getApplications";
 import { ApplicationHeader } from "./ApplicationHeader";
 import { CompanyInfoCard } from "./CompanyInfoCard";
@@ -25,6 +28,17 @@ export async function ApplicationDetails({
 
     return (
       <>
+        <Link href="/admin/application">
+          <Button
+            className="mb-4 border border-border"
+            size="sm"
+            variant="ghost"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to Applications
+          </Button>
+        </Link>
+
         <ApplicationHeader application={application} />
 
         <CompanyInfoCard

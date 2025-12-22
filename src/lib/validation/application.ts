@@ -19,7 +19,7 @@ export const memberFilterSchema = z.object({
     .enum(["active", "unpaid", "overdue", "revoked", "all"])
     .default("all")
     .optional(),
-  sectorId: z.coerce.number().optional(),
+  sectorName: z.string().optional(),
   search: z.string().optional(),
 });
 
