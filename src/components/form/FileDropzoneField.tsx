@@ -16,14 +16,17 @@ interface FileDropzoneFieldProps {
   accept?: Record<string, string[]>;
   maxFiles?: number;
   maxSize?: number;
+  layout?: "grid" | "banner";
 }
 
 const FilePreview = ({
   file,
   onRemove,
+  layout = "grid",
 }: {
   file: File;
   onRemove: () => void;
+  layout?: "grid" | "banner";
 }) => {
   const [preview, setPreview] = React.useState<string | null>(null);
 
@@ -37,8 +40,13 @@ const FilePreview = ({
   }, [file]);
 
   return (
-    <div className="group relative">
-      <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-background">
+    <div className={cn("group relative", layout === "banner" ? "w-full" : "")}>
+      <div
+        className={cn(
+          "relative w-full overflow-hidden rounded-lg border bg-background",
+          layout === "banner" ? "h-48" : "aspect-square",
+        )}
+      >
         {preview ? (
           <ImageZoom className="h-full w-full">
             <Image
@@ -79,6 +87,7 @@ function FileDropzoneField({
   accept = { "image/*": [] },
   maxFiles,
   maxSize,
+  layout = "grid",
 }: FileDropzoneFieldProps) {
   const field = useFieldContext<File[]>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -128,11 +137,19 @@ function FileDropzoneField({
       </Dropzone>
 
       {files.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <div
+          className={cn(
+            "mt-4 grid gap-4",
+            layout === "banner"
+              ? "grid-cols-1"
+              : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+          )}
+        >
           {files.map((file, index) => (
             <FilePreview
               file={file}
               key={`${file.name}-${index}`}
+              layout={layout}
               onRemove={() => removeFile(index)}
             />
           ))}
