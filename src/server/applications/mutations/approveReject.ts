@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { ServerFunctionResult } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ApproveRejectInput } from "@/lib/validation/application";
 import { approveRejectSchema } from "@/lib/validation/application";
@@ -143,4 +144,34 @@ export async function rejectApplicationAction(
     const message = e instanceof Error ? e.message : String(e);
     return [message, null];
   }
+}
+
+// ServerFunction-shaped wrappers for useAction (success/error union)
+export async function approveApplicationServer(
+  input: ApproveRejectInput,
+): Promise<
+  ServerFunctionResult<
+    { success: true; message: string; memberId: string },
+    string
+  >
+> {
+  const [error, data] = await approveApplicationAction(input);
+
+  if (error || !data) {
+    return { success: false, error: error ?? "Unknown error", data: null };
+  }
+
+  return { success: true, data, error: null };
+}
+
+export async function rejectApplicationServer(
+  input: ApproveRejectInput,
+): Promise<ServerFunctionResult<{ success: true; message: string }, string>> {
+  const [error, data] = await rejectApplicationAction(input);
+
+  if (error || !data) {
+    return { success: false, error: error ?? "Unknown error", data: null };
+  }
+
+  return { success: true, data, error: null };
 }

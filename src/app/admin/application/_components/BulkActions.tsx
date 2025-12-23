@@ -1,55 +1,27 @@
 "use client";
 
 import { CheckCircle2, XCircle } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAction } from "@/hooks/useAction";
-import tryCatch from "@/lib/server/tryCatch";
-import {
-  approveApplication,
-  rejectApplication,
-} from "@/server/applications/mutations/approveReject";
 import { useSelectedApplications } from "../_context/SelectedApplicationsContext";
+import { useBulkActions } from "../_hooks/useBulkActions";
 
 export default function BulkActions() {
   const { selectedApplicationIds, clearSelection } = useSelectedApplications();
 
-  const { execute: approve, isPending: isApproving } = useAction(
-    tryCatch(approveApplication),
-    {
-      onSuccess: () => {
-        toast.success("Applications approved");
-        clearSelection();
-      },
-      onError: (err) => toast.error(err || "Failed to approve"),
-    },
-  );
-
-  const { execute: reject, isPending: isRejecting } = useAction(
-    tryCatch(rejectApplication),
-    {
-      onSuccess: () => {
-        toast.success("Applications rejected");
-        clearSelection();
-      },
-      onError: (err) => toast.error(err || "Failed to reject"),
-    },
-  );
+  const { bulkApprove, bulkReject, isPending } = useBulkActions(() => {
+    clearSelection();
+  });
 
   const selectedCount = selectedApplicationIds.size;
   const hasSelection = selectedCount > 0;
 
   const handleApprove = async () => {
-    for (const id of selectedApplicationIds) {
-      await approve({ applicationId: id, action: "approve" });
-    }
+    await bulkApprove(selectedApplicationIds);
   };
 
   const handleReject = async () => {
-    for (const id of selectedApplicationIds) {
-      await reject({ applicationId: id, action: "reject" });
-    }
+    await bulkReject(selectedApplicationIds);
   };
 
   return (
@@ -71,23 +43,23 @@ export default function BulkActions() {
           <div className="grid grid-cols-2 gap-2">
             <Button
               className="border-status-green text-status-green hover:bg-status-green/10"
-              disabled={!hasSelection || isApproving || isRejecting}
+              disabled={!hasSelection || isPending}
               onClick={handleApprove}
               size="sm"
               variant="outline"
             >
               <CheckCircle2 className="mr-1 h-4 w-4" />
-              {isApproving ? "Approving..." : "Approve"}
+              {isPending ? "Processing..." : "Approve"}
             </Button>
             <Button
               className="border-status-red text-status-red hover:bg-status-red/10"
-              disabled={!hasSelection || isApproving || isRejecting}
+              disabled={!hasSelection || isPending}
               onClick={handleReject}
               size="sm"
               variant="outline"
             >
               <XCircle className="mr-1 h-4 w-4" />
-              {isRejecting ? "Rejecting..." : "Reject"}
+              {isPending ? "Processing..." : "Reject"}
             </Button>
           </div>
           <Button

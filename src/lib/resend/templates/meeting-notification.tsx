@@ -21,10 +21,8 @@ export default function MeetingNotificationEmail({
   interviewDate,
   interviewVenue,
 }: MeetingNotificationEmailProps) {
-  const formattedDate = new Date(interviewDate).toLocaleString("en-US", {
-    dateStyle: "full",
-    timeStyle: "short",
-  });
+  // interviewDate is already formatted from the server (e.g., "December 25, 2024, 10:00 AM GMT+8")
+  // Use it directly without re-parsing
 
   return (
     <Html>
@@ -43,7 +41,7 @@ export default function MeetingNotificationEmail({
 
           <Section style={detailsSection}>
             <Text style={detailLabel}>Date and Time:</Text>
-            <Text style={detailValue}>{formattedDate}</Text>
+            <Text style={detailValue}>{interviewDate}</Text>
 
             <Text style={detailLabel}>Venue:</Text>
             <Text style={detailValue}>{interviewVenue}</Text>

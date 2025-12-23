@@ -2,9 +2,8 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
-import tryCatch from "@/lib/server/tryCatch";
 import { scheduleMeetingSchema } from "@/lib/validation/application";
-import { scheduleMeeting } from "@/server/applications/mutations/scheduleMeeting";
+import { scheduleMeetingAction } from "@/server/applications/mutations/scheduleMeeting";
 import { useSelectedApplications } from "../_context/SelectedApplicationsContext";
 
 export function useMeetingScheduler(onSuccess?: () => void) {
@@ -26,24 +25,19 @@ export function useMeetingScheduler(onSuccess?: () => void) {
         return;
       }
 
-      const result = await tryCatch(
-        scheduleMeeting({
-          ...value,
-          interviewDate: value.interviewDate,
-          applicationIds: Array.from(selectedApplicationIds),
-        }),
-      );
+      const [error, data] = await scheduleMeetingAction({
+        ...value,
+        interviewDate: value.interviewDate,
+        applicationIds: Array.from(selectedApplicationIds),
+      });
 
-      if (!result.success) {
-        toast.error(
-          typeof result.error === "string"
-            ? result.error
-            : "Failed to schedule meeting",
-        );
+      if (error || !data) {
+        toast.error(error ?? "Failed to schedule meeting");
         return;
       }
       toast.success(
-        "Meeting scheduled successfully! Emails sent to applicants.",
+        data.message ??
+          "Meeting scheduled successfully! Emails sent to applicants.",
       );
       form.reset();
       onSuccess?.();

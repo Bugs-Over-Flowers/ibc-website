@@ -3,10 +3,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
-import tryCatch from "@/lib/server/tryCatch";
 import {
-  approveApplication,
-  rejectApplication,
+  approveApplicationServer,
+  rejectApplicationServer,
 } from "@/server/applications/mutations/approveReject";
 
 export function useApplicationApproval(applicationId: string) {
@@ -15,10 +14,10 @@ export function useApplicationApproval(applicationId: string) {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
 
   const { execute: executeApprove, isPending: isApproving } = useAction(
-    tryCatch(approveApplication),
+    approveApplicationServer,
     {
-      onSuccess: () => {
-        toast.success("Application approved successfully!");
+      onSuccess: (data) => {
+        toast.success(data.message ?? "Application approved successfully!");
         router.push("/admin/members" as Route);
         router.refresh();
       },
@@ -29,10 +28,10 @@ export function useApplicationApproval(applicationId: string) {
   );
 
   const { execute: executeReject, isPending: isRejecting } = useAction(
-    tryCatch(rejectApplication),
+    rejectApplicationServer,
     {
-      onSuccess: () => {
-        toast.success("Application rejected");
+      onSuccess: (data) => {
+        toast.success(data.message ?? "Application rejected");
         router.push("/admin/application" as Route);
         router.refresh();
       },
