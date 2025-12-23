@@ -146,7 +146,12 @@ export type Database = {
           businessMemberId: string;
           businessName: string;
           joinDate: string;
+          lastPaymentDate: string | null;
           logoImageURL: string | null;
+          membershipExpiryDate: string | null;
+          membershipStatus:
+            | Database["public"]["Enums"]["MembershipStatus"]
+            | null;
           sectorId: number;
           websiteURL: string;
         };
@@ -154,7 +159,12 @@ export type Database = {
           businessMemberId?: string;
           businessName: string;
           joinDate: string;
+          lastPaymentDate?: string | null;
           logoImageURL?: string | null;
+          membershipExpiryDate?: string | null;
+          membershipStatus?:
+            | Database["public"]["Enums"]["MembershipStatus"]
+            | null;
           sectorId: number;
           websiteURL: string;
         };
@@ -162,7 +172,12 @@ export type Database = {
           businessMemberId?: string;
           businessName?: string;
           joinDate?: string;
+          lastPaymentDate?: string | null;
           logoImageURL?: string | null;
+          membershipExpiryDate?: string | null;
+          membershipStatus?:
+            | Database["public"]["Enums"]["MembershipStatus"]
+            | null;
           sectorId?: number;
           websiteURL?: string;
         };
@@ -469,6 +484,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      check_membership_expiry: { Args: never; Returns: undefined };
       get_event_checkin_list: { Args: { p_event_id: string }; Returns: Json };
       get_event_participant_list: {
         Args: { p_event_id: string; p_search_text?: string };
@@ -574,6 +590,7 @@ export type Database = {
       CompanyMemberType: "principal" | "alternate";
       EventType: "public" | "private";
       InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
+      MembershipStatus: "active" | "unpaid" | "overdue" | "revoked";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
     };
@@ -748,6 +765,7 @@ export const Constants = {
       CompanyMemberType: ["principal", "alternate"],
       EventType: ["public", "private"],
       InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
+      MembershipStatus: ["active", "unpaid", "overdue", "revoked"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],
     },

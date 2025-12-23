@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { endOfDay, format, startOfDay } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { useFieldContext } from "@/hooks/_formHooks";
@@ -13,16 +13,30 @@ interface FormDatePickerProps {
   label?: string;
   description?: string;
   className?: string;
+  minDate?: Date;
+  maxDate?: Date;
+  disabled?: (date: Date) => boolean;
+  startMonth?: Date;
+  endMonth?: Date;
 }
 
 const FormDatePicker: React.FC<FormDatePickerProps> = ({
   label,
   description,
   className,
+  minDate,
+  maxDate,
+  disabled,
+  startMonth,
+  endMonth,
 }: FormDatePickerProps) => {
   const field = useFieldContext<Date | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
   const [open, setOpen] = useState(false);
+
+  const computedStartMonth = startMonth ?? minDate ?? new Date(1900, 0);
+  const computedEndMonth = endMonth ?? maxDate ?? new Date(2100, 11);
+
   return (
     <Field className={className} data-invalid={isInvalid}>
       {label && <Label>{label}</Label>}
@@ -45,17 +59,28 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
         </PopoverTrigger>
         <PopoverContent align="start" className="w-auto p-0">
           <Calendar
+            autoFocus
             captionLayout="dropdown"
-            disabled={(date) =>
-              date > new Date() || date < new Date("1900-01-01")
-            }
-            initialFocus
+            disabled={(date) => {
+              if (typeof disabled === "function") return disabled(date);
+              if (minDate && date < startOfDay(minDate)) return true;
+              if (maxDate && date > endOfDay(maxDate)) return true;
+              // If no explicit bounds are provided, default to disallowing
+              // future dates and very old dates (legacy behavior).
+              if (!minDate && !maxDate) {
+                return date > new Date() || date < new Date("1900-01-01");
+              }
+              // When bounds are provided, only keep the historical lower bound.
+              return date < new Date("1900-01-01");
+            }}
+            endMonth={computedEndMonth}
             mode="single"
             onSelect={(date) => {
               field.handleChange(date);
               setOpen(false);
             }}
             selected={field.state.value}
+            startMonth={computedStartMonth}
           />
         </PopoverContent>
       </Popover>

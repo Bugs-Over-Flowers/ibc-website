@@ -90,7 +90,7 @@ export default function EventFilters() {
             <div className="flex items-center gap-2">
               <SortAsc size={16} />
               <span className="hidden md:inline">
-                <SelectValue />
+                <SelectValue aria-label="Sort By Date" />
               </span>
               <span className="md:hidden">Sort</span>
             </div>
@@ -115,7 +115,7 @@ export default function EventFilters() {
             <div className="flex items-center gap-2">
               <Filter size={16} />
               <span className="hidden md:inline">
-                <SelectValue />
+                <SelectValue aria-label="Filter By Status" />
               </span>
               <span className="md:hidden">Filter</span>
             </div>

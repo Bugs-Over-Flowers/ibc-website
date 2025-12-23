@@ -14,7 +14,10 @@ export default function AdminLayout({
   return (
     <SidebarProvider>
       <TooltipProvider>
-        <div className="flex min-h-screen w-full bg-background">
+        <div
+          className="flex min-h-screen w-full bg-background"
+          suppressHydrationWarning
+        >
           <Suspense fallback={<AdminSidebarSkeleton />}>
             <AdminSidebar />
           </Suspense>

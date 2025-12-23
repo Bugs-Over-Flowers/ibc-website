@@ -39,6 +39,14 @@
   --sidebar-accent-foreground: #f8fafc;
   --sidebar-border: #c8d3df;
   --sidebar-ring: #0284c5;
+  --status-blue: #3b82f6;
+  --status-green: #10b981;
+  --status-yellow: #f59e0b;
+  --status-red: #ef4444;
+  --status-purple: #8b5cf6;
+  --status-pink: #ec4899;
+  --status-orange: #f97316;
+  --status-teal: #14b8a6;
 
   --font-sans:
     "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
@@ -102,6 +110,14 @@
   --sidebar-accent-foreground: #020513;
   --sidebar-border: #465467;
   --sidebar-ring: #35bdf8;
+  --status-blue: #60a5fa;
+  --status-green: #34d399;
+  --status-yellow: #fbbf24;
+  --status-red: #f87171;
+  --status-purple: #a78bfa;
+  --status-pink: #f472b6;
+  --status-orange: #fb923c;
+  --status-teal: #2dd4bf;
 
   /* Shadows (8-digit HEX: #RRGGBBAA) */
   --shadow-2xs: 0 1px 3px 0px #0000000d; /* alpha 0.05 */
@@ -184,6 +200,14 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --color-status-blue: var(--status-blue);
+  --color-status-green: var(--status-green);
+  --color-status-yellow: var(--status-yellow);
+  --color-status-red: var(--status-red);
+  --color-status-purple: var(--status-purple);
+  --color-status-pink: var(--status-pink);
+  --color-status-orange: var(--status-orange);
+  --color-status-teal: var(--status-teal);
 }
 
 @layer base {

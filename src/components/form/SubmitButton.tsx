@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import { useFormContext } from "@/hooks/_formHooks";
 import { Button } from "../ui/button";
 
 interface SubmitButtonProps {
-  label: string;
+  label: ReactNode;
   isSubmittingLabel: string;
   className?: string;
 }
