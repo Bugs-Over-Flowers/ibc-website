@@ -24,14 +24,16 @@ export function MembersTable({ members }: MembersTableProps) {
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <Table>
+      <CardContent className="overflow-x-auto">
+        <Table className="text-xs md:text-sm">
           <TableHeader>
             <TableRow>
-              <TableHead>Company Name</TableHead>
-              <TableHead>Sector</TableHead>
-              <TableHead>Website</TableHead>
-              <TableHead>Join Date</TableHead>
+              <TableHead className="min-w-[150px] md:min-w-auto">
+                Company Name
+              </TableHead>
+              <TableHead className="hidden md:table-cell">Sector</TableHead>
+              <TableHead className="hidden lg:table-cell">Website</TableHead>
+              <TableHead className="hidden sm:table-cell">Join Date</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
