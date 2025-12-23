@@ -67,7 +67,7 @@ export async function approveApplication(input: ApproveRejectInput) {
   revalidatePath("/admin/members");
 
   return {
-    success: true,
+    success: true as const,
     message: "Application approved successfully",
     memberId: newMember.businessMemberId,
   };
@@ -98,7 +98,49 @@ export async function rejectApplication(input: ApproveRejectInput) {
   revalidatePath("/admin/application");
 
   return {
-    success: true,
+    success: true as const,
     message: "Application rejected",
   };
+}
+
+// Tuple-style server action wrappers to comply with the [error, data] pattern
+export async function approveApplicationAction(
+  input: ApproveRejectInput,
+): Promise<
+  [
+    error: string | null,
+    data: {
+      success: true;
+      message: string;
+      memberId: string;
+    } | null,
+  ]
+> {
+  try {
+    const result = await approveApplication(input);
+    return [null, result];
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return [message, null];
+  }
+}
+
+export async function rejectApplicationAction(
+  input: ApproveRejectInput,
+): Promise<
+  [
+    error: string | null,
+    data: {
+      success: true;
+      message: string;
+    } | null,
+  ]
+> {
+  try {
+    const result = await rejectApplication(input);
+    return [null, result];
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return [message, null];
+  }
 }

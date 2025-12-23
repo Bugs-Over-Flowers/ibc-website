@@ -34,7 +34,7 @@ export default async function MembersList({ searchParams }: PageProps) {
     search: params.search,
   };
 
-  const members = await getMembers(filters, cookieStore.getAll());
+  const members = await getMembers(cookieStore.getAll(), filters);
 
   if (members.length === 0) {
     return <EmptyMembersState />;

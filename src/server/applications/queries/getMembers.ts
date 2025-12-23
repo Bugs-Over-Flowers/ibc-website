@@ -1,15 +1,14 @@
 import "server-only";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import type { MemberFilterInput } from "@/lib/validation/application";
 
 export async function getMembers(
+  requestCookies: RequestCookie[],
   filters?: MemberFilterInput,
-  requestCookies?: RequestCookie[],
 ) {
-  const cookieStore = requestCookies || (await cookies()).getAll();
-  const supabase = await createClient(cookieStore);
+  "use cache";
+  const supabase = await createClient(requestCookies);
 
   let query = supabase
     .from("BusinessMember")
@@ -45,9 +44,9 @@ export async function getMembers(
   return data;
 }
 
-export async function getSectors(requestCookies?: RequestCookie[]) {
-  const cookieStore = requestCookies || (await cookies()).getAll();
-  const supabase = await createClient(cookieStore);
+export async function getSectors(requestCookies: RequestCookie[]) {
+  "use cache";
+  const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase
     .from("Sector")

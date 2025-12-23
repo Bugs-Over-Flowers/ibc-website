@@ -17,21 +17,28 @@ export async function sendMeetingEmail({
   companyName,
   interviewDate,
   interviewVenue,
-}: SendMeetingEmailProps) {
-  const { error } = await resend.emails.send({
-    to,
-    from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
-    subject: "IBC Membership Application - Interview Scheduled",
-    react: MeetingNotificationEmail({
-      companyName,
-      interviewDate,
-      interviewVenue,
-    }),
-  });
+}: SendMeetingEmailProps): Promise<
+  [error: string | null, data: { success: true } | null]
+> {
+  try {
+    const { error } = await resend.emails.send({
+      to,
+      from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
+      subject: "IBC Membership Application - Interview Scheduled",
+      react: MeetingNotificationEmail({
+        companyName,
+        interviewDate,
+        interviewVenue,
+      }),
+    });
 
-  if (error) {
-    throw new Error(`Failed to send meeting email: ${error.message}`);
+    if (error) {
+      return [`Failed to send meeting email: ${error.message}`, null];
+    }
+
+    return [null, { success: true }];
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return [`Failed to send meeting email: ${message}`, null];
   }
-
-  return { success: true };
 }
