@@ -40,8 +40,8 @@ export function SidebarItem({
         className={cn(
           "h-12 w-full justify-start transition-colors transition-padding",
           isDestructive
-            ? "text-red-600 hover:bg-red-50 hover:text-red-700"
-            : "hover:bg-gray-100",
+            ? "text-destructive hover:bg-destructive/10 hover:text-destructive"
+            : "text-foreground hover:bg-primary/20 hover:text-accent-foreground",
           isActive &&
             !isDestructive &&
             "bg-primary/10 text-primary hover:bg-primary/20",
@@ -53,10 +53,10 @@ export function SidebarItem({
           className={cn(
             "h-5 w-5",
             isDestructive
-              ? "text-red-600"
+              ? "text-destructive"
               : isActive
-                ? "text-muted-background"
-                : "text-primary",
+                ? "text-background"
+                : "text-foreground",
           )}
         />
         <span className="font-medium">{title}</span>

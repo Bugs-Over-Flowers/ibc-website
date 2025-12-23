@@ -12,6 +12,16 @@ interface EventRowProps {
 export default function EventRow({ event }: EventRowProps) {
   const imageUrl = event.eventHeaderUrl?.trim();
 
+  const formatDate = (dateStr: string | Date | null | undefined): string => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return String(dateStr);
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
   return (
     <article className="flex flex-col items-start gap-4 overflow-hidden rounded-lg border bg-background p-4 shadow-sm md:flex-row md:items-center">
       <div className="relative h-48 w-full shrink-0 md:h-58 md:w-58">
@@ -73,7 +83,8 @@ export default function EventRow({ event }: EventRowProps) {
             <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
               <div>
                 <span className="text-sm">
-                  {event.eventStartDate} | {event.eventEndDate}
+                  {formatDate(event.eventStartDate)} |{" "}
+                  {formatDate(event.eventEndDate)}
                 </span>
               </div>
             </div>

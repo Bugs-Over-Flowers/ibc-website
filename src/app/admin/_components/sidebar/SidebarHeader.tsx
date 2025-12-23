@@ -4,7 +4,9 @@ import { cn } from "@/lib/utils";
 export function AdminSidebarHeader() {
   return (
     <SidebarHeader className="border-b px-5 py-4">
-      <SidebarMenuButton className={cn("flex h-12 w-full items-center")}>
+      <SidebarMenuButton
+        className={cn("flex h-12 w-full items-center hover:bg-background")}
+      >
         <div className="m-0 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary">
           <span className="font-semibold text-primary-foreground text-sm">
             A
