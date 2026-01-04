@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.cursor
+.vscode
+out
+build
+.env.local
+npm-debug.log

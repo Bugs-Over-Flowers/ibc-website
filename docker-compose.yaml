@@ -1,0 +1,16 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development # Tells Compose to use the 'development' stage
+    ports:
+      - "3000:3000" # Maps port 3000 on your machine to port 3000 in the container
+    volumes:
+      - .:/app # The "Magic" line: syncs your local code to the container
+      - /app/node_modules # Don't sync node_modules (let Docker handle them)
+      - /app/.next # Don't sync build files
+    environment:
+      - NODE_ENV=development # This makes sure Next.js runs in dev mode
+    env_file:
+      - .env.local # Automatically loads your local variables
