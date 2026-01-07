@@ -1,0 +1,67 @@
+name: 🚀 Improvement / Enhancement
+description: Suggest an improvement or enhancement
+title: "[IMPROVEMENT] "
+labels:
+  - enhancement
+type: improvement
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Short, clear description of the improvement.
+      placeholder: Improve X by doing Y
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Other approaches you thought about.
+    validations:
+      required: false
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Benefits
+      description: List the benefits of this change.
+      placeholder: |
+        - Better UX
+        - Improved performance
+        - Easier maintenance
+    validations:
+      required: true
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks / Trade-offs
+      description: Any downsides or concerns?
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Mockups, screenshots, links, or examples.
+    validations:
+      required: false
