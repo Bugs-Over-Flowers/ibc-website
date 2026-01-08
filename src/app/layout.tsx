@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css?url";
+import "./globals.css";
+import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -18,7 +19,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html className={inter.variable} lang="en" suppressHydrationWarning>
       <head>
-        <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
+        <Script
+          src="https://unpkg.com/react-scan/dist/auto.global.js"
+          strategy="afterInteractive"
+        />
       </head>
       <body
         className={`${inter.variable} font-sans antialiased`}
