@@ -1,6 +1,7 @@
 # Server Functions Rules
 
 ## Server Actions (Mutations)
+
 - **MUST** use `"use server"` directive
 - **MUST** be in `src/server/[feature]/mutations/` folder
 - Can throw errors freely - use `tryCatch` on client to handle
@@ -8,9 +9,75 @@
 - **MUST** use `createActionClient()` from `@/lib/supabase/server` for Supabase
 - **MUST** call `revalidatePath()` after mutations when needed
 
+**Example:**
+
+```typescript
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { createActionClient } from "@/lib/supabase/server";
+import { z } from "zod";
+
+const schema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+});
+
+export async function createUser(input: z.infer<typeof schema>) {
+  // 1. Validate input (throws on failure)
+  const parsed = schema.parse(input);
+  
+  // 2. Perform mutation with createActionClient
+  const supabase = await createActionClient();
+  const { data, error } = await supabase
+    .from("users")
+    .insert(parsed)
+    .select("id")
+    .single();
+  
+  if (error) throw new Error(error.message);
+  
+  // 3. Revalidate and return
+  revalidatePath("/users");
+  return data;
+}
+```
+
 ## Server Queries (Data Fetching)
+
 - **MUST** use `import "server-only"` directive
 - **MUST** be in `src/server/[feature]/queries/` folder
 - Can throw errors - use `tryCatch` on client to handle
 - **MUST** use `createClient(requestCookies)` from `@/lib/supabase/server` for Supabase
 - Get cookies from `next/headers` and pass to `createClient()`
+
+**Example:**
+
+```typescript
+import "server-only";
+
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
+
+export async function getUsers() {
+  const cookieStore = await cookies();
+  const supabase = await createClient(cookieStore.getAll());
+  
+  const { data, error } = await supabase.from("users").select("*");
+  if (error) throw new Error(error.message);
+  
+  return data;
+}
+```
+
+## Server Function Types
+
+Server functions use `ServerFunctionResult<T, E>` from `@/lib/server/types`:
+
+```typescript
+type ServerFunctionResult<T, E = Error | string> =
+  | { success: true; data: T; error: null }
+  | { success: false; data: null; error: E };
+```
+
+This is used for the return type of the `tryCatch` utility function.

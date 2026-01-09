@@ -2,6 +2,29 @@
 
 Next.js 15 + React 19 website for the Iloilo Business Club. Uses Turbopack, Tailwind CSS v4, shadcn/ui, Supabase backend, and bun.
 
+## Commit Message Convention
+
+All commit messages must follow this format: `<type>: <description>`
+
+**Commit Types:**
+
+- `feat:` new feature
+- `fix:` bug fix
+- `docs:` documentation updates
+- `style:` formatting (no code change)
+- `refactor:` code restructure (no feature/bug fix)
+- `test:` add/modify tests
+- `chore:` maintenance tasks
+- `build:` build system changes
+- `perf:` performance improvement
+
+**Examples:**
+
+- `feat: add user authentication`
+- `fix: resolve infinite loop in data fetching`
+- `docs: update API documentation`
+- `refactor: extract validation logic to utility`
+
 ## Quick Reference
 
 ```bash
