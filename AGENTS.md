@@ -31,7 +31,7 @@ All commit messages **MUST** follow this format: `<type>: <description>`
 - **Runtime:** Bun
 - **Language:** TypeScript (strict mode)
 - **Styling:** Tailwind CSS v4 with oklch design tokens
-- **UI:** shadcn/ui (Radix primitives)
+- **UI:** shadcn/ui (Base-ui primitives)
 - **Forms:** TanStack Form with Zod validation
 - **Backend:** Supabase (PostgreSQL)
 - **Testing:** Vitest (unit), Cypress (component/e2e)

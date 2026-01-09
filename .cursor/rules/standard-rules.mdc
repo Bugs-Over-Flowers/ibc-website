@@ -33,7 +33,7 @@ All commit messages **MUST** follow this format: `<type>: <description>`
 - **Runtime:** Bun
 - **Language:** TypeScript (strict mode)
 - **Styling:** Tailwind CSS v4 with oklch design tokens
-- **UI:** shadcn/ui (Radix primitives)
+- **UI:** shadcn/ui (Base-ui primitives)
 - **Forms:** TanStack Form with Zod validation
 - **Backend:** Supabase (PostgreSQL)
 - **Testing:** Vitest (unit), Cypress (component/e2e)
@@ -100,7 +100,7 @@ All commit messages **MUST** follow this format: `<type>: <description>`
 - **Server Components by default** - only add `"use client"` when needed
 - Client-side requirements: hooks, event handlers, browser APIs, context
 - Use React 19 patterns: `use` hook for promises in client components
-- shadcn/ui components use `data-slot` attributes and Radix primitives
+- shadcn/ui components use `data-slot` attributes and Base-ui primitives
 - Add new UI components: `bunx --bun shadcn@latest add <component>`
 
 ## Client-Side Action Handling Rules
