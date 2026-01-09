@@ -1,6 +1,6 @@
 "use client";
 
-import { Facebook, MessageCircle, ThumbsUp, Users } from "lucide-react";
+import { Facebook } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
@@ -29,20 +29,19 @@ export function FacebookCTASection() {
                 highlights. Join our growing online community!
               </p>
 
-              <Button
-                asChild
-                className="rounded-lg bg-[#2E2A6E] px-8 text-white hover:bg-[#2E2A6E]/90"
-                size="lg"
+              <a
+                href="https://www.facebook.com/iloilobusinessclub"
+                rel="noopener noreferrer"
+                target="_blank"
               >
-                <a
-                  href="https://www.facebook.com/iloilobusinessclub"
-                  rel="noopener noreferrer"
-                  target="_blank"
+                <Button
+                  className="rounded-lg bg-[#2E2A6E] px-8 text-white hover:bg-[#2E2A6E]/90"
+                  size="lg"
                 >
                   <Facebook className="mr-2 h-5 w-5" />
                   Follow Us on Facebook
-                </a>
-              </Button>
+                </Button>
+              </a>
             </div>
             <div className="relative hidden aspect-square bg-linear-to-br from-primary/20 to-primary/5 lg:block">
               <div className="absolute inset-0 flex items-center justify-center">

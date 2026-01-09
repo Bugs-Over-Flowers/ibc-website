@@ -45,7 +45,7 @@ src/
 │   ├── layout.tsx      # Root layout with Toaster
 │   └── globals.css     # Tailwind v4 + oklch design tokens
 ├── components/
-│   ├── ui/             # shadcn/ui primitives (Radix-based)
+│   ├── ui/             # shadcn/ui primitives (Base-ui-based)
 │   └── form/           # TanStack Form field wrappers
 ├── hooks/
 │   ├── _formHooks.ts   # TanStack Form context setup
@@ -102,7 +102,7 @@ Server logic placement:
 ### Components
 
 - Server Components by default; add `"use client"` only when needed
-- shadcn/ui components use `data-slot` attributes and Radix primitives
+- shadcn/ui components use `data-slot` attributes and Base-ui primitives
 - Add UI components: `bunx --bun shadcn@latest add <component>`
 
 ---

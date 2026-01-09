@@ -65,22 +65,20 @@ export function MembersGrid({ members }: MembersGridProps) {
                   )}
                   {member.websiteURL && (
                     <div className="mt-4 flex w-full justify-center">
-                      <Button
-                        asChild
-                        className="w-full max-w-[180px] rounded-xl border-none bg-primary font-medium text-primary-foreground text-sm shadow-md hover:cursor-pointer hover:bg-primary/90"
-                        onClick={(e) => e.stopPropagation()}
-                        tabIndex={0}
-                        variant="default"
+                      <a
+                        href={member.websiteURL}
+                        rel="noopener noreferrer"
+                        target="_blank"
                       >
-                        <a
-                          href={member.websiteURL}
-                          rel="noopener noreferrer"
-                          tabIndex={-1}
-                          target="_blank"
+                        <Button
+                          className="w-full max-w-[180px] rounded-xl border-none bg-primary font-medium text-primary-foreground text-sm shadow-md hover:cursor-pointer hover:bg-primary/90"
+                          onClick={(e) => e.stopPropagation()}
+                          tabIndex={0}
+                          variant="default"
                         >
                           Visit Website
-                        </a>
-                      </Button>
+                        </Button>
+                      </a>
                     </div>
                   )}
                 </div>
