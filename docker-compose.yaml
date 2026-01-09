@@ -1,16 +1,19 @@
 services:
-  web:
+  ibc-web-app:
+    container_name: ibc-web-app
     build:
       context: .
       dockerfile: Dockerfile
-      target: development # Tells Compose to use the 'development' stage
+      target: development
     ports:
-      - "3000:3000" # Maps port 3000 on your machine to port 3000 in the container
-    volumes:
-      - .:/app # The "Magic" line: syncs your local code to the container
-      - /app/node_modules # Don't sync node_modules (let Docker handle them)
-      - /app/.next # Don't sync build files
-    environment:
-      - NODE_ENV=development # This makes sure Next.js runs in dev mode
+      - "3000:3000"
     env_file:
-      - .env.local # Automatically loads your local variables
+      - .env.local
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./:/app
+      - /app/node_modules
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

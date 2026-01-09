@@ -5,5 +5,14 @@ node_modules
 .vscode
 out
 build
+.env
 .env.local
 npm-debug.log
+
+.git
+.gitignore
+
+.DS_Store
+
+Dockerfile
+docker-compose.yml
