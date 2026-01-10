@@ -1,4 +1,7 @@
 import { defineConfig } from "cypress";
+import { config as dotenvConfig } from "dotenv";
+
+dotenvConfig({ path: ".env.testing" });
 
 export default defineConfig({
   e2e: {
