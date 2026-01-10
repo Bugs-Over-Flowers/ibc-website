@@ -4,6 +4,41 @@ alwaysApply: true
 
 # IBC Website Development Rules
 
+## Commit Message Convention
+
+All commit messages **MUST** follow this format: `<type>: <description>`
+
+**Commit Types:**
+
+- `feat:` new feature
+- `fix:` bug fix
+- `docs:` documentation updates
+- `style:` formatting (no code change)
+- `refactor:` code restructure (no feature/bug fix)
+- `test:` add/modify tests
+- `chore:` maintenance tasks
+- `build:` build system changes
+- `perf:` performance improvement
+
+**Examples:**
+
+- `feat: add user authentication`
+- `fix: resolve infinite loop in data fetching`
+- `docs: update API documentation`
+- `refactor: extract validation logic to utility`
+
+## Tech Stack
+
+- **Framework:** Next.js 15 (App Router) + React 19 + Turbopack
+- **Runtime:** Bun
+- **Language:** TypeScript (strict mode)
+- **Styling:** Tailwind CSS v4 with oklch design tokens
+- **UI:** shadcn/ui (Radix primitives)
+- **Forms:** TanStack Form with Zod validation
+- **Backend:** Supabase (PostgreSQL)
+- **Testing:** Vitest (unit), Cypress (component/e2e)
+- **Linting:** Biome (replaces ESLint + Prettier)
+
 ## File Structure Rules
 
 ### Component Placement
@@ -27,6 +62,24 @@ alwaysApply: true
 
 - **ALWAYS** use `@/` path alias (maps to `./src/`)
 - Never use relative paths like `../../` when `@/` is available
+- Organize imports: external packages → internal modules → components → types
+- Biome auto-sorts imports on save
+
+### Formatting
+
+- **Indentation:** 2 spaces (enforced by Biome)
+- **Quotes:** Double quotes for strings
+- **Semicolons:** Required
+- **Tailwind classes:** Auto-sorted by Biome's `useSortedClasses` rule
+
+### Naming Conventions
+
+- **Files:** camelCase for utilities, PascalCase for components
+- **Components:** PascalCase (e.g., `UserProfile.tsx`)
+- **Hooks:** camelCase with `use` prefix (e.g., `useUserData.ts`)
+- **Server actions:** camelCase verbs (e.g., `createUser`, `updateProfile`)
+- **Types/Interfaces:** PascalCase (e.g., `User`, `CreateUserInput`)
+- **Constants:** UPPER_SNAKE_CASE (e.g., `MAX_FILE_SIZE`)
 
 ### Styling
 
@@ -34,9 +87,19 @@ alwaysApply: true
 - Use `cva()` from `class-variance-authority` for component variants
 - Design tokens in `globals.css` use oklch colors as CSS variables
 
+### TypeScript
+
+- **Strict mode enabled** - all type errors must be resolved
+- Use `type` for object shapes, `interface` for extensible contracts
+- Prefer explicit return types on exported functions
+- Use generated types from `@/lib/supabase/db.types.ts` for database tables
+- Server functions use `ServerFunctionResult<T, E>` from `@/lib/server/types`
+
 ### Components
 
 - **Server Components by default** - only add `"use client"` when needed
+- Client-side requirements: hooks, event handlers, browser APIs, context
+- Use React 19 patterns: `use` hook for promises in client components
 - shadcn/ui components use `data-slot` attributes and Radix primitives
 - Add new UI components: `bunx --bun shadcn@latest add <component>`
 
@@ -49,11 +112,29 @@ alwaysApply: true
 - Use inline for form submissions
 - Returns `{ error, data, success }` tuple
 
+**Example (inline use):**
+```typescript
+import tryCatch from "@/lib/server/tryCatch";
+const { error, data, success } = await tryCatch(createUser(input));
+if (!success) {
+  form.setErrorMap({ onSubmit: error });
+  return;
+}
+```
+
 ### `useAction` Hook
 
 - **ONLY** for button-triggered mutations (not form submissions)
 - **MUST** wrap server action with `tryCatch()` before passing to `useAction`
 - Returns: `{ execute, isPending, data, error, reset }`
+
+**Example:**
+```typescript
+const { execute, isPending } = useAction(tryCatch(deleteUser), {
+  onSuccess: () => router.push("/users"),
+  onError: (err) => toast.error(err),
+});
+```
 
 ## Validation Rules
 
@@ -73,6 +154,20 @@ alwaysApply: true
 - Add `cacheTag()` for cache invalidation tags
 - **NOTE**: Most files cannot be cached due to Supabase cookie requirements for SSR
 - When cookies are needed, get them at page level and pass to query function
+
+**Example:**
+```typescript
+// In page.tsx
+const cookieStore = await cookies();
+const data = await getCachedData(cookieStore.getAll());
+
+// In query file
+export async function getCachedData(requestCookies: RequestCookie[]) {
+  "use cache";
+  const supabase = await createClient(requestCookies);
+  // ...
+}
+```
 
 ## Loading States Rules
 
@@ -111,5 +206,15 @@ alwaysApply: true
 
 - Server actions can throw errors freely
 - **MUST** wrap with `tryCatch` on client side
-- Check `error` property before accessing `data`
+- Check `success` property before accessing `data`
 - Use discriminated union pattern: `{ success: true, data }` or `{ success: false, error }`
+
+## Common Pitfalls to Avoid
+
+1. **Don't use relative imports** when `@/` alias is available
+2. **Don't add `"use client"`** unless component needs client-side features
+3. **Don't use `createActionClient()`** in cached queries
+4. **Don't use `createClient(requestCookies)`** for mutations
+5. **Always wrap server actions with `tryCatch`** on the client side
+6. **Always validate with Zod** before processing user input
+7. **Don't forget `revalidatePath()`** after mutations that affect cached data

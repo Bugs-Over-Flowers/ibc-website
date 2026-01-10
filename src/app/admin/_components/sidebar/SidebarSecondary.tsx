@@ -1,17 +1,16 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { SidebarGroup, SidebarMenu } from "@/components/ui/sidebar";
-import { SidebarItem } from "./SidebarItem";
-
-const secondaryItems = [
-  {
-    title: "Logout",
-    icon: LogOut,
-    href: "/auth",
-    variant: "destructive" as const,
-  },
-];
+import { useRouter } from "next/navigation";
+import {
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { useAction } from "@/hooks/useAction";
+import { cn } from "@/lib/utils";
+import { logout } from "@/server/auth/mutations/logout";
 
 interface AdminSidebarSecondaryProps {
   onNavigate?: () => void;
@@ -20,20 +19,34 @@ interface AdminSidebarSecondaryProps {
 export function AdminSidebarSecondary({
   onNavigate,
 }: AdminSidebarSecondaryProps) {
+  const router = useRouter();
+  const { execute, isPending } = useAction(logout, {
+    onSuccess: () => {
+      if (onNavigate) {
+        onNavigate();
+      }
+      router.push("/auth");
+    },
+  });
+
   return (
     <SidebarGroup className="mt-auto border-t pt-4">
       <SidebarMenu>
-        {secondaryItems.map((item) => (
-          <SidebarItem
-            href={item.href}
-            icon={item.icon}
-            isActive={false}
-            key={item.title}
-            onNavigate={onNavigate}
-            title={item.title}
-            variant={item.variant}
-          />
-        ))}
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            className={cn(
+              "h-12 w-full justify-start transition-colors transition-padding",
+              "text-red-600 hover:bg-red-50 hover:text-red-700",
+            )}
+            disabled={isPending}
+            onClick={() => execute(undefined)}
+          >
+            <LogOut className="h-5 w-5" />
+            <span className="font-medium">
+              {isPending ? "Logging out..." : "Logout"}
+            </span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
   );
