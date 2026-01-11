@@ -15,12 +15,12 @@ export default function MembershipSuccessPage() {
         an email update regarding your application status.
       </p>
       <div className="flex gap-4">
-        <Button asChild variant="outline">
-          <Link href="/">Return Home</Link>
-        </Button>
-        <Button asChild>
-          <Link href="/events">Browse Events</Link>
-        </Button>
+        <Link href="/">
+          <Button variant="outline">Back home</Button>
+        </Link>
+        <Link href="/events">
+          <Button>View Events</Button>
+        </Link>
       </div>
     </div>
   );

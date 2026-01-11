@@ -37,16 +37,12 @@ export default async function FeaturedEventsSection() {
                 Don't Miss Out
               </h2>
             </div>
-            <Button
-              asChild
-              className="rounded-lg bg-transparent"
-              variant="outline"
-            >
-              <Link href="/events">
+            <Link href="/events">
+              <Button className="rounded-lg bg-transparent" variant="outline">
                 View All Events
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
 
           <div className="py-12 text-center text-muted-foreground">
@@ -69,16 +65,12 @@ export default async function FeaturedEventsSection() {
               Don't Miss Out
             </h2>
           </div>
-          <Button
-            asChild
-            className="rounded-lg bg-transparent"
-            variant="outline"
-          >
-            <Link href="/events">
+          <Link href="/events">
+            <Button className="rounded-lg bg-transparent" variant="outline">
               View All Events
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

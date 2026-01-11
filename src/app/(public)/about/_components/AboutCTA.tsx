@@ -30,21 +30,23 @@ export default function AboutCTA() {
             the future of our region
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button
-              asChild
-              className="bg-white text-[#2E2A6E] shadow-xl transition-all hover:bg-white/90 hover:shadow-2xl"
-              size="lg"
-            >
-              <Link href="/contact">Contact Us</Link>
-            </Button>
-            <Button
-              asChild
-              className="border-2 border-white/50 bg-transparent text-white backdrop-blur-sm hover:bg-white/10"
-              size="lg"
-              variant="outline"
-            >
-              <Link href="/events">View Events</Link>
-            </Button>
+            <Link href="/contact">
+              <Button
+                className="bg-white text-[#2E2A6E] shadow-xl transition-all hover:bg-white/90 hover:shadow-2xl"
+                size="lg"
+              >
+                Contact Us
+              </Button>
+            </Link>
+            <Link href="/events">
+              <Button
+                className="border-2 border-white/50 bg-transparent text-white backdrop-blur-sm hover:bg-white/10"
+                size="lg"
+                variant="outline"
+              >
+                View Events
+              </Button>
+            </Link>
           </div>
         </motion.div>
       </div>

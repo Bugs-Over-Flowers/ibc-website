@@ -18,28 +18,33 @@ export default function MembersCTA() {
           <h2 className="mb-4 font-bold text-3xl text-foreground">
             Become an IBC Member
           </h2>
+
           <p className="mx-auto mb-6 max-w-2xl text-foreground/70">
             Join our elite roster of members & enjoy networking events,
             marketing opportunities, access to data and information, and
             attendance to major business events. Becoming a member is the best
             investment you can make.
           </p>
+
           <div className="flex flex-wrap justify-center gap-4">
-            <Button
-              asChild
-              className="rounded-xl bg-foreground shadow-lg hover:bg-foreground/90"
-              size="lg"
-            >
-              <Link href="/contact">Apply for Membership</Link>
-            </Button>
-            <Button
-              asChild
-              className="rounded-xl shadow-lg hover:text-primary"
-              size="lg"
-              variant="outline"
-            >
-              <Link href="/contact">Check Application Status</Link>
-            </Button>
+            <Link href="/contact">
+              <Button
+                className="rounded-xl bg-foreground shadow-lg hover:bg-foreground/90"
+                size="lg"
+              >
+                Apply for Membership
+              </Button>
+            </Link>
+
+            <Link href="/contact">
+              <Button
+                className="rounded-xl shadow-lg hover:text-primary"
+                size="lg"
+                variant="outline"
+              >
+                Check Application Status
+              </Button>
+            </Link>
           </div>
         </motion.div>
       </div>
