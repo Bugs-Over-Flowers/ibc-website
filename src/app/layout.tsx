@@ -28,7 +28,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         className={`${inter.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+        >
           {children}
           <Toaster position="top-right" richColors />
         </ThemeProvider>

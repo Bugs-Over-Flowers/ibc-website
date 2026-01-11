@@ -23,31 +23,34 @@ export function MembershipCTA() {
             business to the next level.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button
-              asChild
-              className="rounded-xl bg-primary shadow-lg hover:bg-primary/90"
-              size="lg"
-            >
-              <Link href="/contact">Apply for Membership</Link>
-            </Button>
+            <Link href="/contact">
+              <Button
+                className="rounded-xl bg-primary shadow-lg hover:bg-primary/90"
+                size="lg"
+              >
+                Apply for Membership
+              </Button>
+            </Link>
 
-            <Button
-              asChild
-              className="rounded-xl shadow-lg hover:text-primary"
-              size="lg"
-              variant="outline"
-            >
-              <Link href="/contact">Check Application Status</Link>
-            </Button>
+            <Link href="/contact">
+              <Button
+                className="rounded-xl shadow-lg hover:text-primary"
+                size="lg"
+                variant="outline"
+              >
+                Check Application Status
+              </Button>
+            </Link>
 
-            <Button
-              asChild
-              className="rounded-xl shadow-lg"
-              size="lg"
-              variant="ghost"
-            >
-              <Link href="/contact">Contact Us</Link>
-            </Button>
+            <Link href="/contact">
+              <Button
+                className="rounded-xl shadow-lg"
+                size="lg"
+                variant="ghost"
+              >
+                Contact Us
+              </Button>
+            </Link>
           </div>
         </motion.div>
       </div>

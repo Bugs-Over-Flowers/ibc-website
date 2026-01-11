@@ -23,15 +23,6 @@ const navLinks = [
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // Scroll state
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -53,10 +44,7 @@ export function Header() {
     <motion.header
       animate={{ y: 0 }}
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-        isScrolled
-          ? "border-border bg-card/95 shadow-lg backdrop-blur-md"
-          : "bg-transparent",
+        "fixed inset-x-0 top-0 z-50 bg-white shadow-sm transition-all duration-300 dark:bg-slate-950 dark:shadow-md",
       )}
       initial={{ y: -100 }}
       transition={{ duration: 0.5 }}
@@ -69,16 +57,15 @@ export function Header() {
               <Image
                 alt="IBC Logo"
                 className="object-contain"
-                height={48}
+                height={200}
                 priority
                 src="/logo/ibc-logo-2.png"
-                width={48}
+                width={200}
               />
             </div>
             <span
               className={cn(
-                "truncate font-bold transition-colors md:text-xl",
-                isScrolled ? "text-foreground" : "text-primary-foreground",
+                "truncate font-bold text-foreground transition-colors md:text-xl",
               )}
             >
               ILOILO BUSINESS CLUB, INC.
@@ -91,11 +78,7 @@ export function Header() {
               <Link
                 className={cn(
                   "rounded-md px-2 py-2 font-semibold text-sm transition-colors hover:text-primary",
-                  pathname === link.path
-                    ? "text-primary"
-                    : isScrolled
-                      ? "text-foreground"
-                      : "text-primary-foreground",
+                  pathname === link.path ? "text-primary" : "text-foreground",
                 )}
                 href={link.path as Route}
                 key={link.name}
@@ -118,23 +101,13 @@ export function Header() {
             aria-controls="mobile-navigation"
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            className="rounded-lg p-2 hover:bg-muted lg:hidden"
+            className="rounded-lg p-2 text-foreground hover:bg-muted lg:hidden"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
           >
             {mobileMenuOpen ? (
-              <X
-                className={cn(
-                  "h-6 w-6",
-                  isScrolled ? "text-foreground" : "text-primary-foreground",
-                )}
-              />
+              <X className="h-6 w-6" />
             ) : (
-              <Menu
-                className={cn(
-                  "h-6 w-6",
-                  isScrolled ? "text-foreground" : "text-primary-foreground",
-                )}
-              />
+              <Menu className="h-6 w-6" />
             )}
           </Button>
         </div>
