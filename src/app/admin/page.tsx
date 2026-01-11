@@ -1,4 +1,5 @@
 export default function AdminPage() {
+  console.log("making a sample issue / log entry");
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
