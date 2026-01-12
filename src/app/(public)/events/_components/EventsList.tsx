@@ -100,7 +100,7 @@ export function EventsList({ events }: EventsListProps) {
       className="col-span-full py-16 text-center"
       initial={{ opacity: 0 }}
     >
-      <div className="mx-auto max-w-md rounded-2xl p-12 backdrop-blur-xl">
+      <div className="mx-auto max-w-md rounded-2xl bg-card/60 p-12 shadow-lg ring-1 ring-border backdrop-blur-xl">
         <Calendar className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50" />
         <h3 className="mb-2 font-bold text-foreground text-xl">
           No Events Found

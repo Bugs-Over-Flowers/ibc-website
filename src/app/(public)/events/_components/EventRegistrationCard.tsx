@@ -48,7 +48,7 @@ export default function EventRegistrationCard({
     >
       <motion.div variants={fadeInUp}>
         <Card className="sticky top-24 rounded-2xl border-0 bg-card/80 shadow-lg ring-1 ring-border/50 backdrop-blur-xl">
-          <CardContent className="rounded-2xl p-6">
+          <CardContent className="rounded-2xl">
             <h3 className="mb-4 font-semibold text-foreground text-lg">
               Registration
             </h3>
@@ -64,15 +64,6 @@ export default function EventRegistrationCard({
                   ? "Free"
                   : `₱${event.registrationFee.toLocaleString()}`}
               </span>
-            </div>
-
-            {/* Available Slots */}
-            <div className="flex items-center justify-between border-border border-b py-3">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span className="text-sm">Available Slots</span>
-              </div>
-              <span className="font-medium text-primary">Open</span>
             </div>
 
             {/* Action Buttons */}
@@ -101,27 +92,27 @@ export default function EventRegistrationCard({
                 ].map(({ icon: Icon, label }) => (
                   <Button
                     aria-label={`Share on ${label}`}
-                    className="flex-1 rounded-lg bg-muted p-2.5 transition-colors hover:bg-accent"
+                    className="flex-1 rounded-lg bg-primary/10 p-2.5 text-primary transition-colors hover:bg-primary/20 hover:text-primary"
                     key={label}
                     size="icon"
                     type="button"
-                    variant="ghost"
+                    variant="default"
                   >
-                    <Icon className="mx-auto h-4 w-4 text-foreground" />
+                    <Icon className="mx-auto h-4 w-4" />
                   </Button>
                 ))}
                 <Button
                   aria-label="Copy link"
-                  className="flex-1 rounded-lg bg-primary/10 p-2.5 transition-colors hover:bg-primary/20"
+                  className="flex-1 rounded-lg bg-primary/10 p-2.5 text-primary transition-colors hover:bg-primary/20 hover:text-primary"
                   onClick={handleCopyLink}
                   size="icon"
                   type="button"
                   variant="ghost"
                 >
                   {copied ? (
-                    <Check className="mx-auto h-4 w-4 text-primary" />
+                    <Check className="mx-auto h-4 w-4" />
                   ) : (
-                    <Copy className="mx-auto h-4 w-4 text-primary" />
+                    <Copy className="mx-auto h-4 w-4" />
                   )}
                 </Button>
               </div>
