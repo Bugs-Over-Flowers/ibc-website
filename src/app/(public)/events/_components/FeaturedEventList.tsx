@@ -68,7 +68,7 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
       onMouseLeave={() => setPaused(false)}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary/5 via-accent/5 to-transparent p-6 md:p-8">
+      <div className="relative overflow-hidden rounded-2xl p-6 md:p-8">
         <AnimatePresence custom={direction} initial={false} mode="wait">
           <motion.div
             animate="center"

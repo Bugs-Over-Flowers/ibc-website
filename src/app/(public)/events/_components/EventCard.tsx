@@ -29,7 +29,7 @@ export function EventCard({ event, index }: EventCardProps) {
       transition={{ duration: 0.5, delay: 0.1 * index }}
     >
       <div className="h-full">
-        <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-shadow hover:shadow-lg">
+        <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-shadow hover:shadow-lg hover:shadow-primary/10">
           <Link
             className="group block flex-1"
             href={`/events/${event.eventId}`}
@@ -47,13 +47,19 @@ export function EventCard({ event, index }: EventCardProps) {
             </div>
 
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="mb-2 line-clamp-2 font-semibold text-foreground text-lg transition-colors group-hover:text-primary">
-                {event.eventTitle}
-              </h3>
+              <div className="h-14 overflow-hidden">
+                <h3 className="line-clamp-2 font-semibold text-foreground text-lg transition-colors group-hover:text-primary">
+                  {event.eventTitle}
+                </h3>
+              </div>
 
-              <p className="mb-4 line-clamp-2 flex-1 text-muted-foreground text-sm">
-                {event.description}
-              </p>
+              <div className="mt-2 h-10 overflow-hidden">
+                <p className="line-clamp-2 text-muted-foreground text-sm">
+                  {event.description}
+                </p>
+              </div>
+
+              <div className="mt-4 flex-1"></div>
 
               <div className="space-y-2 border-border border-t pt-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -92,23 +98,33 @@ export function EventCard({ event, index }: EventCardProps) {
             </div>
           </Link>
 
-          <div className="mt-4 flex items-center justify-between p-6">
-            <span className="font-bold text-lg text-primary">
-              {event.registrationFee === 0
-                ? "Free"
-                : `₱${event.registrationFee.toLocaleString()}`}
-            </span>
-            {status !== "past" && (
-              <Link
-                className="ml-auto flex w-auto items-center gap-2 rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90 hover:text-white"
-                href={`/registration/${event.eventId}/info`}
-                onClick={(e) => e.stopPropagation()}
-                tabIndex={0}
-              >
-                <ClipboardList className="h-4 w-4" />
-                Register Now
-              </Link>
-            )}
+          <div className="flex flex-col gap-3 px-6 pb-6">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-lg text-primary">
+                {event.registrationFee === 0
+                  ? "Free"
+                  : `₱${event.registrationFee.toLocaleString()}`}
+              </span>
+              {status !== "past" && (
+                <Link
+                  className="ml-auto flex w-auto items-center gap-2 rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90 hover:text-white"
+                  href={`/registration/${event.eventId}/info`}
+                  onClick={(e) => e.stopPropagation()}
+                  tabIndex={0}
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  Register Now
+                </Link>
+              )}
+            </div>
+            <Link
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-primary px-4 py-2 font-medium text-primary text-sm transition-colors hover:bg-primary/10"
+              href={`/events/${event.eventId}`}
+              onClick={(e) => e.stopPropagation()}
+              tabIndex={0}
+            >
+              Read More
+            </Link>
           </div>
         </div>
       </div>

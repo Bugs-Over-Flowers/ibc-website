@@ -16,6 +16,11 @@ import type { EventStatus } from "@/lib/events/eventUtils";
 
 type FilterOption = "all" | EventStatus;
 
+type DateRange = {
+  from?: Date;
+  to?: Date;
+};
+
 interface EventsListProps {
   events: Event[];
 }
@@ -23,6 +28,7 @@ interface EventsListProps {
 export function EventsList({ events }: EventsListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<FilterOption>("all");
+  const [dateRange, setDateRange] = useState<DateRange>({});
 
   const { ongoingEvents, filteredEvents } = useMemo(() => {
     // First filter by search query
@@ -36,13 +42,25 @@ export function EventsList({ events }: EventsListProps) {
       );
     });
 
+    // Filter by date range
+    const dateFiltered = searchFiltered.filter((event) => {
+      const eventDate = new Date(event.eventStartDate || 0);
+      if (dateRange.from && eventDate < dateRange.from) return false;
+      if (dateRange.to) {
+        const toDate = new Date(dateRange.to);
+        toDate.setHours(23, 59, 59, 999);
+        if (eventDate > toDate) return false;
+      }
+      return true;
+    });
+
     // Separate ongoing events (for featured card)
-    const ongoing = searchFiltered.filter(
+    const ongoing = dateFiltered.filter(
       (e) => getEventCategory(e) === "ongoing",
     );
 
     // Filter remaining events based on dropdown selection
-    let remaining = searchFiltered.filter(
+    let remaining = dateFiltered.filter(
       (e) => getEventCategory(e) !== "ongoing",
     );
 
@@ -74,7 +92,7 @@ export function EventsList({ events }: EventsListProps) {
     });
 
     return { ongoingEvents: ongoing, filteredEvents: remaining };
-  }, [events, searchQuery, filter]);
+  }, [events, searchQuery, filter, dateRange]);
 
   const EmptyState = () => (
     <motion.div
@@ -82,7 +100,7 @@ export function EventsList({ events }: EventsListProps) {
       className="col-span-full py-16 text-center"
       initial={{ opacity: 0 }}
     >
-      <div className="mx-auto max-w-md rounded-2xl bg-white/60 p-12 shadow-lg ring-1 ring-white/50 backdrop-blur-xl">
+      <div className="mx-auto max-w-md rounded-2xl p-12 backdrop-blur-xl">
         <Calendar className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50" />
         <h3 className="mb-2 font-bold text-foreground text-xl">
           No Events Found
@@ -147,6 +165,8 @@ export function EventsList({ events }: EventsListProps) {
         </motion.div>
         <div className="mb-12">
           <EventsSearch
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
             onSearchChange={setSearchQuery}
             onStatusChange={setFilter}
             searchQuery={searchQuery}
