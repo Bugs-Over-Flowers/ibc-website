@@ -62,7 +62,12 @@ bun run cy:open              # Open Cypress interactive mode
 bun run cy:run               # Run Cypress tests headless
 
 # Database
-bun run gen:types            # Generate Supabase TypeScript types
+bun run db:start             # Start local Supabase stack
+bun run db:stop              # Stop local Supabase stack
+bun run db:status            # Check local Supabase status
+bun run db:reset             # Reset local DB (migrations + seed)
+bun run db:gen:types         # Generate types from LOCAL DB
+bun run gen:types            # Generate types from PRODUCTION DB
 
 # Email Development
 bun run email:dev            # Email template preview server (port 3050)
