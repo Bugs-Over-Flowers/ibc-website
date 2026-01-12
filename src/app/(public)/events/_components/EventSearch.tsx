@@ -260,6 +260,7 @@ export function EventsSearch({
                   <div className="flex border-border/30 border-r">
                     <Calendar
                       className="pointer-events-auto p-3"
+                      disabled={(date) => date > today}
                       initialFocus
                       mode="single"
                       onSelect={(date) => {
@@ -271,7 +272,8 @@ export function EventsSearch({
                     <Calendar
                       className="pointer-events-auto border-border/30 border-l p-3"
                       disabled={(date) =>
-                        dateRange?.from ? date < dateRange.from : false
+                        date > today ||
+                        (dateRange?.from ? date < dateRange.from : false)
                       }
                       mode="single"
                       onSelect={(date) => {
