@@ -182,14 +182,14 @@ END $$;
 -- =============================================================================
 INSERT INTO "Event" (
   "eventId",
-  "eventName",
-  "eventDescription",
+  "eventTitle",
+  "description",
   "eventStartDate",
   "eventEndDate",
-  "eventLocation",
+  "venue",
   "eventType",
   "registrationFee",
-  "eventHeaderURL"
+  "eventHeaderUrl"
 ) VALUES
   (
     gen_random_uuid(),

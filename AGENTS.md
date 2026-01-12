@@ -61,9 +61,6 @@ vitest tests/example.test.ts # Run specific test file directly
 bun run cy:open              # Open Cypress interactive mode
 bun run cy:run               # Run Cypress tests headless
 
-# Database
-bun run gen:types            # Generate Supabase TypeScript types
-
 # Email Development
 bun run email:dev            # Email template preview server (port 3050)
 ```
