@@ -41,22 +41,25 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
     <Field className={className} data-invalid={isInvalid}>
       {label && <Label>{label}</Label>}
       <Popover onOpenChange={setOpen} open={open}>
-        <PopoverTrigger asChild>
-          <Button
-            className={cn(
-              "w-full justify-between text-left font-normal",
-              !field.state.value && "text-muted-foreground",
-            )}
-            variant={"outline"}
-          >
-            {field.state.value ? (
-              format(field.state.value, "MMMM dd, yyyy")
-            ) : (
-              <span>Pick a date</span>
-            )}
-            <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <Button
+              className={cn(
+                "w-full justify-between text-left font-normal",
+                !field.state.value && "text-muted-foreground",
+              )}
+              variant={"outline"}
+            >
+              {field.state.value ? (
+                format(field.state.value, "MMMM dd, yyyy")
+              ) : (
+                <span>Pick a date</span>
+              )}
+              <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+            </Button>
+          }
+        />
+
         <PopoverContent align="start" className="w-auto p-0">
           <Calendar
             autoFocus

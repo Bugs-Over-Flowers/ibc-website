@@ -40,6 +40,7 @@ export function FloatingParticles() {
             opacity: 0,
           }}
           key={particle.id}
+          suppressHydrationWarning
           transition={{
             duration: particle.duration,
             repeat: Number.POSITIVE_INFINITY,
