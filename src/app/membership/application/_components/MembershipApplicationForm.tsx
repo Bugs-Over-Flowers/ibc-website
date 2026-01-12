@@ -60,8 +60,11 @@ export function MembershipApplicationForm() {
   };
 
   const isSubmitting = useStore(step4Form.store, (state) => state.isSubmitting);
+  const isSubmitted = useMembershipApplicationStore(
+    (state) => state.isSubmitted,
+  );
 
-  if (isSubmitting) {
+  if (isSubmitting || isSubmitted) {
     return <CenterSpinner scale={10} />;
   }
 

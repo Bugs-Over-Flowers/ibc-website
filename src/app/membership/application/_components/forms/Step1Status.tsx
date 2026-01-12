@@ -1,6 +1,6 @@
 import type { useMembershipStep1 } from "@/app/membership/application/_hooks/useMembershipStep1";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 import type { MembershipApplicationStep1Schema } from "@/lib/validation/membership/application";
 
 interface StepProps {
@@ -43,68 +43,54 @@ export function Step1Status({ form }: StepProps) {
       <div className="space-y-4">
         <Label className="text-base">Select Membership Status *</Label>
         <form.AppField name="applicationType">
-          {(field) => (
-            <RadioGroup
-              className="grid grid-cols-1 gap-4 md:grid-cols-3"
-              onValueChange={(value) =>
-                field.handleChange(
-                  value as MembershipApplicationStep1Schema["applicationType"],
-                )
-              }
-              value={field.state.value}
-            >
-              <div>
-                <RadioGroupItem
-                  className="peer sr-only"
-                  id="newMember"
-                  value="newMember"
-                />
-                <Label
-                  className="flex cursor-pointer flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  htmlFor="newMember"
-                >
-                  <span className="font-semibold text-lg">New Member</span>
-                  <span className="text-muted-foreground text-sm">
-                    First time joining
-                  </span>
-                </Label>
-              </div>
+          {(field) => {
+            const options: {
+              value: MembershipApplicationStep1Schema["applicationType"];
+              label: string;
+              description: string;
+            }[] = [
+              {
+                value: "newMember",
+                label: "New Member",
+                description: "First time joining",
+              },
+              {
+                value: "renewal",
+                label: "Renewal",
+                description: "Renewing membership",
+              },
+              {
+                value: "updating",
+                label: "Update Info",
+                description: "Updating details",
+              },
+            ];
 
-              <div>
-                <RadioGroupItem
-                  className="peer sr-only"
-                  id="renewal"
-                  value="renewal"
-                />
-                <Label
-                  className="flex cursor-pointer flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  htmlFor="renewal"
-                >
-                  <span className="font-semibold text-lg">Renewal</span>
-                  <span className="text-muted-foreground text-sm">
-                    Renewing membership
-                  </span>
-                </Label>
+            return (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {options.map((option) => (
+                  <button
+                    className={cn(
+                      "flex cursor-pointer flex-col items-center justify-between rounded-md border-2 bg-popover p-4 transition-colors hover:bg-accent hover:text-accent-foreground",
+                      field.state.value === option.value
+                        ? "border-primary bg-primary/5"
+                        : "border-muted",
+                    )}
+                    key={option.value}
+                    onClick={() => field.handleChange(option.value)}
+                    type="button"
+                  >
+                    <span className="font-semibold text-lg">
+                      {option.label}
+                    </span>
+                    <span className="text-muted-foreground text-sm">
+                      {option.description}
+                    </span>
+                  </button>
+                ))}
               </div>
-
-              <div>
-                <RadioGroupItem
-                  className="peer sr-only"
-                  id="updating"
-                  value="updating"
-                />
-                <Label
-                  className="flex cursor-pointer flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  htmlFor="updating"
-                >
-                  <span className="font-semibold text-lg">Update Info</span>
-                  <span className="text-muted-foreground text-sm">
-                    Updating details
-                  </span>
-                </Label>
-              </div>
-            </RadioGroup>
-          )}
+            );
+          }}
         </form.AppField>
       </div>
     </div>

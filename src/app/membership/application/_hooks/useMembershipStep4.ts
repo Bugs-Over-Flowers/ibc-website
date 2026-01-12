@@ -23,8 +23,9 @@ export const useMembershipStep4 = ({
   const setApplicationData = useMembershipApplicationStore(
     (state) => state.setApplicationData,
   );
-  const setStep = useMembershipApplicationStore((state) => state.setStep);
-  const resetStore = useMembershipApplicationStore((state) => state.resetStore);
+  const setIsSubmitted = useMembershipApplicationStore(
+    (state) => state.setIsSubmitted,
+  );
 
   const defaultApplicationDataStep4 = useMembershipApplicationStore(
     (state) => state.applicationData?.step4,
@@ -137,7 +138,9 @@ export const useMembershipStep4 = ({
       }
 
       toast.success("Application submitted successfully!");
-      resetStore();
+
+      // Set submitted flag to keep showing loading state during navigation
+      setIsSubmitted(true);
 
       if (onSuccess) {
         onSuccess();
