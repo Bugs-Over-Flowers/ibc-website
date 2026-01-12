@@ -46,9 +46,11 @@ export function Step1Status({ form }: StepProps) {
           {(field) => (
             <RadioGroup
               className="grid grid-cols-1 gap-4 md:grid-cols-3"
-              onValueChange={(
-                val: MembershipApplicationStep1Schema["applicationType"],
-              ) => field.handleChange(val)}
+              onValueChange={(value) =>
+                field.handleChange(
+                  value as MembershipApplicationStep1Schema["applicationType"],
+                )
+              }
               value={field.state.value}
             >
               <div>

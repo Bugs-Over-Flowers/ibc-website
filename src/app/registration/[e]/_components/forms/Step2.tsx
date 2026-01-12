@@ -230,17 +230,20 @@ function RemoveParticipantDialog({ idx }: { idx: number }) {
   const field = useFieldContext();
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
-          <Trash2 className="mr-1 h-4 w-4" />
-          Remove
-        </Button>
-      </AlertDialogTrigger>
+      <AlertDialogTrigger
+        render={
+          <Button
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            <Trash2 className="mr-1 h-4 w-4" />
+            Remove
+          </Button>
+        }
+      />
+
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Remove Participant?</AlertDialogTitle>

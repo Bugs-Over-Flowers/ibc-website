@@ -80,7 +80,6 @@ export default function Registrationdata({
               affiliation: data.affiliation,
               registrationIdentifier: data.registrationIdentifier,
               email: data.registrant.email,
-              eventId: data.event.eventId,
               registrationId: data.registrationId,
               paymentStatus: data.paymentStatus,
               proofOfPaymentImageURL: data.signedUrl,
