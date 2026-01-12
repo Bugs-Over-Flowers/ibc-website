@@ -42,7 +42,7 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
       const welcomeTimer = setTimeout(() => {
         setShowWelcome(false);
         cycleCountRef.current = 0;
-      }, 10000);
+      }, 200000);
       return () => clearTimeout(welcomeTimer);
     }
   }, [showWelcome, isPaused]);

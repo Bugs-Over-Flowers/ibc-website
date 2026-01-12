@@ -22,7 +22,7 @@ export function AboutHero() {
           priority
           src="https://picsum.photos/seed/ibc-about/1200/600"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-[#2E2A6E]/70 via-[#2E2A6E]/50" />
+        <div className="absolute inset-0 bg-linear-to-b from-primary/70 via-primary/50" />
       </motion.div>
 
       {/* Animated Blur Orbs */}
