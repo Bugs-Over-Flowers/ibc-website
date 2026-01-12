@@ -1,25 +1,126 @@
 # Form System Rules (TanStack Form)
 
 ## Required Pattern
+
 - **MUST** use `useAppForm` from `@/hooks/_formHooks`
 - **MUST** use registered field components from `@/components/form`
-- Available fields: `TextField`, `NumberField`, `SelectField`, `TextareaField`, `FormDatePicker`, `FormDateRangePicker`
+
+## Available Field Components
+
+| Component             | Use case              |
+| --------------------- | --------------------- |
+| `TextField`           | Text inputs           |
+| `NumberField`         | Numeric inputs        |
+| `SelectField`         | Dropdowns             |
+| `TextareaField`       | Multi-line text       |
+| `FormDatePicker`      | Single date selection |
+| `FormDateRangePicker` | Date range selection  |
+| `RadioGroupField`     | Radio button groups   |
+| `CheckboxField`       | Single checkbox       |
+| `FileDropzoneField`   | File uploads          |
+| `ImageField`          | Image uploads         |
+
+## Basic Form Example
+
+```tsx
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useAppForm } from "@/hooks/_formHooks";
+import tryCatch from "@/lib/server/tryCatch";
+import { createUser } from "@/server/users/mutations";
+import { z } from "zod";
+
+const schema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+});
+
+export function UserForm() {
+  const router = useRouter();
+  
+  const form = useAppForm({
+    defaultValues: { name: "", email: "" },
+    validation: { onSubmit: schema },
+    onSubmit: async ({ value }) => {
+      const { error, data } = await tryCatch(createUser(value));
+      if (error) {
+        form.setErrorMap({ onSubmit: error });
+        return;
+      }
+      router.push(`/users/${data.id}`);
+    },
+  });
+  
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}>
+      <form.AppField name="name">
+        {(field) => <field.TextField label="Name" />}
+      </form.AppField>
+      
+      <form.AppField name="email">
+        {(field) => <field.TextField label="Email" type="email" />}
+      </form.AppField>
+      
+      <form.AppForm>
+        <form.SubmitButton label="Create" isSubmittingLabel="Creating..." />
+      </form.AppForm>
+    </form>
+  );
+}
+```
 
 ## Form Submission Pattern
+
 ```tsx
 onSubmit: async ({ value }) => {
-  const { error, data } = await tryCatch(serverAction(value));
-  if (error) {
+  const { error, data, success } = await tryCatch(serverAction(value));
+  if (!success) {
     form.setErrorMap({ onSubmit: error });
     return;
   }
-  // handle success
+  // handle success (data is available here)
 }
 ```
 
 ## Adding New Field Types
+
 1. Create component in `src/components/form/` using `useFieldContext<T>()`
-2. **MUST** include `<FieldErrors />` for validation display
+2. **MUST** include `<FieldError />` for validation display (not `FieldErrors`)
 3. Export from `src/components/form/index.ts`
 4. **MUST** include `data-invalid` and `aria-invalid` attributes on necessary elements
 5. Register in `src/hooks/_formHooks.ts` under `fieldComponents`
+
+**Field component template:**
+
+```tsx
+import { useFieldContext } from "@/hooks/_formHooks";
+import { cn } from "@/lib/utils";
+import { Field, FieldDescription, FieldLabel, FieldError } from "@/components/ui/field";
+
+interface MyFieldProps {
+  label?: string;
+  description?: string;
+  className?: string;
+}
+
+function MyField({ label, description, className }: MyFieldProps) {
+  const field = useFieldContext<string>();
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  return (
+    <Field
+      className={cn("grid gap-2", className)}
+      data-invalid={isInvalid}
+      aria-invalid={isInvalid}
+    >
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
+      {/* Your input component here */}
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError errors={field.state.meta.errors} />
+    </Field>
+  );
+}
+
+export default MyField;
+```
