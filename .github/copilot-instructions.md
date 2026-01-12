@@ -32,8 +32,8 @@ bun run dev          # Dev server (Turbopack)
 bun run build        # Production build
 bun run check-code   # Biome lint + format
 bun run cy:open      # Cypress interactive
-bun run db:start     # Start local Supabase
-bun run db:reset     # Reset local DB & run migrations
+supabase start       # Start local Supabase
+supabase db reset    # Reset local DB & run migrations
 bun run db:gen:types # Generate local types
 bun run gen:types    # Generate production types
 ```
