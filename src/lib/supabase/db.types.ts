@@ -31,7 +31,7 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
-          sectorId: number;
+          sectorId: number | null;
           websiteURL: string;
         };
         Insert: {
@@ -50,7 +50,7 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
-          sectorId: number;
+          sectorId?: number | null;
           websiteURL: string;
         };
         Update: {
@@ -69,10 +69,17 @@ export type Database = {
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
-          sectorId?: number;
+          sectorId?: number | null;
           websiteURL?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "Application_memberId_fkey";
+            columns: ["memberId"];
+            isOneToOne: false;
+            referencedRelation: "BusinessMember";
+            referencedColumns: ["businessMemberId"];
+          },
           {
             foreignKeyName: "Application_sectorId_fkey";
             columns: ["sectorId"];
@@ -332,15 +339,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["InterviewStatus"] | null;
           updatedAt?: string | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "Interview_applicationId_fkey";
-            columns: ["applicationId"];
-            isOneToOne: false;
-            referencedRelation: "Application";
-            referencedColumns: ["applicationId"];
-          },
-        ];
+        Relationships: [];
       };
       Participant: {
         Row: {
@@ -531,6 +530,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      january_first_reset: { Args: never; Returns: undefined };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
       submit_event_registration: {
         Args: {
