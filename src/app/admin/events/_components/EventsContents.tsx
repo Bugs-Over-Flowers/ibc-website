@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { getAllEvents } from "@/server/events/queries/getAllEvents";
+import CreateEventButton from "./CreateEventButton";
 import EventFilters from "./EventFilters";
 import EventTable from "./EventTable";
 
@@ -35,6 +36,7 @@ export default async function EventsContents({
             Manage and organize your events
           </p>
         </div>
+        <CreateEventButton />
       </div>
 
       <div className="rounded-lg border bg-background p-4 md:p-6">
