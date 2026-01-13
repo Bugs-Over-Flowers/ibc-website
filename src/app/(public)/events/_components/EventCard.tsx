@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Calendar, ClipboardList, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getStatusBadge } from "@/components/BadgeEvents";
 import {
   formatDate,
@@ -20,7 +21,35 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, index }: EventCardProps) {
+  const router = useRouter();
   const status = getEventStatus(event.eventStartDate, event.eventEndDate);
+
+  const handleCardClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.target as HTMLElement;
+    const isInteractiveElement =
+      target.closest("a") ||
+      target.closest("button") ||
+      target.tagName === "A" ||
+      target.tagName === "BUTTON";
+
+    if (!isInteractiveElement) {
+      router.push(`/events/${event.eventId}`);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    const target = e.target as HTMLElement;
+    const isInteractiveElement =
+      target.closest("a") ||
+      target.closest("button") ||
+      target.tagName === "A" ||
+      target.tagName === "BUTTON";
+
+    if (!isInteractiveElement && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      router.push(`/events/${event.eventId}`);
+    }
+  };
 
   return (
     <motion.div
@@ -29,11 +58,14 @@ export function EventCard({ event, index }: EventCardProps) {
       transition={{ duration: 0.5, delay: 0.1 * index }}
     >
       <div className="h-full">
-        <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-shadow hover:shadow-lg hover:shadow-primary/10">
-          <Link
-            className="group block flex-1"
-            href={`/events/${event.eventId}`}
-          >
+        <button
+          className="group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-background text-left transition-shadow hover:shadow-lg hover:shadow-primary/10"
+          onClick={handleCardClick}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          type="button"
+        >
+          <div className="flex-1">
             <div className="relative aspect-16/10 overflow-hidden">
               <Image
                 alt={event.eventTitle}
@@ -96,7 +128,7 @@ export function EventCard({ event, index }: EventCardProps) {
                 </div>
               </div>
             </div>
-          </Link>
+          </div>
 
           <div className="flex flex-col gap-3 px-6 pb-6">
             <div className="flex items-center justify-between">
@@ -109,7 +141,6 @@ export function EventCard({ event, index }: EventCardProps) {
                 <Link
                   className="ml-auto flex w-auto items-center gap-2 rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90 hover:text-white"
                   href={`/registration/${event.eventId}/info`}
-                  onClick={(e) => e.stopPropagation()}
                   tabIndex={0}
                 >
                   <ClipboardList className="h-4 w-4" />
@@ -120,14 +151,13 @@ export function EventCard({ event, index }: EventCardProps) {
             <Link
               className="group/readmore flex w-full items-center justify-center gap-2 rounded-xl border border-primary/50 bg-card px-4 py-2.5 font-medium text-primary text-sm transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:shadow-md hover:shadow-primary/20"
               href={`/events/${event.eventId}`}
-              onClick={(e) => e.stopPropagation()}
               tabIndex={0}
             >
               Read More
               <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/readmore:translate-x-1" />
             </Link>
           </div>
-        </div>
+        </button>
       </div>
     </motion.div>
   );
