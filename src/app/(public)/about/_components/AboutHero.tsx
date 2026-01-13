@@ -17,12 +17,11 @@ export function AboutHero() {
       >
         <Image
           alt="About Iloilo Business Club background"
-          className="object-cover"
+          className="object-cover opacity-20"
           fill
           priority
           src="https://picsum.photos/seed/ibc-about/1200/600"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-primary/70 via-primary/50" />
       </motion.div>
 
       {/* Animated Blur Orbs */}
@@ -50,13 +49,13 @@ export function AboutHero() {
           variants={staggerContainer}
         >
           <motion.h1
-            className="mb-6 font-bold text-4xl text-white drop-shadow-lg md:text-5xl lg:text-6xl"
+            className="mb-6 font-bold text-4xl text-foreground drop-shadow-lg md:text-5xl lg:text-6xl"
             variants={fadeInUp}
           >
             About Iloilo Business Club
           </motion.h1>
           <motion.p
-            className="text-lg text-white/90 leading-relaxed drop-shadow-md"
+            className="text-foreground/90 text-lg leading-relaxed"
             variants={fadeInUp}
           >
             A non-stock, non-profit membership organization founded in October

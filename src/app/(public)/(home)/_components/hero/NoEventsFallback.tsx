@@ -40,17 +40,25 @@ export function NoEventsFallback({ onNavigate }: NoEventsFallbackProps) {
       key="no-events"
       transition={{ duration: 1 }}
     >
-      <Image
-        alt="Iloilo Business Club networking event"
-        className="object-cover"
-        fill
-        priority
-        src="/images/backgrounds/bg-2.jpg"
-      />
+      {/* Background Image with Ken Burns effect */}
+      <motion.div
+        animate={{ scale: 1.08 }}
+        className="absolute inset-0 h-full w-full"
+        initial={{ scale: 1 }}
+        transition={{ duration: 25, ease: "linear" }}
+      >
+        <Image
+          alt="Iloilo Business Club networking event"
+          className="object-cover brightness-100 dark:brightness-75 dark:contrast-110 dark:saturate-90"
+          fill
+          priority
+          src="/images/backgrounds/bg-2.jpg"
+        />
+      </motion.div>
 
-      {/* Multi-layer Gradient Overlay */}
-      <div className="absolute inset-0 bg-linear-to-br from-slate-900/90 via-slate-900/75 to-sky-900/50" />
-      <div className="absolute inset-0 bg-linear-to-t from-slate-900/70 via-transparent to-slate-900/40" />
+      {/* Hero Overlay with contrast-safe tokens */}
+      <div className="absolute inset-0 bg-(--color-hero-overlay)" />
+      <div className="absolute inset-0 bg-linear-to-r from-background/60 via-background/40 to-background/10" />
 
       {/* Content */}
       <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
@@ -62,29 +70,27 @@ export function NoEventsFallback({ onNavigate }: NoEventsFallbackProps) {
         >
           {/* Badge */}
           <motion.div
-            className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md"
+            className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-chart-1/40 bg-background/90 px-4 py-2 shadow-lg backdrop-blur-md"
             variants={itemVariants}
           >
-            <Bell className="h-4 w-4 text-primary" />
-            <span className="font-medium text-sm text-white/90">
+            <Bell className="h-4 w-4 text-chart-1" />
+            <span className="font-medium text-foreground text-sm">
               Stay Informed
             </span>
           </motion.div>
 
           {/* Heading */}
           <motion.h2
-            className="mb-5 text-balance font-bold text-3xl text-white sm:text-4xl lg:text-5xl"
+            className="mb-5 text-balance font-bold text-3xl text-hero-text drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] sm:text-4xl lg:text-5xl dark:drop-shadow-[0_8px_28px_rgba(0,0,0,0.8)]"
             variants={itemVariants}
           >
             Exciting Events Are{" "}
-            <span className="bg-linear from-primary via-sky-400 to-cyan-300 bg-clip-text text-transparent">
-              Coming Soon
-            </span>
+            <span className="text-hero-text">Coming Soon</span>
           </motion.h2>
 
           {/* Description */}
           <motion.p
-            className="mb-8 max-w-lg text-lg text-white/80 leading-relaxed"
+            className="mb-8 max-w-lg text-hero-text text-lg leading-relaxed drop-shadow-[0_1px_4px_rgba(255,255,255,0.2)] dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
             variants={itemVariants}
           >
             We're preparing new networking opportunities and business events for
@@ -95,7 +101,7 @@ export function NoEventsFallback({ onNavigate }: NoEventsFallbackProps) {
           {/* CTA Buttons */}
           <motion.div className="flex flex-wrap gap-4" variants={itemVariants}>
             <Button
-              className="h-12 rounded-full bg-primary px-7 font-semibold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-primary/30 hover:shadow-xl"
+              className="h-13 rounded-3xl bg-chart-1 px-8 font-semibold text-base text-card shadow-chart-1/40 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-chart-1/90 hover:shadow-chart-1/50 hover:shadow-xl"
               onClick={() => onNavigate("public-events")}
               size="lg"
             >
@@ -104,7 +110,7 @@ export function NoEventsFallback({ onNavigate }: NoEventsFallbackProps) {
             </Button>
             <Link href="/contact" scroll={false}>
               <Button
-                className="h-12 rounded-full border-2 border-white/30 bg-white/5 px-7 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-white/50 hover:bg-white/15"
+                className="h-13 rounded-3xl border-2 border-foreground/25 bg-background/80 px-7 font-semibold text-foreground backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-foreground/40 hover:bg-background/90"
                 size="lg"
                 variant="outline"
               >

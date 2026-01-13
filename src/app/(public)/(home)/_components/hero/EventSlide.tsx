@@ -119,7 +119,7 @@ export function EventSlide({
       >
         <Image
           alt={event.eventTitle}
-          className="object-cover"
+          className="object-cover brightness-100 dark:brightness-75 dark:contrast-110 dark:saturate-90"
           fill
           priority={currentIndex === 0}
           src={
@@ -129,9 +129,9 @@ export function EventSlide({
         />
       </motion.div>
 
-      {/* Multi-layer Gradient Overlay for consistent contrast */}
-      <div className="absolute inset-0 bg-linear-to-r from-slate-900/90 via-slate-900/60 to-slate-900/30" />
-      <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 via-transparent to-slate-900/40" />
+      {/* Hero Overlay with contrast-safe tokens */}
+      <div className="absolute inset-0 bg-(--color-hero-overlay)" />
+      <div className="absolute inset-0 bg-linear-to-r from-background/60 via-background/40 to-background/10" />
 
       {/* Content */}
       <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
@@ -147,17 +147,17 @@ export function EventSlide({
             variants={itemVariants}
           >
             <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-chart-2 opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-chart-2" />
             </span>
-            <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-1.5 font-medium text-emerald-300 text-sm tracking-wide backdrop-blur-sm">
+            <span className="rounded-full border border-chart-2/40 bg-background/90 px-4 py-1.5 font-medium text-foreground text-sm tracking-wide shadow-lg backdrop-blur-sm">
               Upcoming Event
             </span>
           </motion.div>
 
           {/* Event Title */}
           <motion.h2
-            className="mb-4 line-clamp-2 text-balance font-bold text-3xl text-white leading-tight sm:text-4xl lg:text-5xl"
+            className="mb-4 line-clamp-2 text-balance font-bold text-3xl text-chartt-2 text-foreground leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] sm:text-4xl lg:text-5xl dark:drop-shadow-[0_8px_28px_rgba(0,0,0,0.8)]"
             variants={itemVariants}
           >
             {event.eventTitle}
@@ -165,7 +165,7 @@ export function EventSlide({
 
           {/* Event Description */}
           <motion.p
-            className="mb-6 line-clamp-2 max-w-2xl text-pretty text-base text-white/80 leading-relaxed sm:text-lg"
+            className="mb-6 line-clamp-2 max-w-2xl text-pretty text-base text-hero-text leading-relaxed drop-shadow-[0_1px_4px_rgba(255,255,255,0.2)] sm:text-lg dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
             variants={itemVariants}
           >
             {event.description ||
@@ -177,16 +177,16 @@ export function EventSlide({
             className="mb-8 flex flex-wrap gap-3"
             variants={itemVariants}
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 backdrop-blur-sm">
-              <Calendar className="h-4 w-4 text-primary" />
-              <span className="font-medium text-sm text-white/90">
+            <div className="inline-flex items-center gap-2 rounded-full border border-chart-1/40 bg-background/90 px-4 py-2 shadow-lg backdrop-blur-md">
+              <Calendar className="h-4 w-4 text-chart-1" />
+              <span className="font-medium text-foreground text-sm">
                 {formatDateRange(event.eventStartDate, event.eventEndDate)}
               </span>
             </div>
             {event.venue && (
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 backdrop-blur-sm">
-                <MapPin className="h-4 w-4 text-primary" />
-                <span className="line-clamp-1 max-w-[200px] font-medium text-sm text-white/90">
+              <div className="inline-flex items-center gap-2 rounded-full border border-chart-1/40 bg-background/90 px-4 py-2 shadow-lg backdrop-blur-md">
+                <MapPin className="h-4 w-4 text-chart-1" />
+                <span className="line-clamp-1 max-w-[200px] font-medium text-foreground text-sm">
                   {event.venue}
                 </span>
               </div>
@@ -196,7 +196,7 @@ export function EventSlide({
           {/* Action Buttons */}
           <motion.div className="flex flex-wrap gap-3" variants={itemVariants}>
             <Button
-              className="h-11 rounded-full bg-primary px-6 font-semibold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-primary/30 hover:shadow-xl"
+              className="h-11 rounded-full bg-primary px-6 font-semibold text-base shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-primary/30 hover:shadow-xl"
               onClick={() =>
                 onNavigate("public-event-details", { eventId: event.eventId })
               }
@@ -207,7 +207,7 @@ export function EventSlide({
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button
-              className="h-11 rounded-full border-2 border-white/25 bg-white/5 px-6 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-white/40 hover:bg-white/10"
+              className="h-11 rounded-3xl border-chart-1/50 bg-background/90 px-8 font-semibold text-base shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-chart-1/70 hover:bg-background"
               onClick={() => onNavigate("public-events")}
               size="lg"
               type="button"
@@ -225,19 +225,19 @@ export function EventSlide({
           {/* Arrow Buttons */}
           <button
             aria-label="Previous event"
-            className="group absolute top-1/2 left-4 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/5 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-white/40 hover:bg-white/15 lg:left-6 lg:h-12 lg:w-12"
+            className="group absolute top-1/2 left-4 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-background/70 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-border hover:bg-background/90 lg:left-6 lg:h-12 lg:w-12"
             onClick={onPrev}
             type="button"
           >
-            <ChevronLeft className="h-5 w-5 text-white transition-transform group-hover:-translate-x-0.5" />
+            <ChevronLeft className="h-5 w-5 text-foreground transition-transform group-hover:-translate-x-0.5" />
           </button>
           <button
             aria-label="Next event"
-            className="group absolute top-1/2 right-4 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/5 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-white/40 hover:bg-white/15 lg:right-6 lg:h-12 lg:w-12"
+            className="group absolute top-1/2 right-4 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-background/70 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-border hover:bg-background/90 lg:right-6 lg:h-12 lg:w-12"
             onClick={onNext}
             type="button"
           >
-            <ChevronRight className="h-5 w-5 text-white transition-transform group-hover:translate-x-0.5" />
+            <ChevronRight className="h-5 w-5 text-foreground transition-transform group-hover:translate-x-0.5" />
           </button>
 
           {/* Progress Dots */}
@@ -254,7 +254,7 @@ export function EventSlide({
                   className={`h-2 rounded-full transition-all duration-300 ${
                     index === currentIndex
                       ? "w-8 bg-primary"
-                      : "w-2 bg-white/30 group-hover:bg-white/50"
+                      : "w-2 bg-muted-foreground/30 group-hover:bg-muted-foreground/50"
                   }`}
                 />
                 {index === currentIndex && !isPaused && (
@@ -270,9 +270,9 @@ export function EventSlide({
           </div>
 
           {/* Event Counter */}
-          <div className="absolute right-6 bottom-8 z-10 hidden rounded-full border border-white/20 bg-white/5 px-4 py-2 font-medium text-sm backdrop-blur-md sm:block">
+          <div className="absolute right-6 bottom-8 z-10 hidden rounded-full border border-border/40 bg-background/70 px-4 py-2 font-medium text-sm backdrop-blur-md sm:block">
             <span className="text-primary">{currentIndex + 1}</span>
-            <span className="text-white/50"> / {totalEvents}</span>
+            <span className="text-muted-foreground"> / {totalEvents}</span>
           </div>
         </>
       )}

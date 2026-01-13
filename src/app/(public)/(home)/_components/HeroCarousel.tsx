@@ -42,7 +42,7 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
       const welcomeTimer = setTimeout(() => {
         setShowWelcome(false);
         cycleCountRef.current = 0;
-      }, 200000);
+      }, 15000);
       return () => clearTimeout(welcomeTimer);
     }
   }, [showWelcome, isPaused]);
@@ -78,7 +78,7 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
           setDirection(1);
           return nextIndex;
         });
-      }, 7000);
+      }, 20000);
       return () => clearInterval(eventTimer);
     }
   }, [showWelcome, hasEvents, upcomingEvents.length, isPaused]);

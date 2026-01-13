@@ -152,7 +152,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
             >
               <Link href="/about" scroll={false}>
                 <Button
-                  className="h-13 rounded-full bg-chart-1 px-8 font-semibold text-base text-foreground shadow-chart-1/40 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-chart-1/90 hover:shadow-chart-1/50 hover:shadow-xl"
+                  className="h-13 rounded-3xl bg-chart-1 px-8 font-semibold text-base text-card shadow-chart-1/40 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-chart-1/90 hover:shadow-chart-1/50 hover:shadow-xl"
                   size="lg"
                 >
                   Discover More
@@ -161,7 +161,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
               </Link>
               <Link href="/membership/application" scroll={false}>
                 <Button
-                  className="h-13 rounded-full border-chart-1/50 bg-background/90 px-8 font-semibold text-base text-foreground shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-chart-1/70 hover:bg-background"
+                  className="h-13 rounded-3xl border-2 border-foreground/25 bg-background/80 px-7 font-semibold text-foreground backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-foreground/40 hover:bg-background/90"
                   size="lg"
                   variant="outline"
                 >
@@ -212,12 +212,12 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
         initial={{ opacity: 0 }}
         transition={{ delay: 1.5 }}
       >
-        <span className="font-semibold text-hero-text-muted text-sm tracking-wide">
+        <span className="font-semibold text-destructive-foreground text-sm tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)] dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
           Scroll to explore
         </span>
         <motion.div
           animate={{ y: [0, 5, 0] }}
-          className="flex h-11 w-7 justify-center rounded-full border-2 border-chart-1/60 bg-background/30 pt-2 backdrop-blur-sm"
+          className="flex h-11 w-7 justify-center rounded-full border-2 border-chart-1 bg-background/95 pt-2 shadow-xl backdrop-blur-md dark:border-chart-1/60 dark:bg-background/40"
           transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
         >
           <motion.div
