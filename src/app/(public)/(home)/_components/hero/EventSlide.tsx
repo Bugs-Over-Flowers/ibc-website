@@ -5,7 +5,6 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Clock,
   MapPin,
 } from "lucide-react";
 import { motion } from "motion/react";

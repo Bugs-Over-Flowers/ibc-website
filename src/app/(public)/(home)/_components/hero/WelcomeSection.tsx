@@ -48,15 +48,16 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
       >
         <Image
           alt="Business professionals networking"
-          className="object-cover"
+          className="object-cover brightness-100 dark:brightness-75 dark:contrast-110 dark:saturate-90"
           fill
           priority
-          src="/images/backgrounds/iloilo-3.jpg"
+          src="/images/backgrounds/iloilo-2.jpg"
         />
       </motion.div>
 
-      {/* Gradient Overlay with brand colors */}
-      <div className="absolute inset-0 bg-linear-to-br from-card via-popover/50 to-muted/20" />
+      {/* Hero Overlay with contrast-safe tokens */}
+      <div className="absolute inset-0 bg-(--color-hero-overlay)" />
+      <div className="absolute inset-0 bg-linear-to-br from-chart-1/20 via-transparent to-chart-2/20 dark:from-chart-1/10 dark:to-chart-2/10" />
 
       {/* Decorative Blue Gradient Orbs */}
       <div className="absolute inset-0 overflow-hidden">
@@ -104,7 +105,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
       <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
         <div className="grid w-full items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left Content */}
-          <motion.div className="text-white">
+          <motion.div>
             {/* Badge */}
             <motion.div
               animate={{ opacity: 1, y: 0 }}
@@ -120,15 +121,15 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
 
             <motion.h1
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 font-bold text-4xl leading-[1.1] sm:text-5xl lg:text-6xl xl:text-7xl"
+              className="mb-6 font-bold text-4xl text-hero-text leading-[1.1] drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)] sm:text-5xl lg:text-6xl xl:text-7xl dark:drop-shadow-[0_8px_28px_rgba(0,0,0,0.8)]"
               initial={{ opacity: 0, y: 30 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <span className="mb-2 block text-balance font-semibold text-md text-secondary">
+              <span className="mb-2 block text-balance font-semibold text-destructive-foreground text-md">
                 Welcome to
               </span>
               <div className="-space-y-2">
-                <span className="block text-balance bg-clip-text text-chart-2 shadow-2xl drop-shadow-xl">
+                <span className="block text-balance text-chart-1">
                   Iloilo Business Club, Inc
                 </span>
               </div>
@@ -136,7 +137,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
 
             <motion.p
               animate={{ opacity: 1, y: 0 }}
-              className="mb-10 max-w-xl text-pretty text-lg text-primary-foreground leading-relaxed drop-shadow-md sm:text-xl lg:text-2xl"
+              className="mb-10 max-w-xl text-pretty text-destructive-foreground text-lg leading-relaxed sm:text-xl lg:text-2xl"
               initial={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
@@ -180,7 +181,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
             {stats.map((stat, index) => (
               <motion.div
                 animate={{ opacity: 1, y: 0 }}
-                className="group rounded-2xl border border-chart-1/30 bg-background/95 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:border-chart-1/50 hover:bg-background"
+                className="group rounded-2xl border border-chart-1/30 bg-card/95 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:border-chart-1/50 hover:bg-card dark:bg-card/85"
                 initial={{ opacity: 0, y: 20 }}
                 key={stat.label}
                 transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
@@ -191,7 +192,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
                     <stat.icon className="h-5 w-5 text-chart-1" />
                   </div>
                 </div>
-                <div className="mb-1 font-bold text-4xl text-foreground">
+                <div className="mb-1 font-bold text-4xl text-card-foreground">
                   <AnimatedNumber value={stat.number} />
                   <span className="text-chart-1">{stat.suffix}</span>
                 </div>
@@ -211,7 +212,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
         initial={{ opacity: 0 }}
         transition={{ delay: 1.5 }}
       >
-        <span className="font-semibold text-primary-foreground text-sm tracking-wide drop-shadow-md">
+        <span className="font-semibold text-hero-text-muted text-sm tracking-wide">
           Scroll to explore
         </span>
         <motion.div
