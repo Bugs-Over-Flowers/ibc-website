@@ -56,7 +56,7 @@ export function AboutBoard() {
           <div className="mb-10 flex flex-wrap justify-center gap-8">
             {boardOfTrustees.slice(0, 2).map((member, index) => (
               <motion.div
-                className="flex h-[340px] w-[260px] flex-col items-center justify-center rounded-3xl bg-white/60 p-8 text-center shadow-xl ring-1 ring-white/50 backdrop-blur-xl"
+                className="flex h-[340px] w-[260px] flex-col items-center justify-center rounded-3xl bg-card/95 p-8 text-center shadow-xl ring-1 ring-border/50 backdrop-blur-xl"
                 initial={{ opacity: 0, y: 20 }}
                 key={member.name}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
