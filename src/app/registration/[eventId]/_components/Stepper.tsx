@@ -24,7 +24,7 @@ const STEPS: Step[] = [
 ];
 
 export default function Stepper() {
-  const step = useRegistrationStore((s) => s.step);
+  const step = useRegistrationStore((state) => state.step);
 
   return (
     <div className="flex flex-col">

@@ -7,7 +7,6 @@ import {
   User,
   Users,
 } from "lucide-react";
-import type { Route } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,25 +23,22 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import tryCatch from "@/lib/server/tryCatch";
+import type { RegistrationInformationPageProps } from "@/lib/types/route";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
 import EmptySection from "../../_components/EmptySection";
-
-type InformationPageProps = PageProps<"/registration/[e]/info">;
 
 export default async function InfoPage({
   params,
 }: {
-  params: InformationPageProps["params"];
+  params: RegistrationInformationPageProps["params"];
 }) {
-  const { e } = await params;
+  const { eventId } = await params;
   const requestCookies = (await cookies()).getAll();
   const {
     error: registrationEventDetailsMessage,
     data,
     success,
-  } = await tryCatch(
-    getRegistrationEventDetails(requestCookies, { eventId: e }),
-  );
+  } = await tryCatch(getRegistrationEventDetails(requestCookies, { eventId }));
 
   if (!success) {
     return <EmptySection message={registrationEventDetailsMessage} />;
@@ -112,7 +108,7 @@ export default async function InfoPage({
     <div className="p-10">
       <Card>
         <CardHeader>
-          <Link href={`/events/${e}` as Route}>
+          <Link href={`/events/${eventId}`}>
             <Button>Back to Event</Button>
           </Link>
           {data.eventHeaderUrl && (
@@ -170,7 +166,7 @@ export default async function InfoPage({
         </CardContent>
         <CardFooter>
           <CardAction>
-            <Link href={`/registration/${e}/` as Route}>
+            <Link href={`/registration/${eventId}`}>
               <Button>Register</Button>
             </Link>
           </CardAction>

@@ -22,17 +22,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FieldGroup, FieldTitle } from "@/components/ui/field";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemTitle,
-} from "@/components/ui/item";
+import { Item, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/item";
 import { useFieldContext } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
 import type { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
 import { useRegistrationStep2 } from "../../_hooks/useRegistrationStep2";
+import RegistrationStepHeader from "./RegistrationStepHeader";
 
 const MAX_OTHER_PARTICIPANTS = 9;
 
@@ -68,18 +63,13 @@ export default function Step2() {
   return (
     <form className="space-y-4" onSubmit={onNext}>
       <ItemGroup>
-        <Item>
-          <ItemContent>
-            <div className="flex items-center gap-2">
-              <Users size={18} />
-              <ItemTitle>Participants</ItemTitle>
-            </div>
-            <ItemDescription>
-              You may register up to a maxiumum of {MAX_OTHER_PARTICIPANTS + 1}{" "}
-              participants (including yourself)
-            </ItemDescription>
-          </ItemContent>
-        </Item>
+        <RegistrationStepHeader
+          description={`You may register up to a maximum of ${
+            MAX_OTHER_PARTICIPANTS + 1
+          } participants (including yourself).`}
+          Icon={Users}
+          title="Participants"
+        />
 
         {/* Participant Counter */}
         <Item variant={"outline"}>
@@ -120,6 +110,7 @@ export default function Step2() {
       {/* Other Registrants */}
       <form.AppField mode="array" name="otherParticipants">
         {(field) => {
+          // Determine if we can add more participants
           const otherParticipantsCount = field.state.value?.length ?? 0;
           const canAddMore = otherParticipantsCount < MAX_OTHER_PARTICIPANTS;
 
@@ -140,6 +131,7 @@ export default function Step2() {
                         <FieldTitle>
                           <h3>Participant {idx + 2}</h3>
                         </FieldTitle>
+                        {/* Remove Participant */}
                         {hasData ? (
                           <RemoveParticipantDialog idx={idx} />
                         ) : (
@@ -163,6 +155,7 @@ export default function Step2() {
                 );
               })}
 
+              {/* Button for adding another participant */}
               <Button
                 className="w-full"
                 disabled={!canAddMore}

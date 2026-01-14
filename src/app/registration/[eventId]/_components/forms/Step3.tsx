@@ -20,7 +20,6 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
-import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dropzone,
@@ -29,9 +28,9 @@ import {
 } from "@/components/ui/shadcn-io/dropzone";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import useRegistrationStore from "@/hooks/registration.store";
-import type { StandardRegistrationStep3Schema } from "@/lib/validation/registration/standard";
 import { PaymentMethodEnum } from "@/lib/validation/utils";
 import { useRegistrationStep3 } from "../../_hooks/useRegistrationStep3";
+import RegistrationStepHeader from "./RegistrationStepHeader";
 
 const BANK_DETAILS = {
   bankName: "BPI",
@@ -63,15 +62,14 @@ export default function Step3() {
   };
   return (
     <form className="space-y-4" onSubmit={onNext}>
-      <Item>
-        <ItemContent className="space-y-5">
-          <div className="flex items-center gap-2">
-            <Banknote size={20} />
-            <ItemTitle>Payment Information</ItemTitle>
-          </div>
-          <PaymentDetails />
-        </ItemContent>
-      </Item>
+      <RegistrationStepHeader
+        description="Select your preferred payment method."
+        Icon={Banknote}
+        title="Payment Method"
+      />
+
+      <PaymentDetails />
+
       <Card>
         <CardHeader>
           <CardTitle>
@@ -83,9 +81,12 @@ export default function Step3() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Payment Method */}
           <form.AppField
             listeners={{
               onChange: () => {
+                // Reset payment proof if payment method is changed
+                // and the paymentProof contains an error
                 if (!form.getFieldValue("paymentProof")) {
                   form.resetField("paymentProof");
                 }
@@ -100,6 +101,8 @@ export default function Step3() {
                   <RadioGroup
                     defaultValue="online"
                     onValueChange={(value) => {
+                      // Validate that the value is part of the enum
+                      // "online" | "onsite"
                       const parsedPaymentMethodValue =
                         PaymentMethodEnum.safeParse(value);
                       if (!parsedPaymentMethodValue.success) {
@@ -109,6 +112,7 @@ export default function Step3() {
                     }}
                     value={field.state.value}
                   >
+                    {/* Selection box for payment method: Online */}
                     <FieldLabel htmlFor="online">
                       <Field orientation={"horizontal"}>
                         <FieldContent>
@@ -118,16 +122,12 @@ export default function Step3() {
                           <FieldDescription>
                             Pay online through BPI and submit a proof of payment
                           </FieldDescription>
-                          <RadioGroupItem
-                            id="online"
-                            value={
-                              "online" as StandardRegistrationStep3Schema["paymentMethod"]
-                            }
-                            variant={"noIcon"}
-                          />
+                          <RadioGroupItem id="online" value={"online"} />
                         </FieldContent>
                       </Field>
                     </FieldLabel>
+
+                    {/* Selection box for payment method: Onsite */}
                     <FieldLabel htmlFor="onsite">
                       <Field orientation={"horizontal"}>
                         <FieldContent>
@@ -137,13 +137,7 @@ export default function Step3() {
                           <FieldDescription>
                             Pay in person at the event
                           </FieldDescription>
-                          <RadioGroupItem
-                            id="onsite"
-                            value={
-                              "onsite" as StandardRegistrationStep3Schema["paymentMethod"]
-                            }
-                            variant={"noIcon"}
-                          />
+                          <RadioGroupItem id="onsite" value={"onsite"} />
                         </FieldContent>
                       </Field>
                     </FieldLabel>
@@ -154,11 +148,14 @@ export default function Step3() {
           </form.AppField>
         </CardContent>
       </Card>
+
+      {/* Payment Proof Upload Area */}
       <form.Subscribe selector={(state) => state.values.paymentMethod}>
         {(paymentMethod) => (
           <Activity mode={paymentMethod === "online" ? "visible" : "hidden"}>
             <form.AppField name="paymentProof">
               {(field) => {
+                // Make a local URL for image preview
                 const localImageUrl =
                   field.state.value && URL.createObjectURL(field.state.value);
 
@@ -167,7 +164,7 @@ export default function Step3() {
                     <CardContent className="flex flex-col items-center space-y-3">
                       <BankTransferDetails />
                       <Field data-invalid={!field.state.meta.isValid}>
-                        <FieldLabel htmlFor="upload proof">
+                        <FieldLabel htmlFor="upload-proof">
                           Upload Proof of Payment
                         </FieldLabel>
                         <FieldContent className="space-y-3">
@@ -246,34 +243,36 @@ function PaymentDetails() {
   const total = baseFee + otherParticipants.length * baseFee;
 
   return (
-    <div>
-      <div className="flex w-full justify-between">
-        <div>Registration Fee per head</div>
-        <div>
-          {Intl.NumberFormat("en-US", {
-            currency: "PHP",
-            style: "currency",
-          }).format(baseFee)}
+    <Card>
+      <CardContent>
+        <div className="flex w-full justify-between">
+          <div>Registration Fee per head</div>
+          <div>
+            {Intl.NumberFormat("en-US", {
+              currency: "PHP",
+              style: "currency",
+            }).format(baseFee)}
+          </div>
         </div>
-      </div>
-      <div className="flex w-full justify-between">
-        <div>Total Number of Participants</div>
-        <div>
-          {registrationData?.step2?.otherParticipants?.length
-            ? registrationData.step2.otherParticipants.length + 1
-            : 1}
+        <div className="flex w-full justify-between">
+          <div>Total Number of Participants</div>
+          <div>
+            {registrationData?.step2?.otherParticipants?.length
+              ? registrationData.step2.otherParticipants.length + 1
+              : 1}
+          </div>
         </div>
-      </div>
-      <div className="flex w-full justify-between font-semibold text-xl">
-        <div>Total Amount</div>
-        <div>
-          {Intl.NumberFormat("en-US", {
-            currency: "PHP",
-            style: "currency",
-          }).format(total)}
+        <div className="flex w-full justify-between font-semibold text-xl">
+          <div>Total Amount</div>
+          <div>
+            {Intl.NumberFormat("en-US", {
+              currency: "PHP",
+              style: "currency",
+            }).format(total)}
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

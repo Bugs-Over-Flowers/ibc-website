@@ -4,20 +4,21 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import tryCatch from "@/lib/server/tryCatch";
+import type { RegistrationRouteProps } from "@/lib/types/route";
 import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
 import RegistrationForm from "./forms/RegistrationForm";
 import RegistrationInformation from "./RegistrationInformation";
 
-interface RegistrationPageProps {
-  params: Promise<{ e: string }>;
-}
-
-const RegistrationPage = async ({ params }: RegistrationPageProps) => {
-  const { e } = await params;
+const RegistrationPage = async ({
+  params,
+}: {
+  params: RegistrationRouteProps["params"];
+}) => {
+  const { eventId } = await params;
   const requestCookies = (await cookies()).getAll();
   const { error: registrationEventDetailsMessage, data: eventData } =
-    await tryCatch(getRegistrationEventDetails(requestCookies, { eventId: e }));
+    await tryCatch(getRegistrationEventDetails(requestCookies, { eventId }));
 
   const { error: getAllMembersMessage, data: members } = await tryCatch(
     getAllMembers(requestCookies),

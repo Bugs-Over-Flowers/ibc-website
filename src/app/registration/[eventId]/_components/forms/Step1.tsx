@@ -1,6 +1,7 @@
 import { Building, CircleAlert } from "lucide-react";
 import type { FormEvent } from "react";
 import FormButtons from "@/components/FormButtons";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
@@ -10,18 +11,12 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
 import { MemberTypeEnum } from "@/lib/validation/utils";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep1 } from "../../_hooks/useRegistrationStep1";
+import RegistrationStepHeader from "./RegistrationStepHeader";
 
 interface Step1Props {
   members: Awaited<ReturnType<typeof getAllMembers>>;
@@ -40,6 +35,7 @@ const Step1 = ({ members }: Step1Props) => {
     form.handleSubmit({ nextStep: true });
   };
 
+  // Prepare member options for select field
   const membersOptions = members.map((m) => ({
     label: m.businessName,
     value: m.businessMemberId,
@@ -48,26 +44,23 @@ const Step1 = ({ members }: Step1Props) => {
   return (
     <form className="space-y-3" onSubmit={onNext}>
       {/* Step 1 Title */}
-      <Item>
-        <ItemContent>
-          <div className="flex items-center gap-2">
-            <Building size={18} />
-            <ItemTitle>Affiliation</ItemTitle>
-          </div>
-          <ItemDescription>
-            Please identify your affiliation with the organization.
-          </ItemDescription>
-        </ItemContent>
-      </Item>
-
+      <RegistrationStepHeader
+        description="Please identify your affiliation with the organization."
+        Icon={Building}
+        title="Affiliation"
+      />
       <Card>
         <CardContent>
+          {/* Member or Non-member selection */}
           <form.AppField name="member">
             {(field) => (
               <FieldSet>
                 <RadioGroup
                   defaultValue="member"
                   onValueChange={(value) => {
+                    // Handle parsing and updating form state
+                    // Validate value against MemberTypeEnum
+                    // If invalid, do nothing
                     const parsedMemberValue = MemberTypeEnum.safeParse(value);
 
                     if (!parsedMemberValue.success) return;
@@ -95,8 +88,15 @@ const Step1 = ({ members }: Step1Props) => {
                         </FieldDescription>
                         {field.state.value === "member" && (
                           <form.AppField name="businessMemberId">
-                            {(field) => (
+                            {/* {(field) => (
                               <field.SelectField
+                                options={membersOptions}
+                                placeholder="Select your Company"
+                              />
+                            )} */}
+
+                            {(field) => (
+                              <field.SingleComboBoxField
                                 options={membersOptions}
                                 placeholder="Select your Company"
                               />
@@ -104,15 +104,11 @@ const Step1 = ({ members }: Step1Props) => {
                           </form.AppField>
                         )}
                       </FieldContent>
-                      <RadioGroupItem
-                        id="member"
-                        value="member"
-                        variant={"noIcon"}
-                      />
+                      <RadioGroupItem id="member" value="member" />
                     </Field>
                   </FieldLabel>
 
-                  {/* Nonmember Select*/}
+                  {/* Nonmember Select */}
                   <FieldLabel htmlFor="nonmember">
                     <Field orientation={"horizontal"}>
                       <FieldContent>
@@ -139,11 +135,7 @@ const Step1 = ({ members }: Step1Props) => {
                           )}
                       </FieldContent>
                       {eventDetails?.eventType === "public" && (
-                        <RadioGroupItem
-                          id="nonmember"
-                          value="nonmember"
-                          variant={"noIcon"}
-                        />
+                        <RadioGroupItem id="nonmember" value="nonmember" />
                       )}
                     </Field>
                   </FieldLabel>
@@ -154,7 +146,7 @@ const Step1 = ({ members }: Step1Props) => {
         </CardContent>
       </Card>
 
-      <Item variant={"outline"}>
+      {/* <Item variant={"outline"}>
         <ItemMedia>
           <CircleAlert />
         </ItemMedia>
@@ -165,7 +157,16 @@ const Step1 = ({ members }: Step1Props) => {
             affiliation, please contact us.
           </ItemDescription>
         </ItemContent>
-      </Item>
+      </Item> */}
+
+      <Alert>
+        <CircleAlert />
+        <AlertTitle>Note</AlertTitle>
+        <AlertDescription>
+          In case you can&apos;t find your organization / business /
+          affiliation, please contact us.
+        </AlertDescription>
+      </Alert>
 
       <FormButtons
         onBack={() => {
