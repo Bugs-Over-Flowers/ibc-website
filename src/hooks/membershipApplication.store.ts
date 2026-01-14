@@ -19,6 +19,7 @@ export interface MembershipApplicationData {
 interface MembershipApplicationStore {
   step: number;
   applicationData: MembershipApplicationData;
+  isSubmitted: boolean;
 }
 
 interface MembershipApplicationStoreActions {
@@ -26,11 +27,13 @@ interface MembershipApplicationStoreActions {
   setApplicationData: (
     applicationData: Partial<MembershipApplicationData> | null,
   ) => void;
+  setIsSubmitted: (isSubmitted: boolean) => void;
   resetStore: () => void;
 }
 
 const getInitialState = (): MembershipApplicationStore => ({
   step: 1,
+  isSubmitted: false,
   applicationData: {
     step1: {
       applicationType: "newMember",
@@ -95,6 +98,7 @@ const useMembershipApplicationStore = create<
     (set) => ({
       ...getInitialState(),
       setStep: (step: number) => set({ step }),
+      setIsSubmitted: (isSubmitted: boolean) => set({ isSubmitted }),
       setApplicationData: (
         applicationData: Partial<MembershipApplicationData> | null,
       ) =>

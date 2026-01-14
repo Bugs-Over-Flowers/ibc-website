@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { landlineSchema, phoneSchema, telefaxSchema } from "../utils";
+import { titleCase } from "@/lib/utils";
+import { phoneSchema } from "../utils";
 
 export const ApplicationTypeEnum = z.enum(["newMember", "updating", "renewal"]);
 export const MembershipPaymentMethodEnum = z.enum(["BPI", "ONSITE"]);
@@ -15,30 +16,38 @@ export type MembershipApplicationStep1Schema = z.infer<
   typeof MembershipApplicationStep1Schema
 >;
 
-export const ApplicationMemberSchema = z.object({
-  companyMemberType: CompanyMemberTypeEnum,
-  firstName: z
-    .string({ message: "First name is required" })
-    .min(1, "First name is required"),
-  lastName: z
-    .string({ message: "Last name is required" })
-    .min(1, "Last name is required"),
-  emailAddress: z.email("Email is required"),
-  companyDesignation: z
-    .string({ message: "Company designation is required" })
-    .min(1, "Company designation is required"),
-  birthdate: z.date({ message: "Birthdate is required" }),
-  sex: SexEnum,
-  nationality: z
-    .string({ message: "Nationality is required" })
-    .min(1, "Nationality is required"),
-  mailingAddress: z
-    .string({ message: "Mailing address is required" })
-    .min(1, "Mailing address is required"),
-  mobileNumber: phoneSchema,
-  landline: landlineSchema,
-  faxNumber: telefaxSchema,
-});
+export const ApplicationMemberSchema = z
+  .object({
+    companyMemberType: CompanyMemberTypeEnum,
+    firstName: z
+      .string({ message: "First name is required" })
+      .min(1, "First name is required"),
+    lastName: z
+      .string({ message: "Last name is required" })
+      .min(1, "Last name is required"),
+    emailAddress: z.email("Email is required"),
+    companyDesignation: z
+      .string({ message: "Company designation is required" })
+      .min(1, "Company designation is required"),
+    birthdate: z.date({ message: "Birthdate is required" }),
+    sex: SexEnum,
+    nationality: z
+      .string({ message: "Nationality is required" })
+      .min(1, "Nationality is required"),
+    mailingAddress: z
+      .string({ message: "Mailing address is required" })
+      .min(1, "Mailing address is required"),
+    mobileNumber: phoneSchema,
+    landline: z.string().min(1, "Landline is required"),
+    faxNumber: z.string().min(1, "Telefax is required"),
+  })
+  .transform((data) => ({
+    ...data,
+    firstName: titleCase(data.firstName).trim(),
+    lastName: titleCase(data.lastName).trim(),
+    companyDesignation: titleCase(data.companyDesignation).trim(),
+    nationality: titleCase(data.nationality).trim(),
+  }));
 
 export const MembershipApplicationStep2Schema = z
   .object({
@@ -59,9 +68,9 @@ export const MembershipApplicationStep2Schema = z
       .string({ message: "Company profile is required" })
       .min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),
-    landline: z.string("Landline is required").min(1, "Landline is required"),
+    landline: z.string().min(1, "Landline is required"),
     mobileNumber: phoneSchema,
-    faxNumber: z.string("Telefax is required").min(1, "Telefax is required"),
+    faxNumber: z.string().min(1, "Telefax is required"),
     logoImageURL: z.string().optional(),
     logoImage: z
       .file("Company logo is required")
@@ -76,7 +85,11 @@ export const MembershipApplicationStep2Schema = z
       );
     },
     { message: "Company logo is required", path: ["logoImage"] },
-  );
+  )
+  .transform((data) => ({
+    ...data,
+    companyName: titleCase(data.companyName).trim(),
+  }));
 
 export type MembershipApplicationStep2Schema = z.infer<
   typeof MembershipApplicationStep2Schema

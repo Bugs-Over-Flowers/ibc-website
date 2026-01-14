@@ -2,6 +2,7 @@
 
 import { Check, ChevronsUpDown, Search } from "lucide-react";
 import * as React from "react";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -68,20 +69,26 @@ export default function MembersFilter({
           <div className="w-full sm:w-64">
             <Popover onOpenChange={setOpen} open={open}>
               <PopoverTrigger
-                aria-expanded={open}
-                className={cn(
-                  "h-[52px] w-full min-w-[140px] justify-between rounded-xl",
-                  "border border-border/50 bg-white px-5 shadow-lg",
-                  "ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90",
-                  "inline-flex items-center",
-                )}
-                role="combobox"
-              >
-                <span className="block max-w-[140px] truncate text-left">
-                  {selectedLabel}
-                </span>
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </PopoverTrigger>
+                render={
+                  <Button
+                    aria-expanded={open}
+                    className={cn(
+                      "h-[52px] w-full min-w-[140px] justify-between rounded-xl",
+                      "border border-border/50 bg-white px-5 shadow-lg",
+                      "ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90",
+                      "inline-flex items-center",
+                    )}
+                    role="combobox"
+                    variant="outline"
+                  >
+                    <span className="block max-w-[140px] truncate text-left">
+                      {selectedLabel}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                }
+              />
+
               <PopoverContent className="w-[260px] rounded-xl border border-border bg-white p-0 text-foreground">
                 <Command className="rounded-xl bg-white p-2 text-foreground">
                   <CommandInput
