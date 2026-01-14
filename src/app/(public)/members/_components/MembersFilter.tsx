@@ -72,7 +72,12 @@ export default function MembersFilter({
                 render={
                   <Button
                     aria-expanded={open}
-                    className="h-[52px] w-full min-w-[140px] justify-between rounded-xl border-border/50 bg-white px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
+                    className={cn(
+                      "h-[52px] w-full min-w-[140px] justify-between rounded-xl",
+                      "border border-border/50 bg-white px-5 shadow-lg",
+                      "ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90",
+                      "inline-flex items-center",
+                    )}
                     role="combobox"
                     variant="outline"
                   >
