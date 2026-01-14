@@ -16,16 +16,18 @@ export function CreateEventForm() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-0">
       <Button
-        className="mb-2 bg-primary pl-0 text-white hover:bg-transparent hover:text-muted-foreground"
+        className="mb-2"
         onClick={() => router.push("/admin/events")}
         type="button"
         variant="ghost"
       >
-        <ArrowLeft className="ml-2 h-4 w-4" />
+        <ArrowLeft className="mr-2 h-4 w-4" />
         Back to events
       </Button>
       <h2 className="mt-8 mb-2 font-bold text-2xl">Create New Event</h2>
-      <p className="!text-lg mb-6">Fill in the details to create new event.</p>
+      <p className="!text-lg mb-6">
+        Fill in the details to create a new event.
+      </p>
 
       <div className="min-h-screen rounded-lg">
         <formContext.Provider value={form}>
@@ -117,12 +119,15 @@ export function CreateEventForm() {
                     </Button>
 
                     <Popover>
-                      <PopoverTrigger asChild>
-                        <Button disabled={isSubmitting}>
-                          {isSubmitting ? "Creating..." : "Create Event"}
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
+                      <PopoverTrigger
+                        render={
+                          <Button disabled={isSubmitting}>
+                            {isSubmitting ? "Creating..." : "Create Event"}
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          </Button>
+                        }
+                      />
+
                       <PopoverContent align="end" className="w-40 p-0">
                         <div className="flex flex-col">
                           <Button
