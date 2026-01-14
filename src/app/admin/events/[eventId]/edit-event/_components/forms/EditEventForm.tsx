@@ -199,15 +199,18 @@ export function EditEventForm({ event }: EditEventFormProps) {
                         </Button>
 
                         <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              className="w-full sm:w-auto"
-                              disabled={isSubmitting}
-                            >
-                              {isSubmitting ? "Saving..." : "Publish Event"}
-                              <ChevronDown className="ml-2 h-4 w-4" />
-                            </Button>
-                          </PopoverTrigger>
+                          <PopoverTrigger
+                            render={
+                              <Button
+                                className="w-full sm:w-auto"
+                                disabled={isSubmitting}
+                              >
+                                {isSubmitting ? "Saving..." : "Publish Event"}
+                                <ChevronDown className="ml-2 h-4 w-4" />
+                              </Button>
+                            }
+                          />
+
                           <PopoverContent align="end" className="w-40 p-0">
                             <div className="flex flex-col">
                               <Button

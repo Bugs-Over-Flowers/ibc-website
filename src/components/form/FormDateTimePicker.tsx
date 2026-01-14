@@ -80,18 +80,21 @@ const FormDateTimePicker: React.FC<FormDateTimePickerProps> = ({
             Date
           </Label>
           <Popover onOpenChange={setOpen} open={open}>
-            <PopoverTrigger asChild>
-              <Button
-                className={cn(
-                  "w-full justify-between px-3 font-normal",
-                  !dateValue && "text-muted-foreground",
-                )}
-                variant="outline"
-              >
-                {dateValue ? format(dateValue, "PPP") : "Select date"}
-                <ChevronDownIcon className="h-4 w-4 opacity-50" />
-              </Button>
-            </PopoverTrigger>
+            <PopoverTrigger
+              render={
+                <Button
+                  className={cn(
+                    "w-full justify-between px-3 font-normal",
+                    !dateValue && "text-muted-foreground",
+                  )}
+                  variant="outline"
+                >
+                  {dateValue ? format(dateValue, "PPP") : "Select date"}
+                  <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                </Button>
+              }
+            />
+
             <PopoverContent align="start" className="w-auto p-0">
               <Calendar
                 captionLayout="dropdown"

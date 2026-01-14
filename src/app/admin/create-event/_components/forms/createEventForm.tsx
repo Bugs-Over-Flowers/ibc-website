@@ -111,12 +111,15 @@ export function CreateEventForm() {
                     </Button>
 
                     <Popover>
-                      <PopoverTrigger asChild>
-                        <Button disabled={isSubmitting}>
-                          {isSubmitting ? "Creating..." : "Create Event"}
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
+                      <PopoverTrigger
+                        render={
+                          <Button disabled={isSubmitting}>
+                            {isSubmitting ? "Creating..." : "Create Event"}
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          </Button>
+                        }
+                      />
+
                       <PopoverContent align="end" className="w-40 p-0">
                         <div className="flex flex-col">
                           <Button

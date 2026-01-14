@@ -1,5 +1,7 @@
+import { useStore } from "@tanstack/react-form";
 import { FileIcon, X } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { useMembershipStep2 } from "@/app/membership/application/_hooks/useMembershipStep2";
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,19 @@ const sectors = [
 ];
 
 export function Step2Company({ form }: StepProps) {
+  const logoImage = useStore(form.store, (state) => state.values.logoImage);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (logoImage instanceof File) {
+      const url = URL.createObjectURL(logoImage);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreview(null);
+    }
+  }, [logoImage]);
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -114,9 +129,19 @@ export function Step2Company({ form }: StepProps) {
                   <Label>Company Logo *</Label>
                   <div className="rounded-lg border bg-background p-4">
                     {field.state.value ? (
-                      <div className="flex items-center justify-between rounded border bg-muted/20 p-2">
-                        <div className="flex items-center gap-2 overflow-hidden">
-                          <FileIcon className="h-4 w-4 shrink-0" />
+                      <div className="flex items-center justify-between rounded border bg-muted/20 p-3">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          {preview ? (
+                            <Image
+                              alt="Logo preview"
+                              className="h-16 w-16 rounded object-contain"
+                              height={64}
+                              src={preview}
+                              width={64}
+                            />
+                          ) : (
+                            <FileIcon className="h-4 w-4 shrink-0" />
+                          )}
                           <span className="max-w-[200px] truncate text-sm">
                             {field.state.value.name}
                           </span>
