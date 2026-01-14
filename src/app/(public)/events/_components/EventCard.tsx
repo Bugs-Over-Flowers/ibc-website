@@ -38,7 +38,7 @@ export function EventCard({ event }: EventCardProps) {
 
   return (
     <motion.div
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 1 }}
       className="group mx-auto flex h-full w-full max-w-[400px] rounded-xl"
       onClick={() => router.push(`/events/${event.eventId}` as Route)}
       onKeyDown={(e) => {

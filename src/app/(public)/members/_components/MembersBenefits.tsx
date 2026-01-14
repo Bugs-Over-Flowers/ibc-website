@@ -111,7 +111,7 @@ export default function MembersBenefits() {
             const Icon = benefit.icon;
             return (
               <motion.div key={benefit.id} variants={fadeInUp}>
-                <Card className="group hover:-translate-y-1 relative h-full overflow-hidden border-0 bg-white/70 shadow-xl ring-1 ring-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl">
+                <Card className="group hover:-translate-y-1 relative h-full overflow-hidden border-0 bg-white/70 shadow-xl ring-1 ring-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl dark:bg-slate-950/70 dark:ring-white/20">
                   <div className="linear-to-r absolute top-0 right-0 left-0 h-1 from-primary via-primary/70 to-transparent" />
                   <CardContent className="p-8">
                     <div className="mb-6 flex items-center gap-4">

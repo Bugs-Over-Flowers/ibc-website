@@ -68,9 +68,7 @@ export function MembersGrid({ members }: MembersGridProps) {
             );
             return (
               <motion.div
-                animate={{ opacity: 1, y: 0 }}
                 key={safeKey}
-                transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 variants={fadeInUp}
                 whileHover={{
                   scale: 1.03,

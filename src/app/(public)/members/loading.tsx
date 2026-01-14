@@ -31,37 +31,82 @@ export default function MembersLoading() {
         {/* Filter Bar Skeleton */}
         <section className="border-border border-b bg-background py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-4 flex flex-col gap-4 sm:flex-row">
-              <div className="flex-1">
-                <Skeleton className="h-[52px] w-full rounded-xl bg-muted/60" />
+            <div className="rounded-2xl border border-border/30 bg-card/60 p-4 shadow-xl backdrop-blur-xl sm:p-6">
+              <div className="flex flex-col gap-4">
+                {/* Search Bar */}
+                <div className="relative">
+                  <Skeleton className="h-14 w-full rounded-xl bg-muted/60" />
+                </div>
+
+                {/* Filters Row */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <Skeleton className="h-12 w-full rounded-xl bg-muted/60 sm:min-w-[200px]" />
+                  <Skeleton className="h-4 w-32 rounded bg-muted/60" />
+                </div>
               </div>
-              <div className="w-full sm:w-64">
-                <Skeleton className="h-[52px] w-full rounded-xl bg-muted/60" />
-              </div>
-            </div>
-            <div className="text-muted-foreground text-sm">
-              <Skeleton className="h-4 w-32 rounded bg-muted/60" />
             </div>
           </div>
         </section>
         {/* Members Grid Skeleton */}
-        <section className="bg-muted/50 py-16">
+        <section className="bg-muted/50 py-16 dark:bg-slate-950/30">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {Array.from({ length: 8 }, (_, i) => `member-skeleton-${i}`).map(
-                (key) => (
-                  <div
-                    className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-xl bg-white p-0 transition-shadow"
-                    key={key}
-                  >
-                    <Skeleton className="aspect-square h-auto w-full bg-muted/60" />
-                    <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
-                      <Skeleton className="h-6 w-32 rounded bg-muted/60" />
-                      <Skeleton className="h-4 w-20 rounded bg-muted/50" />
-                    </div>
-                  </div>
-                ),
-              )}
+              <div className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-xl bg-white p-0 transition-shadow dark:bg-slate-900">
+                <Skeleton className="aspect-square h-auto w-full bg-muted/60 dark:bg-slate-800" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
+                  <Skeleton className="h-6 w-32 rounded bg-muted/60 dark:bg-slate-800" />
+                  <Skeleton className="h-4 w-20 rounded bg-muted/50 dark:bg-slate-800" />
+                </div>
+              </div>
+              <div className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-xl bg-white p-0 transition-shadow dark:bg-slate-900">
+                <Skeleton className="aspect-square h-auto w-full bg-muted/60 dark:bg-slate-800" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
+                  <Skeleton className="h-6 w-32 rounded bg-muted/60 dark:bg-slate-800" />
+                  <Skeleton className="h-4 w-20 rounded bg-muted/50 dark:bg-slate-800" />
+                </div>
+              </div>
+              <div className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-xl bg-white p-0 transition-shadow dark:bg-slate-900">
+                <Skeleton className="aspect-square h-auto w-full bg-muted/60 dark:bg-slate-800" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
+                  <Skeleton className="h-6 w-32 rounded bg-muted/60 dark:bg-slate-800" />
+                  <Skeleton className="h-4 w-20 rounded bg-muted/50 dark:bg-slate-800" />
+                </div>
+              </div>
+              <div className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-xl bg-white p-0 transition-shadow dark:bg-slate-900">
+                <Skeleton className="aspect-square h-auto w-full bg-muted/60 dark:bg-slate-800" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
+                  <Skeleton className="h-6 w-32 rounded bg-muted/60 dark:bg-slate-800" />
+                  <Skeleton className="h-4 w-20 rounded bg-muted/50 dark:bg-slate-800" />
+                </div>
+              </div>
+              <div className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-xl bg-white p-0 transition-shadow dark:bg-slate-900">
+                <Skeleton className="aspect-square h-auto w-full bg-muted/60 dark:bg-slate-800" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
+                  <Skeleton className="h-6 w-32 rounded bg-muted/60 dark:bg-slate-800" />
+                  <Skeleton className="h-4 w-20 rounded bg-muted/50 dark:bg-slate-800" />
+                </div>
+              </div>
+              <div className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-xl bg-white p-0 transition-shadow dark:bg-slate-900">
+                <Skeleton className="aspect-square h-auto w-full bg-muted/60 dark:bg-slate-800" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
+                  <Skeleton className="h-6 w-32 rounded bg-muted/60 dark:bg-slate-800" />
+                  <Skeleton className="h-4 w-20 rounded bg-muted/50 dark:bg-slate-800" />
+                </div>
+              </div>
+              <div className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-xl bg-white p-0 transition-shadow dark:bg-slate-900">
+                <Skeleton className="aspect-square h-auto w-full bg-muted/60 dark:bg-slate-800" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
+                  <Skeleton className="h-6 w-32 rounded bg-muted/60 dark:bg-slate-800" />
+                  <Skeleton className="h-4 w-20 rounded bg-muted/50 dark:bg-slate-800" />
+                </div>
+              </div>
+              <div className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-xl bg-white p-0 transition-shadow dark:bg-slate-900">
+                <Skeleton className="aspect-square h-auto w-full bg-muted/60 dark:bg-slate-800" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
+                  <Skeleton className="h-6 w-32 rounded bg-muted/60 dark:bg-slate-800" />
+                  <Skeleton className="h-4 w-20 rounded bg-muted/50 dark:bg-slate-800" />
+                </div>
+              </div>
             </div>
           </div>
         </section>
