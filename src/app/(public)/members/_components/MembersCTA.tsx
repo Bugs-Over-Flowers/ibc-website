@@ -29,7 +29,7 @@ export default function MembersCTA() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/contact">
               <Button
-                className="rounded-xl bg-foreground shadow-lg hover:bg-foreground/90"
+                className="rounded-xl bg-primary px-6 font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/90 hover:shadow-primary/25 hover:shadow-xl"
                 size="lg"
               >
                 Apply for Membership
@@ -38,7 +38,7 @@ export default function MembersCTA() {
 
             <Link href="/contact">
               <Button
-                className="rounded-xl shadow-lg hover:text-primary"
+                className="rounded-xl border-border bg-transparent px-6 font-semibold transition-all hover:scale-[1.02] hover:border-primary/50 hover:bg-primary/5"
                 size="lg"
                 variant="outline"
               >

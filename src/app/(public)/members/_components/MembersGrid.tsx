@@ -13,9 +13,9 @@ interface MembersGridProps {
 
 export function MembersGrid({ members }: MembersGridProps) {
   return (
-    <section className="bg-muted/50 px-4 py-16">
+    <section className="bg-muted/50 py-16">
       <motion.div
-        className="mx-auto max-w-7xl"
+        className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8"
         initial="hidden"
         variants={staggerContainer}
         viewport={{ once: true, amount: 0.2 }}
@@ -33,11 +33,11 @@ export function MembersGrid({ members }: MembersGridProps) {
             const cardContent = (
               <CardContent className="flex h-full flex-col p-0" key={safeKey}>
                 <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-linear-to-br from-secondary to-accent">
-                  <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-primary/20"></div>
+                  <div className="absolute inset-0"></div>
                   {member.logoImageURL ? (
                     <Img
                       alt={member.businessName}
-                      className="aspect-square h-full w-full bg-white object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="aspect-square h-full w-full bg-white object-cover p-4 transition-transform duration-500 group-hover:scale-105"
                       src={member.logoImageURL}
                       style={{ aspectRatio: "1 / 1", objectPosition: "center" }}
                     />
@@ -63,24 +63,6 @@ export function MembersGrid({ members }: MembersGridProps) {
                       </p>
                     </div>
                   )}
-                  {member.websiteURL && (
-                    <div className="mt-4 flex w-full justify-center">
-                      <a
-                        href={member.websiteURL}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        <Button
-                          className="w-full max-w-[180px] rounded-xl border-none bg-primary font-medium text-primary-foreground text-sm shadow-md hover:cursor-pointer hover:bg-primary/90"
-                          onClick={(e) => e.stopPropagation()}
-                          tabIndex={0}
-                          variant="default"
-                        >
-                          Visit Website
-                        </Button>
-                      </a>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             );
@@ -97,9 +79,22 @@ export function MembersGrid({ members }: MembersGridProps) {
                 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Card className="flex h-full min-h-[400px] flex-col overflow-hidden p-0 transition-shadow">
-                  {cardContent}
-                </Card>
+                {member.websiteURL ? (
+                  <a
+                    className="block h-full"
+                    href={member.websiteURL}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <Card className="flex h-full min-h-[400px] flex-col overflow-hidden p-0 transition-shadow hover:shadow-lg">
+                      {cardContent}
+                    </Card>
+                  </a>
+                ) : (
+                  <Card className="flex h-full min-h-[400px] flex-col overflow-hidden p-0 transition-shadow">
+                    {cardContent}
+                  </Card>
+                )}
               </motion.div>
             );
           })}

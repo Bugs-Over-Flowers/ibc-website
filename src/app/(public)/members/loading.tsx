@@ -29,8 +29,8 @@ export default function MembersLoading() {
       {/* Main content skeleton */}
       <div className="relative z-10">
         {/* Filter Bar Skeleton */}
-        <section className="border-border border-b bg-background px-4 py-8">
-          <div className="mx-auto max-w-7xl">
+        <section className="border-border border-b bg-background py-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-4 flex flex-col gap-4 sm:flex-row">
               <div className="flex-1">
                 <Skeleton className="h-[52px] w-full rounded-xl bg-muted/60" />
@@ -45,8 +45,8 @@ export default function MembersLoading() {
           </div>
         </section>
         {/* Members Grid Skeleton */}
-        <section className="bg-muted/50 px-4 py-16">
-          <div className="mx-auto max-w-7xl">
+        <section className="bg-muted/50 py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {Array.from({ length: 8 }, (_, i) => `member-skeleton-${i}`).map(
                 (key) => (
