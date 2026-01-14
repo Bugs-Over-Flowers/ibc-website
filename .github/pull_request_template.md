@@ -27,4 +27,5 @@
 ## ✅ Checklist
 
 - [ ] I have performed a self-review of my code.
+- [ ] I have generated Supabase types (if schema changed).
 - [ ] I have checked for mobile responsiveness.

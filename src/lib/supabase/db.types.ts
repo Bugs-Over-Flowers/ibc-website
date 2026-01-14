@@ -25,13 +25,14 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          interviewId: string | null;
           landline: string;
           logoImageURL: string;
           memberId: string | null;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
-          sectorId: number;
+          sectorId: number | null;
           websiteURL: string;
         };
         Insert: {
@@ -44,13 +45,14 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          interviewId?: string | null;
           landline: string;
           logoImageURL: string;
           memberId?: string | null;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
-          sectorId: number;
+          sectorId?: number | null;
           websiteURL: string;
         };
         Update: {
@@ -63,16 +65,31 @@ export type Database = {
           companyName?: string;
           emailAddress?: string;
           faxNumber?: string;
+          interviewId?: string | null;
           landline?: string;
           logoImageURL?: string;
           memberId?: string | null;
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
-          sectorId?: number;
+          sectorId?: number | null;
           websiteURL?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "Application_interviewId_fkey";
+            columns: ["interviewId"];
+            isOneToOne: false;
+            referencedRelation: "Interview";
+            referencedColumns: ["interviewId"];
+          },
+          {
+            foreignKeyName: "Application_memberId_fkey";
+            columns: ["memberId"];
+            isOneToOne: false;
+            referencedRelation: "BusinessMember";
+            referencedColumns: ["businessMemberId"];
+          },
           {
             foreignKeyName: "Application_sectorId_fkey";
             columns: ["sectorId"];
@@ -303,7 +320,6 @@ export type Database = {
       };
       Interview: {
         Row: {
-          applicationId: string;
           createdAt: string | null;
           interviewDate: string;
           interviewId: string;
@@ -313,7 +329,6 @@ export type Database = {
           updatedAt: string | null;
         };
         Insert: {
-          applicationId: string;
           createdAt?: string | null;
           interviewDate: string;
           interviewId?: string;
@@ -323,7 +338,6 @@ export type Database = {
           updatedAt?: string | null;
         };
         Update: {
-          applicationId?: string;
           createdAt?: string | null;
           interviewDate?: string;
           interviewId?: string;
@@ -332,15 +346,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["InterviewStatus"] | null;
           updatedAt?: string | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "Interview_applicationId_fkey";
-            columns: ["applicationId"];
-            isOneToOne: false;
-            referencedRelation: "Application";
-            referencedColumns: ["applicationId"];
-          },
-        ];
+        Relationships: [];
       };
       Participant: {
         Row: {
@@ -531,6 +537,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      january_first_reset: { Args: never; Returns: undefined };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
       submit_event_registration: {
         Args: {
