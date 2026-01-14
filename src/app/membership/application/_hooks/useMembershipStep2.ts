@@ -27,6 +27,11 @@ export const useMembershipStep2 = () => {
     onSubmit: ({ value, meta }) => {
       const refinedValue = MembershipApplicationStep2Schema.parse(value);
 
+      // Update form with transformed values
+      if (refinedValue.companyName !== value.companyName) {
+        form.setFieldValue("companyName", refinedValue.companyName);
+      }
+
       if (meta.nextStep) {
         setStep(3);
       }
