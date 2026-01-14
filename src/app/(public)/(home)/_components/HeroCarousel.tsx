@@ -51,7 +51,7 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
     if (!showWelcome && !hasEvents && !isPaused) {
       const fallbackTimer = setTimeout(() => {
         setShowWelcome(true);
-      }, 10000);
+      }, 20000);
       return () => clearTimeout(fallbackTimer);
     }
   }, [showWelcome, hasEvents, isPaused]);
@@ -122,7 +122,7 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
 
       <AnimatePresence custom={direction} mode="wait">
         {showWelcome ? (
-          <WelcomeSection key="welcome" onNavigate={handleNavigate} />
+          <WelcomeSection key="welcome" />
         ) : upcomingEvents.length > 0 ? (
           <EventSlide
             currentIndex={currentEventIndex}

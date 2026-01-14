@@ -11,14 +11,9 @@ import {
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { FloatingParticles } from "./FloatingParticle";
-
-interface WelcomeSectionProps {
-  onNavigate: (page: string) => void;
-}
 
 const stats = [
   { number: 30, label: "Years of Excellence", suffix: "+", icon: Award },
@@ -27,7 +22,7 @@ const stats = [
   { number: 20, label: "Industry Partners", suffix: "+", icon: Building2 },
 ];
 
-export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
+export function WelcomeSection() {
   return (
     <motion.div
       animate={{ opacity: 1 }}
@@ -181,7 +176,7 @@ export function WelcomeSection({ onNavigate }: WelcomeSectionProps) {
             {stats.map((stat, index) => (
               <motion.div
                 animate={{ opacity: 1, y: 0 }}
-                className="group rounded-2xl border border-chart-1/30 bg-card/95 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:border-chart-1/50 hover:bg-card dark:bg-card/85"
+                className="group rounded-2xl border border-chart-1/30 bg-background/95 p-6 shadow-lg backdrop-blur-lg transition-all duration-300 hover:border-chart-1/50 hover:bg-background/90"
                 initial={{ opacity: 0, y: 20 }}
                 key={stat.label}
                 transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
