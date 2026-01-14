@@ -15,11 +15,10 @@ export function MembersGrid({ members }: MembersGridProps) {
   return (
     <section className="bg-muted/50 py-16">
       <motion.div
+        animate="visible"
         className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8"
         initial="hidden"
         variants={staggerContainer}
-        viewport={{ once: true, amount: 0.2 }}
-        whileInView="visible"
       >
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {members.map((member, idx) => {

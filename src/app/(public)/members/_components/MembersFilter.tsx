@@ -93,12 +93,9 @@ export default function MembersFilter({
               {/* Sector Filter */}
               <Popover onOpenChange={setOpen} open={open}>
                 <PopoverTrigger
-                  aria-expanded={open}
                   className={cn(
-                    "inline-flex h-12 min-w-[85%] items-center justify-between gap-3 rounded-xl border border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
-                    filterSector && "border-primary/40 bg-primary/5",
+                    "inline-flex h-12 flex-1 items-center justify-between gap-3 rounded-xl border border-border/40 bg-background/80 px-4 text-base text-muted-foreground/80 transition-all hover:border-primary/30 hover:bg-background",
                   )}
-                  role="combobox"
                 >
                   <span
                     className={cn(
