@@ -76,7 +76,7 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
             custom={direction}
             exit="exit"
             initial="enter"
-            key={index}
+            key={currentEvent.eventId}
             transition={{
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 },

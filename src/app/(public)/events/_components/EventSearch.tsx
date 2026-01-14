@@ -19,7 +19,6 @@ import {
   Search,
   X,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -110,7 +109,6 @@ const getDateRangeFromPreset = (preset: DatePreset): DateRange => {
       );
       return { from: lastQuarterStart, to: endOfQuarter(lastQuarterStart) };
     }
-    case "custom":
     default:
       return { from: undefined, to: undefined };
   }
@@ -370,6 +368,8 @@ export function EventsSearch({
                   animate={{ opacity: 1, scale: 1, width: "auto" }}
                   exit={{ opacity: 0, scale: 0.8, width: 0 }}
                   initial={{ opacity: 0, scale: 0.8, width: 0 }}
+                  key="clear-filters"
+                  transition={{ duration: 0.2 }}
                 >
                   <Button
                     className="h-12 whitespace-nowrap rounded-xl px-4 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
@@ -390,13 +390,15 @@ export function EventsSearch({
         </div>
 
         {/* Active Filters Summary */}
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {hasActiveFilters && (
             <motion.div
               animate={{ opacity: 1, height: "auto" }}
               className="mt-4 border-border/30 border-t pt-4"
               exit={{ opacity: 0, height: 0 }}
               initial={{ opacity: 0, height: 0 }}
+              key="active-filters"
+              transition={{ duration: 0.2 }}
             >
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-muted-foreground/70 text-sm">
@@ -407,6 +409,8 @@ export function EventsSearch({
                     animate={{ opacity: 1, scale: 1 }}
                     className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-sm"
                     initial={{ opacity: 0, scale: 0.8 }}
+                    key="date-filter"
+                    transition={{ duration: 0.2 }}
                   >
                     <CalendarIcon className="h-3 w-3" />
                     {selectedPreset !== "custom"
@@ -426,6 +430,8 @@ export function EventsSearch({
                     animate={{ opacity: 1, scale: 1 }}
                     className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-sm"
                     initial={{ opacity: 0, scale: 0.8 }}
+                    key="status-filter"
+                    transition={{ duration: 0.2 }}
                   >
                     <Filter className="h-3 w-3" />
                     {filterLabels[statusFilter as FilterOption]}
