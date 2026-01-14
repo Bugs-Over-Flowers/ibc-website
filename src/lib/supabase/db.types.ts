@@ -25,6 +25,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          interviewId: string | null;
           landline: string;
           logoImageURL: string;
           memberId: string | null;
@@ -44,6 +45,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          interviewId?: string | null;
           landline: string;
           logoImageURL: string;
           memberId?: string | null;
@@ -63,6 +65,7 @@ export type Database = {
           companyName?: string;
           emailAddress?: string;
           faxNumber?: string;
+          interviewId?: string | null;
           landline?: string;
           logoImageURL?: string;
           memberId?: string | null;
@@ -73,6 +76,13 @@ export type Database = {
           websiteURL?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "Application_interviewId_fkey";
+            columns: ["interviewId"];
+            isOneToOne: false;
+            referencedRelation: "Interview";
+            referencedColumns: ["interviewId"];
+          },
           {
             foreignKeyName: "Application_memberId_fkey";
             columns: ["memberId"];
@@ -310,7 +320,6 @@ export type Database = {
       };
       Interview: {
         Row: {
-          applicationId: string;
           createdAt: string | null;
           interviewDate: string;
           interviewId: string;
@@ -320,7 +329,6 @@ export type Database = {
           updatedAt: string | null;
         };
         Insert: {
-          applicationId: string;
           createdAt?: string | null;
           interviewDate: string;
           interviewId?: string;
@@ -330,7 +338,6 @@ export type Database = {
           updatedAt?: string | null;
         };
         Update: {
-          applicationId?: string;
           createdAt?: string | null;
           interviewDate?: string;
           interviewId?: string;

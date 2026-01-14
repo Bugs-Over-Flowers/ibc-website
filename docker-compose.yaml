@@ -1,0 +1,19 @@
+services:
+  ibc-web-app:
+    container_name: ibc-web-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./:/app
+      - /app/node_modules
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
