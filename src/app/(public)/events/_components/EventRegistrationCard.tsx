@@ -68,13 +68,11 @@ export default function EventRegistrationCard({
 
             {/* Action Buttons */}
             <div className="mt-6 space-y-3">
-              <Link href={`/registration/${eventId}/info` as Route}>
-                <Button
-                  className="h-12 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
-                  size="lg"
-                >
-                  Register for This Event
-                </Button>
+              <Link
+                className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                href={`/registration/${eventId}/info` as Route}
+              >
+                Register for This Event
               </Link>
             </div>
 

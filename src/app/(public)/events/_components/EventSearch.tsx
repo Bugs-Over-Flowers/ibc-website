@@ -214,41 +214,38 @@ export function EventsSearch({
           <div className="flex flex-col gap-3 sm:flex-row">
             {/* Date Range Picker with Calendar */}
             <Popover onOpenChange={setIsDateRangeOpen} open={isDateRangeOpen}>
-              <PopoverTrigger>
-                <Button
-                  className={cn(
-                    "h-12 flex-1 justify-between gap-3 rounded-xl border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
-                    (dateRange?.from || dateRange?.to) &&
-                      "border-primary/40 bg-primary/5",
-                  )}
-                  variant="outline"
-                >
-                  <div className="flex items-center gap-3">
-                    <CalendarIcon
-                      className={cn(
-                        "h-4 w-4 shrink-0",
-                        dateRange?.from || dateRange?.to
-                          ? "text-primary"
-                          : "text-muted-foreground/70",
-                      )}
-                    />
-                    <span
-                      className={cn(
-                        "truncate",
-                        !(dateRange?.from || dateRange?.to) &&
-                          "text-muted-foreground/70",
-                      )}
-                    >
-                      {getDateRangeLabel()}
-                    </span>
-                  </div>
-                  <ChevronDown
+              <PopoverTrigger
+                className={cn(
+                  "inline-flex h-12 flex-1 items-center justify-between gap-3 rounded-xl border border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                  (dateRange?.from || dateRange?.to) &&
+                    "border-primary/40 bg-primary/5",
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <CalendarIcon
                     className={cn(
-                      "h-4 w-4 text-muted-foreground/70 transition-transform",
-                      isDateRangeOpen && "rotate-180",
+                      "h-4 w-4 shrink-0",
+                      dateRange?.from || dateRange?.to
+                        ? "text-primary"
+                        : "text-muted-foreground/70",
                     )}
                   />
-                </Button>
+                  <span
+                    className={cn(
+                      "truncate",
+                      !(dateRange?.from || dateRange?.to) &&
+                        "text-muted-foreground/70",
+                    )}
+                  >
+                    {getDateRangeLabel()}
+                  </span>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 text-muted-foreground/70 transition-transform",
+                    isDateRangeOpen && "rotate-180",
+                  )}
+                />
               </PopoverTrigger>
               <PopoverContent
                 align="start"
@@ -316,35 +313,32 @@ export function EventsSearch({
 
             {/* Filter Dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button
-                  className={cn(
-                    "h-12 min-w-[160px] justify-between gap-2 rounded-xl border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
-                    statusFilter !== "all" && "border-primary/40 bg-primary/5",
-                  )}
-                  variant="outline"
-                >
-                  <div className="flex items-center gap-2">
-                    <Filter
-                      className={cn(
-                        "h-4 w-4",
-                        statusFilter !== "all"
-                          ? "text-primary"
-                          : "text-muted-foreground/70",
-                      )}
-                    />
-                    <span
-                      className={
-                        statusFilter !== "all"
-                          ? "text-foreground"
-                          : "text-muted-foreground/70"
-                      }
-                    >
-                      {filterLabels[statusFilter as FilterOption]}
-                    </span>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
-                </Button>
+              <DropdownMenuTrigger
+                className={cn(
+                  "inline-flex h-12 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                  statusFilter !== "all" && "border-primary/40 bg-primary/5",
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Filter
+                    className={cn(
+                      "h-4 w-4",
+                      statusFilter !== "all"
+                        ? "text-primary"
+                        : "text-muted-foreground/70",
+                    )}
+                  />
+                  <span
+                    className={
+                      statusFilter !== "all"
+                        ? "text-foreground"
+                        : "text-muted-foreground/70"
+                    }
+                  >
+                    {filterLabels[statusFilter as FilterOption]}
+                  </span>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"

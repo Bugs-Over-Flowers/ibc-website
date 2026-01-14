@@ -24,22 +24,17 @@ export function EventsCTA() {
             region&apos;s top business leaders.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/contact">
-              <Button
-                className="rounded-xl bg-primary px-3 shadow-lg hover:bg-primary/90"
-                size="lg"
-              >
-                Contact Us
-              </Button>
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 font-medium text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
+              href="/contact"
+            >
+              Contact Us
             </Link>
-            <Link href="/contact">
-              <Button
-                className="rounded-xl border-primary/50 px-3 shadow-lg hover:border-primary hover:bg-primary/10"
-                size="lg"
-                variant="outline"
-              >
-                Learn More About IBC
-              </Button>
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-primary/50 bg-background px-6 font-medium text-foreground shadow-lg transition-colors hover:border-primary hover:bg-primary/10"
+              href="/contact"
+            >
+              Learn More About IBC
             </Link>
           </div>
         </motion.div>
