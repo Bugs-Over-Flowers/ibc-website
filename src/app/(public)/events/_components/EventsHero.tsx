@@ -17,12 +17,11 @@ export function EventsHero() {
       >
         <Image
           alt="Events background"
-          className="object-cover"
+          className="object-cover opacity-20"
           fill
           priority
           src="https://picsum.photos/seed/picsum/200/300"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-[#2E2A6E]/70 via-[#2E2A6E]/50" />
       </motion.div>
 
       {/* Animated Blur Orbs */}
@@ -50,13 +49,13 @@ export function EventsHero() {
           variants={staggerContainer}
         >
           <motion.h1
-            className="mb-6 font-bold text-4xl text-white drop-shadow-lg md:text-5xl lg:text-6xl"
+            className="mb-6 font-bold text-4xl text-foreground drop-shadow-lg md:text-5xl lg:text-6xl"
             variants={fadeInUp}
           >
-            Events and Activities{" "}
+            Events and Activities
           </motion.h1>
           <motion.p
-            className="text-lg text-white/90 leading-relaxed drop-shadow-md"
+            className="text-foreground/90 text-lg leading-relaxed"
             variants={fadeInUp}
           >
             Discover upcoming events, seminars, and networking opportunities

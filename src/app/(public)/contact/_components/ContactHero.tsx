@@ -22,7 +22,6 @@ export function ContactHero() {
           priority
           src="/images/backgrounds/bg-3.jpg"
         />
-        {/* Gradient overlay */}
       </motion.div>
 
       {/* Animated Blur Orbs */}
