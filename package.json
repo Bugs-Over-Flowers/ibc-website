@@ -16,14 +16,7 @@
     "cy:run": "NODE_OPTIONS='--no-experimental-webstorage' cypress run",
     "cy:component": "NODE_OPTIONS='--no-experimental-webstorage' cypress open --component",
     "cy:e2e": "NODE_OPTIONS='--no-experimental-webstorage' cypress open --e2e",
-    "gen:types": "npx supabase gen types typescript --project-id rpdourwztdpwdebggkkc > src/lib/supabase/db.types.ts",
     "email:dev": "email dev --dir ./src/lib/resend/templates --port 3050",
-    "db:start": "supabase start",
-    "db:stop": "supabase stop",
-    "db:status": "supabase status",
-    "db:reset": "supabase db reset",
-    "db:seed": "supabase db reset",
-    "db:gen:types": "supabase gen types typescript --local > src/lib/supabase/db.types.ts",
     "test": "vitest",
     "test:unit": "vitest run __tests__/unit",
     "test:integration": "vitest run __tests__/integration",
@@ -31,10 +24,7 @@
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "test:all": "vitest run && cypress run",
-    "test:local": "bun run db:start && vitest",
-    "test:local:ui": "bun run db:start && vitest --ui",
-    "pretest": "bun run db:status || bun run db:start"
+    "test:all": "vitest run && cypress run"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
