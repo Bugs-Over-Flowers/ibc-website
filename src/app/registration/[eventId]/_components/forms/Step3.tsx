@@ -181,7 +181,6 @@ export default function Step3() {
                                 field.handleChange(files[0]);
                               }
                             }}
-                            onError={console.error}
                             src={
                               field.state.value
                                 ? [field.state.value]

@@ -80,7 +80,6 @@ export const useSendRegistrationEmail = () => {
       );
 
       if (error) {
-        console.error(error);
         // ROLLBACK: Delete the registration since email failed
         // This maintains data consistency - registrations without emails are incomplete
         await deleteRegistration(registrationId);

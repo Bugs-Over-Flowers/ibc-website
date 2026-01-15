@@ -1,13 +1,18 @@
 "use server";
 
+import { z } from "zod";
 import { createActionClient } from "@/lib/supabase/server";
 import { ServerRegistrationSchema } from "@/lib/validation/registration/standard";
 import { createRegistrationIdentifier } from "@/lib/validation/utils";
 
-interface SubmitRegistrationResponse {
-  registrationId: string;
-  message: string;
-}
+/**
+ * Zod schema for validating RPC response at runtime.
+ * Ensures type safety for data returned from database.
+ */
+const SubmitRegistrationResponseSchema = z.object({
+  registrationId: z.string().uuid(),
+  message: z.string(),
+});
 
 /**
  * Server action to submit event registration to database via RPC call.
@@ -72,8 +77,12 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   if (!rpcResults) {
     throw new Error("No data returned from registration");
   }
+
+  // Validate RPC response with Zod for type safety
+  const validatedResponse = SubmitRegistrationResponseSchema.parse(rpcResults);
+
   return {
-    rpcResults: rpcResults as unknown as SubmitRegistrationResponse,
+    rpcResults: validatedResponse,
     identifier: registrationIdentifier,
   };
 };

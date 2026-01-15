@@ -1,10 +1,9 @@
 import { toast } from "sonner";
-import { v4 as uuidv4 } from "uuid";
 import useRegistrationStore from "@/hooks/registration.store";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { createClient } from "@/lib/supabase/client";
-import { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
+import { uploadPaymentProof } from "@/lib/storage/uploadPaymentProof";
+import type { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
 import { submitRegistrationRPC } from "@/server/registration/actions/submitRegistrationRPC";
 
 /**
@@ -31,98 +30,51 @@ export const useSubmitRegistration = () => {
   const setCreatedRegistrationId = useRegistrationStore(
     (state) => state.setCreatedRegistrationId,
   );
+
   return useAction(
-    tryCatch(async (fullRegistrationData: StandardRegistrationSchema) => {
-      // validate the registration data;
-      const {
-        data: parsedRegistrationData,
-        error,
-        success,
-      } = StandardRegistrationSchema.safeParse(fullRegistrationData);
-
-      if (!success) {
-        console.error(error);
-        throw new Error("Invalid registration data");
-      }
-
-      // check for eventId
+    tryCatch(async (registrationData: StandardRegistrationSchema) => {
+      // Validate eventId exists
       if (!eventDetails?.eventId) {
         throw new Error("Event ID is missing");
       }
 
-      const { step3 } = parsedRegistrationData;
-
-      let returnedRegistrationId = "";
-      let returnedRegistrationIdentifier = "";
+      const { step3 } = registrationData;
 
       /**
        * PAYMENT PROOF UPLOAD FLOW
        *
        * For online payments:
-       * 1. Generate unique UUID to prevent filename collisions
-       * 2. Upload File object to Supabase 'paymentProofs' bucket
-       * 3. Construct final path by appending file extension from MIME type
-       *    Example: "reg-abc123" + ".jpg" (extracted from "image/jpg")
+       * 1. Upload File to Supabase storage
+       * 2. Receive storage path for database
        *
-       * Why separate upload and submission:
-       * - File upload must succeed before database transaction
-       * - Server action cannot receive File objects, only paths
-       * - Storage and database are separate concerns
+       * For onsite payments:
+       * - Skip upload, no proof required
        */
+      let paymentProofPath: string | undefined;
       if (step3.paymentMethod === "online" && step3.paymentProof) {
-        const createUUID = uuidv4();
-        const supabase = await createClient();
-
-        const { data, error } = await supabase.storage
-          .from("paymentProofs")
-          .upload(`reg-${createUUID}`, step3.paymentProof);
-
-        if (error) {
-          console.error(error);
-          throw new Error(`Failed to upload payment proof: ${error.message}`);
-        }
-
-        // Submit registration with file path (not File object)
-        // Path format: "reg-{uuid}.{extension}" (e.g., "reg-abc123.jpg")
-        const {
-          rpcResults: { registrationId },
-          identifier,
-        } = await submitRegistrationRPC({
-          eventId: eventDetails?.eventId,
-          step1: parsedRegistrationData.step1,
-          step2: parsedRegistrationData.step2,
-          step3: {
-            paymentMethod: "online",
-            // Extract file extension from MIME type (e.g., "image/jpeg" → "jpeg")
-            path: `${data.path}.${step3.paymentProof.type.split("/")[1]}`,
-          },
-          step4: parsedRegistrationData.step4,
-        });
-        returnedRegistrationId = registrationId;
-        returnedRegistrationIdentifier = identifier;
-      } else {
-        // Onsite payment: no file upload needed
-        const {
-          rpcResults: { registrationId },
-          identifier,
-        } = await submitRegistrationRPC({
-          eventId: eventDetails?.eventId,
-          step1: parsedRegistrationData.step1,
-          step2: parsedRegistrationData.step2,
-          step3: {
-            paymentMethod: "onsite",
-          },
-          step4: parsedRegistrationData.step4,
-        });
-        returnedRegistrationId = registrationId;
-        returnedRegistrationIdentifier = identifier;
+        paymentProofPath = await uploadPaymentProof(step3.paymentProof);
       }
-      setCreatedRegistrationId(returnedRegistrationId);
 
-      if (!returnedRegistrationId || !returnedRegistrationIdentifier) {
-        throw new Error("Failed to create registration");
-      }
-      return { returnedRegistrationId, returnedRegistrationIdentifier };
+      // Submit registration with appropriate payment data
+      const {
+        rpcResults: { registrationId },
+        identifier,
+      } = await submitRegistrationRPC({
+        eventId: eventDetails.eventId,
+        step1: registrationData.step1,
+        step2: registrationData.step2,
+        step3: paymentProofPath
+          ? { paymentMethod: "online", path: paymentProofPath }
+          : { paymentMethod: "onsite" },
+        step4: registrationData.step4,
+      });
+
+      setCreatedRegistrationId(registrationId);
+
+      return {
+        returnedRegistrationId: registrationId,
+        returnedRegistrationIdentifier: identifier,
+      };
     }),
     {
       onSuccess: () => {

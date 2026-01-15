@@ -170,7 +170,7 @@ const Step1 = ({ members }: Step1Props) => {
 
       <FormButtons
         onBack={() => {
-          console.log("No Back button for step 1");
+          // No back button for step 1 (first step)
         }}
         onNext={onNext}
       />
