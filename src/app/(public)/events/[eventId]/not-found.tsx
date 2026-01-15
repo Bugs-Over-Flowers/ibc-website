@@ -1,7 +1,6 @@
 "use client";
 import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
-import { Footer } from "@/components/navbar/Footer";
 import { Header } from "@/components/navbar/Header";
 import { Button } from "@/components/ui/button";
 
@@ -32,7 +31,6 @@ export default function NotFound() {
           </div>
         </div>
       </div>
-      <Footer />
     </main>
   );
 }
