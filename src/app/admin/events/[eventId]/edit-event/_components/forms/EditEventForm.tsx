@@ -133,6 +133,10 @@ export function EditEventForm({ event }: EditEventFormProps) {
               </div>
             )}
 
+            <form.AppField name="maxGuest">
+              {(field) => <field.NumberField label="Max Guest *" />}
+            </form.AppField>
+
             {/* Current Image Preview */}
             {event.eventHeaderUrl && (
               <div className="space-y-2">

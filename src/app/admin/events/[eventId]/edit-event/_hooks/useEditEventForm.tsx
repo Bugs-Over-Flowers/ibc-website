@@ -38,6 +38,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
       eventEndDate: formatDateForInput(event.eventEndDate),
       venue: event.venue || "",
       registrationFee: event.registrationFee,
+      maxGuest: event.maxGuest,
       eventType: event.eventType as "public" | "private" | null,
       eventImage: [] as File[],
       eventHeaderUrl: event.eventHeaderUrl || "",
@@ -122,6 +123,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
         venue: value.venue,
         eventHeaderUrl: headerUrl || undefined,
         eventType: value.eventType,
+        maxGuest: value.maxGuest,
         ...(isDraft && {
           registrationFee: value.registrationFee,
         }),

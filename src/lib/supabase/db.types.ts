@@ -258,6 +258,7 @@ export type Database = {
           eventType: Database["public"]["Enums"]["EventType"] | null;
           publishedAt: string | null;
           registrationFee: number;
+          maxGuest: number;
           updatedAt: string | null;
           venue: string | null;
         };
@@ -271,6 +272,7 @@ export type Database = {
           eventType?: Database["public"]["Enums"]["EventType"] | null;
           publishedAt?: string | null;
           registrationFee?: number;
+          maxGuest: number;
           updatedAt?: string | null;
           venue?: string | null;
         };
@@ -284,6 +286,7 @@ export type Database = {
           eventType?: Database["public"]["Enums"]["EventType"] | null;
           publishedAt?: string | null;
           registrationFee?: number;
+          maxGuest: number;
           updatedAt?: string | null;
           venue?: string | null;
         };

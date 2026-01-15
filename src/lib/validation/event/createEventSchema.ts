@@ -11,6 +11,7 @@ const baseEventSchema = z.object({
   }),
   venue: z.string().min(5, "Venue must   be 5 characters"),
   registrationFee: z.number().min(0, "Must at least be at least 0"),
+  maxGuest: z.number().min(1, "Must be greater than 0"),
   eventImage: z
     .array(z.instanceof(File))
     .min(1, "At least 1 image is required"),
