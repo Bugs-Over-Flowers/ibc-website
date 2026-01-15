@@ -1,7 +1,6 @@
 import { Img } from "@react-email/components";
 import { motion } from "framer-motion";
 import { Building2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
