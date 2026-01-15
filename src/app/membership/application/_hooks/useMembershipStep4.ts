@@ -26,6 +26,7 @@ export const useMembershipStep4 = ({
   const setIsSubmitted = useMembershipApplicationStore(
     (state) => state.setIsSubmitted,
   );
+  const setStep = useMembershipApplicationStore((state) => state.setStep);
 
   const defaultApplicationDataStep4 = useMembershipApplicationStore(
     (state) => state.applicationData?.step4,

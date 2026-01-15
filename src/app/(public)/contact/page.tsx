@@ -9,7 +9,6 @@ export default function ContactPage() {
     <div className="bg-background">
       <ContactHero />
       <ContactInfoCards />
-
       <section className="bg-card py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2">
