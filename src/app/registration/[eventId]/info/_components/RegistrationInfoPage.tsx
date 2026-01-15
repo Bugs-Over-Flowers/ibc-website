@@ -25,9 +25,10 @@ import { Separator } from "@/components/ui/separator";
 import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationInformationPageProps } from "@/lib/types/route";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
-import EmptySection from "../../_components/EmptySection";
+import NotReadyEvent from "../../_components/NotReadyEvent";
+import RegistrationErrorComponent from "../../_components/RegistrationErrorComponent";
 
-export default async function InfoPage({
+export default async function RegistrationInfoPage({
   params,
 }: {
   params: RegistrationInformationPageProps["params"];
@@ -41,13 +42,13 @@ export default async function InfoPage({
   } = await tryCatch(getRegistrationEventDetails(requestCookies, { eventId }));
 
   if (!success) {
-    return <EmptySection message={registrationEventDetailsMessage} />;
+    return (
+      <RegistrationErrorComponent message={registrationEventDetailsMessage} />
+    );
   }
 
   if (data.eventType === null) {
-    return (
-      <div>This event is still not available. Please come back later.</div>
-    );
+    return <NotReadyEvent title={data.eventTitle} />;
   }
 
   if (!data.eventStartDate || !data.eventEndDate) {
@@ -166,7 +167,10 @@ export default async function InfoPage({
         </CardContent>
         <CardFooter>
           <CardAction>
-            <Link href={`/registration/${eventId}`}>
+            <Link
+              data-cy="event-start-register-button"
+              href={`/registration/${eventId}`}
+            >
               <Button>Register</Button>
             </Link>
           </CardAction>

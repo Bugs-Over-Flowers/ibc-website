@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import type { RegistrationInformationPageProps } from "@/lib/types/route";
-import InfoPage from "./_components/InfoPage";
+import RegistrationInfoPage from "./_components/RegistrationInfoPage";
 
 export default function InfoPageWrapper({
   params,
 }: RegistrationInformationPageProps) {
   return (
     <Suspense>
-      <InfoPage params={params} />
+      <RegistrationInfoPage params={params} />
     </Suspense>
   );
 }

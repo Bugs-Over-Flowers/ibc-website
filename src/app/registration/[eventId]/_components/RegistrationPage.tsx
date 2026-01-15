@@ -8,7 +8,7 @@ import type { RegistrationRouteProps } from "@/lib/types/route";
 import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
 import RegistrationForm from "./forms/RegistrationForm";
-import RegistrationInformation from "./RegistrationInformation";
+import RegistrationInformation from "./RegistrationInfoHeader";
 
 const RegistrationPage = async ({
   params,

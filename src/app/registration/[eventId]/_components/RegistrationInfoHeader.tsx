@@ -7,7 +7,7 @@ import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import useRegistrationStore from "@/hooks/registration.store";
 import Stepper from "./Stepper";
 
-const RegistrationInformation = (
+const RegistrationInfoHeader = (
   initialEventDetails: RegistrationStoreEventDetails,
 ) => {
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
@@ -46,4 +46,4 @@ const RegistrationInformation = (
   );
 };
 
-export default RegistrationInformation;
+export default RegistrationInfoHeader;

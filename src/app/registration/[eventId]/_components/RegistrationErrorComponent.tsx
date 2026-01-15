@@ -10,11 +10,13 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 
-interface EmptySectionProps {
+interface RegistrationErrorComponentProps {
   message: string;
 }
 
-export default function EmptySection({ message }: EmptySectionProps) {
+export default function RegistrationErrorComponent({
+  message,
+}: RegistrationErrorComponentProps) {
   return (
     <Empty>
       <EmptyHeader>

@@ -11,7 +11,7 @@ export default function EventPageDetailsLoading() {
           <div className="absolute inset-0 bg-to-b from-black/40 via-transparent to-black/20" />
 
           {/* Back button skeleton */}
-          <div className="-translate-x-1/2 absolute bottom-8 left-1/2 z-10">
+          <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2">
             <Skeleton className="h-10 w-40 rounded-full bg-foreground/10 backdrop-blur-xl" />
           </div>
         </div>
