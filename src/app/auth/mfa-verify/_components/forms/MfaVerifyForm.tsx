@@ -25,15 +25,20 @@ import { loginVerifyMfa } from "@/server/auth/mutations/mfa";
 export function MfaVerifyForm() {
   const router = useRouter();
   const [code, setCode] = useState("");
+  const [mounted, setMounted] = useState(false);
   const otpRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Reset state and focus on mount
+    // Force remount on navigation
+    setMounted(true);
     setCode("");
     const timer = setTimeout(() => {
       otpRef.current?.focus();
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setMounted(false);
+    };
   }, []);
 
   const { execute, isPending } = useAction(loginVerifyMfa, {
@@ -74,43 +79,46 @@ export function MfaVerifyForm() {
           <Label className="block text-center" htmlFor="code">
             Verification Code
           </Label>
-          <InputOTP
-            autoFocus
-            containerClassName="justify-center"
-            id="code"
-            maxLength={6}
-            onChange={(value) => setCode(value)}
-            onComplete={handleVerify}
-            ref={otpRef}
-            value={code}
-          >
-            <InputOTPGroup className="gap-2">
-              <InputOTPSlot
-                className="h-12 w-12 rounded-md border font-semibold text-lg"
-                index={0}
-              />
-              <InputOTPSlot
-                className="h-12 w-12 rounded-md border font-semibold text-lg"
-                index={1}
-              />
-              <InputOTPSlot
-                className="h-12 w-12 rounded-md border font-semibold text-lg"
-                index={2}
-              />
-              <InputOTPSlot
-                className="h-12 w-12 rounded-md border font-semibold text-lg"
-                index={3}
-              />
-              <InputOTPSlot
-                className="h-12 w-12 rounded-md border font-semibold text-lg"
-                index={4}
-              />
-              <InputOTPSlot
-                className="h-12 w-12 rounded-md border font-semibold text-lg"
-                index={5}
-              />
-            </InputOTPGroup>
-          </InputOTP>
+          {mounted && (
+            <InputOTP
+              id="code"
+              maxLength={6}
+              onChange={(value) => setCode(value)}
+              onComplete={handleVerify}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleVerify();
+              }}
+              ref={otpRef}
+              value={code}
+            >
+              <InputOTPGroup className="gap-2">
+                <InputOTPSlot
+                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  index={0}
+                />
+                <InputOTPSlot
+                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  index={1}
+                />
+                <InputOTPSlot
+                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  index={2}
+                />
+                <InputOTPSlot
+                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  index={3}
+                />
+                <InputOTPSlot
+                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  index={4}
+                />
+                <InputOTPSlot
+                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  index={5}
+                />
+              </InputOTPGroup>
+            </InputOTP>
+          )}
         </div>
       </CardContent>
       <CardFooter>

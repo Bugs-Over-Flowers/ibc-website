@@ -326,3 +326,13 @@
 .sidebar-custom[data-state="collapsed"] {
   width: var(--sidebar-width-icon, 4rem);
 }
+
+/* Fix input-otp hidden input layout shift */
+[data-slot="input-otp"] > input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
