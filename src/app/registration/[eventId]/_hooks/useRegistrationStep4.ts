@@ -10,6 +10,33 @@ import {
 import { useSendRegistrationEmail } from "./useSendRegistrationEmail";
 import { useSubmitRegistration } from "./useSubmitRegistration";
 
+/**
+ * Hook for handling Step 4 (final confirmation) of the registration process.
+ *
+ * TWO-PHASE REGISTRATION FLOW:
+ *
+ * Phase 1 - Create Registration:
+ * 1. Validate all 4 steps of registration data
+ * 2. Submit to database via submitRegistration
+ * 3. Receive registrationId and identifier
+ *
+ * Phase 2 - Send Confirmation Email:
+ * 4. Send confirmation email with QR code to registrant
+ * 5. If email fails → rollback registration (delete from database)
+ * 6. Set cookie with QR data for success page
+ * 7. Navigate to /registration/success
+ *
+ * Why two phases:
+ * - Registration must succeed before sending email (can't email without ID)
+ * - Email failure should rollback registration (data consistency)
+ * - Both operations must succeed for complete registration
+ *
+ * Error handling:
+ * - If Phase 1 fails: user stays on form, can retry
+ * - If Phase 2 fails: registration is deleted, user must start over
+ *
+ * @returns TanStack Form instance configured for Step 4 submission
+ */
 export const useRegistrationStep4 = () => {
   const router = useRouter();
 
@@ -32,11 +59,12 @@ export const useRegistrationStep4 = () => {
     onSubmit: async ({ value }) => {
       const refinedValue = StandardRegistrationStep4Schema.parse(value);
 
-      // handle save data to store
+      // Save step 4 data to store
       setRegistrationData({
         step4: refinedValue,
       });
 
+      // Validate complete registration data (all 4 steps)
       const refinedRegistrationData = StandardRegistrationSchema.safeParse({
         ...registrationData,
         step4: refinedValue,
@@ -49,21 +77,22 @@ export const useRegistrationStep4 = () => {
         return;
       }
 
-      // registration
+      // ========== PHASE 1: Create Registration ==========
       const { data } = await submitRegistration(refinedRegistrationData.data);
 
       if (!data) return;
 
       const { returnedRegistrationId, returnedRegistrationIdentifier } = data;
 
-      // email sending
+      // ========== PHASE 2: Send Email (with rollback on failure) ==========
       const { error: sendEmailError } = await sendEmail(
         returnedRegistrationId,
         returnedRegistrationIdentifier,
       );
+      // Note: If email fails, the registration will be deleted inside useSendRegistrationEmail
       if (sendEmailError) return;
 
-      // redirect
+      // ========== SUCCESS: Navigate to confirmation page ==========
       if (!eventDetails?.eventId) {
         router.push("/events");
         return;

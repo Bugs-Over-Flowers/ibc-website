@@ -41,14 +41,36 @@ export const StandardRegistrationStep2Schema = z
     otherParticipants: z.array(RegistrantDetailsSchema).default([]),
   })
   .superRefine((data, ctx) => {
-    // Logic remains mostly the same, just slightly cleaner map usage
+    /**
+     * DUPLICATE PARTICIPANT DETECTION ALGORITHM
+     *
+     * Purpose: Prevent the same person from being registered multiple times
+     * in a single registration (either as registrant or other participant).
+     *
+     * Algorithm:
+     * 1. Create composite key: "firstname-lastname-email" (case-insensitive)
+     * 2. Store registrant with index -1 (special marker)
+     * 3. Store other participants with their array indices (0, 1, 2, ...)
+     * 4. If duplicate found, generate user-friendly error message
+     *
+     * Example:
+     * Registrant: John Doe (john@example.com) → index: -1
+     * Participant 1: Jane Smith (jane@example.com) → index: 0
+     * Participant 2: John Doe (john@example.com) → DUPLICATE!
+     * Error: "Duplicate registrant: John Doe, john@example.com is already listed as Principal Registrant"
+     *
+     * Why index offset (+2 in error message):
+     * - Array is 0-indexed: [0, 1, 2]
+     * - But users see: "Participant 2, Participant 3, Participant 4"
+     * - Offset = +1 for human counting, +1 for principal registrant = +2
+     */
     const seen = new Map<string, number>();
 
-    // Helper to generate key
+    // Helper to generate composite key from participant details
     const getKey = (f: string, l: string, e: string) =>
       `${f.toLowerCase()}-${l.toLowerCase()}-${e.toLowerCase()}`;
 
-    // Add principal
+    // Add principal registrant with special index -1
     const pKey = getKey(
       data.registrant.firstName,
       data.registrant.lastName,
@@ -56,6 +78,7 @@ export const StandardRegistrationStep2Schema = z
     );
     seen.set(pKey, -1);
 
+    // Check each other participant for duplicates
     data.otherParticipants.forEach((participant, index) => {
       const key = getKey(
         participant.firstName,
@@ -64,12 +87,12 @@ export const StandardRegistrationStep2Schema = z
       );
 
       if (seen.has(key)) {
-        // biome-ignore lint/style/noNonNullAssertion: seen.has(key) run
+        // biome-ignore lint/style/noNonNullAssertion: seen.has(key) guarantees the value exists
         const duplicateIndex = seen.get(key)!;
         const duplicateLabel =
           duplicateIndex === -1
             ? "Principal Registrant"
-            : `Participant ${duplicateIndex + 2}`; // +2 because 0-index + principal
+            : `Participant ${duplicateIndex + 2}`; // +2 offset explained above
 
         ctx.addIssue({
           code: "custom",
