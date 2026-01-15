@@ -13,8 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useAction } from "@/hooks/useAction";
 import { enrollMfa, verifyMfa } from "@/server/auth/mutations/mfa";
@@ -24,6 +29,7 @@ export function MfaSetupForm() {
   const [code, setCode] = useState("");
   const [factorId, setFactorId] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const otpRef = useRef<HTMLInputElement>(null);
 
   const { execute: executeEnroll, isPending: isEnrolling } = useAction(
     enrollMfa,
@@ -50,10 +56,12 @@ export function MfaSetupForm() {
     verifyMfa,
     {
       onSuccess: () => {
+        setCode("");
         toast.success("MFA enabled successfully");
         router.push("/admin/dashboard");
       },
       onError: (error) => {
+        setCode("");
         const errorMessage = error instanceof Error ? error.message : error;
         toast.error(errorMessage);
       },
@@ -69,6 +77,17 @@ export function MfaSetupForm() {
     }
   }, [executeEnroll]);
 
+  useEffect(() => {
+    // Focus the OTP input when QR code is loaded
+    if (qrCode) {
+      setCode("");
+      const timer = setTimeout(() => {
+        otpRef.current?.focus();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [qrCode]);
+
   const handleVerify = () => {
     if (!factorId || !code) return;
     executeVerify({ factorId, code });
@@ -76,9 +95,33 @@ export function MfaSetupForm() {
 
   if (isEnrolling && !qrCode) {
     return (
-      <div className="flex justify-center p-8">
-        <Spinner className="size-8" />
-      </div>
+      <Card className="w-full max-w-[400px]">
+        <CardHeader>
+          <CardTitle>Setup Multi-Factor Authentication</CardTitle>
+          <CardDescription>
+            Scan the QR code with your authenticator app to get started.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-center">
+            <Skeleton className="size-48" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="mx-auto h-4 w-28" />
+            <div className="flex justify-center gap-2">
+              <Skeleton className="size-12 rounded-md" />
+              <Skeleton className="size-12 rounded-md" />
+              <Skeleton className="size-12 rounded-md" />
+              <Skeleton className="size-12 rounded-md" />
+              <Skeleton className="size-12 rounded-md" />
+              <Skeleton className="size-12 rounded-md" />
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Skeleton className="h-9 w-full" />
+        </CardFooter>
+      </Card>
     );
   }
 
@@ -103,14 +146,45 @@ export function MfaSetupForm() {
           </div>
         )}
         <div className="space-y-2">
-          <Label htmlFor="code">Verification Code</Label>
-          <Input
+          <Label className="block text-center" htmlFor="code">
+            Verification Code
+          </Label>
+          <InputOTP
+            autoFocus
+            containerClassName="justify-center"
             id="code"
             maxLength={6}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Enter 6-digit code"
+            onChange={(value) => setCode(value)}
+            ref={otpRef}
             value={code}
-          />
+          >
+            <InputOTPGroup className="gap-2">
+              <InputOTPSlot
+                className="h-12 w-12 rounded-md border font-semibold text-lg"
+                index={0}
+              />
+              <InputOTPSlot
+                className="h-12 w-12 rounded-md border font-semibold text-lg"
+                index={1}
+              />
+              <InputOTPSlot
+                className="h-12 w-12 rounded-md border font-semibold text-lg"
+                index={2}
+              />
+              <InputOTPSlot
+                className="h-12 w-12 rounded-md border font-semibold text-lg"
+                index={3}
+              />
+              <InputOTPSlot
+                className="h-12 w-12 rounded-md border font-semibold text-lg"
+                index={4}
+              />
+              <InputOTPSlot
+                className="h-12 w-12 rounded-md border font-semibold text-lg"
+                index={5}
+              />
+            </InputOTPGroup>
+          </InputOTP>
         </div>
       </CardContent>
       <CardFooter>
@@ -119,7 +193,14 @@ export function MfaSetupForm() {
           disabled={isVerifying || !code || !factorId}
           onClick={handleVerify}
         >
-          {isVerifying ? "Verifying..." : "Verify and Enable"}
+          {isVerifying ? (
+            <>
+              <Spinner className="size-4" />
+              Verifying...
+            </>
+          ) : (
+            "Verify and Enable"
+          )}
         </Button>
       </CardFooter>
     </Card>
