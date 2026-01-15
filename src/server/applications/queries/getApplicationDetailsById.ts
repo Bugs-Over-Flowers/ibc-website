@@ -2,11 +2,13 @@ import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
-import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 import type { ApplicationWithMembers } from "@/lib/types/application";
 
-export async function getApplications(requestCookies?: RequestCookie[]) {
+export async function getApplicationDetailsById(
+  applicationId: string,
+  requestCookies?: RequestCookie[],
+) {
   const cookieStore = requestCookies || (await cookies()).getAll();
   const supabase = await createClient(cookieStore);
 
@@ -20,18 +22,12 @@ export async function getApplications(requestCookies?: RequestCookie[]) {
       ProofImage(proofImageId, path)
     `,
     )
-    .order("applicationDate", { ascending: false });
+    .eq("applicationId", applicationId)
+    .single();
 
   if (error) {
-    throw new Error(`Failed to fetch applications: ${error.message}`);
+    throw new Error(`Failed to fetch application: ${error.message}`);
   }
-
-  type ApplicationWithRelations =
-    Database["public"]["Tables"]["Application"]["Row"] & {
-      ApplicationMember: Database["public"]["Tables"]["ApplicationMember"]["Row"][];
-      Sector: Database["public"]["Tables"]["Sector"]["Row"];
-      ProofImage: Database["public"]["Tables"]["ProofImage"]["Row"][];
-    };
 
   const signLogoUrl = async (path: string | null) => {
     if (!path) return null;
@@ -51,14 +47,10 @@ export async function getApplications(requestCookies?: RequestCookie[]) {
     return null;
   };
 
-  const applicationsWithSignedLogos = await Promise.all(
-    (data as ApplicationWithRelations[]).map(
-      async (application: ApplicationWithRelations) => ({
-        ...application,
-        logoImageURL: await signLogoUrl(application.logoImageURL),
-      }),
-    ),
-  );
+  const applicationWithSignedLogo = {
+    ...data,
+    logoImageURL: await signLogoUrl(data.logoImageURL),
+  };
 
-  return applicationsWithSignedLogos as ApplicationWithMembers[];
+  return applicationWithSignedLogo as ApplicationWithMembers;
 }

@@ -2,6 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { type ReactNode, useState } from "react";
+import { useSelectedApplications } from "../_context/SelectedApplicationsContext";
+import { useTabSelections } from "../_hooks/useTabSelections";
 import BulkActions from "./BulkActions";
 import MeetingScheduler from "./MeetingScheduler";
 
@@ -21,6 +23,20 @@ export default function ApplicationsTabs({
   const [activeTab, setActiveTab] = useState<"new" | "pending" | "finished">(
     "new",
   );
+  const { selectedApplicationIds, clearSelection, selectAll } =
+    useSelectedApplications();
+
+  const { handleTabChange: handleTabSelectionChange } = useTabSelections({
+    activeTab,
+    selectedApplicationIds: Array.from(selectedApplicationIds),
+    clearSelection,
+    selectAll,
+  });
+
+  const handleTabChange = (newTab: "new" | "pending" | "finished") => {
+    handleTabSelectionChange(newTab);
+    setActiveTab(newTab);
+  };
 
   const tabs = [
     { id: "new", label: "New Applications" },
@@ -150,7 +166,7 @@ export default function ApplicationsTabs({
                 }
                 `}
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 type="button"
               >
                 {tab.label}

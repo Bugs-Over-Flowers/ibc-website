@@ -6,6 +6,7 @@ export const scheduleMeetingSchema = z.object({
     .min(1, "Select at least one application"),
   interviewDate: z.date({ message: "Interview date is required" }),
   interviewVenue: z.string().min(3, "Interview venue is required"),
+  customMessage: z.string().optional(),
 });
 
 export const approveRejectSchema = z.object({
