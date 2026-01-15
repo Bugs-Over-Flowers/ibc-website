@@ -6,7 +6,7 @@
 -- =============================================================================
 
 -- Clean up existing test data (if any)
-TRUNCATE TABLE 
+TRUNCATE TABLE
   "Interview",
   "ProofImage",
   "ApplicationMember",
@@ -97,18 +97,18 @@ DECLARE
   app_id_2 uuid;
 BEGIN
   -- Get the first application ID
-  SELECT "applicationId" INTO app_id_1 
-  FROM "Application" 
-  WHERE "companyName" = 'Test Company Inc.' 
+  SELECT "applicationId" INTO app_id_1
+  FROM "Application"
+  WHERE "companyName" = 'Test Company Inc.'
   LIMIT 1;
-  
+
   -- Get the second application ID
-  SELECT "applicationId" INTO app_id_2 
-  FROM "Application" 
-  WHERE "companyName" = 'Sample Corp.' 
+  SELECT "applicationId" INTO app_id_2
+  FROM "Application"
+  WHERE "companyName" = 'Sample Corp.'
   LIMIT 1;
-  
-  -- =============================================================================
+
+  -- =============su================================================================
   -- Insert Test Application Members
   -- =============================================================================
   INSERT INTO "ApplicationMember" (
@@ -191,12 +191,14 @@ INSERT INTO "Event" (
   "registrationFee",
   "eventHeaderUrl"
 ) VALUES
+  -- Event for Tech Summit 2025
+  -- 30 - 32 days from now
   (
     gen_random_uuid(),
-    'Tech Summit 2024',
+    'Tech Summit 2025',
     'Annual technology conference',
-    (NOW() + INTERVAL '30 days')::timestamp,
-    (NOW() + INTERVAL '32 days')::timestamp,
+    date_trunc('day', TIMEZONE('UTC', NOW()) + INTERVAL '30 days')::timestamp,
+    date_trunc('day', TIMEZONE('UTC', NOW()) + INTERVAL '32 days')::timestamp,
     'Manila Convention Center',
     'public',
     1500.00,
@@ -206,13 +208,65 @@ INSERT INTO "Event" (
     gen_random_uuid(),
     'Business Networking Night',
     'Monthly networking event for business members',
-    (NOW() + INTERVAL '15 days')::timestamp,
-    (NOW() + INTERVAL '15 days')::timestamp,
+    date_trunc('day', TIMEZONE('UTC', NOW()) + INTERVAL '15 days')::timestamp,
+    date_trunc('day', TIMEZONE('UTC', NOW()) + INTERVAL '15 days')::timestamp,
     'Makati Business Club',
     'private',
     500.00,
     'https://example.com/networking.jpg'
   );
+
+-- There should also be data for event days for these events
+
+
+
+-- =============================================================================
+-- Create Business Members
+-- =============================================================================
+INSERT INTO "BusinessMember" (
+  "sectorId",
+  "logoImageURL" ,
+  "joinDate",
+  "websiteURL",
+  "businessName",
+  "businessMemberId",
+  "lastPaymentDate",
+  "membershipExpiryDate",
+  "membershipStatus"
+) VALUES
+  (
+   	1,
+    'https://example.com/business1.jpg',
+    NOW(),
+    'https://example.com/business1.com',
+    'Business 1',
+    gen_random_uuid(),
+    NOW(),
+    NOW(),
+    'Active'
+  ),
+  (
+   	2,
+    'https://example.com/business2.jpg',
+    NOW(),
+    'https://example.com/business2.com',
+    'Business Corp.',
+    gen_random_uuid(),
+    NOW(),
+    NOW(),
+    'Active'
+  ),
+  (
+    3,
+    'https://example.com/business3.jpg',
+    NOW(),
+    'https://example.com/business3.com',
+    'Company Ltd.',
+    gen_random_uuid(),
+    NOW(),
+    NOW(),
+    'Active'
+  )
 
 -- =============================================================================
 -- Verify Seed Data
