@@ -13,9 +13,9 @@ interface MembersGridProps {
 
 export function MembersGrid({ members }: MembersGridProps) {
   return (
-    <section className="bg-muted/50 px-4 py-16">
+    <section className="bg-muted/50 py-16">
       <motion.div
-        className="mx-auto max-w-7xl"
+        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
         initial="hidden"
         variants={staggerContainer}
         viewport={{ once: true, amount: 0.2 }}
