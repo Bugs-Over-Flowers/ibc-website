@@ -6,7 +6,7 @@ import { ContactMap } from "./_components/ContactMap";
 
 export default function ContactPage() {
   return (
-    <div className="bg-background">
+    <main className="min-h-screen bg-background">
       <ContactHero />
       <ContactInfoCards />
       <section className="bg-card py-24">
@@ -19,6 +19,6 @@ export default function ContactPage() {
       </section>
 
       <ContactFAQ />
-    </div>
+    </main>
   );
 }

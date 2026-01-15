@@ -1,7 +1,6 @@
 import { Img } from "@react-email/components";
 import { motion } from "framer-motion";
 import { Building2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
@@ -32,12 +31,11 @@ export function MembersGrid({ members }: MembersGridProps) {
                 : `member-${idx}`;
             const cardContent = (
               <CardContent className="flex h-full flex-col p-0" key={safeKey}>
-                <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-linear-to-br from-secondary to-accent">
-                  <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-primary/20"></div>
+                <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-white p-4">
                   {member.logoImageURL ? (
                     <Img
                       alt={member.businessName}
-                      className="aspect-square h-full w-full bg-white object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
                       src={member.logoImageURL}
                       style={{ aspectRatio: "1 / 1", objectPosition: "center" }}
                     />
@@ -66,18 +64,14 @@ export function MembersGrid({ members }: MembersGridProps) {
                   {member.websiteURL && (
                     <div className="mt-4 flex w-full justify-center">
                       <a
+                        className="inline-flex w-full max-w-[180px] items-center justify-center rounded-xl border-none bg-primary px-4 py-2 font-medium text-primary-foreground text-sm shadow-md hover:cursor-pointer hover:bg-primary/90"
                         href={member.websiteURL}
+                        onClick={(e) => e.stopPropagation()}
                         rel="noopener noreferrer"
+                        tabIndex={0}
                         target="_blank"
                       >
-                        <Button
-                          className="w-full max-w-[180px] rounded-xl border-none bg-primary font-medium text-primary-foreground text-sm shadow-md hover:cursor-pointer hover:bg-primary/90"
-                          onClick={(e) => e.stopPropagation()}
-                          tabIndex={0}
-                          variant="default"
-                        >
-                          Visit Website
-                        </Button>
+                        Visit Website
                       </a>
                     </div>
                   )}

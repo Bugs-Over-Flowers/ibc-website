@@ -5,6 +5,8 @@ import type { Tables } from "@/lib/supabase/db.types";
 
 type Event = Tables<"Event">;
 
+import { MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { staggerContainer } from "@/lib/animations/stagger";
 import { getEventStatus } from "@/lib/events/eventUtils";
 import { EventInfoCard } from "./EventInfoCard";
@@ -29,7 +31,7 @@ export function EventDetailsContent({ event }: EventDetailsContentProps) {
           >
             <EventInfoCard event={event} />
           </motion.div>
-          {status !== "past" && (
+          {status !== "past" ? (
             <motion.div
               animate="visible"
               className="flex flex-col lg:col-span-2"
@@ -38,6 +40,17 @@ export function EventDetailsContent({ event }: EventDetailsContentProps) {
             >
               <EventRegistrationCard event={event} />
             </motion.div>
+          ) : (
+            <div className="flex flex-col justify-end lg:col-span-2">
+              <Button
+                className="h-12 w-full rounded-2xl border-border bg-transparent text-foreground hover:bg-accent"
+                size="lg"
+                variant="outline"
+              >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Submit Feedback
+              </Button>
+            </div>
           )}
         </div>
       </div>
