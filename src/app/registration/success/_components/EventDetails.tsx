@@ -62,7 +62,7 @@ export default async function EventDetails({
             <AlertDescription>
               <li>
                 You will receive a confirmation email with your registration
-                details. Please check your email at .
+                details. Please check your email at{" "}
                 <strong>{data.email}</strong>
               </li>
               <li>
