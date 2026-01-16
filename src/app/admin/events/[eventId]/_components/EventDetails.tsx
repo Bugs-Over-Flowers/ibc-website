@@ -35,7 +35,7 @@ export default async function EventDetails({
     getEventById(requestCookies, { id: eventId }),
   );
 
-  const { data: stats, error: statsError } = await tryCatch(
+  const { data: stats } = await tryCatch(
     getEventStats(requestCookies, { eventId }),
   );
 

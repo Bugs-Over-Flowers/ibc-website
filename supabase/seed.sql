@@ -27,7 +27,13 @@ INSERT INTO "Sector" ("sectorId", "sectorName") VALUES
   (1, 'Technology'),
   (2, 'Manufacturing'),
   (3, 'Services'),
-  (4, 'Retail')
+  (4, 'Retail'),
+  (5, 'Healthcare'),
+  (6, 'Finance'),
+  (7, 'Education'),
+  (8, 'Real Estate'),
+  (9, 'Transportation'),
+  (10, 'Hospitality')
 ON CONFLICT ("sectorId") DO UPDATE SET
   "sectorName" = EXCLUDED."sectorName";
 
@@ -127,6 +133,8 @@ BEGIN
     "companyDesignation",
     "companyMemberType"
   ) VALUES
+
+    -- Members for Test Company Inc.
     (
       gen_random_uuid(),
       app_id_1,
@@ -159,6 +167,8 @@ BEGIN
       'CTO',
       'alternate'
     ),
+
+    -- Members for Sample Corp.
     (
       gen_random_uuid(),
       app_id_2,
@@ -174,6 +184,22 @@ BEGIN
       'Filipino',
       'President',
       'principal'
+    ),
+    (
+      gen_random_uuid(),
+      app_id_2,
+      'Alice',
+      'Williams',
+      'alice.williams@sample.com',
+      '+639201234567',
+      '02-2345-6790',
+      '02-9876-5433',
+      '456 Sample Ave, Quezon City',
+      '1988-07-25',
+      'Female',
+      'Filipino',
+      'CFO',
+      'alternate'
     );
 END $$;
 
@@ -193,6 +219,7 @@ INSERT INTO "Event" (
 ) VALUES
   -- Event for Tech Summit 2025
   -- 30 - 32 days from now
+  -- Sample Public Event
   (
     gen_random_uuid(),
     'Tech Summit 2025',
@@ -204,6 +231,7 @@ INSERT INTO "Event" (
     1500.00,
     'https://example.com/tech-summit.jpg'
   ),
+  -- Sample Private Event
   (
     gen_random_uuid(),
     'Business Networking Night',
@@ -214,6 +242,68 @@ INSERT INTO "Event" (
     'private',
     500.00,
     'https://example.com/networking.jpg'
+  ),
+  -- Sample Draft Event
+  (
+    gen_random_uuid(),
+    'Retail Expo 2025',
+    'Exhibition for retail industry innovations',
+    date_trunc('day', TIMEZONE('UTC', NOW()) + INTERVAL '60 days')::timestamp,
+    date_trunc('day', TIMEZONE('UTC', NOW()) + INTERVAL '62 days')::timestamp,
+    'SMX Convention Center',
+    null,
+    2000.00,
+    'https://example.com/retail-expo.jpg'
+  );
+
+-- There should also be data for event days for these events
+
+-- =============================================================================
+-- Create Business Members
+-- =============================================================================
+INSERT INTO "BusinessMember" (
+  "sectorId",
+  "logoImageURL",
+  "joinDate",
+  "websiteURL",
+  "businessName",
+  "businessMemberId",
+  "lastPaymentDate",
+  "membershipExpiryDate",
+  "membershipStatus"
+) VALUES
+  (
+   	1,
+    'https://example.com/business1.jpg',
+    NOW(),
+    'https://example.com/business1.com',
+    'Business 1',
+    gen_random_uuid(),
+    NOW(),
+    NOW(),
+    'active'
+  ),
+  (
+   	2,
+    'https://example.com/business2.jpg',
+    NOW(),
+    'https://example.com/business2.com',
+    'Business Corp.',
+    gen_random_uuid(),
+    NOW(),
+    NOW(),
+    'active'
+  ),
+  (
+    3,
+    'https://example.com/business3.jpg',
+    NOW(),
+    'https://example.com/business3.com',
+    'Company Ltd.',
+    gen_random_uuid(),
+    NOW(),
+    NOW(),
+    'active'
   );
 
 -- There should also be data for event days for these events
@@ -278,4 +368,5 @@ BEGIN
   RAISE NOTICE 'Applications: %', (SELECT COUNT(*) FROM "Application");
   RAISE NOTICE 'Application Members: %', (SELECT COUNT(*) FROM "ApplicationMember");
   RAISE NOTICE 'Events: %', (SELECT COUNT(*) FROM "Event");
+  RAISE NOTICE 'Business Members: %', (SELECT COUNT(*) FROM "BusinessMember");
 END $$;

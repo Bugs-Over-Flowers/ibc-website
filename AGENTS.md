@@ -52,6 +52,9 @@ bun run biome:write          # Lint and format with auto-fix
 
 # Testing
 bun run test                 # Run all tests
+bun run test:local           # Start Supabase & run tests
+bun run test:local:ui        # Start Supabase & run tests with UI
+bun run test:all             # Run all tests (Unit + Cypress)
 bun run test:watch           # Run tests in watch mode
 bun run test:coverage        # Run tests with coverage report
 bun run test -- <file>       # Run single test file
@@ -348,3 +351,8 @@ To bypass (not recommended): `git commit --no-verify`
 - shadcn/ui docs: https://ui.shadcn.com/docs/components
 - TanStack Form docs: https://tanstack.com/form/latest
 - Supabase docs: https://supabase.com/docs
+
+## Editing Rules
+
+-  Do not modify `AGENTS.md` without explicit instructions.
+-  Do not modify `./github/DOD.md` without explicit instructions.
