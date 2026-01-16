@@ -187,3 +187,22 @@ export const areRecordsEqual = <T extends Record<string, unknown>>(
   // Compare values for each key
   return keys1.every((key) => obj1[key] === obj2[key]);
 };
+
+/**
+ * Extracts file extension from MIME type.
+ *
+ * @param mimeType - MIME type string (e.g., "image/jpeg", "application/pdf")
+ * @returns File extension without the dot (e.g., "jpeg", "pdf")
+ * @throws Error if MIME type is invalid
+ *
+ * @example
+ * getExtensionFromMimeType("image/jpeg") // "jpeg"
+ * getExtensionFromMimeType("application/pdf") // "pdf"
+ */
+export function getExtensionFromMimeType(mimeType: string): string {
+  const parts = mimeType.split("/");
+  if (parts.length !== 2) {
+    throw new Error(`Invalid MIME type: ${mimeType}`);
+  }
+  return parts[1];
+}

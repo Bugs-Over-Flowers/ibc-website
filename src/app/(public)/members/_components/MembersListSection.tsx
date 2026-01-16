@@ -1,9 +1,7 @@
 import { cookies } from "next/headers";
 import tryCatch from "@/lib/server/tryCatch";
-import {
-  getAllMembers,
-  getAllSectors,
-} from "@/server/members/queries/getAllMembers";
+import { getAllMembers } from "@/server/members/queries/getAllMembers";
+import { getAllSectors } from "@/server/members/queries/getAllSectors";
 import MembersList from "./MembersList";
 
 export default async function MembersListSection() {

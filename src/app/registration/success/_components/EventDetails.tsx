@@ -4,6 +4,7 @@ import type { Route } from "next";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import Link from "next/link";
 import QRDownloader from "@/components/qr/QRDownloader";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,13 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import { getSuccessPageData } from "@/server/registration/queries/getSuccessPageData";
 import QRCodeItem from "./QRCodeItem";
@@ -62,24 +56,30 @@ export default async function EventDetails({
         </CardContent>
         <Separator />
         <CardContent>
-          <Item>
-            <ItemMedia variant={"icon"}>
-              <CircleAlert />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>Please take note of the following:</ItemTitle>
-              <ItemDescription>
-                - Your registration is confirmed.
-                <br />- You will receive a confirmation email with your
-                registration details. Please check your email at{" "}
-                <strong>{data.email}</strong>.
-                <br />- You have paid{" "}
-                <strong>{data.registrationDetails?.paymentMethod}. </strong>
-                {renderPaymentMethodText}.
-                <br />- If you have any questions, please contact us.
-              </ItemDescription>
-            </ItemContent>
-          </Item>
+          <Alert>
+            <CircleAlert />
+            <AlertTitle>Important Notice:</AlertTitle>
+            <AlertDescription>
+              <li>
+                You will receive a confirmation email with your registration
+                details. Please check your email at{" "}
+                <strong>{data.email}</strong>
+              </li>
+              <li>
+                You have paid{" "}
+                <strong>{data.registrationDetails?.paymentMethod}</strong>.{" "}
+                {renderPaymentMethodText}
+              </li>
+              <li>
+                The dates of the event are subject for changes. Please stay
+                tuned for any announcements.
+              </li>
+              <li>
+                Please present your QR code during the event for check-in.
+              </li>
+              <li>If you have any questions, please contact us.</li>
+            </AlertDescription>
+          </Alert>
         </CardContent>
         <Separator />
         <CardHeader>

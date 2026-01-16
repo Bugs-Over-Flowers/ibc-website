@@ -31,9 +31,7 @@ function SelectField({
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Select
-        onValueChange={(value) =>
-          field.handleChange(value || "Select a business")
-        }
+        onValueChange={(value) => field.handleChange(value || "Select an item")}
         value={field.state.value ?? ""}
       >
         <SelectTrigger id={field.name}>

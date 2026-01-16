@@ -35,11 +35,10 @@ export const getRegistrationEventDetails = async (
     .maybeSingle();
 
   if (error && error.code === "22P02") {
-    console.log("Invalid eventId");
-    throw new Error("Invalid event. Please return to the events page");
+    throw new Error("This event is invalid.");
   }
   if (!data) {
-    throw new Error("No event found");
+    throw new Error("Event Not Found.");
   }
 
   return data;

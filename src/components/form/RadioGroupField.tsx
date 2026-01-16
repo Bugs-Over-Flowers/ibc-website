@@ -25,8 +25,9 @@ function RadioGroupField({
       {label && <FieldLabel>{label}</FieldLabel>}
       <RadioGroup
         className="flex gap-4"
-        onValueChange={(value) => field.handleChange(value)}
-        value={field.state.value ?? ""}
+        defaultValue={options[0]?.value}
+        onValueChange={(value) => field.handleChange(value as string)}
+        value={field.state.value}
       >
         {options.map((option) => (
           <div className="flex items-center gap-2" key={option.value}>

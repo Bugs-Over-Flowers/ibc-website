@@ -15,3 +15,15 @@
 
 // Import commands.js using ES2015 syntax:
 import "./commands";
+
+// Ignore Next.js performance measurement errors
+Cypress.on("uncaught:exception", (err) => {
+  // Ignore Next.js performance measurement errors
+  if (
+    err.message.includes("measure") &&
+    err.message.includes("cannot have a negative time stamp")
+  ) {
+    return false; // Don't fail the test
+  }
+  return true; // Fail for other errors
+});
