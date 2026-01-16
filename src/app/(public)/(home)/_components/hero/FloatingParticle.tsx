@@ -31,15 +31,16 @@ export function FloatingParticles() {
         <motion.div
           animate={{
             y: "-10%",
-            opacity: [0, 0.6, 0],
+            opacity: [0, 0.5, 0],
           }}
-          className="absolute h-1 w-1 rounded-full bg-primary/30"
+          className="absolute h-1 w-1 rounded-full bg-white/50"
           initial={{
             x: `${particle.x}%`,
             y: "110%",
             opacity: 0,
           }}
           key={particle.id}
+          suppressHydrationWarning
           transition={{
             duration: particle.duration,
             repeat: Number.POSITIVE_INFINITY,

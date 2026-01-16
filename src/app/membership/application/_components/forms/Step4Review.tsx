@@ -1,16 +1,18 @@
+import { useStore } from "@tanstack/react-form";
 import { FileIcon, X } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import {
   Dropzone,
   DropzoneEmptyState,
 } from "@/components/ui/shadcn-io/dropzone";
 import type { MembershipApplicationData } from "@/hooks/membershipApplication.store";
-import type { MembershipApplicationStep4Schema } from "@/lib/validation/membership/application";
+import { cn } from "@/lib/utils";
 
 interface StepProps {
   form: ReturnType<typeof useMembershipStep4>["form"];
@@ -18,6 +20,24 @@ interface StepProps {
 }
 
 export function Step4Review({ form, applicationData }: StepProps) {
+  const paymentProof = useStore(
+    form.store,
+    (state) => state.values.paymentProof,
+  );
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (
+      paymentProof instanceof File &&
+      paymentProof.type.startsWith("image/")
+    ) {
+      const url = URL.createObjectURL(paymentProof);
+      setProofPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setProofPreview(null);
+  }, [paymentProof]);
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -88,22 +108,60 @@ export function Step4Review({ form, applicationData }: StepProps) {
             {(field) => (
               <div className="space-y-3">
                 <Label>Select Membership Type *</Label>
-                <RadioGroup
-                  className="flex flex-col space-y-1"
-                  onValueChange={(val) =>
-                    field.handleChange(val as "corporate" | "personal")
-                  }
-                  value={field.state.value}
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem id="corporate" value="corporate" />
-                    <Label htmlFor="corporate">Corporate (10,000 PHP)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem id="personal" value="personal" />
-                    <Label htmlFor="personal">Personal (5,000 PHP)</Label>
-                  </div>
-                </RadioGroup>
+                <div className="flex flex-col space-y-2">
+                  <button
+                    className={cn(
+                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
+                      field.state.value === "corporate"
+                        ? "border-primary bg-primary/5"
+                        : "border-input",
+                    )}
+                    onClick={() => field.handleChange("corporate")}
+                    type="button"
+                  >
+                    <div
+                      className={cn(
+                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                        field.state.value === "corporate"
+                          ? "border-primary bg-primary"
+                          : "border-input",
+                      )}
+                    >
+                      {field.state.value === "corporate" && (
+                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                      )}
+                    </div>
+                    <Label className="cursor-pointer">
+                      Corporate (10,000 PHP)
+                    </Label>
+                  </button>
+                  <button
+                    className={cn(
+                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
+                      field.state.value === "personal"
+                        ? "border-primary bg-primary/5"
+                        : "border-input",
+                    )}
+                    onClick={() => field.handleChange("personal")}
+                    type="button"
+                  >
+                    <div
+                      className={cn(
+                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                        field.state.value === "personal"
+                          ? "border-primary bg-primary"
+                          : "border-input",
+                      )}
+                    >
+                      {field.state.value === "personal" && (
+                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                      )}
+                    </div>
+                    <Label className="cursor-pointer">
+                      Personal (5,000 PHP)
+                    </Label>
+                  </button>
+                </div>
                 {field.state.meta.errors.length > 0 && (
                   <p className="font-medium text-destructive text-sm">
                     {field.state.meta.errors.join(", ")}
@@ -122,28 +180,60 @@ export function Step4Review({ form, applicationData }: StepProps) {
             {(field) => (
               <div className="space-y-3">
                 <Label>Select Payment Method *</Label>
-                <RadioGroup
-                  className="flex flex-col space-y-1"
-                  onValueChange={(val) =>
-                    field.handleChange(
-                      val as MembershipApplicationStep4Schema["paymentMethod"],
-                    )
-                  }
-                  value={field.state.value}
-                >
-                  <div className="flex items-center space-x-3 space-y-0">
-                    <RadioGroupItem id="ONSITE" value="ONSITE" />
-                    <Label className="font-normal" htmlFor="ONSITE">
+                <div className="flex flex-col space-y-2">
+                  <button
+                    className={cn(
+                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
+                      field.state.value === "ONSITE"
+                        ? "border-primary bg-primary/5"
+                        : "border-input",
+                    )}
+                    onClick={() => field.handleChange("ONSITE")}
+                    type="button"
+                  >
+                    <div
+                      className={cn(
+                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                        field.state.value === "ONSITE"
+                          ? "border-primary bg-primary"
+                          : "border-input",
+                      )}
+                    >
+                      {field.state.value === "ONSITE" && (
+                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                      )}
+                    </div>
+                    <Label className="cursor-pointer font-normal">
                       Onsite Payment (Cash/Check at IBC Office)
                     </Label>
-                  </div>
-                  <div className="flex items-center space-x-3 space-y-0">
-                    <RadioGroupItem id="BPI" value="BPI" />
-                    <Label className="font-normal" htmlFor="BPI">
+                  </button>
+                  <button
+                    className={cn(
+                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
+                      field.state.value === "BPI"
+                        ? "border-primary bg-primary/5"
+                        : "border-input",
+                    )}
+                    onClick={() => field.handleChange("BPI")}
+                    type="button"
+                  >
+                    <div
+                      className={cn(
+                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                        field.state.value === "BPI"
+                          ? "border-primary bg-primary"
+                          : "border-input",
+                      )}
+                    >
+                      {field.state.value === "BPI" && (
+                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                      )}
+                    </div>
+                    <Label className="cursor-pointer font-normal">
                       Online Transfer / Bank Deposit (BPI)
                     </Label>
-                  </div>
-                </RadioGroup>
+                  </button>
+                </div>
                 {field.state.meta.errors.length > 0 ? (
                   <p className="font-medium text-destructive text-sm">
                     {field.state.meta.errors.join(", ")}
@@ -163,16 +253,28 @@ export function Step4Review({ form, applicationData }: StepProps) {
                       <Label>Upload Proof of Payment *</Label>
                       <div className="rounded-lg border bg-background p-4">
                         {field.state.value ? (
-                          <div className="flex items-center justify-between rounded border bg-muted/20 p-2">
-                            <div className="flex items-center gap-2 overflow-hidden">
-                              <FileIcon className="h-4 w-4 shrink-0" />
-                              <span className="max-w-[200px] truncate text-sm">
-                                {field.state.value.name}
-                              </span>
-                              <span className="text-muted-foreground text-xs">
-                                ({(field.state.value.size / 1024).toFixed(1)}{" "}
-                                KB)
-                              </span>
+                          <div className="flex items-center justify-between rounded border bg-muted/20 p-3">
+                            <div className="flex items-center gap-3 overflow-hidden">
+                              {proofPreview ? (
+                                <Image
+                                  alt="Payment proof preview"
+                                  className="h-16 w-16 rounded object-contain"
+                                  height={64}
+                                  src={proofPreview}
+                                  width={64}
+                                />
+                              ) : (
+                                <FileIcon className="h-8 w-8 shrink-0" />
+                              )}
+                              <div className="flex flex-col">
+                                <span className="max-w-[200px] truncate text-sm">
+                                  {field.state.value.name}
+                                </span>
+                                <span className="text-muted-foreground text-xs">
+                                  ({(field.state.value.size / 1024).toFixed(1)}{" "}
+                                  KB)
+                                </span>
+                              </div>
                             </div>
                             <Button
                               className="h-8 w-8"

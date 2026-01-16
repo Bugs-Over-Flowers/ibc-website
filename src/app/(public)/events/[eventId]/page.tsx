@@ -21,11 +21,11 @@ export default async function EventDetailsPage({
   if (!event) return <NotFound />;
 
   return (
-    <>
+    <main className="min-h-screen bg-background">
       <EventDetailsHero event={event} />
       <Suspense fallback={<EventPageDetailsLoading />}>
         <EventDetailsContent event={event} />
       </Suspense>
-    </>
+    </main>
   );
 }

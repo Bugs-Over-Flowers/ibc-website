@@ -51,7 +51,7 @@ export default function MembersFilter({
     "Select sector...";
 
   return (
-    <section className="border-border border-b bg-background px-4 py-8">
+    <section className="border-border border-b bg-background px-2 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-4 flex flex-col gap-4 sm:flex-row">
           {/* Search Bar */}
@@ -68,19 +68,27 @@ export default function MembersFilter({
           {/* Sector Combobox */}
           <div className="w-full sm:w-64">
             <Popover onOpenChange={setOpen} open={open}>
-              <PopoverTrigger asChild>
-                <Button
-                  aria-expanded={open}
-                  className="h-[52px] w-full min-w-[140px] justify-between rounded-xl border-border/50 bg-white px-5 shadow-lg ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90"
-                  role="combobox"
-                  variant="outline"
-                >
-                  <span className="block max-w-[140px] truncate text-left">
-                    {selectedLabel}
-                  </span>
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <Button
+                    aria-expanded={open}
+                    className={cn(
+                      "h-[52px] w-full min-w-[140px] justify-between rounded-xl",
+                      "border border-border/50 bg-white px-5 shadow-lg",
+                      "ring-1 ring-white/30 backdrop-blur-xl hover:bg-white/90",
+                      "inline-flex items-center",
+                    )}
+                    role="combobox"
+                    variant="outline"
+                  >
+                    <span className="block max-w-[140px] truncate text-left">
+                      {selectedLabel}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                }
+              />
+
               <PopoverContent className="w-[260px] rounded-xl border border-border bg-white p-0 text-foreground">
                 <Command className="rounded-xl bg-white p-2 text-foreground">
                   <CommandInput

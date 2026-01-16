@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -15,11 +15,19 @@ export function CreateEventForm() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-0">
-      <button onClick={() => router.push("/admin/dashboard")} type="button">
+      <Button
+        className="mb-2"
+        onClick={() => router.push("/admin/events")}
+        type="button"
+        variant="ghost"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
         Back to events
-      </button>
-      <h2 className="mt-12 mb-2 font-bold">Create New Event</h2>
-      <p className="!text-lg mb-6">Fill in the details to create new event.</p>
+      </Button>
+      <h2 className="mt-8 mb-2 font-bold text-2xl">Create New Event</h2>
+      <p className="mb-6 text-lg!">
+        Fill in the details to create a new event.
+      </p>
 
       <div className="min-h-screen rounded-lg">
         <formContext.Provider value={form}>
@@ -111,12 +119,15 @@ export function CreateEventForm() {
                     </Button>
 
                     <Popover>
-                      <PopoverTrigger asChild>
-                        <Button disabled={isSubmitting}>
-                          {isSubmitting ? "Creating..." : "Create Event"}
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
+                      <PopoverTrigger
+                        render={
+                          <Button disabled={isSubmitting}>
+                            {isSubmitting ? "Creating..." : "Create Event"}
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          </Button>
+                        }
+                      />
+
                       <PopoverContent align="end" className="w-40 p-0">
                         <div className="flex flex-col">
                           <Button

@@ -60,11 +60,11 @@ export function AboutThrusts() {
           viewport={{ once: true, margin: "-100px" }}
           whileInView="visible"
         >
-          {thrusts.map((thrust, index) => {
+          {thrusts.map((thrust) => {
             const Icon = thrust.icon;
             return (
               <motion.div key={thrust.title} variants={fadeInUp}>
-                <Card className="group relative h-full overflow-hidden border-0 bg-white/70 shadow-xl ring-1 ring-white/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                <Card className="group relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
                   <div className="absolute top-0 right-0 left-0 h-1 bg-linear-to-r from-primary via-primary/70 to-transparent" />
                   <CardContent className="p-8">
                     <div className="mb-6 flex items-center gap-4">
