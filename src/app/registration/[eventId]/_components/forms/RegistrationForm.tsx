@@ -15,7 +15,11 @@ export default function RegistrationForm({ members }: RegistrationFormProps) {
   const eventDetails = useRegistrationStore((s) => s.eventDetails);
 
   if (!eventDetails) {
-    return <div>Loading Registration Form</div>;
+    return (
+      <div className="flex h-full items-center justify-center text-center">
+        Loading Registration Form...
+      </div>
+    );
   }
   return (
     <main className="pb-10">
