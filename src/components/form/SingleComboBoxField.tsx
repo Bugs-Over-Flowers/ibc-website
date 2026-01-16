@@ -33,7 +33,7 @@ export default function SingleComboBoxField({
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
-  const getLabel = (value: string) => {
+  const getLabel = (value?: string) => {
     const option = options.find((opt) => opt.value === value);
     return option ? option.label : "";
   };
@@ -43,15 +43,29 @@ export default function SingleComboBoxField({
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Combobox
+        data-invalid={isInvalid}
         items={options}
         onValueChange={(value) => {
-          field.handleChange(value || "");
-          setQuery(getLabel(value || ""));
+          console.log("Combobox onValueChange:", value);
+          if (value === field.state.value) return;
+          if (value === null) return;
+          field.handleChange(value);
+          setQuery(getLabel(value));
         }}
-        value={field.state.value}
+        value={field.state.value || null}
       >
         <ComboboxInput
+          onBlur={(e) => {
+            e.preventBaseUIHandler();
+            e.preventDefault();
+            field.handleBlur();
+            setQuery(getLabel(field.state.value));
+          }}
           onChange={(e) => setQuery(e.target.value)}
+          onClear={() => {
+            setQuery("");
+            field.handleChange("");
+          }}
           placeholder={placeholder}
           showClear
           value={query}
@@ -59,7 +73,7 @@ export default function SingleComboBoxField({
         <ComboboxContent className={"w-full"}>
           <ComboboxList>
             {(option: ComboBoxItem) => (
-              <ComboboxItem key={option.value} value={option.value}>
+              <ComboboxItem key={option.label} value={option.value}>
                 {option.label}
               </ComboboxItem>
             )}
