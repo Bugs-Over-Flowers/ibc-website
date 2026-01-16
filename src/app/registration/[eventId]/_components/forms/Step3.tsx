@@ -21,6 +21,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 import {
   Dropzone,
   DropzoneContent,
@@ -40,12 +41,11 @@ const BANK_DETAILS = {
 
 export default function Step3() {
   const form = useRegistrationStep3();
-
   const setRegistrationData = useRegistrationStore(
     (state) => state.setRegistrationData,
   );
-
   const setStep = useRegistrationStore((state) => state.setStep);
+
   const onBack = async () => {
     setStep(2);
     setRegistrationData({
@@ -60,6 +60,7 @@ export default function Step3() {
     }
     form.handleSubmit({ nextStep: true });
   };
+
   return (
     <form className="space-y-4" onSubmit={onNext}>
       <RegistrationStepHeader
@@ -70,164 +71,10 @@ export default function Step3() {
 
       <PaymentDetails />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <h4>Select a Payment Method</h4>
-          </CardTitle>
-          <CardDescription>
-            Choose a payment method that you prefer. Currently, we only support
-            BPI payments and onsite payments.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* Payment Method */}
-          <form.AppField
-            listeners={{
-              onChange: () => {
-                // Reset payment proof if payment method is changed
-                // and the paymentProof contains an error
-                if (!form.getFieldValue("paymentProof")) {
-                  form.resetField("paymentProof");
-                }
-              },
-            }}
-            name="paymentMethod"
-          >
-            {(field) => {
-              return (
-                <FieldSet>
-                  <FieldLabel>Payment Method</FieldLabel>
-                  <RadioGroup
-                    defaultValue="online"
-                    onValueChange={(value) => {
-                      // Validate that the value is part of the enum
-                      // "online" | "onsite"
-                      const parsedPaymentMethodValue =
-                        PaymentMethodEnum.safeParse(value);
-                      if (!parsedPaymentMethodValue.success) {
-                        return;
-                      }
-                      field.handleChange(parsedPaymentMethodValue.data);
-                    }}
-                    value={field.state.value}
-                  >
-                    {/* Selection box for payment method: Online */}
-                    <FieldLabel htmlFor="online">
-                      <Field orientation={"horizontal"}>
-                        <FieldContent>
-                          <FieldTitle className="font-semibold">
-                            <CreditCard /> Pay Online (BPI only)
-                          </FieldTitle>
-                          <FieldDescription>
-                            Pay online through BPI and submit a proof of payment
-                          </FieldDescription>
-                          <RadioGroupItem id="online" value={"online"} />
-                        </FieldContent>
-                      </Field>
-                    </FieldLabel>
+      <PaymentMethodSelection form={form} />
 
-                    {/* Selection box for payment method: Onsite */}
-                    <FieldLabel htmlFor="onsite">
-                      <Field orientation={"horizontal"}>
-                        <FieldContent>
-                          <FieldTitle className="font-semibold">
-                            <Users /> Pay Onsite (On Event)
-                          </FieldTitle>
-                          <FieldDescription>
-                            Pay in person at the event
-                          </FieldDescription>
-                          <RadioGroupItem id="onsite" value={"onsite"} />
-                        </FieldContent>
-                      </Field>
-                    </FieldLabel>
-                  </RadioGroup>
-                </FieldSet>
-              );
-            }}
-          </form.AppField>
-        </CardContent>
-      </Card>
+      <PaymentProofUpload form={form} />
 
-      {/* Payment Proof Upload Area */}
-      <form.Subscribe selector={(state) => state.values.paymentMethod}>
-        {(paymentMethod) => (
-          <Activity mode={paymentMethod === "online" ? "visible" : "hidden"}>
-            <form.AppField name="paymentProof">
-              {(field) => {
-                // Make a local URL for image preview
-                const localImageUrl =
-                  field.state.value && URL.createObjectURL(field.state.value);
-
-                return (
-                  <Card>
-                    <CardContent className="flex flex-col items-center space-y-3">
-                      <BankTransferDetails />
-                      <Field data-invalid={!field.state.meta.isValid}>
-                        <FieldLabel htmlFor="upload-proof">
-                          Upload Proof of Payment
-                        </FieldLabel>
-                        <FieldContent className="space-y-3">
-                          <Dropzone
-                            accept={{
-                              "image/png": [".png"],
-                              "image/jpeg": [".jpg"],
-                              "image/jpg": [".jpg"],
-                            }}
-                            maxFiles={1}
-                            maxSize={1024 * 1024 * 10}
-                            onDrop={(files) => {
-                              if (files[0]) {
-                                field.handleChange(files[0]);
-                              }
-                            }}
-                            src={
-                              field.state.value
-                                ? [field.state.value]
-                                : undefined
-                            }
-                          >
-                            <DropzoneEmptyState />
-
-                            <DropzoneContent />
-                          </Dropzone>
-
-                          {field.state.value && (
-                            <Button
-                              onClick={() => {
-                                field.handleChange(undefined);
-                              }}
-                              type="button"
-                            >
-                              Remove File
-                            </Button>
-                          )}
-                        </FieldContent>
-                        <FieldError errors={field.state.meta.errors} />
-                      </Field>
-
-                      {localImageUrl && (
-                        <ImageZoom>
-                          <Image
-                            alt="Image Preview"
-                            className="object-contain"
-                            height={200}
-                            src={localImageUrl}
-                            width={400}
-                          />
-                          <div className="text-center text-neutral-400 text-sm">
-                            click image to zoom
-                          </div>
-                        </ImageZoom>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              }}
-            </form.AppField>
-          </Activity>
-        )}
-      </form.Subscribe>
       <FormButtons onBack={onBack} onNext={onNext} />
     </form>
   );
@@ -238,37 +85,48 @@ function PaymentDetails() {
   const eventDetails = useRegistrationStore((s) => s.eventDetails);
 
   const baseFee = eventDetails?.registrationFee || 0;
-  const otherParticipants = registrationData?.step2?.otherParticipants || [];
-  const total = baseFee + otherParticipants.length * baseFee;
+  const otherParticipantsCount =
+    registrationData?.step2?.otherParticipants?.length || 0;
+  const participantCount = otherParticipantsCount + 1;
+
+  const total = baseFee * participantCount;
 
   return (
-    <Card>
-      <CardContent>
-        <div className="flex w-full justify-between">
-          <div>Registration Fee per head</div>
-          <div>
-            {Intl.NumberFormat("en-US", {
-              currency: "PHP",
-              style: "currency",
-            }).format(baseFee)}
+    <Card className="border-dashed bg-muted/30">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 font-medium text-base">
+          <Banknote className="size-4 text-muted-foreground" />
+          Payment Summary
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4 text-sm">
+        <div className="grid gap-2">
+          <div className="flex w-full items-center justify-between">
+            <span className="text-muted-foreground">Registration Fee</span>
+            <span>
+              {Intl.NumberFormat("en-US", {
+                currency: "PHP",
+                style: "currency",
+              }).format(baseFee)}
+              <span className="ml-1 text-muted-foreground text-xs">/ head</span>
+            </span>
+          </div>
+          <div className="flex w-full items-center justify-between">
+            <span className="text-muted-foreground">Total Participants</span>
+            <span>{participantCount}</span>
           </div>
         </div>
-        <div className="flex w-full justify-between">
-          <div>Total Number of Participants</div>
-          <div>
-            {registrationData?.step2?.otherParticipants?.length
-              ? registrationData.step2.otherParticipants.length + 1
-              : 1}
-          </div>
-        </div>
-        <div className="flex w-full justify-between font-semibold text-xl">
-          <div>Total Amount</div>
-          <div>
+
+        <Separator className="bg-border/50" />
+
+        <div className="flex w-full items-center justify-between font-semibold text-lg">
+          <span>Total Amount</span>
+          <span className="text-primary">
             {Intl.NumberFormat("en-US", {
               currency: "PHP",
               style: "currency",
             }).format(total)}
-          </div>
+          </span>
         </div>
       </CardContent>
     </Card>
@@ -286,5 +144,171 @@ function BankTransferDetails() {
         {BANK_DETAILS.bankName} - {BANK_DETAILS.accountNumber}
       </div>
     </>
+  );
+}
+
+interface PaymentMethodSelectionProps {
+  form: ReturnType<typeof useRegistrationStep3>;
+}
+
+function PaymentMethodSelection({ form }: PaymentMethodSelectionProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <h4>Select a Payment Method</h4>
+        </CardTitle>
+        <CardDescription>
+          Choose a payment method that you prefer. Currently, we only support
+          BPI payments and onsite payments.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form.AppField
+          listeners={{
+            onChange: () => {
+              if (!form.getFieldValue("paymentProof")) {
+                form.resetField("paymentProof");
+              }
+            },
+          }}
+          name="paymentMethod"
+        >
+          {(field) => {
+            return (
+              <FieldSet>
+                <FieldLabel>Payment Method</FieldLabel>
+                <RadioGroup
+                  defaultValue="online"
+                  onValueChange={(value) => {
+                    const parsedPaymentMethodValue =
+                      PaymentMethodEnum.safeParse(value);
+                    if (!parsedPaymentMethodValue.success) {
+                      return;
+                    }
+                    field.handleChange(parsedPaymentMethodValue.data);
+                  }}
+                  value={field.state.value}
+                >
+                  {/* Online Payment */}
+                  <FieldLabel htmlFor="online">
+                    <Field orientation={"horizontal"}>
+                      <FieldContent>
+                        <FieldTitle className="font-semibold">
+                          <CreditCard /> Pay Online (BPI only)
+                        </FieldTitle>
+                        <FieldDescription>
+                          Pay online through BPI and submit a proof of payment
+                        </FieldDescription>
+                        <RadioGroupItem id="online" value={"online"} />
+                      </FieldContent>
+                    </Field>
+                  </FieldLabel>
+
+                  {/* Onsite Payment */}
+                  <FieldLabel htmlFor="onsite">
+                    <Field orientation={"horizontal"}>
+                      <FieldContent>
+                        <FieldTitle className="font-semibold">
+                          <Users /> Pay Onsite (On Event)
+                        </FieldTitle>
+                        <FieldDescription>
+                          Pay in person at the event
+                        </FieldDescription>
+                        <RadioGroupItem id="onsite" value={"onsite"} />
+                      </FieldContent>
+                    </Field>
+                  </FieldLabel>
+                </RadioGroup>
+              </FieldSet>
+            );
+          }}
+        </form.AppField>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface PaymentProofUploadProps {
+  form: ReturnType<typeof useRegistrationStep3>;
+}
+
+function PaymentProofUpload({ form }: PaymentProofUploadProps) {
+  return (
+    <form.Subscribe selector={(state) => state.values.paymentMethod}>
+      {(paymentMethod) => (
+        <Activity mode={paymentMethod === "online" ? "visible" : "hidden"}>
+          <form.AppField name="paymentProof">
+            {(field) => {
+              const localImageUrl =
+                field.state.value && URL.createObjectURL(field.state.value);
+
+              return (
+                <Card>
+                  <CardContent className="flex flex-col items-center space-y-3">
+                    <BankTransferDetails />
+                    <Field data-invalid={!field.state.meta.isValid}>
+                      <FieldLabel htmlFor="upload-proof">
+                        Upload Proof of Payment
+                      </FieldLabel>
+                      <FieldContent className="space-y-3">
+                        <Dropzone
+                          accept={{
+                            "image/png": [".png"],
+                            "image/jpeg": [".jpg"],
+                            "image/jpg": [".jpg"],
+                          }}
+                          maxFiles={1}
+                          maxSize={1024 * 1024 * 10}
+                          onDrop={(files) => {
+                            if (files[0]) {
+                              field.handleChange(files[0]);
+                            }
+                          }}
+                          src={
+                            field.state.value ? [field.state.value] : undefined
+                          }
+                        >
+                          <DropzoneEmptyState />
+
+                          <DropzoneContent />
+                        </Dropzone>
+
+                        {field.state.value && (
+                          <Button
+                            onClick={() => {
+                              field.handleChange(undefined);
+                            }}
+                            type="button"
+                          >
+                            Remove File
+                          </Button>
+                        )}
+                      </FieldContent>
+                      <FieldError errors={field.state.meta.errors} />
+                    </Field>
+
+                    {localImageUrl && (
+                      <ImageZoom>
+                        <Image
+                          alt="Image Preview"
+                          className="object-contain"
+                          height={200}
+                          src={localImageUrl}
+                          width={400}
+                        />
+                        <div className="text-center text-neutral-400 text-sm">
+                          click image to zoom
+                        </div>
+                      </ImageZoom>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            }}
+          </form.AppField>
+        </Activity>
+      )}
+    </form.Subscribe>
   );
 }

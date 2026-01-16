@@ -32,23 +32,23 @@ export default function Stepper() {
         {STEPS.map((s, index) => (
           <div
             className={cn(
-              "mb-4 flex w-full items-center gap-3 px-2 py-1 last:mb-0",
+              "mb-4 flex w-full items-center gap-3 px-2 py-1 text-xl last:mb-0",
               step === index + 1 && "rounded-md border border-primary",
             )}
             key={s.title}
           >
-            {/*Step Number*/}
+            {/* Step Number */}
             <div
               className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full border-2",
+                "flex size-10 items-center justify-center rounded-full border-2 font-semibold text-primary-foreground",
                 step === index + 1
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary"
                   : "border-neutral-400 bg-white",
               )}
             >
               {index + 1}
             </div>
-            {/*Step Details*/}
+            {/* Step Details */}
             <div>
               <div className="font-semibold">{s.title}</div>
               <div className="text-sm">{s.description}</div>
