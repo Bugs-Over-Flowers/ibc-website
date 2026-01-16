@@ -47,7 +47,7 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
       <RegistrationInformation {...eventData} />
       <div className="flex h-full w-full flex-col gap-4 p-5">
         <div className="flex items-center justify-between gap-2">
-          <Link href={"/events"}>
+          <Link href={`/events/${eventId}`}>
             <Button variant={"ghost"}>
               <ChevronLeft />
               Back to Event

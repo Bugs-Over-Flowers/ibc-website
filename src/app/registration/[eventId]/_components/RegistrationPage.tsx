@@ -36,7 +36,7 @@ const RegistrationPage = async ({
     <div className="flex h-full w-full flex-col gap-4 md:flex-row">
       <RegistrationInformation {...eventData} />
       <div className="flex h-full w-full flex-col gap-4 p-5">
-        <Link href={"/events"}>
+        <Link href={`/events/${eventId}`}>
           <Button variant={"ghost"}>
             <ChevronLeft />
             Back to Event
