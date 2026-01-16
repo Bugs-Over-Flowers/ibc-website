@@ -10,56 +10,58 @@ This project uses a **hybrid testing approach** with both **Vitest** and **Cypre
    - Download: https://www.docker.com/products/docker-desktop
    - Start Docker Desktop before running tests
 
-2. **Start Local Supabase**
+   2. **Start Local Supabase**
+      ```bash
+      supabase start
+      ```
+      This command:
+      - Starts local PostgreSQL on port 54322
+      - Starts Supabase API on port 54321
+      - Starts Supabase Studio on port 54323
+      - Uses credentials from `.env.testing`
+
+   3. **Run Tests**
+      ```bash
+      # Run all tests (automatically starts Supabase if not running via test:local)
+      bun run test:local
+      
+      # Or manually start Supabase first, then run tests
+      supabase start
+      bun run test
+      ```
+
+   ### First Time Setup
+
    ```bash
-   bun run db:start
-   ```
-   This command:
-   - Starts local PostgreSQL on port 54322
-   - Starts Supabase API on port 54321
-   - Starts Supabase Studio on port 54323
-   - Uses credentials from `.env.testing`
+   # 1. Install dependencies
+   bun install
 
-3. **Run Tests**
-   ```bash
-   # Run all tests (automatically starts Supabase if not running)
+   # 2. Start local Supabase (first time will download Docker images)
+   supabase start
+
+   # 3. Check Supabase is running
+   supabase status
+
+   # 4. Seed test database (optional)
+   # (Supabase automatically runs seed.sql on start/reset)
+   supabase db reset
+
+   # 5. Run tests
    bun run test
-   
-   # Or manually start Supabase first, then run tests
-   bun run db:start
-   bun run test
    ```
 
-### First Time Setup
+   ### Environment Variables
 
-```bash
-# 1. Install dependencies
-bun install
+   Tests use **`.env.testing`** file which contains:
+   - ✅ Local Supabase URLs (`http://127.0.0.1:54321`)
+   - ✅ Local database credentials
+   - ✅ Test-specific configuration
+   - ✅ **Safe to commit** (local development keys only)
 
-# 2. Start local Supabase (first time will download Docker images)
-bun run db:start
+   **Important:** The `.env.testing` file is committed to the repository because it only contains local development credentials that work exclusively with your local Supabase instance.
 
-# 3. Check Supabase is running
-bun run db:status
+   ## 📁 Test Structure
 
-# 4. Seed test database (optional)
-bun run db:seed
-
-# 5. Run tests
-bun run test
-```
-
-### Environment Variables
-
-Tests use **`.env.testing`** file which contains:
-- ✅ Local Supabase URLs (`http://127.0.0.1:54321`)
-- ✅ Local database credentials
-- ✅ Test-specific configuration
-- ✅ **Safe to commit** (local development keys only)
-
-**Important:** The `.env.testing` file is committed to the repository because it only contains local development credentials that work exclusively with your local Supabase instance.
-
-## 📁 Test Structure
 
 ```
 __tests__/
@@ -142,27 +144,29 @@ __tests__/
 
 ## 🚀 Running Tests
 
-### Local Database Commands
+   ### Local Database Commands
 
-```bash
-# Start local Supabase
-bun run db:start
+   ```bash
+   # Start local Supabase
+   supabase start
 
-# Stop local Supabase
-bun run db:stop
+   # Stop local Supabase
+   supabase stop
 
-# Check Supabase status
-bun run db:status
+   # Check Supabase status
+   supabase status
 
-# Reset database (wipes all data and runs migrations)
-bun run db:reset
+   # Reset database (wipes all data and runs migrations)
+   supabase db reset
 
-# Seed test data (runs db:reset + executes supabase/seed.sql)
-bun run db:seed
+   # Seed test database (runs db:reset + executes supabase/seed.sql)
+   # (Supabase automatically seeds on reset)
+   supabase db reset
 
-# Generate TypeScript types from local schema
-bun run db:gen:types
-```
+   # Generate TypeScript types from local schema
+   bun run db:gen:types
+   ```
+
 
 ### Vitest Commands
 
@@ -441,7 +445,7 @@ A: In Cypress, create a custom command to log in. In Vitest, mock the authentica
 A: Common causes: race conditions, network delays, animations. Use `cy.wait()` judiciously and prefer `should()` assertions.
 
 **Q: How do I use local Supabase for testing?**
-A: Tests automatically use `.env.testing` which points to `http://127.0.0.1:54321`. Just run `bun run db:start` before testing.
+A: Tests automatically use `.env.testing` which points to `http://127.0.0.1:54321`. Just run `supabase start` before testing.
 
 **Q: Can I test against production Supabase?**
 A: No! Tests should NEVER run against production. Always use local Supabase for testing.
@@ -449,38 +453,39 @@ A: No! Tests should NEVER run against production. Always use local Supabase for 
 ## 🔧 Troubleshooting
 
 ### "Cannot connect to Docker daemon"
-**Problem:** Supabase won't start  
-**Solution:**
-1. Make sure Docker Desktop is installed
-2. Start Docker Desktop application
-3. Wait for Docker to fully start (whale icon in menu bar)
-4. Try `bun run db:start` again
+   **Problem:** Supabase won't start  
+   **Solution:**
+   1. Make sure Docker Desktop is installed
+   2. Start Docker Desktop application
+   3. Wait for Docker to fully start (whale icon in menu bar)
+   4. Try `supabase start` again
 
-### "Port already in use"
-**Problem:** Ports 54321, 54322, or 54323 are in use  
-**Solution:**
-```bash
-# Stop all Supabase services
-bun run db:stop
+   ### "Port already in use"
+   **Problem:** Ports 54321, 54322, or 54323 are in use  
+   **Solution:**
+   ```bash
+   # Stop all Supabase services
+   supabase stop
 
-# Check if ports are still in use
-lsof -i :54321
-lsof -i :54322
+   # Check if ports are still in use
+   lsof -i :54321
+   lsof -i :54322
 
-# Kill processes if needed
-kill -9 <PID>
+   # Kill processes if needed
+   kill -9 <PID>
 
-# Restart Supabase
-bun run db:start
-```
+   # Restart Supabase
+   supabase start
+   ```
 
-### "Tests fail with Supabase connection error"
-**Problem:** Tests can't connect to local Supabase  
-**Solution:**
-1. Verify Supabase is running: `bun run db:status`
-2. Check `.env.testing` has correct URLs
-3. Restart Supabase: `bun run db:stop && bun run db:start`
-4. Check test output for environment variable warnings
+   ### "Tests fail with Supabase connection error"
+   **Problem:** Tests can't connect to local Supabase  
+   **Solution:**
+   1. Verify Supabase is running: `supabase status`
+   2. Check `.env.testing` has correct URLs
+   3. Restart Supabase: `supabase stop && supabase start`
+   4. Check test output for environment variable warnings
+
 
 ### ".env.testing not loaded"
 **Problem:** Tests use wrong environment variables  
@@ -490,21 +495,19 @@ bun run db:start
 3. Restart test runner
 4. Check test setup output for warnings
 
-### "Database schema mismatch"
-**Problem:** Tests fail due to missing tables/columns  
-**Solution:**
-```bash
-# Reset database and run migrations
-bun run db:reset
+   ### "Database schema mismatch"
+   **Problem:** Tests fail due to missing tables/columns  
+   **Solution:**
+   ```bash
+   # Reset database and run migrations
+   supabase db reset
 
-# Verify migrations ran
-bun run db:status
+   # Verify migrations ran
+   supabase status
+   ```
 
-# Re-seed if needed
-bun run db:seed
-```
+   ### "Test passes locally but fails in CI"
 
-### "Test passes locally but fails in CI"
 **Problem:** Environment differences  
 **Solution:**
 1. Make sure CI uses `.env.testing` (or equivalent CI env vars)
@@ -519,20 +522,21 @@ bun run db:seed
 2. Verify test files end with `.cy.ts` or `.cy.tsx`
 3. Restart Cypress
 
-### "Clean up before running tests"
-If tests are failing due to stale data:
-```bash
-# Full reset workflow
-bun run db:stop
-bun run db:start
-bun run db:seed
-bun run test
-```
+   ### "Clean up before running tests"
+   If tests are failing due to stale data:
+   ```bash
+   # Full reset workflow
+   supabase stop
+   supabase start
+   supabase db reset
+   bun run test
+   ```
 
-## 🆘 Getting Help
+   ## 🆘 Getting Help
 
-1. **Check test output** - Tests print helpful environment info
-2. **Review this README** - Most issues are covered in troubleshooting
-3. **Check Supabase status** - `bun run db:status` shows all services
+   1. **Check test output** - Tests print helpful environment info
+   2. **Review this README** - Most issues are covered in troubleshooting
+   3. **Check Supabase status** - `supabase status` shows all services
+
 4. **Read test logs** - Vitest and Cypress provide detailed error messages
 5. **Ask the team** - Share error messages and steps to reproduce
