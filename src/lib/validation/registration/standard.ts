@@ -7,13 +7,13 @@ export const StandardRegistrationStep1Schema = z.discriminatedUnion("member", [
     member: z.literal(MemberTypeEnum.enum.member),
     businessMemberId: z
       .string()
-      .min(1, "Please select your company name / affiliation"),
+      .min(1, "Please select your company / organization / affiliation"),
   }),
   z.object({
     member: z.literal(MemberTypeEnum.enum.nonmember),
     nonMemberName: z
       .string()
-      .min(1, "Please input your company name / affiliation")
+      .min(1, "Please input your company / organization / affiliation")
       .max(100),
   }),
 ]);
@@ -24,8 +24,14 @@ export type StandardRegistrationStep1Schema = z.infer<
 
 export const RegistrantDetailsSchema = z
   .object({
-    firstName: z.string().min(2).max(100),
-    lastName: z.string().min(2).max(100),
+    firstName: z
+      .string()
+      .min(2, "First name must be at least 2 characters")
+      .max(100),
+    lastName: z
+      .string()
+      .min(2, "Last name must be at least 2 characters")
+      .max(100),
     contactNumber: phoneSchema,
     email: z.email().trim(),
   })
@@ -34,6 +40,8 @@ export const RegistrantDetailsSchema = z
     firstName: titleCase(data.firstName).trim(),
     lastName: titleCase(data.lastName).trim(),
   }));
+
+export type RegistrantDetails = z.infer<typeof RegistrantDetailsSchema>;
 
 export const StandardRegistrationStep2Schema = z
   .object({
