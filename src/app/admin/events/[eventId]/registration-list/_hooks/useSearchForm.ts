@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import z from "zod";
 import { useAppForm } from "@/hooks/_formHooks";
 import { setParamsOrDelete } from "@/lib/utils";
 
@@ -24,6 +25,11 @@ export const useSearchForm = (options: UseSearchFormOptions) => {
   const form = useAppForm({
     defaultValues: {
       searchQuery: searchParams.get(qKey) || "",
+    },
+    validators: {
+      onSubmit: z.object({
+        searchQuery: z.string().min(2).max(100),
+      }),
     },
     onSubmit: ({ value }) => {
       const params = setParamsOrDelete(
