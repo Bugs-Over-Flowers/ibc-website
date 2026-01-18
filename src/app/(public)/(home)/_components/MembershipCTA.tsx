@@ -7,11 +7,8 @@ import { Button } from "@/components/ui/button";
 
 export function MembershipCTA() {
   return (
-    <section className="relative overflow-hidden bg-background py-20">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-sky-500/5" />
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="bg-card py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           className="overflow-hidden rounded-3xl border border-border bg-card shadow-xl"
           initial={{ opacity: 0, y: 20 }}
@@ -83,7 +80,7 @@ export function MembershipCTA() {
                       scale: [1, 1.15, 1],
                       opacity: [0.4, 0.6, 0.4],
                     }}
-                    className="absolute -inset-12 rounded-full bg-primary/20 blur-3xl"
+                    className="-inset-12 absolute rounded-full bg-primary/20 blur-3xl"
                     transition={{
                       duration: 5,
                       repeat: Number.POSITIVE_INFINITY,

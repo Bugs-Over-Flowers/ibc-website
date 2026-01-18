@@ -1,6 +1,7 @@
 import { Img } from "@react-email/components";
 import { motion } from "framer-motion";
 import { Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
@@ -14,11 +15,10 @@ export function MembersGrid({ members }: MembersGridProps) {
   return (
     <section className="bg-muted/50 py-16">
       <motion.div
-        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+        animate="visible"
+        className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8"
         initial="hidden"
         variants={staggerContainer}
-        viewport={{ once: true, amount: 0.2 }}
-        whileInView="visible"
       >
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {members.map((member, idx) => {
@@ -31,11 +31,12 @@ export function MembersGrid({ members }: MembersGridProps) {
                 : `member-${idx}`;
             const cardContent = (
               <CardContent className="flex h-full flex-col p-0" key={safeKey}>
-                <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-white p-4">
+                <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-linear-to-br from-secondary to-accent">
+                  <div className="absolute inset-0"></div>
                   {member.logoImageURL ? (
                     <Img
                       alt={member.businessName}
-                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      className="aspect-square h-full w-full bg-white object-cover p-4 transition-transform duration-500 group-hover:scale-105"
                       src={member.logoImageURL}
                       style={{ aspectRatio: "1 / 1", objectPosition: "center" }}
                     />
@@ -61,28 +62,12 @@ export function MembersGrid({ members }: MembersGridProps) {
                       </p>
                     </div>
                   )}
-                  {member.websiteURL && (
-                    <div className="mt-4 flex w-full justify-center">
-                      <a
-                        className="inline-flex w-full max-w-[180px] items-center justify-center rounded-xl border-none bg-primary px-4 py-2 font-medium text-primary-foreground text-sm shadow-md hover:cursor-pointer hover:bg-primary/90"
-                        href={member.websiteURL}
-                        onClick={(e) => e.stopPropagation()}
-                        rel="noopener noreferrer"
-                        tabIndex={0}
-                        target="_blank"
-                      >
-                        Visit Website
-                      </a>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             );
             return (
               <motion.div
-                animate={{ opacity: 1, y: 0 }}
                 key={safeKey}
-                transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 variants={fadeInUp}
                 whileHover={{
                   scale: 1.03,
@@ -91,9 +76,22 @@ export function MembersGrid({ members }: MembersGridProps) {
                 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Card className="flex h-full min-h-[400px] flex-col overflow-hidden p-0 transition-shadow">
-                  {cardContent}
-                </Card>
+                {member.websiteURL ? (
+                  <a
+                    className="block h-full"
+                    href={member.websiteURL}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <Card className="flex h-full min-h-[400px] flex-col overflow-hidden p-0 transition-shadow hover:shadow-lg">
+                      {cardContent}
+                    </Card>
+                  </a>
+                ) : (
+                  <Card className="flex h-full min-h-[400px] flex-col overflow-hidden p-0 transition-shadow">
+                    {cardContent}
+                  </Card>
+                )}
               </motion.div>
             );
           })}
