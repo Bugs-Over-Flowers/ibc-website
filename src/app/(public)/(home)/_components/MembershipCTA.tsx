@@ -80,7 +80,7 @@ export function MembershipCTA() {
                       scale: [1, 1.15, 1],
                       opacity: [0.4, 0.6, 0.4],
                     }}
-                    className="-inset-12 absolute rounded-full bg-primary/20 blur-3xl"
+                    className="absolute -inset-12 rounded-full bg-primary/20 blur-3xl"
                     transition={{
                       duration: 5,
                       repeat: Number.POSITIVE_INFINITY,

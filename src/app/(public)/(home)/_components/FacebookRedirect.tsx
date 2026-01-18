@@ -76,7 +76,7 @@ export function FacebookCTASection() {
                       scale: [1, 1.2, 1],
                       opacity: [0.3, 0.5, 0.3],
                     }}
-                    className="-inset-10 absolute rounded-full bg-[#1877F2]/20 blur-3xl"
+                    className="absolute -inset-10 rounded-full bg-[#1877F2]/20 blur-3xl"
                     transition={{
                       duration: 5,
                       repeat: Number.POSITIVE_INFINITY,

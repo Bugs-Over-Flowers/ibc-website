@@ -89,7 +89,7 @@ export function MembershipApplicationForm() {
 
         <div className="relative space-y-4">
           {/* Progress Bar Background */}
-          <div className="-z-10 absolute top-2 bottom-2 left-[15px] hidden w-[2px] bg-muted lg:block" />
+          <div className="absolute top-2 bottom-2 left-[15px] -z-10 hidden w-[2px] bg-muted lg:block" />
 
           {steps.map((step) => (
             <div
