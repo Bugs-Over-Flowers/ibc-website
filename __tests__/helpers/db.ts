@@ -25,7 +25,7 @@ export async function resetTestDatabase() {
   // For now, we'll rely on `supabase db reset` CLI command
   // which is safer and more reliable
 
-  console.log("Database reset - use `bun run db:reset` for full reset");
+  console.log("Database reset - use `supabase db reset` for full reset");
 }
 
 /**
@@ -36,8 +36,8 @@ export async function seedTestDatabase() {
   checkTestEnvironment();
 
   // Note: Seeding is done via SQL file at supabase/seed.sql
-  // Run: bun run db:seed
-  console.log("Database seeding - use `bun run db:seed` for seeding");
+  // Run: supabase db reset (which automatically seeds)
+  console.log("Database seeding - use `supabase db reset` for seeding");
 }
 
 /**

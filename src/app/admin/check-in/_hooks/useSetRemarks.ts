@@ -14,7 +14,6 @@ export const useSetRemarks = ({
   setOpen,
 }: UseSetRemarksProps) => {
   const setNewRemarks = useCheckInStore((state) => state.setNewRemarks);
-  const fetchedRemarks = useCheckInStore((state) => state.remarks);
   const form = useAppForm({
     defaultValues: {
       remarks: remarks,
