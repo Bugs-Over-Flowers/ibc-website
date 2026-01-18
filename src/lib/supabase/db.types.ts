@@ -169,6 +169,7 @@ export type Database = {
           membershipStatus:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
+          primaryApplicationId: string | null;
           sectorId: number;
           websiteURL: string;
         };
@@ -182,6 +183,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
+          primaryApplicationId?: string | null;
           sectorId: number;
           websiteURL: string;
         };
@@ -195,6 +197,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
+          primaryApplicationId?: string | null;
           sectorId?: number;
           websiteURL?: string;
         };
@@ -211,21 +214,21 @@ export type Database = {
       CheckIn: {
         Row: {
           checkInId: string;
-          date: string;
+          checkInTime: string;
           eventDayId: string;
           participantId: string;
           remarks: string | null;
         };
         Insert: {
           checkInId?: string;
-          date?: string;
+          checkInTime?: string;
           eventDayId?: string;
           participantId?: string;
           remarks?: string | null;
         };
         Update: {
           checkInId?: string;
-          date?: string;
+          checkInTime?: string;
           eventDayId?: string;
           participantId?: string;
           remarks?: string | null;
@@ -256,6 +259,7 @@ export type Database = {
           eventStartDate: string | null;
           eventTitle: string;
           eventType: Database["public"]["Enums"]["EventType"] | null;
+          maxGuest: number | null;
           publishedAt: string | null;
           registrationFee: number;
           updatedAt: string | null;
@@ -269,6 +273,7 @@ export type Database = {
           eventStartDate?: string | null;
           eventTitle: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          maxGuest?: number | null;
           publishedAt?: string | null;
           registrationFee?: number;
           updatedAt?: string | null;
@@ -282,6 +287,7 @@ export type Database = {
           eventStartDate?: string | null;
           eventTitle?: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          maxGuest?: number | null;
           publishedAt?: string | null;
           registrationFee?: number;
           updatedAt?: string | null;
@@ -491,6 +497,10 @@ export type Database = {
     };
     Functions: {
       check_membership_expiry: { Args: never; Returns: undefined };
+      compute_primary_application_id: {
+        Args: { p_member_id: string };
+        Returns: string;
+      };
       get_event_checkin_list: { Args: { p_event_id: string }; Returns: Json };
       get_event_participant_list: {
         Args: { p_event_id: string; p_search_text?: string };
@@ -503,6 +513,10 @@ export type Database = {
         };
       };
       get_event_status: { Args: { p_event_id: string }; Returns: Json };
+      get_member_primary_application: {
+        Args: { p_member_id: string };
+        Returns: string;
+      };
       get_registration_list: {
         Args: {
           p_event_id: string;

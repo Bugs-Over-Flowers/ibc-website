@@ -34,6 +34,8 @@ bun run check-code   # Biome lint + format
 bun run cy:open      # Cypress interactive
 supabase start       # Start local Supabase
 supabase db reset    # Reset local DB & run migrations
+bun run test:local   # Run tests with local Supabase
+bun run test:all     # Run all tests (unit + cypress)
 bun run db:gen:types # Generate local types
 bun run gen:types    # Generate production types
 ```
