@@ -1,6 +1,6 @@
 "use server";
 
-import { updateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
 
 export const verifyPayment = async (registrationId: string) => {
@@ -17,5 +17,8 @@ export const verifyPayment = async (registrationId: string) => {
   }
   updateTag("getRegistrationData");
   updateTag("getRegistrationEventDetails");
+
+  revalidatePath("/admin/events/[eventId]/registration-list");
+
   return "Updated successfully";
 };
