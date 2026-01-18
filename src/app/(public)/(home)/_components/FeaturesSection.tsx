@@ -61,7 +61,7 @@ export function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
         >
           <h2 className="mb-4 text-balance font-bold text-3xl text-foreground sm:text-4xl lg:text-5xl">
-            Why Join Iloilo Business Club, Inc?{" "}
+            Why Join Iloilo Business Club, Inc.?{" "}
           </h2>
           <p className="mx-auto max-w-2xl text-pretty text-lg text-muted-foreground leading-relaxed">
             Join a community dedicated to fostering growth, collaboration, and
