@@ -1,8 +1,8 @@
+import { revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
-import { zodValidator } from "@/lib/utils";
 import {
   StandardRegistrationSchema,
   StandardRegistrationStep4Schema,
@@ -47,14 +47,16 @@ export const useRegistrationStep4 = () => {
     (state) => state.setRegistrationData,
   );
 
-  const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  // const eventDetails = useRegistrationStore((state) => state.eventDetails);
 
   const { execute: submitRegistration } = useSubmitRegistration();
   const { execute: sendEmail } = useSendRegistrationEmail();
   const form = useAppForm({
     defaultValues: registrationData.step4,
+    validationLogic: revalidateLogic(),
     validators: {
-      onSubmit: zodValidator(StandardRegistrationStep4Schema),
+      onDynamic: StandardRegistrationStep4Schema,
+      // onSubmit: zodValidator(StandardRegistrationStep4Schema),
     },
     onSubmit: async ({ value }) => {
       const refinedValue = StandardRegistrationStep4Schema.parse(value);
@@ -93,10 +95,10 @@ export const useRegistrationStep4 = () => {
       if (sendEmailError) return;
 
       // ========== SUCCESS: Navigate to confirmation page ==========
-      if (!eventDetails?.eventId) {
-        router.push("/events");
-        return;
-      }
+      // if (!eventDetails?.eventId) {
+      //   router.push("/events");
+      //   return;
+      // }
       router.push(`/registration/success`);
     },
   });

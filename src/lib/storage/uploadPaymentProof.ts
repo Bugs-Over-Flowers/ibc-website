@@ -22,15 +22,24 @@ export async function uploadPaymentProof(file: File): Promise<string> {
   const uuid = uuidv4();
   const supabase = await createClient();
 
+  console.log(file);
+
+  // Extract file extension from MIME type (e.g., "image/jpeg" → "jpeg")
+  const extension = getExtensionFromMimeType(file.type);
+  const filePath = `reg-${uuid}`;
+
   const { data, error } = await supabase.storage
-    .from("paymentProofs")
-    .upload(`reg-${uuid}`, file);
+    .from("paymentproofs")
+    .upload(filePath, file, {
+      contentType: file.type,
+      upsert: true,
+    });
+
+  console.log(error);
 
   if (error) {
     throw new Error(`Failed to upload payment proof: ${error.message}`);
   }
 
-  // Extract file extension from MIME type (e.g., "image/jpeg" → "jpeg")
-  const extension = getExtensionFromMimeType(file.type);
   return `${data.path}.${extension}`;
 }

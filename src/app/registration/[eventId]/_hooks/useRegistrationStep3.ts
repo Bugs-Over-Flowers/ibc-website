@@ -1,7 +1,7 @@
+import { revalidateLogic } from "@tanstack/react-form";
 import { useAppForm } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
 import type { FormSubmitMeta } from "@/lib/types/FormSubmitMeta";
-import { zodValidator } from "@/lib/utils";
 import { StandardRegistrationStep3Schema } from "@/lib/validation/registration/standard";
 
 const defaultMeta: FormSubmitMeta = {
@@ -20,8 +20,9 @@ export const useRegistrationStep3 = () => {
 
   const form = useAppForm({
     defaultValues: defaultRegistrationDataStep3,
+    validationLogic: revalidateLogic(),
     validators: {
-      onSubmit: zodValidator(StandardRegistrationStep3Schema),
+      onDynamic: StandardRegistrationStep3Schema,
     },
     onSubmitMeta: defaultMeta,
     onSubmit: async ({ value, meta }) => {
