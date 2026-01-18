@@ -206,3 +206,11 @@ export function getExtensionFromMimeType(mimeType: string): string {
   }
   return parts[1];
 }
+
+/**
+ * Returns an array of string keys with an optional prefix.
+ * Example: makeArray(3, "about-line") -> ["about-line-0","about-line-1","about-line-2"]
+ */
+export function makeArray(count: number, prefix = "skeleton") {
+  return Array.from({ length: count }, (_, i) => `${prefix}-${i}`);
+}

@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 
 export function FacebookCTASection() {
   return (
-    <section className="bg-card py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden bg-background py-20">
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-linear-to-br from-[#1877F2]/5 via-transparent to-[#1877F2]/5" />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           className="overflow-hidden rounded-2xl border border-border bg-background shadow-lg"
           initial={{ opacity: 0, y: 20 }}
