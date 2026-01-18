@@ -117,7 +117,7 @@ file_size_limit = "10MiB"
 allowed_mime_types = ["image/*"]
 objects_path = "./paymentProofs"
 [storage.buckets.logoImage]
-public = true
+public = false
 file_size_limit = "10MiB"
 allowed_mime_types = ["image/*"]
 objects_path = "./logoImage"
