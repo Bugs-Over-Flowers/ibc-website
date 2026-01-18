@@ -11,8 +11,8 @@ interface RegistrationFormProps {
 }
 
 export default function RegistrationForm({ members }: RegistrationFormProps) {
-  const step = useRegistrationStore((s) => s.step);
-  const eventDetails = useRegistrationStore((s) => s.eventDetails);
+  const step = useRegistrationStore((state) => state.step);
+  const eventDetails = useRegistrationStore((state) => state.eventDetails);
 
   if (!eventDetails) {
     return (
