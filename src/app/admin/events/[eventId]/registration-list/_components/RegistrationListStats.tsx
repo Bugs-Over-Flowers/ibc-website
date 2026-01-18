@@ -1,11 +1,10 @@
 import { cookies } from "next/headers";
 import { Card, CardContent } from "@/components/ui/card";
 import tryCatch from "@/lib/server/tryCatch";
+import type { RegistrationListPageProps } from "@/lib/types/route";
 import { getRegistrationListStats } from "@/server/registration/queries/getRegistrationListStats";
 import RegistrationStatsComponent from "./RegistrationStatsComponent";
 
-type RegistrationListPageProps =
-  PageProps<"/admin/events/[eventId]/registration-list">;
 export default async function RegistrationListStats({
   params,
 }: {
