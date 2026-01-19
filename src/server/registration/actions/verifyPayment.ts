@@ -17,8 +17,7 @@ export const verifyPayment = async (registrationId: string) => {
   }
   updateTag("getRegistrationData");
   updateTag("getRegistrationEventDetails");
-
-  revalidatePath("/admin/events/[eventId]/registration-list");
+  revalidatePath("/admin/events/[eventId]/registration-list", "page");
 
   return "Updated successfully";
 };

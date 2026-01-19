@@ -15,7 +15,7 @@ export default function ParticipantsButton({
 }: ParticipantsButtonProps) {
   const router = useRouter();
 
-  const handleViewRegistrations = () => {
+  const handleViewParticipants = () => {
     router.push(`/admin/events/${eventId}/registration-list?tab=participants`);
     if (onAction) onAction();
   };
@@ -23,7 +23,7 @@ export default function ParticipantsButton({
   return (
     <DropdownMenuItem
       className="cursor-pointer"
-      onClick={handleViewRegistrations}
+      onClick={handleViewParticipants}
     >
       <Users className="mr-2 h-4 w-4" />
       <span>View Participants</span>

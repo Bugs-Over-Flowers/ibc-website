@@ -24,7 +24,7 @@ export default async function RegistrationListStats({
       <Card>
         <CardContent>
           <p className="text-destructive">
-            Unable to load participants. Please try refreshing the page.
+            Unable to load registration status. Please try refreshing the page.
           </p>
           <p className="text-muted-foreground text-sm">
             {registrationListStats.error}

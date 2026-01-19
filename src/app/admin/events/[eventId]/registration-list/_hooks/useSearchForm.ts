@@ -1,7 +1,7 @@
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import z from "zod";
+import { z } from "zod";
 import { useAppForm } from "@/hooks/_formHooks";
 import { setParamsOrDelete } from "@/lib/utils";
 

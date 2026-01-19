@@ -64,7 +64,7 @@ export const ParticipantListItemSchema = ParticipantSchema.pick({
   contactNumber: true,
 }).extend({
   affiliation: z.string(),
-  registrationDate: z.string(),
+  registrationDate: z.iso.datetime({ offset: true }),
   registrationId: z.string(),
 });
 
@@ -102,7 +102,7 @@ export const ParticipantListRPCSchema = z
     email: z.email(),
     contact_number: z.string(),
     affiliation: z.string(),
-    registration_date: z.string(),
+    registration_date: z.iso.datetime({ offset: true }),
     registration_id: z.string(),
   })
   .pipe(

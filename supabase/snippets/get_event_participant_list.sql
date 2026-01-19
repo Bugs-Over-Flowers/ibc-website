@@ -35,14 +35,14 @@ BEGIN
     p."lastName",
     p."email",
     p."contactNumber",
-    -- COALESCE determines the company name: 
+    -- COALESCE determines the company name:
     -- It prioritizes the linked Business Member name; if null, falls back to nonMemberName
     COALESCE(bm."businessName", r."nonMemberName") AS "affiliation",
     r."registrationDate",
     r."registrationId"
   FROM
     "Participant" p
-  
+
   -- Select the registration
   JOIN
     "Registration" r ON p."registrationId" = r."registrationId"
@@ -60,7 +60,7 @@ BEGIN
     AND (
       -- return everything if no search text or empty
       p_search_text IS NULL
-      OR p_search_text = '' 
+      OR p_search_text = ''
 
       -- filter by data: firstname, lastname, email, or affiliation
       OR (p."firstName" % p_search_text or p."firstName" ilike v_search_pattern)
@@ -77,7 +77,7 @@ BEGIN
     CASE WHEN p_search_text IS NOT NULL AND p_search_text <> '' THEN
         -- *** PRIORITY 1: Exact Substring Matches ***
         -- If the text physically exists inside the string, bring it to the top.
-        CASE 
+        CASE
             WHEN (
                  p."firstName" ILIKE v_search_pattern
                  OR p."lastName" ILIKE v_search_pattern
@@ -85,11 +85,11 @@ BEGIN
                  OR p."email" ILIKE v_search_pattern
                  OR COALESCE(bm."businessName", r."nonMemberName") ILIKE v_search_pattern
             ) THEN 1
-            ELSE 0 
+            ELSE 0
         END
     ELSE 0 END DESC,
 
-    CASE WHEN p_search_text IS NOT NULL AND p_search_text <> '' THEN 
+    CASE WHEN p_search_text IS NOT NULL AND p_search_text <> '' THEN
         -- *** PRIORITY 2: Fuzzy Similarity Score ***
         -- If it wasn't an exact match, sort by how close the typo is.
         GREATEST(
@@ -99,11 +99,11 @@ BEGIN
           similarity(p."email", p_search_text),
           similarity(COALESCE(bm."businessName", r."nonMemberName"), p_search_text)
         )
-      ELSE 0 
+      ELSE 0
     END DESC,
     -- Secondary Sort: Date (Newest first)
     r."registrationDate" DESC;
 END;
 $$;
 
-select * from get_event_participant_list('2132acac-0d8f-4cba-97d4-a96bb52aa4c5')
+-- select * from get_event_participant_list('2132acac-0d8f-4cba-97d4-a96bb52aa4c5')
