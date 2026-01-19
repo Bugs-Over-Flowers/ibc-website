@@ -291,7 +291,7 @@ INSERT INTO auth.users (
   NOW(),
   NOW(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Test Admin"}',
+  '{"full_name":"Test Admin", "email_verified": true}',
   false,
   'authenticated',
   'authenticated',
