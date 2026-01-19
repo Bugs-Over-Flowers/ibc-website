@@ -34,16 +34,5 @@ export const getEventRegistrationList = async (
     })
     .throwOnError();
 
-  const parsedRegistrationList = RegistrationListRPCSchema.array().safeParse(
-    query.data,
-  );
-
-  if (
-    !parsedRegistrationList.data ||
-    parsedRegistrationList.data.length === 0
-  ) {
-    throw new Error("An error has occurred while fetching registration list");
-  }
-
-  return parsedRegistrationList.data;
+  return RegistrationListRPCSchema.array().parse(query.data);
 };
