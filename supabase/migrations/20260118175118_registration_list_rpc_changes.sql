@@ -142,7 +142,7 @@ BEGIN
         END,
         COALESCE(p_data.total_people, 0)::INTEGER AS people,
         r."identifier"
-        AS registrant
+        AS registration_identifier
 
     FROM "Registration" r
     LEFT JOIN "BusinessMember" bm ON r."businessMemberId" = bm."businessMemberId"

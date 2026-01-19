@@ -17,7 +17,7 @@ export default function RegistrationsButton({
 
   const handleViewRegistrations = () => {
     router.push(`/admin/events/${eventId}/registration-list?tab=registrations`);
-    if (onAction) onAction();
+    onAction();
   };
 
   return (

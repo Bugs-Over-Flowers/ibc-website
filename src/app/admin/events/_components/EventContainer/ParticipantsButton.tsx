@@ -17,7 +17,7 @@ export default function ParticipantsButton({
 
   const handleViewParticipants = () => {
     router.push(`/admin/events/${eventId}/registration-list?tab=participants`);
-    if (onAction) onAction();
+    onAction();
   };
 
   return (
