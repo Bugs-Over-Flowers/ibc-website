@@ -1,7 +1,7 @@
 import { CheckCircle, Clock, Users2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { RegistrationListStats as RegistrationListStatsProps } from "@/lib/validation/registration/registration-list";
+import type { RegistrationListStats as RegistrationListStatsProps } from "@/lib/validation/registration-management";
 
 export default function RegistrationListStats({
   pendingRegistrations,

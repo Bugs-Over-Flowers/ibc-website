@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import z from "zod";
+import { z } from "zod";
 import { useAppForm } from "@/hooks/_formHooks";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
