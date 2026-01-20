@@ -34,7 +34,7 @@ All commit messages **MUST** follow this format: `<type>: <description>`
 - **UI:** shadcn/ui (Base-ui primitives)
 - **Forms:** TanStack Form with Zod validation
 - **Backend:** Supabase (PostgreSQL)
-- **Testing:** Vitest (unit), Cypress (component/e2e)
+- **Testing:** Vitest (unit, integration, component)
 - **Linting:** Biome (replaces ESLint + Prettier)
 - **Git Hooks:** Lefthook
 
@@ -54,15 +54,11 @@ bun run biome:write          # Lint and format with auto-fix
 bun run test                 # Run all tests
 bun run test:local           # Start Supabase & run tests
 bun run test:local:ui        # Start Supabase & run tests with UI
-bun run test:all             # Run all tests (Unit + Cypress)
+bun run test:all             # Run all tests
 bun run test:watch           # Run tests in watch mode
 bun run test:coverage        # Run tests with coverage report
 bun run test -- <file>       # Run single test file
 vitest tests/example.test.ts # Run specific test file directly
-
-# Cypress
-bun run cy:open              # Open Cypress interactive mode
-bun run cy:run               # Run Cypress tests headless
 
 # Email Development
 bun run email:dev            # Email template preview server (port 3050)
