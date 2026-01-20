@@ -12,6 +12,8 @@ import {
 import AttendanceModal from "../AttendanceModal";
 import AttendanceButton from "./AttendanceButton";
 import DeleteButton from "./DeleteButton";
+import ParticipantsButton from "./ParticipantsButton";
+import RegistrationsButton from "./RegistrationsButton";
 import ViewDetailsButton from "./ViewDetailsButton";
 
 interface EventActionsDropdownProps {
@@ -46,6 +48,9 @@ export default function EventActionsDropdown({
               setIsAttendanceModalOpen(true);
             }}
           />
+          <DropdownMenuSeparator />
+          <RegistrationsButton eventId={eventId} />
+          <ParticipantsButton eventId={eventId} />
           {status === "draft" && (
             <>
               <DropdownMenuSeparator />
