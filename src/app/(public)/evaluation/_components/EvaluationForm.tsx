@@ -1,5 +1,6 @@
 "use client";
 
+import { MessageSquare, Star, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
@@ -25,27 +26,27 @@ interface EvaluationQuestion {
 const EVALUATION_QUESTIONS: EvaluationQuestion[] = [
   {
     field: "q1Rating",
-    question: "The event was well organized.",
+    question: "How would you rate the organization of the event?",
   },
   {
     field: "q2Rating",
-    question: "Resource Speakers were knowledgeable.",
+    question: "How would you rate the knowledge of the resource speakers?",
   },
   {
     field: "q3Rating",
-    question: "Materials presented were relevant and helpful.",
+    question: "How would you rate the relevance of the materials presented?",
   },
   {
     field: "q4Rating",
-    question: "The facilities were appropriate.",
+    question: "How would you rate the facilities and venue?",
   },
   {
     field: "q5Rating",
-    question: "The purpose of the dialogue was met.",
+    question: "How well did the event meet its stated purpose?",
   },
   {
     field: "q6Rating",
-    question: "My expectations of the dialogue were met.",
+    question: "How well did the event meet your expectations?",
   },
 ];
 
@@ -55,12 +56,12 @@ export function EvaluationForm({ eventId }: EvaluationFormProps) {
     defaultValues: {
       eventId,
       name: "",
-      q1Rating: "good",
-      q2Rating: "good",
-      q3Rating: "good",
-      q4Rating: "good",
-      q5Rating: "good",
-      q6Rating: "good",
+      q1Rating: "",
+      q2Rating: "",
+      q3Rating: "",
+      q4Rating: "",
+      q5Rating: "",
+      q6Rating: "",
       additionalComments: "",
       feedback: "",
     },
@@ -99,68 +100,114 @@ export function EvaluationForm({ eventId }: EvaluationFormProps) {
 
   return (
     <form
-      className="space-y-8"
+      className="mx-auto max-w-4xl space-y-8"
       onSubmit={(e) => {
         e.preventDefault();
         form.handleSubmit();
       }}
     >
-      <form.AppField name="name">
-        {(field) => (
-          <field.TextField
-            label="Name (Optional)"
-            placeholder="Enter your name"
-          />
-        )}
-      </form.AppField>
-
-      {/* Rating Questions */}
-      <div className="space-y-6">
-        <div>
-          <h2 className="mb-6 font-semibold text-foreground text-xl">
-            Please rate the following statements
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Poor = Strongly Disagree | Excellent = Strongly Agree
-          </p>
+      {/* Personal Information Section */}
+      <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6 lg:p-8">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+            <User className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-foreground text-xl">
+              Your Information
+            </h2>
+            <p className="text-base text-muted-foreground">
+              Optional - you can remain anonymous
+            </p>
+          </div>
         </div>
 
-        {EVALUATION_QUESTIONS.map((q) => (
-          <form.AppField key={q.field} name={q.field}>
-            {(field) => <field.RatingScale label={q.question} />}
+        <form.AppField name="name">
+          {(field) => (
+            <field.TextField
+              label="Name"
+              placeholder="Enter your name (optional)"
+            />
+          )}
+        </form.AppField>
+      </section>
+
+      {/* Rating Questions Section */}
+      <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6 lg:p-8">
+        <div className="mb-6 flex items-center gap-3 lg:mb-8">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+            <Star className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-foreground text-xl">
+              Rate Your Experience
+            </h2>
+            <p className="text-base text-muted-foreground">
+              Rate each aspect from Poor to Excellent
+            </p>
+          </div>
+        </div>
+
+        <div className="divide-y divide-border">
+          {EVALUATION_QUESTIONS.map((q) => (
+            <div className="py-5 first:pt-0 last:pb-0 lg:py-6" key={q.field}>
+              <form.AppField name={q.field}>
+                {(field) => <field.RatingScale label={q.question} />}
+              </form.AppField>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Comments & Suggestions Section */}
+      <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6 lg:p-8">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+            <MessageSquare className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-foreground text-xl">
+              Additional Feedback
+            </h2>
+            <p className="text-base text-muted-foreground">
+              Share your thoughts and suggestions
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          <form.AppField name="additionalComments">
+            {(field) => (
+              <field.TextareaField
+                className="min-h-28 resize-none"
+                label="Comments"
+                placeholder="Share any additional thoughts about the event..."
+              />
+            )}
           </form.AppField>
-        ))}
-      </div>
 
-      {/* Additional Comments */}
-      <form.AppField name="additionalComments">
-        {(field) => (
-          <field.TextareaField
-            className="min-h-24"
-            label="Additional comments or feedback"
-            placeholder="Share any additional thoughts or comments..."
-          />
-        )}
-      </form.AppField>
-
-      {/* Suggestions */}
-      <form.AppField name="feedback">
-        {(field) => (
-          <field.TextareaField
-            className="min-h-24"
-            label="Suggestions"
-            placeholder="We'd love to hear your suggestions for improvement..."
-          />
-        )}
-      </form.AppField>
+          <form.AppField name="feedback">
+            {(field) => (
+              <field.TextareaField
+                className="min-h-28 resize-none"
+                label="Suggestions for Improvement"
+                placeholder="How can we make our events even better?"
+              />
+            )}
+          </form.AppField>
+        </div>
+      </section>
 
       {/* Submit Button */}
-      <form.AppForm>
-        <form.SubmitButton
-          isSubmittingLabel="Submitting..."
-          label="Submit Feedback"
-        />
-      </form.AppForm>
+      <div className="pt-2">
+        <form.AppForm>
+          <form.SubmitButton
+            className="w-full py-6 font-semibold text-lg sm:py-5"
+            isSubmittingLabel="Submitting Your Feedback..."
+            label="Submit Feedback"
+          />
+        </form.AppForm>
+      </div>
     </form>
   );
 }
