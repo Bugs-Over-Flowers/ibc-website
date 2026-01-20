@@ -1,3 +1,51 @@
-export default function Page() {
-  return <div>Check In Page</div>;
+import { cookies } from "next/headers";
+import { Suspense } from "react";
+import CenterSpinner from "@/components/CenterSpinner";
+import tryCatch from "@/lib/server/tryCatch";
+import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
+import EventDayDetails from "./_components/EventDayDetails";
+import QRCodeScanner from "./_components/QRCodeScanner";
+
+type CheckInPageProps = PageProps<"/admin/events/check-in/[eventDayId]">;
+
+export default function CheckInPageWrapper({
+  params,
+}: {
+  params: CheckInPageProps["params"];
+}) {
+  return (
+    <div className="space-y-4">
+      <h2>Check In</h2>
+      <Suspense fallback={<CenterSpinner />}>
+        <CheckInPage params={params} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function CheckInPage({ params }: { params: CheckInPageProps["params"] }) {
+  const cookieStore = await cookies();
+  const { eventDayId } = await params;
+  const { data } = await tryCatch(
+    getEventDayDetails(cookieStore.getAll(), {
+      eventDayId: eventDayId,
+    }),
+  );
+
+  if (!data) {
+    return <div>Event Day not found</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <EventDayDetails
+        eventDay={{
+          eventDate: data.eventDate,
+          label: data.label,
+        }}
+      />
+
+      <QRCodeScanner />
+    </div>
+  );
 }
