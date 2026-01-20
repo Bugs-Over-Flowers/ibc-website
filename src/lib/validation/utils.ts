@@ -4,15 +4,18 @@ import { RegistrationIdentifier } from "./qr/standard";
 
 export const phoneSchema = z
   .string()
-  .regex(/^(\+63|0)?9\d{9}$/, "Invalid Philippine phone number");
+  .regex(/^(\+63|0)?9\d{9}$/, "Invalid Philippine Phone Number");
 
+// TODO : Need to verify this format
 export const telefaxSchema = z
   .string()
-  .regex(/^\d{4}-\d{4}$/, "Invalid telefax number");
+  .regex(/^\d{4}-\d{4}$/, "Invalid Telefax Number");
+
+// TODO : Need to verify this format
 
 export const landlineSchema = z
   .string()
-  .regex(/^0\d{4}-\d{4}$/, "Invalid landline number");
+  .regex(/^0\d{4}-\d{4}$/, "Invalid Landline Number");
 
 export const MemberTypeEnum = z.enum(["member", "nonmember"]);
 

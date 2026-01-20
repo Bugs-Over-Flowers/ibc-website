@@ -3,6 +3,7 @@
 import { RotateCcw } from "lucide-react";
 import Image from "next/image";
 import { type FormEvent, useEffect, useState } from "react";
+import { useResendEmail } from "@/app/admin/events/[eventId]/registration-list/_hooks/useResendEmail";
 import QRDownloader from "@/components/qr/QRDownloader";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,6 @@ import {
 import { Field } from "@/components/ui/field";
 import { Skeleton } from "@/components/ui/skeleton";
 import { generateQRDataUrl } from "@/lib/qr/generateQRCode";
-import { useResendEmail } from "../../_hooks/useResendEmail";
 
 interface QRCodeDialogProps {
   email: string;

@@ -11,6 +11,9 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import RegistrationRowActions from "@/app/admin/events/[eventId]/registration-list/_components/registrations/RegistrationRowActions";
+import OnlinePaymentSection from "@/app/admin/events/[eventId]/registration-list/registration/[id]/_components/OnlinePaymentSection";
+import ParticipantCard from "@/app/admin/events/[eventId]/registration-list/registration/[id]/_components/ParticipantCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,11 +25,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { getRegistrationData } from "@/server/registration/queries/getRegistrationData";
-import RegistrationRowActions from "../../../_components/registrations/RegistrationRowActions";
-import OnlinePaymentSection from "./OnlinePaymentSection";
-import ParticipantCard from "./ParticipantCard";
 
-export default function Registrationdata({
+export default function RegistrationDetails({
   data,
 }: {
   data: Awaited<ReturnType<typeof getRegistrationData>>;

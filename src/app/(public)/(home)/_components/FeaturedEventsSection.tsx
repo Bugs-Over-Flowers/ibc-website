@@ -59,7 +59,7 @@ export default async function FeaturedEventsSection() {
         <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <div>
             <h2 className="text-balance font-bold text-3xl text-foreground sm:text-4xl">
-              Don't Miss Out
+              Featured Events
             </h2>
           </div>
           <Link href="/events">

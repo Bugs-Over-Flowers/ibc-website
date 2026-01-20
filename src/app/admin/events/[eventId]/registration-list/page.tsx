@@ -1,10 +1,11 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import BackButton from "@/app/admin/events/[eventId]/_components/BackButton";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
-import BackButton from "../_components/BackButton";
+import type { RegistrationListPageProps } from "@/lib/types/route";
 import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
 import ParticipantList from "./_components/participants/ParticipantList";
 import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";
@@ -12,9 +13,6 @@ import RegistrationListStats from "./_components/RegistrationListStats";
 import RegistrationTabs from "./_components/RegistrationsTabs";
 import RegistrationList from "./_components/registrations/RegistrationList";
 import RegistrationsSearchAndFilter from "./_components/registrations/RegistrationsSearchAndFilter";
-
-type RegistrationListPageProps =
-  PageProps<"/admin/events/[eventId]/registration-list">;
 
 export default function RegistrationPageWrapper({
   params,
@@ -39,6 +37,7 @@ export default function RegistrationPageWrapper({
           </Suspense>
         </div>
 
+        {/* Registration List */}
         <TabsContent className="flex flex-col gap-4" value="registrations">
           {/* Stats */}
 
@@ -54,6 +53,8 @@ export default function RegistrationPageWrapper({
             <RegistrationList params={params} searchParams={searchParams} />
           </Suspense>
         </TabsContent>
+
+        {/* Participants List */}
         <TabsContent className="flex flex-col gap-4" value="participants">
           {/* Search and Filter*/}
           <Suspense
