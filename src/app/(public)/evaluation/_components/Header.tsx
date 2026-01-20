@@ -1,26 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CalendarDays, Clock, MapPin } from "lucide-react";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
-import { formatDate } from "@/lib/events/eventUtils";
-import type { Database } from "@/lib/supabase/db.types";
 
-interface HeaderProps {
-  event: Database["public"]["Tables"]["Event"]["Row"] | null;
-}
-
-export function Header({ event }: HeaderProps) {
-  const formatTime = (date: string | null) => {
-    if (!date) return null;
-    return new Date(date).toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
+export function Header() {
   return (
     <section className="relative flex min-h-[55vh] items-center overflow-hidden bg-linear-to-br from-primary/10 via-background to-primary/5 pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20">
       {/* Animated Blur Orbs */}
@@ -79,71 +63,6 @@ export function Header({ event }: HeaderProps) {
             and activities more effectively. We truly appreciate you taking the
             time to fill out the form!
           </motion.p>
-
-          {/* Event Details Card */}
-          {event && (
-            <motion.div
-              className="mt-8 w-full max-w-5xl rounded-2xl border border-border bg-card/80 p-6 shadow-lg backdrop-blur-sm sm:p-8"
-              variants={fadeInUp}
-            >
-              <h2 className="font-semibold text-foreground text-xl leading-tight sm:text-2xl">
-                {event.eventTitle}
-              </h2>
-
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-muted-foreground text-sm sm:text-base">
-                {(() => {
-                  const hasStartDate = Boolean(event.eventStartDate);
-                  const hasEndDate = Boolean(event.eventEndDate);
-                  let dateDisplay: string | null = null;
-                  if (hasStartDate && hasEndDate) {
-                    const startFormatted = formatDate(
-                      event.eventStartDate as string,
-                    );
-                    const endFormatted = formatDate(
-                      event.eventEndDate as string,
-                    );
-                    dateDisplay =
-                      startFormatted === endFormatted
-                        ? startFormatted
-                        : `${startFormatted} – ${endFormatted}`;
-                  } else if (hasStartDate) {
-                    dateDisplay = formatDate(event.eventStartDate as string);
-                  } else if (hasEndDate) {
-                    dateDisplay = formatDate(event.eventEndDate as string);
-                  }
-                  const timeSource =
-                    (event.eventStartDate as string | null) ??
-                    (event.eventEndDate as string | null) ??
-                    null;
-                  const timeDisplay = timeSource
-                    ? formatTime(timeSource)
-                    : null;
-                  return (
-                    <>
-                      {dateDisplay && (
-                        <div className="flex items-center gap-2">
-                          <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
-                          <span>{dateDisplay}</span>
-                        </div>
-                      )}
-                      {timeDisplay && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 shrink-0 text-primary" />
-                          <span>{timeDisplay}</span>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-                {event.venue && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 shrink-0 text-primary" />
-                    <span>{event.venue}</span>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
         </motion.div>
       </div>
     </section>

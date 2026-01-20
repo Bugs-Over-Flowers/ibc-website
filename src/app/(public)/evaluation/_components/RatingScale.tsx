@@ -94,7 +94,7 @@ export function RatingScale({
             return (
               <label
                 className={cn(
-                  "group flex flex-col items-center gap-0.5 rounded-lg border-0 px-2 py-1.5 transition-all duration-150 sm:px-3 sm:py-2",
+                  "group flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-lg border-0 transition-all duration-150",
                   "cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2",
                   isSelected
                     ? cn(option.bgActive, "shadow-md")

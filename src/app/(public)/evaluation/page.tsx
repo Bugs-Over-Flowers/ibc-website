@@ -54,10 +54,10 @@ export default async function EvaluationPage({
     }
     return (
       <main className="min-h-screen bg-background">
-        <Header event={event} />
+        <Header />
         <section className="bg-background py-16 sm:py-20 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <EvaluationForm eventId={eventId} />
+            <EvaluationForm eventData={event} eventId={eventId} />
           </div>
         </section>
       </main>
