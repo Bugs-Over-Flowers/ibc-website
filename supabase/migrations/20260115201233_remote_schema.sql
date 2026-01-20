@@ -1,5 +1,3 @@
-drop type "public"."participant_list_item";
-drop type "public"."registration_list_item";
 alter table "public"."CheckIn" drop column "timestamp";
 alter table "public"."CheckIn" add column "date" timestamp with time zone not null default (now() AT TIME ZONE 'utc'::text);
 alter table "public"."Event" alter column "eventEndDate" set data type timestamp without time zone using "eventEndDate"::timestamp without time zone;
@@ -9,8 +7,8 @@ alter table "public"."Event" alter column "updatedAt" set data type timestamp wi
 alter table "public"."Registration" alter column "registrationDate" set default now();
 alter table "public"."Registration" alter column "registrationDate" set data type timestamp without time zone using "registrationDate"::timestamp without time zone;
 set check_function_bodies = off;
-create type "public"."participant_list_item" as ("participant_id" uuid, "first_name" text, "last_name" text, "email" text, "contact_number" text, "affiliation" text, "registration_date" timestamp without time zone, "registration_id" uuid);
-create type "public"."registration_list_item" as ("registration_id" uuid, "affiliation" text, "registration_date" timestamp without time zone, "payment_status" public."PaymentStatus", "payment_method" public."PaymentMethod", "business_member_id" uuid, "business_name" text, "is_member" boolean, "registrant" jsonb, "people" integer, "registration_identifier" text);
+alter type "public"."participant_list_item" alter attribute registration_date set data type timestamp without time zone;
+alter type "public"."registration_list_item" alter attribute registration_date set data type timestamp without time zone;
 CREATE OR REPLACE FUNCTION public.submit_event_registration(p_event_id uuid, p_member_type text, p_identifier text, p_business_member_id uuid DEFAULT NULL::uuid, p_non_member_name text DEFAULT NULL::text, p_payment_method text DEFAULT 'onsite'::text, p_payment_path text DEFAULT NULL::text, p_registrant jsonb DEFAULT '{}'::jsonb, p_other_participants jsonb DEFAULT '[]'::jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -24,13 +22,13 @@ DECLARE
 BEGIN
 
   -- Convert and cast the payment method
-  v_payment_method_enum := (CASE 
-    WHEN p_payment_method = 'online' THEN 'BPI' 
-    ELSE 'ONSITE' 
+  v_payment_method_enum := (CASE
+    WHEN p_payment_method = 'online' THEN 'BPI'
+    ELSE 'ONSITE'
   END)::"PaymentMethod";
 
   -- Determine payment status
-  v_payment_status := (CASE 
+  v_payment_status := (CASE
     WHEN p_payment_method = 'online' THEN 'pending'
     ELSE 'verified'
   END)::"PaymentStatus";
