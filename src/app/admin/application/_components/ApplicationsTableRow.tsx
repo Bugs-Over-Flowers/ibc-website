@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { getApplications } from "@/server/applications/queries/getApplications";
-import { useSelectedApplications } from "../_context/SelectedApplicationsContext";
+import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { toPascalCaseWithSpaces } from "../_utils/formatters";
 
 interface ApplicationsTableRowProps {
@@ -45,21 +45,26 @@ function getApplicationTypeColor(type: string): {
 export function ApplicationsTableRow({
   application,
 }: ApplicationsTableRowProps) {
-  const { isSelected, toggleSelection } = useSelectedApplications();
-  const selected = isSelected(application.applicationId);
+  const isSelected = useSelectedApplicationsStore((state) =>
+    state.isSelected(application.applicationId),
+  );
+  const toggleSelection = useSelectedApplicationsStore(
+    (state) => state.toggleSelection,
+  );
   const { borderColor, textColor } = getApplicationTypeColor(
     application.applicationType,
   );
 
   return (
     <TableRow
-      className={selected ? "bg-muted/50" : ""}
+      className={isSelected ? "bg-muted/50" : ""}
       key={application.applicationId}
+      suppressHydrationWarning
     >
-      <TableCell className="w-12">
+      <TableCell className="w-12" suppressHydrationWarning>
         <Checkbox
           aria-label={`Select ${application.companyName}`}
-          checked={selected}
+          checked={isSelected}
           onCheckedChange={() => toggleSelection(application.applicationId)}
         />
       </TableCell>
@@ -86,7 +91,11 @@ export function ApplicationsTableRow({
         </div>
       </TableCell>
       <TableCell>
-        <Button size="sm" variant="outline">
+        <Button
+          className="active:scale-95 active:opacity-80"
+          size="sm"
+          variant="outline"
+        >
           <Link
             href={`/admin/application/${application.applicationId}` as Route}
           >

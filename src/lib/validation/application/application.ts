@@ -4,7 +4,10 @@ export const scheduleMeetingSchema = z.object({
   applicationIds: z
     .array(z.string().uuid())
     .min(1, "Select at least one application"),
-  interviewDate: z.date({ message: "Interview date is required" }),
+  interviewDate: z.union([
+    z.string().min(1, "Interview date is required"),
+    z.date(),
+  ]),
   interviewVenue: z.string().min(3, "Interview venue is required"),
   customMessage: z.string().optional(),
 });

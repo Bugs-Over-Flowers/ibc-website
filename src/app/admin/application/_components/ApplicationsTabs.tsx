@@ -1,9 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { type ReactNode, useState } from "react";
-import { useSelectedApplications } from "../_context/SelectedApplicationsContext";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useTabSelections } from "../_hooks/useTabSelections";
+import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import BulkActions from "./BulkActions";
 import MeetingScheduler from "./MeetingScheduler";
 
@@ -23,8 +23,20 @@ export default function ApplicationsTabs({
   const [activeTab, setActiveTab] = useState<"new" | "pending" | "finished">(
     "new",
   );
+  const [isMobile, setIsMobile] = useState(false);
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const { selectedApplicationIds, clearSelection, selectAll } =
-    useSelectedApplications();
+    useSelectedApplicationsStore();
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const { handleTabChange: handleTabSelectionChange } = useTabSelections({
     activeTab,
@@ -44,24 +56,28 @@ export default function ApplicationsTabs({
     { id: "finished", label: "Finished" },
   ] as const;
 
+  const activeButtonRef = buttonRefs.current[activeTab];
+  const indicatorX = activeButtonRef?.offsetLeft ?? 0;
+  const indicatorWidth = activeButtonRef?.offsetWidth ?? 0;
+
   return (
     <>
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode={isMobile ? "wait" : "popLayout"}>
         {activeTab === "new" ? (
           <motion.div
             animate={{ opacity: 1 }}
             className="flex flex-col items-stretch gap-6 lg:flex-row"
-            exit={{ opacity: 1 }}
-            initial={{ opacity: 1 }}
+            exit={{ opacity: isMobile ? 0 : 1 }}
+            initial={{ opacity: isMobile ? 0 : 1 }}
             key="new"
-            transition={{ duration: 0.5 }}
+            transition={{ duration: isMobile ? 0.2 : 0.5 }}
           >
             <motion.div
               animate={{ x: 0, opacity: 1 }}
               className="flex flex-2 flex-col"
-              exit={{ x: -800, opacity: 1 }}
-              initial={{ x: -800, opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              exit={{ x: isMobile ? 0 : -800, opacity: 1 }}
+              initial={{ x: isMobile ? 0 : -800, opacity: 1 }}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               <MeetingScheduler />
             </motion.div>
@@ -71,8 +87,8 @@ export default function ApplicationsTabs({
               className="flex flex-1 flex-col"
               exit={{ opacity: 1 }}
               initial={{ opacity: 1 }}
-              layoutId="stats-container"
-              transition={{ duration: 0.5 }}
+              layoutId={isMobile ? undefined : "stats-container"}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               {stats}
             </motion.div>
@@ -81,17 +97,17 @@ export default function ApplicationsTabs({
           <motion.div
             animate={{ opacity: 1 }}
             className="flex flex-col items-stretch gap-6 lg:flex-row"
-            exit={{ opacity: 1 }}
-            initial={{ opacity: 1 }}
+            exit={{ opacity: isMobile ? 0 : 1 }}
+            initial={{ opacity: isMobile ? 0 : 1 }}
             key="pending"
-            transition={{ duration: 0.5 }}
+            transition={{ duration: isMobile ? 0.2 : 0.5 }}
           >
             <motion.div
               animate={{ x: 0, opacity: 1 }}
               className="flex flex-1 flex-col"
-              exit={{ x: -500, opacity: 1 }}
-              initial={{ x: -500, opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              exit={{ x: isMobile ? 0 : -500, opacity: 1 }}
+              initial={{ x: isMobile ? 0 : -500, opacity: 1 }}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               <BulkActions />
             </motion.div>
@@ -101,8 +117,8 @@ export default function ApplicationsTabs({
               className="flex flex-2 flex-col"
               exit={{ opacity: 1 }}
               initial={{ opacity: 1 }}
-              layoutId="stats-container"
-              transition={{ duration: 0.5 }}
+              layoutId={isMobile ? undefined : "stats-container"}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               {stats}
             </motion.div>
@@ -111,18 +127,18 @@ export default function ApplicationsTabs({
           <motion.div
             animate={{ opacity: 1 }}
             className="flex flex-col items-stretch"
-            exit={{ opacity: 1 }}
-            initial={{ opacity: 1 }}
+            exit={{ opacity: isMobile ? 0 : 1 }}
+            initial={{ opacity: isMobile ? 0 : 1 }}
             key="finished"
-            transition={{ duration: 0.3 }}
+            transition={{ duration: isMobile ? 0.2 : 0.3 }}
           >
             <motion.div
               animate={{ opacity: 1 }}
               className="flex w-full flex-col"
               exit={{ opacity: 1 }}
               initial={{ opacity: 1 }}
-              layoutId="stats-container"
-              transition={{ duration: 0.5 }}
+              layoutId={isMobile ? undefined : "stats-container"}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               {stats}
             </motion.div>
@@ -132,44 +148,48 @@ export default function ApplicationsTabs({
 
       <div className="w-full">
         <div className="relative">
-          <div className="relative grid grid-cols-3 overflow-hidden rounded-md border border-border bg-background p-1">
+          <div className="relative grid grid-cols-3 gap-0.5 overflow-hidden rounded-md border border-border bg-background p-1 sm:gap-0">
             <motion.div
               animate={{
-                x:
-                  activeTab === "new"
-                    ? "0%"
-                    : activeTab === "pending"
-                      ? "100%"
-                      : "200%",
+                x: indicatorX,
+                width: indicatorWidth,
               }}
               className="absolute rounded-md bg-primary/20"
-              layout
               style={{
-                width: "calc(100% / 3)",
-                height: "calc(100% - 8px)",
                 top: "4px",
-                left: "4px",
+                height: "calc(100% - 8px)",
               }}
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 25,
+                stiffness: 380,
+                damping: 30,
               }}
             />
 
             {tabs.map((tab) => (
               <button
-                className={`relative z-10 py-1 font-medium text-sm transition-all duration-200 ${
+                className={`relative z-10 whitespace-nowrap px-0.5 py-2 font-medium text-xs transition-colors duration-200 sm:text-sm ${
                   activeTab === tab.id
-                    ? "font-medium text-muted-foreground hover:text-foreground"
-                    : "text-primary"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }
                 `}
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
+                ref={(el) => {
+                  if (el) buttonRefs.current[tab.id] = el;
+                }}
+                title={tab.label}
                 type="button"
               >
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="inline sm:hidden">
+                  {tab.id === "new"
+                    ? "New"
+                    : tab.id === "pending"
+                      ? "Pending"
+                      : "Finished"}
+                </span>
               </button>
             ))}
           </div>
