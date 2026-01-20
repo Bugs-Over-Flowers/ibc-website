@@ -3,7 +3,7 @@ import "server-only";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
 
-export const getAllEventDaysByEventId = async (
+export const getEventDayDetails = async (
   requestCookies: RequestCookie[],
   {
     eventDayId,
@@ -15,8 +15,18 @@ export const getAllEventDaysByEventId = async (
 
   const { data, error } = await client
     .from("EventDay")
-    .select("*")
-    .eq("eventDayId", eventDayId);
+    .select(`
+        eventDayId,
+        Event(
+        	eventId,
+          eventTitle,
+          venue
+        ),
+        label,
+        eventDate
+			`)
+    .eq("eventDayId", eventDayId)
+    .maybeSingle();
 
   if (error) {
     throw new Error(error.message);
