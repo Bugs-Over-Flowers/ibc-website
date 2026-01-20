@@ -7,10 +7,30 @@ export type Json =
   | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5";
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
   public: {
     Tables: {
@@ -250,6 +270,59 @@ export type Database = {
           },
         ];
       };
+      EvaluationForm: {
+        Row: {
+          additionalComments: string | null;
+          createdAt: string | null;
+          evaluationId: string;
+          eventId: string;
+          feedback: string | null;
+          name: string | null;
+          q1Rating: number | null;
+          q2Rating: number | null;
+          q3Rating: number | null;
+          q4Rating: number | null;
+          q5Rating: number | null;
+          q6Rating: number | null;
+        };
+        Insert: {
+          additionalComments?: string | null;
+          createdAt?: string | null;
+          evaluationId?: string;
+          eventId: string;
+          feedback?: string | null;
+          name?: string | null;
+          q1Rating?: number | null;
+          q2Rating?: number | null;
+          q3Rating?: number | null;
+          q4Rating?: number | null;
+          q5Rating?: number | null;
+          q6Rating?: number | null;
+        };
+        Update: {
+          additionalComments?: string | null;
+          createdAt?: string | null;
+          evaluationId?: string;
+          eventId?: string;
+          feedback?: string | null;
+          name?: string | null;
+          q1Rating?: number | null;
+          q2Rating?: number | null;
+          q3Rating?: number | null;
+          q4Rating?: number | null;
+          q5Rating?: number | null;
+          q6Rating?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "EvaluationForm_eventId_fkey";
+            columns: ["eventId"];
+            isOneToOne: false;
+            referencedRelation: "Event";
+            referencedColumns: ["eventId"];
+          },
+        ];
+      };
       Event: {
         Row: {
           description: string | null;
@@ -326,6 +399,7 @@ export type Database = {
       };
       Interview: {
         Row: {
+          applicationId: string | null;
           createdAt: string | null;
           interviewDate: string;
           interviewId: string;
@@ -335,6 +409,7 @@ export type Database = {
           updatedAt: string | null;
         };
         Insert: {
+          applicationId?: string | null;
           createdAt?: string | null;
           interviewDate: string;
           interviewId?: string;
@@ -344,6 +419,7 @@ export type Database = {
           updatedAt?: string | null;
         };
         Update: {
+          applicationId?: string | null;
           createdAt?: string | null;
           interviewDate?: string;
           interviewId?: string;
@@ -352,7 +428,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["InterviewStatus"] | null;
           updatedAt?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "Interview_applicationId_fkey";
+            columns: ["applicationId"];
+            isOneToOne: false;
+            referencedRelation: "Application";
+            referencedColumns: ["applicationId"];
+          },
+        ];
       };
       Participant: {
         Row: {
@@ -614,6 +698,7 @@ export type Database = {
       MembershipStatus: "active" | "unpaid" | "overdue" | "revoked";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
+      ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
     };
     CompositeTypes: {
       participant_list_item: {
@@ -778,6 +863,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],
@@ -789,6 +877,7 @@ export const Constants = {
       MembershipStatus: ["active", "unpaid", "overdue", "revoked"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],
+      ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
     },
   },
 } as const;
