@@ -259,6 +259,49 @@ INSERT INTO "Event" (
 -- There should also be data for event days for these events
 
 -- =============================================================================
+-- Insert Test Users (auth.users)
+-- =============================================================================
+-- Create a test admin user for Cypress E2E tests
+-- Email: admin@test.local
+-- Password: Test123!@#
+-- No MFA setup for simplified testing
+INSERT INTO auth.users (
+  id,
+  instance_id,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  created_at,
+  updated_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  is_super_admin,
+  role,
+  aud,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change
+) VALUES (
+  gen_random_uuid(),
+  '00000000-0000-0000-0000-000000000000',
+  'admin@test.local',
+  crypt('Test123!@#', gen_salt('bf')),
+  NOW(),
+  NOW(),
+  NOW(),
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"Test Admin", "email_verified": true}',
+  false,
+  'authenticated',
+  'authenticated',
+  '',
+  '',
+  '',
+  ''
+);
+
+-- =============================================================================
 -- Create Business Members
 -- =============================================================================
 INSERT INTO "BusinessMember" (
@@ -307,56 +350,6 @@ INSERT INTO "BusinessMember" (
   );
 
 -- There should also be data for event days for these events
-
-
-
--- =============================================================================
--- Create Business Members
--- =============================================================================
-INSERT INTO "BusinessMember" (
-  "sectorId",
-  "logoImageURL" ,
-  "joinDate",
-  "websiteURL",
-  "businessName",
-  "businessMemberId",
-  "lastPaymentDate",
-  "membershipExpiryDate",
-  "membershipStatus"
-) VALUES
-  (
-   	1,
-    'https://example.com/business1.jpg',
-    NOW(),
-    'https://example.com/business1.com',
-    'Business 1',
-    gen_random_uuid(),
-    NOW(),
-    NOW(),
-    'Active'
-  ),
-  (
-   	2,
-    'https://example.com/business2.jpg',
-    NOW(),
-    'https://example.com/business2.com',
-    'Business Corp.',
-    gen_random_uuid(),
-    NOW(),
-    NOW(),
-    'Active'
-  ),
-  (
-    3,
-    'https://example.com/business3.jpg',
-    NOW(),
-    'https://example.com/business3.com',
-    'Company Ltd.',
-    gen_random_uuid(),
-    NOW(),
-    NOW(),
-    'Active'
-  )
 
 -- =============================================================================
 -- Verify Seed Data
