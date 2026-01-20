@@ -56,12 +56,12 @@ export function EvaluationForm({ eventId }: EvaluationFormProps) {
     defaultValues: {
       eventId,
       name: "",
-      q1Rating: "",
-      q2Rating: "",
-      q3Rating: "",
-      q4Rating: "",
-      q5Rating: "",
-      q6Rating: "",
+      q1Rating: undefined as string | undefined,
+      q2Rating: undefined as string | undefined,
+      q3Rating: undefined as string | undefined,
+      q4Rating: undefined as string | undefined,
+      q5Rating: undefined as string | undefined,
+      q6Rating: undefined as string | undefined,
       additionalComments: "",
       feedback: "",
     },
@@ -71,11 +71,13 @@ export function EvaluationForm({ eventId }: EvaluationFormProps) {
         const { error } = await tryCatch(submitEvaluationForm(validated));
 
         if (error) {
+          const message =
+            typeof error === "string" ? error : "Failed to submit form";
           toast.error("Failed to submit feedback. Please try again.");
           return {
             onSubmit: [
               {
-                message: error ?? "Failed to submit form",
+                message,
               },
             ],
           };

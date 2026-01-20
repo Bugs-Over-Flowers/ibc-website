@@ -5,6 +5,7 @@ import { Download, FileImage, FileText, QrCode } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -51,7 +52,9 @@ export function EvaluationQRDownloader({
         const dataUrl = await generateQRDataUrl(evaluationUrl);
         setQrDataUrl(dataUrl);
       } catch (error) {
-        console.error("Failed to generate QR code:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        toast.error(`Failed to generate QR code: ${errorMessage}`);
       } finally {
         setIsLoading(false);
       }
@@ -69,14 +72,21 @@ export function EvaluationQRDownloader({
       return;
     }
 
-    if (as === "image") {
-      const url = await toPng(ref.current, { pixelRatio: 3 });
-      const link = document.createElement("a");
-      link.download = `evaluation-qr-${eventId}.png`;
-      link.href = url;
-      link.click();
-    } else {
-      print();
+    try {
+      if (as === "image") {
+        const url = await toPng(ref.current, { pixelRatio: 3 });
+        const link = document.createElement("a");
+        link.download = `evaluation-qr-${eventId}.png`;
+        link.href = url;
+        link.click();
+        toast.success("QR code downloaded successfully!");
+      } else {
+        print();
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      toast.error(`Failed to download QR code: ${errorMessage}`);
     }
   };
 

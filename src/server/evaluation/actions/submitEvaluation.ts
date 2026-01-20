@@ -8,11 +8,10 @@ export async function submitEvaluationForm(
   input: EvaluationFormInput,
 ): Promise<void> {
   const parsed = EvaluationFormSchema.parse(input);
-  console.log("submitEvaluationForm parsed input:", parsed);
 
   const supabase = await createActionClient();
 
-  const { data, error } = await supabase.rpc("submit_evaluation_form", {
+  const { error } = await supabase.rpc("submit_evaluation_form", {
     p_event_id: parsed.eventId,
     p_name: parsed.name,
     p_q1_rating: parsed.q1Rating,
@@ -26,9 +25,6 @@ export async function submitEvaluationForm(
   });
 
   if (error) {
-    console.error("submitEvaluationForm error:", error);
     throw new Error(error.message);
   }
-
-  console.log("submitEvaluationForm result:", data);
 }

@@ -1,7 +1,12 @@
 "use client";
 
 import { Frown, Laugh, Meh, Smile, SmilePlus } from "lucide-react";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
 
@@ -74,49 +79,58 @@ export function RatingScale({
       className={cn("space-y-2", className)}
       data-invalid={isInvalid}
     >
-      <FieldLabel className="font-medium text-base text-foreground sm:text-lg">
+      <FieldLabel
+        className="font-medium text-base text-foreground sm:text-lg"
+        id="rating-label"
+      >
         {label}
       </FieldLabel>
       {description && <FieldDescription>{description}</FieldDescription>}
 
-      <div className="flex items-center justify-start gap-1 sm:gap-2">
-        {RATING_OPTIONS.map((option) => {
-          const isSelected = value === option.value;
-          return (
-            <button
-              aria-label={`Rating ${option.label}`}
-              aria-pressed={isSelected}
-              className={cn(
-                "group flex flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 transition-all duration-150 sm:px-3 sm:py-2",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-                isSelected
-                  ? cn(option.bgActive, "shadow-md")
-                  : "hover:bg-accent/60",
-              )}
-              key={option.value}
-              onClick={() => handleRatingClick(option.value)}
-              type="button"
-            >
-              <option.Icon
+      <fieldset aria-labelledby="rating-label" className="border-0 p-0">
+        <div className="flex items-center justify-start gap-1 sm:gap-2">
+          {RATING_OPTIONS.map((option) => {
+            const isSelected = value === option.value;
+            return (
+              <label
                 className={cn(
-                  "h-7 w-7 transition-transform duration-150 sm:h-8 sm:w-8",
+                  "group flex flex-col items-center gap-0.5 rounded-lg border-0 px-2 py-1.5 transition-all duration-150 sm:px-3 sm:py-2",
+                  "cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2",
                   isSelected
-                    ? cn(option.color, "scale-110")
-                    : cn(option.colorMuted, "group-hover:scale-105"),
+                    ? cn(option.bgActive, "shadow-md")
+                    : "hover:bg-accent/60",
                 )}
-              />
-              <span
-                className={cn(
-                  "text-center font-medium text-[9px] leading-tight sm:text-[10px]",
-                  isSelected ? option.color : "text-muted-foreground",
-                )}
+                key={option.value}
               >
-                {option.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+                <input
+                  checked={isSelected}
+                  className="sr-only"
+                  onChange={() => handleRatingClick(option.value)}
+                  type="radio"
+                  value={option.value}
+                />
+                <option.Icon
+                  className={cn(
+                    "h-7 w-7 transition-transform duration-150 sm:h-8 sm:w-8",
+                    isSelected
+                      ? cn(option.color, "scale-110")
+                      : cn(option.colorMuted, "group-hover:scale-105"),
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-center font-medium text-[9px] leading-tight sm:text-[10px]",
+                    isSelected ? option.color : "text-muted-foreground",
+                  )}
+                >
+                  {option.label}
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+      <FieldError errors={field.state.meta.errors} />
     </Field>
   );
 }

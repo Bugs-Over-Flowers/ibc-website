@@ -91,17 +91,28 @@ export function Header({ event }: HeaderProps) {
               </h2>
 
               <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-muted-foreground text-sm sm:text-base">
-                {event.eventEndDate && (
+                {(event.eventStartDate || event.eventEndDate) && (
                   <div className="flex items-center gap-2">
                     <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
-                    <span>{formatDate(event.eventEndDate)}</span>
+                    <span>
+                      {event.eventStartDate && event.eventEndDate
+                        ? formatDate(event.eventStartDate) ===
+                          formatDate(event.eventEndDate)
+                          ? formatDate(event.eventStartDate)
+                          : `${formatDate(event.eventStartDate)} – ${formatDate(event.eventEndDate)}`
+                        : event.eventStartDate
+                          ? formatDate(event.eventStartDate)
+                          : formatDate(event.eventEndDate)}
+                    </span>
                   </div>
                 )}
 
-                {event.eventEndDate && (
+                {(event.eventStartDate || event.eventEndDate) && (
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 shrink-0 text-primary" />
-                    <span>{formatTime(event.eventEndDate)}</span>
+                    <span>
+                      {formatTime(event.eventStartDate || event.eventEndDate)}
+                    </span>
                   </div>
                 )}
 

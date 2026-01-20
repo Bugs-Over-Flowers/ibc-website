@@ -8,15 +8,30 @@ export const EvaluationFormSchema = z.object({
     .string()
     .max(255)
     .optional()
-    .transform((v) => v ?? "Anonymous Participant"),
+    .transform((v) => {
+      if (v == null || v.trim() === "") {
+        return "Anonymous Participant";
+      }
+      return v.trim();
+    }),
   q1Rating: z.enum(RATING_SCALE),
   q2Rating: z.enum(RATING_SCALE),
   q3Rating: z.enum(RATING_SCALE),
   q4Rating: z.enum(RATING_SCALE),
   q5Rating: z.enum(RATING_SCALE),
   q6Rating: z.enum(RATING_SCALE),
-  additionalComments: z.string().max(1000),
-  feedback: z.string().max(1000),
+  additionalComments: z
+    .string()
+    .trim()
+    .max(1000)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
+  feedback: z
+    .string()
+    .trim()
+    .max(1000)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
 });
 
 export type EvaluationFormInput = z.infer<typeof EvaluationFormSchema>;
