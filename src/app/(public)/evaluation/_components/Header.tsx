@@ -91,31 +91,50 @@ export function Header({ event }: HeaderProps) {
               </h2>
 
               <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-muted-foreground text-sm sm:text-base">
-                {(event.eventStartDate || event.eventEndDate) && (
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
-                    <span>
-                      {event.eventStartDate && event.eventEndDate
-                        ? formatDate(event.eventStartDate) ===
-                          formatDate(event.eventEndDate)
-                          ? formatDate(event.eventStartDate)
-                          : `${formatDate(event.eventStartDate)} – ${formatDate(event.eventEndDate)}`
-                        : event.eventStartDate
-                          ? formatDate(event.eventStartDate)
-                          : formatDate(event.eventEndDate)}
-                    </span>
-                  </div>
-                )}
-
-                {(event.eventStartDate || event.eventEndDate) && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 shrink-0 text-primary" />
-                    <span>
-                      {formatTime(event.eventStartDate || event.eventEndDate)}
-                    </span>
-                  </div>
-                )}
-
+                {(() => {
+                  const hasStartDate = Boolean(event.eventStartDate);
+                  const hasEndDate = Boolean(event.eventEndDate);
+                  let dateDisplay: string | null = null;
+                  if (hasStartDate && hasEndDate) {
+                    const startFormatted = formatDate(
+                      event.eventStartDate as string,
+                    );
+                    const endFormatted = formatDate(
+                      event.eventEndDate as string,
+                    );
+                    dateDisplay =
+                      startFormatted === endFormatted
+                        ? startFormatted
+                        : `${startFormatted} – ${endFormatted}`;
+                  } else if (hasStartDate) {
+                    dateDisplay = formatDate(event.eventStartDate as string);
+                  } else if (hasEndDate) {
+                    dateDisplay = formatDate(event.eventEndDate as string);
+                  }
+                  const timeSource =
+                    (event.eventStartDate as string | null) ??
+                    (event.eventEndDate as string | null) ??
+                    null;
+                  const timeDisplay = timeSource
+                    ? formatTime(timeSource)
+                    : null;
+                  return (
+                    <>
+                      {dateDisplay && (
+                        <div className="flex items-center gap-2">
+                          <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
+                          <span>{dateDisplay}</span>
+                        </div>
+                      )}
+                      {timeDisplay && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 shrink-0 text-primary" />
+                          <span>{timeDisplay}</span>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
                 {event.venue && (
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 shrink-0 text-primary" />

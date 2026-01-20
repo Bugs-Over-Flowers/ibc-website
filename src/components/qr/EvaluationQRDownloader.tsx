@@ -72,21 +72,21 @@ export function EvaluationQRDownloader({
       return;
     }
 
-    try {
-      if (as === "image") {
+    if (as === "image") {
+      try {
         const url = await toPng(ref.current, { pixelRatio: 3 });
         const link = document.createElement("a");
         link.download = `evaluation-qr-${eventId}.png`;
         link.href = url;
         link.click();
         toast.success("QR code downloaded successfully!");
-      } else {
-        print();
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        toast.error(`Failed to download QR code: ${errorMessage}`);
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to download QR code: ${errorMessage}`);
+    } else {
+      print();
     }
   };
 
