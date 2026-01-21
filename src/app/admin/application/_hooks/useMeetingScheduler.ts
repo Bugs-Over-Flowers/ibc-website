@@ -2,22 +2,37 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
-import { scheduleMeetingSchema } from "@/lib/validation/application";
-import { scheduleMeetingAction } from "@/server/applications/mutations/scheduleMeeting";
-import { useSelectedApplications } from "../_context/SelectedApplicationsContext";
+import { zodValidator } from "@/lib/utils";
+import { scheduleMeetingSchema } from "@/lib/validation/application/application";
+import { scheduleMeetingAction } from "@/server/applications/mutations/scheduleMeetingAction";
+import { useMeetingSchedulerStore } from "../_store/useMeetingSchedulerStore";
+import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 
 export function useMeetingScheduler(onSuccess?: () => void) {
   const router = useRouter();
-  const { selectedApplicationIds } = useSelectedApplications();
+  const { selectedApplicationIds } = useSelectedApplicationsStore();
+  const { interviewDate, interviewVenue, reset } = useMeetingSchedulerStore();
+
+  // Persisted store may hydrate interviewDate as a string; normalize to Date.
+  const hydratedInterviewDate =
+    typeof interviewDate === "string" ? new Date(interviewDate) : interviewDate;
+  const hasValidInterviewDate =
+    hydratedInterviewDate && !Number.isNaN(hydratedInterviewDate.getTime());
+
+  // Format store date as string for FormDateTimePicker
+  const defaultDateString = hasValidInterviewDate
+    ? hydratedInterviewDate.toISOString().slice(0, 16)
+    : "";
 
   const form = useAppForm({
     defaultValues: {
       applicationIds: Array.from(selectedApplicationIds),
-      interviewDate: undefined as Date | undefined,
-      interviewVenue: "",
+      interviewDate: defaultDateString,
+      interviewVenue: interviewVenue ?? "",
+      customMessage: "",
     },
     validators: {
-      onSubmit: scheduleMeetingSchema,
+      onSubmit: zodValidator(scheduleMeetingSchema),
     },
     onSubmit: async ({ value }) => {
       if (!value.interviewDate) {
@@ -25,9 +40,12 @@ export function useMeetingScheduler(onSuccess?: () => void) {
         return;
       }
 
+      // Convert string datetime to Date object
+      const interviewDateObj = new Date(value.interviewDate);
+
       const [error, data] = await scheduleMeetingAction({
         ...value,
-        interviewDate: value.interviewDate,
+        interviewDate: interviewDateObj,
         applicationIds: Array.from(selectedApplicationIds),
       });
 
@@ -40,6 +58,7 @@ export function useMeetingScheduler(onSuccess?: () => void) {
           "Meeting scheduled successfully! Emails sent to applicants.",
       );
       form.reset();
+      reset();
       onSuccess?.();
       router.refresh();
     },

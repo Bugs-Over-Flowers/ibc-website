@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
-import type { ScheduleMeetingInput } from "@/lib/validation/application";
-import { scheduleMeetingSchema } from "@/lib/validation/application";
+import type { ScheduleMeetingInput } from "@/lib/validation/application/application";
+import { scheduleMeetingSchema } from "@/lib/validation/application/application";
 import { sendMeetingEmail } from "@/server/emails/mutations/sendMeetingEmail";
 
 export async function scheduleMeeting(input: ScheduleMeetingInput) {
@@ -18,6 +18,10 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     parsed.interviewDate instanceof Date
       ? parsed.interviewDate
       : new Date(parsed.interviewDate as unknown as string);
+
+  if (Number.isNaN(interviewDate.getTime())) {
+    throw new Error("Invalid interview date");
+  }
 
   // Store in UTC for DB consistency; prefer a timestamptz column in DB
   const interviewDateUtcIso = interviewDate.toISOString();
@@ -55,6 +59,24 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     throw new Error("No applications found");
   }
 
+  // Send emails to all applicants first; only update DB when notifications succeed
+  const emailPromises = applications.map(async (app) => {
+    const [emailError] = await sendMeetingEmail({
+      to: app.emailAddress,
+      companyName: app.companyName,
+      // Send a timezone-aware, human-readable datetime to applicants
+      interviewDate: formattedInterviewDateLocal,
+      interviewVenue: parsed.interviewVenue,
+      customMessage: parsed.customMessage,
+    });
+
+    if (emailError) {
+      throw new Error(emailError);
+    }
+  });
+
+  await Promise.all(emailPromises);
+
   // Update application status to "pending" (interview scheduled)
   const { error: updateError } = await supabase
     .from("Application")
@@ -84,49 +106,10 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     throw new Error(`Failed to create interviews: ${insertError.message}`);
   }
 
-  // Send emails to all applicants
-  const emailPromises = applications.map(async (app) => {
-    const [emailError] = await sendMeetingEmail({
-      to: app.emailAddress,
-      companyName: app.companyName,
-      // Send a timezone-aware, human-readable datetime to applicants
-      interviewDate: formattedInterviewDateLocal,
-      interviewVenue: parsed.interviewVenue,
-    });
-
-    if (emailError) {
-      throw new Error(emailError);
-    }
-  });
-
-  await Promise.all(emailPromises);
-
   revalidatePath("/admin/application");
 
   return {
     success: true as const,
     message: `Meeting scheduled for ${applications.length} application(s) — ${formattedInterviewDateLocal} (${DEFAULT_TZ})`,
   };
-}
-
-// Tuple-style server action wrapper to comply with [error, data] pattern
-// without breaking existing call sites using tryCatch(object-union).
-export async function scheduleMeetingAction(
-  input: ScheduleMeetingInput,
-): Promise<
-  [
-    error: string | null,
-    data: {
-      success: true;
-      message: string;
-    } | null,
-  ]
-> {
-  try {
-    const result = await scheduleMeeting(input);
-    return [null, result];
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return [message, null];
-  }
 }
