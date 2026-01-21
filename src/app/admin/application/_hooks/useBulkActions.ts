@@ -46,7 +46,9 @@ export function useBulkActions(onSuccess?: () => void) {
       );
     }
 
-    onSuccess?.();
+    if (failCount === 0 && successCount > 0) {
+      onSuccess?.();
+    }
   };
 
   const bulkReject = async (applicationIds: Set<string>) => {
@@ -75,7 +77,9 @@ export function useBulkActions(onSuccess?: () => void) {
       );
     }
 
-    onSuccess?.();
+    if (failCount === 0 && successCount > 0) {
+      onSuccess?.();
+    }
   };
 
   return {

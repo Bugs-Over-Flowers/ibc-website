@@ -3,11 +3,12 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSelectedApplications } from "../_context/SelectedApplicationsContext";
 import { useBulkActions } from "../_hooks/useBulkActions";
+import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 
 export default function BulkActions() {
-  const { selectedApplicationIds, clearSelection } = useSelectedApplications();
+  const { selectedApplicationIds, clearSelection } =
+    useSelectedApplicationsStore();
 
   const { bulkApprove, bulkReject, isPending } = useBulkActions(() => {
     clearSelection();
@@ -42,7 +43,7 @@ export default function BulkActions() {
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-2 gap-2">
             <Button
-              className="border-status-green text-status-green hover:bg-status-green/10"
+              className="border-status-green text-status-green hover:bg-status-green/10 active:scale-95 active:opacity-80"
               disabled={!hasSelection || isPending}
               onClick={handleApprove}
               size="sm"
@@ -52,7 +53,7 @@ export default function BulkActions() {
               {isPending ? "Processing..." : "Approve"}
             </Button>
             <Button
-              className="border-status-red text-status-red hover:bg-status-red/10"
+              className="border-status-red text-status-red hover:bg-status-red/10 active:scale-95 active:opacity-80"
               disabled={!hasSelection || isPending}
               onClick={handleReject}
               size="sm"
@@ -63,7 +64,7 @@ export default function BulkActions() {
             </Button>
           </div>
           <Button
-            className="w-full"
+            className="w-full active:scale-95 active:opacity-80"
             disabled={!hasSelection}
             onClick={clearSelection}
             size="sm"

@@ -3,12 +3,10 @@
 import { revalidatePath } from "next/cache";
 import type { ServerFunctionResult } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
-import type { ApproveRejectInput } from "@/lib/validation/application";
-import { approveRejectSchema } from "@/lib/validation/application";
+import type { ApproveRejectInput } from "@/lib/validation/application/application";
+import { approveRejectSchema } from "@/lib/validation/application/application";
+import { sendApplicationDecisionEmail } from "@/server/emails/mutations/sendApplicationDecisionEmail";
 
-/**
- * Approve an application and create a BusinessMember record
- */
 export async function approveApplication(input: ApproveRejectInput) {
   const parsed = approveRejectSchema.parse(input);
 
@@ -21,7 +19,12 @@ export async function approveApplication(input: ApproveRejectInput) {
   // Get application details
   const { data: application, error: fetchError } = await supabase
     .from("Application")
-    .select("*")
+    .select(
+      `
+      *,
+      ApplicationMember(firstName, lastName, emailAddress)
+    `,
+    )
     .eq("applicationId", parsed.applicationId)
     .single();
 
@@ -29,9 +32,22 @@ export async function approveApplication(input: ApproveRejectInput) {
     throw new Error(`Failed to fetch application: ${fetchError?.message}`);
   }
 
+  const recipientEmail =
+    application.emailAddress ||
+    application.ApplicationMember?.[0]?.emailAddress;
+
+  if (!recipientEmail) {
+    throw new Error("Applicant email is missing for this application");
+  }
+
   // Check if already approved
-  if (application.memberId) {
+  if (application.businessMemberId) {
     throw new Error("Application has already been approved");
+  }
+
+  // Validate required fields for member creation
+  if (!application.sectorId) {
+    throw new Error("Sector ID is required to approve application");
   }
 
   // Create BusinessMember record
@@ -40,7 +56,7 @@ export async function approveApplication(input: ApproveRejectInput) {
     .insert({
       businessName: application.companyName,
       sectorId: application.sectorId,
-      websiteURL: application.websiteURL,
+      websiteURL: application.websiteURL ?? "",
       logoImageURL: application.logoImageURL,
       joinDate: new Date().toISOString(),
     })
@@ -51,11 +67,11 @@ export async function approveApplication(input: ApproveRejectInput) {
     throw new Error(`Failed to create member: ${memberError?.message}`);
   }
 
-  // Update application with memberId and set status to approved
+  // Update application with businessMemberId and set status to approved
   const { error: updateError } = await supabase
     .from("Application")
     .update({
-      memberId: newMember.businessMemberId,
+      businessMemberId: newMember.businessMemberId,
       applicationStatus: "approved",
     })
     .eq("applicationId", parsed.applicationId);
@@ -64,13 +80,24 @@ export async function approveApplication(input: ApproveRejectInput) {
     throw new Error(`Failed to update application: ${updateError.message}`);
   }
 
+  const [emailError] = await sendApplicationDecisionEmail({
+    to: recipientEmail,
+    companyName: application.companyName,
+    decision: "approved",
+    notes: parsed.notes,
+  });
+
+  if (emailError) {
+    throw new Error(emailError);
+  }
+
   revalidatePath("/admin/application");
   revalidatePath("/admin/members");
 
   return {
     success: true as const,
     message: "Application approved successfully",
-    memberId: newMember.businessMemberId,
+    businessMemberId: newMember.businessMemberId,
   };
 }
 
@@ -96,6 +123,41 @@ export async function rejectApplication(input: ApproveRejectInput) {
     throw new Error(`Failed to reject application: ${error.message}`);
   }
 
+  const { data: application, error: fetchError } = await supabase
+    .from("Application")
+    .select(
+      `
+      companyName,
+      emailAddress,
+      ApplicationMember(emailAddress)
+    `,
+    )
+    .eq("applicationId", parsed.applicationId)
+    .single();
+
+  if (fetchError || !application) {
+    throw new Error(`Failed to fetch application: ${fetchError?.message}`);
+  }
+
+  const recipientEmail =
+    application.emailAddress ||
+    application.ApplicationMember?.[0]?.emailAddress;
+
+  if (!recipientEmail) {
+    throw new Error("Applicant email is missing for this application");
+  }
+
+  const [emailError] = await sendApplicationDecisionEmail({
+    to: recipientEmail,
+    companyName: application.companyName,
+    decision: "rejected",
+    notes: parsed.notes,
+  });
+
+  if (emailError) {
+    throw new Error(emailError);
+  }
+
   revalidatePath("/admin/application");
 
   return {
@@ -113,7 +175,7 @@ export async function approveApplicationAction(
     data: {
       success: true;
       message: string;
-      memberId: string;
+      businessMemberId: string;
     } | null,
   ]
 > {
@@ -151,7 +213,7 @@ export async function approveApplicationServer(
   input: ApproveRejectInput,
 ): Promise<
   ServerFunctionResult<
-    { success: true; message: string; memberId: string },
+    { success: true; message: string; businessMemberId: string },
     string
   >
 > {
