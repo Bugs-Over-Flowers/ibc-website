@@ -1,8 +1,10 @@
 import Image from "next/image";
-import type { getApplicationById } from "@/server/applications/queries/getApplications";
+import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 
 interface ProofImagesCardProps {
-  proofImages: Awaited<ReturnType<typeof getApplicationById>>["ProofImage"];
+  proofImages: Awaited<
+    ReturnType<typeof getApplicationDetailsById>
+  >["ProofImage"];
 }
 
 export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
