@@ -17,7 +17,7 @@ export const getEventDayDetails = async (
     .from("EventDay")
     .select(`
         eventDayId,
-        Event(
+        event:Event(
         	eventId,
           eventTitle,
           venue

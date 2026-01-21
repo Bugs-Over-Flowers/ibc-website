@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { formatDate } from "date-fns";
+import { useRouter } from "next/navigation";
 import { use } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,13 @@ export default function AttendanceModal({
 }: AttendanceModalProps) {
   const { getAllEventDaysByEventId } = useEventDayFetchContext();
   const eventDays = use(getAllEventDaysByEventId);
+
+  const router = useRouter();
+
+  const handleClick = (eventDayId: string) => {
+    setIsOpen(false);
+    router.push(`/admin/events/check-in/${eventDayId}`);
+  };
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
       <DialogContent>
@@ -27,20 +35,17 @@ export default function AttendanceModal({
         <DialogDescription>
           Please select a day to check attendance.
         </DialogDescription>
-        <ul className="flex flex-col gap-3">
+        <ul className="flex h-full flex-col gap-3">
           {eventDays.map((day) => (
-            <Link
-              href={`/admin/events/check-in/${day.eventDayId}`}
+            <Button
+              className={"flex h-20 flex-col gap-2"}
               key={day.eventDayId}
+              onClick={() => handleClick(day.eventDayId)}
+              variant={"outline"}
             >
-              <Button
-                className={"flex h-full w-full flex-col gap-2 py-3"}
-                variant={"outline"}
-              >
-                <div className="text-lg">{day.label}</div>
-                <div>{day.eventDate}</div>
-              </Button>
-            </Link>
+              <div className="text-lg">{day.label}</div>
+              <div>{formatDate(day.eventDate, "EEEE, MMMM do, yyyy")}</div>
+            </Button>
           ))}
         </ul>
       </DialogContent>
