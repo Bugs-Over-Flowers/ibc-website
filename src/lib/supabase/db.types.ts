@@ -305,6 +305,7 @@ export type Database = {
       };
       Event: {
         Row: {
+          availableSlots: number | null;
           description: string | null;
           eventEndDate: string | null;
           eventHeaderUrl: string | null;
@@ -319,6 +320,7 @@ export type Database = {
           venue: string | null;
         };
         Insert: {
+          availableSlots?: number | null;
           description?: string | null;
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
@@ -333,6 +335,7 @@ export type Database = {
           venue?: string | null;
         };
         Update: {
+          availableSlots?: number | null;
           description?: string | null;
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
@@ -564,6 +567,13 @@ export type Database = {
       compute_primary_application_id: {
         Args: { p_member_id: string };
         Returns: string;
+      };
+      delete_evaluation: {
+        Args: { eval_id: string };
+        Returns: {
+          message: string;
+          success: boolean;
+        }[];
       };
       get_all_evaluations: {
         Args: never;

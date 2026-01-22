@@ -20,7 +20,7 @@ export function EvaluationFilterWrapper({
         evaluations={evaluations}
         onFilter={setFilteredEvaluations}
       />
-      <EvaluationList evaluations={filteredEvaluations} />
+      <EvaluationList evaluations={filteredEvaluations} pageSize={10} />
     </div>
   );
 }
