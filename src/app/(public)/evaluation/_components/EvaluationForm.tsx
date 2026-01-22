@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { fadeInUp } from "@/lib/animations/fade";
+import { EVALUATION_QUESTIONS } from "@/lib/evaluation/evaluationQuestions";
 import { formatDate, formatTime } from "@/lib/events/eventUtils";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
@@ -24,44 +25,6 @@ interface EvaluationFormProps {
   eventId: string;
   eventData: Database["public"]["Tables"]["Event"]["Row"] | null;
 }
-
-interface EvaluationQuestion {
-  field:
-    | "q1Rating"
-    | "q2Rating"
-    | "q3Rating"
-    | "q4Rating"
-    | "q5Rating"
-    | "q6Rating";
-  question: string;
-}
-
-const EVALUATION_QUESTIONS: EvaluationQuestion[] = [
-  {
-    field: "q1Rating",
-    question: "How would you rate the organization of the event?",
-  },
-  {
-    field: "q2Rating",
-    question: "How would you rate the knowledge of the resource speakers?",
-  },
-  {
-    field: "q3Rating",
-    question: "How would you rate the relevance of the materials presented?",
-  },
-  {
-    field: "q4Rating",
-    question: "How would you rate the facilities and venue?",
-  },
-  {
-    field: "q5Rating",
-    question: "How well did the event meet its stated purpose?",
-  },
-  {
-    field: "q6Rating",
-    question: "How well did the event meet your expectations?",
-  },
-];
 
 export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
   const router = useRouter();

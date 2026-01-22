@@ -4,6 +4,7 @@ import {
   Calendar,
   FileText,
   LayoutDashboard,
+  MessageSquareDiff,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -36,6 +37,11 @@ const menuItems = [
     title: "Application",
     icon: FileText,
     href: "/admin/application",
+  },
+  {
+    title: "Evaluations",
+    icon: MessageSquareDiff,
+    href: "/admin/evaluation",
   },
 ];
 
