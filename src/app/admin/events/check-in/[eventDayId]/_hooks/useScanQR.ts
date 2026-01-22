@@ -24,7 +24,7 @@ export const useScanQR = () => {
       onError: (message) => {
         toast.error(message);
       },
-      persist: false,
+      persist: true,
     },
   );
 };

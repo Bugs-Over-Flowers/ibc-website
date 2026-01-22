@@ -38,19 +38,21 @@ async function CheckInPage({ params }: { params: CheckInPageProps["params"] }) {
   }
 
   return (
-    <div className="space-y-4">
-      <EventDayDetails
-        eventDayData={{
-          eventTitle: data.event.eventTitle,
-          eventDate: data.eventDate,
-          label: data.label,
-        }}
-      />
+    <>
+      <div className="space-y-4">
+        <EventDayDetails
+          eventDayData={{
+            eventTitle: data.event.eventTitle,
+            eventDate: data.eventDate,
+            label: data.label,
+          }}
+        />
 
-      <div className="flex w-full gap-4">
-        <QRCodeScanner />
+        <div className="flex w-full gap-4">
+          <QRCodeScanner />
+        </div>
       </div>
       <CheckInDataDialog />
-    </div>
+    </>
   );
 }
