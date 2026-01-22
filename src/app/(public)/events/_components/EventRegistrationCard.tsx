@@ -58,10 +58,12 @@ export default function EventRegistrationCard({
                 <Banknote className="h-4 w-4" />
                 <span className="text-md">Registration Fee</span>
               </div>
-              <span className="font-bold text-foreground text-lg">
+              <span className="font-bold text-lg text-primary">
                 {event.registrationFee === 0
                   ? "Free"
-                  : `₱${event.registrationFee.toLocaleString()}`}
+                  : Math.trunc(event.registrationFee) > 999999
+                    ? "₱999,999+"
+                    : `₱${Math.trunc(event.registrationFee).toLocaleString()}`}
               </span>
             </div>
 

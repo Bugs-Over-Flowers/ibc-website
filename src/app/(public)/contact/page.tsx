@@ -12,11 +12,15 @@ export default function ContactPage() {
       <Suspense fallback={<Loading />}>
         <ContactHero />
         <ContactInfoCards />
-        <section className="bg-card py-24">
+        <section className="bg-card py-16 md:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-2">
-              <ContactForm />
-              <ContactMap />
+            <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-2 md:gap-16">
+              <div className="mx-auto w-full max-w-xl md:mx-0">
+                <ContactForm />
+              </div>
+              <div className="mx-auto w-full max-w-xl md:mx-0">
+                <ContactMap />
+              </div>
             </div>
           </div>
         </section>

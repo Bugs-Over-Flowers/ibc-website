@@ -136,7 +136,9 @@ export function EventCard({ event, index }: EventCardProps) {
               <span className="font-bold text-lg text-primary">
                 {event.registrationFee === 0
                   ? "Free"
-                  : `₱${event.registrationFee.toLocaleString()}`}
+                  : Math.trunc(event.registrationFee) > 999999
+                    ? "₱999,999+"
+                    : `₱${Math.trunc(event.registrationFee).toLocaleString()}`}
               </span>
               {status !== "past" && (
                 <Link
