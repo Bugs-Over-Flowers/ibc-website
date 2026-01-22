@@ -27,10 +27,14 @@ export async function updateCheckInRemarks(
       .eq("participantId", participant.participantId)
       .eq("eventDayId", parsed.eventDayId);
 
-    if (!error) {
+    if (error) {
+      console.error(
+        `Failed to update remark for participant ${participant.participantId}:`,
+        error,
+      );
+    } else {
       updatedCount++;
     }
-    // Continue on error - don't throw, just skip that participant
   }
 
   revalidatePath(`/admin/events/check-in/${parsed.eventDayId}`);

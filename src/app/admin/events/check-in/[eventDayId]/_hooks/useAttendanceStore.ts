@@ -18,12 +18,6 @@ type AttendanceStore = {
    * Currently selected participant id for remark editing
    */
   selectedRemarkParticipantId: string | null;
-
-  /**
-   * A function to refetch the currently scanned data. Passed down from
-   * the useCheckIn hook on `CheckInDataDialog`
-   */
-  refetchScannedDataFunction: (() => Promise<void>) | null;
 };
 
 type AttendanceStoreActions = {
@@ -81,12 +75,6 @@ type AttendanceStoreActions = {
   resetCheckInState: () => void;
 
   /**
-   * Function to set the refetch function for scanned data
-   * @param refetch The refetch function to set
-   */
-  setRefetchScannedDataFunction: (refetch: () => Promise<void>) => void;
-
-  /**
    * Function to set the selected remark participant id
    * @param participantId The id of the participant to set as the selected remark participant
    */
@@ -109,7 +97,6 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
     selectedParticipants: {},
     editedRemarks: {},
     selectedRemarkParticipantId: "",
-    refetchScannedDataFunction: null,
 
     // Actions
     setScannedData: (scannedData: GetCheckInForDateSchema) => {
@@ -210,10 +197,6 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
         selectedParticipants: {},
         editedRemarks: {},
       });
-    },
-
-    setRefetchScannedDataFunction: (refetch: () => Promise<void>) => {
-      set({ refetchScannedDataFunction: refetch });
     },
   }),
 );

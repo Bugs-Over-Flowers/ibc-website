@@ -1,3 +1,4 @@
+import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
@@ -5,6 +6,7 @@ import { checkInParticipants } from "@/server/events/mutations/checkInParticipan
 import { updateCheckInRemarks } from "@/server/events/mutations/updateCheckInRemarks";
 import type { CheckInInput, OptimisticCheckIn } from "../_types/scan";
 import useAttendanceStore from "./useAttendanceStore";
+import { useScanQR } from "./useScanQR";
 
 /**
  * Wrapper function that handles both new check-ins and remark updates
@@ -35,54 +37,41 @@ async function handleCheckInAndRemarks(
     }
   }
 
-  // Execute mutations in parallel
-  const promises: Promise<unknown>[] = [];
-
-  if (newCheckIns.length > 0) {
-    promises.push(
-      checkInParticipants({
-        eventDayId: input.eventDayId,
-        participants: newCheckIns,
-      }),
-    );
-  }
-
-  if (remarkUpdates.length > 0) {
-    promises.push(
-      updateCheckInRemarks({
-        eventDayId: input.eventDayId,
-        participants: remarkUpdates.map((p) => ({
-          participantId: p.participantId,
-          remarks: p.remarks || null,
-        })),
-      }),
-    );
-  }
-
-  const results = await Promise.all(promises);
-
-  // Combine results
-  const checkInResult = newCheckIns.length > 0 ? results[0] : null;
-  const updateResult =
-    remarkUpdates.length > 0 ? results[newCheckIns.length > 0 ? 1 : 0] : null;
+  // Execute mutations in parallel with explicit ordering
+  const [checkInResult, updateResult] = await Promise.all([
+    newCheckIns.length > 0
+      ? checkInParticipants({
+          eventDayId: input.eventDayId,
+          participants: newCheckIns,
+        })
+      : Promise.resolve({ checkInCount: 0 }),
+    remarkUpdates.length > 0
+      ? updateCheckInRemarks({
+          eventDayId: input.eventDayId,
+          participants: remarkUpdates.map((p) => ({
+            participantId: p.participantId,
+            remarks: p.remarks || null,
+          })),
+        })
+      : Promise.resolve({ updatedCount: 0 }),
+  ]);
 
   return {
-    checkInCount:
-      (checkInResult as { checkInCount?: number })?.checkInCount || 0,
-    updatedCount:
-      (updateResult as { updatedCount?: number })?.updatedCount || 0,
-    totalCount:
-      ((checkInResult as { checkInCount?: number })?.checkInCount || 0) +
-      ((updateResult as { updatedCount?: number })?.updatedCount || 0),
+    checkInCount: checkInResult.checkInCount,
+    updatedCount: updateResult.updatedCount,
+    totalCount: checkInResult.checkInCount + updateResult.updatedCount,
   };
 }
 
-export const useCheckIn = () => {
+interface UseCheckInProps {
+  eventId: string;
+}
+
+export const useCheckIn = ({ eventId }: UseCheckInProps) => {
+  const { eventDayId } = useParams<{ eventDayId: string }>();
   const scannedData = useAttendanceStore((s) => s.scannedData);
   const clearSelection = useAttendanceStore((s) => s.clearSelection);
-  const refetchScannedDataFunction = useAttendanceStore(
-    (s) => s.refetchScannedDataFunction,
-  );
+  const { execute: scanQRData } = useScanQR({ eventId: eventId });
 
   return useOptimisticAction(
     tryCatch(async (input: CheckInInput) => {
@@ -144,18 +133,17 @@ export const useCheckIn = () => {
        * Success callback
        */
       onSuccess: async (data) => {
-        if (refetchScannedDataFunction) {
-          await refetchScannedDataFunction();
+        // Refetch the scanned data to get latest state from server
+        if (scannedData) {
+          await scanQRData(scannedData.identifier, eventDayId);
         }
 
         // Clear selections and edited remarks
         clearSelection();
 
         // Show success toast with appropriate message
-        const checkInCount =
-          (data as { checkInCount?: number })?.checkInCount || 0;
-        const updatedCount =
-          (data as { updatedCount?: number })?.updatedCount || 0;
+        const checkInCount = data.checkInCount || 0;
+        const updatedCount = data.updatedCount || 0;
         const messages: string[] = [];
 
         if (checkInCount > 0) {

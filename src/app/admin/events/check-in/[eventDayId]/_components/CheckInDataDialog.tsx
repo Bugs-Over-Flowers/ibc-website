@@ -13,7 +13,11 @@ import useAttendanceStore from "../_hooks/useAttendanceStore";
 import { useCheckIn } from "../_hooks/useCheckIn";
 import CheckInTable from "./CheckInTable";
 
-export default function CheckInDataDialog() {
+interface CheckInDataDialogProps {
+  eventId: string;
+}
+
+export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
   const { eventDayId } = useParams<{ eventDayId: string }>();
 
   // Store selectors
@@ -29,7 +33,7 @@ export default function CheckInDataDialog() {
   const editedRemarks = useAttendanceStore((s) => s.editedRemarks);
 
   // Optimistic action hook
-  const { execute, optimistic, isPending } = useCheckIn();
+  const { execute, optimistic, isPending } = useCheckIn({ eventId: eventId });
 
   if (!scannedData) return null;
 

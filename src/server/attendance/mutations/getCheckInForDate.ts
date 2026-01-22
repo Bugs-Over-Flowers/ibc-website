@@ -47,12 +47,12 @@ export const getCheckInForDate = async (
     .eq("participants.checkIn.eventDayId", eventDayId)
     .single();
 
-  if (error) {
-    throw new Error("An error has occured while fetching check-in data.");
-  }
-
   if (!data) {
     throw new Error("No check-in data found for the given identifier.");
+  }
+
+  if (error) {
+    throw new Error("An error has occured while fetching check-in data.");
   }
 
   // transform the checkin data to get the first one

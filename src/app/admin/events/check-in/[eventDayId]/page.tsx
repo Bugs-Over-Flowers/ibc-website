@@ -33,7 +33,7 @@ async function CheckInPage({ params }: { params: CheckInPageProps["params"] }) {
     }),
   );
 
-  if (!data) {
+  if (!data || !data.event) {
     return <div>Event Day not found</div>;
   }
 
@@ -49,10 +49,10 @@ async function CheckInPage({ params }: { params: CheckInPageProps["params"] }) {
         />
 
         <div className="flex w-full gap-4">
-          <QRCodeScanner />
+          <QRCodeScanner eventId={data.event.eventId} />
         </div>
       </div>
-      <CheckInDataDialog />
+      <CheckInDataDialog eventId={data.event.eventId} />
     </>
   );
 }

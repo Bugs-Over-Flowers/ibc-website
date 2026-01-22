@@ -96,7 +96,7 @@ export function SelectableRowDataTable<TData, TValue>({
                     if (customRowSelectHandler) {
                       customRowSelectHandler(row);
                     } else {
-                      row.getToggleSelectedHandler();
+                      row.getToggleSelectedHandler()(e);
                     }
                   }}
                 >

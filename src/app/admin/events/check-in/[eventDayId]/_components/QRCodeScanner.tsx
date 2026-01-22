@@ -1,32 +1,24 @@
 "use client";
 import { type IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { RegistrationIdentifier } from "@/lib/validation/utils";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
 import { useScanQR } from "../_hooks/useScanQR";
 
-export default function QRCodeScanner() {
+interface QRCodeScannerProps {
+  eventId: string;
+}
+
+export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
   const { eventDayId } = useParams<{ eventDayId: string }>();
 
-  const { execute: scanQRData, isPending: scanPending } = useScanQR();
+  const { execute: scanQRData, isPending: scanPending } = useScanQR({
+    eventId,
+  });
 
   const scannedData = useAttendanceStore((state) => state.scannedData);
-  const setRefetchScannedDataFunction = useAttendanceStore(
-    (state) => state.setRefetchScannedDataFunction,
-  );
-
-  // Set refetch function on mount
-  useEffect(() => {
-    const refetch = async () => {
-      if (!scannedData) return;
-      console.log("🔄 Refetching scanned data...");
-      await scanQRData(scannedData.identifier, eventDayId);
-    };
-    setRefetchScannedDataFunction(refetch);
-  }, [scannedData, scanQRData, eventDayId, setRefetchScannedDataFunction]);
 
   const isCameraPaused = scanPending || scannedData !== null;
 
