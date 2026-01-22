@@ -88,13 +88,13 @@ export function RatingScale({
       {description && <FieldDescription>{description}</FieldDescription>}
 
       <fieldset aria-labelledby="rating-label" className="border-0 p-0">
-        <div className="flex items-center justify-start gap-1 sm:gap-2">
+        <div className="flex flex-wrap items-center justify-start gap-1.5 sm:gap-2 md:gap-3">
           {RATING_OPTIONS.map((option) => {
             const isSelected = value === option.value;
             return (
               <label
                 className={cn(
-                  "group flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-lg border-0 transition-all duration-150",
+                  "group flex h-14 w-14 flex-col items-center justify-center gap-0 rounded-lg border-0 transition-all duration-150 sm:h-16 sm:w-16 md:h-20 md:w-20",
                   "cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2",
                   isSelected
                     ? cn(option.bgActive, "shadow-md")
@@ -111,7 +111,7 @@ export function RatingScale({
                 />
                 <option.Icon
                   className={cn(
-                    "h-7 w-7 transition-transform duration-150 sm:h-8 sm:w-8",
+                    "h-4 w-4 transition-transform duration-150 sm:h-5 sm:w-5 md:h-7 md:w-7 lg:h-8 lg:w-8",
                     isSelected
                       ? cn(option.color, "scale-110")
                       : cn(option.colorMuted, "group-hover:scale-105"),
@@ -119,7 +119,7 @@ export function RatingScale({
                 />
                 <span
                   className={cn(
-                    "text-center font-medium text-[9px] leading-tight sm:text-[10px]",
+                    "text-center font-medium text-[7px] leading-tight sm:text-[8px] md:text-[9px] lg:text-[10px]",
                     isSelected ? option.color : "text-muted-foreground",
                   )}
                 >

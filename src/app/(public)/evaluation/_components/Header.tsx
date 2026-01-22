@@ -6,7 +6,7 @@ import { staggerContainer } from "@/lib/animations/stagger";
 
 export function Header() {
   return (
-    <section className="relative flex min-h-[55vh] items-center overflow-hidden bg-linear-to-br from-primary/10 via-background to-primary/5 pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20">
+    <section className="relative flex min-h-[60vh] items-center overflow-hidden pt-32 pb-16">
       {/* Animated Blur Orbs */}
       <motion.div
         animate={{
@@ -42,13 +42,13 @@ export function Header() {
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           animate="visible"
-          className="flex flex-col items-center text-center"
+          className="mx-auto max-w-3xl text-center"
           initial="hidden"
           variants={staggerContainer}
         >
           {/* Main Title */}
           <motion.h1
-            className="w-full max-w-7xl font-bold text-3xl text-foreground tracking-tight sm:text-4xl lg:text-5xl"
+            className="mb-6 font-bold text-4xl text-foreground drop-shadow-lg md:text-5xl lg:text-6xl"
             variants={fadeInUp}
           >
             Evaluation Form
@@ -56,7 +56,7 @@ export function Header() {
 
           {/* Subtitle */}
           <motion.p
-            className="mt-3 max-w-2xl text-muted-foreground sm:text-lg"
+            className="text-foreground/90 text-lg leading-relaxed"
             variants={fadeInUp}
           >
             The information you provide will help us in planning future events

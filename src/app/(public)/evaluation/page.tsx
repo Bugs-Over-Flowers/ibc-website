@@ -34,8 +34,8 @@ export default async function EvaluationPage({
     <main className="min-h-screen bg-background">
       <Suspense fallback={<EvaluationLoading />}>
         <Header />
-        <section className="bg-background py-16 sm:py-20 lg:py-24">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="bg-background py-8 sm:py-12 lg:py-16">
+          <div className="mx-auto w-full max-w-7xl">
             <EvaluationForm eventData={event} eventId={eventId} />
           </div>
         </section>

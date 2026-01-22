@@ -83,7 +83,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
 
   return (
     <form
-      className="mx-auto max-w-4xl space-y-6"
+      className="mx-auto w-full max-w-4xl space-y-4 px-4 sm:space-y-6 sm:px-0"
       onSubmit={(e) => {
         e.preventDefault();
         form.handleSubmit();
@@ -92,10 +92,10 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       {/* Event Details Card */}
       {eventData && (
         <motion.div
-          className="rounded-xl border border-border bg-linear-to-br from-primary/5 to-transparent p-6 sm:p-8"
+          className="rounded-lg border border-border bg-linear-to-br from-primary/5 to-transparent p-4 sm:rounded-xl sm:p-6 lg:p-8"
           variants={fadeInUp}
         >
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
               <p className="font-medium text-muted-foreground text-sm">
                 Event Evaluation
@@ -105,7 +105,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               </h1>
             </div>
 
-            <div className="space-y-3 pt-2">
+            <div className="space-y-2 pt-2 sm:space-y-3">
               {(() => {
                 const hasStartDate = Boolean(eventData.eventStartDate);
                 const hasEndDate = Boolean(eventData.eventEndDate);
@@ -168,16 +168,16 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       )}
 
       {/* Personal Information Section */}
-      <section className="rounded-xl border border-border bg-card p-6 sm:p-8">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <User className="h-5 w-5 text-primary" />
+      <section className="rounded-lg border border-border bg-card p-4 sm:rounded-xl sm:p-6 lg:p-8">
+        <div className="mb-4 flex items-start gap-3 sm:mb-6">
+          <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-10 sm:w-10">
+            <User className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-base text-foreground">
               Your Information
             </h2>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               Optional - you can remain anonymous
             </p>
           </div>
@@ -194,16 +194,16 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       </section>
 
       {/* Rating Questions Section */}
-      <section className="rounded-xl border border-border bg-card p-6 sm:p-8">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <Star className="h-5 w-5 text-primary" />
+      <section className="rounded-lg border border-border bg-card p-4 sm:rounded-xl sm:p-6 lg:p-8">
+        <div className="mb-6 flex items-start gap-3 sm:mb-8">
+          <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-10 sm:w-10">
+            <Star className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-base text-foreground">
               Rate Your Experience
             </h2>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               Rate each aspect from Poor to Excellent
             </p>
           </div>
@@ -211,7 +211,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
 
         <div className="divide-y divide-border">
           {EVALUATION_QUESTIONS.map((q) => (
-            <div className="py-6 first:pt-0 last:pb-0" key={q.field}>
+            <div className="py-4 first:pt-0 last:pb-0 sm:py-6" key={q.field}>
               <form.AppField name={q.field}>
                 {(field) => <field.RatingScale label={q.question} />}
               </form.AppField>
@@ -221,26 +221,26 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       </section>
 
       {/* Comments & Suggestions Section */}
-      <section className="rounded-xl border border-border bg-card p-6 sm:p-8">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <MessageSquare className="h-5 w-5 text-primary" />
+      <section className="rounded-lg border border-border bg-card p-4 sm:rounded-xl sm:p-6 lg:p-8">
+        <div className="mb-4 flex items-start gap-3 sm:mb-6">
+          <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-10 sm:w-10">
+            <MessageSquare className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-base text-foreground">
               Additional Feedback
             </h2>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               Share your thoughts and suggestions
             </p>
           </div>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-3 sm:space-y-5">
           <form.AppField name="additionalComments">
             {(field) => (
               <field.TextareaField
-                className="min-h-28 resize-none"
+                className="min-h-24 resize-none sm:min-h-28"
                 label="Comments"
                 placeholder="Share any additional thoughts about the event..."
               />
@@ -250,7 +250,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
           <form.AppField name="feedback">
             {(field) => (
               <field.TextareaField
-                className="min-h-28 resize-none"
+                className="min-h-24 resize-none sm:min-h-28"
                 label="Suggestions for Improvement"
                 placeholder="How can we make our events even better?"
               />
@@ -260,10 +260,10 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       </section>
 
       {/* Submit Button */}
-      <div className="pt-4">
+      <div className="pt-2 sm:pt-4">
         <form.AppForm>
           <form.SubmitButton
-            className="rounded-xl bg-primary px-6 font-semibold text-md shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/90 hover:shadow-primary/25 hover:shadow-xl"
+            className="w-full rounded-lg bg-primary px-4 py-3 font-semibold text-sm shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/90 hover:shadow-primary/25 hover:shadow-xl sm:rounded-xl sm:px-6 sm:text-base"
             isSubmittingLabel="Submitting Your Evaluation..."
             label="Submit Evaluation"
           />
