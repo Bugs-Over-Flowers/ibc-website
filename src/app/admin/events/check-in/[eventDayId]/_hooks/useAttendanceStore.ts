@@ -167,7 +167,10 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
     },
 
     clearSelection: () => {
-      set({ selectedParticipants: {} });
+      set({
+        selectedParticipants: {},
+        editedRemarks: {},
+      });
     },
 
     setSelectedRemarkParticipantId: (participantId: string | null) => {
@@ -175,11 +178,19 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
     },
 
     getEditingParticipantRemark: (participantId?: string | null) => {
-      if (!participantId) return;
+      if (!participantId) return "";
+
       const participant = get().scannedData?.participants.find(
         (p) => p.participantId === participantId,
       );
-      return participant ? get().editedRemarks[participant.participantId] : "";
+
+      if (!participant) return "";
+
+      // Return edited remark if exists, otherwise return original from checkIn
+      const editedRemark = get().editedRemarks[participantId];
+      if (editedRemark !== undefined) return editedRemark;
+
+      return participant.checkIn?.remarks || "";
     },
 
     setRemark: (participantId: string, remark: string) => {

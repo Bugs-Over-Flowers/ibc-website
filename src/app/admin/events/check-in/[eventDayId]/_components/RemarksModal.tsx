@@ -39,7 +39,7 @@ export default function RemarksModal() {
     }),
     validators: {
       onDynamic: z.object({
-        remark: z.string(),
+        remark: z.string().max(500, "Remark cannot exceed 500 characters"),
       }),
     },
     onSubmit: ({ value }) => {
@@ -98,7 +98,7 @@ export default function RemarksModal() {
                   rows={4}
                 />
                 <div className="text-muted-foreground text-sm">
-                  {field.state.value?.length || 0} characters
+                  {field.state.value?.length || 0} / 500 characters
                 </div>
               </div>
             )}

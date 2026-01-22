@@ -146,21 +146,36 @@ export default function CheckInTable({ data }: CheckInTableProps) {
       header: "Remarks",
       cell: ({ row }) => {
         const participant = row.original;
-        const originalRemark = participant.checkIn?.remarks;
+        const originalRemark = participant.checkIn?.remarks || "";
         const editedRemark = editedRemarks[participant.participantId];
         const hasRemark = originalRemark || editedRemark;
 
+        // Detect if remark was edited (changed from original)
+        const hasBeenEdited =
+          participant.checkIn !== null && // Is checked in
+          editedRemark !== undefined && // Has an edited value
+          originalRemark !== editedRemark; // Different from original
+
         return (
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedRemarkParticipantId(participant.participantId);
-            }}
-            size="sm"
-            variant={hasRemark ? "secondary" : "outline"}
-          >
-            {hasRemark ? "Edit Remark" : "Add Remark"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedRemarkParticipantId(participant.participantId);
+              }}
+              size="sm"
+              variant={hasRemark ? "secondary" : "outline"}
+            >
+              {hasRemark ? "Edit Remark" : "Add Remark"}
+            </Button>
+
+            {/* Badge indicator for edited remarks */}
+            {hasBeenEdited && (
+              <Badge className="text-xs" variant="default">
+                Edited
+              </Badge>
+            )}
+          </div>
         );
       },
       enableSorting: false,

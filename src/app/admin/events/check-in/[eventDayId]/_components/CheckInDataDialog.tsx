@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,41 +36,56 @@ export default function CheckInDataDialog() {
   const selectedCount =
     Object.values(selectedParticipants).filter(Boolean).length;
 
+  // Detect if there are any edited remarks for checked-in participants
+  const hasCheckedInRemarkEdits = () => {
+    if (!scannedData || Object.keys(editedRemarks).length === 0) return false;
+
+    return Object.keys(editedRemarks).some((participantId) => {
+      const participant = scannedData.participants.find(
+        (p) => p.participantId === participantId,
+      );
+      // Check if participant is already checked in AND remark is different
+      if (!participant?.checkIn) return false;
+
+      const originalRemark = participant.checkIn.remarks || "";
+      const editedRemark = editedRemarks[participantId] || "";
+
+      return originalRemark !== editedRemark;
+    });
+  };
+
   const handleCheckIn = async () => {
-    // Get selected participant IDs
+    // Collect all participants that need processing:
+    // 1. Selected participants (new check-ins)
+    // 2. Participants with edited remarks (updates)
+
     const selectedIds = Object.entries(selectedParticipants)
       .filter(([_, isSelected]) => isSelected)
       .map(([id]) => id);
 
-    // If no participants are selected, return early
-    if (selectedIds.length === 0) return;
+    // Also include participants with edited remarks (even if not selected)
+    // Used a Set in order to merge same data
+    const participantsToProcess = new Set([
+      ...selectedIds,
+      ...Object.keys(editedRemarks),
+    ]);
 
-    console.log("🚀 Check-in started:", {
-      participantIds: selectedIds,
+    if (participantsToProcess.size === 0) return;
+
+    console.log("🚀 Check-in/Update started:", {
+      participantIds: Array.from(participantsToProcess),
       eventDayId,
       remarks: editedRemarks,
     });
 
-    // Show loading toast
-    const loadingToastId = toast.loading(
-      `Checking in ${selectedIds.length} participant(s)...`,
-    );
-
     // Execute optimistic action
-    const { error } = await execute({
+    await execute({
       eventDayId,
-      participants: selectedIds.map((id) => ({
+      participants: Array.from(participantsToProcess).map((id) => ({
         participantId: id,
         remarks: editedRemarks[id] || undefined,
       })),
     });
-
-    if (error) {
-      toast.error(`Failed to check in participants: ${error}`);
-    } else {
-      toast.dismiss(loadingToastId);
-      toast.success(`Checked in ${selectedIds.length} participant(s)`);
-    }
   };
 
   return (
@@ -100,14 +114,20 @@ export default function CheckInDataDialog() {
           </Button>
           <div>
             <Button
-              disabled={selectedCount === 0 || isPending}
+              disabled={
+                (selectedCount === 0 && !hasCheckedInRemarkEdits) || isPending
+              }
               onClick={handleCheckIn}
             >
               {isPending ? (
                 <>
                   <Spinner className="mr-2" />
-                  Checking In...
+                  Processing...
                 </>
+              ) : selectedCount > 0 ? (
+                <>Check In Selected ({selectedCount})</>
+              ) : hasCheckedInRemarkEdits() ? (
+                <>Update Remarks</>
               ) : (
                 <>Check In Selected ({selectedCount})</>
               )}
