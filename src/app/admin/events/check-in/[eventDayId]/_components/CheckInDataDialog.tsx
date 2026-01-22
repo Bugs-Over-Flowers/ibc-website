@@ -22,6 +22,8 @@ export default function CheckInDataDialog() {
     (s) => s.setCheckInDialogOpen,
   );
   const scannedData = useAttendanceStore((s) => s.scannedData);
+
+  // Data to be sent to the backend
   const selectedParticipants = useAttendanceStore(
     (s) => s.selectedParticipants,
   );
@@ -41,6 +43,7 @@ export default function CheckInDataDialog() {
       .filter(([_, isSelected]) => isSelected)
       .map(([id]) => id);
 
+    // If no participants are selected, return early
     if (selectedIds.length === 0) return;
 
     console.log("🚀 Check-in started:", {
@@ -55,7 +58,7 @@ export default function CheckInDataDialog() {
     );
 
     // Execute optimistic action
-    await execute({
+    const { error } = await execute({
       eventDayId,
       participants: selectedIds.map((id) => ({
         participantId: id,
@@ -63,7 +66,12 @@ export default function CheckInDataDialog() {
       })),
     });
 
-    toast.dismiss(loadingToastId);
+    if (error) {
+      toast.error(`Failed to check in participants: ${error}`);
+    } else {
+      toast.dismiss(loadingToastId);
+      toast.success(`Checked in ${selectedIds.length} participant(s)`);
+    }
   };
 
   return (
@@ -78,8 +86,8 @@ export default function CheckInDataDialog() {
         <h4>{scannedData.affiliation}</h4>
 
         <div className="w-full overflow-auto">
-          {/* Pass optimistic data to table */}
-          <CheckInTable data={optimistic || scannedData} />
+          {/* Pass optimistic data to table, but prioritize fetched Data */}
+          <CheckInTable data={scannedData || optimistic} />
         </div>
 
         <DialogFooter className="flex justify-between sm:justify-between">
@@ -90,20 +98,21 @@ export default function CheckInDataDialog() {
           >
             Close
           </Button>
-
-          <Button
-            disabled={selectedCount === 0 || isPending}
-            onClick={handleCheckIn}
-          >
-            {isPending ? (
-              <>
-                <Spinner className="mr-2" />
-                Checking In...
-              </>
-            ) : (
-              <>Check In Selected ({selectedCount})</>
-            )}
-          </Button>
+          <div>
+            <Button
+              disabled={selectedCount === 0 || isPending}
+              onClick={handleCheckIn}
+            >
+              {isPending ? (
+                <>
+                  <Spinner className="mr-2" />
+                  Checking In...
+                </>
+              ) : (
+                <>Check In Selected ({selectedCount})</>
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { revalidateLogic } from "@tanstack/react-form";
+import { useEffect, useEffectEvent } from "react";
 import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,71 +11,110 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAppForm } from "@/hooks/_formHooks";
+import useAttendanceStore from "../_hooks/useAttendanceStore";
 
-interface RemarksModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  participantName: string;
-  initialRemark: string;
-  onSave: (remark: string) => void;
-}
+export default function RemarksModal() {
+  const editedRemarks = useAttendanceStore((state) => state.editedRemarks);
 
-export default function RemarksModal({
-  isOpen,
-  onClose,
-  participantName,
-  initialRemark,
-  onSave,
-}: RemarksModalProps) {
-  const [remark, setRemark] = useState(initialRemark);
+  const setSelectedRemarkParticipantId = useAttendanceStore(
+    (state) => state.setSelectedRemarkParticipantId,
+  );
+  const selectedRemarkParticipantId = useAttendanceStore(
+    (state) => state.selectedRemarkParticipantId,
+  );
+
+  const getEditingParticipantRemark = useAttendanceStore(
+    (state) => state.getEditingParticipantRemark,
+  );
+
+  const setRemark = useAttendanceStore((state) => state.setRemark);
+  const scannedData = useAttendanceStore((state) => state.scannedData);
 
   const form = useAppForm({
     defaultValues: {
-      remark: initialRemark,
+      remark: getEditingParticipantRemark(selectedRemarkParticipantId),
     },
+    validationLogic: revalidateLogic({
+      mode: "change",
+    }),
     validators: {
-      onSubmit: z.object({
+      onDynamic: z.object({
         remark: z.string(),
       }),
     },
+    onSubmit: ({ value }) => {
+      if (!selectedRemarkParticipantId) return;
+      setRemark(selectedRemarkParticipantId, value.remark?.trim() || "");
+      console.log("Remark saved", selectedRemarkParticipantId);
+      setSelectedRemarkParticipantId(null);
+    },
   });
 
-  // Sync with initialRemark when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setRemark(initialRemark);
-    }
-  }, [isOpen, initialRemark]);
+  const handleSetInitialState = useEffectEvent(
+    (selectedRemarkParticipantId: string | null) => {
+      if (selectedRemarkParticipantId !== "") {
+        console.log("Setting initial state: ");
+        console.log("edited remarks: ", editedRemarks);
 
-  const handleSave = () => {
-    onSave(remark.trim());
-  };
+        console.log(
+          "participant remark:",
+          getEditingParticipantRemark(selectedRemarkParticipantId),
+        );
+        form.reset();
+      }
+    },
+  );
+
+  useEffect(() => {
+    if (selectedRemarkParticipantId !== "") {
+      handleSetInitialState(selectedRemarkParticipantId);
+    }
+  }, [selectedRemarkParticipantId]);
 
   return (
-    <Dialog onOpenChange={onClose} open={isOpen}>
+    <Dialog open={!!selectedRemarkParticipantId}>
       <DialogContent>
-        <form>
-          <DialogTitle>Remarks - {participantName}</DialogTitle>
+        <form
+          onSubmit={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <DialogTitle>
+            Remarks -{" "}
+            {
+              scannedData?.participants.find(
+                (p) => p.participantId === selectedRemarkParticipantId,
+              )?.firstName
+            }
+          </DialogTitle>
 
-          <div className="space-y-4 py-4">
-            <form.AppField name="remark">
-              {(field) => (
+          <form.AppField name="remark">
+            {(field) => (
+              <div className="space-y-4 py-4">
                 <field.TextareaField
                   placeholder="Enter remarks here..."
                   rows={4}
                 />
-              )}
-            </form.AppField>
-            <div className="text-muted-foreground text-sm">
-              {remark.length} characters
-            </div>
-          </div>
+                <div className="text-muted-foreground text-sm">
+                  {field.state.value?.length || 0} characters
+                </div>
+              </div>
+            )}
+          </form.AppField>
 
           <DialogFooter>
-            <Button onClick={onClose} variant="outline">
+            <Button
+              onClick={() => setSelectedRemarkParticipantId(null)}
+              type="button"
+              variant="outline"
+            >
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <form.AppForm>
+              <form.SubmitButton isSubmittingLabel="Saving..." label="Save" />
+            </form.AppForm>
           </DialogFooter>
         </form>
       </DialogContent>

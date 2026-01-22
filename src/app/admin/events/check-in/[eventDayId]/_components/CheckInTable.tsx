@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { formatDate } from "date-fns";
 import { SelectableRowDataTable } from "@/components/SelectableRowDataTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,23 +13,7 @@ import type { ParticipantCheckInRow } from "../_types/checkInTable";
 import RemarksModal from "./RemarksModal";
 
 interface CheckInTableProps {
-  /**
-   * Optimistic scanned data - may include temporary check-ins
-   * before server confirmation
-   */
   data: GetCheckInForDateSchema;
-}
-
-// Helper: Transform scanned data to table rows
-function transformParticipants(
-  data: GetCheckInForDateSchema,
-): ParticipantCheckInRow[] {
-  return data.participants.map((participant) => ({
-    ...participant,
-    registrationId: data.registrationId,
-    identifier: data.identifier,
-    affiliation: data.affiliation,
-  }));
 }
 
 export default function CheckInTable({ data }: CheckInTableProps) {
@@ -44,26 +28,32 @@ export default function CheckInTable({ data }: CheckInTableProps) {
   const selectAllSelectableParticipants = useAttendanceStore(
     (s) => s.selectAllSelectableParticipants,
   );
-  const setRemark = useAttendanceStore((s) => s.setRemark);
   const setSelectedParticipants = useAttendanceStore(
     (s) => s.setSelectedParticipants,
   );
 
-  // Local state for remarks modal
-  const [editingParticipant, setEditingParticipant] =
-    useState<ParticipantCheckInRow | null>(null);
+  const setSelectedRemarkParticipantId = useAttendanceStore(
+    (s) => s.setSelectedRemarkParticipantId,
+  );
+  // Helper: Transform scanned data to table rows
+  const transformParticipants = (
+    data: GetCheckInForDateSchema,
+  ): ParticipantCheckInRow[] => {
+    return data.participants.map((participant) => ({
+      ...participant,
+      registrationId: data.registrationId,
+      identifier: data.identifier,
+      affiliation: data.affiliation,
+    }));
+  };
 
   // Transform data (data already includes optimistic updates from parent)
-  const participants = useMemo(() => transformParticipants(data), [data]);
+  const participants = transformParticipants(data);
 
   // Get selectable participant IDs (not checked in)
-  const selectableIds = useMemo(
-    () =>
-      participants
-        .filter((p) => p.checkIn === null)
-        .map((p) => p.participantId),
-    [participants],
-  );
+  const selectableIds = participants
+    .filter((p) => p.checkIn === null)
+    .map((p) => p.participantId);
 
   // Check if all selectable are selected
   const allSelectableSelected =
@@ -141,6 +131,15 @@ export default function CheckInTable({ data }: CheckInTableProps) {
       cell: ({ row }) => row.original.contactNumber,
     },
 
+    // Check in time
+    {
+      id: "checkInTime",
+      header: "Check In Time",
+      cell: ({ row }) =>
+        row.original.checkIn?.checkInTime &&
+        formatDate(row.original.checkIn?.checkInTime, "h:mm a"),
+    },
+
     // Remarks Column with Button
     {
       id: "remarks",
@@ -153,7 +152,10 @@ export default function CheckInTable({ data }: CheckInTableProps) {
 
         return (
           <Button
-            onClick={() => setEditingParticipant(participant)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedRemarkParticipantId(participant.participantId);
+            }}
             size="sm"
             variant={hasRemark ? "secondary" : "outline"}
           >
@@ -173,7 +175,7 @@ export default function CheckInTable({ data }: CheckInTableProps) {
           {participants.length !== 1 ? "s" : ""}
           {selectableIds.length === 0 && participants.length > 0 && (
             <span className="ml-2 text-green-600">
-              • All participants have been checked in ✓
+              All participants have been checked in ✓
             </span>
           )}
         </div>
@@ -192,28 +194,7 @@ export default function CheckInTable({ data }: CheckInTableProps) {
         />
       </div>
 
-      <RemarksModal
-        initialRemark={
-          editingParticipant
-            ? editedRemarks[editingParticipant.participantId] ||
-              editingParticipant.checkIn?.remarks ||
-              ""
-            : ""
-        }
-        isOpen={editingParticipant !== null}
-        onClose={() => setEditingParticipant(null)}
-        onSave={(remark) => {
-          if (editingParticipant) {
-            setRemark(editingParticipant.participantId, remark);
-            setEditingParticipant(null);
-          }
-        }}
-        participantName={
-          editingParticipant
-            ? `${editingParticipant.firstName} ${editingParticipant.lastName}`
-            : ""
-        }
-      />
+      <RemarksModal />
     </>
   );
 }

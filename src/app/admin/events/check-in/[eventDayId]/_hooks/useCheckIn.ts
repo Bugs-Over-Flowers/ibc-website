@@ -9,7 +9,10 @@ export const useCheckIn = () => {
   const scannedData = useAttendanceStore((s) => s.scannedData);
 
   const clearSelection = useAttendanceStore((s) => s.clearSelection);
-  const refetchScannedData = useAttendanceStore((s) => s.refetchScannedData);
+
+  const refetchScannedDataFunction = useAttendanceStore(
+    (s) => s.refetchScannedDataFunction,
+  );
 
   return useOptimisticAction(tryCatch(checkInParticipants), scannedData, {
     /**
@@ -61,12 +64,9 @@ export const useCheckIn = () => {
     /**
      * Success callback
      */
-    onSuccess: async (data) => {
-      const count = data?.checkInCount || 0;
-      console.log("✅ Check-in successful:", data);
-
-      if (refetchScannedData) {
-        const { error } = await tryCatch(refetchScannedData());
+    onSuccess: async () => {
+      if (refetchScannedDataFunction) {
+        const { error } = await tryCatch(refetchScannedDataFunction());
 
         if (error) {
           console.error("Failed to refetch scanned data:", error);
@@ -75,10 +75,6 @@ export const useCheckIn = () => {
 
       // Refetch the scanned data to get the updated state from server
       clearSelection();
-
-      toast.success("Check-in successful!", {
-        description: `${count} participant(s) checked in`,
-      });
     },
 
     /**

@@ -13,13 +13,8 @@ export const useScanQR = () => {
       getCheckInForDate(qrCodeData, eventDayId),
     ),
     {
-      onSuccess: ({ checkInData, message }) => {
-        console.log("Registration data with check-in:", checkInData);
+      onSuccess: ({ checkInData }) => {
         setScannedData(checkInData);
-
-        if (message) {
-          toast.warning(message);
-        }
       },
       onError: (message) => {
         toast.error(message);
