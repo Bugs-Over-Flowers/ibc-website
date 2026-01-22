@@ -1,12 +1,6 @@
 import z from "zod";
 import { PaymentStatusEnum } from "../utils";
 
-export const RegistrationIdentifier = z
-  .string()
-  .regex(/^ibc-reg-[a-zA-Z0-9]{8}$/);
-
-export type RegistrationIdentifier = z.infer<typeof RegistrationIdentifier>;
-
 const CheckInSchema = z.object({
   remarks: z.string().nullable(),
   checkInId: z.string(),
