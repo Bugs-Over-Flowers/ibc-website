@@ -73,7 +73,7 @@ export default function RemarksModal() {
 
   return (
     <Dialog open={!!selectedRemarkParticipantId}>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <form
           onSubmit={(e) => {
             e.stopPropagation();

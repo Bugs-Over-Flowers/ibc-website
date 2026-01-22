@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import type { GetCheckInForDateSchema } from "@/lib/validation/qr/standard";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
 import type { ParticipantCheckInRow } from "../_types/checkInTable";
+import CheckInItemActions from "./CheckInItemActions";
 import RemarksModal from "./RemarksModal";
 
 interface CheckInTableProps {
@@ -117,20 +118,6 @@ export default function CheckInTable({ data }: CheckInTableProps) {
       },
     },
 
-    // Email Column
-    {
-      accessorKey: "email",
-      header: "Email",
-      cell: ({ row }) => row.original.email,
-    },
-
-    // Contact Number Column
-    {
-      accessorKey: "contactNumber",
-      header: "Contact",
-      cell: ({ row }) => row.original.contactNumber,
-    },
-
     // Check in time
     {
       id: "checkInTime",
@@ -177,6 +164,17 @@ export default function CheckInTable({ data }: CheckInTableProps) {
             )}
           </div>
         );
+      },
+      enableSorting: false,
+    },
+
+    // Actions
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const participant = row.original;
+        return <CheckInItemActions participant={participant} />;
       },
       enableSorting: false,
     },
