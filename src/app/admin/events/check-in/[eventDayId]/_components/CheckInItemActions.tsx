@@ -75,7 +75,7 @@ export default function CheckInItemActions({
               }}
             >
               <ChevronRightIcon />
-              View Registration Details
+              Registration
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
