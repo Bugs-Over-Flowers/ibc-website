@@ -9,7 +9,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import DeleteButton from "./DeleteButton";
+import ParticipantsButton from "./ParticipantsButton";
 import QrButton from "./QrButton";
+import RegistrationsButton from "./RegistrationsButton";
 import ViewDetailsButton from "./ViewDetailsButton";
 
 interface EventActionsDropdownProps {
@@ -38,6 +40,9 @@ export default function EventActionsDropdown({
       <DropdownMenuContent align="end" className="w-56 md:w-48" sideOffset={10}>
         <ViewDetailsButton eventId={eventId} onAction={handleAction} />
         <QrButton eventId={eventId} onAction={handleAction} />
+        <DropdownMenuSeparator />
+        <RegistrationsButton eventId={eventId} onAction={handleAction} />
+        <ParticipantsButton eventId={eventId} onAction={handleAction} />
         {status === "draft" && (
           <>
             <DropdownMenuSeparator />
