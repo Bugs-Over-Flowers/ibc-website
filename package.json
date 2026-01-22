@@ -22,7 +22,14 @@
     "test:ui": "vitest --ui",
     "test:local": "supabase start && vitest",
     "test:local:ui": "supabase start && vitest --ui",
-    "test:all": "vitest run",
+    "test:all": "vitest run && playwright run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:local": "supabase start && playwright test",
+    "test:e2e:codegen": "playwright codegen http://localhost:3000",
     "db:gen:types": "supabase gen types typescript --local > src/lib/supabase/db.types.ts",
     "gen:types": "bunx supabase gen types typescript --project-id rpdourwztdpwdebggkkc > src/lib/supabase/db.types.ts"
   },
@@ -72,6 +79,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.11",
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
