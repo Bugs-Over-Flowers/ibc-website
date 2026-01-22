@@ -42,40 +42,44 @@ export function EvaluationCard({
   return (
     <button
       className={cn(
-        "w-full cursor-pointer rounded-lg border p-6 text-left transition-all",
+        "w-full cursor-pointer rounded-lg border p-5 text-left transition-all",
         "border-border bg-card hover:border-primary hover:shadow-lg",
         isSelected && "border-primary bg-primary/5 shadow-lg",
       )}
       onClick={handleClick}
       type="button"
     >
-      <div className="mb-4 flex items-start justify-between">
-        <div className="flex-1">
-          <h3 className="mb-1 font-semibold text-lg text-primary">
+      <div className="mb-2 flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="mb-0.5 truncate font-semibold text-base text-primary">
             {eventTitle}
           </h3>
-          <p className="mb-2 text-foreground">Evaluation from {userName}</p>
-          <div className="flex flex-wrap gap-4 text-muted-foreground text-sm">
+          <p className="mb-1 truncate text-foreground text-xs">
+            Evaluation from {userName}
+          </p>
+          <div className="flex flex-wrap gap-2 text-muted-foreground text-xs">
             <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              {format(createdAt, "MMM d, yyyy, h:mm a")}
+              <Calendar className="h-3 w-3" />
+              <span className="truncate">
+                {format(createdAt, "MMM d, yyyy, h:mm a")}
+              </span>
             </div>
           </div>
         </div>
 
         {overallRating && (
-          <div className="flex flex-col items-end gap-2 rounded-lg bg-primary/10 px-3 py-2">
-            <div className="flex items-center gap-2">
+          <div className="flex min-w-[60px] flex-col items-end gap-1 rounded bg-primary/10 px-2 py-1">
+            <div className="flex items-center gap-1">
               {renderStars(overallRating)}
             </div>
-            <span className="font-semibold text-foreground text-sm">
+            <span className="font-semibold text-foreground text-xs">
               {overallRating}/5
             </span>
           </div>
         )}
       </div>
 
-      <div className="font-medium text-primary text-sm">
+      <div className="font-medium text-primary text-xs">
         Click to view details →
       </div>
     </button>

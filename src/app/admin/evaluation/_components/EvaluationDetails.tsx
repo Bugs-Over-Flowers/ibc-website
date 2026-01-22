@@ -22,7 +22,7 @@ export async function EvaluationDetails({
     return <EvaluationCard evaluation={evaluation} />;
   } catch (_error) {
     return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
         <p className="text-destructive">
           Failed to load evaluation. Please try again later.
         </p>

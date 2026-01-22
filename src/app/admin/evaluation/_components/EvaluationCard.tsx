@@ -37,9 +37,9 @@ export function EvaluationCard({ evaluation }: EvaluationCardProps) {
   };
 
   return (
-    <form className="mx-auto max-w-full space-y-6 p-3">
+    <form className="mx-auto max-w-full space-y-6">
       <button
-        className="flex items-center gap-2 text-primary transition-colors hover:text-primary/80"
+        className="flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
         onClick={() => handleClick()}
         type="button"
       >

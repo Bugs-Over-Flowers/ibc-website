@@ -2,7 +2,7 @@
 
 export default function EvaluationDetailSkeleton() {
   return (
-    <form className="mx-auto max-w-full space-y-6 p-3">
+    <form className="mx-auto max-w-full space-y-6">
       {/* Back Button */}
       <div className="h-6 w-48 animate-pulse rounded-lg bg-muted dark:bg-muted/70" />
 

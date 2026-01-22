@@ -189,8 +189,8 @@ export function EvaluationFilter({
     sortOrder !== "latest";
 
   return (
-    <div className="rounded-xl border border-border bg-card p-2 sm:p-6">
-      <div className="flex flex-col gap-4">
+    <div className="rounded-xl border border-border bg-card p-3">
+      <div className="flex flex-col gap-3">
         {/* Search Bar */}
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
@@ -462,7 +462,7 @@ export function EvaluationFilter({
         {hasActiveFilters && (
           <motion.div
             animate={{ opacity: 1, height: "auto" }}
-            className="mt-4 border-border/30 border-t pt-4"
+            className="mt-4 border-border/30 border-t pt-2"
             exit={{ opacity: 0, height: 0 }}
             initial={{ opacity: 0, height: 0 }}
             key="active-filters"
