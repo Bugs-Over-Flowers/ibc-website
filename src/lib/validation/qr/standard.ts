@@ -27,6 +27,9 @@ const ParticipantWithCheckInSchema = z.object({
 
 export const GetCheckInForDateSchema = z
   .object({
+    event: z.object({
+      eventId: z.string(),
+    }),
     registrationId: z.string(),
     nonMemberName: z.string().nullable(),
     registrationDate: z.string(),

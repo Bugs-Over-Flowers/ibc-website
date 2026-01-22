@@ -42,6 +42,7 @@ export default function CheckInTable({ data }: CheckInTableProps) {
   ): ParticipantCheckInRow[] => {
     return data.participants.map((participant) => ({
       ...participant,
+      eventId: data.event.eventId,
       registrationId: data.registrationId,
       identifier: data.identifier,
       affiliation: data.affiliation,
@@ -171,10 +172,20 @@ export default function CheckInTable({ data }: CheckInTableProps) {
     // Actions
     {
       id: "actions",
-      header: "Actions",
       cell: ({ row }) => {
         const participant = row.original;
-        return <CheckInItemActions participant={participant} />;
+        return (
+          <CheckInItemActions
+            eventId={row.original.eventId}
+            participant={{
+              contactNumber: participant.contactNumber,
+              email: participant.email,
+              firstName: participant.firstName,
+              lastName: participant.lastName,
+            }}
+            registrationId={row.original.registrationId}
+          />
+        );
       },
       enableSorting: false,
     },

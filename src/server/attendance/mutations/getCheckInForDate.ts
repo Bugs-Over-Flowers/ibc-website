@@ -37,6 +37,9 @@ export const getCheckInForDate = async (
            eventDayId,
            checkInTime
           )
+        ),
+        event:Event(
+          eventId
         )
       `,
     )

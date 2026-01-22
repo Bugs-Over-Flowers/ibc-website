@@ -7,6 +7,7 @@ export type ParticipantWithCheckIn =
 // Flattened row type for the table
 export type ParticipantCheckInRow = ParticipantWithCheckIn & {
   // Add parent registration context
+  eventId: string;
   registrationId: string;
   identifier: string;
   affiliation: string | null;

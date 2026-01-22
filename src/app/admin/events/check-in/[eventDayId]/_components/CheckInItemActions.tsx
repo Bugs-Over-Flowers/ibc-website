@@ -1,5 +1,8 @@
-import { Ellipsis } from "lucide-react";
+import { ChevronRightIcon, Ellipsis } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { StopPropagationButton } from "@/components/StopPropagationButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -14,18 +17,28 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 import type { ParticipantCheckInRow } from "../_types/checkInTable";
 
 interface CheckInItemActionsProps {
-  participant: ParticipantCheckInRow;
+  participant: Pick<
+    ParticipantCheckInRow,
+    "firstName" | "lastName" | "email" | "contactNumber"
+  >;
+  eventId: string;
+  registrationId: string;
 }
 
 export default function CheckInItemActions({
   participant,
+  eventId,
+  registrationId,
 }: CheckInItemActionsProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const router = useRouter();
   return (
     <>
       <DropdownMenu>
@@ -41,21 +54,32 @@ export default function CheckInItemActions({
             </Button>
           }
         />
-        <DropdownMenuGroup>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-              Actions
-            </DropdownMenuItem>
+        <DropdownMenuContent>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>More</DropdownMenuLabel>
+            <Separator />
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
                 setIsDetailsOpen(true);
               }}
             >
+              <ChevronRightIcon />
               Details
             </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenuGroup>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(
+                  `/admin/events/${eventId}/registration-list/registration/${registrationId}`,
+                );
+              }}
+            >
+              <ChevronRightIcon />
+              View Registration Details
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
       </DropdownMenu>
       <ParticipantDetailsDialog
         contactNumber={participant.contactNumber}
@@ -112,24 +136,5 @@ function ParticipantDetailsDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function StopPropagationButton({
-  children,
-  ...props
-}: React.ComponentProps<typeof Button> & {
-  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-}) {
-  return (
-    <Button
-      {...props}
-      onClick={(e) => {
-        e.stopPropagation();
-        props.onClick?.(e);
-      }}
-    >
-      {children}
-    </Button>
   );
 }
