@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 /**
  * Vitest component tests for simple UI components
- * These are faster than Cypress and good for testing props/logic
+ * Fast and good for testing props/logic
  */
 describe("Button Component", () => {
   it("should render with default variant", () => {

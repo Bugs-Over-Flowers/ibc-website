@@ -1,7 +1,5 @@
 create type "public"."ratingScale" as enum ('poor', 'fair', 'good', 'veryGood', 'excellent');
-
-
-  create table "public"."EvaluationForm" (
+create table "public"."EvaluationForm" (
     "evaluationId" uuid not null default gen_random_uuid(),
     "eventId" uuid not null,
     "name" text,
