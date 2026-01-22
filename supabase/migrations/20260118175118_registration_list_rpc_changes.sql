@@ -102,9 +102,7 @@ BEGIN
     -- Secondary Sort: Date (Newest first)
     r."registrationDate" DESC;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_registration_list(p_event_id uuid, p_search_text text DEFAULT NULL::text, p_payment_status public."PaymentStatus" DEFAULT NULL::public."PaymentStatus")
  RETURNS SETOF public.registration_list_item
  LANGUAGE plpgsql

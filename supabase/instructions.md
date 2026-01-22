@@ -486,7 +486,7 @@ bun run docker:dev
 | `gen:types`    | `bunx supabase gen types...`    | Generate TS types from PROD DB  |
 | `test:local`   | `supabase start && vitest`      | Start Supabase & run tests      |
 | `test:local:ui`| `supabase start && vitest --ui` | Start Supabase & run tests with UI|
-| `test:all`     | `vitest run && cypress run`     | Run all tests (unit + e2e)      |
+| `test:all`     | `vitest run`     | Run all tests      |
 
 For database operations, we use the `supabase` CLI directly:
 
