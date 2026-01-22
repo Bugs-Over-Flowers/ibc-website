@@ -1,9 +1,8 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import type { RegistrationListPageProps } from "@/lib/types/route";
 
-type RegistrationListPageProps =
-  PageProps<"/admin/events/[eventId]/registration-list">;
 export default async function BackButton({
   params,
 }: {

@@ -1,8 +1,15 @@
 drop type "public"."participant_list_item" cascade;
+
 drop type "public"."registration_list_item" cascade;
+
 set check_function_bodies = off;
+
 create type "public"."participant_list_item" as ("participant_id" uuid, "first_name" text, "last_name" text, "email" text, "contact_number" text, "affiliation" text, "registration_date" timestamp with time zone, "registration_id" uuid);
+
 create type "public"."registration_list_item" as ("registration_id" uuid, "affiliation" text, "registration_date" timestamp with time zone, "payment_status" public."PaymentStatus", "payment_method" public."PaymentMethod", "business_member_id" uuid, "business_name" text, "is_member" boolean, "registrant" jsonb, "people" integer, "registration_identifier" text);
+
+
+
 CREATE OR REPLACE FUNCTION public.get_event_participant_list(p_event_id uuid, p_search_text text DEFAULT NULL::text)
  RETURNS SETOF public.participant_list_item
  LANGUAGE plpgsql
@@ -199,4 +206,5 @@ BEGIN
         CASE WHEN p_search_text IS NOT NULL THEN s.sim_score ELSE 0 END DESC,
         r."registrationDate" DESC;
 END;
-$function$;
+$function$
+;
