@@ -94,14 +94,10 @@ export function useScheduleInterviewForm({
     const result = await onSubmit(finalMessage, applicationIds);
 
     if (result.success) {
-      setHasError(false);
-    } else {
-      setHasError(true);
-    }
-
-    if (result.success) {
       clearSelection();
       reset();
+    } else {
+      setHasError(true);
     }
 
     setStep("success");
