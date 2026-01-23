@@ -30,16 +30,36 @@ export default function MeetingNotificationEmail({
   const renderCustomMessage = () => {
     if (!customMessage) return null;
 
-    const processedMessage = customMessage
+    const hasDatePlaceholder = customMessage.includes("{INTERVIEW_DATE}");
+    const hasVenuePlaceholder = customMessage.includes("{INTERVIEW_VENUE}");
+
+    let processedMessage = customMessage
       .replace(/\{INTERVIEW_DATE\}/g, interviewDate)
       .replace(/\{INTERVIEW_VENUE\}/g, interviewVenue);
 
+    // If no placeholders found, append interview details
+    if (!hasDatePlaceholder && !hasVenuePlaceholder) {
+      const interviewDetails = `\n\nInterview Details:\nDate & Time: ${interviewDate}\nVenue: ${interviewVenue}`;
+      processedMessage = `${processedMessage}${interviewDetails}`;
+    }
+
     const lines = processedMessage.split("\n");
-    return lines.map((line, i) => (
-      <Text key={`msg-${line.substring(0, 20)}-${i}`} style={text}>
-        {line || "\u00A0"}
-      </Text>
-    ));
+    // Use a stable hash of the message to create consistent keys
+    const messageHash = customMessage
+      .split("")
+      .reduce((acc, char) => (acc << 5) - acc + char.charCodeAt(0), 0);
+
+    return lines.map((line) => {
+      // Create a stable hash for each line content
+      const lineHash = line
+        .split("")
+        .reduce((acc, char) => (acc << 5) - acc + char.charCodeAt(0), 0);
+      return (
+        <Text key={`line-${messageHash}-${lineHash}`} style={text}>
+          {line || "\u00A0"}
+        </Text>
+      );
+    });
   };
 
   return (

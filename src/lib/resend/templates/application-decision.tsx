@@ -70,11 +70,20 @@ export default function ApplicationDecisionEmail({
             <>
               <Text style={text}>Additional notes from our team:</Text>
               <Section style={notesSection}>
-                {notesLines.map((line, idx) => (
-                  <Text key={`${idx}-${line.substring(0, 16)}`} style={text}>
-                    {line}
-                  </Text>
-                ))}
+                {notesLines.map((line) => {
+                  // Create a stable hash for each line content
+                  const lineHash = line
+                    .split("")
+                    .reduce(
+                      (acc, char) => (acc << 5) - acc + char.charCodeAt(0),
+                      0,
+                    );
+                  return (
+                    <Text key={`line-${lineHash}`} style={text}>
+                      {line}
+                    </Text>
+                  );
+                })}
               </Section>
             </>
           )}
