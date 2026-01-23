@@ -24,6 +24,7 @@ export default function ApplicationsTabs({
     "new",
   );
   const [isMobile, setIsMobile] = useState(false);
+  const [indicatorReady, setIndicatorReady] = useState(false);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const { selectedApplicationIds, clearSelection, selectAll } =
     useSelectedApplicationsStore();
@@ -37,6 +38,13 @@ export default function ApplicationsTabs({
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Ensure indicator is rendered after refs are set
+  useEffect(() => {
+    if (buttonRefs.current[activeTab]) {
+      setIndicatorReady(true);
+    }
+  }, [activeTab]);
 
   const { handleTabChange: handleTabSelectionChange } = useTabSelections({
     activeTab,
@@ -149,22 +157,24 @@ export default function ApplicationsTabs({
       <div className="w-full">
         <div className="relative">
           <div className="relative grid grid-cols-3 gap-0.5 overflow-hidden rounded-md border border-border bg-background p-1 sm:gap-0">
-            <motion.div
-              animate={{
-                x: indicatorX,
-                width: indicatorWidth,
-              }}
-              className="absolute rounded-md bg-primary/20"
-              style={{
-                top: "4px",
-                height: "calc(100% - 8px)",
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 380,
-                damping: 30,
-              }}
-            />
+            {indicatorReady && (
+              <motion.div
+                animate={{
+                  x: indicatorX,
+                  width: indicatorWidth,
+                }}
+                className="absolute rounded-md bg-primary/20"
+                style={{
+                  top: "4px",
+                  height: "calc(100% - 8px)",
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 380,
+                  damping: 30,
+                }}
+              />
+            )}
 
             {tabs.map((tab) => (
               <button

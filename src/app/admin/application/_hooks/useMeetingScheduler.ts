@@ -1,7 +1,8 @@
-import { revalidateLogic, useForm } from "@tanstack/react-form";
+import { revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useAppForm } from "@/hooks/_formHooks";
 import { scheduleMeetingAction } from "@/server/applications/mutations/scheduleMeetingAction";
 import { useMeetingSchedulerStore } from "../_store/useMeetingSchedulerStore";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
@@ -22,7 +23,7 @@ export function useMeetingScheduler(onSuccess?: () => void) {
     ? hydratedInterviewDate.toISOString().slice(0, 16)
     : "";
 
-  const form = useForm({
+  const form = useAppForm({
     defaultValues: {
       applicationIds: Array.from(selectedApplicationIds),
       interviewDate: defaultDateString,
@@ -32,10 +33,18 @@ export function useMeetingScheduler(onSuccess?: () => void) {
     validationLogic: revalidateLogic(),
     validators: {
       onDynamic: ({ value }) => {
+        const errors: Record<string, string> = {};
+
         if (!value.interviewDate) {
-          return { interviewDate: "Interview date is required" };
+          errors.interviewDate = "Interview date is required";
         }
-        return undefined;
+
+        if (!value.interviewVenue || value.interviewVenue.trim().length < 3) {
+          errors.interviewVenue =
+            "Interview venue is required (min. 3 characters)";
+        }
+
+        return Object.keys(errors).length > 0 ? errors : undefined;
       },
     },
     onSubmit: async ({ value }) => {

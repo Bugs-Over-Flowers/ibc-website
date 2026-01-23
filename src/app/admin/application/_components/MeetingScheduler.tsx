@@ -1,58 +1,24 @@
 "use client";
 
 import { Calendar as CalendarIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useMeetingScheduler } from "../_hooks/useMeetingScheduler";
-import { useMeetingSchedulerStore } from "../_store/useMeetingSchedulerStore";
+import { useMeetingSchedulerSync } from "../_hooks/useMeetingSchedulerSync";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 
 export default function MeetingScheduler() {
-  const router = useRouter();
   const { selectedApplicationIds, clearSelection } =
     useSelectedApplicationsStore();
-  const { setInterviewDate, setInterviewVenue } = useMeetingSchedulerStore();
 
   const form = useMeetingScheduler(() => {
     clearSelection();
   });
 
+  const { handleNavigateToSchedule } = useMeetingSchedulerSync(form);
+
   const selectedCount = selectedApplicationIds.size;
-
-  useEffect(() => {
-    const dateString = form.state.values.interviewDate;
-    if (!dateString) {
-      setInterviewDate(undefined);
-      return;
-    }
-
-    const parsed = new Date(dateString);
-    if (!Number.isNaN(parsed.getTime())) {
-      setInterviewDate(parsed);
-    }
-  }, [form.state.values.interviewDate, setInterviewDate]);
-
-  useEffect(() => {
-    setInterviewVenue(form.state.values.interviewVenue ?? "");
-  }, [form.state.values.interviewVenue, setInterviewVenue]);
-
-  const handleNavigateToSchedule = () => {
-    // Ensure store is updated with latest form values before navigation
-    const dateString = form.state.values.interviewDate;
-    if (dateString) {
-      const parsed = new Date(dateString);
-      if (!Number.isNaN(parsed.getTime())) {
-        setInterviewDate(parsed);
-      }
-    } else {
-      setInterviewDate(undefined);
-    }
-    setInterviewVenue(form.state.values.interviewVenue ?? "");
-    router.push("/admin/application/schedule-interview");
-  };
 
   return (
     <Card className="flex h-full flex-col">
@@ -113,6 +79,12 @@ export default function MeetingScheduler() {
               selector={(state) => ({
                 interviewDate: state.values.interviewDate,
                 interviewVenue: state.values.interviewVenue,
+                isFieldInvalid:
+                  (state.fieldMeta.interviewDate?.errors?.length ?? 0) > 0 ||
+                  (state.fieldMeta.interviewVenue?.errors?.length ?? 0) > 0,
+                isVenueTooShort:
+                  !state.values.interviewVenue ||
+                  state.values.interviewVenue.trim().length < 3,
               })}
             >
               {(state) => (
@@ -121,7 +93,9 @@ export default function MeetingScheduler() {
                   disabled={
                     selectedCount === 0 ||
                     !state.interviewDate ||
-                    !state.interviewVenue
+                    !state.interviewVenue ||
+                    state.isFieldInvalid ||
+                    state.isVenueTooShort
                   }
                   onClick={handleNavigateToSchedule}
                   type="button"
