@@ -12,16 +12,11 @@ export function useMeetingScheduler(onSuccess?: () => void) {
   const { selectedApplicationIds } = useSelectedApplicationsStore();
   const { interviewDate, interviewVenue, reset } = useMeetingSchedulerStore();
 
-  // Persisted store may hydrate interviewDate as a string; normalize to Date.
-  const hydratedInterviewDate =
-    typeof interviewDate === "string" ? new Date(interviewDate) : interviewDate;
-  const hasValidInterviewDate =
-    hydratedInterviewDate && !Number.isNaN(hydratedInterviewDate.getTime());
-
   // Format store date as string for FormDateTimePicker
-  const defaultDateString = hasValidInterviewDate
-    ? hydratedInterviewDate.toISOString().slice(0, 16)
-    : "";
+  const defaultDateString =
+    interviewDate && !Number.isNaN(interviewDate.getTime())
+      ? interviewDate.toISOString().slice(0, 16)
+      : "";
 
   const form = useAppForm({
     defaultValues: {

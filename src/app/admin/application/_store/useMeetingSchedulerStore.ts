@@ -22,7 +22,6 @@ export const useMeetingSchedulerStore = create<MeetingSchedulerState>()(
       name: "meeting-scheduler-store",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        interviewDate: state.interviewDate,
         interviewVenue: state.interviewVenue,
       }),
     },
