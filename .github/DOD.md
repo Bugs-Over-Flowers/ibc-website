@@ -32,7 +32,7 @@
 
 3. Testing
 
-- [ ] Tests written for critical features (Cypress or Vitest):
+- [ ] Tests written for critical features (Vitest):
   - Authentication flows
   - Payment/financial transactions
   - Data integrity operations
@@ -40,8 +40,7 @@
   - Admin-only functionality
   - Private information handling
 - [ ] All tests pass:
-  - bun run test (unit tests)
-  - bun run cy:run (component/e2e tests, if applicable)
+  - bun run test (unit, integration, component tests)
 - [ ] Manual testing completed:
   - Feature works as expected in development environment
   - Edge cases validated
