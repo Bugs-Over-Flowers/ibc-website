@@ -24,7 +24,7 @@ export function MembersTableRow({ member }: MembersTableRowProps) {
             {showImage ? (
               <Image
                 alt={member.businessName}
-                className="h-8 w-8 shrink-0 rounded object-cover sm:h-10 sm:w-10"
+                className="h-12 w-12 shrink-0 rounded object-cover"
                 height={40}
                 onError={() => setImageError(true)}
                 src={member.logoImageURL as string}
@@ -32,19 +32,18 @@ export function MembersTableRow({ member }: MembersTableRowProps) {
                 width={40}
               />
             ) : (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-gray-100 font-semibold text-gray-600 text-xs sm:h-10 sm:w-10 sm:text-sm">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-gray-100 font-semibold text-gray-600 text-xs sm:h-10 sm:w-10 sm:text-sm">
                 {member.businessName.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="line-clamp-1 text-ellipsis font-medium text-sm sm:text-base">
+            <div className="line-clamp-1 text-ellipsis font-medium text-base">
               {member.businessName}
             </div>
             <div className="mt-1 space-y-1 text-muted-foreground text-xs md:hidden">
               {member.Sector?.sectorName && (
-                <div>
-                  <span className="font-semibold">Sector:</span>{" "}
+                <div className="line-clamp-1 text-ellipsis">
                   {member.Sector.sectorName}
                 </div>
               )}
