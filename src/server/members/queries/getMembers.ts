@@ -75,6 +75,7 @@ export async function getMembers(
       return {
         ...memberWithoutApplication,
         logoImageURL: await signLogoUrl(member.logoImageURL),
+        primaryApplicationId: member.primaryApplicationId,
       };
     }),
   );
