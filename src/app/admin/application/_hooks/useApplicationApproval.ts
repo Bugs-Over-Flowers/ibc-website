@@ -3,10 +3,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
-import {
-  approveApplicationServer,
-  rejectApplicationServer,
-} from "@/server/applications/mutations/approveReject";
+import tryCatch from "@/lib/server/tryCatch";
+import { approveApplication } from "@/server/applications/mutations/approveApplication";
+import { rejectApplication } from "@/server/applications/mutations/rejectApplication";
 
 export function useApplicationApproval(applicationId: string) {
   const router = useRouter();
@@ -14,7 +13,7 @@ export function useApplicationApproval(applicationId: string) {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
 
   const { execute: executeApprove, isPending: isApproving } = useAction(
-    approveApplicationServer,
+    tryCatch(approveApplication),
     {
       onSuccess: (data) => {
         toast.success(data.message ?? "Application approved successfully!");
@@ -28,7 +27,7 @@ export function useApplicationApproval(applicationId: string) {
   );
 
   const { execute: executeReject, isPending: isRejecting } = useAction(
-    rejectApplicationServer,
+    tryCatch(rejectApplication),
     {
       onSuccess: (data) => {
         toast.success(data.message ?? "Application rejected");

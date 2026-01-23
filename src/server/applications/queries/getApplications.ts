@@ -2,11 +2,14 @@ import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
-import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 import type { ApplicationWithMembers } from "@/lib/types/application";
 
-export async function getApplications(requestCookies?: RequestCookie[]) {
+type GetApplicationsResult = ApplicationWithMembers[];
+
+export async function getApplications(
+  requestCookies?: RequestCookie[],
+): Promise<GetApplicationsResult> {
   const cookieStore = requestCookies || (await cookies()).getAll();
   const supabase = await createClient(cookieStore);
 
@@ -25,13 +28,6 @@ export async function getApplications(requestCookies?: RequestCookie[]) {
   if (error) {
     throw new Error(`Failed to fetch applications: ${error.message}`);
   }
-
-  type ApplicationWithRelations =
-    Database["public"]["Tables"]["Application"]["Row"] & {
-      ApplicationMember: Database["public"]["Tables"]["ApplicationMember"]["Row"][];
-      Sector: Database["public"]["Tables"]["Sector"]["Row"];
-      ProofImage: Database["public"]["Tables"]["ProofImage"]["Row"][];
-    };
 
   const signLogoUrl = async (path: string | null) => {
     if (!path) return null;
@@ -52,13 +48,13 @@ export async function getApplications(requestCookies?: RequestCookie[]) {
   };
 
   const applicationsWithSignedLogos = await Promise.all(
-    (data as ApplicationWithRelations[]).map(
-      async (application: ApplicationWithRelations) => ({
+    (data as ApplicationWithMembers[]).map(
+      async (application: ApplicationWithMembers) => ({
         ...application,
         logoImageURL: await signLogoUrl(application.logoImageURL),
       }),
     ),
   );
 
-  return applicationsWithSignedLogos as ApplicationWithMembers[];
+  return applicationsWithSignedLogos;
 }

@@ -1,9 +1,7 @@
+import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { useAppForm } from "@/hooks/_formHooks";
-import { zodValidator } from "@/lib/utils";
-import { scheduleMeetingSchema } from "@/lib/validation/application/application";
 import { scheduleMeetingAction } from "@/server/applications/mutations/scheduleMeetingAction";
 import { useMeetingSchedulerStore } from "../_store/useMeetingSchedulerStore";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
@@ -24,22 +22,23 @@ export function useMeetingScheduler(onSuccess?: () => void) {
     ? hydratedInterviewDate.toISOString().slice(0, 16)
     : "";
 
-  const form = useAppForm({
+  const form = useForm({
     defaultValues: {
       applicationIds: Array.from(selectedApplicationIds),
       interviewDate: defaultDateString,
       interviewVenue: interviewVenue ?? "",
       customMessage: "",
     },
+    validationLogic: revalidateLogic(),
     validators: {
-      onSubmit: zodValidator(scheduleMeetingSchema),
+      onDynamic: ({ value }) => {
+        if (!value.interviewDate) {
+          return { interviewDate: "Interview date is required" };
+        }
+        return undefined;
+      },
     },
     onSubmit: async ({ value }) => {
-      if (!value.interviewDate) {
-        toast.error("Interview date is required");
-        return;
-      }
-
       // Convert string datetime to Date object
       const interviewDateObj = new Date(value.interviewDate);
 
