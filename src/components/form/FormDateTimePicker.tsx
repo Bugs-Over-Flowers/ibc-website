@@ -115,9 +115,6 @@ const FormDateTimePicker: React.FC<FormDateTimePickerProps> = ({
                   if (typeof disabled === "function") return disabled(date);
                   if (minDate && date < startOfDay(minDate)) return true;
                   if (maxDate && date > endOfDay(maxDate)) return true;
-                  if (!minDate && !maxDate) {
-                    return date > new Date() || date < new Date("1900-01-01");
-                  }
                   return date < new Date("1900-01-01");
                 }}
                 endMonth={computedEndMonth}

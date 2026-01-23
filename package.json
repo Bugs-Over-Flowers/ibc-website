@@ -29,6 +29,7 @@
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@react-email/components": "^1.0.6",
+    "@react-email/render": "^2.0.4",
     "@react-pdf/renderer": "^4.3.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.91.0",
