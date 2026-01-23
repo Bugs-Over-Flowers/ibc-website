@@ -50,6 +50,23 @@ export function PreviewStep({
       "{INTERVIEW_DATE}",
       formattedDate,
     ).replace("{INTERVIEW_VENUE}", interviewVenue || "Not set");
+
+    // If no custom message, show only details
+    if (!message) {
+      return details;
+    }
+
+    const hasDatePlaceholder = message.includes("{INTERVIEW_DATE}");
+    const hasVenuePlaceholder = message.includes("{INTERVIEW_VENUE}");
+
+    // If message has placeholders, replace them
+    if (hasDatePlaceholder || hasVenuePlaceholder) {
+      return message
+        .replace(/\{INTERVIEW_DATE\}/g, formattedDate)
+        .replace(/\{INTERVIEW_VENUE\}/g, interviewVenue || "Not set");
+    }
+
+    // Otherwise, append details to ensure they're always shown
     return `${message}\n\n${details}`;
   };
 

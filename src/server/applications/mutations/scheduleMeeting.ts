@@ -14,10 +14,7 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
   // Use a deterministic org-default timezone for communications.
   const DEFAULT_TZ = "Asia/Manila";
 
-  const interviewDate =
-    parsed.interviewDate instanceof Date
-      ? parsed.interviewDate
-      : new Date(parsed.interviewDate as unknown as string);
+  const interviewDate = parsed.interviewDate as Date;
 
   if (Number.isNaN(interviewDate.getTime())) {
     throw new Error("Invalid interview date");
