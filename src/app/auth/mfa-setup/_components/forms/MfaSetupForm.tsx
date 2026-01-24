@@ -59,7 +59,7 @@ export function MfaSetupForm() {
       onSuccess: () => {
         setCode("");
         toast.success("MFA enabled successfully");
-        router.push("/admin/dashboard");
+        router.push("/admin");
       },
       onError: (error) => {
         setCode("");

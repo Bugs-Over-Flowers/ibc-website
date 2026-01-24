@@ -45,7 +45,7 @@ export function MfaVerifyForm() {
     onSuccess: () => {
       setCode("");
       toast.success("Logged in successfully");
-      router.push("/admin/dashboard");
+      router.push("/admin");
     },
     onError: (error) => {
       setCode("");
