@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { fadeInUp } from "@/lib/animations/fade";
@@ -18,6 +18,7 @@ import { EVALUATION_QUESTIONS } from "@/lib/evaluation/evaluationQuestions";
 import { formatDate, formatTime } from "@/lib/events/eventUtils";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
+import { zodValidator } from "@/lib/utils";
 import { EvaluationFormSchema } from "@/lib/validation/evaluation/evaluation-form";
 import { submitEvaluationForm } from "@/server/evaluation/actions/submitEvaluation";
 
@@ -28,58 +29,52 @@ interface EvaluationFormProps {
 
 export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
   const router = useRouter();
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const TOTAL_QUESTIONS = EVALUATION_QUESTIONS.length;
 
   const form = useAppForm({
     defaultValues: {
       eventId,
       name: "",
-      q1Rating: undefined as string | undefined,
-      q2Rating: undefined as string | undefined,
-      q3Rating: undefined as string | undefined,
-      q4Rating: undefined as string | undefined,
-      q5Rating: undefined as string | undefined,
-      q6Rating: undefined as string | undefined,
+      q1Rating: "" as const,
+      q2Rating: "" as const,
+      q3Rating: "" as const,
+      q4Rating: "" as const,
+      q5Rating: "" as const,
+      q6Rating: "" as const,
       additionalComments: "",
       feedback: "",
     },
+    validators: {
+      onSubmit: zodValidator(EvaluationFormSchema),
+    },
     onSubmit: async ({ value }) => {
-      try {
-        const validated = EvaluationFormSchema.parse(value);
-        const { error } = await tryCatch(submitEvaluationForm(validated));
+      const completedQuestions = EVALUATION_QUESTIONS.filter(
+        (q) => value[q.field as keyof typeof value] !== "",
+      ).length;
 
-        if (error) {
-          const message =
-            typeof error === "string" ? error : "Failed to submit form";
-          toast.error("Failed to submit feedback. Please try again.");
-          return {
-            onSubmit: [
-              {
-                message,
-              },
-            ],
-          };
-        }
-
-        toast.success("Thank you! Your feedback has been submitted.");
-        router.push("/events");
+      if (completedQuestions < TOTAL_QUESTIONS) {
+        setShowValidationErrors(true);
+        toast.error(
+          `Please complete all rating questions (${completedQuestions}/${TOTAL_QUESTIONS})`,
+        );
         return undefined;
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Validation failed";
-        return {
-          onSubmit: [
-            {
-              message,
-            },
-          ],
-        };
       }
+
+      const { error } = await tryCatch(submitEvaluationForm(value));
+
+      if (error) {
+        const message =
+          typeof error === "string" ? error : "Failed to submit form";
+        toast.error("Failed to submit feedback. Please try again.");
+        return undefined;
+      }
+
+      toast.success("Thank you! Your feedback has been submitted.");
+      router.push("/events");
+      return undefined;
     },
   });
-
-  useEffect(() => {
-    form.reset();
-  }, [form]);
 
   return (
     <form
@@ -195,18 +190,46 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
 
       {/* Rating Questions Section */}
       <section className="rounded-lg border border-border bg-card p-4 sm:rounded-xl sm:p-6 lg:p-8">
-        <div className="mb-6 flex items-start gap-3 sm:mb-8">
-          <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-10 sm:w-10">
-            <Star className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+        <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:mb-8 sm:flex-row sm:items-center">
+          <div className="flex items-start gap-3">
+            <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-10 sm:w-10">
+              <Star className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-semibold text-base text-foreground">
+                Rate Your Experience
+              </h2>
+              <p className="text-muted-foreground text-xs sm:text-sm">
+                Rate each aspect from Poor to Excellent
+              </p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="font-semibold text-base text-foreground">
-              Rate Your Experience
-            </h2>
-            <p className="text-muted-foreground text-xs sm:text-sm">
-              Rate each aspect from Poor to Excellent
-            </p>
-          </div>
+          <form.Subscribe
+            selector={(state) =>
+              EVALUATION_QUESTIONS.filter(
+                (q) =>
+                  state.values[q.field as keyof typeof state.values] !== "",
+              ).length
+            }
+          >
+            {(completedQuestions) => (
+              <div className="flex items-center gap-2">
+                <div className="whitespace-nowrap rounded-full bg-primary/10 px-3 py-1 text-center">
+                  <p className="font-semibold text-primary text-sm">
+                    {completedQuestions}/{TOTAL_QUESTIONS}
+                  </p>
+                </div>
+                {showValidationErrors &&
+                  completedQuestions < TOTAL_QUESTIONS && (
+                    <div className="whitespace-nowrap rounded-full bg-red-100 px-3 py-1 text-center dark:bg-red-950">
+                      <p className="font-semibold text-red-600 text-sm dark:text-red-400">
+                        {TOTAL_QUESTIONS - completedQuestions} missing
+                      </p>
+                    </div>
+                  )}
+              </div>
+            )}
+          </form.Subscribe>
         </div>
 
         <div className="divide-y divide-border">

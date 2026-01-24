@@ -92,12 +92,14 @@ export function EvaluationQRDownloader({
 
   return (
     <Dialog>
-      <DialogTrigger>
-        <Button className={triggerClassName} variant="outline">
-          <QrCode className="mr-2 h-4 w-4" />
-          Evaluation QR Code
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <Button className={triggerClassName} variant="outline">
+            <QrCode className="mr-2 h-4 w-4" />
+            Evaluation QR Code
+          </Button>
+        }
+      />
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Evaluation Form QR Code</DialogTitle>
