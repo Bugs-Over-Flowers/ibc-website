@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface UseTabSelectionsProps {
   activeTab: "new" | "pending" | "finished";
@@ -13,36 +13,28 @@ export function useTabSelections({
   clearSelection,
   selectAll,
 }: UseTabSelectionsProps) {
-  // Store selections per tab
-  const [newTabSelections, setNewTabSelections] = useState<Set<string>>(
-    new Set(),
-  );
-  const [pendingTabSelections, setPendingTabSelections] = useState<Set<string>>(
-    new Set(),
-  );
+  // Store selections per tab using a ref to avoid race conditions
+  const tabSelectionsRef = useRef<
+    Record<"new" | "pending" | "finished", string[]>
+  >({
+    new: [],
+    pending: [],
+    finished: [],
+  });
 
-  // Save current selections when switching tabs
+  // Sync current tab's selections whenever selectedApplicationIds changes
+  useEffect(() => {
+    tabSelectionsRef.current[activeTab] = selectedApplicationIds;
+  }, [activeTab, selectedApplicationIds]);
+
+  // Save current selections when switching tabs and restore target tab's selections
   const handleTabChange = (newTab: "new" | "pending" | "finished") => {
-    // Save current tab's selections
-    if (activeTab === "new") {
-      setNewTabSelections(new Set(selectedApplicationIds));
-    } else if (activeTab === "pending") {
-      setPendingTabSelections(new Set(selectedApplicationIds));
-    }
+    // Current tab's selections are already synced via useEffect
+    // Get target tab's saved selections
+    const targetTabSelections = tabSelectionsRef.current[newTab];
 
-    // Restore new tab's selections
-    if (newTab === "new") {
-      if (newTabSelections.size > 0) {
-        selectAll(Array.from(newTabSelections));
-      } else {
-        clearSelection();
-      }
-    } else if (newTab === "pending") {
-      if (pendingTabSelections.size > 0) {
-        selectAll(Array.from(pendingTabSelections));
-      } else {
-        clearSelection();
-      }
+    if (targetTabSelections.length > 0) {
+      selectAll(targetTabSelections);
     } else {
       clearSelection();
     }

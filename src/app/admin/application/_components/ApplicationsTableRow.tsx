@@ -2,6 +2,7 @@
 
 import type { Route } from "next";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,6 +46,13 @@ function getApplicationTypeColor(type: string): {
 export function ApplicationsTableRow({
   application,
 }: ApplicationsTableRowProps) {
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Ensure Zustand store state is only used after hydration
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const isSelected = useSelectedApplicationsStore((state) =>
     state.isSelected(application.applicationId),
   );
@@ -57,11 +65,10 @@ export function ApplicationsTableRow({
 
   return (
     <TableRow
-      className={isSelected ? "bg-muted/50" : ""}
+      className={isHydrated && isSelected ? "bg-muted/50" : ""}
       key={application.applicationId}
-      suppressHydrationWarning
     >
-      <TableCell className="w-12" suppressHydrationWarning>
+      <TableCell className="w-12">
         <Checkbox
           aria-label={`Select ${application.companyName}`}
           checked={isSelected}
