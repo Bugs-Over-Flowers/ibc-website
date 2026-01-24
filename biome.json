@@ -16,7 +16,8 @@
       "!**/src/components/ui",
       "!**/playwright-report",
       "!**/test-results",
-      "!.playwright"
+      "!.playwright",
+      "!**/__test__/e2e/generated"
     ]
   },
   "css": {

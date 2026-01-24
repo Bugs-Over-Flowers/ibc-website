@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { Database } from "@/lib/supabase/db.types";
 import { createE2EAdminClient } from "../helpers/supabase";
 
@@ -72,7 +71,7 @@ export async function seedE2ERegistrationData(options?: {
       websiteURL: "https://e2e-test.local",
       logoImageURL: "https://picsum.photos/200/200",
       joinDate: new Date().toISOString(),
-      membershipStatus: "active", // Valid enum value
+      membershipStatus: "paid", // Valid enum value
       lastPaymentDate: new Date().toISOString(),
       membershipExpiryDate: new Date(
         Date.now() + 365 * 24 * 60 * 60 * 1000,

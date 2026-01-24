@@ -94,6 +94,7 @@
     "dotenv": "^17.2.3",
     "happy-dom": "^20.3.4",
     "lefthook": "^2.0.15",
+    "playwright-bdd": "^8.4.2",
     "react-email": "5.2.5",
     "supabase": "^2.72.8",
     "tailwindcss": "^4.1.18",

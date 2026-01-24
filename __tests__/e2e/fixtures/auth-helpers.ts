@@ -6,10 +6,19 @@ import type { Page } from "@playwright/test";
  * Password: Test123!@#
  */
 export async function loginAsAdmin(page: Page) {
+  const testEmail = process.env.TEST_EMAIL;
+  const testPassword = process.env.TEST_PASSWORD;
+
+  if (!testEmail || !testPassword) {
+    throw new Error(
+      "TEST_EMAIL and TEST_PASSWORD must be set in environment variables",
+    );
+  }
+
   await page.goto("/auth/login");
 
-  await page.getByLabel(/email/i).fill(process.env.TEST_EMAIL!);
-  await page.getByLabel(/password/i).fill(process.env.TEST_PASSWORD!);
+  await page.getByLabel(/email/i).fill(testEmail);
+  await page.getByLabel(/password/i).fill(testPassword);
 
   await page.getByRole("button", { name: /sign in|login/i }).click();
 
