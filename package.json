@@ -24,7 +24,7 @@
     "test:local:ui": "supabase start && vitest --ui",
     "test:all": "vitest run",
     "db:gen:types": "supabase gen types typescript --local > src/lib/supabase/db.types.ts",
-    "gen:types": "bunx supabase gen types typescript --project-id rpdourwztdpwdebggkkc > src/lib/supabase/db.types.ts"
+    "gen:types": "supabase gen types typescript --project-id rpdourwztdpwdebggkkc > src/lib/supabase/db.types.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
