@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getSectors } from "@/server/applications/queries/getMembers";
+import { getSectors } from "@/server/members/queries/getMembers";
 import MemberFilters from "./MemberFilters";
 
 export default async function FiltersWrapper() {
