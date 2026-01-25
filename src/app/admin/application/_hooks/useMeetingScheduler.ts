@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { scheduleMeetingSchema } from "@/lib/validation/scheduleMeeting";
-import { scheduleMeetingAction } from "@/server/applications/mutations/scheduleMeetingAction";
+import { scheduleMeetingAction } from "@/server/applications/actions/scheduleMeetingAction";
 import { useMeetingSchedulerStore } from "../_store/useMeetingSchedulerStore";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 

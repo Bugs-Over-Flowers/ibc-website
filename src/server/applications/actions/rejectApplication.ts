@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ApplicationDecisionInput } from "@/lib/validation/application/application";
 import { applicationDecisionSchema } from "@/lib/validation/application/application";
-import { sendApplicationDecisionEmail } from "@/server/emails/mutations/sendApplicationDecisionEmail";
+import { sendApplicationDecisionEmail } from "@/server/emails/actions/sendApplicationDecisionEmail";
 
 // Reject an application
 export async function rejectApplication(input: ApplicationDecisionInput) {

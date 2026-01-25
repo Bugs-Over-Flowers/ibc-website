@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useAction } from "@/hooks/useAction";
-import { enrollMfa, verifyMfa } from "@/server/auth/mutations/mfa";
+import { enrollMfa, verifyMfa } from "@/server/auth/actions/mfa";
 
 export function MfaSetupForm() {
   const router = useRouter();
