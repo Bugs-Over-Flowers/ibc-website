@@ -6,18 +6,29 @@ import { toast } from "sonner";
 import { useScheduleMeetingAction } from "@/app/admin/application/_hooks/useScheduleMeetingAction";
 import { useMeetingSchedulerStore } from "@/app/admin/application/_store/useMeetingSchedulerStore";
 import { useSelectedApplicationsStore } from "@/app/admin/application/_store/useSelectedApplicationsStore";
+import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { getApplicationsByIds } from "@/server/applications/queries/getApplicationsByIds";
+import { fetchApplicationsByIds } from "@/server/applications/queries/fetchApplicationsByIds";
 import { ScheduleInterviewContent } from "./ScheduleInterviewContent";
 import { ScheduleInterviewSkeleton } from "./ScheduleInterviewSkeleton";
 
 export function ScheduleInterview() {
   const router = useRouter();
-  const { selectedApplicationIds } = useSelectedApplicationsStore();
-  const { interviewDate, interviewVenue } = useMeetingSchedulerStore();
+  const { selectedApplicationIds, clearSelection } =
+    useSelectedApplicationsStore();
+  const {
+    interviewDate,
+    interviewVenue,
+    reset: resetScheduler,
+  } = useMeetingSchedulerStore();
 
-  // Redirect if required data is not set
+  // Track if submission was successful to prevent redirect effect from firing
+  const [isSubmitSuccess, setIsSubmitSuccess] = React.useState(false);
+
+  // Redirect if required data is not set (but not after successful submission)
   useEffect(() => {
+    if (isSubmitSuccess) return;
+
     if (
       !interviewDate ||
       !interviewVenue ||
@@ -28,7 +39,13 @@ export function ScheduleInterview() {
       );
       router.push("/admin/application");
     }
-  }, [interviewDate, interviewVenue, selectedApplicationIds, router]);
+  }, [
+    interviewDate,
+    interviewVenue,
+    selectedApplicationIds,
+    router,
+    isSubmitSuccess,
+  ]);
 
   const { scheduleMeeting, isPending } = useScheduleMeetingAction({
     onSuccess: (data) => {
@@ -36,6 +53,11 @@ export function ScheduleInterview() {
         data.message ??
           "Meeting scheduled successfully! Emails sent to applicants.",
       );
+      // Mark as success to prevent redirect effect from firing
+      setIsSubmitSuccess(true);
+      // Reset form and clear selections after successful submission
+      resetScheduler();
+      clearSelection();
     },
     onError: (error) => {
       toast.error(
@@ -63,7 +85,11 @@ export function ScheduleInterview() {
     return { success: result.success };
   };
 
-  // Fetch applications
+  // Fetch applications via server action
+  const { execute: executeGetApplications } = useAction(
+    tryCatch(fetchApplicationsByIds),
+  );
+
   const [applications, setApplications] = React.useState<
     Array<{ applicationId: string; companyName: string }>
   >([]);
@@ -72,8 +98,8 @@ export function ScheduleInterview() {
   React.useEffect(() => {
     async function fetchApplications() {
       if (selectedApplicationIds.size > 0) {
-        const { error, data, success } = await tryCatch(
-          getApplicationsByIds(Array.from(selectedApplicationIds)),
+        const { error, data, success } = await executeGetApplications(
+          Array.from(selectedApplicationIds),
         );
 
         if (!success || !data) {
@@ -89,7 +115,7 @@ export function ScheduleInterview() {
     }
 
     fetchApplications();
-  }, [selectedApplicationIds, router]);
+  }, [selectedApplicationIds, router, executeGetApplications]);
 
   if (isLoading) {
     return <ScheduleInterviewSkeleton />;

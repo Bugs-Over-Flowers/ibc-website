@@ -1,7 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { useTabSelections } from "../_hooks/useTabSelections";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import BulkActions from "./BulkActions";
@@ -24,27 +31,40 @@ export default function ApplicationsTabs({
     "new",
   );
   const [isMobile, setIsMobile] = useState(false);
-  const [indicatorReady, setIndicatorReady] = useState(false);
+  const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
   const { selectedApplicationIds, clearSelection, selectAll } =
     useSelectedApplicationsStore();
 
+  // Update indicator position based on active tab button
+  const updateIndicator = useCallback(() => {
+    const activeButton = buttonRefs.current[activeTab];
+    if (activeButton) {
+      setIndicatorStyle({
+        x: activeButton.offsetLeft,
+        width: activeButton.offsetWidth,
+      });
+    }
+  }, [activeTab]);
+
+  // Update indicator on tab change and initial mount
+  useLayoutEffect(() => {
+    updateIndicator();
+  }, [updateIndicator]);
+
+  // Handle window resize to recalculate indicator position
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024);
+      // Recalculate indicator after resize
+      updateIndicator();
     };
 
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  // Ensure indicator is rendered after refs are set
-  useEffect(() => {
-    if (buttonRefs.current[activeTab]) {
-      setIndicatorReady(true);
-    }
-  }, [activeTab]);
+  }, [updateIndicator]);
 
   const { handleTabChange: handleTabSelectionChange } = useTabSelections({
     activeTab,
@@ -63,10 +83,6 @@ export default function ApplicationsTabs({
     { id: "pending", label: "Pending Interviews" },
     { id: "finished", label: "Finished" },
   ] as const;
-
-  const activeButtonRef = buttonRefs.current[activeTab];
-  const indicatorX = activeButtonRef?.offsetLeft ?? 0;
-  const indicatorWidth = activeButtonRef?.offsetWidth ?? 0;
 
   return (
     <>
@@ -156,12 +172,15 @@ export default function ApplicationsTabs({
 
       <div className="w-full">
         <div className="relative">
-          <div className="relative grid grid-cols-3 gap-0.5 overflow-hidden rounded-md border border-border bg-background p-1 sm:gap-0">
-            {indicatorReady && (
+          <div
+            className="relative grid grid-cols-3 gap-0.5 overflow-hidden rounded-md border border-border bg-background p-1 sm:gap-0"
+            ref={containerRef}
+          >
+            {indicatorStyle.width > 0 && (
               <motion.div
                 animate={{
-                  x: indicatorX,
-                  width: indicatorWidth,
+                  x: indicatorStyle.x,
+                  width: indicatorStyle.width,
                 }}
                 className="absolute rounded-md bg-primary/20"
                 style={{
@@ -187,7 +206,11 @@ export default function ApplicationsTabs({
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
                 ref={(el) => {
-                  if (el) buttonRefs.current[tab.id] = el;
+                  buttonRefs.current[tab.id] = el;
+                  // Update indicator when active tab's ref is set
+                  if (el && tab.id === activeTab) {
+                    updateIndicator();
+                  }
                 }}
                 title={tab.label}
                 type="button"
