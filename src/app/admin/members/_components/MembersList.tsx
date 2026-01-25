@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getMembers } from "@/server/applications/queries/getMembers";
+import { getMembers } from "@/server/members/queries/getMembers";
 import { EmptyMembersState } from "./EmptyMembersState";
 import { MembersTable } from "./MembersTable";
 

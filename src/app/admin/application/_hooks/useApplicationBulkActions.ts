@@ -1,20 +1,19 @@
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
-import {
-  approveApplicationServer,
-  rejectApplicationServer,
-} from "@/server/applications/mutations/approveReject";
+import tryCatch from "@/lib/server/tryCatch";
+import { approveApplication } from "@/server/applications/actions/approveApplication";
+import { rejectApplication } from "@/server/applications/actions/rejectApplication";
 
 export function useBulkActions(onSuccess?: () => void) {
   const { execute: approveOne, isPending: isApprovingOne } = useAction(
-    approveApplicationServer,
+    tryCatch(approveApplication),
     {
       onError: (err) => toast.error(err || "Failed to approve application"),
     },
   );
 
   const { execute: rejectOne, isPending: isRejectingOne } = useAction(
-    rejectApplicationServer,
+    tryCatch(rejectApplication),
     {
       onError: (err) => toast.error(err || "Failed to reject application"),
     },
@@ -25,9 +24,12 @@ export function useBulkActions(onSuccess?: () => void) {
     let failCount = 0;
 
     for (const id of applicationIds) {
-      const result = await approveOne({ applicationId: id, action: "approve" });
+      const { success } = await approveOne({
+        applicationId: id,
+        action: "approve",
+      });
 
-      if (result.success) {
+      if (success) {
         successCount++;
       } else {
         failCount++;
@@ -46,7 +48,9 @@ export function useBulkActions(onSuccess?: () => void) {
       );
     }
 
-    onSuccess?.();
+    if (failCount === 0 && successCount > 0) {
+      onSuccess?.();
+    }
   };
 
   const bulkReject = async (applicationIds: Set<string>) => {
@@ -54,9 +58,12 @@ export function useBulkActions(onSuccess?: () => void) {
     let failCount = 0;
 
     for (const id of applicationIds) {
-      const result = await rejectOne({ applicationId: id, action: "reject" });
+      const { success } = await rejectOne({
+        applicationId: id,
+        action: "reject",
+      });
 
-      if (result.success) {
+      if (success) {
         successCount++;
       } else {
         failCount++;
@@ -75,7 +82,9 @@ export function useBulkActions(onSuccess?: () => void) {
       );
     }
 
-    onSuccess?.();
+    if (failCount === 0 && successCount > 0) {
+      onSuccess?.();
+    }
   };
 
   return {

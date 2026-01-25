@@ -13,7 +13,11 @@
       "!.next",
       "!dist",
       "!build",
-      "!**/src/components/ui"
+      "!**/src/components/ui",
+      "!**/playwright-report",
+      "!**/test-results",
+      "!.playwright",
+      "!**/__test__/e2e/generated"
     ]
   },
   "css": {

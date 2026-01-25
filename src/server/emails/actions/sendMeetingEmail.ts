@@ -1,5 +1,6 @@
 "use server";
 
+import { render } from "@react-email/render";
 import { Resend } from "resend";
 import MeetingNotificationEmail from "@/lib/resend/templates/meeting-notification";
 
@@ -10,6 +11,7 @@ interface SendMeetingEmailProps {
   companyName: string;
   interviewDate: string;
   interviewVenue: string;
+  customMessage?: string;
 }
 
 export async function sendMeetingEmail({
@@ -17,19 +19,37 @@ export async function sendMeetingEmail({
   companyName,
   interviewDate,
   interviewVenue,
+  customMessage,
 }: SendMeetingEmailProps): Promise<
   [error: string | null, data: { success: true } | null]
 > {
   try {
+    const html = await render(
+      MeetingNotificationEmail({
+        companyName,
+        interviewDate,
+        interviewVenue,
+        customMessage,
+      }),
+      { pretty: false },
+    );
+
+    const text = await render(
+      MeetingNotificationEmail({
+        companyName,
+        interviewDate,
+        interviewVenue,
+        customMessage,
+      }),
+      { plainText: true, pretty: false },
+    );
+
     const { error } = await resend.emails.send({
       to,
       from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
       subject: "IBC Membership Application - Interview Scheduled",
-      react: MeetingNotificationEmail({
-        companyName,
-        interviewDate,
-        interviewVenue,
-      }),
+      html: String(html),
+      text: String(text),
     });
 
     if (error) {

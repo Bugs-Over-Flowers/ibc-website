@@ -18,6 +18,7 @@ export default defineConfig({
       "**/node_modules/**",
       "**/dist/**",
       "**/.{idea,git,cache,output,temp}/**",
+      "__tests__/e2e/**",
     ],
     coverage: {
       provider: "v8",
