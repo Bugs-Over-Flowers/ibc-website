@@ -64,6 +64,7 @@ export default function EventActionsDropdown({
         </DropdownMenuContent>
       </DropdownMenu>
       <AttendanceModal
+        eventId={eventId}
         isOpen={isAttendanceModalOpen}
         setIsOpen={setIsAttendanceModalOpen}
       />
