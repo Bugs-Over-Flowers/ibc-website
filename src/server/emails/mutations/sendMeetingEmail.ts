@@ -31,6 +31,7 @@ export async function sendMeetingEmail({
         interviewVenue,
         customMessage,
       }),
+      { pretty: false },
     );
 
     const text = await render(
@@ -40,7 +41,7 @@ export async function sendMeetingEmail({
         interviewVenue,
         customMessage,
       }),
-      { plainText: true },
+      { plainText: true, pretty: false },
     );
 
     const { error } = await resend.emails.send({

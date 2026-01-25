@@ -22,19 +22,28 @@ export async function sendApplicationDecisionEmail({
   [error: string | null, data: { success: true } | null]
 > {
   try {
-    const emailComponent = ApplicationDecisionEmail({
-      companyName,
-      decision,
-      notes,
-    });
-
-    const html = await render(emailComponent);
-    const text = await render(emailComponent, { plainText: true });
-
     const subject =
       decision === "approved"
         ? "IBC Membership Application Approved"
         : "IBC Membership Application Update";
+
+    const html = await render(
+      ApplicationDecisionEmail({
+        companyName,
+        decision,
+        notes,
+      }),
+      { pretty: false },
+    );
+
+    const text = await render(
+      ApplicationDecisionEmail({
+        companyName,
+        decision,
+        notes,
+      }),
+      { plainText: true, pretty: false },
+    );
 
     const { error } = await resend.emails.send({
       to,
