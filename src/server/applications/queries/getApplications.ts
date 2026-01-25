@@ -1,10 +1,15 @@
 import "server-only";
+
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import type { ApplicationWithMembers } from "@/lib/types/application";
 
-export async function getApplications(requestCookies?: RequestCookie[]) {
+type GetApplicationsResult = ApplicationWithMembers[];
+
+export async function getApplications(
+  requestCookies?: RequestCookie[],
+): Promise<GetApplicationsResult> {
   const cookieStore = requestCookies || (await cookies()).getAll();
   const supabase = await createClient(cookieStore);
 
@@ -24,73 +29,32 @@ export async function getApplications(requestCookies?: RequestCookie[]) {
     throw new Error(`Failed to fetch applications: ${error.message}`);
   }
 
-  return data as ApplicationWithMembers[];
-}
+  const signLogoUrl = async (path: string | null) => {
+    if (!path) return null;
 
-export async function getApplicationById(
-  applicationId: string,
-  requestCookies?: RequestCookie[],
-) {
-  const cookieStore = requestCookies || (await cookies()).getAll();
-  const supabase = await createClient(cookieStore);
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path;
+    }
 
-  const { data, error } = await supabase
-    .from("Application")
-    .select(
-      `
-      *,
-      ApplicationMember(*),
-      Sector(sectorId, sectorName),
-      ProofImage(proofImageId, path)
-    `,
-    )
-    .eq("applicationId", applicationId)
-    .single();
+    const { data: signed, error } = await supabase.storage
+      .from("logoImage")
+      .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
 
-  if (error) {
-    throw new Error(`Failed to fetch application: ${error.message}`);
-  }
+    if (!error && signed?.signedUrl) {
+      return signed.signedUrl;
+    }
 
-  return data as ApplicationWithMembers;
-}
+    return null;
+  };
 
-/**
- * Get applications by status
- * Note: This requires adding an 'applicationStatus' column to the Application table
- * For now, we'll filter based on memberId:
- * - null memberId = pending/new applications
- * - has memberId = approved applications
- */
-export async function getApplicationsByStatus(
-  status: "pending" | "approved",
-  requestCookies?: RequestCookie[],
-) {
-  const cookieStore = requestCookies || (await cookies()).getAll();
-  const supabase = await createClient(cookieStore);
+  const applicationsWithSignedLogos = await Promise.all(
+    (data as ApplicationWithMembers[]).map(
+      async (application: ApplicationWithMembers) => ({
+        ...application,
+        logoImageURL: await signLogoUrl(application.logoImageURL),
+      }),
+    ),
+  );
 
-  let query = supabase
-    .from("Application")
-    .select(
-      `
-      *,
-      ApplicationMember(*),
-      Sector(sectorId, sectorName),
-      ProofImage(proofImageId, path)
-    `,
-    )
-    .order("applicationDate", { ascending: false });
-
-  if (status === "pending") {
-    query = query.is("memberId", null);
-  } else {
-    query = query.not("memberId", "is", null);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(`Failed to fetch applications: ${error.message}`);
-  }
-
-  return data as ApplicationWithMembers[];
+  return applicationsWithSignedLogos;
 }

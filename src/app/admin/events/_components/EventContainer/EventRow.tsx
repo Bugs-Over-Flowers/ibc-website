@@ -1,6 +1,7 @@
 import { Calendar, DollarSign, MapPin } from "lucide-react";
 import { cookies } from "next/headers";
 import Image from "next/image";
+import { formatFullDateTime } from "@/lib/events/eventUtils";
 import { getAllEventDaysByEventId } from "@/server/events/queries/getAllEventDaysByEventId";
 import { EventDayFetchProvider } from "../../_hooks/useEventDayFetchContext";
 import type { EventWithStatus } from "../../types/event";
@@ -48,7 +49,7 @@ export default async function EventRow({ event }: EventRowProps) {
 
       <div className="flex w-full flex-1 flex-col gap-3">
         <div className="flex h-36 flex-col gap-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2">
             <span
               className={`whitespace-nowrap rounded-xl ${
                 event.eventType ? "bg-muted" : ""
@@ -56,6 +57,12 @@ export default async function EventRow({ event }: EventRowProps) {
             >
               {event.eventType}
             </span>
+            <div className="flex items-center justify-end">
+              <EventActionsDropdown
+                eventId={event.eventId}
+                status={event.computedStatus}
+              />
+            </div>
           </div>
           <h3 className="line-clamp-2 font-semibold text-lg md:text-xl">
             {event.eventTitle}
@@ -65,7 +72,7 @@ export default async function EventRow({ event }: EventRowProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 border-t pt-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 border-t pt-2 sm:grid-cols-2 xl:grid-cols-3">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <MapPin size={12} />
@@ -74,17 +81,14 @@ export default async function EventRow({ event }: EventRowProps) {
             <span className="line-clamp-2 text-sm">{event.venue}</span>
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <Calendar size={12} />
               <span>Dates</span>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
-              <div>
-                <span className="text-sm">
-                  {event.eventStartDate} | {event.eventEndDate}
-                </span>
-              </div>
+            <div className="flex flex-col gap-1 text-sm">
+              <div>{formatFullDateTime(event.eventStartDate)}</div>
+              <div>{formatFullDateTime(event.eventEndDate)}</div>
             </div>
           </div>
 

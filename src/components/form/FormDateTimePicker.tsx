@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { endOfDay, format, startOfDay } from "date-fns";
 import { ChevronDownIcon } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
@@ -18,16 +18,29 @@ interface FormDateTimePickerProps {
   label?: string;
   description?: string;
   className?: string;
+  minDate?: Date;
+  maxDate?: Date;
+  disabled?: (date: Date) => boolean;
+  startMonth?: Date;
+  endMonth?: Date;
 }
 
 const FormDateTimePicker: React.FC<FormDateTimePickerProps> = ({
   label,
   description,
   className,
+  minDate,
+  maxDate,
+  disabled,
+  startMonth,
+  endMonth,
 }) => {
   const field = useFieldContext<string | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
   const [open, setOpen] = React.useState(false);
+
+  const computedStartMonth = startMonth ?? minDate ?? new Date(1900, 0);
+  const computedEndMonth = endMonth ?? maxDate ?? new Date(2100, 11);
 
   // Parse the string value "YYYY-MM-DDTHH:mm"
   const value = field.state.value;
@@ -98,11 +111,19 @@ const FormDateTimePicker: React.FC<FormDateTimePickerProps> = ({
             <PopoverContent align="start" className="w-auto p-0">
               <Calendar
                 captionLayout="dropdown"
+                disabled={(date) => {
+                  if (typeof disabled === "function") return disabled(date);
+                  if (minDate && date < startOfDay(minDate)) return true;
+                  if (maxDate && date > endOfDay(maxDate)) return true;
+                  return date < new Date("1900-01-01");
+                }}
+                endMonth={computedEndMonth}
                 fromYear={1900}
                 initialFocus
                 mode="single"
                 onSelect={handleDateSelect}
                 selected={dateValue}
+                startMonth={computedStartMonth}
                 toYear={2100}
               />
             </PopoverContent>
