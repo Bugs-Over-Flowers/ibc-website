@@ -3,7 +3,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
   type ReactNode,
-  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -11,7 +10,7 @@ import {
 } from "react";
 import { useTabSelections } from "../_hooks/useTabSelections";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
-import BulkActions from "./BulkActions";
+import BulkActions from "./ApplicationBulkActions";
 import MeetingScheduler from "./MeetingScheduler";
 
 interface ApplicationsTabsProps {
@@ -37,8 +36,8 @@ export default function ApplicationsTabs({
   const { selectedApplicationIds, clearSelection, selectAll } =
     useSelectedApplicationsStore();
 
-  // Update indicator position based on active tab button
-  const updateIndicator = useCallback(() => {
+  // Update indicator on tab change and initial mount
+  useLayoutEffect(() => {
     const activeButton = buttonRefs.current[activeTab];
     if (activeButton) {
       setIndicatorStyle({
@@ -48,13 +47,18 @@ export default function ApplicationsTabs({
     }
   }, [activeTab]);
 
-  // Update indicator on tab change and initial mount
-  useLayoutEffect(() => {
-    updateIndicator();
-  }, [updateIndicator]);
-
   // Handle window resize to recalculate indicator position
   useEffect(() => {
+    const updateIndicator = () => {
+      const activeButton = buttonRefs.current[activeTab];
+      if (activeButton) {
+        setIndicatorStyle({
+          x: activeButton.offsetLeft,
+          width: activeButton.offsetWidth,
+        });
+      }
+    };
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024);
       // Recalculate indicator after resize
@@ -64,7 +68,7 @@ export default function ApplicationsTabs({
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, [updateIndicator]);
+  }, [activeTab]);
 
   const { handleTabChange: handleTabSelectionChange } = useTabSelections({
     activeTab,
@@ -209,7 +213,10 @@ export default function ApplicationsTabs({
                   buttonRefs.current[tab.id] = el;
                   // Update indicator when active tab's ref is set
                   if (el && tab.id === activeTab) {
-                    updateIndicator();
+                    setIndicatorStyle({
+                      x: el.offsetLeft,
+                      width: el.offsetWidth,
+                    });
                   }
                 }}
                 title={tab.label}

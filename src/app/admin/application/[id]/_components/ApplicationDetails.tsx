@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import { ApplicationHeader } from "./ApplicationHeader";
 import { CompanyInfoCard } from "./CompanyInfoCard";
@@ -22,57 +23,56 @@ export async function ApplicationDetails({
 }: ApplicationDetailsProps) {
   const cookieStore = await cookies();
 
-  try {
-    const application = await getApplicationDetailsById(
-      applicationId,
-      cookieStore.getAll(),
-    );
+  const { data: application, success } = await tryCatch(
+    getApplicationDetailsById(applicationId, cookieStore.getAll()),
+  );
 
-    return (
-      <>
-        <Link
-          href={source === "members" ? "/admin/members" : "/admin/application"}
-        >
-          <Button
-            className="mb-4 border border-border active:scale-95 active:opacity-80"
-            size="sm"
-            variant="ghost"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            {source === "members" ? "Back to Members" : "Back to Applications"}
-          </Button>
-        </Link>
-
-        <ApplicationHeader application={application} />
-
-        <CompanyInfoCard
-          applicationMemberType={application.applicationMemberType}
-          applicationType={application.applicationType}
-          companyAddress={application.companyAddress}
-          companyName={application.companyName}
-          sectorName={application.Sector?.sectorName}
-          websiteURL={application.websiteURL}
-        />
-
-        <ContactInfoCard
-          emailAddress={application.emailAddress}
-          faxNumber={application.faxNumber}
-          landline={application.landline}
-          mobileNumber={application.mobileNumber}
-        />
-
-        <RepresentativesCard members={application.ApplicationMember} />
-
-        <PaymentInfoCard
-          applicationDate={new Date(application.applicationDate)}
-          paymentMethod={application.paymentMethod}
-          paymentStatus={application.paymentStatus}
-        />
-
-        <ProofImagesCard proofImages={application.ProofImage} />
-      </>
-    );
-  } catch {
+  if (!success) {
     notFound();
   }
+
+  return (
+    <>
+      <Link
+        href={source === "members" ? "/admin/members" : "/admin/application"}
+      >
+        <Button
+          className="mb-4 border border-border active:scale-95 active:opacity-80"
+          size="sm"
+          variant="ghost"
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          {source === "members" ? "Back to Members" : "Back to Applications"}
+        </Button>
+      </Link>
+
+      <ApplicationHeader application={application} />
+
+      <CompanyInfoCard
+        applicationMemberType={application.applicationMemberType}
+        applicationType={application.applicationType}
+        companyAddress={application.companyAddress}
+        companyName={application.companyName}
+        sectorName={application.Sector?.sectorName}
+        websiteURL={application.websiteURL}
+      />
+
+      <ContactInfoCard
+        emailAddress={application.emailAddress}
+        faxNumber={application.faxNumber}
+        landline={application.landline}
+        mobileNumber={application.mobileNumber}
+      />
+
+      <RepresentativesCard members={application.ApplicationMember} />
+
+      <PaymentInfoCard
+        applicationDate={new Date(application.applicationDate)}
+        paymentMethod={application.paymentMethod}
+        paymentStatus={application.paymentStatus}
+      />
+
+      <ProofImagesCard proofImages={application.ProofImage} />
+    </>
+  );
 }

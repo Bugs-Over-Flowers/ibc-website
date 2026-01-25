@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
+import { scheduleMeetingSchema } from "@/lib/validation/scheduleMeeting";
 import { scheduleMeetingAction } from "@/server/applications/mutations/scheduleMeetingAction";
 import { useMeetingSchedulerStore } from "../_store/useMeetingSchedulerStore";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
@@ -27,20 +28,7 @@ export function useMeetingScheduler(onSuccess?: () => void) {
     },
     validationLogic: revalidateLogic(),
     validators: {
-      onDynamic: ({ value }) => {
-        const errors: Record<string, string> = {};
-
-        if (!value.interviewDate) {
-          errors.interviewDate = "Interview date is required";
-        }
-
-        if (!value.interviewVenue || value.interviewVenue.trim().length < 3) {
-          errors.interviewVenue =
-            "Interview venue is required (min. 3 characters)";
-        }
-
-        return Object.keys(errors).length > 0 ? errors : undefined;
-      },
+      onDynamic: scheduleMeetingSchema,
     },
     onSubmit: async ({ value }) => {
       // Convert string datetime to Date object
