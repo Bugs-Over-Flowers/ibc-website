@@ -3,7 +3,7 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useBulkActions } from "../_hooks/useBulkActions";
+import { useBulkActions } from "../_hooks/useApplicationBulkActions";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 
 export default function BulkActions() {
