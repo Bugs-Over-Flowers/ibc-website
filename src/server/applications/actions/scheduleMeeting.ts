@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ScheduleMeetingInput } from "@/lib/validation/application/application";
 import { scheduleMeetingSchema } from "@/lib/validation/application/application";
-import { sendMeetingEmail } from "@/server/emails/mutations/sendMeetingEmail";
+import { sendMeetingEmail } from "@/server/emails/actions/sendMeetingEmail";
 
 export async function scheduleMeeting(input: ScheduleMeetingInput) {
   const parsed = scheduleMeetingSchema.parse(input);

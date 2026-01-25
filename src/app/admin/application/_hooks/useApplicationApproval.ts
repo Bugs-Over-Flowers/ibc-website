@@ -4,8 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { approveApplication } from "@/server/applications/mutations/approveApplication";
-import { rejectApplication } from "@/server/applications/mutations/rejectApplication";
+import { approveApplication } from "@/server/applications/actions/approveApplication";
+import { rejectApplication } from "@/server/applications/actions/rejectApplication";
 
 export function useApplicationApproval(applicationId: string) {
   const router = useRouter();

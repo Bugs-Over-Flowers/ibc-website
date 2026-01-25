@@ -7,7 +7,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/client";
 import { zodValidator } from "@/lib/utils";
 import { MembershipApplicationStep4Schema } from "@/lib/validation/membership/application";
-import { submitMembershipApplication } from "@/server/membership/mutations/submitApplication";
+import { submitMembershipApplication } from "@/server/membership/actions/submitApplication";
 
 interface UseMembershipStep4Props {
   onSuccess?: () => void;

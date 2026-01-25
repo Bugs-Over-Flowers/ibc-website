@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAction } from "@/hooks/useAction";
 import { cn } from "@/lib/utils";
-import { logout } from "@/server/auth/mutations/logout";
+import { logout } from "@/server/auth/actions/logout";
 
 interface AdminSidebarSecondaryProps {
   onNavigate?: () => void;

@@ -2,7 +2,7 @@
 
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { scheduleMeeting } from "@/server/applications/mutations/scheduleMeeting";
+import { scheduleMeeting } from "@/server/applications/actions/scheduleMeeting";
 
 type ScheduleMeetingResult = { success: true; message: string };
 
