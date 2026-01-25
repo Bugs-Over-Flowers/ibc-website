@@ -54,7 +54,6 @@ export function EventCard({ event, index }: EventCardProps) {
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
-      data-cy="event-card"
       initial={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.5, delay: 0.1 * index }}
     >
@@ -141,7 +140,6 @@ export function EventCard({ event, index }: EventCardProps) {
               {status !== "past" && (
                 <Link
                   className="ml-auto flex w-auto items-center gap-2 rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90 hover:text-white"
-                  data-cy="register-now-button"
                   href={`/registration/${event.eventId}/info`}
                   tabIndex={0}
                 >
@@ -152,7 +150,6 @@ export function EventCard({ event, index }: EventCardProps) {
             </div>
             <Link
               className="group/readmore flex w-full items-center justify-center gap-2 rounded-xl border border-primary/50 bg-card px-4 py-2.5 font-medium text-primary text-sm transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:shadow-md hover:shadow-primary/20"
-              data-cy="event-details-button"
               href={`/events/${event.eventId}`}
               tabIndex={0}
             >
