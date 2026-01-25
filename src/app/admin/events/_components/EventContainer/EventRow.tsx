@@ -1,6 +1,6 @@
 import { Calendar, DollarSign, MapPin } from "lucide-react";
-import { cookies } from "next/headers";
 import Image from "next/image";
+import { Suspense } from "react";
 import { formatFullDateTime } from "@/lib/events/eventUtils";
 import type { EventWithStatus } from "../../types/event";
 import EventActionsDropdown from "./EventActionsDropdown";
@@ -9,16 +9,8 @@ interface EventRowProps {
   event: EventWithStatus;
 }
 
-export default async function EventRow({ event }: EventRowProps) {
+export default function EventRow({ event }: EventRowProps) {
   const imageUrl = event.eventHeaderUrl?.trim();
-
-  const cookieStore = await cookies();
-  const getEventDaysByEventIdPromise = getAllEventDaysByEventId(
-    cookieStore.getAll(),
-    {
-      eventId: event.eventId,
-    },
-  );
 
   return (
     <article className="flex flex-col items-start gap-4 overflow-hidden rounded-lg border bg-background p-4 shadow-sm md:flex-row md:items-center">
@@ -56,10 +48,12 @@ export default async function EventRow({ event }: EventRowProps) {
               {event.eventType}
             </span>
             <div className="flex items-center justify-end">
-              <EventActionsDropdown
-                eventId={event.eventId}
-                status={event.computedStatus}
-              />
+              <Suspense>
+                <EventActionsDropdown
+                  eventId={event.eventId}
+                  status={event.computedStatus}
+                />
+              </Suspense>
             </div>
           </div>
           <h3 className="line-clamp-2 font-semibold text-lg md:text-xl">
