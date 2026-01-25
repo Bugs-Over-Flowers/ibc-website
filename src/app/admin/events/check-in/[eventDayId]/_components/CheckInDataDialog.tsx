@@ -93,7 +93,11 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
   };
 
   return (
-    <Dialog onOpenChange={setCheckInDialogOpen} open={scannedData !== null}>
+    <Dialog
+      disablePointerDismissal
+      onOpenChange={setCheckInDialogOpen}
+      open={scannedData !== null}
+    >
       <DialogContent
         className={"w-full md:min-w-2xl md:max-w-2xl"}
         showCloseButton={false}
