@@ -6,18 +6,15 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 interface ParticipantsButtonProps {
   eventId: string;
-  onAction: () => void;
 }
 
 export default function ParticipantsButton({
   eventId,
-  onAction,
 }: ParticipantsButtonProps) {
   const router = useRouter();
 
   const handleViewParticipants = () => {
     router.push(`/admin/events/${eventId}/registration-list?tab=participants`);
-    onAction();
   };
 
   return (

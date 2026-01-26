@@ -16,7 +16,7 @@
 
 import { z } from "zod";
 import { Constants, type Enums } from "@/lib/supabase/db.types";
-import { RegistrationIdentifier } from "@/lib/validation/qr/standard";
+import { RegistrationIdentifier } from "@/lib/validation/utils";
 
 //
 // Database Enum Constants
