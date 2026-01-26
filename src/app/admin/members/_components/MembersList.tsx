@@ -15,13 +15,7 @@ export default async function MembersList({ searchParams }: PageProps) {
   const params = await searchParams;
   const cookieStore = await cookies();
 
-  const allowedStatuses = [
-    "active",
-    "unpaid",
-    "overdue",
-    "revoked",
-    "all",
-  ] as const;
+  const allowedStatuses = ["paid", "unpaid", "cancelled", "all"] as const;
   const status =
     params.status &&
     (allowedStatuses as readonly string[]).includes(params.status)
