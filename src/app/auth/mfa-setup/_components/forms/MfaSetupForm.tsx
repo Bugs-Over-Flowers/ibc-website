@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useAction } from "@/hooks/useAction";
-import { enrollMfa, verifyMfa } from "@/server/auth/mutations/mfa";
+import { enrollMfa, verifyMfa } from "@/server/auth/actions/mfa";
 
 export function MfaSetupForm() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export function MfaSetupForm() {
       onSuccess: () => {
         setCode("");
         toast.success("MFA enabled successfully");
-        router.push("/admin/dashboard");
+        router.push("/admin");
       },
       onError: (error) => {
         setCode("");
@@ -166,29 +166,29 @@ export function MfaSetupForm() {
               ref={otpRef}
               value={code}
             >
-              <InputOTPGroup className="gap-2">
+              <InputOTPGroup className="gap-1 sm:gap-2">
                 <InputOTPSlot
-                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
                   index={0}
                 />
                 <InputOTPSlot
-                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
                   index={1}
                 />
                 <InputOTPSlot
-                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
                   index={2}
                 />
                 <InputOTPSlot
-                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
                   index={3}
                 />
                 <InputOTPSlot
-                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
                   index={4}
                 />
                 <InputOTPSlot
-                  className="h-12 w-12 rounded-md border font-semibold text-lg"
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
                   index={5}
                 />
               </InputOTPGroup>

@@ -167,10 +167,7 @@ export default async function RegistrationInfoPage({
         </CardContent>
         <CardFooter>
           <CardAction>
-            <Link
-              data-cy="event-start-register-button"
-              href={`/registration/${eventId}`}
-            >
+            <Link href={`/registration/${eventId}`}>
               <Button>Register</Button>
             </Link>
           </CardAction>

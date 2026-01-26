@@ -14,6 +14,25 @@ export const formatDate = (dateString: string | null) => {
   });
 };
 
+/**
+ * Format as "Month Day, Year h:mm AM/PM" (e.g., January 5, 2026 3:21 PM)
+ */
+export const formatFullDateTime = (dateString: string | null) => {
+  if (!dateString) return "TBA";
+  const date = new Date(dateString);
+  const dateStr = date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  const timeStr = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${dateStr} ${timeStr}`;
+};
+
 export const formatTime = (
   startDate: string | null,
   endDate: string | null,

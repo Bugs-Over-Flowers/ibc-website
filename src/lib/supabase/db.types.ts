@@ -501,6 +501,7 @@ export type Database = {
           eventId: string;
           identifier: string;
           nonMemberName: string | null;
+          numberOfParticipants: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           registrationDate: string;
@@ -511,6 +512,7 @@ export type Database = {
           eventId: string;
           identifier: string;
           nonMemberName?: string | null;
+          numberOfParticipants?: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           registrationDate?: string;
@@ -521,6 +523,7 @@ export type Database = {
           eventId?: string;
           identifier?: string;
           nonMemberName?: string | null;
+          numberOfParticipants?: number | null;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           registrationDate?: string;
@@ -742,7 +745,7 @@ export type Database = {
       CompanyMemberType: "principal" | "alternate";
       EventType: "public" | "private";
       InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
-      MembershipStatus: "active" | "unpaid" | "overdue" | "revoked";
+      MembershipStatus: "paid" | "unpaid" | "cancelled";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
@@ -918,7 +921,7 @@ export const Constants = {
       CompanyMemberType: ["principal", "alternate"],
       EventType: ["public", "private"],
       InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
-      MembershipStatus: ["active", "unpaid", "overdue", "revoked"],
+      MembershipStatus: ["paid", "unpaid", "cancelled"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
