@@ -1,7 +1,8 @@
 "use client";
 
 import { formatDate } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,15 @@ export default function AttendanceModal({
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
       <DialogContent showCloseButton={false}>
-        <DialogTitle>Check Attendance</DialogTitle>
+        <div className="flex justify-between">
+          <DialogTitle className={"w-full"}>Check Attendance</DialogTitle>
+          <Link href={`/admin/events/${eventId}/check-in-list`}>
+            <Button variant={"ghost"}>
+              <ChevronRight />
+              All
+            </Button>
+          </Link>
+        </div>
         <DialogDescription>
           Please select a day to check attendance.
         </DialogDescription>
