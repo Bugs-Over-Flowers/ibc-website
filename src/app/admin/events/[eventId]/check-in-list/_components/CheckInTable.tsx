@@ -2,9 +2,10 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
-import { ArrowDownAZ, ArrowUpZA, Clock } from "lucide-react";
+import { ArrowDownAZ, ArrowUpZA, Clock, Download } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
+import { exportToExcel } from "@/lib/export/excel";
 import type { CheckInListItem } from "@/lib/validation/check-in/check-in-list";
 import CheckInRowActions from "./CheckInRowActions";
 import RemarksDialog from "./RemarksDialog";
@@ -14,9 +15,11 @@ interface CheckInTableProps {
   eventDayId: string;
 }
 
+type CheckInListRow = CheckInListItem & { name: string };
+
 const getCheckInListColumns = (
   eventDayId: string,
-): ColumnDef<CheckInListItem>[] => [
+): ColumnDef<CheckInListRow>[] => [
   {
     accessorKey: "checkInTime",
     sortingFn: "datetime",
@@ -54,8 +57,7 @@ const getCheckInListColumns = (
     cell: ({ row }) => row.original.affiliation,
   },
   {
-    id: "name",
-    accessorFn: (row) => `${row.firstName} ${row.lastName}`,
+    accessorKey: "name",
     sortingFn: (rowA, rowB) => {
       const aName = `${rowA.original.firstName} ${rowA.original.lastName}`;
       const bName = `${rowB.original.firstName} ${rowB.original.lastName}`;
@@ -99,6 +101,7 @@ const getCheckInListColumns = (
     cell: ({ row }) => row.original.contactNumber,
   },
   {
+    accessorKey: "remarks",
     id: "remarks",
     header: "Remarks",
     cell: ({ row }) => {
@@ -127,10 +130,54 @@ const getCheckInListColumns = (
   },
 ];
 
+const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
+  {
+    accessorKey: "checkInTime",
+    header: "Time", // Custom Excel header
+  },
+  {
+    accessorKey: "affiliation",
+    header: "Affiliation", // Custom Excel header
+  },
+  {
+    accessorKey: "name",
+    header: "Full Name", // Custom Excel header
+  },
+  {
+    accessorKey: "email",
+    header: "Email Address", // Custom Excel header
+  },
+  {
+    accessorKey: "contactNumber",
+    header: "Phone Number", // Custom Excel header
+  },
+  {
+    accessorKey: "remarks",
+    header: "Remarks", // Custom Excel header
+  },
+];
+
 export default function CheckInTable({
   checkIns,
   eventDayId,
 }: CheckInTableProps) {
+  const tableData: CheckInListRow[] = checkIns.map((checkIn) => ({
+    ...checkIn,
+    name: `${checkIn.firstName} ${checkIn.lastName}`,
+  }));
+
+  const handleExportToExcel = async () => {
+    await exportToExcel({
+      data: tableData,
+      columns: getExcelColumns(),
+      filename: "check-in-list",
+      sheetName: "Check-In List",
+      excludeColumns: ["actions"],
+      formatters: {
+        checkInTime: (value) => formatDate(new Date(String(value)), "h:mm aaa"),
+      },
+    });
+  };
   return (
     <div className="space-y-2">
       <div className="flex h-8 items-center justify-between">
@@ -138,8 +185,14 @@ export default function CheckInTable({
           {checkIns.length}{" "}
           {checkIns.length === 1 ? "participant" : "participants"} checked in
         </div>
+        <div>
+          <Button onClick={handleExportToExcel} size="sm" variant="outline">
+            <Download className="size-4" />
+            Export to Excel
+          </Button>
+        </div>
       </div>
-      <DataTable columns={getCheckInListColumns(eventDayId)} data={checkIns} />
+      <DataTable columns={getCheckInListColumns(eventDayId)} data={tableData} />
     </div>
   );
 }
