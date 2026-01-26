@@ -108,7 +108,7 @@ export const useMembershipStep1 = () => {
               setMemberValidationAttempt(newAttemptCount);
 
               if (newAttemptCount >= 3) {
-                const cooldownEnd = now + 30000; // 30 seconds
+                const cooldownEnd = now + 900000; // 30 seconds
                 setMemberValidationCooldown(cooldownEnd);
                 toast.error(
                   "Too many failed attempts. Please wait 30 seconds before trying again.",
