@@ -1,4 +1,5 @@
 "use server";
+import { render } from "@react-email/render";
 import { updateTag } from "next/cache";
 import { Resend } from "resend";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
@@ -59,11 +60,8 @@ export const resendQRCode = async ({
     throw new Error("Registrant details not found");
   }
 
-  const { error: sendEmailError } = await resend.emails.send({
-    to: toEmail,
-    from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
-    subject: `Resend QR Code for ${eventDetails.eventTitle}`,
-    react: ResendQRCodeTemplate({
+  const emailHtml = await render(
+    ResendQRCodeTemplate({
       email: toEmail,
       eventDetails,
       self: {
@@ -77,6 +75,13 @@ export const resendQRCode = async ({
           fullName: `${participant.firstName} ${participant.lastName}`,
         })),
     }),
+  );
+
+  const { error: sendEmailError } = await resend.emails.send({
+    to: toEmail,
+    from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
+    subject: `Resend QR Code for ${eventDetails.eventTitle}`,
+    html: emailHtml,
     attachments: [
       {
         filename: `${qrData}.png`,

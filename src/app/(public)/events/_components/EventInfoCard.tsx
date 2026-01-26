@@ -6,7 +6,7 @@ import type { Tables } from "@/lib/supabase/db.types";
 
 type Event = Tables<"Event">;
 
-import { Calendar, Clock, MapPin, Sparkles } from "lucide-react";
+import { Calendar, Clock, MapPin, Sparkles, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fadeInUp } from "@/lib/animations/fade";
@@ -72,6 +72,15 @@ export function EventInfoCard({ event }: EventInfoCardProps) {
           <Clock className="h-5 w-5 text-primary" />
           <span className="text-foreground">
             {formatTime(event.eventStartDate, event.eventEndDate)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Users className="h-5 w-5 text-primary" />
+          <span className="text-foreground">
+            {event.maxGuest
+              ? `Available slots: ${event.availableSlots}/${event.maxGuest}`
+              : "No Guest Limit"}
           </span>
         </div>
       </motion.div>

@@ -3,9 +3,18 @@ import z from "zod";
 const baseEventSchema = z.object({
   eventTitle: z.string().min(5, "Title must at least be 5 characters"),
   description: z.string(),
-  eventStartDate: z.date({
-    message: "Event start date is required",
-  }),
+  eventStartDate: z
+    .date({
+      message: "Event start date is required",
+    })
+    .refine(
+      (date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return date >= today;
+      },
+      { message: "Event start date must be today or in the future" },
+    ),
   eventEndDate: z.date({
     message: "Event end date is required",
   }),

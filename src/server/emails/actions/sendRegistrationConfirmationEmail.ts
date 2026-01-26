@@ -1,5 +1,6 @@
 "use server";
 
+import { render } from "@react-email/render";
 import { Resend } from "resend";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
@@ -30,11 +31,8 @@ export const sendRegistrationConfirmationEmail = async ({
 }: SendRegistrationConfirmationEmailProps) => {
   const qrBuffer = await generateQRBuffer(identifier);
 
-  const { error } = await resend.emails.send({
-    to: toEmail,
-    from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
-    subject: `Registration Confirmation for ${eventDetails.eventTitle}`,
-    react: StandardRegistrationConfirmationTemplate({
+  const emailHtml = await render(
+    StandardRegistrationConfirmationTemplate({
       email: toEmail,
       eventDetails,
       self: {
@@ -43,6 +41,13 @@ export const sendRegistrationConfirmationEmail = async ({
       },
       otherParticipants,
     }),
+  );
+
+  const { error } = await resend.emails.send({
+    to: toEmail,
+    from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
+    subject: `Registration Confirmation for ${eventDetails.eventTitle}`,
+    html: emailHtml,
     attachments: [
       {
         filename: `${identifier}.png`,

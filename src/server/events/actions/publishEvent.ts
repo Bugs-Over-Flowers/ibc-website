@@ -46,6 +46,7 @@ export const publishEvent: ServerFunction<
       venue: data.venue,
       registrationFee: data.registrationFee,
       maxGuest: data.maxGuest,
+      availableSlots: data.maxGuest,
       eventType: data.eventType as Database["public"]["Enums"]["EventType"],
       eventHeaderUrl: data.eventImage,
       publishedAt: new Date().toISOString(),

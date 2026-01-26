@@ -259,6 +259,7 @@ export type Database = {
           publishedAt: string | null;
           registrationFee: number;
           maxGuest: number;
+          availableSlots: number;
           updatedAt: string | null;
           venue: string | null;
         };
@@ -273,6 +274,7 @@ export type Database = {
           publishedAt?: string | null;
           registrationFee?: number;
           maxGuest: number;
+          availableSlots?: number;
           updatedAt?: string | null;
           venue?: string | null;
         };
@@ -287,6 +289,7 @@ export type Database = {
           publishedAt?: string | null;
           registrationFee?: number;
           maxGuest: number;
+          availableSlots?: number;
           updatedAt?: string | null;
           venue?: string | null;
         };

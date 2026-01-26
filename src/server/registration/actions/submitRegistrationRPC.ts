@@ -16,6 +16,7 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   const registrationIdentifier = createRegistrationIdentifier();
 
   const { step1, step3, eventId, step2 } = parsedData;
+
   const { data: rpcResults, error } = await supabase.rpc(
     "submit_event_registration",
     {
@@ -34,7 +35,8 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   );
 
   if (error) {
-    throw new Error("Failed to submit event registration");
+    console.error("Submit Registration RPC Error:", error);
+    throw new Error(`Failed to submit event registration: ${error.message}`);
   }
 
   if (!rpcResults) {

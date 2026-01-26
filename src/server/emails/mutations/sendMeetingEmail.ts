@@ -1,5 +1,6 @@
 "use server";
 
+import { render } from "@react-email/render";
 import { Resend } from "resend";
 import MeetingNotificationEmail from "@/lib/resend/templates/meeting-notification";
 
@@ -21,15 +22,19 @@ export async function sendMeetingEmail({
   [error: string | null, data: { success: true } | null]
 > {
   try {
-    const { error } = await resend.emails.send({
-      to,
-      from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
-      subject: "IBC Membership Application - Interview Scheduled",
-      react: MeetingNotificationEmail({
+    const emailHtml = await render(
+      MeetingNotificationEmail({
         companyName,
         interviewDate,
         interviewVenue,
       }),
+    );
+
+    const { error } = await resend.emails.send({
+      to,
+      from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
+      subject: "IBC Membership Application - Interview Scheduled",
+      html: emailHtml,
     });
 
     if (error) {
