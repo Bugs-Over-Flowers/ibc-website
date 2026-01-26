@@ -15,6 +15,11 @@
 __tests__/cypress-screenshots
 __tests__/cypress-videos
 
+# playwright
+/playwright-report/
+/test-results/
+/.playwright/
+
 # next.js
 /.next/
 /out/
@@ -43,3 +48,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright
+node_modules/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

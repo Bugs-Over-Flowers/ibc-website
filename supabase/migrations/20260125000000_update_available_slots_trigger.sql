@@ -28,9 +28,9 @@ BEGIN
     FROM "Event"
     WHERE "eventId" = v_event_id;
 
-    -- Update availableSlots: maxGuest - total participants
+    -- Update availableSlots: maxGuest - total participants, ensuring it doesn't go below 0
     UPDATE "Event"
-    SET "availableSlots" = v_max_guest - v_total_participants
+    SET "availableSlots" = GREATEST(0, v_max_guest - v_total_participants)
     WHERE "eventId" = v_event_id;
 
     -- Return appropriate record

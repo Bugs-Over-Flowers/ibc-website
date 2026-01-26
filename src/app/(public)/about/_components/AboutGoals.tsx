@@ -73,7 +73,7 @@ export function AboutGoals() {
           viewport={{ once: true, margin: "-100px" }}
           whileInView="visible"
         >
-          {goals.map((goal, index) => {
+          {goals.map((goal) => {
             const Icon = goal.icon;
             return (
               <motion.div key={goal.title} variants={fadeInUp}>

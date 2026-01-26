@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { getMembers } from "@/server/applications/queries/getMembers";
+import type { getMembers } from "@/server/members/queries/getMembers";
 import { MembersTableRow } from "./MembersTableRow";
 
 interface MembersTableProps {

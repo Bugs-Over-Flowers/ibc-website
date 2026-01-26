@@ -1,6 +1,5 @@
 "use server";
-import { render } from "@react-email/render";
-import { updateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { Resend } from "resend";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import ResendQRCodeTemplate from "@/lib/resend/templates/ResendQRCodeTemplate";
@@ -96,8 +95,6 @@ export const resendQRCode = async ({
     throw new Error("Failed to send email");
   }
 
-  console.log(registrantDetails.email, ", ", toEmail);
-
   // change the email if does not match participant email
   if (toEmail !== registrantDetails.email) {
     await supabase
@@ -108,4 +105,5 @@ export const resendQRCode = async ({
   }
   updateTag("getRegistrationData");
   updateTag("getRegistrationEventDetails");
+  revalidatePath("/admin/events/[eventId]/registration-list", "page");
 };

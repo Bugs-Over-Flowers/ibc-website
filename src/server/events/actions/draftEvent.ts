@@ -51,6 +51,6 @@ export const draftEvent: ServerFunction<
     };
   }
 
-  revalidatePath("/admin/dashboard");
+  revalidatePath("/admin");
   return { success: true, data: { eventId: eventData.eventId }, error: null };
 };

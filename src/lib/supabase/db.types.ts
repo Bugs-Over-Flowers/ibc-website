@@ -21,6 +21,7 @@ export type Database = {
           applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           applicationStatus: Database["public"]["Enums"]["ApplicationStatus"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
+          businessMemberId: string | null;
           companyAddress: string;
           companyName: string;
           emailAddress: string;
@@ -28,7 +29,6 @@ export type Database = {
           interviewId: string | null;
           landline: string;
           logoImageURL: string;
-          memberId: string | null;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
@@ -41,6 +41,7 @@ export type Database = {
           applicationMemberType: Database["public"]["Enums"]["ApplicationMemberType"];
           applicationStatus?: Database["public"]["Enums"]["ApplicationStatus"];
           applicationType: Database["public"]["Enums"]["ApplicationType"];
+          businessMemberId?: string | null;
           companyAddress: string;
           companyName: string;
           emailAddress: string;
@@ -48,7 +49,6 @@ export type Database = {
           interviewId?: string | null;
           landline: string;
           logoImageURL: string;
-          memberId?: string | null;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
@@ -61,6 +61,7 @@ export type Database = {
           applicationMemberType?: Database["public"]["Enums"]["ApplicationMemberType"];
           applicationStatus?: Database["public"]["Enums"]["ApplicationStatus"];
           applicationType?: Database["public"]["Enums"]["ApplicationType"];
+          businessMemberId?: string | null;
           companyAddress?: string;
           companyName?: string;
           emailAddress?: string;
@@ -68,7 +69,6 @@ export type Database = {
           interviewId?: string | null;
           landline?: string;
           logoImageURL?: string;
-          memberId?: string | null;
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
@@ -77,18 +77,18 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "Application_businessMemberId_fkey";
+            columns: ["businessMemberId"];
+            isOneToOne: false;
+            referencedRelation: "BusinessMember";
+            referencedColumns: ["businessMemberId"];
+          },
+          {
             foreignKeyName: "Application_interviewId_fkey";
             columns: ["interviewId"];
             isOneToOne: false;
             referencedRelation: "Interview";
             referencedColumns: ["interviewId"];
-          },
-          {
-            foreignKeyName: "Application_memberId_fkey";
-            columns: ["memberId"];
-            isOneToOne: false;
-            referencedRelation: "BusinessMember";
-            referencedColumns: ["businessMemberId"];
           },
           {
             foreignKeyName: "Application_sectorId_fkey";
@@ -169,6 +169,7 @@ export type Database = {
           membershipStatus:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
+          primaryApplicationId: string | null;
           sectorId: number;
           websiteURL: string;
         };
@@ -182,6 +183,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
+          primaryApplicationId?: string | null;
           sectorId: number;
           websiteURL: string;
         };
@@ -195,6 +197,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
+          primaryApplicationId?: string | null;
           sectorId?: number;
           websiteURL?: string;
         };
@@ -211,21 +214,21 @@ export type Database = {
       CheckIn: {
         Row: {
           checkInId: string;
-          date: string;
+          checkInTime: string;
           eventDayId: string;
           participantId: string;
           remarks: string | null;
         };
         Insert: {
           checkInId?: string;
-          date?: string;
+          checkInTime?: string;
           eventDayId?: string;
           participantId?: string;
           remarks?: string | null;
         };
         Update: {
           checkInId?: string;
-          date?: string;
+          checkInTime?: string;
           eventDayId?: string;
           participantId?: string;
           remarks?: string | null;
@@ -247,8 +250,62 @@ export type Database = {
           },
         ];
       };
+      EvaluationForm: {
+        Row: {
+          additionalComments: string | null;
+          createdAt: string;
+          evaluationId: string;
+          eventId: string;
+          feedback: string | null;
+          name: string | null;
+          q1Rating: Database["public"]["Enums"]["ratingScale"];
+          q2Rating: Database["public"]["Enums"]["ratingScale"];
+          q3Rating: Database["public"]["Enums"]["ratingScale"];
+          q4Rating: Database["public"]["Enums"]["ratingScale"];
+          q5Rating: Database["public"]["Enums"]["ratingScale"];
+          q6Rating: Database["public"]["Enums"]["ratingScale"];
+        };
+        Insert: {
+          additionalComments?: string | null;
+          createdAt?: string;
+          evaluationId?: string;
+          eventId: string;
+          feedback?: string | null;
+          name?: string | null;
+          q1Rating: Database["public"]["Enums"]["ratingScale"];
+          q2Rating: Database["public"]["Enums"]["ratingScale"];
+          q3Rating: Database["public"]["Enums"]["ratingScale"];
+          q4Rating: Database["public"]["Enums"]["ratingScale"];
+          q5Rating: Database["public"]["Enums"]["ratingScale"];
+          q6Rating: Database["public"]["Enums"]["ratingScale"];
+        };
+        Update: {
+          additionalComments?: string | null;
+          createdAt?: string;
+          evaluationId?: string;
+          eventId?: string;
+          feedback?: string | null;
+          name?: string | null;
+          q1Rating?: Database["public"]["Enums"]["ratingScale"];
+          q2Rating?: Database["public"]["Enums"]["ratingScale"];
+          q3Rating?: Database["public"]["Enums"]["ratingScale"];
+          q4Rating?: Database["public"]["Enums"]["ratingScale"];
+          q5Rating?: Database["public"]["Enums"]["ratingScale"];
+          q6Rating?: Database["public"]["Enums"]["ratingScale"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "evaluationform_eventid_fkey";
+            columns: ["eventId"];
+            isOneToOne: false;
+            referencedRelation: "Event";
+            referencedColumns: ["eventId"];
+          },
+        ];
+      };
       Event: {
         Row: {
+          availableSlots: number | null;
           description: string | null;
           eventEndDate: string | null;
           eventHeaderUrl: string | null;
@@ -256,6 +313,7 @@ export type Database = {
           eventStartDate: string | null;
           eventTitle: string;
           eventType: Database["public"]["Enums"]["EventType"] | null;
+          maxGuest: number | null;
           publishedAt: string | null;
           registrationFee: number;
           maxGuest: number;
@@ -264,6 +322,7 @@ export type Database = {
           venue: string | null;
         };
         Insert: {
+          availableSlots?: number | null;
           description?: string | null;
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
@@ -271,6 +330,7 @@ export type Database = {
           eventStartDate?: string | null;
           eventTitle: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          maxGuest?: number | null;
           publishedAt?: string | null;
           registrationFee?: number;
           maxGuest: number;
@@ -279,6 +339,7 @@ export type Database = {
           venue?: string | null;
         };
         Update: {
+          availableSlots?: number | null;
           description?: string | null;
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
@@ -286,6 +347,7 @@ export type Database = {
           eventStartDate?: string | null;
           eventTitle?: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          maxGuest?: number | null;
           publishedAt?: string | null;
           registrationFee?: number;
           maxGuest: number;
@@ -326,6 +388,7 @@ export type Database = {
       };
       Interview: {
         Row: {
+          applicationId: string | null;
           createdAt: string | null;
           interviewDate: string;
           interviewId: string;
@@ -335,6 +398,7 @@ export type Database = {
           updatedAt: string | null;
         };
         Insert: {
+          applicationId?: string | null;
           createdAt?: string | null;
           interviewDate: string;
           interviewId?: string;
@@ -344,6 +408,7 @@ export type Database = {
           updatedAt?: string | null;
         };
         Update: {
+          applicationId?: string | null;
           createdAt?: string | null;
           interviewDate?: string;
           interviewId?: string;
@@ -352,7 +417,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["InterviewStatus"] | null;
           updatedAt?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "Interview_applicationId_fkey";
+            columns: ["applicationId"];
+            isOneToOne: false;
+            referencedRelation: "Application";
+            referencedColumns: ["applicationId"];
+          },
+        ];
       };
       Participant: {
         Row: {
@@ -434,6 +507,7 @@ export type Database = {
           eventId: string;
           identifier: string;
           nonMemberName: string | null;
+          numberOfParticipants: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           registrationDate: string;
@@ -444,6 +518,7 @@ export type Database = {
           eventId: string;
           identifier: string;
           nonMemberName?: string | null;
+          numberOfParticipants?: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           registrationDate?: string;
@@ -454,6 +529,7 @@ export type Database = {
           eventId?: string;
           identifier?: string;
           nonMemberName?: string | null;
+          numberOfParticipants?: number | null;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           registrationDate?: string;
@@ -497,6 +573,59 @@ export type Database = {
     };
     Functions: {
       check_membership_expiry: { Args: never; Returns: undefined };
+      compute_primary_application_id: {
+        Args: { p_member_id: string };
+        Returns: string;
+      };
+      delete_evaluation: {
+        Args: { eval_id: string };
+        Returns: {
+          message: string;
+          success: boolean;
+        }[];
+      };
+      get_all_evaluations: {
+        Args: never;
+        Returns: {
+          additional_comments: string;
+          created_at: string;
+          evaluation_id: string;
+          event_end_date: string;
+          event_id: string;
+          event_start_date: string;
+          event_title: string;
+          feedback: string;
+          name: string;
+          q1_rating: Database["public"]["Enums"]["ratingScale"];
+          q2_rating: Database["public"]["Enums"]["ratingScale"];
+          q3_rating: Database["public"]["Enums"]["ratingScale"];
+          q4_rating: Database["public"]["Enums"]["ratingScale"];
+          q5_rating: Database["public"]["Enums"]["ratingScale"];
+          q6_rating: Database["public"]["Enums"]["ratingScale"];
+          venue: string;
+        }[];
+      };
+      get_evaluation_by_id: {
+        Args: { eval_id: string };
+        Returns: {
+          additional_comments: string;
+          created_at: string;
+          evaluation_id: string;
+          event_end_date: string;
+          event_id: string;
+          event_start_date: string;
+          event_title: string;
+          feedback: string;
+          name: string;
+          q1_rating: Database["public"]["Enums"]["ratingScale"];
+          q2_rating: Database["public"]["Enums"]["ratingScale"];
+          q3_rating: Database["public"]["Enums"]["ratingScale"];
+          q4_rating: Database["public"]["Enums"]["ratingScale"];
+          q5_rating: Database["public"]["Enums"]["ratingScale"];
+          q6_rating: Database["public"]["Enums"]["ratingScale"];
+          venue: string;
+        }[];
+      };
       get_event_checkin_list: { Args: { p_event_id: string }; Returns: Json };
       get_event_participant_list: {
         Args: { p_event_id: string; p_search_text?: string };
@@ -509,6 +638,10 @@ export type Database = {
         };
       };
       get_event_status: { Args: { p_event_id: string }; Returns: Json };
+      get_member_primary_application: {
+        Args: { p_member_id: string };
+        Returns: string;
+      };
       get_registration_list: {
         Args: {
           p_event_id: string;
@@ -545,6 +678,21 @@ export type Database = {
       };
       january_first_reset: { Args: never; Returns: undefined };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
+      submit_evaluation_form: {
+        Args: {
+          p_additional_comments?: string;
+          p_event_id: string;
+          p_feedback?: string;
+          p_name: string;
+          p_q1_rating: Database["public"]["Enums"]["ratingScale"];
+          p_q2_rating: Database["public"]["Enums"]["ratingScale"];
+          p_q3_rating: Database["public"]["Enums"]["ratingScale"];
+          p_q4_rating: Database["public"]["Enums"]["ratingScale"];
+          p_q5_rating: Database["public"]["Enums"]["ratingScale"];
+          p_q6_rating: Database["public"]["Enums"]["ratingScale"];
+        };
+        Returns: Json;
+      };
       submit_event_registration: {
         Args: {
           p_business_member_id?: string;
@@ -603,9 +751,10 @@ export type Database = {
       CompanyMemberType: "principal" | "alternate";
       EventType: "public" | "private";
       InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
-      MembershipStatus: "active" | "unpaid" | "overdue" | "revoked";
+      MembershipStatus: "paid" | "unpaid" | "cancelled";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
+      ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
     };
     CompositeTypes: {
       participant_list_item: {
@@ -778,9 +927,10 @@ export const Constants = {
       CompanyMemberType: ["principal", "alternate"],
       EventType: ["public", "private"],
       InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
-      MembershipStatus: ["active", "unpaid", "overdue", "revoked"],
+      MembershipStatus: ["paid", "unpaid", "cancelled"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],
+      ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
     },
   },
 } as const;

@@ -60,7 +60,7 @@ export function AboutThrusts() {
           viewport={{ once: true, margin: "-100px" }}
           whileInView="visible"
         >
-          {thrusts.map((thrust, index) => {
+          {thrusts.map((thrust) => {
             const Icon = thrust.icon;
             return (
               <motion.div key={thrust.title} variants={fadeInUp}>

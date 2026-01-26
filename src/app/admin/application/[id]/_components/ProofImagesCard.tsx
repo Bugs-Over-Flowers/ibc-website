@@ -1,8 +1,10 @@
 import Image from "next/image";
-import type { getApplicationById } from "@/server/applications/queries/getApplications";
+import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 
 interface ProofImagesCardProps {
-  proofImages: Awaited<ReturnType<typeof getApplicationById>>["ProofImage"];
+  proofImages: Awaited<
+    ReturnType<typeof getApplicationDetailsById>
+  >["ProofImage"];
 }
 
 export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
@@ -19,7 +21,7 @@ export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
       </div>
       <div className="p-6 pt-0">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          {proofImages.map((proof) => (
+          {proofImages.map((proof, index) => (
             <a
               className="overflow-hidden rounded-lg border transition-opacity hover:opacity-80"
               href={proof.path}
@@ -28,7 +30,7 @@ export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
               target="_blank"
             >
               <Image
-                alt="Payment proof"
+                alt={`Payment proof ${index + 1} of ${proofImages.length}`}
                 className="h-48 w-full object-cover"
                 height={200}
                 src={proof.path}

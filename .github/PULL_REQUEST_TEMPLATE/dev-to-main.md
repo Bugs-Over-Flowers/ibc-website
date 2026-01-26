@@ -20,7 +20,6 @@
 
 - [ ] All tests passing (bun run test)
 - [ ] Biome checks passing (bun run biome:check)
-- [ ] Cypress E2E tests passing (critical paths verified)
 - [ ] Test coverage maintained/improved
 
 ## 🔒 Security
