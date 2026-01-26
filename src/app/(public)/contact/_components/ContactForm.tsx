@@ -73,6 +73,9 @@ ${inquiryType}
 Message:
 ${formData.message}
 
+Submitted On:
+${new Date().toLocaleString()}
+
 ──────────────────────────
 Sent via Website Contact Form
     `.trim();
