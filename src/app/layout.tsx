@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Iloilo Business Club",
+  title: "Iloilo Business Club, Inc.",
   description: "Sustaining the Momentum for Progress since 1990",
 };
 
