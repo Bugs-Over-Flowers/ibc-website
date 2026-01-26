@@ -301,24 +301,6 @@ export default async function EventDetails({
             </Link>
           </CardContent>
         </Card>
-
-        <Card className="flex flex-col">
-          <CardContent className="flex flex-1 flex-col p-6">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
-              <MessageSquare className="h-6 w-6" />
-            </div>
-            <h3 className="mb-2 font-semibold text-lg">Event Feedbacks</h3>
-            <p className="mb-6 flex-1 text-muted-foreground text-sm">
-              View and analyze participant feedback and ratings for this event
-            </p>
-            <Link href={`/admin/events/${eventId}/feedbacks` as Route}>
-              <Button className="w-full" variant="outline">
-                <MessageSquare className="mr-2 h-4 w-4" />
-                View Feedbacks
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
