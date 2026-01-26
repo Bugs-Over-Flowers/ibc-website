@@ -11,6 +11,7 @@ export const getAllMembers = cache(async (cookieStore: RequestCookie[]) => {
     .select(
       "businessMemberId, businessName, sectorId, logoImageURL, websiteURL",
     )
+    .neq("membershipStatus", "cancelled")
     .order("businessName")
     .throwOnError();
 
