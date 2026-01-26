@@ -11,21 +11,19 @@ import {
   Dropzone,
   DropzoneEmptyState,
 } from "@/components/ui/shadcn-io/dropzone";
+import type { Sector } from "@/server/membership/queries/getSectors";
 
 interface StepProps {
   form: ReturnType<typeof useMembershipStep2>;
+  sectors: Sector[];
 }
 
-// Mock sectors - replace with DB fetch if available
-const sectors = [
-  { value: "1", label: "Technology" },
-  { value: "2", label: "Finance" },
-  { value: "3", label: "Manufacturing" },
-  { value: "4", label: "Retail" },
-  { value: "5", label: "Services" },
-];
+export function Step2Company({ form, sectors }: StepProps) {
+  const sectorOptions = sectors.map((sector) => ({
+    value: String(sector.sectorId),
+    label: sector.sectorName,
+  }));
 
-export function Step2Company({ form }: StepProps) {
   const logoImage = useStore(form.store, (state) => state.values.logoImage);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -62,7 +60,7 @@ export function Step2Company({ form }: StepProps) {
           {(field) => (
             <field.SelectField
               label="Industry/Sector"
-              options={sectors}
+              options={sectorOptions}
               placeholder="Select industry"
             />
           )}

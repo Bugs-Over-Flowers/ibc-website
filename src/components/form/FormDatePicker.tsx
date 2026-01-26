@@ -60,9 +60,12 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
           }
         />
 
-        <PopoverContent align="start" className="w-auto p-0">
+        <PopoverContent
+          align="start"
+          className="w-auto p-0"
+          collisionPadding={16}
+        >
           <Calendar
-            autoFocus
             captionLayout="dropdown"
             disabled={(date) => {
               if (typeof disabled === "function") return disabled(date);

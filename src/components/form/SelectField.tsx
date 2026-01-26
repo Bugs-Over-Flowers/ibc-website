@@ -27,16 +27,21 @@ function SelectField({
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
+  const selectedOption = options.find(
+    (option) => option.value === field.state.value,
+  );
+  const hasValue = field.state.value && selectedOption;
+
   return (
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Select
-        onValueChange={(value) => field.handleChange(value || "Select an item")}
+        onValueChange={(value) => field.handleChange(value || "")}
         value={field.state.value ?? ""}
       >
         <SelectTrigger id={field.name}>
-          <SelectValue data-placeholder={placeholder}>
-            {(val) => options.find((option) => option.value === val)?.label}
+          <SelectValue placeholder={placeholder}>
+            {hasValue ? selectedOption.label : null}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>

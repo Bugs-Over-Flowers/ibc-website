@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { titleCase } from "@/lib/utils";
+import { validateFileTypeMime } from "../fileTypes";
 import { phoneSchema } from "../utils";
 
 export const ApplicationTypeEnum = z.enum(["newMember", "updating", "renewal"]);
@@ -8,9 +9,24 @@ export const CompanyMemberTypeEnum = z.enum(["principal", "alternate"]);
 export const ApplicationMemberTypeEnum = z.enum(["corporate", "personal"]);
 export const SexEnum = z.enum(["male", "female"]);
 
-export const MembershipApplicationStep1Schema = z.object({
-  applicationType: ApplicationTypeEnum,
-});
+export const MembershipApplicationStep1Schema = z
+  .object({
+    applicationType: ApplicationTypeEnum,
+    businessMemberId: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      (data.applicationType === "renewal" ||
+        data.applicationType === "updating") &&
+      (!data.businessMemberId || data.businessMemberId.trim().length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Member ID is required for renewal and update applications",
+        path: ["businessMemberId"],
+      });
+    }
+  });
 
 export type MembershipApplicationStep1Schema = z.infer<
   typeof MembershipApplicationStep1Schema
@@ -41,13 +57,20 @@ export const ApplicationMemberSchema = z
     landline: z.string().min(1, "Landline is required"),
     faxNumber: z.string().min(1, "Telefax is required"),
   })
-  .transform((data) => ({
-    ...data,
-    firstName: titleCase(data.firstName).trim(),
-    lastName: titleCase(data.lastName).trim(),
-    companyDesignation: titleCase(data.companyDesignation).trim(),
-    nationality: titleCase(data.nationality).trim(),
-  }));
+  .transform((data) => {
+    // Only apply titleCase to companyDesignation if all letters are lowercase
+    const isAllLowercase =
+      data.companyDesignation === data.companyDesignation.toLowerCase();
+    return {
+      ...data,
+      firstName: titleCase(data.firstName).trim(),
+      lastName: titleCase(data.lastName).trim(),
+      companyDesignation: isAllLowercase
+        ? titleCase(data.companyDesignation).trim()
+        : data.companyDesignation.trim(),
+      nationality: titleCase(data.nationality).trim(),
+    };
+  });
 
 export const MembershipApplicationStep2Schema = z
   .object({
@@ -74,7 +97,11 @@ export const MembershipApplicationStep2Schema = z
     logoImageURL: z.string().optional(),
     logoImage: z
       .file("Company logo is required")
-      .max(1024 * 1024 * 5)
+      .max(1024 * 1024 * 5, "File size must be less than 5MB")
+      .refine(
+        (file) => validateFileTypeMime(file),
+        "Only JPEG, PNG, and PDF files are allowed",
+      )
       .optional(),
   })
   .refine(
@@ -110,7 +137,14 @@ export const MembershipApplicationStep4Schema = z
     applicationMemberType: ApplicationMemberTypeEnum,
     paymentMethod: MembershipPaymentMethodEnum,
     paymentProofUrl: z.string().optional(),
-    paymentProof: z.any().optional(),
+    paymentProof: z
+      .file()
+      .max(1024 * 1024 * 5, "File size must be less than 5MB")
+      .refine(
+        (file) => validateFileTypeMime(file),
+        "Only JPEG, PNG, and PDF files are allowed",
+      )
+      .optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -134,6 +168,7 @@ export const MembershipApplicationSchema = z
   .object({
     applicationType: ApplicationTypeEnum,
     applicationMemberType: ApplicationMemberTypeEnum,
+    businessMemberId: z.string().optional(),
     companyName: z.string().min(1, "Company name is required"),
     sectorId: z.number({ message: "Industry/Sector is required" }),
     companyAddress: z.string().min(1, "Company address is required"),
