@@ -79,7 +79,7 @@ export function EventInfoCard({ event }: EventInfoCardProps) {
           <Users className="h-5 w-5 text-primary" />
           <span className="text-foreground">
             {event.maxGuest
-              ? `Available slots: ${event.availableSlots}/${event.maxGuest}`
+              ? `Available slots: ${event.availableSlots ?? "..."}/${event.maxGuest}`
               : "No Guest Limit"}
           </span>
         </div>

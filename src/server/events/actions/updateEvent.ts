@@ -59,10 +59,10 @@ export const updateEvent: ServerFunction<
     };
   }
 
-  if (data.maxGuest < currentEvent.maxGuest) {
+  if (data.maxGuest < (currentEvent.maxGuest ?? 0)) {
     return {
       success: false,
-      error: `Max guests cannot be decreased. Current limit is ${currentEvent.maxGuest}.`,
+      error: `Max guests cannot be decreased. Current limit is ${currentEvent.maxGuest ?? 0}.`,
       data: null,
     };
   }
@@ -109,10 +109,27 @@ export const updateEvent: ServerFunction<
     };
   }
 
-  // Update maxGuest separately since it's not in the RPC
+  // Calculate new available slots based on total participants
+  const { data: registrations } = await supabase
+    .from("Registration")
+    .select("numberOfParticipants")
+    .eq("eventId", data.eventId);
+
+  const currentParticipants =
+    registrations?.reduce(
+      (sum, reg) => sum + (reg.numberOfParticipants || 0),
+      0,
+    ) || 0;
+
+  const newAvailableSlots = Math.max(0, data.maxGuest - currentParticipants);
+
+  // Update maxGuest and availableSlots together
   const { error: maxGuestError } = await supabase
     .from("Event")
-    .update({ maxGuest: data.maxGuest })
+    .update({
+      maxGuest: data.maxGuest,
+      availableSlots: newAvailableSlots,
+    })
     .eq("eventId", data.eventId);
 
   if (maxGuestError) {

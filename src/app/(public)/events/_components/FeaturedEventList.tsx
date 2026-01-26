@@ -140,8 +140,8 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
 
-                {currentEvent.maxGuest > 0 &&
-                currentEvent.availableSlots <= 0 ? (
+                {currentEvent.maxGuest &&
+                (currentEvent.availableSlots ?? 0) <= 0 ? (
                   <Button
                     className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-muted px-8 text-muted-foreground transition hover:bg-muted"
                     disabled

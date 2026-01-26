@@ -136,7 +136,7 @@ export function EventCard({ event, index }: EventCardProps) {
                   <Users className="h-4 w-4 text-primary" />
                   <span>
                     {event.maxGuest
-                      ? `Available slots: ${event.availableSlots}/${event.maxGuest}`
+                      ? `Available slots: ${event.availableSlots ?? "..."}/${event.maxGuest}`
                       : "No Limit"}
                   </span>
                 </div>
@@ -152,7 +152,7 @@ export function EventCard({ event, index }: EventCardProps) {
                   : `₱${event.registrationFee.toLocaleString()}`}
               </span>
               {status !== "past" &&
-                (event.maxGuest > 0 && event.availableSlots <= 0 ? (
+                (event.maxGuest && (event.availableSlots ?? 0) <= 0 ? (
                   <button
                     className="ml-auto flex w-auto cursor-not-allowed items-center gap-2 rounded-xl bg-muted px-4 py-2 font-medium text-muted-foreground text-sm"
                     disabled
