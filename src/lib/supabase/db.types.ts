@@ -572,10 +572,12 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      check_member_exists: {
-        Args: { p_business_member_id: string };
-        Returns: Json;
-      };
+      check_member_exists:
+        | { Args: { p_identifier: string }; Returns: Json }
+        | {
+            Args: { p_application_type?: string; p_identifier: string };
+            Returns: Json;
+          };
       check_membership_expiry: { Args: never; Returns: undefined };
       compute_primary_application_id: {
         Args: { p_member_id: string };
