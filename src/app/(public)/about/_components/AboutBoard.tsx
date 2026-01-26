@@ -2,7 +2,6 @@
 
 import { User } from "lucide-react";
 import { motion } from "motion/react";
-import Image from "next/image";
 
 const boardOfTrustees = [
   { name: "Juan Jose Jamora III", position: "Chairman Emeritus" },

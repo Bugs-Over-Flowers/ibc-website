@@ -1,4 +1,5 @@
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
+import { RatingScale } from "@/app/(public)/evaluation/_components/RatingScale";
 import {
   FileDropzoneField,
   FormCalendar,
@@ -13,6 +14,7 @@ import {
   TextField,
 } from "@/components/form";
 import FormCheckBox from "@/components/form/FormCheckBox";
+import SingleComboBoxField from "@/components/form/SingleComboBoxField";
 import SubmitButton from "@/components/form/SubmitButton";
 
 export const { useFormContext, useFieldContext, formContext, fieldContext } =
@@ -34,6 +36,8 @@ export const { useAppForm, withForm } = createFormHook({
     ImageField,
     FileDropzoneField,
     RadioGroupField,
+    RatingScale,
+    SingleComboBoxField,
   },
   formComponents: {
     SubmitButton,

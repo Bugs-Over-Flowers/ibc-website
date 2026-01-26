@@ -7,7 +7,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/client";
 import { zodValidator } from "@/lib/utils";
 import { MembershipApplicationStep4Schema } from "@/lib/validation/membership/application";
-import { submitMembershipApplication } from "@/server/membership/mutations/submitApplication";
+import { submitMembershipApplication } from "@/server/membership/actions/submitApplication";
 
 interface UseMembershipStep4Props {
   onSuccess?: () => void;
@@ -26,6 +26,7 @@ export const useMembershipStep4 = ({
   const setIsSubmitted = useMembershipApplicationStore(
     (state) => state.setIsSubmitted,
   );
+  const setStep = useMembershipApplicationStore((state) => state.setStep);
 
   const defaultApplicationDataStep4 = useMembershipApplicationStore(
     (state) => state.applicationData?.step4,

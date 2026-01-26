@@ -6,13 +6,13 @@ import EventLoadingPage from "./loading";
 
 async function EventsPage() {
   return (
-    <>
-      <EventsHero />
+    <main className="min-h-screen bg-background">
       <Suspense fallback={<EventLoadingPage />}>
+        <EventsHero />
         <EventsListSection />
+        <EventsCTA />
       </Suspense>
-      <EventsCTA />
-    </>
+    </main>
   );
 }
 

@@ -2,14 +2,18 @@
 
 import { MoreVertical } from "lucide-react";
 import { useState } from "react";
+import { ConfirmDeleteDialog } from "@/app/admin/events/_components/ConfirmDeleteDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import AttendanceModal from "../AttendanceModal";
+import AttendanceButton from "./AttendanceButton";
 import DeleteButton from "./DeleteButton";
-import QrButton from "./QrButton";
+import ParticipantsButton from "./ParticipantsButton";
+import RegistrationsButton from "./RegistrationsButton";
 import ViewDetailsButton from "./ViewDetailsButton";
 
 interface EventActionsDropdownProps {
@@ -21,30 +25,54 @@ export default function EventActionsDropdown({
   eventId,
   status,
 }: EventActionsDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleAction = () => {
-    setIsOpen(false);
-  };
+  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   return (
-    <DropdownMenu onOpenChange={setIsOpen} open={isOpen}>
-      <DropdownMenuTrigger
-        aria-label="Event actions"
-        className="rounded-full p-2 transition-colors hover:bg-muted md:rounded-md"
-      >
-        <MoreVertical size={20} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 md:w-48" sideOffset={10}>
-        <ViewDetailsButton eventId={eventId} onAction={handleAction} />
-        <QrButton eventId={eventId} onAction={handleAction} />
-        {status === "draft" && (
-          <>
-            <DropdownMenuSeparator />
-            <DeleteButton id={eventId} onAction={handleAction} />
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger
+          aria-label="Event actions"
+          className="rounded-full p-2 transition-colors hover:bg-muted md:rounded-md"
+        >
+          <MoreVertical size={20} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-56 md:w-48"
+          sideOffset={10}
+        >
+          <ViewDetailsButton eventId={eventId} />
+          <AttendanceButton
+            handleClick={() => {
+              setIsAttendanceModalOpen(true);
+            }}
+          />
+          <DropdownMenuSeparator />
+          <RegistrationsButton eventId={eventId} />
+          <ParticipantsButton eventId={eventId} />
+          {status === "draft" && (
+            <>
+              <DropdownMenuSeparator />
+              <DeleteButton
+                handleClick={() => {
+                  setIsDeleteDialogOpen(true);
+                }}
+              />
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AttendanceModal
+        eventId={eventId}
+        isOpen={isAttendanceModalOpen}
+        setIsOpen={setIsAttendanceModalOpen}
+      />
+      <ConfirmDeleteDialog
+        eventId={eventId}
+        onOpenChange={setIsDeleteDialogOpen}
+        open={isDeleteDialogOpen}
+      />
+    </>
   );
 }

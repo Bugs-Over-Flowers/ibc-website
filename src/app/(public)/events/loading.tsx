@@ -1,86 +1,117 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { makeArray } from "@/lib/utils";
 
-const eventSkeletonIds = ["a1b", "b2c", "c3d"];
-
-export default function EventDetailsSkeleton() {
+export default function EventLoadingPage() {
   return (
-    <div className="min-h-screen space-y-16 bg-background">
-      {/* Hero Skeleton */}
+    <main className="min-h-screen bg-background">
+      {/* Hero Section */}
       <section className="relative flex min-h-[60vh] items-center overflow-hidden pt-32 pb-16">
-        <Skeleton className="absolute inset-0 h-full w-full" />
-        <div className="absolute inset-0 bg-linear-to-b from-[#2E2A6E]/70 via-[#2E2A6E]/50" />
+        {/* Background placeholder */}
+        <div className="absolute inset-0">
+          <div className="h-full w-full animate-pulse bg-muted/50 dark:bg-muted/40" />
+        </div>
+
+        {/* Animated orbs placeholders */}
+        <div className="absolute top-20 right-0 h-[500px] w-[500px] animate-pulse rounded-full bg-primary/20 blur-[100px] dark:bg-primary/10" />
+
+        {/* Content */}
         <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <Skeleton className="mx-auto mb-6 h-12 w-2/3 rounded" />
-            <Skeleton className="mx-auto h-6 w-3/4 rounded" />
+            <div className="mx-auto mb-6 h-12 w-3/4 animate-pulse rounded-lg bg-muted dark:bg-muted/70" />
+            <div className="mx-auto h-4 w-2/3 animate-pulse rounded-lg bg-muted dark:bg-muted/70" />
           </div>
         </div>
       </section>
 
-      {/* Search/Filter Skeleton */}
-      <section className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <Skeleton className="mx-auto h-8 w-48 rounded" />
-        </div>
-        <div className="mb-12 flex flex-col gap-4 sm:flex-row">
-          <div className="relative flex-1">
-            <Skeleton className="absolute top-1/2 left-4 z-10 h-5 w-5 -translate-y-1/2 rounded-full" />
-            <Skeleton className="h-[52px] w-full rounded-xl pl-12" />
-            <Skeleton className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-full" />
-          </div>
-          <div className="w-full sm:w-64">
-            <Skeleton className="h-[52px] w-full rounded-xl" />
-          </div>
-        </div>
+      {/* Search/Filter Section */}
+      <section className="bg-background py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 rounded-2xl border border-border/30 bg-card/60 p-4 shadow-xl backdrop-blur-xl sm:p-6">
+            <div className="flex flex-col gap-4">
+              {/* Search input skeleton */}
+              <div className="relative">
+                <div className="h-14 w-full animate-pulse rounded-xl border border-border/40 bg-muted/50 dark:bg-muted/40" />
+              </div>
 
-        {/* Events Grid Skeleton */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {eventSkeletonIds.map((id) => (
-            <Card
-              className="mx-auto flex h-full min-h-[480px] w-full max-w-[400px] flex-col overflow-hidden rounded-2xl bg-white/80 py-0 shadow-lg ring-1 ring-border/50 backdrop-blur-xl"
-              key={id}
-            >
-              <div className="relative aspect-4/3 overflow-hidden">
-                <Skeleton className="h-full w-full" />
-                <div className="absolute top-3 left-3">
-                  <Skeleton className="h-6 w-20 rounded" />
+              {/* Filter row skeleton */}
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="flex-1">
+                  <div className="h-12 animate-pulse rounded-xl border border-border/40 bg-muted/50 dark:bg-muted/40" />
                 </div>
-                <div className="absolute right-3 bottom-3">
-                  <Skeleton className="h-6 w-24 rounded" />
+                <div className="w-full sm:w-40">
+                  <div className="h-12 animate-pulse rounded-xl border border-border/40 bg-muted/50 dark:bg-muted/40" />
                 </div>
               </div>
-              <CardContent className="flex flex-1 flex-col p-5">
-                <Skeleton className="mb-2 h-6 w-3/4 rounded" />
-                <Skeleton className="mb-4 h-4 w-full rounded" />
-                <Skeleton className="mb-3 h-4 w-1/2 rounded" />
-                <Skeleton className="mb-4 h-4 w-1/3 rounded" />
-                <div className="mt-auto flex flex-col gap-2">
-                  <Skeleton className="h-12 w-full rounded-xl" />
-                  <Skeleton className="h-12 w-full rounded-xl" />
+            </div>
+          </div>
+
+          {/* Event Cards Grid */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {makeArray(6, "event-skeleton").map((key) => (
+              <div
+                className="overflow-hidden rounded-xl border border-border bg-background shadow-md"
+                key={key}
+              >
+                {/* Event image skeleton */}
+                <div className="aspect-16/10 w-full animate-pulse bg-muted dark:bg-muted/70" />
+
+                {/* Card content */}
+                <div className="flex flex-col p-6">
+                  {/* Title skeleton */}
+                  <div className="mb-2 space-y-2">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-muted dark:bg-muted/70" />
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-muted dark:bg-muted/70" />
+                  </div>
+
+                  {/* Description skeleton */}
+                  <div className="mb-4 space-y-2">
+                    <div className="h-3 w-full animate-pulse rounded bg-muted dark:bg-muted/70" />
+                    <div className="h-3 w-5/6 animate-pulse rounded bg-muted dark:bg-muted/70" />
+                  </div>
+
+                  {/* Spacer */}
+                  <div className="flex-1" />
+
+                  {/* Event details skeleton */}
+                  <div className="space-y-2 border-border border-t pt-4">
+                    <div className="h-3 w-full animate-pulse rounded bg-muted dark:bg-muted/70" />
+                    <div className="h-3 w-5/6 animate-pulse rounded bg-muted dark:bg-muted/70" />
+                    <div className="h-3 w-4/5 animate-pulse rounded bg-muted dark:bg-muted/70" />
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                {/* Button section skeleton */}
+                <div className="flex flex-col gap-3 px-6 pb-6">
+                  <div className="h-8 animate-pulse rounded bg-muted dark:bg-muted/70" />
+                  <div className="h-10 animate-pulse rounded-xl bg-muted dark:bg-muted/70" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CTA Skeleton */}
+      {/* CTA Section */}
       <section className="relative overflow-hidden py-16">
         <div className="absolute inset-0 bg-linear-to-r from-primary/5 to-[#2E2A6E]/5" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Card className="rounded-3xl bg-white/70 shadow-xl ring-1 ring-white/50 backdrop-blur-xl">
-            <CardContent className="p-8 text-center md:p-12">
-              <Skeleton className="mx-auto mb-4 h-8 w-64 rounded" />
-              <Skeleton className="mx-auto mb-6 h-4 w-2/3 rounded" />
-              <div className="flex flex-wrap justify-center gap-4">
-                <Skeleton className="h-12 w-40 rounded-xl" />
-                <Skeleton className="h-12 w-56 rounded-xl" />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="rounded-3xl border-0 bg-card/80 p-8 text-center shadow-xl ring-1 ring-border/50 backdrop-blur-xl md:p-12">
+            {/* Heading skeleton */}
+            <div className="mx-auto mb-4 h-8 w-3/4 animate-pulse rounded-lg bg-muted dark:bg-muted/70" />
+
+            {/* Description skeleton */}
+            <div className="mx-auto mb-6 max-w-2xl space-y-2">
+              <div className="h-4 w-full animate-pulse rounded bg-muted dark:bg-muted/70" />
+              <div className="h-4 w-5/6 animate-pulse rounded bg-muted dark:bg-muted/70" />
+            </div>
+
+            {/* Buttons skeleton */}
+            <div className="flex flex-wrap justify-center gap-4">
+              <div className="h-11 w-32 animate-pulse rounded-xl bg-muted dark:bg-muted/70" />
+              <div className="h-11 w-40 animate-pulse rounded-xl bg-muted dark:bg-muted/70" />
+            </div>
+          </div>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

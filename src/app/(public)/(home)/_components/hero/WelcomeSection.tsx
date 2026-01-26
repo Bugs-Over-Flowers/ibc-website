@@ -125,7 +125,7 @@ export function WelcomeSection() {
               </span>
               <div className="-space-y-2">
                 <span className="block text-balance text-chart-1">
-                  Iloilo Business Club, Inc
+                  Iloilo Business Club, Inc.
                 </span>
               </div>
             </motion.h1>

@@ -1,6 +1,10 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
-import { getAllEvents } from "@/server/events/queries/getAllEvents";
+import {
+  getAdminEventsPage,
+  type SortOption,
+} from "@/server/events/queries/getAdminEventsPage";
+import CreateEventButton from "./CreateEventButton";
 import EventFilters from "./EventFilters";
 import EventTable from "./EventTable";
 
@@ -18,9 +22,9 @@ export default async function EventsContents({
   const sp = await searchParams;
   const cookieStore = await cookies();
 
-  const events = await getAllEvents(cookieStore.getAll(), {
+  const { items, nextCursor } = await getAdminEventsPage(cookieStore.getAll(), {
     search: sp.search,
-    sort: sp.sort,
+    sort: sp.sort as SortOption,
     status: sp.status,
   });
 
@@ -35,6 +39,7 @@ export default async function EventsContents({
             Manage and organize your events
           </p>
         </div>
+        <CreateEventButton />
       </div>
 
       <div className="rounded-lg border bg-background p-4 md:p-6">
@@ -46,7 +51,13 @@ export default async function EventsContents({
       </div>
 
       <div className="rounded-lg border bg-background p-4 md:border-0 md:p-0">
-        <EventTable events={events} />
+        <EventTable
+          initialEvents={items}
+          initialNextCursor={nextCursor}
+          search={sp.search}
+          sort={sp.sort as SortOption}
+          status={sp.status}
+        />
       </div>
     </div>
   );

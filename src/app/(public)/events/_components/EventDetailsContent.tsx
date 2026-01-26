@@ -1,10 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import type { Tables } from "@/lib/supabase/db.types";
 
 type Event = Tables<"Event">;
 
+import { MessageSquare } from "lucide-react";
+import type { Route } from "next";
+import { Button } from "@/components/ui/button";
 import { staggerContainer } from "@/lib/animations/stagger";
 import { getEventStatus } from "@/lib/events/eventUtils";
 import { EventInfoCard } from "./EventInfoCard";
@@ -15,7 +19,12 @@ interface EventDetailsContentProps {
 }
 
 export function EventDetailsContent({ event }: EventDetailsContentProps) {
+  const router = useRouter();
   const status = getEventStatus(event.eventStartDate, event.eventEndDate);
+
+  const handleEvaluationClick = () => {
+    router.push(`/evaluation?eventId=${event.eventId}` as Route);
+  };
 
   return (
     <section className="relative overflow-hidden bg-background py-8 md:py-12">
@@ -29,7 +38,7 @@ export function EventDetailsContent({ event }: EventDetailsContentProps) {
           >
             <EventInfoCard event={event} />
           </motion.div>
-          {status !== "past" && (
+          {status !== "past" ? (
             <motion.div
               animate="visible"
               className="flex flex-col lg:col-span-2"
@@ -38,6 +47,18 @@ export function EventDetailsContent({ event }: EventDetailsContentProps) {
             >
               <EventRegistrationCard event={event} />
             </motion.div>
+          ) : (
+            <div className="flex flex-col justify-end lg:col-span-2">
+              <Button
+                className="h-12 w-full rounded-2xl border-border bg-transparent text-foreground hover:bg-accent"
+                onClick={handleEvaluationClick}
+                size="lg"
+                variant="outline"
+              >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Submit Feedback
+              </Button>
+            </div>
           )}
         </div>
       </div>
