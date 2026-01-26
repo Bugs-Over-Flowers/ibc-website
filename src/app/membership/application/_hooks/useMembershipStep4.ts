@@ -35,6 +35,11 @@ export const useMembershipStep4 = ({
     (state) => state.memberValidation.memberInfo.businessMemberId,
   );
 
+  // Get the verified businessMemberId (UUID) from member validation
+  const verifiedBusinessMemberId = useMembershipApplicationStore(
+    (state) => state.memberValidation.memberInfo.businessMemberId,
+  );
+
   const defaultApplicationDataStep4 = useMembershipApplicationStore(
     (state) => state.applicationData?.step4,
   );

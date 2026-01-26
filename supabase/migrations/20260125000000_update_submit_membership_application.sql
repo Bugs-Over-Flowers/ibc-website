@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION submit_membership_application(
   p_representatives jsonb,       -- Array: [{ memberType, firstName, lastName, ... }]
   p_payment_method text,         -- 'BPI', 'ONSITE'
   p_application_member_type text, -- 'corporate', 'personal'
-  p_payment_proof_url text DEFAULT NULL -- URL to proof of payment image (required if payment_method = 'BPI')
+  p_payment_proof_url text DEFAULT NULL
 ) RETURNS jsonb AS $$
 DECLARE
   v_application_id uuid;
@@ -168,15 +168,9 @@ EXCEPTION
     RAISE EXCEPTION 'Application submission failed: %', SQLERRM;
 END;
 $$ LANGUAGE plpgsql;
+
 -- Add comment for documentation
-COMMENT ON FUNCTION submit_membership_application(
- text,   
-jsonb,       
- jsonb,      
-text,        
- text, 
-text
-) IS 
+COMMENT ON FUNCTION submit_membership_application IS 
 'Submits a membership application for new members, renewals, or information updates.
 - newMember: New membership application (no businessMemberId required)
 - renewal: Membership renewal (requires businessMemberId from existing member)
