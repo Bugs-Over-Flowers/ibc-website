@@ -8,13 +8,13 @@ import {
   Edit,
   Globe,
   MapPin,
-  MessageSquare,
   Users,
 } from "lucide-react";
 import type { Route } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import { EvaluationQRDownloader } from "@/components/qr/EvaluationQRDownloader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -116,14 +116,20 @@ export default async function EventDetails({
                 {event.description}
               </p>
             </div>
-            {showEditButton && (
-              <Link href={`/admin/events/${eventId}/edit-event` as Route}>
-                <Button variant="outline">
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Event
-                </Button>
-              </Link>
-            )}
+            <div className="flex items-center gap-2">
+              <EvaluationQRDownloader
+                eventId={eventId}
+                eventTitle={event.eventTitle}
+              />
+              {showEditButton && (
+                <Link href={`/admin/events/${eventId}/edit-event` as Route}>
+                  <Button variant="outline">
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Event
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -212,7 +218,7 @@ export default async function EventDetails({
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="font-medium text-muted-foreground text-sm">
@@ -276,7 +282,7 @@ export default async function EventDetails({
       </div>
 
       {/* Action Cards */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className="flex flex-col">
           <CardContent className="flex flex-1 flex-col p-6">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
@@ -295,7 +301,6 @@ export default async function EventDetails({
             </Link>
           </CardContent>
         </Card>
-
         <Card className="flex flex-col">
           <CardContent className="flex flex-1 flex-col p-6">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600">
@@ -310,24 +315,6 @@ export default async function EventDetails({
               <Button className="w-full" variant="outline">
                 <CheckSquare className="mr-2 h-4 w-4" />
                 View Check-in List
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="flex flex-col">
-          <CardContent className="flex flex-1 flex-col p-6">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
-              <MessageSquare className="h-6 w-6" />
-            </div>
-            <h3 className="mb-2 font-semibold text-lg">Event Feedbacks</h3>
-            <p className="mb-6 flex-1 text-muted-foreground text-sm">
-              View and analyze participant feedback and ratings for this event
-            </p>
-            <Link href={`/admin/events/${eventId}/feedbacks` as Route}>
-              <Button className="w-full" variant="outline">
-                <MessageSquare className="mr-2 h-4 w-4" />
-                View Feedbacks
               </Button>
             </Link>
           </CardContent>

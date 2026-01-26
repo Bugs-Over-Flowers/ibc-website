@@ -87,3 +87,31 @@ export const getEventCategory = (
   if (now >= start && now <= end) return "ongoing";
   return "past";
 };
+
+/**
+ * Format event date range display
+ * Handles single date, date range, or returns null if no dates available
+ */
+export const formatEventDateRange = (
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+): string | null => {
+  const hasStartDate = Boolean(startDate);
+  const hasEndDate = Boolean(endDate);
+
+  if (!hasStartDate && !hasEndDate) {
+    return null;
+  }
+
+  if (hasStartDate && hasEndDate) {
+    const startFormatted = formatDate(startDate ?? null);
+    const endFormatted = formatDate(endDate ?? null);
+    return startFormatted === endFormatted
+      ? startFormatted
+      : `${startFormatted} - ${endFormatted}`;
+  }
+
+  return hasStartDate
+    ? formatDate(startDate ?? null)
+    : formatDate(endDate ?? null);
+};
