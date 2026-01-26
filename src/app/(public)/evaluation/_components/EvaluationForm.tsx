@@ -262,6 +262,9 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
                     className="min-h-24 resize-none sm:min-h-28"
                     label="Comments"
                     placeholder="Share any additional thoughts about the event..."
+                    textareaProps={{
+                      maxLength: 500,
+                    }}
                   />
                   <div className="flex justify-end text-muted-foreground text-xs">
                     {length}/{max} characters
@@ -281,6 +284,9 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
                     className="min-h-24 resize-none sm:min-h-28"
                     label="Suggestions for Improvement"
                     placeholder="How can we make our events even better?"
+                    textareaProps={{
+                      maxLength: 500,
+                    }}
                   />
                   <div className="flex justify-end text-muted-foreground text-xs">
                     {length}/{max} characters
