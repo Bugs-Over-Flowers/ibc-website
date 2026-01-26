@@ -44,3 +44,16 @@ export type UpdateCheckInRemarksInput = z.infer<
 export type UpdateCheckInRemarksOutput = {
   updatedCount: number;
 };
+
+// Update check-in time validation schema
+export const UpdateCheckInTimeInput = z.object({
+  checkInId: z.string().uuid("Invalid check-in ID"),
+  checkInTime: z.string().datetime("Invalid datetime format"),
+  eventDayId: z.string().uuid("Invalid event day ID"),
+});
+
+export type UpdateCheckInTimeInput = z.infer<typeof UpdateCheckInTimeInput>;
+
+export type UpdateCheckInTimeOutput = {
+  success: boolean;
+};
