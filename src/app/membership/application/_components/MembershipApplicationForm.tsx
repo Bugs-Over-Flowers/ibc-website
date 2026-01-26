@@ -3,6 +3,7 @@
 import { useStore } from "@tanstack/react-form";
 import { CheckCircle2, ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMembershipStep1 } from "@/app/membership/application/_hooks/useMembershipStep1";
 import { useMembershipStep2 } from "@/app/membership/application/_hooks/useMembershipStep2";
 import { useMembershipStep3 } from "@/app/membership/application/_hooks/useMembershipStep3";
@@ -37,8 +38,10 @@ const steps = [
 ];
 
 export function MembershipApplicationForm() {
+  const router = useRouter();
   const currentStep = useMembershipApplicationStore((state) => state.step);
   const setStep = useMembershipApplicationStore((state) => state.setStep);
+  const resetStore = useMembershipApplicationStore((state) => state.resetStore);
 
   const step1Form = useMembershipStep1();
   const step2Form = useMembershipStep2();
@@ -50,7 +53,7 @@ export function MembershipApplicationForm() {
   } = useMembershipStep4();
 
   const handleNext = (
-    form: typeof step1Form | typeof step2Form | typeof step3Form,
+    form: typeof step1Form.form | typeof step2Form | typeof step3Form,
   ) => {
     form.handleSubmit({ nextStep: true });
   };
@@ -146,21 +149,34 @@ export function MembershipApplicationForm() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleNext(step1Form);
+                  handleNext(step1Form.form);
                 }}
               >
-                <Step1Status form={step1Form} />
+                <Step1Status
+                  form={step1Form.form}
+                  memberValidation={step1Form.memberValidation}
+                  resetMemberValidation={step1Form.resetMemberValidation}
+                />
                 <div className="flex justify-between pt-6">
-                  <Button disabled type="button" variant="outline">
-                    Back
+                  <Button
+                    onClick={() => {
+                      resetStore();
+                      router.push("/");
+                    }}
+                    type="button"
+                    variant="outline"
+                  >
+                    Cancel
                   </Button>
-                  <step1Form.Subscribe selector={(state) => state.isSubmitting}>
+                  <step1Form.form.Subscribe
+                    selector={(state) => state.isSubmitting}
+                  >
                     {(isSubmitting) => (
                       <Button disabled={isSubmitting} type="submit">
                         {isSubmitting ? "Saving..." : "Next"}
                       </Button>
                     )}
-                  </step1Form.Subscribe>
+                  </step1Form.form.Subscribe>
                 </div>
               </form>
             )}
