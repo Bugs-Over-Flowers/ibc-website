@@ -1,5 +1,5 @@
 import { useStore } from "@tanstack/react-form";
-import { AlertCircle, FileIcon, X } from "lucide-react";
+import { AlertCircle, FileIcon, MapPin, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
@@ -255,6 +255,24 @@ export function Step4Review({ form, applicationData }: StepProps) {
               </div>
             )}
           </form.AppField>
+
+          {/* Conditional: Onsite Payment Info */}
+          <form.Subscribe selector={(state) => state.values.paymentMethod}>
+            {(paymentMethod) =>
+              paymentMethod === "ONSITE" && (
+                <Alert className="border-primary/30 bg-primary/5">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <AlertTitle className="text-primary">
+                    IBC Office Location
+                  </AlertTitle>
+                  <AlertDescription className="text-muted-foreground">
+                    GF Rm. 105-B Maryville Bldg., Marymart Mall, Delgado St.,
+                    Iloilo City 5000
+                  </AlertDescription>
+                </Alert>
+              )
+            }
+          </form.Subscribe>
 
           {/* Conditional Payment Proof Upload */}
           <form.Subscribe selector={(state) => state.values.paymentMethod}>
