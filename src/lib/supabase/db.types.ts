@@ -46,6 +46,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          identifier: string | null;
           interviewId: string | null;
           landline: string;
           logoImageURL: string;
@@ -66,6 +67,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          identifier?: string | null;
           interviewId?: string | null;
           landline: string;
           logoImageURL: string;
@@ -86,6 +88,7 @@ export type Database = {
           companyName?: string;
           emailAddress?: string;
           faxNumber?: string;
+          identifier?: string | null;
           interviewId?: string | null;
           landline?: string;
           logoImageURL?: string;
@@ -640,7 +643,6 @@ export type Database = {
           venue: string;
         }[];
       };
-      get_event_checkin_list: { Args: { p_event_id: string }; Returns: Json };
       get_event_participant_list: {
         Args: { p_event_id: string; p_search_text?: string };
         Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
@@ -668,16 +670,6 @@ export type Database = {
           to: "registration_list_item";
           isOneToOne: false;
           isSetofReturn: true;
-        };
-      };
-      get_registration_list_checkin: {
-        Args: { p_identifier: string; p_today?: string };
-        Returns: Database["public"]["CompositeTypes"]["registration_details_result"];
-        SetofOptions: {
-          from: "*";
-          to: "registration_details_result";
-          isOneToOne: true;
-          isSetofReturn: false;
         };
       };
       get_registration_list_stats: {
@@ -721,28 +713,17 @@ export type Database = {
         };
         Returns: Json;
       };
-      submit_membership_application:
-        | {
-            Args: {
-              p_application_member_type: string;
-              p_application_type: string;
-              p_company_details: Json;
-              p_payment_method: string;
-              p_payment_proof_url?: string;
-              p_representatives: Json;
-            };
-            Returns: Json;
-          }
-        | {
-            Args: {
-              p_application_type: string;
-              p_company_details: Json;
-              p_payment_method: string;
-              p_payment_proof_url?: string;
-              p_representatives: Json;
-            };
-            Returns: Json;
-          };
+      submit_membership_application: {
+        Args: {
+          p_application_member_type: string;
+          p_application_type: string;
+          p_company_details: Json;
+          p_payment_method: string;
+          p_payment_proof_url?: string;
+          p_representatives: Json;
+        };
+        Returns: Json;
+      };
       update_event_details: {
         Args: {
           p_description?: string;
