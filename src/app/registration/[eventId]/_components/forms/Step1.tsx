@@ -1,16 +1,9 @@
-import { Building, CircleAlert } from "lucide-react";
+import { Building, Info } from "lucide-react";
 import type { FormEvent } from "react";
 import FormButtons from "@/components/FormButtons";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldLabel,
-  FieldSet,
-  FieldTitle,
-} from "@/components/ui/field";
+import { FieldLabel, FieldSet } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
 import { MemberTypeEnum } from "@/lib/validation/utils";
@@ -39,23 +32,22 @@ const Step1 = ({ members }: Step1Props) => {
   }));
 
   return (
-    <form className="space-y-3" onSubmit={onNext}>
+    <form className="space-y-6" onSubmit={onNext}>
       <RegistrationStepHeader
         description="Please identify your affiliation with the organization."
         Icon={Building}
-        title="Affiliation"
+        title="Organization Affiliation"
       />
 
       <MemberTypeSelection form={form} membersOptions={membersOptions} />
 
-      <Alert>
-        <CircleAlert />
-        <AlertTitle>Note</AlertTitle>
-        <AlertDescription>
-          In case you can&apos;t find your organization / business /
-          affiliation, please contact us.
-        </AlertDescription>
-      </Alert>
+      {/* Help Note */}
+      <div className="flex items-start gap-2 rounded-lg bg-muted/30 p-3 text-sm">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+        <p className="text-muted-foreground">
+          Can&apos;t find your organization? Please contact us for assistance.
+        </p>
+      </div>
 
       <FormButtons
         onBack={() => {
@@ -82,11 +74,13 @@ function MemberTypeSelection({
 
   return (
     <Card>
-      <CardContent>
+      <CardContent className="pt-6">
         <form.AppField name="member">
           {(field) => (
-            <FieldSet>
+            <FieldSet className="space-y-4">
+              <Label className="font-medium text-sm">Affiliation Type</Label>
               <RadioGroup
+                className="space-y-3"
                 defaultValue="member"
                 onValueChange={(value) => {
                   const parsedMemberValue = MemberTypeEnum.safeParse(value);
@@ -106,58 +100,83 @@ function MemberTypeSelection({
                 value={field.state.value}
               >
                 {/* Member Option */}
-                <FieldLabel htmlFor="member">
-                  <Field orientation={"horizontal"}>
-                    <FieldContent>
-                      <FieldTitle>Member</FieldTitle>
-                      <FieldDescription>I am a member of IBC.</FieldDescription>
-                      {field.state.value === "member" && (
-                        <form.AppField name="businessMemberId">
+                <FieldLabel
+                  className="flex cursor-pointer items-start gap-3 rounded-lg border-2 p-4 transition-all hover:border-primary/50 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
+                  htmlFor="member"
+                >
+                  <RadioGroupItem
+                    className="mt-0.5"
+                    id="member"
+                    value="member"
+                  />
+                  <div className="flex-1">
+                    <span className="font-medium text-foreground">Member</span>
+                    <p className="mt-0.5 text-muted-foreground text-sm">
+                      I am a member of the organization
+                    </p>
+                  </div>
+                </FieldLabel>
+
+                {/* Conditional: Member Organization Select */}
+                {field.state.value === "member" && (
+                  <div className="ml-4 space-y-2 border-primary/30 border-l-2 pl-4">
+                    <form.AppField name="businessMemberId">
+                      {(field) => (
+                        <field.SingleComboBoxField
+                          options={membersOptions}
+                          placeholder="Select your organization"
+                        />
+                      )}
+                    </form.AppField>
+                  </div>
+                )}
+
+                {/* Non-member Option */}
+                {eventDetails?.eventType === "public" ? (
+                  <>
+                    <FieldLabel
+                      className="flex cursor-pointer items-start gap-3 rounded-lg border-2 p-4 transition-all hover:border-primary/50 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
+                      htmlFor="nonmember"
+                    >
+                      <RadioGroupItem
+                        className="mt-0.5"
+                        id="nonmember"
+                        value="nonmember"
+                      />
+                      <div className="flex-1">
+                        <span className="font-medium text-foreground">
+                          Non-member
+                        </span>
+                        <p className="mt-0.5 text-muted-foreground text-sm">
+                          I am not a member of the organization
+                        </p>
+                      </div>
+                    </FieldLabel>
+
+                    {/* Conditional: Non-member Company Input */}
+                    {field.state.value === "nonmember" && (
+                      <div className="ml-4 space-y-2 border-primary/30 border-l-2 pl-4">
+                        <form.AppField name="nonMemberName">
                           {(field) => (
-                            <field.SingleComboBoxField
-                              options={membersOptions}
-                              placeholder="Select your Company"
+                            <field.TextField
+                              label="Company / Organization Name"
+                              placeholder="Enter your company or organization name"
                             />
                           )}
                         </form.AppField>
-                      )}
-                    </FieldContent>
-                    <RadioGroupItem id="member" value="member" />
-                  </Field>
-                </FieldLabel>
-
-                {/* Non-member Option */}
-                <FieldLabel htmlFor="nonmember">
-                  <Field orientation={"horizontal"}>
-                    <FieldContent>
-                      <FieldTitle>Non-member</FieldTitle>
-                      <FieldDescription>
-                        I am not a member of IBC.
-                      </FieldDescription>
-                      {eventDetails?.eventType === "private" && (
-                        <FieldDescription>
-                          This event is private only. Only members of IBC are
-                          allowed to attend this event.
-                        </FieldDescription>
-                      )}
-                      {field.state.value === "nonmember" &&
-                        eventDetails?.eventType === "public" && (
-                          <form.AppField name="nonMemberName">
-                            {(field) => (
-                              <field.TextField
-                                label="Affiliation"
-                                placeholder="Enter your Organization / Company Name"
-                              />
-                            )}
-                          </form.AppField>
-                        )}
-                    </FieldContent>
-                    {eventDetails?.eventType === "public" && (
-                      <RadioGroupItem id="nonmember" value="nonmember" />
+                      </div>
                     )}
-                  </Field>
-                </FieldLabel>
+                  </>
+                ) : null}
               </RadioGroup>
+
+              {/* Private Event Notice */}
+              {eventDetails?.eventType === "private" &&
+                field.state.value === "nonmember" && (
+                  <div className="text-destructive text-sm">
+                    This is a private event. Only IBC members can attend.
+                  </div>
+                )}
             </FieldSet>
           )}
         </form.AppField>

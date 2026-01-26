@@ -1,15 +1,11 @@
 import { formatDate } from "date-fns";
-import { CircleAlert, User } from "lucide-react";
-import Image from "next/image";
+import { Check, Info, User } from "lucide-react";
 import { type FormEvent, useMemo } from "react";
 import FormButtons from "@/components/FormButtons";
 import TermsAndConditions from "@/components/TermsAndConditions";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldError } from "@/components/ui/field";
+import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import useRegistrationStore from "@/hooks/registration.store";
@@ -27,6 +23,7 @@ export default function Step4({ members }: Step4Props) {
   const registrationData = useRegistrationStore(
     (state) => state.registrationData,
   );
+  const eventDetails = useRegistrationStore((state) => state.eventDetails);
 
   const step1Data = registrationData.step1;
   const step2Data = registrationData.step2;
@@ -41,6 +38,9 @@ export default function Step4({ members }: Step4Props) {
     return "";
   }, [members, step1Data]);
 
+  const totalParticipants = 1 + (step2Data.otherParticipants?.length ?? 0);
+  const totalAmount = (eventDetails?.registrationFee ?? 0) * totalParticipants;
+
   const onNext = (e?: FormEvent) => {
     if (e) {
       e.preventDefault();
@@ -50,29 +50,144 @@ export default function Step4({ members }: Step4Props) {
   };
 
   return (
-    <form className="space-y-3" onSubmit={onNext}>
+    <form className="space-y-6" onSubmit={onNext}>
       <RegistrationStepHeader
-        description="Please review your registration details below."
+        description="Please review your registration details before submitting."
         Icon={User}
-        title="Confirm Registration"
+        title="Review & Confirm"
       />
 
-      <EventDetailsSection />
+      {/* Event Info */}
+      <div className="rounded-lg border bg-muted/20 p-4">
+        <p className="font-semibold text-foreground">
+          {eventDetails?.eventTitle}
+        </p>
+        <p className="mt-1 text-muted-foreground text-sm">
+          {eventDetails?.eventStartDate &&
+            formatDate(eventDetails.eventStartDate, "MMMM d, yyyy")}
+        </p>
+      </div>
 
-      <ParticipantInformationSection
-        memberName={memberName}
-        otherParticipants={step2Data.otherParticipants}
-        registrant={step2Data.registrant}
-        step1Data={step1Data}
-      />
+      {/* Summary Sections */}
+      <div className="space-y-4">
+        {/* Affiliation */}
+        <div className="space-y-2">
+          <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+            Organization
+          </h4>
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <span className="text-foreground text-sm">
+              {step1Data.member === "member"
+                ? memberName
+                : step1Data.nonMemberName}
+            </span>
+            <Badge className="text-xs" variant="outline">
+              {step1Data.member === "member" ? "Member" : "Non-member"}
+            </Badge>
+          </div>
+        </div>
 
-      <PaymentSummarySection
-        otherParticipants={step2Data.otherParticipants}
-        step3Data={step3Data}
-      />
+        <Separator />
 
-      <PaymentNoteAlert paymentMethod={step3Data.paymentMethod} />
+        {/* Participants */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              Participants
+            </h4>
+            <Badge className="text-xs" variant="secondary">
+              {totalParticipants} total
+            </Badge>
+          </div>
 
+          {/* Primary */}
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <p className="font-medium text-sm">
+                {step2Data.registrant?.firstName}{" "}
+                {step2Data.registrant?.lastName}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {step2Data.registrant?.email}
+              </p>
+            </div>
+            <Badge className="text-xs">Primary</Badge>
+          </div>
+
+          {/* Others */}
+          {step2Data.otherParticipants &&
+            step2Data.otherParticipants.length > 0 &&
+            step2Data.otherParticipants.map((participant, index) => (
+              <div
+                className="flex items-center justify-between rounded-lg border bg-muted/20 p-3"
+                key={`${participant.firstName}-${index}`}
+              >
+                <p className="font-medium text-sm">
+                  {participant.firstName} {participant.lastName}
+                </p>
+                <Check className="h-4 w-4 text-green-600" />
+              </div>
+            ))}
+        </div>
+
+        <Separator />
+
+        {/* Payment */}
+        <div className="space-y-3">
+          <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+            Payment
+          </h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Method</span>
+              <Badge
+                variant={
+                  step3Data.paymentMethod === "online" ? "default" : "secondary"
+                }
+              >
+                {step3Data.paymentMethod === "online"
+                  ? "Bank Transfer"
+                  : "Onsite"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Fee</span>
+              <span>
+                {formatCurrency(eventDetails?.registrationFee ?? 0)} ×{" "}
+                {totalParticipants}
+              </span>
+            </div>
+            {step3Data.paymentMethod === "online" && step3Data.paymentProof && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Proof</span>
+                <span className="flex items-center gap-1 text-green-600 text-xs">
+                  <Check className="h-3 w-3" />
+                  Attached
+                </span>
+              </div>
+            )}
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between pt-1">
+            <span className="font-medium">Total</span>
+            <span className="font-semibold text-lg text-primary">
+              {formatCurrency(totalAmount)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Note */}
+      <div className="flex items-start gap-2 rounded-lg bg-muted/30 p-3 text-sm">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+        <p className="text-muted-foreground">
+          {step3Data.paymentMethod === "online"
+            ? "Your registration will be confirmed once payment is verified."
+            : "Please settle payment at the venue before the event."}
+        </p>
+      </div>
+
+      {/* Terms */}
       <TermsAndConditionsField form={form} />
 
       <form.Subscribe selector={(state) => state.isSubmitting}>
@@ -90,242 +205,11 @@ export default function Step4({ members }: Step4Props) {
   );
 }
 
-function EventDetailsSection() {
-  const eventDetails = useRegistrationStore((state) => state.eventDetails);
-
-  return (
-    <Card className="border-dashed bg-muted/30">
-      <CardHeader>
-        <CardTitle>
-          <h4>Event Details</h4>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-3">
-        <div className="flex flex-col gap-1">
-          <p className="text-muted-foreground text-sm">
-            Review the implementation details.
-          </p>
-        </div>
-        <div className="grid gap-1">
-          <p className="font-medium text-primary">{eventDetails?.eventTitle}</p>
-
-          <div className="flex items-center text-muted-foreground text-sm">
-            {eventDetails?.eventStartDate &&
-              formatDate(eventDetails?.eventStartDate, "MMMM d, yyyy")}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-interface ParticipantInformationSectionProps {
-  step1Data: {
-    member: string;
-    businessMemberId?: string;
-    nonMemberName?: string;
-  };
-  memberName: string | undefined;
-  registrant: { firstName: string; lastName: string; email: string };
-  otherParticipants: Array<{ firstName: string; lastName: string }>;
-}
-
-function ParticipantInformationSection({
-  step1Data,
-  memberName,
-  registrant,
-  otherParticipants,
-}: ParticipantInformationSectionProps) {
-  return (
-    <Card className="border-dashed bg-muted/30">
-      <CardHeader>
-        <CardTitle>
-          <h4>Participant Information</h4>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-muted-foreground text-sm">
-            Verify your personal and group information.
-          </p>
-        </div>
-
-        <div className="grid gap-4">
-          <div className="flex items-center justify-between">
-            <span className="font-medium">Affiliation</span>
-            <span className="text-muted-foreground text-sm">
-              {step1Data.member === "member"
-                ? memberName
-                : step1Data.nonMemberName}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="font-medium">Total Participants</span>
-            <Badge variant="outline">
-              {1 + (otherParticipants?.length ?? 0)} Participants
-            </Badge>
-          </div>
-
-          <div className="space-y-3">
-            {/* Primary Registrant */}
-            <div className="rounded-lg border bg-card p-3 text-card-foreground shadow-sm">
-              <div className="flex flex-col gap-1">
-                <span className="font-semibold text-muted-foreground text-xs uppercase">
-                  Primary Registrant
-                </span>
-                <div className="font-medium">
-                  {registrant?.firstName} {registrant?.lastName}
-                </div>
-                <div className="text-muted-foreground text-sm">
-                  {registrant?.email}
-                </div>
-              </div>
-            </div>
-
-            {/* Other Participants */}
-            {otherParticipants && otherParticipants.length > 0 && (
-              <div className="space-y-2">
-                <div className="pt-2 font-semibold text-muted-foreground text-xs uppercase">
-                  Additional Participants
-                </div>
-                <div className="grid gap-2">
-                  {otherParticipants?.map((person, i) => (
-                    <div
-                      className="flex items-center justify-between rounded-lg border bg-muted/50 p-3 text-sm"
-                      key={`${person.firstName}-${i}`}
-                    >
-                      <span className="font-medium">
-                        {person.firstName} {person.lastName}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-interface PaymentSummarySectionProps {
-  step3Data: { paymentMethod: string; paymentProof?: File };
-  otherParticipants: Array<unknown>;
-}
-
-function PaymentSummarySection({
-  step3Data,
-  otherParticipants,
-}: PaymentSummarySectionProps) {
-  const eventDetails = useRegistrationStore((state) => state.eventDetails);
-
-  const paymentProofUrl =
-    step3Data.paymentMethod === "online" && step3Data.paymentProof
-      ? URL.createObjectURL(step3Data.paymentProof)
-      : null;
-
-  return (
-    <Card className="border-dashed bg-muted/30">
-      <CardHeader>
-        <CardTitle>
-          <h4>Payment Summary</h4>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-muted-foreground text-sm">
-            Confirm your payment method and total.
-          </p>
-        </div>
-
-        <div className="grid gap-2 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Payment Method</span>
-            <Badge
-              variant={
-                step3Data.paymentMethod === "online" ? "default" : "secondary"
-              }
-            >
-              {step3Data.paymentMethod === "online"
-                ? "Online Payment"
-                : "Onsite Payment"}
-            </Badge>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Registration Fee</span>
-            <span>
-              {Intl.NumberFormat("en-US", {
-                currency: "PHP",
-                style: "currency",
-              }).format(eventDetails?.registrationFee ?? 0)}
-              <span className="ml-1 text-muted-foreground text-xs">/ head</span>
-            </span>
-          </div>
-
-          <Separator className="my-2 bg-border/50" />
-
-          <div className="flex items-center justify-between font-semibold text-base">
-            <span>Total Amount</span>
-            <span className="text-lg text-primary">
-              {Intl.NumberFormat("en-US", {
-                currency: "PHP",
-                style: "currency",
-              }).format(
-                (eventDetails?.registrationFee ?? 0) *
-                  (otherParticipants.length + 1),
-              )}
-            </span>
-          </div>
-        </div>
-
-        {paymentProofUrl && (
-          <div className="flex flex-col gap-2 pt-2">
-            <span className="font-semibold text-muted-foreground text-xs uppercase">
-              Payment Proof
-            </span>
-            <div className="relative aspect-video w-full max-w-[200px] self-start overflow-hidden rounded-md border bg-muted">
-              <Image
-                alt="Payment Proof"
-                className="object-cover"
-                fill
-                src={paymentProofUrl}
-              />
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-interface PaymentNoteAlertProps {
-  paymentMethod: string;
-}
-
-function PaymentNoteAlert({ paymentMethod }: PaymentNoteAlertProps) {
-  return (
-    <Alert>
-      <CircleAlert />
-      <AlertTitle>Note</AlertTitle>
-      <AlertDescription>
-        {paymentMethod === "online" ? (
-          <>
-            Your payment is pending for approval. Once you confirm your
-            registration, the admin will review your payment and approve it. You
-            may receive an email notification once your payment is declined.
-          </>
-        ) : (
-          <>
-            Please ensure to be able to settle the full payment before the
-            event. You may opt to pay on the event proper or on the IBC Office.
-          </>
-        )}
-      </AlertDescription>
-    </Alert>
-  );
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "PHP",
+  }).format(amount);
 }
 
 interface TermsAndConditionsFieldProps {
@@ -339,11 +223,12 @@ function TermsAndConditionsField({ form }: TermsAndConditionsFieldProps) {
         const isInvalid =
           field.state.meta.isTouched && !field.state.meta.isValid;
         return (
-          <div className="py-3">
-            <Field orientation="horizontal">
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 rounded-lg border p-4">
               <Checkbox
                 aria-invalid={isInvalid}
                 checked={field.state.value}
+                className="mt-0.5"
                 id={field.name}
                 name={field.name}
                 onBlur={field.handleBlur}
@@ -351,33 +236,42 @@ function TermsAndConditionsField({ form }: TermsAndConditionsFieldProps) {
                   field.handleChange(checked === true)
                 }
               />
-              <Label htmlFor={field.name}>
-                I have read the Terms and Conditions.{" "}
-              </Label>
-              <FieldError errors={field.state.meta.errors} />
-            </Field>
-            <div className="pt-2">
-              <TermsAndConditions
-                customAcceptButton={(closeTermsAndConditions) => (
-                  <Button
-                    onClick={() => {
-                      field.handleChange(true);
-                      closeTermsAndConditions();
-                    }}
-                  >
-                    Accept
-                  </Button>
-                )}
-                triggerOverride={
-                  <button
-                    className="text-medium text-sm hover:underline"
-                    type="button"
-                  >
-                    Read Terms and Conditions here
-                  </button>
-                }
-              />
+              <div>
+                <Label
+                  className="cursor-pointer font-medium text-sm"
+                  htmlFor={field.name}
+                >
+                  I agree to the Terms and Conditions
+                </Label>
+                <p className="mt-0.5 text-muted-foreground text-xs">
+                  By checking this box, you agree to our terms of service and
+                  privacy policy.
+                </p>
+              </div>
             </div>
+            <TermsAndConditions
+              customAcceptButton={(closeTermsAndConditions) => (
+                <button
+                  className="font-medium text-primary text-sm hover:underline"
+                  onClick={() => {
+                    field.handleChange(true);
+                    closeTermsAndConditions();
+                  }}
+                  type="button"
+                >
+                  Read Terms and Conditions here
+                </button>
+              )}
+              triggerOverride={
+                <button
+                  className="font-medium text-primary text-sm hover:underline"
+                  type="button"
+                >
+                  Read Terms and Conditions here
+                </button>
+              }
+            />
+            <FieldError errors={field.state.meta.errors} />
           </div>
         );
       }}

@@ -14,7 +14,7 @@ import RegistrationInformation from "./_components/RegistrationInfoHeader";
 
 export default function Page({ params }: RegistrationRouteProps) {
   return (
-    <main className="flex h-screen w-full items-center justify-center p-5">
+    <main className="flex min-h-screen w-full items-center justify-center p-5">
       <Suspense fallback={<Spinner />}>
         <RegistrationPage params={params} />
       </Suspense>
@@ -43,9 +43,9 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
   }
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 md:flex-row">
+    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6 md:flex-row">
       <RegistrationInformation {...eventData} />
-      <div className="flex h-full w-full flex-col gap-4 p-5">
+      <div className="flex h-full flex-1 flex-col gap-4">
         <div className="flex items-center justify-between gap-2">
           <Link href={`/events/${eventId}`}>
             <Button variant={"ghost"}>
