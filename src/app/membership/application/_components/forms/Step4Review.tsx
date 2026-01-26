@@ -1,10 +1,12 @@
 import { useStore } from "@tanstack/react-form";
-import { FileIcon, X } from "lucide-react";
+import { AlertCircle, FileIcon, MapPin, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -25,6 +27,8 @@ export function Step4Review({ form, applicationData }: StepProps) {
     (state) => state.values.paymentProof,
   );
   const [proofPreview, setProofPreview] = useState<string | null>(null);
+
+  const isUpdateInfo = applicationData.step1.applicationType === "updating";
 
   useEffect(() => {
     if (
@@ -101,76 +105,89 @@ export function Step4Review({ form, applicationData }: StepProps) {
           </CardContent>
         </Card>
 
-        {/* Membership Type Section */}
-        <div className="space-y-4">
-          <h3 className="font-medium text-lg">Membership Type</h3>
-          <form.AppField name="applicationMemberType">
-            {(field) => (
-              <div className="space-y-3">
-                <Label>Select Membership Type *</Label>
-                <div className="flex flex-col space-y-2">
-                  <button
-                    className={cn(
-                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
-                      field.state.value === "corporate"
-                        ? "border-primary bg-primary/5"
-                        : "border-input",
-                    )}
-                    onClick={() => field.handleChange("corporate")}
-                    type="button"
-                  >
-                    <div
+        {/* Membership Type Section - Only show for New Member and Renewal */}
+        {!isUpdateInfo && (
+          <div className="space-y-4">
+            <h3 className="font-medium text-lg">Membership Type</h3>
+            <form.AppField name="applicationMemberType">
+              {(field) => (
+                <div className="space-y-3">
+                  <Label>Select Membership Type *</Label>
+                  <div className="flex flex-col space-y-2">
+                    <button
                       className={cn(
-                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                        "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
                         field.state.value === "corporate"
-                          ? "border-primary bg-primary"
+                          ? "border-primary bg-primary/5"
                           : "border-input",
                       )}
+                      onClick={() => field.handleChange("corporate")}
+                      type="button"
                     >
-                      {field.state.value === "corporate" && (
-                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
-                      )}
-                    </div>
-                    <Label className="cursor-pointer">
-                      Corporate (10,000 PHP)
-                    </Label>
-                  </button>
-                  <button
-                    className={cn(
-                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
-                      field.state.value === "personal"
-                        ? "border-primary bg-primary/5"
-                        : "border-input",
-                    )}
-                    onClick={() => field.handleChange("personal")}
-                    type="button"
-                  >
-                    <div
+                      <div
+                        className={cn(
+                          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                          field.state.value === "corporate"
+                            ? "border-primary bg-primary"
+                            : "border-input",
+                        )}
+                      >
+                        {field.state.value === "corporate" && (
+                          <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                        )}
+                      </div>
+                      <Label className="cursor-pointer">
+                        Corporate (10,000 PHP)
+                      </Label>
+                    </button>
+                    <button
                       className={cn(
-                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                        "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
                         field.state.value === "personal"
-                          ? "border-primary bg-primary"
+                          ? "border-primary bg-primary/5"
                           : "border-input",
                       )}
+                      onClick={() => field.handleChange("personal")}
+                      type="button"
                     >
-                      {field.state.value === "personal" && (
-                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
-                      )}
-                    </div>
-                    <Label className="cursor-pointer">
-                      Personal (5,000 PHP)
-                    </Label>
-                  </button>
+                      <div
+                        className={cn(
+                          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                          field.state.value === "personal"
+                            ? "border-primary bg-primary"
+                            : "border-input",
+                        )}
+                      >
+                        {field.state.value === "personal" && (
+                          <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                        )}
+                      </div>
+                      <Label className="cursor-pointer">
+                        Personal (5,000 PHP)
+                      </Label>
+                    </button>
+                  </div>
+                  <FieldError errors={field.state.meta.errors} />
                 </div>
-                {field.state.meta.errors.length > 0 && (
-                  <p className="font-medium text-destructive text-sm">
-                    {field.state.meta.errors.join(", ")}
-                  </p>
-                )}
-              </div>
-            )}
-          </form.AppField>
-        </div>
+              )}
+            </form.AppField>
+          </div>
+        )}
+
+        {/* Update Info Fee Notice */}
+        {isUpdateInfo && (
+          <Alert className="border-amber-500 bg-amber-50">
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-800">
+              Information Update Fee
+            </AlertTitle>
+            <AlertDescription className="text-amber-700">
+              Updating your membership information requires a processing fee of{" "}
+              <span className="font-semibold">₱2,000.00</span>. Please complete
+              the payment using one of the methods below.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Payment Section */}
         <div className="space-y-4">
@@ -234,14 +251,28 @@ export function Step4Review({ form, applicationData }: StepProps) {
                     </Label>
                   </button>
                 </div>
-                {field.state.meta.errors.length > 0 ? (
-                  <p className="font-medium text-destructive text-sm">
-                    {field.state.meta.errors.join(", ")}
-                  </p>
-                ) : null}
+                <FieldError errors={field.state.meta.errors} />
               </div>
             )}
           </form.AppField>
+
+          {/* Conditional: Onsite Payment Info */}
+          <form.Subscribe selector={(state) => state.values.paymentMethod}>
+            {(paymentMethod) =>
+              paymentMethod === "ONSITE" && (
+                <Alert className="border-primary/30 bg-primary/5">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <AlertTitle className="text-primary">
+                    IBC Office Location
+                  </AlertTitle>
+                  <AlertDescription className="text-muted-foreground">
+                    GF Rm. 105-B Maryville Bldg., Marymart Mall, Delgado St.,
+                    Iloilo City 5000
+                  </AlertDescription>
+                </Alert>
+              )
+            }
+          </form.Subscribe>
 
           {/* Conditional Payment Proof Upload */}
           <form.Subscribe selector={(state) => state.values.paymentMethod}>
@@ -303,11 +334,7 @@ export function Step4Review({ form, applicationData }: StepProps) {
                           </Dropzone>
                         )}
                       </div>
-                      {field.state.meta.errors.length > 0 ? (
-                        <p className="font-medium text-destructive text-sm">
-                          {field.state.meta.errors.join(", ")}
-                        </p>
-                      ) : null}
+                      <FieldError errors={field.state.meta.errors} />
                     </div>
                   )}
                 </form.AppField>
