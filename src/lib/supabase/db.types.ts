@@ -7,30 +7,10 @@ export type Json =
   | Json[];
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5";
   };
   public: {
     Tables: {
@@ -185,6 +165,7 @@ export type Database = {
         Row: {
           businessMemberId: string;
           businessName: string;
+          identifier: string;
           joinDate: string;
           lastPaymentDate: string | null;
           logoImageURL: string | null;
@@ -199,6 +180,7 @@ export type Database = {
         Insert: {
           businessMemberId?: string;
           businessName: string;
+          identifier: string;
           joinDate: string;
           lastPaymentDate?: string | null;
           logoImageURL?: string | null;
@@ -213,6 +195,7 @@ export type Database = {
         Update: {
           businessMemberId?: string;
           businessName?: string;
+          identifier?: string;
           joinDate?: string;
           lastPaymentDate?: string | null;
           logoImageURL?: string | null;
@@ -589,6 +572,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      check_member_exists: {
+        Args: { p_business_member_id: string };
+        Returns: Json;
+      };
       check_membership_expiry: { Args: never; Returns: undefined };
       compute_primary_application_id: {
         Args: { p_member_id: string };
@@ -670,6 +657,16 @@ export type Database = {
           to: "registration_list_item";
           isOneToOne: false;
           isSetofReturn: true;
+        };
+      };
+      get_registration_list_checkin: {
+        Args: { p_identifier: string; p_today?: string };
+        Returns: Database["public"]["CompositeTypes"]["registration_details_result"];
+        SetofOptions: {
+          from: "*";
+          to: "registration_details_result";
+          isOneToOne: true;
+          isSetofReturn: false;
         };
       };
       get_registration_list_stats: {
@@ -914,9 +911,6 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],
