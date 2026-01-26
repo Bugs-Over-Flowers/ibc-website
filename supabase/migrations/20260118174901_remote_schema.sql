@@ -121,6 +121,3 @@ using ((bucket_id = 'paymentproofs'::text));
   for update
   to anon, authenticated
 using ((bucket_id = 'paymentproofs'::text));
-
-
-
