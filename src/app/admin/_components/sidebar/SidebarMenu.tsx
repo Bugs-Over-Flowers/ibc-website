@@ -1,6 +1,12 @@
 "use client";
 
-import { Calendar, FileText, LayoutDashboard, Users } from "lucide-react";
+import {
+  Calendar,
+  FileText,
+  LayoutDashboard,
+  MessageSquareDiff,
+  Users,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { SidebarGroup, SidebarMenu } from "@/components/ui/sidebar";
 import { SidebarItem } from "./SidebarItem";
@@ -25,6 +31,11 @@ const menuItems = [
     title: "Application",
     icon: FileText,
     href: "/admin/application",
+  },
+  {
+    title: "Evaluations",
+    icon: MessageSquareDiff,
+    href: "/admin/evaluation",
   },
 ];
 
