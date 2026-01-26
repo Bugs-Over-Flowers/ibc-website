@@ -102,6 +102,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
   return (
     <form
       className="mx-auto w-full max-w-4xl space-y-3 px-3 sm:space-y-4 sm:px-4 md:space-y-5 md:px-6 lg:space-y-6 lg:px-8"
+      className="mx-auto w-full max-w-4xl space-y-3 px-3 sm:space-y-4 sm:px-4 md:space-y-5 md:px-6 lg:space-y-6 lg:px-8"
       onSubmit={(e) => {
         e.preventDefault();
         form.handleSubmit();
@@ -111,19 +112,27 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       {eventData && (
         <motion.div
           className="rounded-lg border border-border bg-linear-to-br from-primary/5 to-transparent p-3 sm:rounded-lg sm:p-4 md:rounded-xl md:p-5 lg:rounded-xl lg:p-6"
+          className="rounded-lg border border-border bg-linear-to-br from-primary/5 to-transparent p-3 sm:rounded-lg sm:p-4 md:rounded-xl md:p-5 lg:rounded-xl lg:p-6"
           variants={fadeInUp}
         >
           <div className="space-y-2 sm:space-y-3 md:space-y-4">
+          <div className="space-y-2 sm:space-y-3 md:space-y-4">
             <div>
+              <p className="font-medium text-muted-foreground text-xs sm:text-sm">
               <p className="font-medium text-muted-foreground text-xs sm:text-sm">
                 Event Evaluation
               </p>
+              <h1 className="mt-1 font-bold text-foreground text-xl sm:mt-2 sm:text-2xl md:text-3xl">
               <h1 className="mt-1 font-bold text-foreground text-xl sm:mt-2 sm:text-2xl md:text-3xl">
                 {eventData.eventTitle}
               </h1>
             </div>
             <div className="space-y-1.5 pt-1 sm:space-y-2 sm:pt-2 md:space-y-3">
+            <div className="space-y-1.5 pt-1 sm:space-y-2 sm:pt-2 md:space-y-3">
               {dateDisplay && (
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <CalendarDays className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" />
+                  <span className="font-medium text-foreground text-xs sm:text-sm">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <CalendarDays className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" />
                   <span className="font-medium text-foreground text-xs sm:text-sm">
@@ -135,11 +144,17 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Clock className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" />
                   <span className="font-medium text-foreground text-xs sm:text-sm">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Clock className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" />
+                  <span className="font-medium text-foreground text-xs sm:text-sm">
                     {timeDisplay}
                   </span>
                 </div>
               )}
               {eventData.venue && (
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <MapPin className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5 lg:mt-0.5" />
+                  <span className="font-medium text-foreground text-xs sm:text-sm">
                 <div className="flex items-start gap-2 sm:gap-3">
                   <MapPin className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5 lg:mt-0.5" />
                   <span className="font-medium text-foreground text-xs sm:text-sm">
@@ -157,11 +172,17 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
         <div className="mb-3 flex items-start gap-2 sm:mb-4 md:mb-5 lg:mb-6">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9 md:h-10 md:w-10">
             <User className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
+      <section className="rounded-lg border border-border bg-card p-3 sm:rounded-lg sm:p-4 md:rounded-xl md:p-5 lg:rounded-xl lg:p-6">
+        <div className="mb-3 flex items-start gap-2 sm:mb-4 md:mb-5 lg:mb-6">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9 md:h-10 md:w-10">
+            <User className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-foreground text-sm sm:text-base">
+            <h2 className="font-semibold text-foreground text-sm sm:text-base">
               Your Information
             </h2>
+            <p className="text-muted-foreground text-xs">
             <p className="text-muted-foreground text-xs">
               Optional - you can remain anonymous
             </p>
@@ -184,11 +205,18 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
           <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9 md:h-10 md:w-10">
               <Star className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
+      <section className="rounded-lg border border-border bg-card p-3 sm:rounded-lg sm:p-4 md:rounded-xl md:p-5 lg:rounded-xl lg:p-6">
+        <div className="mb-4 flex flex-col items-start justify-between gap-2 sm:mb-5 sm:gap-3 md:mb-6 lg:mb-8 lg:flex-row lg:items-center">
+          <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9 md:h-10 md:w-10">
+              <Star className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-semibold text-foreground text-sm sm:text-base">
+              <h2 className="font-semibold text-foreground text-sm sm:text-base">
                 Rate Your Experience
               </h2>
+              <p className="text-muted-foreground text-xs">
               <p className="text-muted-foreground text-xs">
                 Rate each aspect from Poor to Excellent
               </p>
@@ -206,11 +234,16 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <div className="whitespace-nowrap rounded-full bg-primary/10 px-2.5 py-0.5 text-center sm:px-3 sm:py-1">
                   <p className="font-semibold text-primary text-xs sm:text-sm">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <div className="whitespace-nowrap rounded-full bg-primary/10 px-2.5 py-0.5 text-center sm:px-3 sm:py-1">
+                  <p className="font-semibold text-primary text-xs sm:text-sm">
                     {completedQuestions}/{TOTAL_QUESTIONS}
                   </p>
                 </div>
                 {showValidationErrors &&
                   completedQuestions < TOTAL_QUESTIONS && (
+                    <div className="whitespace-nowrap rounded-full bg-red-100 px-2.5 py-0.5 text-center sm:px-3 sm:py-1 dark:bg-red-950">
+                      <p className="font-semibold text-red-600 text-xs sm:text-sm dark:text-red-400">
                     <div className="whitespace-nowrap rounded-full bg-red-100 px-2.5 py-0.5 text-center sm:px-3 sm:py-1 dark:bg-red-950">
                       <p className="font-semibold text-red-600 text-xs sm:text-sm dark:text-red-400">
                         {TOTAL_QUESTIONS - completedQuestions} missing
@@ -228,7 +261,6 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               className="py-3 first:pt-0 last:pb-0 sm:py-4 md:py-5 lg:py-6"
               key={q.field}
             >
-              {/* @ts-expect-error - Form infers type from defaultValues with null, but rating fields exist at runtime */}
               <form.AppField name={q.field}>
                 {(field) => <field.RatingScale label={q.question} />}
               </form.AppField>
@@ -242,11 +274,17 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
         <div className="mb-3 flex items-start gap-2 sm:mb-4 md:mb-5 lg:mb-6">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9 md:h-10 md:w-10">
             <MessageSquare className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
+      <section className="rounded-lg border border-border bg-card p-3 sm:rounded-lg sm:p-4 md:rounded-xl md:p-5 lg:rounded-xl lg:p-6">
+        <div className="mb-3 flex items-start gap-2 sm:mb-4 md:mb-5 lg:mb-6">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9 md:h-10 md:w-10">
+            <MessageSquare className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-foreground text-sm sm:text-base">
+            <h2 className="font-semibold text-foreground text-sm sm:text-base">
               Additional Feedback
             </h2>
+            <p className="text-muted-foreground text-xs">
             <p className="text-muted-foreground text-xs">
               Share your thoughts and suggestions
             </p>
@@ -254,13 +292,16 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
         </div>
 
         <div className="space-y-3 sm:space-y-4 md:space-y-5">
+        <div className="space-y-3 sm:space-y-4 md:space-y-5">
           <form.AppField name="additionalComments">
             {(field) => {
               const max = 500;
               const length = field.state.value?.length || 0;
               return (
                 <div className="space-y-1 sm:space-y-1.5">
+                <div className="space-y-1 sm:space-y-1.5">
                   <field.TextareaField
+                    className="min-h-20 resize-none sm:min-h-24 md:min-h-28"
                     className="min-h-20 resize-none sm:min-h-24 md:min-h-28"
                     label="Comments"
                     maxLength={500}
@@ -280,7 +321,9 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               const length = field.state.value?.length || 0;
               return (
                 <div className="space-y-1 sm:space-y-1.5">
+                <div className="space-y-1 sm:space-y-1.5">
                   <field.TextareaField
+                    className="min-h-20 resize-none sm:min-h-24 md:min-h-28"
                     className="min-h-20 resize-none sm:min-h-24 md:min-h-28"
                     label="Suggestions for Improvement"
                     maxLength={500}
@@ -298,8 +341,10 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
 
       {/* Submit Button */}
       <div className="pt-2 sm:pt-3 md:pt-4 lg:pt-6">
+      <div className="pt-2 sm:pt-3 md:pt-4 lg:pt-6">
         <form.AppForm>
           <form.SubmitButton
+            className="w-full rounded-lg bg-primary px-3 py-2.5 font-semibold text-white text-xs shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/90 hover:shadow-primary/25 hover:shadow-xl sm:rounded-lg sm:px-4 sm:py-3 sm:text-sm md:rounded-xl md:px-5 md:py-3 md:text-base"
             className="w-full rounded-lg bg-primary px-3 py-2.5 font-semibold text-white text-xs shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/90 hover:shadow-primary/25 hover:shadow-xl sm:rounded-lg sm:px-4 sm:py-3 sm:text-sm md:rounded-xl md:px-5 md:py-3 md:text-base"
             isSubmittingLabel="Submitting Your Evaluation..."
             label="Submit Evaluation"
