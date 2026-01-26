@@ -25,6 +25,7 @@ export async function getCheckInList(
         email,
         contactNumber,
         registration:Registration (
+          identifier,
           registrationId,
           nonMemberName,
           businessMember:BusinessMember (
@@ -43,6 +44,10 @@ export async function getCheckInList(
   }
 
   console.log("Fetched check-in data:", data);
+  console.log(
+    "Identifier:",
+    data.map((i) => i.participant.registration.identifier),
+  );
 
   // Transform nested data to flat structure
   const transformed = data.map((item) => ({
@@ -59,6 +64,7 @@ export async function getCheckInList(
     affiliation:
       item.participant.registration.businessMember?.businessName ||
       item.participant.registration.nonMemberName,
+    identifier: item.participant.registration.identifier,
   }));
 
   const { data: parsedData, error: parseError } =

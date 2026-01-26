@@ -40,6 +40,12 @@ const getCheckInListColumns = (
       formatDate(new Date(row.original.checkInTime), "h:mm aaa"),
   },
   {
+    accessorKey: "identifier",
+    cell: ({ row }) => {
+      return <pre>{row.original.identifier}</pre>;
+    },
+  },
+  {
     accessorKey: "affiliation",
     header: ({ column }) => (
       <Button
@@ -134,6 +140,10 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
   {
     accessorKey: "checkInTime",
     header: "Time", // Custom Excel header
+  },
+  {
+    accessorKey: "identifier",
+    header: "Identifier", // Custom Excel header
   },
   {
     accessorKey: "affiliation",

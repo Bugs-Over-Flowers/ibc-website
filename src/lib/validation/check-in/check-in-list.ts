@@ -12,6 +12,7 @@ export const CheckInListItemSchema = z.object({
   contactNumber: z.string(),
   registrationId: z.uuid(),
   affiliation: z.string(),
+  identifier: z.string(),
 });
 
 export const CheckInListSchema = z.array(CheckInListItemSchema);
