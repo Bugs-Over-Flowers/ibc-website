@@ -12,7 +12,7 @@ import {
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { exportToExcel } from "@/lib/export/excel";
-import type { ParticipantListItem } from "@/lib/validation/participant/participant-list";
+import type { ParticipantListItem } from "@/lib/validation/registration-management";
 import ParticipantRowActions from "./ParticipantRowActions";
 
 interface ParticipantListProps {
@@ -157,13 +157,40 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
   },
 ];
 
+const getExcelColumns = (): ColumnDef<ParticipantListItem>[] => [
+  {
+    accessorKey: "affiliation",
+    header: "Company/Organization", // Custom Excel header
+  },
+  {
+    accessorKey: "firstName",
+    header: "First Name",
+  },
+  {
+    accessorKey: "lastName",
+    header: "Last Name",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+  },
+  {
+    accessorKey: "contactNumber",
+    header: "Contact Number",
+  },
+  {
+    accessorKey: "registrationDate",
+    header: "Registration Date",
+  },
+];
+
 export default function ParticipantListTable({
   participantList,
 }: ParticipantListProps) {
   const handleExport = async (data: ParticipantListItem[]) => {
     await exportToExcel({
       data,
-      columns: participantListColumns,
+      columns: getExcelColumns(),
       filename: "participants",
       sheetName: "Participants",
       excludeColumns: ["actions"],
@@ -174,6 +201,7 @@ export default function ParticipantListTable({
       <div className="flex h-8 justify-between">
         <div>{participantList.length} results</div>
         <Button
+          disabled={participantList.length === 0}
           onClick={() => {
             handleExport(participantList);
           }}

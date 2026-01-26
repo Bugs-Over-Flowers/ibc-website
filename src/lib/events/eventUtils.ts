@@ -14,6 +14,25 @@ export const formatDate = (dateString: string | null) => {
   });
 };
 
+/**
+ * Format as "Month Day, Year h:mm AM/PM" (e.g., January 5, 2026 3:21 PM)
+ */
+export const formatFullDateTime = (dateString: string | null) => {
+  if (!dateString) return "TBA";
+  const date = new Date(dateString);
+  const dateStr = date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  const timeStr = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${dateStr} ${timeStr}`;
+};
+
 export const formatTime = (
   startDate: string | null,
   endDate: string | null,
@@ -67,4 +86,32 @@ export const getEventCategory = (
   if (now < start) return "upcoming";
   if (now >= start && now <= end) return "ongoing";
   return "past";
+};
+
+/**
+ * Format event date range display
+ * Handles single date, date range, or returns null if no dates available
+ */
+export const formatEventDateRange = (
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+): string | null => {
+  const hasStartDate = Boolean(startDate);
+  const hasEndDate = Boolean(endDate);
+
+  if (!hasStartDate && !hasEndDate) {
+    return null;
+  }
+
+  if (hasStartDate && hasEndDate) {
+    const startFormatted = formatDate(startDate ?? null);
+    const endFormatted = formatDate(endDate ?? null);
+    return startFormatted === endFormatted
+      ? startFormatted
+      : `${startFormatted} - ${endFormatted}`;
+  }
+
+  return hasStartDate
+    ? formatDate(startDate ?? null)
+    : formatDate(endDate ?? null);
 };

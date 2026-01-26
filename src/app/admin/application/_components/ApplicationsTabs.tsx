@@ -1,8 +1,16 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { type ReactNode, useState } from "react";
-import BulkActions from "./BulkActions";
+import {
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { useTabSelections } from "../_hooks/useTabSelections";
+import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
+import BulkActions from "./ApplicationBulkActions";
 import MeetingScheduler from "./MeetingScheduler";
 
 interface ApplicationsTabsProps {
@@ -21,6 +29,58 @@ export default function ApplicationsTabs({
   const [activeTab, setActiveTab] = useState<"new" | "pending" | "finished">(
     "new",
   );
+  const [isMobile, setIsMobile] = useState(false);
+  const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { selectedApplicationIds, clearSelection, selectAll } =
+    useSelectedApplicationsStore();
+
+  // Update indicator on tab change and initial mount
+  useLayoutEffect(() => {
+    const activeButton = buttonRefs.current[activeTab];
+    if (activeButton) {
+      setIndicatorStyle({
+        x: activeButton.offsetLeft,
+        width: activeButton.offsetWidth,
+      });
+    }
+  }, [activeTab]);
+
+  // Handle window resize to recalculate indicator position
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeButton = buttonRefs.current[activeTab];
+      if (activeButton) {
+        setIndicatorStyle({
+          x: activeButton.offsetLeft,
+          width: activeButton.offsetWidth,
+        });
+      }
+    };
+
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+      // Recalculate indicator after resize
+      updateIndicator();
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [activeTab]);
+
+  const { handleTabChange: handleTabSelectionChange } = useTabSelections({
+    activeTab,
+    selectedApplicationIds: Array.from(selectedApplicationIds),
+    clearSelection,
+    selectAll,
+  });
+
+  const handleTabChange = (newTab: "new" | "pending" | "finished") => {
+    handleTabSelectionChange(newTab);
+    setActiveTab(newTab);
+  };
 
   const tabs = [
     { id: "new", label: "New Applications" },
@@ -30,22 +90,22 @@ export default function ApplicationsTabs({
 
   return (
     <>
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode={isMobile ? "wait" : "popLayout"}>
         {activeTab === "new" ? (
           <motion.div
             animate={{ opacity: 1 }}
             className="flex flex-col items-stretch gap-6 lg:flex-row"
-            exit={{ opacity: 1 }}
-            initial={{ opacity: 1 }}
+            exit={{ opacity: isMobile ? 0 : 1 }}
+            initial={{ opacity: isMobile ? 0 : 1 }}
             key="new"
-            transition={{ duration: 0.5 }}
+            transition={{ duration: isMobile ? 0.2 : 0.5 }}
           >
             <motion.div
               animate={{ x: 0, opacity: 1 }}
               className="flex flex-2 flex-col"
-              exit={{ x: -800, opacity: 1 }}
-              initial={{ x: -800, opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              exit={{ x: isMobile ? 0 : -800, opacity: 1 }}
+              initial={{ x: isMobile ? 0 : -800, opacity: 1 }}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               <MeetingScheduler />
             </motion.div>
@@ -55,8 +115,8 @@ export default function ApplicationsTabs({
               className="flex flex-1 flex-col"
               exit={{ opacity: 1 }}
               initial={{ opacity: 1 }}
-              layoutId="stats-container"
-              transition={{ duration: 0.5 }}
+              layoutId={isMobile ? undefined : "stats-container"}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               {stats}
             </motion.div>
@@ -65,17 +125,17 @@ export default function ApplicationsTabs({
           <motion.div
             animate={{ opacity: 1 }}
             className="flex flex-col items-stretch gap-6 lg:flex-row"
-            exit={{ opacity: 1 }}
-            initial={{ opacity: 1 }}
+            exit={{ opacity: isMobile ? 0 : 1 }}
+            initial={{ opacity: isMobile ? 0 : 1 }}
             key="pending"
-            transition={{ duration: 0.5 }}
+            transition={{ duration: isMobile ? 0.2 : 0.5 }}
           >
             <motion.div
               animate={{ x: 0, opacity: 1 }}
               className="flex flex-1 flex-col"
-              exit={{ x: -500, opacity: 1 }}
-              initial={{ x: -500, opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              exit={{ x: isMobile ? 0 : -500, opacity: 1 }}
+              initial={{ x: isMobile ? 0 : -500, opacity: 1 }}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               <BulkActions />
             </motion.div>
@@ -85,8 +145,8 @@ export default function ApplicationsTabs({
               className="flex flex-2 flex-col"
               exit={{ opacity: 1 }}
               initial={{ opacity: 1 }}
-              layoutId="stats-container"
-              transition={{ duration: 0.5 }}
+              layoutId={isMobile ? undefined : "stats-container"}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               {stats}
             </motion.div>
@@ -95,18 +155,18 @@ export default function ApplicationsTabs({
           <motion.div
             animate={{ opacity: 1 }}
             className="flex flex-col items-stretch"
-            exit={{ opacity: 1 }}
-            initial={{ opacity: 1 }}
+            exit={{ opacity: isMobile ? 0 : 1 }}
+            initial={{ opacity: isMobile ? 0 : 1 }}
             key="finished"
-            transition={{ duration: 0.3 }}
+            transition={{ duration: isMobile ? 0.2 : 0.3 }}
           >
             <motion.div
               animate={{ opacity: 1 }}
               className="flex w-full flex-col"
               exit={{ opacity: 1 }}
               initial={{ opacity: 1 }}
-              layoutId="stats-container"
-              transition={{ duration: 0.5 }}
+              layoutId={isMobile ? undefined : "stats-container"}
+              transition={{ duration: isMobile ? 0.2 : 0.5 }}
             >
               {stats}
             </motion.div>
@@ -116,44 +176,60 @@ export default function ApplicationsTabs({
 
       <div className="w-full">
         <div className="relative">
-          <div className="relative grid grid-cols-3 overflow-hidden rounded-md border border-border bg-background p-1">
-            <motion.div
-              animate={{
-                x:
-                  activeTab === "new"
-                    ? "0%"
-                    : activeTab === "pending"
-                      ? "100%"
-                      : "200%",
-              }}
-              className="absolute rounded-md bg-primary/20"
-              layout
-              style={{
-                width: "calc(100% / 3)",
-                height: "calc(100% - 8px)",
-                top: "4px",
-                left: "4px",
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 25,
-              }}
-            />
+          <div
+            className="relative grid grid-cols-3 gap-0.5 overflow-hidden rounded-md border border-border bg-background p-1 sm:gap-0"
+            ref={containerRef}
+          >
+            {indicatorStyle.width > 0 && (
+              <motion.div
+                animate={{
+                  x: indicatorStyle.x,
+                  width: indicatorStyle.width,
+                }}
+                className="absolute rounded-md bg-primary/20"
+                style={{
+                  top: "4px",
+                  height: "calc(100% - 8px)",
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 380,
+                  damping: 30,
+                }}
+              />
+            )}
 
             {tabs.map((tab) => (
               <button
-                className={`relative z-10 py-1 font-medium text-sm transition-all duration-200 ${
+                className={`relative z-10 whitespace-nowrap px-0.5 py-2 font-medium text-xs transition-colors duration-200 sm:text-sm ${
                   activeTab === tab.id
-                    ? "font-medium text-muted-foreground hover:text-foreground"
-                    : "text-primary"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }
                 `}
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
+                ref={(el) => {
+                  buttonRefs.current[tab.id] = el;
+                  // Update indicator when active tab's ref is set
+                  if (el && tab.id === activeTab) {
+                    setIndicatorStyle({
+                      x: el.offsetLeft,
+                      width: el.offsetWidth,
+                    });
+                  }
+                }}
+                title={tab.label}
                 type="button"
               >
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="inline sm:hidden">
+                  {tab.id === "new"
+                    ? "New"
+                    : tab.id === "pending"
+                      ? "Pending"
+                      : "Finished"}
+                </span>
               </button>
             ))}
           </div>

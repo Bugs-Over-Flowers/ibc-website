@@ -7,18 +7,13 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 interface ViewDetailsButtonProps {
   eventId: string;
-  onAction: () => void;
 }
 
-export default function ViewDetailsButton({
-  eventId,
-  onAction,
-}: ViewDetailsButtonProps) {
+export default function ViewDetailsButton({ eventId }: ViewDetailsButtonProps) {
   const router = useRouter();
 
   const handleViewDetails = () => {
     router.push(`/admin/events/${eventId}` as Route);
-    if (onAction) onAction();
   };
 
   return (

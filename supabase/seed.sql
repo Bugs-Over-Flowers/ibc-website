@@ -42,7 +42,7 @@ ON CONFLICT ("sectorId") DO UPDATE SET
 -- =============================================================================
 INSERT INTO "Application" (
   "applicationId",
-  "memberId",
+  "businessMemberId",
   "sectorId",
   "logoImageURL",
   "applicationType",
@@ -324,7 +324,7 @@ INSERT INTO "BusinessMember" (
     gen_random_uuid(),
     NOW(),
     NOW(),
-    'active'
+    'paid'
   ),
   (
    	2,
@@ -335,7 +335,7 @@ INSERT INTO "BusinessMember" (
     gen_random_uuid(),
     NOW(),
     NOW(),
-    'active'
+    'paid'
   ),
   (
     3,
@@ -346,7 +346,7 @@ INSERT INTO "BusinessMember" (
     gen_random_uuid(),
     NOW(),
     NOW(),
-    'active'
+    'paid'
   );
 
 -- There should also be data for event days for these events

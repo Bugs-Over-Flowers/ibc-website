@@ -1,7 +1,6 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { cookies } from "next/headers";
 import type { Database } from "./db.types";
 
 /**
@@ -64,6 +63,7 @@ export async function createClient(requestCookies: RequestCookie[]) {
  * }
  */
 export async function createActionClient() {
+  const { cookies } = await import("next/headers");
   const supabase_url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabase_key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
