@@ -22,6 +22,7 @@ export const useCreateEventForm = () => {
       eventEndDate: undefined as Date | undefined,
       venue: "",
       registrationFee: 0,
+      maxGuest: undefined as number | undefined,
       eventType: null as "public" | "private" | null,
       eventImage: [] as File[],
     },

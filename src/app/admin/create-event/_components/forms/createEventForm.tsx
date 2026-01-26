@@ -80,9 +80,15 @@ export function CreateEventForm() {
               )}
             </form.AppField>
 
-            <form.AppField name="registrationFee">
-              {(field) => <field.NumberField label="Registration Fee * " />}
-            </form.AppField>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <form.AppField name="registrationFee">
+                {(field) => <field.NumberField label="Registration Fee * " />}
+              </form.AppField>
+
+              <form.AppField name="maxGuest">
+                {(field) => <field.NumberField label="Max guest *" />}
+              </form.AppField>
+            </div>
 
             <form.AppField name="eventImage">
               {(field) => (

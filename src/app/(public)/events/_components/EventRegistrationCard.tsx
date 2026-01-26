@@ -67,12 +67,21 @@ export default function EventRegistrationCard({
 
             {/* Action Buttons */}
             <div className="mt-6 space-y-3">
-              <Link
-                className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                href={`/registration/${eventId}/info` as Route}
-              >
-                Register for This Event
-              </Link>
+              {event.maxGuest > 0 && event.availableSlots <= 0 ? (
+                <Button
+                  className="h-12 w-full rounded-2xl bg-muted text-muted-foreground hover:bg-muted"
+                  disabled
+                >
+                  Event Full
+                </Button>
+              ) : (
+                <Link
+                  className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                  href={`/registration/${eventId}/info` as Route}
+                >
+                  Register for This Event
+                </Link>
+              )}
             </div>
 
             {/* Share Section */}

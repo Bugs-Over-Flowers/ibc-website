@@ -71,7 +71,8 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   );
 
   if (error) {
-    throw new Error("Failed to submit event registration");
+    console.error("Submit Registration RPC Error:", error);
+    throw new Error(`Failed to submit event registration: ${error.message}`);
   }
 
   if (!rpcResults) {

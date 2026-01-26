@@ -8,6 +8,7 @@ const baseEditEventSchema = z.object({
   eventStartDate: z.iso.datetime({ local: true }),
   eventEndDate: z.iso.datetime({ local: true }),
   venue: z.string().min(1, "Venue is required"),
+  maxGuest: z.int().min(1, "Must be greater than 0"),
 });
 
 // Draft events can edit everything

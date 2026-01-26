@@ -140,12 +140,23 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
 
-                <Link
-                  className="inline-flex h-12 items-center justify-center rounded-lg border border-primary px-8 text-primary transition hover:bg-primary/5"
-                  href={`/registration/${currentEvent.eventId}/info`}
-                >
-                  Register Now
-                </Link>
+                {currentEvent.maxGuest &&
+                (currentEvent.availableSlots ?? 0) <= 0 ? (
+                  <Button
+                    className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-muted px-8 text-muted-foreground transition hover:bg-muted"
+                    disabled
+                    variant="outline"
+                  >
+                    Event Full
+                  </Button>
+                ) : (
+                  <Link
+                    className="inline-flex h-12 items-center justify-center rounded-lg border border-primary px-8 text-primary transition hover:bg-primary/5"
+                    href={`/registration/${currentEvent.eventId}/info`}
+                  >
+                    Register Now
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

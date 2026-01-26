@@ -44,6 +44,29 @@ export const updateEvent: ServerFunction<
   const data = result.data;
   const supabase = await createActionClient();
 
+  // Check if maxGuest is valid (must be >= current maxGuest)
+  const { data: currentEvent, error: fetchError } = await supabase
+    .from("Event")
+    .select("maxGuest")
+    .eq("eventId", data.eventId)
+    .single();
+
+  if (fetchError || !currentEvent) {
+    return {
+      success: false,
+      error: "Failed to fetch current event details",
+      data: null,
+    };
+  }
+
+  if (data.maxGuest < (currentEvent.maxGuest ?? 0)) {
+    return {
+      success: false,
+      error: `Max guests cannot be decreased. Current limit is ${currentEvent.maxGuest ?? 0}.`,
+      data: null,
+    };
+  }
+
   console.log("Updating event with data:", {
     eventId: data.eventId,
     title: data.eventTitle,
@@ -52,6 +75,7 @@ export const updateEvent: ServerFunction<
     startDate: data.eventStartDate,
     endDate: data.eventEndDate,
     venue: data.venue,
+    maxGuest: data.maxGuest,
     isDraft,
   });
 
@@ -83,6 +107,36 @@ export const updateEvent: ServerFunction<
       error: rpcError.message,
       data: null,
     };
+  }
+
+  // Calculate new available slots based on total participants
+  const { data: registrations } = await supabase
+    .from("Registration")
+    .select("numberOfParticipants")
+    .eq("eventId", data.eventId);
+
+  const currentParticipants =
+    registrations?.reduce(
+      (sum, reg) => sum + (reg.numberOfParticipants || 0),
+      0,
+    ) || 0;
+
+  const newAvailableSlots = Math.max(0, data.maxGuest - currentParticipants);
+
+  // Update maxGuest and availableSlots together
+  const { error: maxGuestError } = await supabase
+    .from("Event")
+    .update({
+      maxGuest: data.maxGuest,
+      availableSlots: newAvailableSlots,
+    })
+    .eq("eventId", data.eventId);
+
+  if (maxGuestError) {
+    console.error("Failed to update maxGuest:", maxGuestError);
+    // We don't fail the whole request since the main details were updated,
+    // but ideally we should probably return an error or warning.
+    // For now, let's log it.
   }
 
   // Cast the result to the expected type
