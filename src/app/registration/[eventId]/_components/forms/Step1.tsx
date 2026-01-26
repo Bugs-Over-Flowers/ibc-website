@@ -49,12 +49,7 @@ const Step1 = ({ members }: Step1Props) => {
         </p>
       </div>
 
-      <FormButtons
-        onBack={() => {
-          // No back button for step 1 (first step)
-        }}
-        onNext={onNext}
-      />
+      <FormButtons onBack={() => {}} onNext={onNext} />
     </form>
   );
 };
@@ -80,95 +75,81 @@ function MemberTypeSelection({
             <FieldSet className="space-y-4">
               <Label className="font-medium text-sm">Affiliation Type</Label>
               <RadioGroup
-                className="space-y-3"
-                defaultValue="member"
-                onValueChange={(value) => {
-                  const parsedMemberValue = MemberTypeEnum.safeParse(value);
-
-                  if (!parsedMemberValue.success) return;
-
-                  form.setErrorMap({});
-
-                  if (parsedMemberValue.data === "member") {
-                    form.setFieldValue("nonMemberName", "");
-                  } else if (parsedMemberValue.data === "nonmember") {
-                    form.setFieldValue("businessMemberId", "");
-                  }
-
-                  field.handleChange(parsedMemberValue.data);
-                }}
+                onValueChange={(value) => field.handleChange(value)}
                 value={field.state.value}
               >
-                {/* Member Option */}
-                <FieldLabel
-                  className="flex cursor-pointer items-start gap-3 rounded-lg border-2 p-4 transition-all hover:border-primary/50 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
-                  htmlFor="member"
-                >
-                  <RadioGroupItem
-                    className="mt-0.5"
-                    id="member"
-                    value="member"
-                  />
+                <div className="flex flex-row gap-4">
+                  {/* Member Option Column */}
                   <div className="flex-1">
-                    <span className="font-medium text-foreground">Member</span>
-                    <p className="mt-0.5 text-muted-foreground text-sm">
-                      I am a member of the organization
-                    </p>
-                  </div>
-                </FieldLabel>
-
-                {/* Conditional: Member Organization Select */}
-                {field.state.value === "member" && (
-                  <div className="ml-4 space-y-2 border-primary/30 border-l-2 pl-4">
-                    <form.AppField name="businessMemberId">
-                      {(field) => (
-                        <field.SingleComboBoxField
-                          options={membersOptions}
-                          placeholder="Select your organization"
-                        />
-                      )}
-                    </form.AppField>
-                  </div>
-                )}
-
-                {/* Non-member Option */}
-                {eventDetails?.eventType === "public" ? (
-                  <>
                     <FieldLabel
                       className="flex cursor-pointer items-start gap-3 rounded-lg border-2 p-4 transition-all hover:border-primary/50 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
-                      htmlFor="nonmember"
+                      htmlFor="member"
                     >
                       <RadioGroupItem
                         className="mt-0.5"
-                        id="nonmember"
-                        value="nonmember"
+                        id="member"
+                        value="member"
                       />
                       <div className="flex-1">
                         <span className="font-medium text-foreground">
-                          Non-member
+                          Member
                         </span>
                         <p className="mt-0.5 text-muted-foreground text-sm">
-                          I am not a member of the organization
+                          I am a member of the organization
                         </p>
                       </div>
                     </FieldLabel>
-
-                    {/* Conditional: Non-member Company Input */}
-                    {field.state.value === "nonmember" && (
-                      <div className="ml-4 space-y-2 border-primary/30 border-l-2 pl-4">
-                        <form.AppField name="nonMemberName">
-                          {(field) => (
-                            <field.TextField
-                              label="Company / Organization Name"
-                              placeholder="Enter your company or organization name"
-                            />
-                          )}
-                        </form.AppField>
-                      </div>
-                    )}
-                  </>
-                ) : null}
+                  </div>
+                  {/* Non-member Option Column */}
+                  {eventDetails?.eventType === "public" && (
+                    <div className="flex-1">
+                      <FieldLabel
+                        className="flex cursor-pointer items-start gap-3 rounded-lg border-2 p-4 transition-all hover:border-primary/50 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
+                        htmlFor="nonmember"
+                      >
+                        <RadioGroupItem
+                          className="mt-0.5"
+                          id="nonmember"
+                          value="nonmember"
+                        />
+                        <div className="flex-1">
+                          <span className="font-medium text-foreground">
+                            Non-member
+                          </span>
+                          <p className="mt-0.5 text-muted-foreground text-sm">
+                            I am not a member of the organization
+                          </p>
+                        </div>
+                      </FieldLabel>
+                    </div>
+                  )}
+                </div>
               </RadioGroup>
+
+              {/* Unified Field Below Columns */}
+              <div className="mt-4 space-y-2 border-primary/30 border-l-2 pl-4">
+                {field.state.value === "member" ? (
+                  <form.AppField name="businessMemberId">
+                    {(field) => (
+                      <field.SingleComboBoxField
+                        label="Select your organization"
+                        options={membersOptions}
+                        placeholder="Choose an organization"
+                      />
+                    )}
+                  </form.AppField>
+                ) : eventDetails?.eventType === "public" &&
+                  field.state.value === "nonmember" ? (
+                  <form.AppField name="nonMemberName">
+                    {(field) => (
+                      <field.TextField
+                        label="Company / Organization Name"
+                        placeholder="Enter your company or organization name"
+                      />
+                    )}
+                  </form.AppField>
+                ) : null}
+              </div>
 
               {/* Private Event Notice */}
               {eventDetails?.eventType === "private" &&
