@@ -76,6 +76,31 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
     },
   });
 
+  let dateDisplay: string | null = null;
+  let timeDisplay: string | null = null;
+  if (eventData) {
+    const hasStartDate = Boolean(eventData.eventStartDate);
+    const hasEndDate = Boolean(eventData.eventEndDate);
+    if (hasStartDate && hasEndDate) {
+      const startFormatted = formatDate(eventData.eventStartDate as string);
+      const endFormatted = formatDate(eventData.eventEndDate as string);
+      dateDisplay =
+        startFormatted === endFormatted
+          ? startFormatted
+          : `${startFormatted} – ${endFormatted}`;
+    } else if (hasStartDate) {
+      dateDisplay = formatDate(eventData.eventStartDate as string);
+    } else if (hasEndDate) {
+      dateDisplay = formatDate(eventData.eventEndDate as string);
+    }
+    if (eventData.eventStartDate || eventData.eventEndDate) {
+      timeDisplay = formatTime(
+        eventData.eventStartDate as string,
+        eventData.eventEndDate as string,
+      );
+    }
+  }
+
   return (
     <form
       className="mx-auto w-full max-w-4xl space-y-4 px-4 sm:space-y-6 sm:px-0"
@@ -99,56 +124,23 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
                 {eventData.eventTitle}
               </h1>
             </div>
-
             <div className="space-y-2 pt-2 sm:space-y-3">
-              {(() => {
-                const hasStartDate = Boolean(eventData.eventStartDate);
-                const hasEndDate = Boolean(eventData.eventEndDate);
-                let dateDisplay: string | null = null;
-                if (hasStartDate && hasEndDate) {
-                  const startFormatted = formatDate(
-                    eventData.eventStartDate as string,
-                  );
-                  const endFormatted = formatDate(
-                    eventData.eventEndDate as string,
-                  );
-                  dateDisplay =
-                    startFormatted === endFormatted
-                      ? startFormatted
-                      : `${startFormatted} – ${endFormatted}`;
-                } else if (hasStartDate) {
-                  dateDisplay = formatDate(eventData.eventStartDate as string);
-                } else if (hasEndDate) {
-                  dateDisplay = formatDate(eventData.eventEndDate as string);
-                }
-                const timeDisplay =
-                  eventData.eventStartDate || eventData.eventEndDate
-                    ? formatTime(
-                        eventData.eventStartDate as string,
-                        eventData.eventEndDate as string,
-                      )
-                    : null;
-                return (
-                  <>
-                    {dateDisplay && (
-                      <div className="flex items-center gap-3">
-                        <CalendarDays className="h-5 w-5 shrink-0 text-primary" />
-                        <span className="font-medium text-foreground text-sm">
-                          {dateDisplay}
-                        </span>
-                      </div>
-                    )}
-                    {timeDisplay && (
-                      <div className="flex items-center gap-3">
-                        <Clock className="h-5 w-5 shrink-0 text-primary" />
-                        <span className="font-medium text-foreground text-sm">
-                          {timeDisplay}
-                        </span>
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
+              {dateDisplay && (
+                <div className="flex items-center gap-3">
+                  <CalendarDays className="h-5 w-5 shrink-0 text-primary" />
+                  <span className="font-medium text-foreground text-sm">
+                    {dateDisplay}
+                  </span>
+                </div>
+              )}
+              {timeDisplay && (
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5 shrink-0 text-primary" />
+                  <span className="font-medium text-foreground text-sm">
+                    {timeDisplay}
+                  </span>
+                </div>
+              )}
               {eventData.venue && (
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 shrink-0 text-primary" />
@@ -261,23 +253,41 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
 
         <div className="space-y-3 sm:space-y-5">
           <form.AppField name="additionalComments">
-            {(field) => (
-              <field.TextareaField
-                className="min-h-24 resize-none sm:min-h-28"
-                label="Comments"
-                placeholder="Share any additional thoughts about the event..."
-              />
-            )}
+            {(field) => {
+              const max = 500;
+              const length = field.state.value?.length || 0;
+              return (
+                <div className="space-y-1">
+                  <field.TextareaField
+                    className="min-h-24 resize-none sm:min-h-28"
+                    label="Comments"
+                    placeholder="Share any additional thoughts about the event..."
+                  />
+                  <div className="flex justify-end text-muted-foreground text-xs">
+                    {length}/{max} characters
+                  </div>
+                </div>
+              );
+            }}
           </form.AppField>
 
           <form.AppField name="feedback">
-            {(field) => (
-              <field.TextareaField
-                className="min-h-24 resize-none sm:min-h-28"
-                label="Suggestions for Improvement"
-                placeholder="How can we make our events even better?"
-              />
-            )}
+            {(field) => {
+              const max = 500;
+              const length = field.state.value?.length || 0;
+              return (
+                <div className="space-y-1">
+                  <field.TextareaField
+                    className="min-h-24 resize-none sm:min-h-28"
+                    label="Suggestions for Improvement"
+                    placeholder="How can we make our events even better?"
+                  />
+                  <div className="flex justify-end text-muted-foreground text-xs">
+                    {length}/{max} characters
+                  </div>
+                </div>
+              );
+            }}
           </form.AppField>
         </div>
       </section>
