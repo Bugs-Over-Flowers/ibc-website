@@ -5,7 +5,6 @@ import {
   FileText,
   LayoutDashboard,
   MessageSquareDiff,
-  UserCheck,
   Users,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -22,11 +21,6 @@ const menuItems = [
     title: "Events",
     icon: Calendar,
     href: "/admin/events",
-  },
-  {
-    title: "Check-in",
-    icon: UserCheck,
-    href: "/admin/check-in",
   },
   {
     title: "Members",

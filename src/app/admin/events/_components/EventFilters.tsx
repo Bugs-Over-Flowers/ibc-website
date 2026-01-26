@@ -65,10 +65,10 @@ export default function EventFilters() {
 
   return (
     <form
-      className="grid grid-cols-2 gap-3 md:grid-cols-12 md:gap-4"
+      className="grid grid-cols-2 gap-3 xl:grid-cols-12 xl:gap-4"
       onSubmit={handleSubmit}
     >
-      <div className="relative col-span-1 md:col-span-7">
+      <div className="relative col-span-1 xl:col-span-7">
         <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-foreground" />
         <Input
           autoComplete="off"
@@ -102,10 +102,10 @@ export default function EventFilters() {
           <SelectTrigger className="w-full border-border">
             <div className="flex items-center gap-2">
               <SortAsc size={16} />
-              <span className="hidden md:inline">
+              <span className="hidden xl:inline">
                 <SelectValue aria-label="Sort By Date" />
               </span>
-              <span className="md:hidden">Sort</span>
+              <span className="xl:hidden">Sort</span>
             </div>
           </SelectTrigger>
           <SelectContent className="w-auto">
@@ -125,10 +125,10 @@ export default function EventFilters() {
           <SelectTrigger className="w-full border-border">
             <div className="flex items-center gap-2">
               <Filter size={16} />
-              <span className="hidden md:inline">
+              <span className="hidden xl:inline">
                 <SelectValue aria-label="Filter By Status" />
               </span>
-              <span className="md:hidden">Filter</span>
+              <span className="xl:hidden">Filter</span>
             </div>
           </SelectTrigger>
           <SelectContent>
