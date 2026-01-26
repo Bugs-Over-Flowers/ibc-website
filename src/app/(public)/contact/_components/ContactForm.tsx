@@ -48,24 +48,39 @@ export function ContactForm() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!inquiryType) return;
+
     setIsLoading(true);
 
-    // Build mailto link
-    const mailto = [
-      `mailto:siaotongkj@gmail.com`,
-      `?subject=Contact Form: ${encodeURIComponent(inquiryType)}`,
-      `&body=${encodeURIComponent(
-        `First Name: ${formData.firstName}\n` +
-          `Last Name: ${formData.lastName}\n` +
-          `Email: ${formData.email}\n` +
-          `Phone: ${formData.phone}\n` +
-          `Company/Organization: ${formData.company}\n` +
-          `Type of Inquiry: ${inquiryType}\n` +
-          `Message: ${formData.message}`,
-      )}`,
-    ].join("");
+    const emailBody = `
+New Contact Form Submission
+──────────────────────────
+
+Name:
+${formData.firstName} ${formData.lastName}
+
+Email:
+${formData.email}
+
+Phone:
+${formData.phone || "N/A"}
+
+Company / Organization:
+${formData.company || "N/A"}
+
+Inquiry Type:
+${inquiryType}
+
+Message:
+${formData.message}
+
+──────────────────────────
+Sent via Website Contact Form
+    `.trim();
+
+    const mailto = `mailto:siaotongkj@gmail.com?subject=${encodeURIComponent(`Contact Form Inquiry — ${inquiryType}`)}&body=${encodeURIComponent(emailBody)}`;
 
     window.location.href = mailto;
+
     setFormData({
       firstName: "",
       lastName: "",
@@ -124,7 +139,7 @@ export function ContactForm() {
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
               <Input
-                className="rounded-xl"
+                className="rounded-xl placeholder:opacity-50"
                 id="firstName"
                 onChange={handleInputChange}
                 placeholder="Juan"
@@ -135,7 +150,7 @@ export function ContactForm() {
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
               <Input
-                className="rounded-xl"
+                className="rounded-xl placeholder:opacity-50"
                 id="lastName"
                 onChange={handleInputChange}
                 placeholder="Dela Cruz"
@@ -148,7 +163,7 @@ export function ContactForm() {
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <Input
-              className="rounded-xl"
+              className="rounded-xl placeholder:opacity-50"
               id="email"
               onChange={handleInputChange}
               placeholder="juan@example.com"
@@ -161,7 +176,7 @@ export function ContactForm() {
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
             <Input
-              className="rounded-xl"
+              className="rounded-xl placeholder:opacity-50"
               id="phone"
               onChange={handleInputChange}
               placeholder="+63 912 345 6789"
@@ -173,7 +188,7 @@ export function ContactForm() {
           <div className="space-y-2">
             <Label htmlFor="company">Company/Organization</Label>
             <Input
-              className="rounded-xl"
+              className="rounded-xl placeholder:opacity-50"
               id="company"
               onChange={handleInputChange}
               placeholder="Your Company Name"
@@ -211,7 +226,7 @@ export function ContactForm() {
           <div className="space-y-2">
             <Label htmlFor="message">Your Message</Label>
             <Textarea
-              className="rounded-xl"
+              className="rounded-xl placeholder:opacity-50"
               id="message"
               onChange={handleInputChange}
               placeholder="How can we help you?"
