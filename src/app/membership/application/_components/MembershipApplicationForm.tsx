@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import useMembershipApplicationStore from "@/hooks/membershipApplication.store";
 import { cn } from "@/lib/utils";
+import type { Sector } from "@/server/membership/queries/getSectors";
 import { Step1Status } from "./forms/Step1Status";
 import { Step2Company } from "./forms/Step2Company";
 import { Step3Representatives } from "./forms/Step3Representatives";
@@ -37,7 +38,13 @@ const steps = [
   { id: 4, title: "Review & Submit", description: "Confirm and submit" },
 ];
 
-export function MembershipApplicationForm() {
+interface MembershipApplicationFormProps {
+  sectors: Sector[];
+}
+
+export function MembershipApplicationForm({
+  sectors,
+}: MembershipApplicationFormProps) {
   const router = useRouter();
   const currentStep = useMembershipApplicationStore((state) => state.step);
   const setStep = useMembershipApplicationStore((state) => state.setStep);
@@ -191,7 +198,7 @@ export function MembershipApplicationForm() {
                   handleNext(step2Form);
                 }}
               >
-                <Step2Company form={step2Form} />
+                <Step2Company form={step2Form} sectors={sectors} />
                 <div className="flex justify-between pt-6">
                   <Button
                     onClick={() => handleBack(1)}
