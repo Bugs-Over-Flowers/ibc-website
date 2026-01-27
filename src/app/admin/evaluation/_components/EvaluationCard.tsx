@@ -154,7 +154,7 @@ export function EvaluationCard({ evaluation }: EvaluationCardProps) {
                   Comments
                 </h3>
                 <div className="rounded-lg bg-primary/5 p-4">
-                  <p className="whitespace-pre-wrap font-semibold text-foreground text-sm">
+                  <p className="safe-text max-w-full whitespace-pre-wrap break-all font-semibold text-foreground text-sm">
                     {evaluation.additional_comments}
                   </p>
                 </div>
@@ -167,7 +167,7 @@ export function EvaluationCard({ evaluation }: EvaluationCardProps) {
                   Suggestions for Improvement
                 </h3>
                 <div className="rounded-lg bg-primary/5 p-4">
-                  <p className="whitespace-pre-wrap font-semibold text-foreground text-sm">
+                  <p className="safe-text max-w-full whitespace-pre-wrap break-all font-semibold text-foreground text-sm">
                     {evaluation.feedback}
                   </p>
                 </div>
