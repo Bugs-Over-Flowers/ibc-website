@@ -139,6 +139,31 @@ export function Step3Representatives({ form }: StepProps) {
                         {(subField) => (
                           <subField.TextField
                             label="Landline"
+                            onKeyDown={(e) => {
+                              // Allow: backspace, delete, tab, escape, enter, home, end, arrows
+                              if (
+                                [
+                                  "Backspace",
+                                  "Delete",
+                                  "Tab",
+                                  "Escape",
+                                  "Enter",
+                                  "Home",
+                                  "End",
+                                  "ArrowLeft",
+                                  "ArrowRight",
+                                ].includes(e.key) ||
+                                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                                ((e.ctrlKey || e.metaKey) &&
+                                  ["a", "c", "v", "x"].includes(e.key))
+                              ) {
+                                return;
+                              }
+                              // Block if not a number or allowed special characters
+                              if (!/[0-9()\-\s]/.test(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             placeholder="(033) XXX-XXXX"
                           />
                         )}
@@ -150,6 +175,31 @@ export function Step3Representatives({ form }: StepProps) {
                         {(subField) => (
                           <subField.TextField
                             label="Telefax"
+                            onKeyDown={(e) => {
+                              // Allow: backspace, delete, tab, escape, enter, home, end, arrows
+                              if (
+                                [
+                                  "Backspace",
+                                  "Delete",
+                                  "Tab",
+                                  "Escape",
+                                  "Enter",
+                                  "Home",
+                                  "End",
+                                  "ArrowLeft",
+                                  "ArrowRight",
+                                ].includes(e.key) ||
+                                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                                ((e.ctrlKey || e.metaKey) &&
+                                  ["a", "c", "v", "x"].includes(e.key))
+                              ) {
+                                return;
+                              }
+                              // Block if not a number or hyphen
+                              if (!/[0-9-]/.test(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             placeholder="XXXX-XXXX"
                           />
                         )}
@@ -161,7 +211,32 @@ export function Step3Representatives({ form }: StepProps) {
                         {(subField) => (
                           <subField.TextField
                             label="Mobile Number"
-                            placeholder="+63XX XXX XXXX"
+                            onKeyDown={(e) => {
+                              // Allow: backspace, delete, tab, escape, enter, home, end, arrows
+                              if (
+                                [
+                                  "Backspace",
+                                  "Delete",
+                                  "Tab",
+                                  "Escape",
+                                  "Enter",
+                                  "Home",
+                                  "End",
+                                  "ArrowLeft",
+                                  "ArrowRight",
+                                ].includes(e.key) ||
+                                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                                ((e.ctrlKey || e.metaKey) &&
+                                  ["a", "c", "v", "x"].includes(e.key))
+                              ) {
+                                return;
+                              }
+                              // Block if not a number or plus sign
+                              if (!/[0-9+]/.test(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+                            placeholder="09XXXXXXXXX"
                           />
                         )}
                       </form.AppField>

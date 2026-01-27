@@ -2,6 +2,7 @@ import { useStore } from "@tanstack/react-form";
 import { AlertCircle, FileIcon, MapPin, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -193,7 +194,18 @@ export function Step4Review({ form, applicationData }: StepProps) {
         <div className="space-y-4">
           <h3 className="font-medium text-lg">Payment Details</h3>
 
-          <form.AppField name="paymentMethod">
+          <form.AppField
+            listeners={{
+              onChange: ({ value }) => {
+                // Reset payment proof field and its errors when switching to ONSITE
+                if (value === "ONSITE") {
+                  form.setFieldValue("paymentProof", undefined);
+                  form.resetField("paymentProof");
+                }
+              },
+            }}
+            name="paymentMethod"
+          >
             {(field) => (
               <div className="space-y-3">
                 <Label>Select Payment Method *</Label>
@@ -278,66 +290,89 @@ export function Step4Review({ form, applicationData }: StepProps) {
           <form.Subscribe selector={(state) => state.values.paymentMethod}>
             {(paymentMethod) =>
               paymentMethod === "BPI" && (
-                <form.AppField name="paymentProof">
-                  {(field) => (
-                    <div className="space-y-2">
-                      <Label>Upload Proof of Payment *</Label>
-                      <div className="rounded-lg border bg-background p-4">
-                        {field.state.value ? (
-                          <div className="flex items-center justify-between rounded border bg-muted/20 p-3">
-                            <div className="flex items-center gap-3 overflow-hidden">
-                              {proofPreview ? (
-                                <Image
-                                  alt="Payment proof preview"
-                                  className="h-16 w-16 rounded object-contain"
-                                  height={64}
-                                  src={proofPreview}
-                                  width={64}
-                                />
-                              ) : (
-                                <FileIcon className="h-8 w-8 shrink-0" />
-                              )}
-                              <div className="flex flex-col">
-                                <span className="max-w-[200px] truncate text-sm">
-                                  {field.state.value.name}
-                                </span>
-                                <span className="text-muted-foreground text-xs">
-                                  ({(field.state.value.size / 1024).toFixed(1)}{" "}
-                                  KB)
-                                </span>
-                              </div>
-                            </div>
-                            <Button
-                              className="h-8 w-8"
-                              onClick={() => field.handleChange(undefined)}
-                              size="icon"
-                              type="button"
-                              variant="ghost"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Dropzone
-                            accept={{
-                              "image/*": [".png", ".jpg", ".jpeg"],
-                              "application/pdf": [".pdf"],
-                            }}
-                            maxFiles={1}
-                            onDrop={(acceptedFiles) => {
-                              if (acceptedFiles.length > 0) {
-                                field.handleChange(acceptedFiles[0]);
-                              }
-                            }}
-                          >
-                            <DropzoneEmptyState />
-                          </Dropzone>
-                        )}
-                      </div>
-                      <FieldError errors={field.state.meta.errors} />
+                <div className="space-y-4">
+                  {/* Bank Transfer Details */}
+                  <div className="flex flex-col items-center space-y-3 rounded-lg border bg-muted/30 p-6">
+                    <h4 className="font-medium text-lg">
+                      Bank Transfer Details
+                    </h4>
+                    <div className="relative h-40 w-40">
+                      <Image
+                        alt="BPI QR Code"
+                        className="rounded-md object-contain"
+                        fill
+                        src={IBCBPIQRCode}
+                      />
                     </div>
-                  )}
-                </form.AppField>
+                    <p className="text-muted-foreground text-sm">
+                      BPI - 000XXXXXXXX
+                    </p>
+                  </div>
+
+                  <form.AppField name="paymentProof">
+                    {(field) => (
+                      <div className="space-y-2">
+                        <Label>Upload Proof of Payment *</Label>
+                        <div className="rounded-lg border bg-background p-4">
+                          {field.state.value ? (
+                            <div className="flex items-center justify-between rounded border bg-muted/20 p-3">
+                              <div className="flex items-center gap-3 overflow-hidden">
+                                {proofPreview ? (
+                                  <Image
+                                    alt="Payment proof preview"
+                                    className="h-16 w-16 rounded object-contain"
+                                    height={64}
+                                    src={proofPreview}
+                                    width={64}
+                                  />
+                                ) : (
+                                  <FileIcon className="h-8 w-8 shrink-0" />
+                                )}
+                                <div className="flex flex-col">
+                                  <span className="max-w-[200px] truncate text-sm">
+                                    {field.state.value.name}
+                                  </span>
+                                  <span className="text-muted-foreground text-xs">
+                                    (
+                                    {(field.state.value.size / 1024).toFixed(1)}{" "}
+                                    KB)
+                                  </span>
+                                </div>
+                              </div>
+                              <Button
+                                className="h-8 w-8"
+                                onClick={() => field.handleChange(undefined)}
+                                size="icon"
+                                type="button"
+                                variant="ghost"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Dropzone
+                              accept={{
+                                "image/png": [".png"],
+                                "image/jpeg": [".jpeg"],
+                                "image/jpg": [".jpg"],
+                              }}
+                              maxFiles={1}
+                              maxSize={10 * 1024 * 1024}
+                              onDrop={(acceptedFiles) => {
+                                if (acceptedFiles.length > 0) {
+                                  field.handleChange(acceptedFiles[0]);
+                                }
+                              }}
+                            >
+                              <DropzoneEmptyState />
+                            </Dropzone>
+                          )}
+                        </div>
+                        <FieldError errors={field.state.meta.errors} />
+                      </div>
+                    )}
+                  </form.AppField>
+                </div>
               )
             }
           </form.Subscribe>

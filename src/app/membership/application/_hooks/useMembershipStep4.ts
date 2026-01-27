@@ -28,6 +28,7 @@ export const useMembershipStep4 = ({
     (state) => state.setIsSubmitted,
   );
   const setStep = useMembershipApplicationStore((state) => state.setStep);
+  const resetStore = useMembershipApplicationStore((state) => state.resetStore);
 
   // Get the verified businessMemberId (UUID) from member validation
   const verifiedBusinessMemberId = useMembershipApplicationStore(
@@ -176,6 +177,9 @@ export const useMembershipStep4 = ({
       const identifier = (data as { identifier?: string })?.identifier ?? "";
 
       toast.success("Application submitted successfully!");
+
+      // Reset the form data but preserve rate limiting data
+      resetStore();
 
       // Set submitted flag to keep showing loading state during navigation
       setIsSubmitted(true);
