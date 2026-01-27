@@ -60,10 +60,7 @@ export const draftEventSchema = draftObj.refine(
 
 export const publishEventSchema = z
   .union([publicObj, privateObj])
-  .refine(
-    (data) => data.eventEndDate >= data.eventStartDate,
-    dateRefinementOptions,
-  );
+  .refine(dateRefinement, dateRefinementOptions);
 
 export const draftEventServerSchema = baseEventSchema
   .extend({
@@ -77,10 +74,7 @@ export const publishEventServerSchema = publishBaseEventSchema
     eventType: z.enum(["public", "private"]),
     eventImage: z.string().url(),
   })
-  .refine(
-    (data) => data.eventEndDate >= data.eventStartDate,
-    dateRefinementOptions,
-  );
+  .refine(dateRefinement, dateRefinementOptions);
 
 export const createEventSchema = z
   .discriminatedUnion("eventType", [draftObj, publicObj, privateObj])
