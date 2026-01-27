@@ -16,7 +16,6 @@ export default function CheckInPageWrapper({
 }) {
   return (
     <div className="space-y-4">
-      <h2>Check In</h2>
       <Suspense fallback={<CenterSpinner />}>
         <CheckInPage params={params} />
       </Suspense>
@@ -45,6 +44,7 @@ async function CheckInPage({ params }: { params: CheckInPageProps["params"] }) {
             eventTitle: data.event.eventTitle,
             eventDate: data.eventDate,
             label: data.label,
+            venue: data.event.venue,
           }}
         />
 

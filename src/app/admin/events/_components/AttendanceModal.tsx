@@ -76,7 +76,7 @@ export default function AttendanceModal({
         )}
 
         {data && !isPending && (
-          <ul className="flex h-full flex-col gap-3">
+          <ul className="flex h-full max-h-[50vh] flex-col gap-3 overflow-y-auto">
             {data.map((day: EventDay) => (
               <Button
                 className={"flex h-20 flex-col gap-2"}
