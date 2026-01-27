@@ -50,7 +50,19 @@ export const useCreateEventForm = () => {
         const file = value.eventImage[0];
         const fileExt = file.name.split(".").pop()?.toLowerCase();
         const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+      let publicUrl: string | null | undefined = null;
 
+      if (value.eventImage && value.eventImage.length > 0) {
+        const file = value.eventImage[0];
+        const fileExt = file.name.split(".").pop()?.toLowerCase();
+        const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+
+        if (!fileExt || !allowedExtensions.includes(fileExt)) {
+          toast.error(
+            "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
+          );
+          return;
+        }
         if (!fileExt || !allowedExtensions.includes(fileExt)) {
           toast.error(
             "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
@@ -62,12 +74,20 @@ export const useCreateEventForm = () => {
           .toString(36)
           .substring(2)}_${Date.now()}.${fileExt}`;
         const filePath = `event-headers/${fileName}`;
+        const fileName = `${Math.random()
+          .toString(36)
+          .substring(2)}_${Date.now()}.${fileExt}`;
+        const filePath = `event-headers/${fileName}`;
 
         const supabase = await createClient();
         const { error: uploadError } = await supabase.storage
-          .from("headerimage")
+          .from("headerImage")
           .upload(filePath, file);
 
+        if (uploadError) {
+          toast.error(`Image upload failed: ${uploadError.message}`);
+          return;
+        }
         if (uploadError) {
           toast.error(`Image upload failed: ${uploadError.message}`);
           return;
@@ -75,7 +95,7 @@ export const useCreateEventForm = () => {
 
         const {
           data: { publicUrl: url },
-        } = supabase.storage.from("headerimage").getPublicUrl(filePath);
+        } = supabase.storage.from("headerImage").getPublicUrl(filePath);
         publicUrl = url;
       }
 
