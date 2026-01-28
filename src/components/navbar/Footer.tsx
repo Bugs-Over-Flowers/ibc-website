@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 
 export function Footer() {
   const quickLinks = [
-    { name: "Home", href: "/home" },
+    { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Members", href: "/members" },
     { name: "Events", href: "/events" },

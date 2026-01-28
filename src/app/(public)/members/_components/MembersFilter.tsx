@@ -107,13 +107,13 @@ export default function MembersFilter({
                   </span>
                   <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground/70" />
                 </PopoverTrigger>
-                <PopoverContent className="w-[260px] rounded-xl border-border/50 bg-card p-0 shadow-2xl">
+                <PopoverContent className="w-[400px] rounded-xl border-border/50 bg-card p-0 shadow-2xl">
                   <Command className="rounded-xl bg-card p-2">
                     <CommandInput
                       className="h-9 placeholder:text-muted-foreground"
                       placeholder="Search sector..."
                     />
-                    <CommandList className="w-[240px]">
+                    <CommandList className="w-md">
                       <CommandEmpty className="text-muted-foreground">
                         No sector found.
                       </CommandEmpty>

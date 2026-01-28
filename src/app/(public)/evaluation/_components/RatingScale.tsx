@@ -76,11 +76,11 @@ export function RatingScale({
   return (
     <Field
       aria-invalid={isInvalid}
-      className={cn("space-y-2", className)}
+      className={cn("space-y-1.5 sm:space-y-2", className)}
       data-invalid={isInvalid}
     >
       <FieldLabel
-        className="font-medium text-base text-foreground sm:text-lg"
+        className="font-medium text-foreground text-xs sm:text-sm md:text-base"
         id="rating-label"
       >
         {label}
@@ -88,14 +88,14 @@ export function RatingScale({
       {description && <FieldDescription>{description}</FieldDescription>}
 
       <fieldset aria-labelledby="rating-label" className="border-0 p-0">
-        <div className="flex flex-wrap items-center justify-start gap-1.5 sm:gap-2 md:gap-3">
+        <div className="flex items-center justify-center gap-0.5 sm:gap-1 md:gap-1.5 lg:gap-3">
           {RATING_OPTIONS.map((option) => {
             const isSelected = value === option.value;
             return (
               <label
                 className={cn(
-                  "group flex h-14 w-14 flex-col items-center justify-center gap-0 rounded-lg border-0 transition-all duration-150 sm:h-16 sm:w-16 md:h-20 md:w-20",
-                  "cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2",
+                  "group flex h-14 w-14 flex-col items-center justify-center gap-0 rounded-lg border-0 transition-all duration-150 sm:h-16 sm:w-16 md:h-18 md:w-18 lg:h-20 lg:w-20",
+                  "cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 sm:focus-within:ring-offset-2",
                   isSelected
                     ? cn(option.bgActive, "shadow-md")
                     : "hover:bg-accent/60",
@@ -111,7 +111,7 @@ export function RatingScale({
                 />
                 <option.Icon
                   className={cn(
-                    "h-4 w-4 transition-transform duration-150 sm:h-5 sm:w-5 md:h-7 md:w-7 lg:h-8 lg:w-8",
+                    "h-4 w-4 transition-transform duration-150 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7 xl:h-8 xl:w-8",
                     isSelected
                       ? cn(option.color, "scale-110")
                       : cn(option.colorMuted, "group-hover:scale-105"),
@@ -119,7 +119,7 @@ export function RatingScale({
                 />
                 <span
                   className={cn(
-                    "text-center font-medium text-[7px] leading-tight sm:text-[8px] md:text-[9px] lg:text-[10px]",
+                    "text-center font-medium text-[7px] leading-tight sm:text-[8px] md:text-[9px] lg:text-[10px] xl:text-[11px]",
                     isSelected ? option.color : "text-muted-foreground",
                   )}
                 >
