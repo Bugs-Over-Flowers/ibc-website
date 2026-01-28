@@ -20,7 +20,7 @@ interface MembershipApplicationStore {
   step: number;
   applicationData: MembershipApplicationData;
   isSubmitted: boolean;
-  // Member validation rate limiting
+  resetKey: number;
   memberValidation: {
     attemptCount: number;
     cooldownEndTime: number | null;
@@ -31,7 +31,7 @@ interface MembershipApplicationStore {
     memberInfo: {
       companyName?: string;
       membershipStatus?: string;
-      businessMemberId?: string; // The actual UUID from database
+      businessMemberId?: string;
     };
   };
 }
@@ -39,7 +39,7 @@ interface MembershipApplicationStore {
 interface MembershipApplicationStoreActions {
   setStep: (step: number) => void;
   setApplicationData: (
-    applicationData: Partial<MembershipApplicationData> | null,
+    applicationData: Partial<MembershipApplicationData>,
   ) => void;
   setIsSubmitted: (isSubmitted: boolean) => void;
   resetStore: () => void;
@@ -60,9 +60,10 @@ interface MembershipApplicationStoreActions {
   resetMemberValidation: () => void;
 }
 
-const getInitialState = (): MembershipApplicationStore => ({
+const initialState: MembershipApplicationStore = {
   step: 1,
   isSubmitted: false,
+  resetKey: 0,
   memberValidation: {
     attemptCount: 0,
     cooldownEndTime: null,
@@ -128,62 +129,63 @@ const getInitialState = (): MembershipApplicationStore => ({
       paymentProof: undefined,
     },
   },
-});
+};
 
 const useMembershipApplicationStore = create<
   MembershipApplicationStore & MembershipApplicationStoreActions
 >()(
   persist(
     (set) => ({
-      ...getInitialState(),
-      setStep: (step: number) => set({ step }),
-      setIsSubmitted: (isSubmitted: boolean) => set({ isSubmitted }),
-      setApplicationData: (
-        applicationData: Partial<MembershipApplicationData> | null,
-      ) =>
+      ...initialState,
+
+      setStep: (step) => set({ step }),
+
+      setIsSubmitted: (isSubmitted) => set({ isSubmitted }),
+
+      setApplicationData: (data) =>
         set((state) => ({
-          applicationData:
-            applicationData === null
-              ? state.applicationData
-              : {
-                  ...state.applicationData,
-                  ...applicationData,
-                },
+          applicationData: {
+            ...state.applicationData,
+            ...data,
+          },
         })),
+
       resetStore: () =>
         set((state) => {
-          const initialState = getInitialState();
+          // Clear the persisted storage to ensure no stale data
+          localStorage.removeItem("membership-application-storage");
+
           return {
             ...initialState,
-            // Preserve rate limiting data to prevent bypass
+            // Increment resetKey to force React remount of form components
+            resetKey: state.resetKey + 1,
             memberValidation: {
               ...initialState.memberValidation,
-              attemptCount: state.memberValidation.attemptCount,
-              cooldownEndTime: state.memberValidation.cooldownEndTime,
-              remainingTime: state.memberValidation.remainingTime,
+              attemptCount: state.memberValidation?.attemptCount ?? 0,
+              cooldownEndTime: state.memberValidation?.cooldownEndTime ?? null,
+              remainingTime: state.memberValidation?.remainingTime ?? 0,
             },
           };
         }),
-      // Member validation actions
-      setMemberValidationAttempt: (count: number) =>
+
+      setMemberValidationAttempt: (count) =>
         set((state) => ({
-          memberValidation: {
-            ...state.memberValidation,
-            attemptCount: count,
-          },
+          memberValidation: { ...state.memberValidation, attemptCount: count },
         })),
-      setMemberValidationCooldown: (endTime: number | null) =>
+
+      setMemberValidationCooldown: (endTime) =>
         set((state) => ({
           memberValidation: {
             ...state.memberValidation,
             cooldownEndTime: endTime,
           },
         })),
+
       setMemberValidationStatus: (
-        status: "idle" | "valid" | "invalid",
+        status,
         memberInfo = {},
-        memberId: string | null = null,
-        applicationType: "renewal" | "updating" | null = null,
+        memberId = null,
+        applicationType = null,
       ) =>
         set((state) => ({
           memberValidation: {
@@ -197,13 +199,12 @@ const useMembershipApplicationStore = create<
               state.memberValidation.lastValidatedApplicationType,
           },
         })),
-      setMemberValidationRemainingTime: (time: number) =>
+
+      setMemberValidationRemainingTime: (time) =>
         set((state) => ({
-          memberValidation: {
-            ...state.memberValidation,
-            remainingTime: time,
-          },
+          memberValidation: { ...state.memberValidation, remainingTime: time },
         })),
+
       resetMemberValidation: () =>
         set((state) => ({
           memberValidation: {
@@ -212,113 +213,115 @@ const useMembershipApplicationStore = create<
             lastValidatedMemberId: null,
             lastValidatedApplicationType: null,
             memberInfo: {},
-            // Keep attemptCount and cooldownEndTime to prevent bypass
           },
         })),
     }),
     {
       name: "membership-application-storage",
-      version: 5,
-      migrate: (persistedState, version) => {
-        const state = persistedState as Partial<MembershipApplicationStore>;
-        const initialState = getInitialState();
+      version: 3,
 
-        // For any version upgrade, preserve what we can
-        if (version < 5) {
+      // 1. Migrate logic
+      migrate: (persistedState, version) => {
+        if (version < 3) {
+          const oldState =
+            persistedState as Partial<MembershipApplicationStore>;
           return {
-            step: state?.step ?? initialState.step,
-            isSubmitted: false,
+            ...initialState,
             memberValidation: {
-              attemptCount: state?.memberValidation?.attemptCount ?? 0,
-              cooldownEndTime: state?.memberValidation?.cooldownEndTime ?? null,
-              validationStatus:
-                state?.memberValidation?.validationStatus ?? "idle",
-              lastValidatedMemberId:
-                state?.memberValidation?.lastValidatedMemberId ?? null,
-              lastValidatedApplicationType:
-                state?.memberValidation?.lastValidatedApplicationType ?? null,
-              remainingTime: state?.memberValidation?.remainingTime ?? 0,
-              memberInfo: state?.memberValidation?.memberInfo ?? {},
-            },
-            applicationData: {
-              step1:
-                state?.applicationData?.step1 ??
-                initialState.applicationData.step1,
-              step2:
-                state?.applicationData?.step2 ??
-                initialState.applicationData.step2,
-              step3: {
-                representatives:
-                  state?.applicationData?.step3?.representatives ??
-                  initialState.applicationData.step3.representatives.map(
-                    (rep) => ({
-                      ...rep,
-                      birthdate: undefined,
-                    }),
-                  ),
-              },
-              step4: {
-                applicationMemberType:
-                  state?.applicationData?.step4?.applicationMemberType ??
-                  initialState.applicationData.step4.applicationMemberType,
-                paymentMethod:
-                  state?.applicationData?.step4?.paymentMethod ??
-                  initialState.applicationData.step4.paymentMethod,
-                paymentProofUrl:
-                  state?.applicationData?.step4?.paymentProofUrl ??
-                  initialState.applicationData.step4.paymentProofUrl,
-              },
+              ...initialState.memberValidation,
+              attemptCount: oldState?.memberValidation?.attemptCount ?? 0,
+              cooldownEndTime:
+                oldState?.memberValidation?.cooldownEndTime ?? null,
             },
           };
         }
-        return persistedState;
+        return persistedState as MembershipApplicationStore;
       },
-      partialize: (state) => ({
-        step: state.step,
-        isSubmitted: state.isSubmitted,
-        memberValidation: {
-          attemptCount: state.memberValidation.attemptCount,
-          cooldownEndTime: state.memberValidation.cooldownEndTime,
-          validationStatus: state.memberValidation.validationStatus,
-          lastValidatedMemberId: state.memberValidation.lastValidatedMemberId,
-          lastValidatedApplicationType:
-            state.memberValidation.lastValidatedApplicationType,
-          remainingTime: state.memberValidation.remainingTime,
-          memberInfo: state.memberValidation.memberInfo,
-        },
-        applicationData: {
-          step1: state.applicationData.step1,
-          step2: state.applicationData.step2,
-          step3: {
-            representatives: state.applicationData.step3.representatives.map(
-              (rep) => ({
-                ...rep,
-                birthdate: rep.birthdate
-                  ? new Date(rep.birthdate).toISOString()
-                  : undefined,
-              }),
-            ),
+
+      // 2. Partialize logic - Excludes non-serializable fields (File objects)
+      partialize: (state) =>
+        ({
+          step: state.step,
+          isSubmitted: state.isSubmitted,
+          // resetKey is intentionally excluded from persistence
+          // It should always start at 0 on page load
+          memberValidation: state.memberValidation,
+          applicationData: {
+            step1: state.applicationData.step1,
+            // Step2: Explicitly exclude logoImage (File object) - cannot be serialized to localStorage
+            step2: {
+              companyName: state.applicationData.step2.companyName,
+              companyAddress: state.applicationData.step2.companyAddress,
+              sectorId: state.applicationData.step2.sectorId,
+              landline: state.applicationData.step2.landline,
+              faxNumber: state.applicationData.step2.faxNumber,
+              mobileNumber: state.applicationData.step2.mobileNumber,
+              emailAddress: state.applicationData.step2.emailAddress,
+              websiteURL: state.applicationData.step2.websiteURL,
+              logoImageURL: state.applicationData.step2.logoImageURL,
+              // logoImage: undefined - File object excluded from persistence
+              logoImage: undefined,
+            },
+            step3: {
+              representatives: state.applicationData.step3.representatives.map(
+                (rep) => ({
+                  ...rep,
+                  // Serialize Date to string
+                  birthdate: rep.birthdate
+                    ? new Date(rep.birthdate).toISOString()
+                    : undefined,
+                }),
+              ),
+            },
+            // Step4: Explicitly exclude paymentProof (File object) - cannot be serialized to localStorage
+            step4: {
+              applicationMemberType:
+                state.applicationData.step4.applicationMemberType,
+              paymentMethod: state.applicationData.step4.paymentMethod,
+              paymentProofUrl: state.applicationData.step4.paymentProofUrl,
+              // paymentProof: undefined - File object excluded from persistence
+              paymentProof: undefined,
+            },
           },
-          step4: {
-            applicationMemberType:
-              state.applicationData.step4.applicationMemberType,
-            paymentMethod: state.applicationData.step4.paymentMethod,
-            paymentProofUrl: state.applicationData.step4.paymentProofUrl,
-          },
-        },
-      }),
+        }) as unknown as MembershipApplicationStore,
+
+      // 3. Rehydrate logic - Handles the string-to-Date conversion
       onRehydrateStorage: () => (state) => {
-        if (state?.applicationData?.step3?.representatives) {
+        if (!state) return;
+
+        if (state.applicationData?.step3?.representatives) {
           state.applicationData.step3.representatives =
             state.applicationData.step3.representatives.map((rep) => {
-              const serialized = rep as unknown as { birthdate?: string };
+              // At runtime, 'rep.birthdate' might be a string string despite the type definition
+              const serialized = rep as unknown as {
+                birthdate?: string | Date;
+              };
+
+              let birthdateVal: Date | undefined;
+
+              if (serialized.birthdate) {
+                if (serialized.birthdate instanceof Date) {
+                  birthdateVal = serialized.birthdate;
+                } else {
+                  birthdateVal = new Date(serialized.birthdate);
+                }
+              }
+
               return {
                 ...rep,
-                birthdate: (serialized.birthdate
-                  ? new Date(serialized.birthdate)
-                  : undefined) as Date,
+                birthdate: birthdateVal as Date,
               };
             });
+        }
+
+        // Ensure File objects are explicitly undefined after rehydration
+        // This is defensive programming - partialize already excludes them,
+        // but this ensures type safety and prevents any confusion
+        if (state.applicationData?.step2) {
+          state.applicationData.step2.logoImage = undefined;
+        }
+        if (state.applicationData?.step4) {
+          state.applicationData.step4.paymentProof = undefined;
         }
       },
     },
