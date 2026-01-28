@@ -36,12 +36,12 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
     defaultValues: {
       eventId,
       name: "",
-      q1Rating: "" as const,
-      q2Rating: "" as const,
-      q3Rating: "" as const,
-      q4Rating: "" as const,
-      q5Rating: "" as const,
-      q6Rating: "" as const,
+      q1Rating: "",
+      q2Rating: "",
+      q3Rating: "",
+      q4Rating: "",
+      q5Rating: "",
+      q6Rating: "",
       additionalComments: "",
       feedback: "",
     },
@@ -264,10 +264,8 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
                   <field.TextareaField
                     className="min-h-20 resize-none sm:min-h-24 md:min-h-28"
                     label="Comments"
+                    maxLength={500}
                     placeholder="Share any additional thoughts about the event..."
-                    textareaProps={{
-                      maxLength: 500,
-                    }}
                   />
                   <div className="flex justify-end text-muted-foreground text-xs">
                     {length}/{max} characters
@@ -286,10 +284,8 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
                   <field.TextareaField
                     className="min-h-20 resize-none sm:min-h-24 md:min-h-28"
                     label="Suggestions for Improvement"
+                    maxLength={500}
                     placeholder="How can we make our events even better?"
-                    textareaProps={{
-                      maxLength: 500,
-                    }}
                   />
                   <div className="flex justify-end text-muted-foreground text-xs">
                     {length}/{max} characters

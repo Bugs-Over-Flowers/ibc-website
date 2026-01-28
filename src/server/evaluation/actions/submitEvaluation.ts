@@ -1,11 +1,11 @@
 "use server";
 
 import { createActionClient } from "@/lib/supabase/server";
-import type { EvaluationFormInput } from "@/lib/validation/evaluation/evaluation-form";
+import type { EvaluationFormData } from "@/lib/validation/evaluation/evaluation-form";
 import { EvaluationFormSchema } from "@/lib/validation/evaluation/evaluation-form";
 
 export async function submitEvaluationForm(
-  input: EvaluationFormInput,
+  input: EvaluationFormData,
 ): Promise<void> {
   const parsed = EvaluationFormSchema.parse(input);
 

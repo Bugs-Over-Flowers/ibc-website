@@ -2,20 +2,22 @@ import { z } from "zod";
 
 const ratingEnum = z.enum(["poor", "fair", "good", "veryGood", "excellent"]);
 
+// export const EvaluationFormSchema
+
 export const EvaluationFormSchema = z
   .object({
     eventId: z.string(),
-    name: z.string().optional().or(z.literal("")),
+    name: z.string().default(""),
 
-    q1Rating: ratingEnum.or(z.literal("")),
-    q2Rating: ratingEnum.or(z.literal("")),
-    q3Rating: ratingEnum.or(z.literal("")),
-    q4Rating: ratingEnum.or(z.literal("")),
-    q5Rating: ratingEnum.or(z.literal("")),
-    q6Rating: ratingEnum.or(z.literal("")),
+    q1Rating: ratingEnum,
+    q2Rating: ratingEnum,
+    q3Rating: ratingEnum,
+    q4Rating: ratingEnum,
+    q5Rating: ratingEnum,
+    q6Rating: ratingEnum,
 
-    feedback: z.string().optional().or(z.literal("")),
-    additionalComments: z.string().optional().or(z.literal("")),
+    feedback: z.string().optional(),
+    additionalComments: z.string().optional(),
   })
   .refine(
     (data) =>
