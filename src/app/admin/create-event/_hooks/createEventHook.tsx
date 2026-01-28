@@ -1,9 +1,11 @@
 "use client";
 
+import { revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { createClient } from "@/lib/supabase/client";
+import { zodErrorToFieldErrors } from "@/lib/utils";
 import {
   createEventSchema,
   type DraftEventInput,
@@ -26,8 +28,17 @@ export const useCreateEventForm = () => {
       eventImage: [] as File[],
     },
 
+    validationLogic: revalidateLogic(),
+
     validators: {
-      onSubmit: createEventSchema,
+      onDynamic: ({ value }) => {
+        const result = createEventSchema.safeParse(value);
+        if (!result.success) {
+          const fields = zodErrorToFieldErrors(result.error);
+          return { fields };
+        }
+        return undefined;
+      },
     },
 
     onSubmit: async ({ value }) => {
