@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { getSectors } from "@/server/membership/queries/getSectors";
-import { MembershipApplicationForm } from "./_components/MembershipApplicationForm";
+import { MembershipApplicationFormWrapper } from "./_components/MembershipApplicationFormWrapper";
 
 export default async function MembershipApplicationPage() {
   const cookieStore = await cookies();
@@ -15,7 +15,7 @@ export default async function MembershipApplicationPage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-25">
       <Suspense>
-        <MembershipApplicationForm sectors={sectors} />
+        <MembershipApplicationFormWrapper sectors={sectors} />
       </Suspense>
     </div>
   );

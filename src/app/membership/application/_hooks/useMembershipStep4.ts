@@ -181,6 +181,9 @@ export const useMembershipStep4 = ({
       // Reset the form data but preserve rate limiting data
       resetStore();
 
+      // Reset the form state
+      form.reset();
+
       // Set submitted flag to keep showing loading state during navigation
       setIsSubmitted(true);
 
