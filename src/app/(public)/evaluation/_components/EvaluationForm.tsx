@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { fadeInUp } from "@/lib/animations/fade";
@@ -36,12 +36,12 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
     defaultValues: {
       eventId,
       name: "",
-      q1Rating: "",
-      q2Rating: "",
-      q3Rating: "",
-      q4Rating: "",
-      q5Rating: "",
-      q6Rating: "",
+      q1Rating: null,
+      q2Rating: null,
+      q3Rating: null,
+      q4Rating: null,
+      q5Rating: null,
+      q6Rating: null,
       additionalComments: "",
       feedback: "",
     },
@@ -50,7 +50,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
     },
     onSubmit: async ({ value }) => {
       const completedQuestions = EVALUATION_QUESTIONS.filter(
-        (q) => value[q.field as keyof typeof value] !== "",
+        (q) => value[q.field as keyof typeof value] !== null,
       ).length;
 
       if (completedQuestions < TOTAL_QUESTIONS) {
@@ -64,7 +64,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       const { error } = await tryCatch(submitEvaluationForm(value));
 
       if (error) {
-        const message =
+        const _message =
           typeof error === "string" ? error : "Failed to submit form";
         toast.error("Failed to submit feedback. Please try again.");
         return undefined;
@@ -200,7 +200,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
             selector={(state) =>
               EVALUATION_QUESTIONS.filter(
                 (q) =>
-                  state.values[q.field as keyof typeof state.values] !== "",
+                  state.values[q.field as keyof typeof state.values] !== null,
               ).length
             }
           >
@@ -230,6 +230,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               className="py-3 first:pt-0 last:pb-0 sm:py-4 md:py-5 lg:py-6"
               key={q.field}
             >
+              {/* @ts-expect-error - Form infers type from defaultValues with null, but rating fields exist at runtime */}
               <form.AppField name={q.field}>
                 {(field) => <field.RatingScale label={q.question} />}
               </form.AppField>

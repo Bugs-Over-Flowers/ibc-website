@@ -26,7 +26,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
-          identifier: string | null;
+          identifier: string;
           interviewId: string | null;
           landline: string;
           logoImageURL: string;
@@ -47,7 +47,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
-          identifier?: string | null;
+          identifier: string;
           interviewId?: string | null;
           landline: string;
           logoImageURL: string;
@@ -68,7 +68,7 @@ export type Database = {
           companyName?: string;
           emailAddress?: string;
           faxNumber?: string;
-          identifier?: string | null;
+          identifier?: string;
           interviewId?: string | null;
           landline?: string;
           logoImageURL?: string;

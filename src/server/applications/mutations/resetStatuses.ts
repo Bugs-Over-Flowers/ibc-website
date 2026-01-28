@@ -14,7 +14,7 @@ export async function resetMemberStatuses() {
   const { data, error } = await supabase
     .from("BusinessMember")
     .update({ membershipStatus: "unpaid" })
-    .eq("membershipStatus", "active")
+    .eq("membershipStatus", "unpaid")
     .select("businessMemberId");
 
   if (error) {
@@ -46,7 +46,7 @@ export async function updateOverdueMembers(deadlineDate: Date) {
   // Update members with unpaid status whose membership expiry date has passed
   const { data, error } = await supabase
     .from("BusinessMember")
-    .update({ membershipStatus: "overdue" })
+    .update({ membershipStatus: "cancelled" })
     .eq("membershipStatus", "unpaid")
     .lt("membershipExpiryDate", deadlineDateString)
     .select("businessMemberId");

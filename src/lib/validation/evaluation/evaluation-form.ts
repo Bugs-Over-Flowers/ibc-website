@@ -9,24 +9,24 @@ export const EvaluationFormSchema = z
     eventId: z.string(),
     name: z.string().default(""),
 
-    q1Rating: ratingEnum,
-    q2Rating: ratingEnum,
-    q3Rating: ratingEnum,
-    q4Rating: ratingEnum,
-    q5Rating: ratingEnum,
-    q6Rating: ratingEnum,
+    q1Rating: ratingEnum.nullable(),
+    q2Rating: ratingEnum.nullable(),
+    q3Rating: ratingEnum.nullable(),
+    q4Rating: ratingEnum.nullable(),
+    q5Rating: ratingEnum.nullable(),
+    q6Rating: ratingEnum.nullable(),
 
     feedback: z.string().optional(),
     additionalComments: z.string().optional(),
   })
   .refine(
     (data) =>
-      data.q1Rating &&
-      data.q2Rating &&
-      data.q3Rating &&
-      data.q4Rating &&
-      data.q5Rating &&
-      data.q6Rating,
+      data.q1Rating !== null &&
+      data.q2Rating !== null &&
+      data.q3Rating !== null &&
+      data.q4Rating !== null &&
+      data.q5Rating !== null &&
+      data.q6Rating !== null,
     {
       message: "All ratings are required",
     },
