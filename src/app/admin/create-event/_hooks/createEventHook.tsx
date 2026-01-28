@@ -1,9 +1,11 @@
 "use client";
 
+import { revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { createClient } from "@/lib/supabase/client";
+import { zodErrorToFieldErrors } from "@/lib/utils";
 import {
   createEventSchema,
   type DraftEventInput,
@@ -26,42 +28,56 @@ export const useCreateEventForm = () => {
       eventImage: [] as File[],
     },
 
+    validationLogic: revalidateLogic(),
+
     validators: {
-      onSubmit: createEventSchema,
+      onDynamic: ({ value }) => {
+        const result = createEventSchema.safeParse(value);
+        if (!result.success) {
+          const fields = zodErrorToFieldErrors(result.error);
+          return { fields };
+        }
+        return undefined;
+      },
     },
 
     onSubmit: async ({ value }) => {
       console.log("Submitting form to server...", value);
 
-      const file = value.eventImage[0];
-      const fileExt = file.name.split(".").pop()?.toLowerCase();
-      const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+      let publicUrl: string | null | undefined = null;
 
-      if (!fileExt || !allowedExtensions.includes(fileExt)) {
-        toast.error(
-          "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
-        );
-        return;
+      if (value.eventImage && value.eventImage.length > 0) {
+        const file = value.eventImage[0];
+        const fileExt = file.name.split(".").pop()?.toLowerCase();
+        const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+
+        if (!fileExt || !allowedExtensions.includes(fileExt)) {
+          toast.error(
+            "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
+          );
+          return;
+        }
+
+        const fileName = `${Math.random()
+          .toString(36)
+          .substring(2)}_${Date.now()}.${fileExt}`;
+        const filePath = `event-headers/${fileName}`;
+
+        const supabase = await createClient();
+        const { error: uploadError } = await supabase.storage
+          .from("headerImage")
+          .upload(filePath, file);
+
+        if (uploadError) {
+          toast.error(`Image upload failed: ${uploadError.message}`);
+          return;
+        }
+
+        const {
+          data: { publicUrl: url },
+        } = supabase.storage.from("headerImage").getPublicUrl(filePath);
+        publicUrl = url;
       }
-
-      const fileName = `${Math.random()
-        .toString(36)
-        .substring(2)}_${Date.now()}.${fileExt}`;
-      const filePath = `event-headers/${fileName}`;
-
-      const supabase = await createClient();
-      const { error: uploadError } = await supabase.storage
-        .from("headerImage")
-        .upload(filePath, file);
-
-      if (uploadError) {
-        toast.error(`Image upload failed: ${uploadError.message}`);
-        return;
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("headerImage").getPublicUrl(filePath);
 
       const payload = {
         ...value,
