@@ -8,7 +8,7 @@ export default async function MembershipApplicationPage() {
   const sectors = await getSectors(cookieStore.getAll());
 
   return (
-    <div className="container mx-auto py-25">
+    <div className="container mx-auto px-4 py-8 md:py-25">
       <Suspense>
         <MembershipApplicationFormWrapper sectors={sectors} />
       </Suspense>
