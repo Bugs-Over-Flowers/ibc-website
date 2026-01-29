@@ -17,7 +17,7 @@ export default function CheckApplicationStatus() {
             Check Application Status
           </EmptyTitle>
           <EmptyDescription>
-            This page is in progress. Please check this later.
+            This page is still not available. Please check back later.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
