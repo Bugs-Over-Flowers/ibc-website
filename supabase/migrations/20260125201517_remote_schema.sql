@@ -1,13 +1,9 @@
 drop function if exists "public"."submit_membership_application"(p_application_type text, p_company_details jsonb, p_representatives jsonb, p_payment_method text, p_payment_proof_url text);
-
 alter table "public"."Application" add column "identifier" text;
-
 CREATE UNIQUE INDEX "Application_identifier_key" ON public."Application" USING btree (identifier);
-
 alter table "public"."Application" add constraint "Application_identifier_key" UNIQUE using index "Application_identifier_key";
-
 set check_function_bodies = off;
-
+create type "public"."registration_details_result" as ("registration_details" jsonb, "event_details" jsonb, "check_in_list" jsonb, "event_days" jsonb, "all_is_checked_in" boolean, "is_event_day" boolean);
 CREATE OR REPLACE FUNCTION public.get_event_checkin_list(p_event_id uuid)
  RETURNS jsonb
  LANGUAGE sql
@@ -70,11 +66,132 @@ SELECT jsonb_build_object(
     left join "BusinessMember" bm on bm."businessMemberId" = r."businessMemberId"
   )
 );
-$function$
-;
+$function$;
+CREATE OR REPLACE FUNCTION public.get_registration_list_checkin(p_identifier text, p_today date DEFAULT CURRENT_DATE)
+ RETURNS public.registration_details_result
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+  v_result registration_details_result;
+BEGIN
 
-create type "public"."registration_details_result" as ("registration_details" jsonb, "event_details" jsonb, "check_in_list" jsonb, "event_days" jsonb, "all_is_checked_in" boolean, "is_event_day" boolean);
+  WITH
+  -- registration and event details
+  base_data AS (
+    SELECT 
+      r."registrationId",
+      r."nonMemberName",
+      r."businessMemberId",
+      e.*
+    FROM "Registration" r
+    JOIN "Event" e on r."eventId" = e."eventId"
+    WHERE r.identifier = p_identifier
+    LIMIT 1
+  ),
 
+  -- Current Event Day
+  current_event_day AS (
+    SELECT ed.*
+    FROM "EventDay" ed
+    JOIN base_data bd ON ed."eventId" = bd."eventId"
+    -- FOR DEBUGGING COMMENT THIS OUT
+    WHERE ed."eventDate" = p_today
+    limit 1
+  ),
+
+  check_in_list AS (
+    SELECT 
+      p.*,
+      ci.remarks,
+      ci.date,
+      -- Check if a CheckIn exists for this participant on the current event day(s)
+      EXISTS (
+        SELECT 1 
+        FROM "CheckIn" ci
+        JOIN current_event_day ced ON ci."eventDayId" = ced."eventDayId"
+        WHERE ci."participantId" = p."participantId"
+      ) AS is_checked_in
+    FROM "Participant" p
+    JOIN base_data bd ON p."registrationId" = bd."registrationId"
+    LEFT JOIN "CheckIn" ci on ci."participantId" = p."participantId"
+  )
+
+  select
+    -- Registration details
+    json_build_object(
+      'registrationId', bd."registrationId",
+      'affiliation', COALESCE(bm."businessName", bd."nonMemberName")
+    ),
+    -- Event details except the createdAt and the updatedAt
+    to_jsonb(bd) - 'createdAt' - 'updatedAt' - 'registrationId' - 'nonMemberName' - 'businessMemberId',
+    -- participant list, and check if checkedin today
+    (
+      SELECT json_agg(
+        to_jsonb(cil.*) || jsonb_build_object(
+          'checkedIn', cil.is_checked_in
+        )
+        ORDER BY 
+          "lastName" ASC,      
+          "firstName" ASC
+      )
+      FROM check_in_list cil
+     
+    ),
+    -- event day(s) details today
+    (
+      SELECT COALESCE(jsonb_agg(ced.*), '[]'::jsonb)
+      FROM current_event_day ced
+    ),
+    (
+      -- Check if every participant has a check-in for today
+      SELECT COALESCE(BOOL_AND(cil.is_checked_in), FALSE)
+      FROM check_in_list cil
+    ),
+    (
+      -- Check if today is within the event date range
+      (p_today >= bd."eventStartDate" AND p_today <= bd."eventEndDate")
+    )
+  INTO 
+    v_result.registration_details,
+    v_result.event_details,
+    v_result.check_in_list,
+    v_result.event_days,
+    v_result.all_is_checked_in,
+    v_result.is_event_day
+
+  FROM base_data bd
+  LEFT JOIN "BusinessMember" bm ON bd."businessMemberId" = bm."businessMemberId";
+  
+  -- Check if registration exists
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Registration Not Found';
+  END IF;
+
+  -- Validate Affiliation
+  IF v_result.registration_details->>'affiliation' IS NULL THEN
+    RAISE EXCEPTION 'Affiliation not found';
+  END IF;
+
+  -- Validate that we have required data
+  IF v_result.event_details IS NULL THEN
+    RAISE EXCEPTION 'Event details not found';
+  END IF;
+
+  -- Validate if not event dat
+  -- IF NOT v_result.is_event_day THEN
+  --   RAISE EXCEPTION 'Today is not within the event date range for event: %', v_result.event_details->>'eventTitle';
+  -- END IF;
+
+  -- Validate if Event Day Exists
+  IF v_result.event_days = '[]'::jsonb THEN
+    RAISE EXCEPTION 'Event days not found for today';
+  END IF;
+
+  RETURN v_result;
+
+END;
+$function$;
 CREATE OR REPLACE FUNCTION public.update_event_available_slots_trigger()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -116,9 +233,7 @@ BEGIN
         RETURN NEW;
     END IF;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.submit_membership_application(p_application_type text, p_company_details jsonb, p_representatives jsonb, p_payment_method text, p_application_member_type text, p_payment_proof_url text DEFAULT NULL::text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -283,7 +398,5 @@ EXCEPTION
   WHEN OTHERS THEN
     RAISE EXCEPTION 'Application submission failed: %', SQLERRM;
 END;
-$function$
-;
-
+$function$;
 CREATE TRIGGER tr_update_event_available_slots AFTER INSERT OR DELETE OR UPDATE OF "numberOfParticipants" ON public."Registration" FOR EACH ROW EXECUTE FUNCTION public.update_event_available_slots_trigger();

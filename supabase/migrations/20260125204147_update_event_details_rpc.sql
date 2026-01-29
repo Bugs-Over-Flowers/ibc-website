@@ -1,5 +1,4 @@
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.get_event_status(p_event_id uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -119,7 +118,4 @@ BEGIN
     'event_days', days_arr
   );
 END;
-$function$
-;
-
-
+$function$;
