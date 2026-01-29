@@ -28,13 +28,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
   // Convert timestamptz to datetime-local format (YYYY-MM-DDTHH:mm)
   const formatForDateTimeLocal = (dateString: string | null) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return formatDate(dateString, "yyyy-MM-dd'T'HH:mm");
   };
 
   const form = useAppForm({
@@ -44,6 +38,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
       description: event.description || "",
       eventStartDate: formatForDateTimeLocal(event.eventStartDate),
       eventEndDate: formatForDateTimeLocal(event.eventEndDate),
+
       venue: event.venue || "",
       registrationFee: event.registrationFee,
       eventType: event.eventType as "public" | "private" | null,
@@ -121,12 +116,15 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
         return;
       }
 
+      const isoStartDate = new Date(value.eventStartDate).toISOString();
+      const isoEndDate = new Date(value.eventEndDate).toISOString();
+
       const payload = {
         eventId: value.eventId,
         eventTitle: value.eventTitle,
         description: value.description,
-        eventStartDate: value.eventStartDate,
-        eventEndDate: value.eventEndDate,
+        eventStartDate: isoStartDate,
+        eventEndDate: isoEndDate,
         venue: value.venue,
         eventHeaderUrl: headerUrl || undefined,
         eventType: value.eventType,
