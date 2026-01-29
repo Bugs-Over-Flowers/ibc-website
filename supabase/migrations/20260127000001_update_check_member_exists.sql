@@ -3,7 +3,6 @@
 
 -- Drop the old function first
 DROP FUNCTION IF EXISTS check_member_exists(uuid);
-
 -- Create new function that checks by identifier (text format: ibc-mem-XXXXXXXX)
 CREATE OR REPLACE FUNCTION check_member_exists(
   p_identifier text
@@ -57,7 +56,6 @@ EXCEPTION
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- Add comment for documentation
 COMMENT ON FUNCTION check_member_exists(text) IS 
 'Validates if a business member identifier exists and is active. 
@@ -65,7 +63,6 @@ Accepts identifier in format ibc-mem-XXXXXXXX.
 Returns member existence status and basic info for confirmation.
 Used during renewal and update applications to verify member identity.
 Security: DEFINER rights ensure consistent access regardless of caller permissions.';
-
 -- Grant execute permissions
 GRANT EXECUTE ON FUNCTION check_member_exists(text) TO anon;
 GRANT EXECUTE ON FUNCTION check_member_exists(text) TO authenticated;
