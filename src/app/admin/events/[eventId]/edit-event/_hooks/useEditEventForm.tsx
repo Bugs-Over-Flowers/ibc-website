@@ -79,7 +79,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
 
         const supabase = await createClient();
         const { error: uploadError } = await supabase.storage
-          .from("headerImage")
+          .from("headerimage")
           .upload(filePath, file);
 
         if (uploadError) {
@@ -89,7 +89,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
 
         const {
           data: { publicUrl },
-        } = supabase.storage.from("headerImage").getPublicUrl(filePath);
+        } = supabase.storage.from("headerimage").getPublicUrl(filePath);
 
         headerUrl = publicUrl;
 
@@ -102,7 +102,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
           if (pathParts.length > 1) {
             const oldPath = pathParts[1];
             const { error: deleteError } = await supabase.storage
-              .from("headerImage")
+              .from("headerimage")
               .remove([oldPath]);
 
             if (deleteError) {

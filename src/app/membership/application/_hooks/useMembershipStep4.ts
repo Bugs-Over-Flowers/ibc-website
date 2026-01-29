@@ -82,7 +82,7 @@ export const useMembershipStep4 = ({
             const fileName = `logo-${createUUID}.${fileExt}`;
 
             const { data, error: uploadError } = await supabase.storage
-              .from("logoImage")
+              .from("logoimage")
               .upload(fileName, file);
 
             if (uploadError) {
