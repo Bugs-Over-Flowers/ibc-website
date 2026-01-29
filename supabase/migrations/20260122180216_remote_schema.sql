@@ -1,75 +1,39 @@
 alter table "public"."Application" drop constraint "Application_memberId_fkey";
-
 alter table "public"."EvaluationForm" drop constraint "EvaluationForm_eventId_fkey";
-
 alter table "public"."EvaluationForm" drop constraint "EvaluationForm_q1Rating_check";
-
 alter table "public"."EvaluationForm" drop constraint "EvaluationForm_q2Rating_check";
-
 alter table "public"."EvaluationForm" drop constraint "EvaluationForm_q3Rating_check";
-
 alter table "public"."EvaluationForm" drop constraint "EvaluationForm_q4Rating_check";
-
 alter table "public"."EvaluationForm" drop constraint "EvaluationForm_q5Rating_check";
-
 alter table "public"."BusinessMember" alter column "membershipStatus" drop default;
-
 alter type "public"."MembershipStatus" rename to "MembershipStatus__old_version_to_be_dropped";
-
 create type "public"."MembershipStatus" as enum ('paid', 'unpaid', 'cancelled');
-
 alter table "public"."BusinessMember" alter column "membershipStatus" type "public"."MembershipStatus" using "membershipStatus"::text::"public"."MembershipStatus";
-
 alter table "public"."BusinessMember" alter column "membershipStatus" set default 'paid'::public."MembershipStatus";
-
 drop type "public"."MembershipStatus__old_version_to_be_dropped";
-
 alter table "public"."Application" drop column "memberId";
-
 alter table "public"."Application" add column "businessMemberId" uuid;
-
 alter table "public"."BusinessMember" alter column "membershipStatus" set default 'paid'::public."MembershipStatus";
-
 alter table "public"."EvaluationForm" alter column "createdAt" set not null;
-
 alter table "public"."EvaluationForm" alter column "q1Rating" set not null;
-
 alter table "public"."EvaluationForm" alter column "q1Rating" set data type public."ratingScale" using "q1Rating"::text::public."ratingScale";
-
 alter table "public"."EvaluationForm" alter column "q2Rating" set not null;
-
 alter table "public"."EvaluationForm" alter column "q2Rating" set data type public."ratingScale" using "q2Rating"::text::public."ratingScale";
-
 alter table "public"."EvaluationForm" alter column "q3Rating" set not null;
-
 alter table "public"."EvaluationForm" alter column "q3Rating" set data type public."ratingScale" using "q3Rating"::text::public."ratingScale";
-
 alter table "public"."EvaluationForm" alter column "q4Rating" set not null;
-
 alter table "public"."EvaluationForm" alter column "q4Rating" set data type public."ratingScale" using "q4Rating"::text::public."ratingScale";
-
 alter table "public"."EvaluationForm" alter column "q5Rating" set not null;
-
 alter table "public"."EvaluationForm" alter column "q5Rating" set data type public."ratingScale" using "q5Rating"::text::public."ratingScale";
-
 alter table "public"."EvaluationForm" alter column "q6Rating" set not null;
-
 alter table "public"."EvaluationForm" alter column "q6Rating" set data type public."ratingScale" using "q6Rating"::text::public."ratingScale";
-
 alter table "public"."Event" add column "availableSlots" bigint;
-
 alter table "public"."Registration" add column "numberOfParticipants" bigint;
-
 alter table "public"."Application" add constraint "Application_businessMemberId_fkey" FOREIGN KEY ("businessMemberId") REFERENCES public."BusinessMember"("businessMemberId") ON UPDATE CASCADE ON DELETE CASCADE not valid;
-
 alter table "public"."Application" validate constraint "Application_businessMemberId_fkey";
-
 alter table "public"."EvaluationForm" add constraint "evaluationform_eventid_fkey" FOREIGN KEY ("eventId") REFERENCES public."Event"("eventId") ON DELETE CASCADE not valid;
-
 alter table "public"."EvaluationForm" validate constraint "evaluationform_eventid_fkey";
-
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.delete_evaluation(eval_id uuid)
  RETURNS TABLE(success boolean, message text)
  LANGUAGE plpgsql
@@ -88,9 +52,7 @@ begin
     return query select true, 'Evaluation deleted successfully'::text;
   end if;
 end;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_all_evaluations()
  RETURNS TABLE(evaluation_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, venue text, name text, q1_rating public."ratingScale", q2_rating public."ratingScale", q3_rating public."ratingScale", q4_rating public."ratingScale", q5_rating public."ratingScale", q6_rating public."ratingScale", additional_comments text, feedback text, created_at timestamp with time zone)
  LANGUAGE sql
@@ -118,9 +80,7 @@ AS $function$
     left join "Event" e on ef."eventId" = e."eventId"
   order by
     ef."createdAt" desc;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_evaluation_by_id(eval_id uuid)
  RETURNS TABLE(evaluation_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, venue text, name text, q1_rating public."ratingScale", q2_rating public."ratingScale", q3_rating public."ratingScale", q4_rating public."ratingScale", q5_rating public."ratingScale", q6_rating public."ratingScale", additional_comments text, feedback text, created_at timestamp with time zone)
  LANGUAGE sql
@@ -148,9 +108,7 @@ AS $function$
     left join "Event" e on ef."eventId" = e."eventId"
   where
     ef."evaluationId" = eval_id;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.submit_evaluation_form(p_event_id uuid, p_name text, p_q1_rating public."ratingScale", p_q2_rating public."ratingScale", p_q3_rating public."ratingScale", p_q4_rating public."ratingScale", p_q5_rating public."ratingScale", p_q6_rating public."ratingScale", p_additional_comments text DEFAULT NULL::text, p_feedback text DEFAULT NULL::text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -206,9 +164,7 @@ EXCEPTION
   WHEN OTHERS THEN
     RAISE EXCEPTION 'Evaluation submission failed: %', SQLERRM;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.update_participant_count_trigger()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -232,9 +188,7 @@ BEGIN
     END IF;
     RETURN NULL;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.check_membership_expiry()
  RETURNS void
  LANGUAGE plpgsql
@@ -263,9 +217,7 @@ BEGIN
     WHERE "membershipExpiryDate" < NOW()
     AND "membershipStatus" = 'paid';
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.set_membership_expiry()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -277,9 +229,7 @@ AS $function$BEGIN
         NEW."membershipStatus" = 'paid'::"MembershipStatus";
     END IF;
     RETURN NEW;
-END;$function$
-;
-
+END;$function$;
 CREATE OR REPLACE FUNCTION public.submit_event_registration(p_event_id uuid, p_member_type text, p_identifier text, p_business_member_id uuid DEFAULT NULL::uuid, p_non_member_name text DEFAULT NULL::text, p_payment_method text DEFAULT 'onsite'::text, p_payment_path text DEFAULT NULL::text, p_registrant jsonb DEFAULT '{}'::jsonb, p_other_participants jsonb DEFAULT '[]'::jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -379,9 +329,7 @@ BEGIN
     'message', 'Registration created successfully'
   );
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.update_primary_application_for_member()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -405,34 +353,23 @@ BEGIN
   
   RETURN COALESCE(NEW, OLD);
 END;
-$function$
-;
-
-
-  create policy "Allow all inserts"
+$function$;
+create policy "Allow all inserts"
   on "public"."EvaluationForm"
   as permissive
   for insert
   to public
 with check (true);
-
-
-
-  create policy "Allow get for all users"
+create policy "Allow get for all users"
   on "public"."EvaluationForm"
   as permissive
   for select
   to public
 using (true);
-
-
-
-  create policy "Delete evaluation"
+create policy "Delete evaluation"
   on "public"."EvaluationForm"
   as permissive
   for delete
   to authenticated
 using (true);
-
-
 CREATE TRIGGER tr_update_participant_count AFTER INSERT OR DELETE OR UPDATE ON public."Participant" FOR EACH ROW EXECUTE FUNCTION public.update_participant_count_trigger();

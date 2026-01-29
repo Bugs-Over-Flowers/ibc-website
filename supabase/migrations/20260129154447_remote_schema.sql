@@ -1,7 +1,5 @@
 alter table "public"."Application" alter column "identifier" set not null;
-
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.check_member_exists(p_identifier text, p_application_type text DEFAULT 'renewal'::text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -51,9 +49,7 @@ EXCEPTION
   WHEN OTHERS THEN
     RETURN jsonb_build_object('exists', false, 'message', 'Unable to validate member ID at this time');
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.check_member_exists(p_identifier text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -90,9 +86,7 @@ EXCEPTION
   WHEN OTHERS THEN
     RETURN jsonb_build_object('exists', false, 'message', 'Unable to validate member ID at this time');
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.generate_member_identifier()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -103,9 +97,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.update_event_available_slots_trigger()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -147,19 +139,10 @@ BEGIN
         RETURN NEW;
     END IF;
 END;
-$function$
-;
-
+$function$;
 drop policy "Allow admins to to operations m7tc2d_0" on "storage"."objects";
-
 drop policy "Allow admins to to operations m7tc2d_1" on "storage"."objects";
-
 drop policy "Allow admins to to operations m7tc2d_2" on "storage"."objects";
-
 drop policy "Allow admins to to operations m7tc2d_3" on "storage"."objects";
-
 drop policy "Allow anyone to delete m7tc2d_0" on "storage"."objects";
-
 drop policy "Allow anyone to insert m7tc2d_0" on "storage"."objects";
-
-

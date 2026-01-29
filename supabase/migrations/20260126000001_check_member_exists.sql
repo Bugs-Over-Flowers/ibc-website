@@ -44,7 +44,6 @@ EXCEPTION
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- Add comment for documentation
 COMMENT ON FUNCTION check_member_exists IS 
 'Validates if a business member ID exists and is active. Returns member existence status and basic info for confirmation.
