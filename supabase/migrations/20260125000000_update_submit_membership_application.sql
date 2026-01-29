@@ -170,7 +170,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Add comment for documentation
-COMMENT ON FUNCTION submit_membership_application IS 
+COMMENT ON FUNCTION submit_membership_application(
+ text,   
+jsonb,       
+ jsonb,      
+text,        
+ text, 
+text
+) IS 
 'Submits a membership application for new members, renewals, or information updates.
 - newMember: New membership application (no businessMemberId required)
 - renewal: Membership renewal (requires businessMemberId from existing member)
