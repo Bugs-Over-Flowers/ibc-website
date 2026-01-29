@@ -72,8 +72,6 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       const { error } = await tryCatch(submitEvaluationForm(value));
 
       if (error) {
-        const _message =
-          typeof error === "string" ? error : "Failed to submit form";
         toast.error("Failed to submit feedback. Please try again.");
         return undefined;
       }
