@@ -6,10 +6,7 @@ import { getEventStatus } from "./helpers";
 
 export async function deleteEvents(eventId: string) {
   try {
-    console.log("[deleteEvents] Starting delete for eventId:", eventId);
-
     const supabase = await createActionClient();
-    console.log("[deleteEvents] Supabase client created");
 
     const { data: event, error: selectError } = await supabase
       .from("Event")
@@ -17,48 +14,61 @@ export async function deleteEvents(eventId: string) {
       .eq("eventId", eventId)
       .single();
 
-    console.log("[deleteEvents] Event fetch result:", { event, selectError });
-
     if (selectError) {
-      console.error("[deleteEvents] Error fetching event:", selectError);
       throw new Error(`Event not found: ${selectError.message}`);
     }
-
     if (!event) {
       throw new Error("Event not found");
     }
 
     const status = getEventStatus(event);
-    console.log("[deleteEvents] Event status:", status);
-
     if (status !== "draft") {
       throw new Error("Only draft events can be deleted");
     }
 
-    console.log("[deleteEvents] Attempting to delete event...");
+    // Delete associated header image from Supabase Storage
+    if (
+      event.eventHeaderUrl?.includes(
+        "/storage/v1/object/public/headerImage/event-headers/",
+      )
+    ) {
+      try {
+        // Extract the file path from the URL
+        const match = event.eventHeaderUrl?.match(
+          /headerImage\/event-headers\/(.+)$/,
+        );
+        if (match?.[1]) {
+          const filePath = `event-headers/${match[1]}`;
+          const { error: storageError } = await supabase.storage
+            .from("headerImage")
+            .remove([filePath]);
+          if (storageError) {
+            // Log but do not block event deletion
+            console.error(
+              "Failed to delete header image:",
+              storageError.message,
+            );
+          }
+        }
+      } catch (storageErr) {
+        // Log but do not block event deletion
+        console.error("Error deleting header image:", storageErr);
+      }
+    }
+
+    // Delete the event
     const { error: deleteError } = await supabase
       .from("Event")
       .delete()
       .eq("eventId", eventId);
-
     if (deleteError) {
-      console.error("[deleteEvents] Supabase delete error:", deleteError);
       throw new Error(deleteError.message || "Failed to delete event");
     }
 
-    console.log("[deleteEvents] Delete successful, revalidating path...");
-    try {
-      revalidatePath("/admin/events");
-      console.log("[deleteEvents] Path revalidated");
-    } catch (e) {
-      console.error("[deleteEvents] revalidatePath failed:", e);
-    }
-
-    console.log("[deleteEvents] Returning success");
+    revalidatePath("/admin/events");
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("[deleteEvents] Caught error:", message);
     throw new Error(message);
   }
 }
