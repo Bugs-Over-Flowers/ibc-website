@@ -10,8 +10,6 @@
     "docker:devb": "docker compose up ibc-dev --build",
     "docker:prod": "docker compose up ibc-prod",
     "docker:prodb": "docker compose up ibc-prod --build",
-    "docker:build": "docker build -t ibc_project .",
-    "docker:run": "docker run -p 3000:3000 ibc_project",
     "start": "bun .next/standalone/server.js",
     "biome:check": "biome check",
     "biome:write": "biome check --write",
