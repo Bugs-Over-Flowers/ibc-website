@@ -62,6 +62,12 @@ vitest tests/example.test.ts # Run specific test file directly
 
 # Email Development
 bun run email:dev            # Email template preview server (port 3050)
+
+# Docker
+bun run docker:dev           # Start development container
+bun run docker:devb          # Build & start development container
+bun run docker:prod          # Start production container
+bun run docker:prodb         # Build & start production container
 ```
 
 ## Project Structure

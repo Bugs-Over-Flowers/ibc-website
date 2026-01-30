@@ -65,7 +65,7 @@ export const useCreateEventForm = () => {
 
         const supabase = await createClient();
         const { error: uploadError } = await supabase.storage
-          .from("headerImage")
+          .from("headerimage")
           .upload(filePath, file);
 
         if (uploadError) {
@@ -75,7 +75,7 @@ export const useCreateEventForm = () => {
 
         const {
           data: { publicUrl: url },
-        } = supabase.storage.from("headerImage").getPublicUrl(filePath);
+        } = supabase.storage.from("headerimage").getPublicUrl(filePath);
         publicUrl = url;
       }
 

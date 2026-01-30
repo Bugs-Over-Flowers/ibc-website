@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
 import { ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -85,7 +85,7 @@ export default function AttendanceModal({
                 variant={"outline"}
               >
                 <div className="text-lg">{day.label}</div>
-                <div>{formatDate(day.eventDate, "EEEE, MMMM do, yyyy")}</div>
+                <div>{format(day.eventDate, "EEEE, MMMM do, yyyy")}</div>
               </Button>
             ))}
           </ul>

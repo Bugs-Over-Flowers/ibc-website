@@ -5,12 +5,11 @@ import { AboutHero } from "./_components/AboutHero";
 import AboutStory from "./_components/AboutStory";
 import { AboutThrusts } from "./_components/AboutThrusts";
 import { AboutVisionMission } from "./_components/AboutVisionMission";
-import Loading from "./loading";
 
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-background">
-      <Suspense fallback={<Loading />}>
+      <Suspense>
         <AboutHero />
         <AboutStory />
         <AboutVisionMission />
