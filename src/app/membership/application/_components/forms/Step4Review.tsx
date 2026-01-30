@@ -357,7 +357,7 @@ export function Step4Review({ form, applicationData }: StepProps) {
                                 "image/jpg": [".jpg"],
                               }}
                               maxFiles={1}
-                              maxSize={10 * 1024 * 1024}
+                              maxSize={5 * 1024 * 1024}
                               onDrop={(acceptedFiles) => {
                                 if (acceptedFiles.length > 0) {
                                   field.handleChange(acceptedFiles[0]);
