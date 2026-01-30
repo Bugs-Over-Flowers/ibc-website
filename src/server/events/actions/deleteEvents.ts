@@ -32,19 +32,27 @@ export async function deleteEvents(eventId: string) {
         "/storage/v1/object/public/headerImage/event-headers/",
       )
     ) {
-      // Extract the file path from the URL
-      const match = event.eventHeaderUrl.match(
-        /headerImage\/event-headers\/(.+)$/,
-      );
-      if (match?.[1]) {
-        const filePath = `event-headers/${match[1]}`;
-        const { error: storageError } = await supabase.storage
-          .from("headerImage")
-          .remove([filePath]);
-        if (storageError) {
-          // Log but do not block event deletion
-          console.error("Failed to delete header image:", storageError.message);
+      try {
+        // Extract the file path from the URL
+        const match = event.eventHeaderUrl?.match(
+          /headerImage\/event-headers\/(.+)$/,
+        );
+        if (match?.[1]) {
+          const filePath = `event-headers/${match[1]}`;
+          const { error: storageError } = await supabase.storage
+            .from("headerImage")
+            .remove([filePath]);
+          if (storageError) {
+            // Log but do not block event deletion
+            console.error(
+              "Failed to delete header image:",
+              storageError.message,
+            );
+          }
         }
+      } catch (storageErr) {
+        // Log but do not block event deletion
+        console.error("Error deleting header image:", storageErr);
       }
     }
 
@@ -57,6 +65,7 @@ export async function deleteEvents(eventId: string) {
       throw new Error(deleteError.message || "Failed to delete event");
     }
 
+    revalidatePath("/admin/events");
     revalidatePath("/admin/events");
     return { success: true };
   } catch (err) {
