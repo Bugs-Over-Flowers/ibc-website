@@ -11,7 +11,6 @@
     "docker:prod": "docker compose up ibc-prod",
     "docker:prodb": "docker compose up ibc-prod --build",
     "start": "bun run --bun next start",
-    "start:standalone": "bun .next/standalone/server.js",
     "biome:check": "biome check",
     "biome:write": "biome check --write",
     "email:dev": "email dev --dir ./src/lib/resend/templates --port 3050",
