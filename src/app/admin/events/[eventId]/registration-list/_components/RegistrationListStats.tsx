@@ -1,10 +1,10 @@
 import { cookies } from "next/headers";
+import { Card, CardContent } from "@/components/ui/card";
 import tryCatch from "@/lib/server/tryCatch";
+import type { RegistrationListPageProps } from "@/lib/types/route";
 import { getRegistrationListStats } from "@/server/registration/queries/getRegistrationListStats";
 import RegistrationStatsComponent from "./RegistrationStatsComponent";
 
-type RegistrationListPageProps =
-  PageProps<"/admin/events/[eventId]/registration-list">;
 export default async function RegistrationListStats({
   params,
 }: {
@@ -13,15 +13,26 @@ export default async function RegistrationListStats({
   const { eventId } = await params;
 
   const cookieStore = await cookies();
-  const registrationList = await tryCatch(
+  const registrationListStats = await tryCatch(
     getRegistrationListStats(cookieStore.getAll(), {
       eventId,
     }),
   );
 
-  if (!registrationList.success) {
-    return <div>Error: {registrationList.error}</div>;
+  if (!registrationListStats.success) {
+    return (
+      <Card>
+        <CardContent>
+          <p className="text-destructive">
+            Unable to load registration status. Please try refreshing the page.
+          </p>
+          <p className="text-muted-foreground text-sm">
+            {registrationListStats.error}
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
-  return <RegistrationStatsComponent {...registrationList.data} />;
+  return <RegistrationStatsComponent {...registrationListStats.data} />;
 }

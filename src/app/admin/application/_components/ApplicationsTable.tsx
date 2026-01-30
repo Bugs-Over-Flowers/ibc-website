@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { getApplications } from "@/server/applications/queries/getApplications";
-import { useSelectedApplications } from "../_context/SelectedApplicationsContext";
+import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { ApplicationsTableRow } from "./ApplicationsTableRow";
 
 interface ApplicationsTableProps {
@@ -32,7 +32,7 @@ export function ApplicationsTable({
   status,
 }: ApplicationsTableProps) {
   const { selectAll, clearSelection, selectedApplicationIds } =
-    useSelectedApplications();
+    useSelectedApplicationsStore();
 
   const allSelected =
     applications.length > 0 &&

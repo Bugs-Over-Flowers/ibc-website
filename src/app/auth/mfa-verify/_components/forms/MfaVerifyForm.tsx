@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,21 +12,43 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { useAction } from "@/hooks/useAction";
-import { loginVerifyMfa } from "@/server/auth/mutations/mfa";
+import { loginVerifyMfa } from "@/server/auth/actions/mfa";
 
 export function MfaVerifyForm() {
   const router = useRouter();
   const [code, setCode] = useState("");
+  const [mounted, setMounted] = useState(false);
+  const otpRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Force remount on navigation
+    setMounted(true);
+    setCode("");
+    const timer = setTimeout(() => {
+      otpRef.current?.focus();
+    }, 300);
+    return () => {
+      clearTimeout(timer);
+      setMounted(false);
+    };
+  }, []);
 
   const { execute, isPending } = useAction(loginVerifyMfa, {
     onSuccess: () => {
+      setCode("");
       toast.success("Logged in successfully");
-      router.push("/admin/dashboard");
+      router.push("/admin");
     },
     onError: (error) => {
+      setCode("");
       const errorMessage = error instanceof Error ? error.message : error;
       toast.error(errorMessage);
       if (
@@ -54,19 +76,49 @@ export function MfaVerifyForm() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="code">Verification Code</Label>
-          <Input
-            id="code"
-            maxLength={6}
-            onChange={(e) => setCode(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleVerify();
-              }
-            }}
-            placeholder="Enter 6-digit code"
-            value={code}
-          />
+          <Label className="block text-center" htmlFor="code">
+            Verification Code
+          </Label>
+          {mounted && (
+            <InputOTP
+              id="code"
+              maxLength={6}
+              onChange={(value) => setCode(value)}
+              onComplete={handleVerify}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleVerify();
+              }}
+              ref={otpRef}
+              value={code}
+            >
+              <InputOTPGroup className="gap-1 sm:gap-2">
+                <InputOTPSlot
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
+                  index={0}
+                />
+                <InputOTPSlot
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
+                  index={1}
+                />
+                <InputOTPSlot
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
+                  index={2}
+                />
+                <InputOTPSlot
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
+                  index={3}
+                />
+                <InputOTPSlot
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
+                  index={4}
+                />
+                <InputOTPSlot
+                  className="size-10 rounded-md border font-semibold text-base sm:size-12 sm:text-lg"
+                  index={5}
+                />
+              </InputOTPGroup>
+            </InputOTP>
+          )}
         </div>
       </CardContent>
       <CardFooter>
@@ -75,7 +127,14 @@ export function MfaVerifyForm() {
           disabled={isPending || !code}
           onClick={handleVerify}
         >
-          {isPending ? "Verifying..." : "Verify"}
+          {isPending ? (
+            <>
+              <Spinner className="size-4" />
+              Verifying...
+            </>
+          ) : (
+            "Verify"
+          )}
         </Button>
       </CardFooter>
     </Card>

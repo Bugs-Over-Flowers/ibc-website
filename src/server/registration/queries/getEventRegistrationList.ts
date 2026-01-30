@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   type RegistrationItem,
   RegistrationListRPCSchema,
-} from "@/lib/validation/registration/registration-list";
+} from "@/lib/validation/registration-management";
 import { PaymentStatusEnum } from "@/lib/validation/utils";
 
 interface GetRegistrationListParams {

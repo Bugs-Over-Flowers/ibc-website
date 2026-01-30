@@ -11,6 +11,7 @@ interface TextFieldProps {
   placeholder?: string;
   type?: React.HTMLInputTypeAttribute;
   disabled?: boolean;
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
 }
 
 function TextField({
@@ -20,6 +21,7 @@ function TextField({
   placeholder,
   type = "text",
   disabled,
+  onKeyDown,
 }: TextFieldProps) {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -36,6 +38,7 @@ function TextField({
         name={field.name}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         type={type}
         value={field.state.value ?? ""}

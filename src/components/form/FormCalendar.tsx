@@ -79,22 +79,25 @@ export default function FormCalendar({
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
 
       <Popover onOpenChange={setIsOpen} open={isOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !field.state.value && "text-muted-foreground",
-            )}
-            variant={"outline"}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {field.state.value ? (
-              format(field.state.value, "PPP HH:mm")
-            ) : (
-              <span>Pick a date</span>
-            )}
-          </Button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <Button
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !field.state.value && "text-muted-foreground",
+              )}
+              variant={"outline"}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {field.state.value ? (
+                format(field.state.value, "PPP HH:mm")
+              ) : (
+                <span>Pick a date</span>
+              )}
+            </Button>
+          }
+        />
+
         <PopoverContent align="start" className="w-auto p-0">
           <div className="space-y-4 rounded-md border bg-background p-4">
             <Calendar

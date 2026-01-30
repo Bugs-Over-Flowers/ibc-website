@@ -2,14 +2,47 @@
 
 Next.js 15 + React 19 website for the Iloilo Business Club. Uses Turbopack, Tailwind CSS v4, shadcn/ui, Supabase backend, and bun.
 
+## Commit Message Convention
+
+All commit messages must follow this format: `<type>: <description>`
+
+**Commit Types:**
+
+- `feat:` new feature
+- `fix:` bug fix
+- `docs:` documentation updates
+- `style:` formatting (no code change)
+- `refactor:` code restructure (no feature/bug fix)
+- `test:` add/modify tests
+- `chore:` maintenance tasks
+- `build:` build system changes
+- `perf:` performance improvement
+
+**Examples:**
+
+- `feat: add user authentication`
+- `fix: resolve infinite loop in data fetching`
+- `docs: update API documentation`
+- `refactor: extract validation logic to utility`
+
 ## Quick Reference
 
 ```bash
 bun run dev          # Dev server (Turbopack)
 bun run build        # Production build
 bun run check-code   # Biome lint + format
-bun run cy:open      # Cypress interactive
-bun run gen:types    # Generate Supabase types
+supabase start       # Start local Supabase
+supabase db reset    # Reset local DB & run migrations
+bun run test:local   # Run tests with local Supabase
+bun run test:all     # Run all tests
+bun run db:gen:types # Generate local types
+bun run gen:types    # Generate production types
+
+# Docker
+bun run docker:dev   # Start development container
+bun run docker:devb  # Build & start development container
+bun run docker:prod  # Start production container
+bun run docker:prodb # Build & start production container
 ```
 
 ## Architecture Overview
@@ -22,7 +55,7 @@ src/
 │   ├── layout.tsx      # Root layout with Toaster
 │   └── globals.css     # Tailwind v4 + oklch design tokens
 ├── components/
-│   ├── ui/             # shadcn/ui primitives (Radix-based)
+│   ├── ui/             # shadcn/ui primitives (Base-ui-based)
 │   └── form/           # TanStack Form field wrappers
 ├── hooks/
 │   ├── _formHooks.ts   # TanStack Form context setup
@@ -79,7 +112,7 @@ Server logic placement:
 ### Components
 
 - Server Components by default; add `"use client"` only when needed
-- shadcn/ui components use `data-slot` attributes and Radix primitives
+- shadcn/ui components use `data-slot` attributes and Base-ui primitives
 - Add UI components: `bunx --bun shadcn@latest add <component>`
 
 ---
@@ -478,14 +511,14 @@ const { data, error } = await supabase.from("table").select("*");
 
 ### Generated Types
 
-Database types are in `@/lib/supabase/db.types.ts`. Regenerate with:
+Database types are in `@/lib/supabase/db.types.ts`.
 
+**For Local Development (after migrations):**
 ```bash
-npx supabase gen types typescript --project-id <id> > src/lib/supabase/db.types.ts
+bun run db:gen:types
 ```
 
-or
-
+**For Production (before deployment):**
 ```bash
 bun run gen:types
 ```

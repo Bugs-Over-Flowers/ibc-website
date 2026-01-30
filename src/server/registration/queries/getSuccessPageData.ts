@@ -2,7 +2,7 @@ import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
-import { RegistrationIdentifier } from "@/lib/validation/qr/standard";
+import { RegistrationIdentifier } from "@/lib/validation/utils";
 
 export const getSuccessPageData = async (
   requestCookies: RequestCookie[],

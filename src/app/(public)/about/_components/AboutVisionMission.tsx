@@ -48,7 +48,7 @@ const VisionMissionCard = ({
   title,
   description,
 }: VisionMissionCardProps) => (
-  <Card className="group relative h-full overflow-hidden border-0 bg-white/70 ring-1 ring-white/50 drop-shadow-xl backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+  <Card className="group relative h-full overflow-hidden border-0 bg-card/95 ring-1 ring-border/50 drop-shadow-xl backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
     <div className="absolute top-0 right-0 left-0 h-1 bg-primary" />
     <CardContent className="p-8">
       <div className="mb-8 flex items-center gap-6">

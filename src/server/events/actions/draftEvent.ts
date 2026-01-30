@@ -32,9 +32,9 @@ export const draftEvent: ServerFunction<
       eventTitle: data.eventTitle,
       description: data.description,
       eventStartDate: data.eventStartDate.toISOString(),
-      eventEndDate: data.eventEndDate.toISOString(),
+      eventEndDate: data.eventEndDate?.toISOString(),
       venue: data.venue,
-      registrationFee: data.registrationFee,
+      registrationFee: data.registrationFee ?? 0,
       eventType: null, // Force eventType to null for drafts
       eventHeaderUrl: data.eventImage,
     })
@@ -49,6 +49,6 @@ export const draftEvent: ServerFunction<
     };
   }
 
-  revalidatePath("/admin/dashboard");
+  revalidatePath("/admin");
   return { success: true, data: { eventId: eventData.eventId }, error: null };
 };

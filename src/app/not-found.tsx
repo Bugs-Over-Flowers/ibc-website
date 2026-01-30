@@ -16,9 +16,9 @@ export default function NotFound() {
           The page you are looking for does not exist or has been moved.
         </p>
       </div>
-      <Button asChild>
-        <Link href="/">Go back home</Link>
-      </Button>
+      <Link href="/">
+        <Button>Go back home</Button>
+      </Link>
     </div>
   );
 }

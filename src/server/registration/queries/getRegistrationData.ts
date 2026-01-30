@@ -82,7 +82,7 @@ export const getRegistrationData = async (
   let signedUrl: string | undefined;
   if (proofOfPayment?.path) {
     const { data: signedUrlData } = await supabase.storage
-      .from("paymentProofs")
+      .from("paymentproofs")
       .createSignedUrl(proofOfPayment.path.split(".")[0], 3600);
 
     signedUrl = signedUrlData?.signedUrl;

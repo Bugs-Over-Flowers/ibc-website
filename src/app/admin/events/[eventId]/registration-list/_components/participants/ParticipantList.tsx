@@ -1,11 +1,10 @@
 import { cookies } from "next/headers";
 import tryCatch from "@/lib/server/tryCatch";
+import type { RegistrationListPageProps } from "@/lib/types/route";
 import { parseStringParam } from "@/lib/utils";
 import { getEventParticipantList } from "@/server/registration/queries/getEventParticipantList";
 import ParticipantListTable from "./ParticipantListTable";
 
-type RegistrationListPageProps =
-  PageProps<"/admin/events/[eventId]/registration-list">;
 export default async function ParticipantList({
   params,
   searchParams,

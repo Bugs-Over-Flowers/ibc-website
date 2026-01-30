@@ -17,14 +17,11 @@ export function MembersHero() {
       >
         <Image
           alt="IBC Members Group Photo"
-          className="object-cover"
+          className="object-cover opacity-20"
           fill
           priority
           src="/images/backgrounds/bg-4.jpg"
         />
-        {/* New gradient overlay */}
-        <div className="absolute inset-0 bg-linear-to-br from-foreground/95 via-foreground/85 to-primary/40" />
-        {/* Existing blue overlay */}
       </motion.div>
 
       {/* Animated Blur Orbs */}
@@ -52,13 +49,13 @@ export function MembersHero() {
           variants={staggerContainer}
         >
           <motion.h1
-            className="mb-6 font-bold text-4xl text-white drop-shadow-lg md:text-5xl lg:text-6xl"
+            className="mb-6 font-bold text-4xl text-foreground drop-shadow-lg md:text-5xl lg:text-6xl"
             variants={fadeInUp}
           >
             IBC Members
           </motion.h1>
           <motion.p
-            className="text-lg text-white/90 leading-relaxed drop-shadow-md"
+            className="text-foreground/90 text-lg leading-relaxed"
             variants={fadeInUp}
           >
             Meet the Iloilo Business Club members, discover their stories, and

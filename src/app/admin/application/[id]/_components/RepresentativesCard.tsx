@@ -1,9 +1,11 @@
 import { Badge } from "@/components/ui/badge";
-import type { getApplicationById } from "@/server/applications/queries/getApplications";
+import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import { DetailRow } from "./DetailRow";
 
 interface RepresentativesCardProps {
-  members: Awaited<ReturnType<typeof getApplicationById>>["ApplicationMember"];
+  members: Awaited<
+    ReturnType<typeof getApplicationDetailsById>
+  >["ApplicationMember"];
 }
 
 export function RepresentativesCard({ members }: RepresentativesCardProps) {

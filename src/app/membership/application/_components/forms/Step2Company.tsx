@@ -1,5 +1,7 @@
+import { useStore } from "@tanstack/react-form";
 import { FileIcon, X } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { useMembershipStep2 } from "@/app/membership/application/_hooks/useMembershipStep2";
 import { Button } from "@/components/ui/button";
@@ -9,21 +11,32 @@ import {
   Dropzone,
   DropzoneEmptyState,
 } from "@/components/ui/shadcn-io/dropzone";
+import type { Sector } from "@/server/membership/queries/getSectors";
 
 interface StepProps {
   form: ReturnType<typeof useMembershipStep2>;
+  sectors: Sector[];
 }
 
-// Mock sectors - replace with DB fetch if available
-const sectors = [
-  { value: "1", label: "Technology" },
-  { value: "2", label: "Finance" },
-  { value: "3", label: "Manufacturing" },
-  { value: "4", label: "Retail" },
-  { value: "5", label: "Services" },
-];
+export function Step2Company({ form, sectors }: StepProps) {
+  const sectorOptions = sectors.map((sector) => ({
+    value: String(sector.sectorId),
+    label: sector.sectorName,
+  }));
 
-export function Step2Company({ form }: StepProps) {
+  const logoImage = useStore(form.store, (state) => state.values.logoImage);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (logoImage instanceof File) {
+      const url = URL.createObjectURL(logoImage);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreview(null);
+    }
+  }, [logoImage]);
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -47,7 +60,7 @@ export function Step2Company({ form }: StepProps) {
           {(field) => (
             <field.SelectField
               label="Industry/Sector"
-              options={sectors}
+              options={sectorOptions}
               placeholder="Select industry"
             />
           )}
@@ -86,13 +99,69 @@ export function Step2Company({ form }: StepProps) {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <form.AppField name="landline">
             {(field) => (
-              <field.TextField label="Landline" placeholder="(033) XXX-XXXX" />
+              <field.TextField
+                label="Landline"
+                onKeyDown={(e) => {
+                  // Allow: backspace, delete, tab, escape, enter, home, end, arrows
+                  if (
+                    [
+                      "Backspace",
+                      "Delete",
+                      "Tab",
+                      "Escape",
+                      "Enter",
+                      "Home",
+                      "End",
+                      "ArrowLeft",
+                      "ArrowRight",
+                    ].includes(e.key) ||
+                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    ((e.ctrlKey || e.metaKey) &&
+                      ["a", "c", "v", "x"].includes(e.key))
+                  ) {
+                    return;
+                  }
+                  // Block if not a number or allowed special characters
+                  if (!/[0-9()\-\s]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="(033) XXX-XXXX"
+              />
             )}
           </form.AppField>
 
           <form.AppField name="faxNumber">
             {(field) => (
-              <field.TextField label="Telefax" placeholder="XXXX-XXXX" />
+              <field.TextField
+                label="Telefax"
+                onKeyDown={(e) => {
+                  // Allow: backspace, delete, tab, escape, enter, home, end, arrows
+                  if (
+                    [
+                      "Backspace",
+                      "Delete",
+                      "Tab",
+                      "Escape",
+                      "Enter",
+                      "Home",
+                      "End",
+                      "ArrowLeft",
+                      "ArrowRight",
+                    ].includes(e.key) ||
+                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    ((e.ctrlKey || e.metaKey) &&
+                      ["a", "c", "v", "x"].includes(e.key))
+                  ) {
+                    return;
+                  }
+                  // Block if not a number or hyphen
+                  if (!/[0-9-]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="XXXX-XXXX"
+              />
             )}
           </form.AppField>
 
@@ -100,7 +169,32 @@ export function Step2Company({ form }: StepProps) {
             {(field) => (
               <field.TextField
                 label="Mobile Number"
-                placeholder="+63XXXXXXXXX"
+                onKeyDown={(e) => {
+                  // Allow: backspace, delete, tab, escape, enter, home, end, arrows
+                  if (
+                    [
+                      "Backspace",
+                      "Delete",
+                      "Tab",
+                      "Escape",
+                      "Enter",
+                      "Home",
+                      "End",
+                      "ArrowLeft",
+                      "ArrowRight",
+                    ].includes(e.key) ||
+                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    ((e.ctrlKey || e.metaKey) &&
+                      ["a", "c", "v", "x"].includes(e.key))
+                  ) {
+                    return;
+                  }
+                  // Block if not a number or plus sign
+                  if (!/[0-9+]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="09XXXXXXXXX"
               />
             )}
           </form.AppField>
@@ -114,9 +208,19 @@ export function Step2Company({ form }: StepProps) {
                   <Label>Company Logo *</Label>
                   <div className="rounded-lg border bg-background p-4">
                     {field.state.value ? (
-                      <div className="flex items-center justify-between rounded border bg-muted/20 p-2">
-                        <div className="flex items-center gap-2 overflow-hidden">
-                          <FileIcon className="h-4 w-4 shrink-0" />
+                      <div className="flex items-center justify-between rounded border bg-muted/20 p-3">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          {preview ? (
+                            <Image
+                              alt="Logo preview"
+                              className="h-16 w-16 rounded object-contain"
+                              height={64}
+                              src={preview}
+                              width={64}
+                            />
+                          ) : (
+                            <FileIcon className="h-4 w-4 shrink-0" />
+                          )}
                           <span className="max-w-[200px] truncate text-sm">
                             {field.state.value.name}
                           </span>

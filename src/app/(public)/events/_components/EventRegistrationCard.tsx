@@ -7,10 +7,8 @@ import {
   Copy,
   Facebook,
   Linkedin,
-  MessageSquare,
   Share2,
   Twitter,
-  Users,
 } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
@@ -49,7 +47,7 @@ export default function EventRegistrationCard({
     >
       <motion.div variants={fadeInUp}>
         <Card className="sticky top-24 rounded-2xl border-0 bg-card/80 shadow-lg ring-1 ring-border/50 backdrop-blur-xl">
-          <CardContent className="rounded-2xl p-6">
+          <CardContent className="rounded-2xl">
             <h3 className="mb-4 font-semibold text-foreground text-lg">
               Registration
             </h3>
@@ -67,34 +65,14 @@ export default function EventRegistrationCard({
               </span>
             </div>
 
-            {/* Available Slots */}
-            <div className="flex items-center justify-between border-border border-b py-3">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span className="text-sm">Available Slots</span>
-              </div>
-              <span className="font-medium text-primary">Open</span>
-            </div>
-
             {/* Action Buttons */}
             <div className="mt-6 space-y-3">
-              <Link href={`/registration/${eventId}/info` as Route}>
-                <Button
-                  className="h-12 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
-                  size="lg"
-                >
-                  Register for This Event
-                </Button>
-              </Link>
-
-              <Button
-                className="h-12 w-full rounded-2xl border-border bg-transparent text-foreground hover:bg-accent"
-                size="lg"
-                variant="outline"
+              <Link
+                className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                href={`/registration/${eventId}/info` as Route}
               >
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Submit Feedback
-              </Button>
+                Register for This Event
+              </Link>
             </div>
 
             {/* Share Section */}
@@ -111,27 +89,27 @@ export default function EventRegistrationCard({
                 ].map(({ icon: Icon, label }) => (
                   <Button
                     aria-label={`Share on ${label}`}
-                    className="flex-1 rounded-lg bg-muted p-2.5 transition-colors hover:bg-accent"
+                    className="flex-1 rounded-lg bg-primary/10 p-2.5 text-primary transition-colors hover:bg-primary/20 hover:text-primary"
                     key={label}
                     size="icon"
                     type="button"
-                    variant="ghost"
+                    variant="default"
                   >
-                    <Icon className="mx-auto h-4 w-4 text-foreground" />
+                    <Icon className="mx-auto h-4 w-4" />
                   </Button>
                 ))}
                 <Button
                   aria-label="Copy link"
-                  className="flex-1 rounded-lg bg-primary/10 p-2.5 transition-colors hover:bg-primary/20"
+                  className="flex-1 rounded-lg bg-primary/10 p-2.5 text-primary transition-colors hover:bg-primary/20 hover:text-primary"
                   onClick={handleCopyLink}
                   size="icon"
                   type="button"
                   variant="ghost"
                 >
                   {copied ? (
-                    <Check className="mx-auto h-4 w-4 text-primary" />
+                    <Check className="mx-auto h-4 w-4" />
                   ) : (
-                    <Copy className="mx-auto h-4 w-4 text-primary" />
+                    <Copy className="mx-auto h-4 w-4" />
                   )}
                 </Button>
               </div>

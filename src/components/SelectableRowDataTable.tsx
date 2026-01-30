@@ -91,11 +91,12 @@ export function SelectableRowDataTable<TData, TValue>({
                 <TableRow
                   data-state={row.getIsSelected() && "selected"}
                   key={row.id}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (customRowSelectHandler) {
                       customRowSelectHandler(row);
                     } else {
-                      row.getToggleSelectedHandler();
+                      row.getToggleSelectedHandler()(e);
                     }
                   }}
                 >

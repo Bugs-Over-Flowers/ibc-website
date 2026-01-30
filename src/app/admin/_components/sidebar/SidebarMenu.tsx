@@ -4,7 +4,7 @@ import {
   Calendar,
   FileText,
   LayoutDashboard,
-  UserCheck,
+  MessageSquareDiff,
   Users,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -23,11 +23,6 @@ const menuItems = [
     href: "/admin/events",
   },
   {
-    title: "Check-in",
-    icon: UserCheck,
-    href: "/admin/check-in",
-  },
-  {
     title: "Members",
     icon: Users,
     href: "/admin/members",
@@ -36,6 +31,11 @@ const menuItems = [
     title: "Application",
     icon: FileText,
     href: "/admin/application",
+  },
+  {
+    title: "Evaluations",
+    icon: MessageSquareDiff,
+    href: "/admin/evaluation",
   },
 ];
 

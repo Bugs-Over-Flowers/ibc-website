@@ -1,9 +1,11 @@
 import { ChevronRight, MoreHorizontal } from "lucide-react";
 import type { Route } from "next";
-import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -17,24 +19,28 @@ export default function ParticipantRowActions({
   registrationId,
 }: ParticipantRowActionsProps) {
   const { eventId } = useParams<{ eventId: string }>();
-  const router = useRouter();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
         <MoreHorizontal />
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem
-          onSelect={() =>
-            router.push(
-              `/admin/event/${eventId}/registration-list/registration/${registrationId}` as Route,
-            )
-          }
-        >
-          <ChevronRight />
-          View Registration Details
-        </DropdownMenuItem>
+      <DropdownMenuContent className={"w-46"}>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem
+            nativeButton={false}
+            render={
+              <Link
+                href={
+                  `/admin/events/${eventId}/registration-list/registration/${registrationId}` as Route
+                }
+              >
+                <ChevronRight />
+                Registration Details
+              </Link>
+            }
+          />
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

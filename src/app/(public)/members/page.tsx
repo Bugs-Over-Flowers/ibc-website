@@ -7,13 +7,13 @@ import MembersLoading from "./loading";
 
 export default function Page() {
   return (
-    <>
-      <MembersHero />
+    <main className="min-h-screen bg-background">
       <Suspense fallback={<MembersLoading />}>
+        <MembersHero />
         <MembersListSection />
+        <MembersBenefits />
+        <MembersCTA />
       </Suspense>
-      <MembersBenefits />
-      <MembersCTA />
-    </>
+    </main>
   );
 }

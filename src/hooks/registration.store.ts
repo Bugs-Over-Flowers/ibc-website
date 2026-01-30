@@ -31,7 +31,6 @@ const initialState: RegistrationStore = {
     step1: {
       member: "member",
       businessMemberId: "",
-      nonMemberName: "",
     },
     step2: {
       registrant: {

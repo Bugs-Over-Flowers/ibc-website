@@ -1,7 +1,7 @@
 import { cacheLife } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { createClient } from "@/lib/supabase/server";
-import { RegistrationListStatsSchema } from "@/lib/validation/registration/registration-list";
+import { RegistrationListStatsSchema } from "@/lib/validation/registration-management";
 
 export const getRegistrationListStats = async (
   requestCookies: RequestCookie[],

@@ -17,13 +17,11 @@ export function ContactHero() {
       >
         <Image
           alt="Contact Us Background"
-          className="object-cover"
+          className="object-cover opacity-20"
           fill
           priority
           src="/images/backgrounds/bg-3.jpg"
         />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-foreground/95 via-foreground/85 to-primary/40" />
       </motion.div>
 
       {/* Animated Blur Orbs */}
@@ -51,13 +49,13 @@ export function ContactHero() {
           variants={staggerContainer}
         >
           <motion.h1
-            className="mb-6 font-bold text-4xl text-white drop-shadow-lg md:text-5xl lg:text-6xl"
+            className="mb-6 font-bold text-4xl text-foreground drop-shadow-lg md:text-5xl lg:text-6xl"
             variants={fadeInUp}
           >
             Contact Us
           </motion.h1>
           <motion.p
-            className="text-lg text-white/90 leading-relaxed drop-shadow-md"
+            className="text-foreground/90 text-lg leading-relaxed"
             variants={fadeInUp}
           >
             Get in touch with the Iloilo Business Club. We're here to answer

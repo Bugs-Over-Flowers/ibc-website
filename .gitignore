@@ -12,6 +12,13 @@
 
 # testing
 /coverage
+__tests__/cypress-screenshots
+__tests__/cypress-videos
+
+# playwright
+/playwright-report/
+/test-results/
+/.playwright/
 
 # next.js
 /.next/
@@ -32,6 +39,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+!.env.testing
 
 # vercel
 .vercel
@@ -39,3 +48,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright
+node_modules/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

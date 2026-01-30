@@ -1,18 +1,98 @@
 # Supabase Client Rules
 
-## Server-Side: `createClient(requestCookies)`
-- **USE** in cached queries (`"use cache"`) or Server Components
-- **REQUIRES** passing `requestCookies` from `cookies().getAll()`
-- **CANNOT** set cookies (read-only)
-- **NEVER** use for mutations
+## Three Client Types
 
-## Server-Side: `createActionClient()`
-- **USE** in Server Actions (`"use server"`)
-- **CAN** set cookies (for auth token refresh)
-- **NEVER** use inside `"use cache"` functions
-- **NEVER** import in `"use client"` components
+There are **three** different Supabase clients with specific use cases:
 
-## Client-Side: `createClient()`
-- **USE** from `@/lib/supabase/client`
-- **ONLY** in Client Components, React Hooks, and client-side files
-- **NEVER** import in `"use server"` components
+### 1. Server-Side: `createClient(requestCookies)` - For Cached Queries
+
+**Import from:** `@/lib/supabase/server`
+
+- ✅ **USE** in cached queries (`"use cache"`) or Server Components
+- ✅ **REQUIRES** passing `requestCookies` from `cookies().getAll()`
+- ❌ **CANNOT** set cookies (read-only)
+- ❌ **NEVER** use for mutations
+
+**Example:**
+
+```typescript
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
+
+// In page.tsx
+const cookieStore = await cookies();
+const data = await getCachedData(cookieStore.getAll());
+
+// In query file with "use cache"
+export async function getCachedData(requestCookies: RequestCookie[]) {
+  "use cache";
+  const supabase = await createClient(requestCookies);
+  const { data, error } = await supabase.from("table").select("*");
+  // ...
+}
+```
+
+**Alternative (dynamic fetching):**
+
+```typescript
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
+
+export async function getDynamicData() {
+  const cookieStore = await cookies();
+  const supabase = await createClient(cookieStore.getAll());
+  const { data, error } = await supabase.from("table").select("*");
+  // ...
+}
+```
+
+### 2. Server-Side: `createActionClient()` - For Server Actions
+
+**Import from:** `@/lib/supabase/server`
+
+- ✅ **USE** in Server Actions (`"use server"`)
+- ✅ **CAN** set cookies (auth token refresh)
+- ❌ **NEVER** use inside `"use cache"` functions
+- ❌ **NEVER** import in `"use client"` components
+
+**Example:**
+
+```typescript
+import { createActionClient } from "@/lib/supabase/server";
+
+export async function updateItem(data: FormData) {
+  "use server";
+  const supabase = await createActionClient();
+  const { data, error } = await supabase
+    .from("table")
+    .update(data)
+    .eq("id", id);
+  // ...
+}
+```
+
+### 3. Client-Side: `createClient()` - For Client Components
+
+**Import from:** `@/lib/supabase/client`
+
+- ✅ **USE** in Client Components, React Hooks, and client-side files
+- ❌ **NEVER** import in `"use server"` functions
+
+**Example:**
+
+```typescript
+import { createClient } from "@/lib/supabase/client";
+
+const supabase = await createClient();
+const { data, error } = await supabase.from("table").select("*");
+```
+
+## Generated Types
+
+Database types are in `@/lib/supabase/db.types.ts`. Regenerate with:
+
+```bash
+bun run gen:types
+```
+
+All clients are typed with your `Database` types from `db.types.ts`.

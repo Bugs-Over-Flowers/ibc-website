@@ -1,9 +1,14 @@
 "use client";
 
 import { Filter, Search, SortAsc } from "lucide-react";
-import type { Route } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,62 +17,58 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEventFilters } from "../_hooks/useEventFilters";
 
 export default function EventFilters() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
+  const { updateSort, updateStatus, updateSearch, searchParams } =
+    useEventFilters();
+  const [searchValue, setSearchValue] = useState("");
+  const deferredSearch = useDeferredValue(searchValue);
+  const lastSearchRef = useRef<string | null>(null);
 
-  // Local state for search input to prevent laggy typing (TOOK ME 2HOURS TO FIX IT)
-  const [searchValue, setSearchValue] = useState(
-    searchParams.get("search") || "",
-  );
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const submitSearch = useCallback(() => {
+    updateSearch(searchValue.trim());
+  }, [searchValue, updateSearch]);
 
-  const updateFilters = useCallback(
-    (key: string, value: string | null) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value) params.set(key, value);
-      else params.delete(key);
-      router.push(`${pathname}?${params.toString()}` as Route);
-    },
-    [searchParams, pathname, router],
-  );
-
-  // Update local state when URL changes
+  // Auto-search using React's deferred value (avoids setTimeout)
+  // Only trigger when the deferred value actually changes from last search
   useEffect(() => {
-    setSearchValue(searchParams.get("search") || "");
-  }, [searchParams]);
+    const trimmed = deferredSearch.trim();
+    const currentUrlSearch = searchParams.get("search") || "";
 
-  // Handle search input change with debouncing (DEBOUNCING ANG TERM)
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setSearchValue(value);
+    // Skip if search hasn't changed from URL or last submitted value
+    if (trimmed === currentUrlSearch || trimmed === lastSearchRef.current) {
+      return;
+    }
 
-      // Clear previous timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      // Update URL with debouncing
-      timeoutRef.current = setTimeout(() => {
-        updateFilters("search", value || null);
-      }, 300);
+    lastSearchRef.current = trimmed;
+    updateSearch(trimmed);
+  }, [deferredSearch, searchParams, updateSearch]);
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      submitSearch();
     },
-    [updateFilters],
+    [submitSearch],
   );
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitSearch();
       }
-    };
-  }, []);
+    },
+    [submitSearch],
+  );
 
   return (
-    <div className="grid grid-cols-6 gap-3 md:gap-4">
-      <div className="relative col-span-4">
+    <form
+      className="grid grid-cols-2 gap-3 xl:grid-cols-12 xl:gap-4"
+      onSubmit={handleSubmit}
+    >
+      <div className="relative col-span-1 xl:col-span-7">
         <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-foreground" />
         <Input
           autoComplete="off"
@@ -75,24 +76,36 @@ export default function EventFilters() {
           data-form-type="other"
           data-lpignore="true"
           name="event-search"
-          onChange={handleSearchChange}
+          onChange={(e) => setSearchValue(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Search title or venue..."
           value={searchValue}
         />
       </div>
 
-      <div className="col-span-1">
+      <div className="col-span-1 flex items-stretch">
+        <Button
+          aria-label="Search"
+          className="w-full"
+          type="submit"
+          variant="default"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="col-span-2">
         <Select
-          onValueChange={(value) => updateFilters("sort", value)}
+          onValueChange={updateSort}
           value={searchParams.get("sort") || "date-asc"}
         >
           <SelectTrigger className="w-full border-border">
             <div className="flex items-center gap-2">
               <SortAsc size={16} />
-              <span className="hidden md:inline">
+              <span className="hidden xl:inline">
                 <SelectValue aria-label="Sort By Date" />
               </span>
-              <span className="md:hidden">Sort</span>
+              <span className="xl:hidden">Sort</span>
             </div>
           </SelectTrigger>
           <SelectContent className="w-auto">
@@ -104,20 +117,18 @@ export default function EventFilters() {
         </Select>
       </div>
 
-      <div className="col-span-1">
+      <div className="col-span-2">
         <Select
-          onValueChange={(value) =>
-            updateFilters("status", value === "all" ? "" : value)
-          }
+          onValueChange={updateStatus}
           value={searchParams.get("status") || "all"}
         >
           <SelectTrigger className="w-full border-border">
             <div className="flex items-center gap-2">
               <Filter size={16} />
-              <span className="hidden md:inline">
+              <span className="hidden xl:inline">
                 <SelectValue aria-label="Filter By Status" />
               </span>
-              <span className="md:hidden">Filter</span>
+              <span className="xl:hidden">Filter</span>
             </div>
           </SelectTrigger>
           <SelectContent>
@@ -128,6 +139,6 @@ export default function EventFilters() {
           </SelectContent>
         </Select>
       </div>
-    </div>
+    </form>
   );
 }

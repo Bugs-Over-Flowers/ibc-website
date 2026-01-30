@@ -1,7 +1,8 @@
 "use client";
 
+import type React from "react";
 import { useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -11,10 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from "@/components/ui/dialog";
 
 interface TermsAndConditionsProps {
-  triggerOverride?: React.ReactNode;
+  triggerOverride?: React.ReactElement;
   customAcceptButton?: (closeTermsAndConditions: () => void) => React.ReactNode;
 }
 
@@ -28,9 +29,10 @@ export default function TermsAndConditions({
 
   return (
     <Dialog onOpenChange={(isOpen) => setIsOpen(isOpen)} open={isOpen}>
-      <DialogTrigger asChild={triggerOverride !== undefined}>
-        {triggerOverride || <>Terms and Conditions</>}
-      </DialogTrigger>
+      <DialogTrigger
+        render={triggerOverride || <Button>Terms and Conditions</Button>}
+      />
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Terms and Conditions</DialogTitle>
@@ -45,11 +47,14 @@ export default function TermsAndConditions({
           </p>
         </div>
         <DialogFooter className="space-x-3">
-          <DialogClose asChild>
-            <Button type="button" variant={"outline"}>
-              Close
-            </Button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Button type="button" variant={"outline"}>
+                Close
+              </Button>
+            }
+          />
+
           {customAcceptButton?.(handleClose)}
         </DialogFooter>
       </DialogContent>

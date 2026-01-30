@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
   cacheComponents: true,
   typedRoutes: true,
   reactCompiler: true,
@@ -35,7 +36,26 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "upload.wikimedia.org",
       },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "54321",
+        pathname: "/storage/v1/object/**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "54321",
+        pathname: "/storage/v1/object/**",
+      },
+      {
+        protocol: "http",
+        hostname: "host.docker.internal",
+        port: "54321",
+        pathname: "/storage/v1/object/**",
+      },
     ],
+    dangerouslyAllowLocalIP: true,
   },
 };
 

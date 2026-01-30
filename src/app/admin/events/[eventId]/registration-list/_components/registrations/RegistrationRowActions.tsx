@@ -2,7 +2,7 @@
 import { ChevronRight, MoreHorizontal, QrCodeIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -55,7 +55,7 @@ export default function RegistrationRowActions({
                     }
                   >
                     <ChevronRight />
-                    View Registration Details
+                    Registration Details
                   </Link>
                 }
               />

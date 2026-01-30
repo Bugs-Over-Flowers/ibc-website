@@ -30,23 +30,19 @@ export default async function FeaturedEventsSection() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div>
-              <span className="mb-4 inline-block rounded-lg bg-primary/10 px-4 py-1.5 font-medium text-primary text-sm">
-                Upcoming Events
-              </span>
               <h2 className="text-balance font-bold text-3xl text-foreground sm:text-4xl">
                 Don't Miss Out
               </h2>
             </div>
-            <Button
-              asChild
-              className="rounded-lg bg-transparent"
-              variant="outline"
-            >
-              <Link href="/events">
+            <Link href="/events">
+              <Button
+                className="rounded-xl border-border bg-transparent px-6 font-semibold transition-all hover:scale-[1.02] hover:border-primary/50 hover:bg-primary/5"
+                variant="outline"
+              >
                 View All Events
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
 
           <div className="py-12 text-center text-muted-foreground">
@@ -62,23 +58,19 @@ export default async function FeaturedEventsSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <div>
-            <span className="mb-4 inline-block rounded-lg bg-primary/10 px-4 py-1.5 font-medium text-primary text-sm">
-              Upcoming Events
-            </span>
             <h2 className="text-balance font-bold text-3xl text-foreground sm:text-4xl">
-              Don't Miss Out
+              Featured Events
             </h2>
           </div>
-          <Button
-            asChild
-            className="rounded-lg bg-transparent"
-            variant="outline"
-          >
-            <Link href="/events">
+          <Link href="/events">
+            <Button
+              className="rounded-xl border-border bg-transparent px-6 font-semibold transition-all hover:scale-[1.02] hover:border-primary/50 hover:bg-primary/5"
+              variant="outline"
+            >
               View All Events
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

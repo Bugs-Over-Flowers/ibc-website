@@ -1,5 +1,5 @@
-import CenterSpinner from "@/components/CenterSpinner";
+import AnimatedLogoLoader from "@/components/AnimatedLogoLoader";
 
 export default function Loading() {
-  return <CenterSpinner />;
+  return <AnimatedLogoLoader />;
 }

@@ -45,17 +45,17 @@ IBC's commitment is to promote the City and the Province of Iloilo as a tourist 
             viewport={{ once: true }}
             whileInView={{ opacity: 1, scale: 1 }}
           >
-            <div className="relative h-[400px] overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/20">
+            <div className="relative h-[400px] overflow-hidden rounded-3xl shadow-2xl ring-1 ring-border/30">
               <Image
                 alt="IBC Business Meeting"
                 className="object-cover"
                 fill
                 src="/images/backgrounds/bg-about.jpg"
               />
-              <div className="absolute inset-0 bg-linear-to-t from-[#2E2A6E]/50 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-chart-2/30 to-transparent" />
             </div>
             <motion.div
-              className="absolute -bottom-6 -left-6 rounded-2xl border border-white/50 bg-white/80 p-5 shadow-xl ring-1 ring-primary/10 backdrop-blur-xl"
+              className="absolute -bottom-6 -left-6 rounded-2xl border border-border/50 bg-card/95 p-5 shadow-xl ring-1 ring-primary/10 backdrop-blur-xl"
               initial={{ opacity: 0, x: -20 }}
               transition={{ delay: 0.5 }}
               viewport={{ once: true }}
@@ -65,7 +65,7 @@ IBC's commitment is to promote the City and the Province of Iloilo as a tourist 
               <p className="text-foreground/70 text-sm">Senior Executives</p>
             </motion.div>
             <motion.div
-              className="absolute -top-4 -right-4 rounded-2xl border border-white/50 bg-white/80 p-5 shadow-xl ring-1 ring-[#2E2A6E]/10 backdrop-blur-xl"
+              className="absolute -top-4 -right-4 rounded-2xl border border-border/50 bg-card/95 p-5 shadow-xl ring-1 ring-primary/10 backdrop-blur-xl"
               initial={{ opacity: 0, x: 20 }}
               transition={{ delay: 0.6 }}
               viewport={{ once: true }}

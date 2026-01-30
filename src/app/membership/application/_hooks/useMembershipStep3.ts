@@ -96,6 +96,35 @@ export const useMembershipStep3 = () => {
         }),
       );
 
+      // Update form with transformed values
+      representatives.forEach((rep, index) => {
+        const original = value.representatives[index];
+        if (rep.firstName !== original.firstName) {
+          form.setFieldValue(
+            `representatives[${index}].firstName`,
+            rep.firstName,
+          );
+        }
+        if (rep.lastName !== original.lastName) {
+          form.setFieldValue(
+            `representatives[${index}].lastName`,
+            rep.lastName,
+          );
+        }
+        if (rep.companyDesignation !== original.companyDesignation) {
+          form.setFieldValue(
+            `representatives[${index}].companyDesignation`,
+            rep.companyDesignation,
+          );
+        }
+        if (rep.nationality !== original.nationality) {
+          form.setFieldValue(
+            `representatives[${index}].nationality`,
+            rep.nationality,
+          );
+        }
+      });
+
       if (meta.nextStep) {
         setStep(4);
       }

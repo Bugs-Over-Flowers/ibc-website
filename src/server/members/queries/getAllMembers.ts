@@ -11,25 +11,12 @@ export const getAllMembers = cache(async (cookieStore: RequestCookie[]) => {
     .select(
       "businessMemberId, businessName, sectorId, logoImageURL, websiteURL",
     )
+    .neq("membershipStatus", "cancelled")
     .order("businessName")
     .throwOnError();
 
   if (!data) {
     throw new Error("Failed to fetch members");
-  }
-  return data;
-});
-
-export const getAllSectors = cache(async (cookieStore: RequestCookie[]) => {
-  const supabase = await createClient(cookieStore);
-  const { data } = await supabase
-    .from("Sector")
-    .select("sectorId, sectorName")
-    .order("sectorName")
-    .throwOnError();
-
-  if (!data) {
-    throw new Error("Failed to fetch sectors");
   }
   return data;
 });

@@ -9,9 +9,10 @@ export type ApplicationStatus =
   | "approved"
   | "rejected";
 
-export type MembershipStatus = "active" | "unpaid" | "overdue" | "revoked";
+export type MembershipStatus = "paid" | "unpaid" | "cancelled";
 
-export interface ApplicationWithMembers extends Application {
+export interface ApplicationWithMembers
+  extends Omit<Application, "logoImageURL"> {
   ApplicationMember: ApplicationMember[];
   Sector: {
     sectorId: number;
@@ -21,6 +22,7 @@ export interface ApplicationWithMembers extends Application {
     proofImageId: string;
     path: string;
   }[];
+  logoImageURL: string | null;
 }
 
 export interface ApplicationListItem {

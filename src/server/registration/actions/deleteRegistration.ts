@@ -30,7 +30,7 @@ export const deleteRegistration = async (registrationId: string) => {
   // Delete image file from storage
   if (paymentProof) {
     const { data: deletedImage } = await supabase.storage
-      .from("paymentProofs")
+      .from("paymentproofs")
       .remove([paymentProof.path.split(".")[0]]);
 
     console.log("deleted image: ", deletedImage);

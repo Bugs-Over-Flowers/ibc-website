@@ -17,7 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { RegistrationItem } from "@/lib/validation/registration/registration-list";
+import type { RegistrationItem } from "@/lib/validation/registration-management";
 import RegistrationRowActions from "./RegistrationRowActions";
 
 interface RegistrationListProps {

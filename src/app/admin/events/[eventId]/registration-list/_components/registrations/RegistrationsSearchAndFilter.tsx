@@ -1,6 +1,8 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useSearchForm } from "@/app/admin/events/[eventId]/registration-list/_hooks/useSearchForm";
+import useSetFilter from "@/app/admin/events/[eventId]/registration-list/_hooks/useSetFilter";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   InputGroup,
@@ -17,8 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSearchForm } from "../../_hooks/useSearchForm";
-import useSetFilter from "../../_hooks/useSetFilter";
 
 export default function RegistrationSearchAndFilter() {
   const form = useSearchForm({ scope: "registrations" });

@@ -45,7 +45,5 @@ async function RegistrationDetailsPage({
     );
   }
 
-  console.log(registration.signedUrl);
-
   return <RegistrationDetails data={registration} />;
 }

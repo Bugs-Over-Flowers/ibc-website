@@ -3,6 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import FacebookCTASection from "./_components/FacebookRedirect";
 import { FeaturedEventsHero } from "./_components/FeaturedEventsHero";
 import FeaturedEventsSection from "./_components/FeaturedEventsSection";
+import { FeaturesSection } from "./_components/FeaturesSection";
 import { MembershipCTA } from "./_components/MembershipCTA";
 
 function HeroSkeleton() {
@@ -15,6 +16,7 @@ export default function Page() {
       <Suspense fallback={<HeroSkeleton />}>
         <FeaturedEventsHero />
       </Suspense>
+      <FeaturesSection />
       <Suspense fallback={null}>
         <FeaturedEventsSection />
       </Suspense>

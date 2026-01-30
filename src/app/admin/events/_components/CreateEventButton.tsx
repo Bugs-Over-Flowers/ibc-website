@@ -1,9 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 export default function CreateEventButton() {
+  const router = useRouter();
+
   const handleCreateEvent = () => {
-    console.log("Create event clicked");
-    // TODO: Implement create event navigation/functionality
+    router.push("/admin/create-event");
   };
 
   return (
