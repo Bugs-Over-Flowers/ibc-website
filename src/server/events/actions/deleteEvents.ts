@@ -32,27 +32,19 @@ export async function deleteEvents(eventId: string) {
         "/storage/v1/object/public/headerImage/event-headers/",
       )
     ) {
-      try {
-        // Extract the file path from the URL
-        const match = event.eventHeaderUrl?.match(
-          /headerImage\/event-headers\/(.+)$/,
-        );
-        if (match?.[1]) {
-          const filePath = `event-headers/${match[1]}`;
-          const { error: storageError } = await supabase.storage
-            .from("headerImage")
-            .remove([filePath]);
-          if (storageError) {
-            // Log but do not block event deletion
-            console.error(
-              "Failed to delete header image:",
-              storageError.message,
-            );
-          }
+      // Extract the file path from the URL
+      const match = event.eventHeaderUrl.match(
+        /headerImage\/event-headers\/(.+)$/,
+      );
+      if (match?.[1]) {
+        const filePath = `event-headers/${match[1]}`;
+        const { error: storageError } = await supabase.storage
+          .from("headerImage")
+          .remove([filePath]);
+        if (storageError) {
+          // Log but do not block event deletion
+          console.error("Failed to delete header image:", storageError.message);
         }
-      } catch (storageErr) {
-        // Log but do not block event deletion
-        console.error("Error deleting header image:", storageErr);
       }
     }
 
