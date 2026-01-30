@@ -2,6 +2,9 @@ services:
   # Development service - for local development with hot reload
   ibc-dev:
     container_name: ibc-dev
+  # Development service - for local development with hot reload
+  ibc-dev:
+    container_name: ibc-dev
     build:
       context: .
       dockerfile: Dockerfile
@@ -15,6 +18,7 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
+      - /app/.next
       - /app/.next
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -33,6 +37,9 @@ services:
       context: .
       dockerfile: Dockerfile
       target: prod
+      args:
+        - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
     ports:
       - "3000:3000"
     env_file:

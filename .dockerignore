@@ -1,5 +1,8 @@
 # Dependencies
+# Dependencies
 node_modules
+
+# Build outputs
 
 # Build outputs
 .next
@@ -8,9 +11,11 @@ build
 dist
 
 # Environment files
+dist
+
+# Environment files
 .env
 .env.local
-.env.*
 .env.*.local
 
 # Logs
@@ -23,6 +28,15 @@ yarn-error.log*
 .git
 .gitignore
 
+# IDE and editor files
+.cursor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
 # IDE and editor files
 .cursor
 .vscode
@@ -45,9 +59,30 @@ __tests__
 *.spec.tsx
 
 # Docker files (don't need to copy these into the image)
+Thumbs.db
+
+# Test and coverage
+coverage
+.nyc_output
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Docker files (don't need to copy these into the image)
 Dockerfile
 docker-compose.yaml
+docker-compose.yaml
 docker-compose.yml
+.dockerignore
+
+# Misc
+*.md
+!README.md
+.github
+.husky
+lefthook.yml
 .dockerignore
 
 # Misc
