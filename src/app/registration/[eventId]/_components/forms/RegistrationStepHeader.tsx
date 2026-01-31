@@ -21,7 +21,7 @@ export default function RegistrationStepHeader({
   description,
 }: RegistrationStepHeaderProps) {
   return (
-    <Item>
+    <Item className="px-0">
       <ItemContent>
         <div className="flex items-center gap-2">
           <Icon size={18} />

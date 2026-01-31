@@ -6,7 +6,6 @@ import { FieldLabel, FieldSet } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
-import { MemberTypeEnum } from "@/lib/validation/utils";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep1 } from "../../_hooks/useRegistrationStep1";
 import RegistrationStepHeader from "./RegistrationStepHeader";
@@ -69,7 +68,7 @@ function MemberTypeSelection({
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent>
         <form.AppField name="member">
           {(field) => (
             <FieldSet className="space-y-4">
@@ -82,7 +81,7 @@ function MemberTypeSelection({
                   {/* Member Option Column */}
                   <div className="flex-1">
                     <FieldLabel
-                      className="flex cursor-pointer items-start gap-3 rounded-lg border-2 p-4 transition-all hover:border-primary/50 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
+                      className="flex w-full cursor-pointer items-start gap-3 rounded-lg border-2 p-4 transition-all hover:border-primary/50 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
                       htmlFor="member"
                     >
                       <RadioGroupItem
@@ -90,13 +89,13 @@ function MemberTypeSelection({
                         id="member"
                         value="member"
                       />
-                      <div className="flex-1">
+                      <div className="flex flex-col gap-0.5">
                         <span className="font-medium text-foreground">
                           Member
                         </span>
-                        <p className="mt-0.5 text-muted-foreground text-sm">
+                        <span className="text-muted-foreground text-sm">
                           I am a member of the organization
-                        </p>
+                        </span>
                       </div>
                     </FieldLabel>
                   </div>
@@ -104,7 +103,7 @@ function MemberTypeSelection({
                   {eventDetails?.eventType === "public" && (
                     <div className="flex-1">
                       <FieldLabel
-                        className="flex cursor-pointer items-start gap-3 rounded-lg border-2 p-4 transition-all hover:border-primary/50 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
+                        className="flex w-full cursor-pointer items-start gap-3 rounded-lg border-2 p-4 transition-all hover:border-primary/50 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
                         htmlFor="nonmember"
                       >
                         <RadioGroupItem

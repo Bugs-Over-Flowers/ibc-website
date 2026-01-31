@@ -2,7 +2,6 @@
 import { Building2, ClipboardCheck, CreditCard, Users } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import useRegistrationStore from "@/hooks/registration.store";
-import type Step from "@/lib/types/Step";
 import { cn } from "@/lib/utils";
 
 const STEPS: Array<{
@@ -61,7 +60,7 @@ export default function Stepper() {
                   <div
                     aria-hidden="true"
                     className={cn(
-                      "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-all",
+                      "z-10 mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-all",
                       isCompleted &&
                         "border-primary bg-primary text-primary-foreground",
                       isActive && "border-primary bg-card text-primary",
@@ -118,8 +117,8 @@ export default function Stepper() {
                   <div
                     aria-hidden="true"
                     className={cn(
-                      "absolute top-[52px] left-[27px] h-4 w-0.5 transition-colors",
-                      isCompleted ? "bg-primary" : "bg-border",
+                      "absolute top-[53px] left-[31px] z-0 h-9 w-0.5 transition-colors",
+                      isCompleted ? "bg-primary" : "bg-muted/60",
                     )}
                   />
                 )}

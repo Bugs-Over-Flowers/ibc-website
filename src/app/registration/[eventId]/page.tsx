@@ -1,11 +1,8 @@
-import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
-import Link from "next/link";
 import { Suspense } from "react";
 import RegistrationForm from "@/app/registration/[eventId]/_components/forms/RegistrationForm";
-import { Button } from "@/components/ui/button";
+import { Header } from "@/components/navbar/Header";
 import { Spinner } from "@/components/ui/spinner";
-
 import type { RegistrationRouteProps } from "@/lib/types/route";
 import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
@@ -15,6 +12,7 @@ import RegistrationInformation from "./_components/RegistrationInfoHeader";
 export default function Page({ params }: RegistrationRouteProps) {
   return (
     <main className="flex min-h-screen w-full items-center justify-center p-5">
+      <Header />
       <Suspense fallback={<Spinner />}>
         <RegistrationPage params={params} />
       </Suspense>
@@ -43,22 +41,10 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6 md:flex-row">
+    <div className="mx-auto mt-20 flex h-full w-full max-w-6xl flex-col gap-6 md:flex-row">
       <RegistrationInformation {...eventData} />
       <div className="flex h-full flex-1 flex-col gap-4">
-        <div className="flex items-center justify-between gap-2">
-          <Link href={`/events/${eventId}`}>
-            <Button variant={"ghost"}>
-              <ChevronLeft />
-              Back to Event
-            </Button>
-          </Link>
-
-          <Link href={`/registration/${eventId}/info`}>
-            <Button variant={"outline"}>Back to Info</Button>
-          </Link>
-        </div>
-
+        <div className="flex items-center justify-between gap-2"></div>
         <RegistrationForm members={members} />
       </div>
     </div>
