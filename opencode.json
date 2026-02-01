@@ -1,33 +1,75 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "agent": {
-    "Database": {
+    "dave": {
       "description": "Database Specialist",
-      "prompt": "{file:.github/agents/database-specialist.md}"
+      "prompt": ".github/agents/database-specialist.md",
+      "permission": {
+        "skill": {
+          "db-*": "allow",
+          "sql-*": "allow",
+          "migration-*": "allow",
+          "ui-*": "deny"
+        }
+      }
     },
-    "Forms": {
+    "fay": {
       "description": "Form Specialist",
-      "prompt": "{file:.github/agents/form-specialist.md}"
+      "prompt": ".github/agents/form-specialist.md",
+      "permission": {
+        "skill": {
+          "form-*": "allow",
+          "input-*": "allow",
+          "react-hook-form-*": "allow"
+        }
+      }
     },
-    "Server": {
+    "sam": {
       "description": "Server Specialist",
-      "prompt": "{file:.github/agents/server-specialist.md}"
+      "prompt": ".github/agents/server-specialist.md",
+      "permission": {
+        "skill": {
+          "server-*": "allow",
+          "api-*": "allow",
+          "docker-*": "allow",
+          "deploy-*": "ask"
+        }
+      }
     },
-    "Testing": {
+    "tina": {
       "description": "Testing Specialist",
-      "prompt": "{file:.github/agents/testing-specialist.md}"
+      "prompt": ".github/agents/testing-specialist.md",
+      "permission": {
+        "skill": {
+          "test-*": "allow",
+          "jest-*": "allow",
+          "cypress-*": "allow",
+          "playwright-*": "allow"
+        }
+      }
     },
-    "UI": {
+    "uma": {
       "description": "UI Specialist",
-      "prompt": "{file:.github/agents/ui-specialist.md}"
+      "prompt": ".github/agents/ui-specialist.md",
+      "permission": {
+        "skill": {
+          "ui-*": "allow",
+          "css-*": "allow",
+          "tailwind-*": "allow",
+          "db-*": "deny"
+        }
+      }
     },
-    "Validation": {
+    "val": {
       "description": "Validation Specialist",
-      "prompt": "{file:.github/agents/validation-specialist.md}"
-    },
-    "Review": {
-      "description": "Code Review Specialist",
-      "prompt": "{file:.github/agents/code-review-specialist.md}"
+      "prompt": ".github/agents/validation-specialist.md",
+      "permission": {
+        "skill": {
+          "validation-*": "allow",
+          "schema-*": "allow",
+          "zod-*": "allow"
+        }
+      }
     }
   }
 }
