@@ -1,0 +1,75 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "dave": {
+      "description": "Database Specialist",
+      "prompt": ".github/agents/database-specialist.md",
+      "permission": {
+        "skill": {
+          "db-*": "allow",
+          "sql-*": "allow",
+          "migration-*": "allow",
+          "ui-*": "deny"
+        }
+      }
+    },
+    "fay": {
+      "description": "Form Specialist",
+      "prompt": ".github/agents/form-specialist.md",
+      "permission": {
+        "skill": {
+          "form-*": "allow",
+          "input-*": "allow",
+          "react-hook-form-*": "allow"
+        }
+      }
+    },
+    "sam": {
+      "description": "Server Specialist",
+      "prompt": ".github/agents/server-specialist.md",
+      "permission": {
+        "skill": {
+          "server-*": "allow",
+          "api-*": "allow",
+          "docker-*": "allow",
+          "deploy-*": "ask"
+        }
+      }
+    },
+    "tina": {
+      "description": "Testing Specialist",
+      "prompt": ".github/agents/testing-specialist.md",
+      "permission": {
+        "skill": {
+          "test-*": "allow",
+          "jest-*": "allow",
+          "cypress-*": "allow",
+          "playwright-*": "allow"
+        }
+      }
+    },
+    "uma": {
+      "description": "UI Specialist",
+      "prompt": ".github/agents/ui-specialist.md",
+      "permission": {
+        "skill": {
+          "ui-*": "allow",
+          "css-*": "allow",
+          "tailwind-*": "allow",
+          "db-*": "deny"
+        }
+      }
+    },
+    "val": {
+      "description": "Validation Specialist",
+      "prompt": ".github/agents/validation-specialist.md",
+      "permission": {
+        "skill": {
+          "validation-*": "allow",
+          "schema-*": "allow",
+          "zod-*": "allow"
+        }
+      }
+    }
+  }
+}
