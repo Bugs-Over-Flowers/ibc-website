@@ -3,73 +3,31 @@
   "agent": {
     "Database": {
       "description": "Database Specialist",
-      "prompt": "{file:.github/agents/database-specialist.md}",
-      "permission": {
-        "skill": {
-          "db-*": "allow",
-          "sql-*": "allow",
-          "migration-*": "allow",
-          "ui-*": "deny"
-        }
-      }
+      "prompt": "{file:.github/agents/database-specialist.md}"
     },
     "Forms": {
       "description": "Form Specialist",
-      "prompt": "{file:.github/agents/form-specialist.md}",
-      "permission": {
-        "skill": {
-          "form-*": "allow",
-          "input-*": "allow",
-          "react-hook-form-*": "allow"
-        }
-      }
+      "prompt": "{file:.github/agents/form-specialist.md}"
     },
     "Server": {
       "description": "Server Specialist",
-      "prompt": "{file:.github/agents/server-specialist.md}",
-      "permission": {
-        "skill": {
-          "server-*": "allow",
-          "api-*": "allow",
-          "docker-*": "allow",
-          "deploy-*": "ask"
-        }
-      }
+      "prompt": "{file:.github/agents/server-specialist.md}"
     },
     "Testing": {
       "description": "Testing Specialist",
-      "prompt": "{file:.github/agents/testing-specialist.md}",
-      "permission": {
-        "skill": {
-          "test-*": "allow",
-          "jest-*": "allow",
-          "cypress-*": "allow",
-          "playwright-*": "allow"
-        }
-      }
+      "prompt": "{file:.github/agents/testing-specialist.md}"
     },
     "UI": {
       "description": "UI Specialist",
-      "prompt": "{file:.github/agents/ui-specialist.md}",
-      "permission": {
-        "skill": {
-          "ui-*": "allow",
-          "css-*": "allow",
-          "tailwind-*": "allow",
-          "db-*": "deny"
-        }
-      }
+      "prompt": "{file:.github/agents/ui-specialist.md}"
     },
     "Validation": {
       "description": "Validation Specialist",
-      "prompt": "{file:.github/agents/validation-specialist.md}",
-      "permission": {
-        "skill": {
-          "validation-*": "allow",
-          "schema-*": "allow",
-          "zod-*": "allow"
-        }
-      }
+      "prompt": "{file:.github/agents/validation-specialist.md}"
+    },
+    "Review": {
+      "description": "Code Review Specialist",
+      "prompt": "{file:.github/agents/code-review-specialist.md}"
     }
   }
 }
