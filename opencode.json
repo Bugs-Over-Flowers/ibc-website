@@ -1,9 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "agent": {
-    "dave": {
+    "Database": {
       "description": "Database Specialist",
-      "prompt": ".github/agents/database-specialist.md",
+      "prompt": "{file:.github/agents/database-specialist.md}",
       "permission": {
         "skill": {
           "db-*": "allow",
@@ -13,9 +13,9 @@
         }
       }
     },
-    "fay": {
+    "Forms": {
       "description": "Form Specialist",
-      "prompt": ".github/agents/form-specialist.md",
+      "prompt": "{file:.github/agents/form-specialist.md}",
       "permission": {
         "skill": {
           "form-*": "allow",
@@ -24,9 +24,9 @@
         }
       }
     },
-    "sam": {
+    "Server": {
       "description": "Server Specialist",
-      "prompt": ".github/agents/server-specialist.md",
+      "prompt": "{file:.github/agents/server-specialist.md}",
       "permission": {
         "skill": {
           "server-*": "allow",
@@ -36,9 +36,9 @@
         }
       }
     },
-    "tina": {
+    "Testing": {
       "description": "Testing Specialist",
-      "prompt": ".github/agents/testing-specialist.md",
+      "prompt": "{file:.github/agents/testing-specialist.md}",
       "permission": {
         "skill": {
           "test-*": "allow",
@@ -48,9 +48,9 @@
         }
       }
     },
-    "uma": {
+    "UI": {
       "description": "UI Specialist",
-      "prompt": ".github/agents/ui-specialist.md",
+      "prompt": "{file:.github/agents/ui-specialist.md}",
       "permission": {
         "skill": {
           "ui-*": "allow",
@@ -60,9 +60,9 @@
         }
       }
     },
-    "val": {
+    "Validation": {
       "description": "Validation Specialist",
-      "prompt": ".github/agents/validation-specialist.md",
+      "prompt": "{file:.github/agents/validation-specialist.md}",
       "permission": {
         "skill": {
           "validation-*": "allow",
