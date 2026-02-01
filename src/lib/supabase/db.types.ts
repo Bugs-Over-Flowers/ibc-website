@@ -567,6 +567,53 @@ export type Database = {
         };
         Relationships: [];
       };
+      SponsoredRegistration: {
+        Row: {
+          createdAt: string;
+          eventId: string;
+          feeDeduction: number;
+          maxSponsoredGuests: number | null;
+          sponsoredBy: string;
+          sponsoredRegistrationId: string;
+          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt: string;
+          usedCount: number;
+          uuid: string;
+        };
+        Insert: {
+          createdAt?: string;
+          eventId: string;
+          feeDeduction?: number;
+          maxSponsoredGuests?: number | null;
+          sponsoredBy: string;
+          sponsoredRegistrationId?: string;
+          status?: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt?: string;
+          usedCount?: number;
+          uuid?: string;
+        };
+        Update: {
+          createdAt?: string;
+          eventId?: string;
+          feeDeduction?: number;
+          maxSponsoredGuests?: number | null;
+          sponsoredBy?: string;
+          sponsoredRegistrationId?: string;
+          status?: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt?: string;
+          usedCount?: number;
+          uuid?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "SponsoredRegistration_event_fkey";
+            columns: ["eventId"];
+            isOneToOne: false;
+            referencedRelation: "Event";
+            referencedColumns: ["eventId"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -749,6 +796,7 @@ export type Database = {
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
+      SponsoredRegistrationStatus: "active" | "full" | "disabled";
     };
     CompositeTypes: {
       participant_list_item: {
@@ -925,6 +973,7 @@ export const Constants = {
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
+      SponsoredRegistrationStatus: ["active", "full", "disabled"],
     },
   },
 } as const;
