@@ -106,11 +106,11 @@ enabled = true
 file_size_limit = "50MiB"
 
 # Uncomment to configure local storage buckets
-[storage.buckets.headerImages]
+[storage.buckets.headerImage]
 public = true
 file_size_limit = "50MiB"
 allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
-objects_path = "./headerImages"
+objects_path = "./headerImage"
 [storage.buckets.paymentProofs]
 public = false
 file_size_limit = "10MiB"

@@ -59,7 +59,7 @@ export async function getMembers(
     }
 
     const { data: signed, error } = await supabase.storage
-      .from("logoImage")
+      .from("logoimage")
       .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
 
     if (!error && signed?.signedUrl) {

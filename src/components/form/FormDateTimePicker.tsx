@@ -111,6 +111,7 @@ const FormDateTimePicker: React.FC<FormDateTimePickerProps> = ({
             <PopoverContent align="start" className="w-auto p-0">
               <Calendar
                 captionLayout="dropdown"
+                defaultMonth={dateValue}
                 disabled={(date) => {
                   if (typeof disabled === "function") return disabled(date);
                   if (minDate && date < startOfDay(minDate)) return true;

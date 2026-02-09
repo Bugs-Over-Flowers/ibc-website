@@ -17,7 +17,7 @@
       "!**/playwright-report",
       "!**/test-results",
       "!.playwright",
-      "!**/__test__/e2e/generated"
+      "!**/__tests__/e2e/generated"
     ]
   },
   "css": {

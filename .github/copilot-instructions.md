@@ -37,6 +37,12 @@ bun run test:local   # Run tests with local Supabase
 bun run test:all     # Run all tests
 bun run db:gen:types # Generate local types
 bun run gen:types    # Generate production types
+
+# Docker
+bun run docker:dev   # Start development container
+bun run docker:devb  # Build & start development container
+bun run docker:prod  # Start production container
+bun run docker:prodb # Build & start production container
 ```
 
 ## Architecture Overview

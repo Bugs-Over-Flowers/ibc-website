@@ -25,9 +25,7 @@ export function CreateEventForm() {
         Back to events
       </Button>
       <h2 className="mt-8 mb-2 font-bold text-2xl">Create New Event</h2>
-      <p className="mb-6 text-lg!">
-        Fill in the details to create a new event.
-      </p>
+      <p className="mb-6 text-lg">Fill in the details to create a new event.</p>
 
       <div className="min-h-screen rounded-lg">
         <formContext.Provider value={form}>

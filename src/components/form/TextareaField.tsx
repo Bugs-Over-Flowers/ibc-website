@@ -9,7 +9,6 @@ interface TextareaFieldProps {
   description?: string;
   className?: string;
   placeholder?: string;
-  textareaProps?: TextareaHTMLAttributes<HTMLTextAreaElement>;
 }
 
 function TextareaField({
@@ -17,8 +16,8 @@ function TextareaField({
   description,
   className,
   placeholder,
-  textareaProps,
-}: TextareaFieldProps) {
+  ...textareaProps
+}: TextareaFieldProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 

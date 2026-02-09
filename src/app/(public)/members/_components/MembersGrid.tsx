@@ -66,14 +66,10 @@ export function MembersGrid({ members }: MembersGridProps) {
             );
             return (
               <motion.div
+                animate="visible"
+                initial="hidden"
                 key={safeKey}
                 variants={fadeInUp}
-                whileHover={{
-                  scale: 1.03,
-                  y: -4,
-                  boxShadow: "0 8px 32px 0 rgba(34, 60, 80, 0.12)",
-                }}
-                whileTap={{ scale: 0.98 }}
               >
                 {member.websiteURL ? (
                   <a
@@ -96,10 +92,22 @@ export function MembersGrid({ members }: MembersGridProps) {
           })}
         </div>
         {members.length === 0 && (
-          <motion.div className="py-12 text-center" variants={fadeInUp}>
-            <p className="text-muted-foreground">
-              No members found in this sector.
-            </p>
+          <motion.div
+            animate="visible"
+            className="flex items-center justify-center"
+            initial="hidden"
+            variants={fadeInUp}
+          >
+            <div className="mx-auto max-w-md rounded-2xl p-12 backdrop-blur-xl">
+              <Building2 className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50" />
+              <h3 className="mb-2 text-center font-bold text-foreground text-xl">
+                No Members Found
+              </h3>
+              <p className="text-center text-muted-foreground">
+                Members will appear here as organizations join or match your
+                search/filter criteria.
+              </p>
+            </div>
           </motion.div>
         )}
       </motion.div>

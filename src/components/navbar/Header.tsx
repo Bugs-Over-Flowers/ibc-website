@@ -7,9 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ModeToggle } from "@/components/NightModeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ModeToggle } from "../NightModeToggle";
 
 const navLinks = [
   { name: "HOME", path: "/" },

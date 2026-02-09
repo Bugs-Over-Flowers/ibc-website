@@ -2,12 +2,12 @@ import { format } from "date-fns";
 import {
   ArrowLeft,
   Calendar,
+  CheckSquare,
   ClipboardList,
   Clock,
   Edit,
   Globe,
   MapPin,
-  MessageSquare,
   Users,
 } from "lucide-react";
 import type { Route } from "next";
@@ -297,6 +297,24 @@ export default async function EventDetails({
               <Button className="w-full" variant="default">
                 <ClipboardList className="mr-2 h-4 w-4" />
                 View Registration List
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+        <Card className="flex flex-col">
+          <CardContent className="flex flex-1 flex-col p-6">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600">
+              <CheckSquare className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 font-semibold text-lg">Check-in List</h3>
+            <p className="mb-6 flex-1 text-muted-foreground text-sm">
+              View daily attendance records and export check-in data by event
+              day
+            </p>
+            <Link href={`/admin/events/${eventId}/check-in-list` as Route}>
+              <Button className="w-full" variant="outline">
+                <CheckSquare className="mr-2 h-4 w-4" />
+                View Check-in List
               </Button>
             </Link>
           </CardContent>

@@ -7,7 +7,7 @@ import { getExtensionFromMimeType } from "@/lib/utils";
  *
  * This function handles the complete payment proof upload process:
  * 1. Generates a unique UUID to prevent filename collisions
- * 2. Uploads the file to the 'paymentProofs' bucket
+ * 2. Uploads the file to the 'paymentproofs' bucket
  * 3. Constructs the final path with the correct file extension
  *
  * @param file - Payment proof image file from user

@@ -24,9 +24,15 @@ RUN bun run build
 FROM oven/bun:1 AS prod
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./.next/standalone
+
+# Copy the standalone output (contains server.js and minimal node_modules)
+COPY --from=builder /app/.next/standalone ./
+
+# Copy static files to where standalone expects them
 COPY --from=builder /app/.next/static ./.next/static
 
+# Copy public folder to where standalone expects it
+COPY --from=builder /app/public ./public
+
 EXPOSE 3000
-CMD ["bun", "run", "server.js"]
+CMD ["bun", "server.js"]

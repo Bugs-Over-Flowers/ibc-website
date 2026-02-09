@@ -7,30 +7,10 @@ export type Json =
   | Json[];
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5";
   };
   public: {
     Tables: {
@@ -46,6 +26,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          identifier: string;
           interviewId: string | null;
           landline: string;
           logoImageURL: string;
@@ -66,6 +47,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          identifier: string;
           interviewId?: string | null;
           landline: string;
           logoImageURL: string;
@@ -86,6 +68,7 @@ export type Database = {
           companyName?: string;
           emailAddress?: string;
           faxNumber?: string;
+          identifier?: string;
           interviewId?: string | null;
           landline?: string;
           logoImageURL?: string;
@@ -182,6 +165,7 @@ export type Database = {
         Row: {
           businessMemberId: string;
           businessName: string;
+          identifier: string;
           joinDate: string;
           lastPaymentDate: string | null;
           logoImageURL: string | null;
@@ -196,6 +180,7 @@ export type Database = {
         Insert: {
           businessMemberId?: string;
           businessName: string;
+          identifier: string;
           joinDate: string;
           lastPaymentDate?: string | null;
           logoImageURL?: string | null;
@@ -210,6 +195,7 @@ export type Database = {
         Update: {
           businessMemberId?: string;
           businessName?: string;
+          identifier?: string;
           joinDate?: string;
           lastPaymentDate?: string | null;
           logoImageURL?: string | null;
@@ -581,11 +567,68 @@ export type Database = {
         };
         Relationships: [];
       };
+      SponsoredRegistration: {
+        Row: {
+          createdAt: string;
+          eventId: string;
+          feeDeduction: number;
+          maxSponsoredGuests: number | null;
+          sponsoredBy: string;
+          sponsoredRegistrationId: string;
+          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt: string;
+          usedCount: number;
+          uuid: string;
+        };
+        Insert: {
+          createdAt?: string;
+          eventId: string;
+          feeDeduction?: number;
+          maxSponsoredGuests?: number | null;
+          sponsoredBy: string;
+          sponsoredRegistrationId?: string;
+          status?: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt?: string;
+          usedCount?: number;
+          uuid?: string;
+        };
+        Update: {
+          createdAt?: string;
+          eventId?: string;
+          feeDeduction?: number;
+          maxSponsoredGuests?: number | null;
+          sponsoredBy?: string;
+          sponsoredRegistrationId?: string;
+          status?: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt?: string;
+          usedCount?: number;
+          uuid?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "SponsoredRegistration_event_fkey";
+            columns: ["eventId"];
+            isOneToOne: false;
+            referencedRelation: "Event";
+            referencedColumns: ["eventId"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      check_application_status: {
+        Args: { p_application_identifier: string };
+        Returns: Json;
+      };
+      check_member_exists:
+        | { Args: { p_identifier: string }; Returns: Json }
+        | {
+            Args: { p_application_type?: string; p_identifier: string };
+            Returns: Json;
+          };
       check_membership_expiry: { Args: never; Returns: undefined };
       compute_primary_application_id: {
         Args: { p_member_id: string };
@@ -640,7 +683,6 @@ export type Database = {
           venue: string;
         }[];
       };
-      get_event_checkin_list: { Args: { p_event_id: string }; Returns: Json };
       get_event_participant_list: {
         Args: { p_event_id: string; p_search_text?: string };
         Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
@@ -721,28 +763,17 @@ export type Database = {
         };
         Returns: Json;
       };
-      submit_membership_application:
-        | {
-            Args: {
-              p_application_member_type: string;
-              p_application_type: string;
-              p_company_details: Json;
-              p_payment_method: string;
-              p_payment_proof_url?: string;
-              p_representatives: Json;
-            };
-            Returns: Json;
-          }
-        | {
-            Args: {
-              p_application_type: string;
-              p_company_details: Json;
-              p_payment_method: string;
-              p_payment_proof_url?: string;
-              p_representatives: Json;
-            };
-            Returns: Json;
-          };
+      submit_membership_application: {
+        Args: {
+          p_application_member_type: string;
+          p_application_type: string;
+          p_company_details: Json;
+          p_payment_method: string;
+          p_payment_proof_url?: string;
+          p_representatives: Json;
+        };
+        Returns: Json;
+      };
       update_event_details: {
         Args: {
           p_description?: string;
@@ -769,6 +800,7 @@ export type Database = {
       PaymentMethod: "BPI" | "ONSITE";
       PaymentStatus: "pending" | "verified";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
+      SponsoredRegistrationStatus: "active" | "full" | "disabled";
     };
     CompositeTypes: {
       participant_list_item: {
@@ -933,9 +965,6 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],
@@ -948,6 +977,7 @@ export const Constants = {
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentStatus: ["pending", "verified"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
+      SponsoredRegistrationStatus: ["active", "full", "disabled"],
     },
   },
 } as const;

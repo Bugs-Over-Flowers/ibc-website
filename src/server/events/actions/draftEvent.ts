@@ -32,9 +32,9 @@ export const draftEvent: ServerFunction<
       eventTitle: data.eventTitle,
       description: data.description,
       eventStartDate: data.eventStartDate.toISOString(),
-      eventEndDate: data.eventEndDate.toISOString(),
+      eventEndDate: data.eventEndDate?.toISOString(),
       venue: data.venue,
-      registrationFee: data.registrationFee,
+      registrationFee: data.registrationFee ?? 0,
       maxGuest: data.maxGuest,
       availableSlots: data.maxGuest,
       eventType: null, // Force eventType to null for drafts
