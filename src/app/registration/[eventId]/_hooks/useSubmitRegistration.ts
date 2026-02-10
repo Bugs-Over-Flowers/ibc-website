@@ -4,7 +4,7 @@ import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import { uploadPaymentProof } from "@/lib/storage/uploadPaymentProof";
 import type { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
-import { submitRegistrationRPC } from "@/server/registration/actions/submitRegistrationRPC";
+import { submitRegistrationRPC } from "@/server/registration/mutations/submitRegistrationRPC";
 
 /**
  * Hook for submitting event registration data to the server.

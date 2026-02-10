@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/db.types";
-import { updateEvent } from "@/server/events/actions/updateEvent";
+import { updateEvent } from "@/server/events/mutations/updateEvent";
 
 type EventRow = Database["public"]["Tables"]["Event"]["Row"];
 
