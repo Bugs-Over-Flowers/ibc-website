@@ -9,8 +9,8 @@ type SponsoredRegistration =
   Database["public"]["Tables"]["SponsoredRegistration"]["Row"];
 
 const updateSRSchema = z.object({
-  sponsoredRegistrationId: z.string().min(1, "ID is required"),
-  eventId: z.string().min(1, "Event ID is required"),
+  sponsoredRegistrationId: z.string().uuid("Invalid ID format"),
+  eventId: z.string().uuid("Invalid Event ID format"),
 });
 
 type UpdateSRInput = z.infer<typeof updateSRSchema>;
@@ -22,32 +22,13 @@ export async function updateSRStatus(
 
   const supabase = await createActionClient();
 
-  // First, fetch the current status
-  const { data: current, error: fetchError } = await supabase
-    .from("SponsoredRegistration")
-    .select("status")
-    .eq("sponsoredRegistrationId", parsed.sponsoredRegistrationId)
-    .single();
+  const { data, error } = await supabase.rpc("toggle_sr_status", {
+    p_sponsored_registration_id: parsed.sponsoredRegistrationId,
+  });
 
-  if (fetchError) {
+  if (error || !(data as { result?: SponsoredRegistration })?.result) {
     throw new Error(
-      `Failed to fetch sponsored registration: ${fetchError.message}`,
-    );
-  }
-
-  // Toggle status between active and disabled
-  const newStatus = current.status === "active" ? "disabled" : "active";
-
-  const { data, error } = await supabase
-    .from("SponsoredRegistration")
-    .update({ status: newStatus })
-    .eq("sponsoredRegistrationId", parsed.sponsoredRegistrationId)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(
-      `Failed to update sponsored registration: ${error.message}`,
+      `Failed to update sponsored registration: ${error?.message || "Unknown error"}`,
     );
   }
 
@@ -56,5 +37,5 @@ export async function updateSRStatus(
     "page",
   );
 
-  return data as SponsoredRegistration;
+  return (data as { result: SponsoredRegistration }).result;
 }

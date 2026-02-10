@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
 import {
   Table,
@@ -29,10 +27,8 @@ export function SponsoredRegistrationsList({
   event,
   registrations,
 }: SponsoredRegistrationsListProps) {
-  const router = useRouter();
-
   const handleCopyLink = (uuid: string, eventId: string) => {
-    const link = `${window.location.origin}/events/${eventId}/register/${uuid}`;
+    const link = `${window.location.origin}/events/${eventId}/register?sr=${uuid}`;
     navigator.clipboard.writeText(link);
     toast.success("Link copied to clipboard!");
   };

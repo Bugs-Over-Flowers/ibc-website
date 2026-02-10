@@ -220,11 +220,22 @@ function PaymentSummarySection({
   otherParticipants,
 }: PaymentSummarySectionProps) {
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const sponsorFeeDeduction = useRegistrationStore(
+    (state) => state.sponsorFeeDeduction,
+  );
 
   const paymentProofUrl =
     step3Data.paymentMethod === "online" && step3Data.paymentProof
       ? URL.createObjectURL(step3Data.paymentProof)
       : null;
+
+  const participantCount = otherParticipants.length + 1;
+  const baseFee = eventDetails?.registrationFee ?? 0;
+  const subtotal = baseFee * participantCount;
+  const totalSponsorDiscount = sponsorFeeDeduction
+    ? sponsorFeeDeduction * participantCount
+    : 0;
+  const total = subtotal - totalSponsorDiscount;
 
   return (
     <Card className="border-dashed bg-muted/30">
@@ -260,10 +271,46 @@ function PaymentSummarySection({
               {Intl.NumberFormat("en-US", {
                 currency: "PHP",
                 style: "currency",
-              }).format(eventDetails?.registrationFee ?? 0)}
+              }).format(baseFee)}
               <span className="ml-1 text-muted-foreground text-xs">/ head</span>
             </span>
           </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Total Participants</span>
+            <span>{participantCount}</span>
+          </div>
+
+          <Separator className="my-2 bg-border/50" />
+
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span>
+              {Intl.NumberFormat("en-US", {
+                currency: "PHP",
+                style: "currency",
+              }).format(subtotal)}
+            </span>
+          </div>
+
+          {totalSponsorDiscount > 0 && (
+            <div className="flex items-center justify-between text-green-600">
+              <div className="flex flex-col">
+                <span className="text-muted-foreground">Sponsor Discount</span>
+                <span className="text-muted-foreground text-xs">
+                  ₱{sponsorFeeDeduction?.toLocaleString()} × {participantCount}{" "}
+                  heads
+                </span>
+              </div>
+              <span>
+                -
+                {Intl.NumberFormat("en-US", {
+                  currency: "PHP",
+                  style: "currency",
+                }).format(totalSponsorDiscount)}
+              </span>
+            </div>
+          )}
 
           <Separator className="my-2 bg-border/50" />
 
@@ -273,10 +320,7 @@ function PaymentSummarySection({
               {Intl.NumberFormat("en-US", {
                 currency: "PHP",
                 style: "currency",
-              }).format(
-                (eventDetails?.registrationFee ?? 0) *
-                  (otherParticipants.length + 1),
-              )}
+              }).format(total)}
             </span>
           </div>
         </div>

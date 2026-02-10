@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import useRegistrationStore from "@/hooks/registration.store";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import Step1 from "./Step1";
@@ -8,11 +9,40 @@ import Step4 from "./Step4";
 
 interface RegistrationFormProps {
   members: Awaited<ReturnType<typeof getAllMembers>>;
+  sponsorUuid?: string;
+  sponsoredRegistrationId?: string;
+  sponsorFeeDeduction?: number;
 }
 
-export default function RegistrationForm({ members }: RegistrationFormProps) {
+export default function RegistrationForm({
+  members,
+  sponsorUuid,
+  sponsoredRegistrationId,
+  sponsorFeeDeduction,
+}: RegistrationFormProps) {
   const step = useRegistrationStore((state) => state.step);
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const setSponsorInfo = useRegistrationStore((state) => state.setSponsorInfo);
+
+  // Store sponsor info if provided
+  React.useEffect(() => {
+    if (
+      sponsorUuid &&
+      sponsoredRegistrationId &&
+      sponsorFeeDeduction !== undefined
+    ) {
+      setSponsorInfo({
+        sponsorUuid,
+        sponsoredRegistrationId,
+        feeDeduction: sponsorFeeDeduction,
+      });
+    }
+  }, [
+    sponsorUuid,
+    sponsoredRegistrationId,
+    sponsorFeeDeduction,
+    setSponsorInfo,
+  ]);
 
   if (!eventDetails) {
     return (

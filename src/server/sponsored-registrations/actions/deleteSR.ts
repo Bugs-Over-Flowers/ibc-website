@@ -5,8 +5,8 @@ import { z } from "zod";
 import { createActionClient } from "@/lib/supabase/server";
 
 const deleteSRSchema = z.object({
-  sponsoredRegistrationId: z.string().min(1, "ID is required"),
-  eventId: z.string().min(1, "Event ID is required"),
+  sponsoredRegistrationId: z.string().uuid("Invalid ID format"),
+  eventId: z.string().uuid("Invalid Event ID format"),
 });
 
 type DeleteSRInput = z.infer<typeof deleteSRSchema>;
@@ -18,14 +18,13 @@ export async function deleteSR(
 
   const supabase = await createActionClient();
 
-  const { error } = await supabase
-    .from("SponsoredRegistration")
-    .delete()
-    .eq("sponsoredRegistrationId", parsed.sponsoredRegistrationId);
+  const { data, error } = await supabase.rpc("delete_sr", {
+    p_sponsored_registration_id: parsed.sponsoredRegistrationId,
+  });
 
-  if (error) {
+  if (error || !(data as { result?: { success: boolean } })?.result?.success) {
     throw new Error(
-      `Failed to delete sponsored registration: ${error.message}`,
+      `Failed to delete sponsored registration: ${error?.message || "Unknown error"}`,
     );
   }
 

@@ -83,13 +83,22 @@ export default function Step3() {
 function PaymentDetails() {
   const registrationData = useRegistrationStore((s) => s.registrationData);
   const eventDetails = useRegistrationStore((s) => s.eventDetails);
+  const sponsorFeeDeduction = useRegistrationStore(
+    (s) => s.sponsorFeeDeduction,
+  );
 
   const baseFee = eventDetails?.registrationFee || 0;
   const otherParticipantsCount =
     registrationData?.step2?.otherParticipants?.length || 0;
   const participantCount = otherParticipantsCount + 1;
 
-  const total = baseFee * participantCount;
+  const subtotal = baseFee * participantCount;
+
+  // Apply sponsor deduction to each participant
+  const totalSponsorDiscount = sponsorFeeDeduction
+    ? sponsorFeeDeduction * participantCount
+    : 0;
+  const total = subtotal - totalSponsorDiscount;
 
   return (
     <Card className="border-dashed bg-muted/30">
@@ -116,6 +125,37 @@ function PaymentDetails() {
             <span>{participantCount}</span>
           </div>
         </div>
+
+        <Separator className="bg-border/50" />
+
+        <div className="flex w-full items-center justify-between">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span>
+            {Intl.NumberFormat("en-US", {
+              currency: "PHP",
+              style: "currency",
+            }).format(subtotal)}
+          </span>
+        </div>
+
+        {totalSponsorDiscount > 0 && (
+          <div className="flex w-full items-center justify-between text-green-600">
+            <div className="flex flex-col">
+              <span className="text-muted-foreground">Sponsor Discount</span>
+              <span className="text-muted-foreground text-xs">
+                ₱{sponsorFeeDeduction?.toLocaleString()} × {participantCount}{" "}
+                heads
+              </span>
+            </div>
+            <span>
+              -
+              {Intl.NumberFormat("en-US", {
+                currency: "PHP",
+                style: "currency",
+              }).format(totalSponsorDiscount)}
+            </span>
+          </div>
+        )}
 
         <Separator className="bg-border/50" />
 

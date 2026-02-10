@@ -2,10 +2,11 @@
 
 import { motion } from "framer-motion";
 import { Copy, ExternalLink, Power, Trash2 } from "lucide-react";
-import Link from "next/link";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { TableCell } from "@/components/ui/table";
 import type { Database } from "@/lib/supabase/db.types";
 import { getStatusBadgeVariant } from "./utils";
 
@@ -32,6 +33,7 @@ export function SponsoredRegistrationsRow({
   onToggleStatus,
   onDeleteClick,
 }: SponsoredRegistrationsRowProps) {
+  const router = useRouter();
   const remainingGuests =
     (registration.maxSponsoredGuests ?? 0) - registration.usedCount;
 
@@ -79,21 +81,18 @@ export function SponsoredRegistrationsRow({
           >
             <Copy className="h-4 w-4" />
           </Button>
-          <Link
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-transparent bg-transparent px-2 py-2 font-medium text-sm transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-            href={{
-              pathname: "/events/[eventId]/register/[uuid]",
-              query: {
-                eventId: event.eventId,
-                uuid: registration.uuid,
-              },
-            }}
-            rel="noopener noreferrer"
-            target="_blank"
+          <Button
+            onClick={() =>
+              router.push(
+                `/events/${event.eventId}/register?sr=${registration.uuid}` as Route,
+              )
+            }
+            size="icon"
             title="Open link"
+            variant="ghost"
           >
             <ExternalLink className="h-4 w-4" />
-          </Link>
+          </Button>
 
           <Button
             disabled={registration.status === "full"}

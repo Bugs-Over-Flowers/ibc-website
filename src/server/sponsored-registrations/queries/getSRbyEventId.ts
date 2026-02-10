@@ -13,10 +13,9 @@ export async function getSRbyEventId(
   const cookieStore = await cookies();
   const supabase = await createClient(cookieStore.getAll());
 
-  const { data, error } = await supabase
-    .from("SponsoredRegistration")
-    .select("*")
-    .eq("eventId", eventId);
+  const { data, error } = await supabase.rpc("get_sr_by_event_id", {
+    p_event_id: eventId,
+  });
 
   if (error) {
     console.error("Error fetching sponsored registrations:", error);

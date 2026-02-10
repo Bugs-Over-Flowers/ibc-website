@@ -619,6 +619,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      check_application_status: {
+        Args: { p_application_identifier: string };
+        Returns: Json;
+      };
       check_member_exists:
         | { Args: { p_identifier: string }; Returns: Json }
         | {
@@ -636,6 +640,10 @@ export type Database = {
           message: string;
           success: boolean;
         }[];
+      };
+      delete_sr: {
+        Args: { p_sponsored_registration_id: string };
+        Returns: Json;
       };
       get_all_evaluations: {
         Args: never;
@@ -728,6 +736,25 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      get_sponsored_registration_by_uuid: {
+        Args: { p_uuid: string };
+        Returns: Json;
+      };
+      get_sr_by_event_id: {
+        Args: { p_event_id: string };
+        Returns: {
+          createdAt: string;
+          eventId: string;
+          feeDeduction: number;
+          maxSponsoredGuests: number;
+          sponsoredBy: string;
+          sponsoredRegistrationId: string;
+          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt: string;
+          usedCount: number;
+          uuid: string;
+        }[];
+      };
       january_first_reset: { Args: never; Returns: undefined };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
       submit_evaluation_form: {
@@ -768,6 +795,10 @@ export type Database = {
           p_payment_proof_url?: string;
           p_representatives: Json;
         };
+        Returns: Json;
+      };
+      toggle_sr_status: {
+        Args: { p_sponsored_registration_id: string };
         Returns: Json;
       };
       update_event_details: {
