@@ -73,7 +73,7 @@ export default function SingleComboBoxField({
         <ComboboxContent className={"w-full"}>
           <ComboboxList>
             {(option: ComboBoxItem) => (
-              <ComboboxItem key={option.label} value={option.value}>
+              <ComboboxItem key={option.value} value={option.value}>
                 {option.label}
               </ComboboxItem>
             )}

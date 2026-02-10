@@ -101,7 +101,7 @@ export default async function RegistrationInfoPage({
       icon: QrCode,
       title: "Step 5: Get QR Code",
       description:
-        "Receive your check-in QR code instantly on the success page and via email.",
+        "Receive your QR code instantly on the success page and via email.",
     },
   ];
 

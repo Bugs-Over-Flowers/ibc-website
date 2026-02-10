@@ -1,10 +1,13 @@
 import { useStore } from "@tanstack/react-form";
-import { FileIcon, X } from "lucide-react";
+import { AlertCircle, FileIcon, MapPin, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -25,6 +28,8 @@ export function Step4Review({ form, applicationData }: StepProps) {
     (state) => state.values.paymentProof,
   );
   const [proofPreview, setProofPreview] = useState<string | null>(null);
+
+  const isUpdateInfo = applicationData.step1.applicationType === "updating";
 
   useEffect(() => {
     if (
@@ -101,82 +106,106 @@ export function Step4Review({ form, applicationData }: StepProps) {
           </CardContent>
         </Card>
 
-        {/* Membership Type Section */}
-        <div className="space-y-4">
-          <h3 className="font-medium text-lg">Membership Type</h3>
-          <form.AppField name="applicationMemberType">
-            {(field) => (
-              <div className="space-y-3">
-                <Label>Select Membership Type *</Label>
-                <div className="flex flex-col space-y-2">
-                  <button
-                    className={cn(
-                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
-                      field.state.value === "corporate"
-                        ? "border-primary bg-primary/5"
-                        : "border-input",
-                    )}
-                    onClick={() => field.handleChange("corporate")}
-                    type="button"
-                  >
-                    <div
+        {/* Membership Type Section - Only show for New Member and Renewal */}
+        {!isUpdateInfo && (
+          <div className="space-y-4">
+            <h3 className="font-medium text-lg">Membership Type</h3>
+            <form.AppField name="applicationMemberType">
+              {(field) => (
+                <div className="space-y-3">
+                  <Label>Select Membership Type *</Label>
+                  <div className="flex flex-col space-y-2">
+                    <button
                       className={cn(
-                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                        "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
                         field.state.value === "corporate"
-                          ? "border-primary bg-primary"
+                          ? "border-primary bg-primary/5"
                           : "border-input",
                       )}
+                      onClick={() => field.handleChange("corporate")}
+                      type="button"
                     >
-                      {field.state.value === "corporate" && (
-                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
-                      )}
-                    </div>
-                    <Label className="cursor-pointer">
-                      Corporate (10,000 PHP)
-                    </Label>
-                  </button>
-                  <button
-                    className={cn(
-                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
-                      field.state.value === "personal"
-                        ? "border-primary bg-primary/5"
-                        : "border-input",
-                    )}
-                    onClick={() => field.handleChange("personal")}
-                    type="button"
-                  >
-                    <div
+                      <div
+                        className={cn(
+                          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                          field.state.value === "corporate"
+                            ? "border-primary bg-primary"
+                            : "border-input",
+                        )}
+                      >
+                        {field.state.value === "corporate" && (
+                          <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                        )}
+                      </div>
+                      <Label className="cursor-pointer">
+                        Corporate (10,000 PHP)
+                      </Label>
+                    </button>
+                    <button
                       className={cn(
-                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                        "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
                         field.state.value === "personal"
-                          ? "border-primary bg-primary"
+                          ? "border-primary bg-primary/5"
                           : "border-input",
                       )}
+                      onClick={() => field.handleChange("personal")}
+                      type="button"
                     >
-                      {field.state.value === "personal" && (
-                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
-                      )}
-                    </div>
-                    <Label className="cursor-pointer">
-                      Personal (5,000 PHP)
-                    </Label>
-                  </button>
+                      <div
+                        className={cn(
+                          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                          field.state.value === "personal"
+                            ? "border-primary bg-primary"
+                            : "border-input",
+                        )}
+                      >
+                        {field.state.value === "personal" && (
+                          <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                        )}
+                      </div>
+                      <Label className="cursor-pointer">
+                        Personal (5,000 PHP)
+                      </Label>
+                    </button>
+                  </div>
+                  <FieldError errors={field.state.meta.errors} />
                 </div>
-                {field.state.meta.errors.length > 0 && (
-                  <p className="font-medium text-destructive text-sm">
-                    {field.state.meta.errors.join(", ")}
-                  </p>
-                )}
-              </div>
-            )}
-          </form.AppField>
-        </div>
+              )}
+            </form.AppField>
+          </div>
+        )}
+
+        {/* Update Info Fee Notice */}
+        {isUpdateInfo && (
+          <Alert className="border-amber-500 bg-amber-50">
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-800">
+              Information Update Fee
+            </AlertTitle>
+            <AlertDescription className="text-amber-700">
+              Updating your membership information requires a processing fee of{" "}
+              <span className="font-semibold">₱2,000.00</span>. Please complete
+              the payment using one of the methods below.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Payment Section */}
         <div className="space-y-4">
           <h3 className="font-medium text-lg">Payment Details</h3>
 
-          <form.AppField name="paymentMethod">
+          <form.AppField
+            listeners={{
+              onChange: ({ value }) => {
+                // Reset payment proof field and its errors when switching to ONSITE
+                if (value === "ONSITE") {
+                  form.setFieldValue("paymentProof", undefined);
+                  form.resetField("paymentProof");
+                }
+              },
+            }}
+            name="paymentMethod"
+          >
             {(field) => (
               <div className="space-y-3">
                 <Label>Select Payment Method *</Label>
@@ -234,83 +263,116 @@ export function Step4Review({ form, applicationData }: StepProps) {
                     </Label>
                   </button>
                 </div>
-                {field.state.meta.errors.length > 0 ? (
-                  <p className="font-medium text-destructive text-sm">
-                    {field.state.meta.errors.join(", ")}
-                  </p>
-                ) : null}
+                <FieldError errors={field.state.meta.errors} />
               </div>
             )}
           </form.AppField>
+
+          {/* Conditional: Onsite Payment Info */}
+          <form.Subscribe selector={(state) => state.values.paymentMethod}>
+            {(paymentMethod) =>
+              paymentMethod === "ONSITE" && (
+                <Alert className="border-primary/30 bg-primary/5">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <AlertTitle className="text-primary">
+                    IBC Office Location
+                  </AlertTitle>
+                  <AlertDescription className="text-muted-foreground">
+                    GF Rm. 105-B Maryville Bldg., Marymart Mall, Delgado St.,
+                    Iloilo City 5000
+                  </AlertDescription>
+                </Alert>
+              )
+            }
+          </form.Subscribe>
 
           {/* Conditional Payment Proof Upload */}
           <form.Subscribe selector={(state) => state.values.paymentMethod}>
             {(paymentMethod) =>
               paymentMethod === "BPI" && (
-                <form.AppField name="paymentProof">
-                  {(field) => (
-                    <div className="space-y-2">
-                      <Label>Upload Proof of Payment *</Label>
-                      <div className="rounded-lg border bg-background p-4">
-                        {field.state.value ? (
-                          <div className="flex items-center justify-between rounded border bg-muted/20 p-3">
-                            <div className="flex items-center gap-3 overflow-hidden">
-                              {proofPreview ? (
-                                <Image
-                                  alt="Payment proof preview"
-                                  className="h-16 w-16 rounded object-contain"
-                                  height={64}
-                                  src={proofPreview}
-                                  width={64}
-                                />
-                              ) : (
-                                <FileIcon className="h-8 w-8 shrink-0" />
-                              )}
-                              <div className="flex flex-col">
-                                <span className="max-w-[200px] truncate text-sm">
-                                  {field.state.value.name}
-                                </span>
-                                <span className="text-muted-foreground text-xs">
-                                  ({(field.state.value.size / 1024).toFixed(1)}{" "}
-                                  KB)
-                                </span>
-                              </div>
-                            </div>
-                            <Button
-                              className="h-8 w-8"
-                              onClick={() => field.handleChange(undefined)}
-                              size="icon"
-                              type="button"
-                              variant="ghost"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Dropzone
-                            accept={{
-                              "image/*": [".png", ".jpg", ".jpeg"],
-                              "application/pdf": [".pdf"],
-                            }}
-                            maxFiles={1}
-                            onDrop={(acceptedFiles) => {
-                              if (acceptedFiles.length > 0) {
-                                field.handleChange(acceptedFiles[0]);
-                              }
-                            }}
-                          >
-                            <DropzoneEmptyState />
-                          </Dropzone>
-                        )}
-                      </div>
-                      {field.state.meta.errors.length > 0 ? (
-                        <p className="font-medium text-destructive text-sm">
-                          {field.state.meta.errors.join(", ")}
-                        </p>
-                      ) : null}
+                <div className="space-y-4">
+                  {/* Bank Transfer Details */}
+                  <div className="flex flex-col items-center space-y-3 rounded-lg border bg-muted/30 p-6">
+                    <h4 className="font-medium text-lg">
+                      Bank Transfer Details
+                    </h4>
+                    <div className="relative h-40 w-40">
+                      <Image
+                        alt="BPI QR Code"
+                        className="rounded-md object-contain"
+                        fill
+                        src={IBCBPIQRCode}
+                      />
                     </div>
-                  )}
-                </form.AppField>
+                    <p className="text-muted-foreground text-sm">
+                      BPI - 000XXXXXXXX
+                    </p>
+                  </div>
+
+                  <form.AppField name="paymentProof">
+                    {(field) => (
+                      <div className="space-y-2">
+                        <Label>Upload Proof of Payment *</Label>
+                        <div className="rounded-lg border bg-background p-4">
+                          {field.state.value ? (
+                            <div className="flex items-center justify-between rounded border bg-muted/20 p-3">
+                              <div className="flex items-center gap-3 overflow-hidden">
+                                {proofPreview ? (
+                                  <Image
+                                    alt="Payment proof preview"
+                                    className="h-16 w-16 rounded object-contain"
+                                    height={64}
+                                    src={proofPreview}
+                                    width={64}
+                                  />
+                                ) : (
+                                  <FileIcon className="h-8 w-8 shrink-0" />
+                                )}
+                                <div className="flex flex-col">
+                                  <span className="max-w-[200px] truncate text-sm">
+                                    {field.state.value.name}
+                                  </span>
+                                  <span className="text-muted-foreground text-xs">
+                                    (
+                                    {(field.state.value.size / 1024).toFixed(1)}{" "}
+                                    KB)
+                                  </span>
+                                </div>
+                              </div>
+                              <Button
+                                className="h-8 w-8"
+                                onClick={() => field.handleChange(undefined)}
+                                size="icon"
+                                type="button"
+                                variant="ghost"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Dropzone
+                              accept={{
+                                "image/png": [".png"],
+                                "image/jpeg": [".jpeg"],
+                                "image/jpg": [".jpg"],
+                              }}
+                              maxFiles={1}
+                              maxSize={5 * 1024 * 1024}
+                              onDrop={(acceptedFiles) => {
+                                if (acceptedFiles.length > 0) {
+                                  field.handleChange(acceptedFiles[0]);
+                                }
+                              }}
+                            >
+                              <DropzoneEmptyState />
+                            </Dropzone>
+                          )}
+                        </div>
+                        <FieldError errors={field.state.meta.errors} />
+                      </div>
+                    )}
+                  </form.AppField>
+                </div>
               )
             }
           </form.Subscribe>

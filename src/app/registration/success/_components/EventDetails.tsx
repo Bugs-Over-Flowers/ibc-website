@@ -74,9 +74,7 @@ export default async function EventDetails({
                 The dates of the event are subject for changes. Please stay
                 tuned for any announcements.
               </li>
-              <li>
-                Please present your QR code during the event for check-in.
-              </li>
+              <li>Please present your QR code during the event.</li>
               <li>If you have any questions, please contact us.</li>
             </AlertDescription>
           </Alert>
@@ -85,8 +83,8 @@ export default async function EventDetails({
         <CardHeader>
           <CardTitle>Please download your QR code.</CardTitle>
           <CardDescription>
-            This will be used for check-in during the event for you and the
-            people you registered.
+            This will be used during the event for you and the people you
+            registered.
           </CardDescription>
         </CardHeader>
         <CardContent>

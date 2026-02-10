@@ -2,11 +2,9 @@
 
 import type { Route } from "next";
 import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TableCell, TableRow } from "@/components/ui/table";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
 interface MembersTableRowProps {
@@ -16,85 +14,108 @@ interface MembersTableRowProps {
 export function MembersTableRow({ member }: MembersTableRowProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = member.logoImageURL && !imageError;
+  const router = useRouter();
+  const lastTapRef = useRef<number>(0);
+
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTapRef.current;
+
+    if (timeSinceLastTap < 300) {
+      router.push(
+        `/admin/application/${member.primaryApplicationId}?source=members` as Route,
+      );
+    }
+
+    lastTapRef.current = now;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      router.push(
+        `/admin/application/${member.primaryApplicationId}?source=members` as Route,
+      );
+    }
+  };
+
   return (
-    <TableRow key={member.businessMemberId}>
-      <TableCell className="py-2 font-medium md:py-4">
-        <div className="flex min-w-0 max-w-96 items-center gap-2">
-          <div className="shrink-0">
-            {showImage ? (
-              <Image
-                alt={member.businessName}
-                className="h-12 w-12 shrink-0 rounded object-cover"
-                height={40}
-                onError={() => setImageError(true)}
-                src={member.logoImageURL as string}
-                unoptimized
-                width={40}
-              />
-            ) : (
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-gray-100 font-semibold text-gray-600 text-xs sm:h-10 sm:w-10 sm:text-sm">
-                {member.businessName.charAt(0).toUpperCase()}
-              </div>
-            )}
+    <button
+      className="flex w-full cursor-pointer flex-col gap-3 overflow-hidden rounded-lg border bg-background p-3 text-left shadow-sm md:flex-row md:items-center md:gap-4"
+      onClick={handleDoubleTap}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      type="button"
+    >
+      {/* Image with status badge */}
+      <div className="relative aspect-square h-auto w-full shrink-0 md:aspect-auto md:h-40 md:w-40">
+        {showImage ? (
+          <Image
+            alt={member.businessName}
+            className="h-full w-full rounded object-cover"
+            height={160}
+            onError={() => setImageError(true)}
+            priority={false}
+            sizes="(max-width: 768px) 100vw, 160px"
+            src={member.logoImageURL as string}
+            unoptimized
+            width={160}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center rounded bg-muted font-semibold text-3xl text-muted-foreground">
+            {member.businessName.charAt(0).toUpperCase()}
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="line-clamp-1 text-ellipsis font-medium text-base">
-              {member.businessName}
-            </div>
-            <div className="mt-1 space-y-1 text-muted-foreground text-xs md:hidden">
-              {member.Sector?.sectorName && (
-                <div className="line-clamp-1 text-ellipsis">
-                  {member.Sector.sectorName}
-                </div>
-              )}
-              {member.websiteURL && (
-                <a
-                  className="block truncate text-blue-600 hover:underline"
-                  href={member.websiteURL}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {member.websiteURL}
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </TableCell>
-      <TableCell className="hidden max-w-[120px] truncate md:table-cell">
-        {member.Sector?.sectorName}
-      </TableCell>
-      <TableCell className="hidden max-w-[180px] lg:table-cell">
-        <a
-          className="block truncate text-blue-600 hover:underline"
-          href={member.websiteURL}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          {member.websiteURL}
-        </a>
-      </TableCell>
-      <TableCell className="hidden whitespace-nowrap text-xs sm:table-cell md:text-sm">
-        {new Date(member.joinDate).toLocaleDateString()}
-      </TableCell>
-      <TableCell className="whitespace-nowrap text-xs md:text-sm">
-        <div className="flex justify-center">
-          <Badge className="px-2 py-1 text-xs" variant="default">
-            Active
-          </Badge>
-        </div>
-      </TableCell>
-      <TableCell className="whitespace-nowrap">
-        <Button className="h-8 px-3 text-xs" size="sm" variant="outline">
-          <Link
-            href={
-              `/admin/application/${member.primaryApplicationId}?source=members` as Route
+        )}
+        <div className="absolute top-2 left-2">
+          <Badge
+            className="bg-background text-muted-foreground capitalize"
+            variant={
+              member.membershipStatus === "paid" ? "default" : "destructive"
             }
           >
-            View Details
-          </Link>
-        </Button>
-      </TableCell>
-    </TableRow>
+            {member.membershipStatus}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Middle content */}
+      <div className="relative flex w-full flex-1 flex-col gap-2">
+        <div className="absolute top-0 right-0">
+          <p className="text-muted-foreground text-xs italic opacity-50">
+            {member.identifier}
+          </p>
+        </div>
+        <h3 className="line-clamp-1 pt-4 font-semibold text-lg md:text-2xl">
+          {member.businessName}
+        </h3>
+        <p className="line-clamp-1 text-sm">
+          {member.Sector?.sectorName || "—"}
+        </p>
+        <div className="h-px w-full bg-border" />
+        {member.websiteURL && (
+          <a
+            className="inline-block max-w-fit truncate text-blue-600 text-xs hover:underline md:text-sm"
+            href={member.websiteURL}
+            onClick={(e) => e.stopPropagation()}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {member.websiteURL}
+          </a>
+        )}
+        <p className="text-muted-foreground text-xs">
+          Join Date: {new Date(member.joinDate).toLocaleDateString()}
+        </p>
+
+        <div className="flex justify-center pt-2">
+          <p className="text-muted-foreground text-xs italic opacity-50">
+            -- Double click to view details --
+          </p>
+        </div>
+      </div>
+
+      {/* Divider on desktop */}
+      <div className="hidden h-full w-px bg-border md:block" />
+    </button>
   );
 }

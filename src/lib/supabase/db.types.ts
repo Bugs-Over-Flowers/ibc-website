@@ -26,6 +26,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          identifier: string;
           interviewId: string | null;
           landline: string;
           logoImageURL: string;
@@ -46,6 +47,7 @@ export type Database = {
           companyName: string;
           emailAddress: string;
           faxNumber: string;
+          identifier: string;
           interviewId?: string | null;
           landline: string;
           logoImageURL: string;
@@ -66,6 +68,7 @@ export type Database = {
           companyName?: string;
           emailAddress?: string;
           faxNumber?: string;
+          identifier?: string;
           interviewId?: string | null;
           landline?: string;
           logoImageURL?: string;
@@ -162,6 +165,7 @@ export type Database = {
         Row: {
           businessMemberId: string;
           businessName: string;
+          identifier: string;
           joinDate: string;
           lastPaymentDate: string | null;
           logoImageURL: string | null;
@@ -176,6 +180,7 @@ export type Database = {
         Insert: {
           businessMemberId?: string;
           businessName: string;
+          identifier: string;
           joinDate: string;
           lastPaymentDate?: string | null;
           logoImageURL?: string | null;
@@ -190,6 +195,7 @@ export type Database = {
         Update: {
           businessMemberId?: string;
           businessName?: string;
+          identifier?: string;
           joinDate?: string;
           lastPaymentDate?: string | null;
           logoImageURL?: string | null;
@@ -566,6 +572,12 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      check_member_exists:
+        | { Args: { p_identifier: string }; Returns: Json }
+        | {
+            Args: { p_application_type?: string; p_identifier: string };
+            Returns: Json;
+          };
       check_membership_expiry: { Args: never; Returns: undefined };
       compute_primary_application_id: {
         Args: { p_member_id: string };
@@ -620,7 +632,6 @@ export type Database = {
           venue: string;
         }[];
       };
-      get_event_checkin_list: { Args: { p_event_id: string }; Returns: Json };
       get_event_participant_list: {
         Args: { p_event_id: string; p_search_text?: string };
         Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
@@ -701,28 +712,17 @@ export type Database = {
         };
         Returns: Json;
       };
-      submit_membership_application:
-        | {
-            Args: {
-              p_application_member_type: string;
-              p_application_type: string;
-              p_company_details: Json;
-              p_payment_method: string;
-              p_payment_proof_url?: string;
-              p_representatives: Json;
-            };
-            Returns: Json;
-          }
-        | {
-            Args: {
-              p_application_type: string;
-              p_company_details: Json;
-              p_payment_method: string;
-              p_payment_proof_url?: string;
-              p_representatives: Json;
-            };
-            Returns: Json;
-          };
+      submit_membership_application: {
+        Args: {
+          p_application_member_type: string;
+          p_application_type: string;
+          p_company_details: Json;
+          p_payment_method: string;
+          p_payment_proof_url?: string;
+          p_representatives: Json;
+        };
+        Returns: Json;
+      };
       update_event_details: {
         Args: {
           p_description?: string;

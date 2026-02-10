@@ -255,7 +255,7 @@ function PaymentProofUpload({ form }: PaymentProofUploadProps) {
                         <Dropzone
                           accept={{
                             "image/png": [".png"],
-                            "image/jpeg": [".jpg"],
+                            "image/jpeg": [".jpeg"],
                             "image/jpg": [".jpg"],
                           }}
                           maxFiles={1}

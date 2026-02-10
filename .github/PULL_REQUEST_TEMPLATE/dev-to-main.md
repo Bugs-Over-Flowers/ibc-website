@@ -27,7 +27,6 @@
 - [ ] No new security vulnerabilities (bun audit)
 - [ ] Auth flows tested (if modified)
 - [ ] RLS policies reviewed (if database changes)
-- [ ] Supabase advisors checked (bun run gen:types + check advisors)
 
 ## 🗄️ Supabase-Specific
 
@@ -36,8 +35,8 @@
 
 ## 🛑 Deployment Manifest
 
-- [ ] **Database Migrations:** (Are there schema changes? Provide script name/order)
-- [ ] **Environment Variables:** (Do we need to add new keys to Vercel/AWS/Heroku?)
+- [ ] **Database Migrations:** (Are there schema changes?)
+- [ ] **Environment Variables:** (Are new env vars required?)
 - [ ] **3rd Party Dependencies:** (Did we update packages/SDKs?)
 - [ ] **None:** (Safe code-only deploy)
 
@@ -46,7 +45,6 @@
 ## ✅ Sprint Definition of Done (DoD)
 
 - [ ] **Definition of Done:** All staging tickets have been verified.
-- [ ] **Product Sign-off:** Product Owner has reviewed and accepted the features.
 - [ ] **Mobile Responsive:** Verified on mobile devices/simulators.
 - [ ] **Clean Up:** Feature flags removed (if applicable) / Logs cleaned.
 
@@ -58,4 +56,8 @@
 
 ## ⚠️ Known Issues / Technical Debt
 
--
+- 
+
+## Concerns not addressed in this release:
+
+- 

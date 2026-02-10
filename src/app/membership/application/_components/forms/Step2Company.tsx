@@ -11,21 +11,19 @@ import {
   Dropzone,
   DropzoneEmptyState,
 } from "@/components/ui/shadcn-io/dropzone";
+import type { Sector } from "@/server/membership/queries/getSectors";
 
 interface StepProps {
   form: ReturnType<typeof useMembershipStep2>;
+  sectors: Sector[];
 }
 
-// Mock sectors - replace with DB fetch if available
-const sectors = [
-  { value: "1", label: "Technology" },
-  { value: "2", label: "Finance" },
-  { value: "3", label: "Manufacturing" },
-  { value: "4", label: "Retail" },
-  { value: "5", label: "Services" },
-];
+export function Step2Company({ form, sectors }: StepProps) {
+  const sectorOptions = sectors.map((sector) => ({
+    value: String(sector.sectorId),
+    label: sector.sectorName,
+  }));
 
-export function Step2Company({ form }: StepProps) {
   const logoImage = useStore(form.store, (state) => state.values.logoImage);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -62,7 +60,7 @@ export function Step2Company({ form }: StepProps) {
           {(field) => (
             <field.SelectField
               label="Industry/Sector"
-              options={sectors}
+              options={sectorOptions}
               placeholder="Select industry"
             />
           )}
@@ -101,13 +99,69 @@ export function Step2Company({ form }: StepProps) {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <form.AppField name="landline">
             {(field) => (
-              <field.TextField label="Landline" placeholder="(033) XXX-XXXX" />
+              <field.TextField
+                label="Landline"
+                onKeyDown={(e) => {
+                  // Allow: backspace, delete, tab, escape, enter, home, end, arrows
+                  if (
+                    [
+                      "Backspace",
+                      "Delete",
+                      "Tab",
+                      "Escape",
+                      "Enter",
+                      "Home",
+                      "End",
+                      "ArrowLeft",
+                      "ArrowRight",
+                    ].includes(e.key) ||
+                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    ((e.ctrlKey || e.metaKey) &&
+                      ["a", "c", "v", "x"].includes(e.key))
+                  ) {
+                    return;
+                  }
+                  // Block if not a number or allowed special characters
+                  if (!/[0-9()\-\s]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="(033) XXX-XXXX"
+              />
             )}
           </form.AppField>
 
           <form.AppField name="faxNumber">
             {(field) => (
-              <field.TextField label="Telefax" placeholder="XXXX-XXXX" />
+              <field.TextField
+                label="Telefax"
+                onKeyDown={(e) => {
+                  // Allow: backspace, delete, tab, escape, enter, home, end, arrows
+                  if (
+                    [
+                      "Backspace",
+                      "Delete",
+                      "Tab",
+                      "Escape",
+                      "Enter",
+                      "Home",
+                      "End",
+                      "ArrowLeft",
+                      "ArrowRight",
+                    ].includes(e.key) ||
+                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    ((e.ctrlKey || e.metaKey) &&
+                      ["a", "c", "v", "x"].includes(e.key))
+                  ) {
+                    return;
+                  }
+                  // Block if not a number or hyphen
+                  if (!/[0-9-]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="XXXX-XXXX"
+              />
             )}
           </form.AppField>
 
@@ -115,7 +169,32 @@ export function Step2Company({ form }: StepProps) {
             {(field) => (
               <field.TextField
                 label="Mobile Number"
-                placeholder="+63XXXXXXXXX"
+                onKeyDown={(e) => {
+                  // Allow: backspace, delete, tab, escape, enter, home, end, arrows
+                  if (
+                    [
+                      "Backspace",
+                      "Delete",
+                      "Tab",
+                      "Escape",
+                      "Enter",
+                      "Home",
+                      "End",
+                      "ArrowLeft",
+                      "ArrowRight",
+                    ].includes(e.key) ||
+                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    ((e.ctrlKey || e.metaKey) &&
+                      ["a", "c", "v", "x"].includes(e.key))
+                  ) {
+                    return;
+                  }
+                  // Block if not a number or plus sign
+                  if (!/[0-9+]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="09XXXXXXXXX"
               />
             )}
           </form.AppField>

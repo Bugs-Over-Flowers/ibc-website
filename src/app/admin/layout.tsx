@@ -26,7 +26,7 @@ export default function AdminLayout({
             <Suspense fallback={<MobileHeaderSkeleton />}>
               <MobileHeader />
             </Suspense>
-            <div className="p-4 md:p-6">{children}</div>
+            <div className="h-full w-full p-4 md:p-6">{children}</div>
           </main>
         </div>
       </TooltipProvider>

@@ -1,3 +1,4 @@
+import type { TextareaHTMLAttributes } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
@@ -8,7 +9,6 @@ interface TextareaFieldProps {
   description?: string;
   className?: string;
   placeholder?: string;
-  rows?: number;
 }
 
 function TextareaField({
@@ -16,8 +16,8 @@ function TextareaField({
   description,
   className,
   placeholder,
-  rows,
-}: TextareaFieldProps) {
+  ...textareaProps
+}: TextareaFieldProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
@@ -31,8 +31,8 @@ function TextareaField({
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         placeholder={placeholder}
-        rows={rows}
         value={field.state.value ?? ""}
+        {...textareaProps}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} />

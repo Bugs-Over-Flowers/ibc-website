@@ -6,18 +6,15 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 interface RegistrationsButtonProps {
   eventId: string;
-  onAction: () => void;
 }
 
 export default function RegistrationsButton({
   eventId,
-  onAction,
 }: RegistrationsButtonProps) {
   const router = useRouter();
 
   const handleViewRegistrations = () => {
     router.push(`/admin/events/${eventId}/registration-list?tab=registrations`);
-    onAction();
   };
 
   return (

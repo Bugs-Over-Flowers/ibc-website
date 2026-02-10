@@ -1,7 +1,6 @@
-"use client";
-
 import { Calendar, DollarSign, MapPin } from "lucide-react";
 import Image from "next/image";
+import { Suspense } from "react";
 import { formatFullDateTime } from "@/lib/events/eventUtils";
 import type { EventWithStatus } from "../../types/event";
 import EventActionsDropdown from "./EventActionsDropdown";
@@ -49,10 +48,12 @@ export default function EventRow({ event }: EventRowProps) {
               {event.eventType}
             </span>
             <div className="flex items-center justify-end">
-              <EventActionsDropdown
-                eventId={event.eventId}
-                status={event.computedStatus}
-              />
+              <Suspense>
+                <EventActionsDropdown
+                  eventId={event.eventId}
+                  status={event.computedStatus}
+                />
+              </Suspense>
             </div>
           </div>
           <h3 className="line-clamp-2 font-semibold text-lg md:text-xl">

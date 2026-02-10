@@ -42,6 +42,7 @@ ON CONFLICT ("sectorId") DO UPDATE SET
 -- =============================================================================
 INSERT INTO "Application" (
   "applicationId",
+  "identifier",
   "businessMemberId",
   "sectorId",
   "logoImageURL",
@@ -60,6 +61,7 @@ INSERT INTO "Application" (
 ) VALUES
   (
     gen_random_uuid(),
+    'ibc-app-test001',
     NULL,
     1,
     'https://test-company.com/logo.png',
@@ -78,6 +80,7 @@ INSERT INTO "Application" (
   ),
   (
     gen_random_uuid(),
+    'ibc-app-test002',
     NULL,
     2,
     'https://sample-corp.com/logo.png',

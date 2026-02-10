@@ -6,13 +6,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const menuItemKeys = [
-  "dashboard",
-  "events",
-  "check-in",
-  "members",
-  "application",
-];
+const menuItemKeys = ["dashboard", "events", "members", "application"];
 
 export function SidebarMenuSkeleton() {
   return (

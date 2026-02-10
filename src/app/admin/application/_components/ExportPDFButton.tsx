@@ -84,7 +84,7 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
             <div class="value">${new Date(application.applicationDate).toLocaleDateString()}</div>
             
             <div class="label">Status:</div>
-            <div class="value">${application.memberId ? "Approved" : "Pending"}</div>
+            <div class="value">${application.businessMemberId ? "Approved" : "Pending"}</div>
           </div>
 
           <h2>Company Information</h2>
