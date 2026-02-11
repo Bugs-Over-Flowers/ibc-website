@@ -26,6 +26,9 @@ import { submitRegistrationRPC } from "@/server/registration/actions/submitRegis
  */
 export const useSubmitRegistration = () => {
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const sponsoredRegistrationId = useRegistrationStore(
+    (state) => state.sponsoredRegistrationId,
+  );
 
   const setCreatedRegistrationId = useRegistrationStore(
     (state) => state.setCreatedRegistrationId,
@@ -67,6 +70,7 @@ export const useSubmitRegistration = () => {
           ? { paymentMethod: "online", path: paymentProofPath }
           : { paymentMethod: "onsite" },
         step4: registrationData.step4,
+        sponsoredRegistrationId: sponsoredRegistrationId || null,
       });
 
       setCreatedRegistrationId(registrationId);

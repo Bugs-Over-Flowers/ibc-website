@@ -1,18 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
 import { deleteSR } from "@/server/sponsored-registrations/actions/deleteSR";
 import { updateSRStatus } from "@/server/sponsored-registrations/actions/updateSR";
-import { SponsoredRegistrationsRow } from "./SponsoredRegistrationsRow";
+import { SponsoredRegistrationCard } from "./SponsoredRegistrationCard";
 
 type Event = Database["public"]["Tables"]["Event"]["Row"];
 type SponsoredRegistration =
@@ -21,12 +16,50 @@ type SponsoredRegistration =
 interface SponsoredRegistrationsListProps {
   event: Event;
   registrations: SponsoredRegistration[];
+  pageSize?: number;
 }
 
 export function SponsoredRegistrationsList({
   event,
   registrations,
+  pageSize = 10,
 }: SponsoredRegistrationsListProps) {
+  const router = useRouter();
+  const [displayedCount, setDisplayedCount] = useState(pageSize);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const lastEntry = entries[0];
+        if (
+          lastEntry.isIntersecting &&
+          displayedCount < registrations.length &&
+          !isLoadingMore
+        ) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setDisplayedCount((prev) =>
+              Math.min(prev + pageSize, registrations.length),
+            );
+            setIsLoadingMore(false);
+          }, 300);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [displayedCount, registrations.length, pageSize, isLoadingMore]);
+
+  const displayedRegistrations = registrations.slice(0, displayedCount);
+
   const handleCopyLink = (uuid: string, eventId: string) => {
     const link = `${window.location.origin}/events/${eventId}/register?sr=${uuid}`;
     navigator.clipboard.writeText(link);
@@ -49,15 +82,11 @@ export function SponsoredRegistrationsList({
     }
 
     toast.success("Status updated!", { id: toastId });
+    router.refresh();
   };
 
   const handleDeleteClick = async (registration: SponsoredRegistration) => {
-    const confirmed = confirm(
-      `Are you sure you want to delete the sponsored registration by ${registration.sponsoredBy}?`,
-    );
-
-    if (!confirmed) return;
-
+    setIsDeleting(true);
     const toastId = toast.loading("Deleting...");
 
     const { error } = await tryCatch(
@@ -67,41 +96,46 @@ export function SponsoredRegistrationsList({
       }),
     );
 
+    setIsDeleting(false);
+
     if (error) {
       toast.error(`Failed to delete: ${error}`, { id: toastId });
       return;
     }
 
     toast.success("Deleted successfully!", { id: toastId });
+    router.refresh();
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Sponsored By</TableHead>
-          <TableHead>Fee Deduction</TableHead>
-          <TableHead>Max Guests</TableHead>
-          <TableHead>Used</TableHead>
-          <TableHead>Remaining</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Created</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {registrations.map((registration, index) => (
-          <SponsoredRegistrationsRow
-            event={event}
-            index={index}
-            key={registration.sponsoredRegistrationId}
-            onCopyLink={handleCopyLink}
-            onDeleteClick={handleDeleteClick}
-            onToggleStatus={handleToggleStatus}
-            registration={registration}
-          />
-        ))}
-      </TableBody>
-    </Table>
+    <div className="space-y-3">
+      {displayedRegistrations.map((registration, _index) => (
+        <SponsoredRegistrationCard
+          event={event}
+          key={registration.sponsoredRegistrationId}
+          onCopyLink={handleCopyLink}
+          onDeleteClick={handleDeleteClick}
+          onToggleStatus={handleToggleStatus}
+          registration={registration}
+        />
+      ))}
+
+      {displayedCount < registrations.length && (
+        <div className="py-4 text-center" ref={loaderRef}>
+          {isLoadingMore ? (
+            <span className="text-muted-foreground text-sm">
+              Loading more...
+            </span>
+          ) : (
+            <span className="text-muted-foreground text-sm">
+              Scroll to load more
+            </span>
+          )}
+        </div>
+      )}
+    </div>
   );
+}
+function setIsDeleting(_arg0: boolean) {
+  throw new Error("Function not implemented.");
 }

@@ -1,26 +1,18 @@
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
 import { getSRbyEventId } from "@/server/sponsored-registrations/queries/getSRbyEventId";
-import { SponsoredRegistrationsList } from "./SponsoredRegistrationsList";
+import { SponsoredRegistrationsFilterWrapper } from "./SponsoredRegistrationsFilterWrapper";
 
 type Event = Database["public"]["Tables"]["Event"]["Row"];
-type SponsoredRegistration =
-  Database["public"]["Tables"]["SponsoredRegistration"]["Row"];
 
 interface SponsoredRegistrationsTableProps {
   event: Event;
   eventId: string;
-  onCopyLink?: (uuid: string) => void;
-  onToggleStatus?: (id: string) => void;
-  onDeleteClick?: (registration: SponsoredRegistration) => void;
 }
 
 export default async function SponsoredRegistrationsTable({
   event,
   eventId,
-  onCopyLink = () => {},
-  onToggleStatus = () => {},
-  onDeleteClick = () => {},
 }: SponsoredRegistrationsTableProps) {
   const { data: sponsoredRegistrations, error } = await tryCatch(
     getSRbyEventId(eventId),
@@ -47,11 +39,9 @@ export default async function SponsoredRegistrationsTable({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <SponsoredRegistrationsList
-        event={event}
-        registrations={sponsoredRegistrations}
-      />
-    </div>
+    <SponsoredRegistrationsFilterWrapper
+      event={event}
+      registrations={sponsoredRegistrations}
+    />
   );
 }

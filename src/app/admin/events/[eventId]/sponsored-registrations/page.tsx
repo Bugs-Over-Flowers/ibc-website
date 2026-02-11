@@ -1,46 +1,29 @@
-import { ArrowLeft } from "lucide-react";
-import type { Route } from "next";
 import { cookies } from "next/headers";
-import Link from "next/link";
 import { Suspense } from "react";
-import { Button } from "@/components/ui/button";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
-import { TableSkeleton } from "../registration-list/_components/page-skeletons";
-import SponsoredRegistrationsTable from "./_components/SponsoredRegistrationsTable";
+import { BackButton } from "./_components/BackButton";
+import { SponsoredRegistrationsTableWrapper } from "./_components/SponsoredRegistrationsTableWrapper";
+import SponsoredRegistrationsLoading from "./loading";
 
 type SponsoredRegistrationsPageProps =
   PageProps<"/admin/events/[eventId]/sponsored-registrations">;
 
-export default function SponsoredRegistrationsPageWrapper({
+export default function SponsoredRegistrationsPage({
   params,
 }: SponsoredRegistrationsPageProps) {
   return (
-    <main className="flex flex-col gap-4 p-5 md:p-10">
-      <Link href={`/admin/events` as Route}>
-        <Button size="sm" variant="outline">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Events
-        </Button>
-      </Link>
-
-      <div className="space-y-4">
-        <div>
-          <h1 className="font-bold text-3xl">Sponsored Registrations</h1>
-          <p className="text-muted-foreground">
-            Manage sponsored registration links and track sponsored guest usage
-          </p>
-        </div>
-
-        <Suspense fallback={<TableSkeleton columns={8} />}>
-          <SponsoredRegistrationsTableWrapper params={params} />
-        </Suspense>
-      </div>
-    </main>
+    <div className="space-y-6">
+      <Suspense fallback={<SponsoredRegistrationsLoading />}>
+        <BackButtonWrapper params={params} />
+        <EventHeader params={params} />
+        <SponsoredRegistrationsTableWrapper params={params} />
+      </Suspense>
+    </div>
   );
 }
 
-async function SponsoredRegistrationsTableWrapper({
+async function EventHeader({
   params,
 }: {
   params: SponsoredRegistrationsPageProps["params"];
@@ -53,9 +36,26 @@ async function SponsoredRegistrationsTableWrapper({
     getEventById(requestCookies, { id: eventId }),
   );
 
-  if (!event) {
-    return <div>Event not found</div>;
-  }
+  return (
+    <div>
+      <div className="space-y-1">
+        <p className="text-muted-foreground text-sm">Sponsored Registration</p>
+        <h1 className="font-bold text-3xl text-foreground">
+          {event?.eventTitle || "Sponsored Registrations"}
+        </h1>
+      </div>
+      <p className="mt-2 text-muted-foreground">
+        Manage sponsored registration links and track sponsored guest usage
+      </p>
+    </div>
+  );
+}
 
-  return <SponsoredRegistrationsTable event={event} eventId={eventId} />;
+async function BackButtonWrapper({
+  params,
+}: {
+  params: SponsoredRegistrationsPageProps["params"];
+}) {
+  const { eventId } = await params;
+  return <BackButton eventId={eventId} />;
 }

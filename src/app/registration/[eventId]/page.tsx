@@ -9,14 +9,15 @@ import { Spinner } from "@/components/ui/spinner";
 import type { RegistrationRouteProps } from "@/lib/types/route";
 import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
+import { getSponsoredRegistrationByUuid } from "@/server/sponsored-registrations/queries/getSponsoredRegistrationByUuid";
 import NotReadyEvent from "./_components/NotReadyEvent";
 import RegistrationInformation from "./_components/RegistrationInfoHeader";
 
-export default function Page({ params }: RegistrationRouteProps) {
+export default function Page({ params, searchParams }: RegistrationRouteProps) {
   return (
     <main className="flex h-screen w-full items-center justify-center p-5">
       <Suspense fallback={<Spinner />}>
-        <RegistrationPage params={params} />
+        <RegistrationPage params={params} searchParams={searchParams} />
       </Suspense>
     </main>
   );
@@ -24,10 +25,15 @@ export default function Page({ params }: RegistrationRouteProps) {
 
 interface RegistrationPageProps {
   params: RegistrationRouteProps["params"];
+  searchParams: RegistrationRouteProps["searchParams"];
 }
 
-async function RegistrationPage({ params }: RegistrationPageProps) {
+async function RegistrationPage({
+  params,
+  searchParams,
+}: RegistrationPageProps) {
   const { eventId } = await params;
+  const { sr: sponsorUuid } = await searchParams;
   const requestCookies = (await cookies()).getAll();
 
   // use a Promise.all to fetch event details and members concurrently
@@ -36,6 +42,30 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
     getRegistrationEventDetails(requestCookies, { eventId }),
     getAllMembers(requestCookies),
   ]);
+
+  // Validate sponsored registration if UUID provided
+  let sponsorInfo: {
+    sponsorUuid: string;
+    sponsoredRegistrationId: string;
+    feeDeduction: number;
+  } | null = null;
+
+  if (sponsorUuid && typeof sponsorUuid === "string") {
+    const sponsoredRegistration =
+      await getSponsoredRegistrationByUuid(sponsorUuid);
+
+    if (
+      sponsoredRegistration &&
+      sponsoredRegistration.status === "active" &&
+      sponsoredRegistration.eventId === eventId
+    ) {
+      sponsorInfo = {
+        sponsorUuid,
+        sponsoredRegistrationId: sponsoredRegistration.sponsoredRegistrationId,
+        feeDeduction: Number(sponsoredRegistration.feeDeduction),
+      };
+    }
+  }
 
   // Handle if event is draft
   if (eventData.eventType === null) {
@@ -59,7 +89,12 @@ async function RegistrationPage({ params }: RegistrationPageProps) {
           </Link>
         </div>
 
-        <RegistrationForm members={members} />
+        <RegistrationForm
+          members={members}
+          sponsoredRegistrationId={sponsorInfo?.sponsoredRegistrationId}
+          sponsorFeeDeduction={sponsorInfo?.feeDeduction}
+          sponsorUuid={sponsorInfo?.sponsorUuid}
+        />
       </div>
     </div>
   );

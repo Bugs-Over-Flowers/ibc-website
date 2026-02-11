@@ -18,10 +18,13 @@ export async function getSRbyEventId(
   });
 
   if (error) {
-    console.error("Error fetching sponsored registrations:", error);
-    throw new Error(
-      `Failed to fetch sponsored registrations: ${error.message}`,
+    console.error(
+      "Error fetching sponsored registrations:",
+      error.code,
+      error.message,
+      error.details,
     );
+    throw new Error("Failed to fetch sponsored registrations");
   }
 
   return (data as SponsoredRegistration[]) || [];
