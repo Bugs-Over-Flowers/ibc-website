@@ -10,7 +10,6 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { motion } from "motion/react";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -20,8 +19,6 @@ import type { Database } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { getStatusBadgeVariant } from "./utils";
-
-const MotionArticle = motion.article;
 
 type Event = Database["public"]["Tables"]["Event"]["Row"];
 type SponsoredRegistration =
@@ -33,7 +30,6 @@ interface SponsoredRegistrationCardProps {
   onCopyLink: (uuid: string, eventId: string) => void;
   onToggleStatus: (id: string) => void;
   onDeleteClick: (registration: SponsoredRegistration) => void;
-  index?: number;
 }
 
 export function SponsoredRegistrationCard({
@@ -42,7 +38,6 @@ export function SponsoredRegistrationCard({
   onCopyLink,
   onToggleStatus,
   onDeleteClick,
-  index = 0,
 }: SponsoredRegistrationCardProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -94,16 +89,14 @@ export function SponsoredRegistrationCard({
 
   return (
     <>
-      <MotionArticle
-        animate={{ opacity: 1, y: 0 }}
+      <button
         className={cn(
-          "group relative w-full rounded-xl border bg-card",
+          "group relative w-full rounded-xl border bg-card text-left",
           "cursor-pointer transition-all duration-200",
           "hover:border-primary/50 hover:bg-accent/5 hover:shadow-lg",
         )}
-        initial={{ opacity: 0, y: 10 }}
         onClick={handleViewDetails}
-        transition={{ delay: index * 0.05 }}
+        type="button"
       >
         <div className="flex flex-col gap-5 p-5">
           {/* Header Row - Name and Badge */}
@@ -299,7 +292,7 @@ export function SponsoredRegistrationCard({
             </Button>
           </div>
         </div>
-      </MotionArticle>
+      </button>
 
       <ConfirmDeleteDialog
         isLoading={isDeleting}

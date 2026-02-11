@@ -676,6 +676,40 @@ export type Database = {
           venue: string;
         }[];
       };
+      get_all_sponsored_registrations: {
+        Args: never;
+        Returns: {
+          created_at: string;
+          event_end_date: string;
+          event_id: string;
+          event_name: string;
+          event_start_date: string;
+          max_sponsored_guests: number;
+          sponsored_by: string;
+          sponsored_registration_id: string;
+          status: string;
+          updated_at: string;
+          used_count: number;
+          uuid: string;
+        }[];
+      };
+      get_all_sponsored_registrations_with_event: {
+        Args: never;
+        Returns: {
+          created_at: string;
+          event_end_date: string;
+          event_id: string;
+          event_start_date: string;
+          event_title: string;
+          max_sponsored_guests: number;
+          sponsored_by: string;
+          sponsored_registration_id: string;
+          status: string;
+          updated_at: string;
+          used_count: number;
+          uuid: string;
+        }[];
+      };
       get_evaluation_by_id: {
         Args: { eval_id: string };
         Returns: {
