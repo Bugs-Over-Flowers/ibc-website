@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { getEventDays } from "@/server/events/actions/getEventDays";
+import type { getEventDays } from "@/server/events/mutations/getEventDays";
 import CheckInListStats from "./CheckInListStats";
 
 interface CheckInListTabWrapperProps {

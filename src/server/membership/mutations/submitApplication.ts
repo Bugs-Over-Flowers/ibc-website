@@ -6,7 +6,7 @@ import {
   type MembershipApplicationInput,
   MembershipApplicationSchema,
 } from "@/lib/validation/membership/application";
-import { sendMembershipApplicationEmail } from "@/server/emails/actions/sendMembershipApplicationEmail";
+import { sendMembershipApplicationEmail } from "@/server/emails/mutations/sendMembershipApplicationEmail";
 
 type SubmitApplicationOutput = {
   applicationId: string;
