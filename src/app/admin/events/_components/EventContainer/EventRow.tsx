@@ -60,18 +60,6 @@ export default function EventRow({ event }: EventRowProps) {
           <h3 className="line-clamp-2 font-semibold text-lg md:text-xl">
             {event.eventTitle}
           </h3>
-          {event.description ? (
-            <div className="line-clamp-2">
-              <RichTextDisplay
-                className="text-muted-foreground text-sm"
-                content={event.description}
-              />
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-sm italic">
-              No description available.
-            </p>
-          )}
         </div>
 
         <div className="grid grid-cols-1 gap-4 border-t pt-2 sm:grid-cols-2 xl:grid-cols-3">
