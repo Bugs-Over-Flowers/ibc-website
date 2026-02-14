@@ -619,8 +619,22 @@ function ItemsList() {
 
 ### Caching Components / Data
 
-Use the "use cache" directive inside query functions, inside react server components,
-or on top of the file to cache data. Add a cacheLife() and a cacheTag() if needed.
+Use the `"use cache"` directive only for queries with good cache reuse. Prefer explicit cache profiles and centralized tags.
+
+#### Project Cache Rules
+
+- Use cache profiles from `next.config.ts`: `publicHours`, `admin5m`, `realtime60s`
+- Use centralized tags from `src/lib/cache/tags.ts`
+- In cached queries, pass `cookieStore.getAll()` from the caller into `createClient(requestCookies)`
+- In mutations, prefer `updateTag(...)` for admin-critical freshness
+- Use `revalidateTag(tag, "max")` only for eventual consistency in public flows
+- Use `revalidatePath(...)` only when route-level refresh is explicitly needed
+
+#### What to Cache
+
+- Cache low-cardinality, shared, repeat-read queries (public lists, admin stats, registration/check-in lists)
+- Avoid caching high-cardinality search/filter/cursor queries unless proven reusable
+- Avoid caching time-dependent queries (`new Date()`, `Date.now()`) unless intentional staleness is acceptable
 
 ```tsx
 // page.tsx -- cached file
@@ -664,9 +678,7 @@ export async function getItems(
 }
 ```
 
-In most cases, the file cannot be cached due to supabase's
-requirement of the cookies for SSR for fetching data, which requires
-to be resolved on a higher component / function.
+In most cases, resolve cookies at the caller and pass `cookieStore.getAll()` into cached query functions.
 
 ```tsx
 import { cookies } from "next/headers";
@@ -703,8 +715,9 @@ export async function getItems(
 }
 ```
 
-- cacheLife will be used to set the cache duration in seconds
-- cacheTag will be used to set a certain tag for the cache, which can be used to invalidate the cache.
+- `cacheLife(...)` defines cache profile/lifetime
+- `cacheTag(...)` defines invalidation groups
+- `updateTag(...)` is preferred for immediate admin freshness after mutations
 
 For more details, see [Next.js caching](https://nextjs.org/docs/app/building-your-application/caching),
 [CacheComponents](https://nextjs.org/docs/app/getting-started/cache-components)

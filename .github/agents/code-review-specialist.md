@@ -157,8 +157,9 @@ const form = useAppForm({
 ```typescript
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { z } from "zod";
 
 const schema = z.object({
@@ -180,8 +181,8 @@ export async function createUser(input: z.infer<typeof schema>) {
   
   if (error) throw new Error(error.message);
   
-  // 3. Revalidate
-  revalidatePath("/users");
+  // 3. Invalidate cache
+  updateTag(CACHE_TAGS.members.admin);
   return data;
 }
 ```
@@ -195,7 +196,7 @@ import { createClient } from "@/lib/supabase/server"; // Wrong client!
 export async function createUser(data: any) { // No validation!
   const supabase = await createClient(cookies); // Wrong client for mutations!
   await supabase.from("users").insert(data);
-  // Missing revalidatePath!
+  // Missing cache invalidation!
 }
 ```
 
@@ -205,7 +206,8 @@ export async function createUser(data: any) { // No validation!
 - [ ] Validates input with Zod (throws on failure)
 - [ ] Uses `createActionClient()` for mutations
 - [ ] Throws errors (not returns error objects)
-- [ ] Calls `revalidatePath()` when needed
+- [ ] Calls `updateTag(...)` for affected cache tags
+- [ ] Uses `revalidatePath(...)` only when route-level refresh is explicitly needed
 
 ### 6. Server Queries
 
@@ -244,6 +246,8 @@ export async function getUsers() {
 - [ ] Uses `createClient(requestCookies)` for queries
 - [ ] Gets cookies from `next/headers`
 - [ ] For cached queries: uses `"use cache"` and passes cookies from page level
+- [ ] For cached queries: avoids high-cardinality filter/cursor/search inputs unless justified
+- [ ] For cached queries: avoids time-dependent logic (`new Date()`, `Date.now()`) unless intentional
 
 ### 7. Supabase Client Usage
 
@@ -410,7 +414,7 @@ type DBUser = Database["public"]["Tables"]["users"]["Row"];
 **Critical (Must Fix):**
 1. Using wrong Supabase client type
 2. Not validating user input with Zod
-3. Missing `revalidatePath()` after mutations
+3. Missing cache invalidation (`updateTag(...)`) after mutations
 4. Security issues (auth checks in server actions)
 5. Not using `tryCatch` on client for throwing server actions
 
@@ -457,7 +461,7 @@ type DBUser = Database["public"]["Tables"]["users"]["Row"];
 4. ❌ Using `createClient(requestCookies)` for mutations
 5. ❌ Not wrapping server actions with `tryCatch` on client
 6. ❌ Not validating with Zod before processing input
-7. ❌ Forgetting `revalidatePath()` after mutations
+7. ❌ Forgetting `updateTag(...)` after mutations
 8. ❌ Server actions returning errors instead of throwing
 9. ❌ Not using `useAppForm` for forms
 10. ❌ Using TanStack Form directly instead of the wrapped version
@@ -491,6 +495,7 @@ type DBUser = Database["public"]["Tables"]["users"]["Row"];
 - Check `success` before accessing `data`
 
 **Caching:**
-- Use `"use cache"` for data that can be cached
-- Pass cookies from page level for cached queries
-- Call `revalidatePath()` after mutations
+- Use cache profiles (`publicHours`, `admin5m`, `realtime60s`) with `"use cache"`
+- Use centralized tags from `@/lib/cache/tags`
+- Mutations should invalidate with `updateTag(...)` first
+- Use `revalidatePath(...)` only when route-level refresh behavior is required

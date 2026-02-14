@@ -119,12 +119,15 @@ bun run gen:types
 
 ```typescript
 import "server-only";
+import { cacheTag } from "next/cache";
+import { useAdmin5mCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function getCachedData(requestCookies: RequestCookie[]) {
   "use cache";
-  cacheLife(60); // Cache for 60 seconds
-  cacheTag("users"); // Tag for invalidation
-  
+  useAdmin5mCache();
+  cacheTag(CACHE_TAGS.members.admin);
+   
   const supabase = await createClient(requestCookies);
   const { data } = await supabase.from("users").select("*");
   
@@ -137,17 +140,31 @@ export async function getCachedData(requestCookies: RequestCookie[]) {
 ```typescript
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function updateUser(id: string, data: UserUpdate) {
   const supabase = await createActionClient();
   await supabase.from("users").update(data).eq("id", id);
-  
-  // Invalidate cache
+   
+  // Admin-critical freshness
+  updateTag(CACHE_TAGS.members.admin);
+
+  // Optional route refresh behavior
   revalidatePath("/users");
-  revalidateTag("users");
+
+  // For eventual consistency public flows
+  revalidateTag(CACHE_TAGS.members.public, "max");
 }
 ```
+
+### Cache Design Rules
+
+- Prefer cache profiles from `next.config.ts`: `publicHours`, `admin5m`, `realtime60s`
+- Use centralized tags from `src/lib/cache/tags.ts` only (avoid ad-hoc strings)
+- Cache low-cardinality, shared, repeat-read queries
+- Avoid caching high-cardinality filter/cursor/search queries unless proven reusable
+- Avoid caching time-dependent queries (`new Date()`, `Date.now()`) unless staleness is intentional
 
 ## Query Patterns
 
@@ -223,6 +240,6 @@ const { error } = await supabase
 
 3. **Don't forget to regenerate types** after schema changes
 
-4. **Use proper cache invalidation** after mutations with `revalidatePath()` and `revalidateTag()`
+4. **Use proper cache invalidation** after mutations (`updateTag(...)` first; use `revalidatePath(...)` only when route refresh is needed)
 
 5. **Pass cookies from page level** for cached queries - don't read cookies inside cached functions

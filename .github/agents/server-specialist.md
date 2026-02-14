@@ -7,7 +7,7 @@ Use this agent when working with:
 - Server Queries in `src/server/[feature]/queries/`
 - Supabase server-side operations
 - Error handling with `tryCatch`
-- Cache revalidation with `revalidatePath()`
+- Cache invalidation with `updateTag()` / `revalidateTag()`
 
 ## Server Actions (Mutations)
 
@@ -16,8 +16,9 @@ Use this agent when working with:
 ```typescript
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { z } from "zod";
 
 const schema = z.object({
@@ -39,8 +40,8 @@ export async function createUser(input: z.infer<typeof schema>) {
   
   if (error) throw new Error(error.message);
   
-  // 3. Revalidate and return
-  revalidatePath("/users");
+  // 3. Invalidate and return
+  updateTag(CACHE_TAGS.members.admin);
   return data;
 }
 ```
@@ -52,7 +53,8 @@ export async function createUser(input: z.infer<typeof schema>) {
 - Can throw errors freely - use `tryCatch` on client to handle
 - **MUST** validate input with Zod schemas (throws on failure)
 - **MUST** use `createActionClient()` from `@/lib/supabase/server` for Supabase
-- **MUST** call `revalidatePath()` after mutations when needed
+- **MUST** invalidate cache after mutations (`updateTag(...)` first)
+- `revalidatePath(...)` is optional and should only be used when route-level refresh behavior is required
 
 ## Server Queries (Data Fetching)
 
@@ -82,6 +84,8 @@ import "server-only";
 
 export async function getCachedData(requestCookies: RequestCookie[]) {
   "use cache";
+  useAdmin5mCache();
+  cacheTag(CACHE_TAGS.members.admin);
   const supabase = await createClient(requestCookies);
   const { data, error } = await supabase.from("table").select("*");
   // ...
@@ -96,6 +100,8 @@ export async function getCachedData(requestCookies: RequestCookie[]) {
 - **MUST** use `createClient(requestCookies)` from `@/lib/supabase/server` for Supabase
 - Get cookies from `next/headers` and pass to `createClient()`
 - For cached queries, use `"use cache"` directive and pass cookies from page level
+- Prefer cache profiles (`publicHours`, `admin5m`, `realtime60s`) and centralized tags from `@/lib/cache/tags`
+- Avoid caching high-cardinality or time-dependent queries unless staleness is intentional
 
 ## Client-Side Error Handling
 
@@ -142,5 +148,5 @@ The result is a discriminated union based on the `success` property:
 2. **Don't use `createClient(requestCookies)`** for mutations
 3. **Always wrap server actions with `tryCatch`** on the client side
 4. **Always validate with Zod** before processing user input
-5. **Don't forget `revalidatePath()`** after mutations that affect cached data
+5. **Don't forget cache invalidation** after mutations (`updateTag(...)` first)
 6. Server actions can **throw errors freely** - the client handles them with `tryCatch`

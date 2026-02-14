@@ -321,6 +321,22 @@ export function UserForm() {
 
 **Never mix client types incorrectly** - see `.cursor/rules/supabase-rules.mdc` for details.
 
+### Caching Strategy (Next.js Cache Components)
+
+- **Use explicit cache profiles** from `next.config.ts`: `publicHours`, `admin5m`, `realtime60s`
+- **Centralize tags** in `src/lib/cache/tags.ts` (do not hardcode random tag strings)
+- **In cached queries** (`"use cache"`), use `createClient(requestCookies)` and pass `cookieStore.getAll()` from caller
+- **In mutations** (`"use server"`), use `createActionClient()` and prefer `updateTag(...)` for admin-critical freshness
+- Use `revalidateTag(tag, "max")` only for eventual-consistency/public flows where stale-while-revalidate is acceptable
+- Keep `revalidatePath(...)` only when route-level refresh behavior is explicitly required
+
+### Cache Design Rules
+
+- **Do cache** low-cardinality, shared, and repeatedly-read queries (lists, stats, public sections)
+- **Avoid caching** high-cardinality filter/cursor/search queries unless there is proven reuse
+- **Avoid caching** queries with time-dependent logic (`new Date()`, `Date.now()`) unless staleness is acceptable and intentional
+- Query arguments become part of the cache key; avoid adding unnecessary inputs to cached function signatures
+
 ## Validation
 
 **MUST use Zod schemas** for all forms. Import reusable schemas from `@/lib/validation/utils`:
@@ -344,7 +360,7 @@ To bypass (not recommended): `git commit --no-verify`
 4. **Don't use `createClient(requestCookies)`** for mutations
 5. **Always wrap server actions with `tryCatch`** on the client side
 6. **Always validate with Zod** before processing user input
-7. **Don't forget `revalidatePath()`** after mutations that affect cached data
+7. **Don't forget cache invalidation after mutations** (`updateTag(...)` first, `revalidatePath(...)` only when needed)
 
 ## Additional Resources
 
