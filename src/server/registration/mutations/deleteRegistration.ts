@@ -1,4 +1,7 @@
 "use server";
+
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 
 export const deleteRegistration = async (registrationId: string) => {
@@ -35,6 +38,12 @@ export const deleteRegistration = async (registrationId: string) => {
 
     console.log("deleted image: ", deletedImage);
   }
+
+  updateTag(CACHE_TAGS.registrations.all);
+  updateTag(CACHE_TAGS.registrations.list);
+  updateTag(CACHE_TAGS.registrations.details);
+  updateTag(CACHE_TAGS.registrations.stats);
+  updateTag(CACHE_TAGS.events.registrations);
 
   console.log("Registration deleted");
 };
