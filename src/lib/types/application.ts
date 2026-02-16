@@ -54,3 +54,21 @@ export interface MeetingDetails {
   interviewVenue: string;
   applicationIds: string[];
 }
+
+export type InterviewDetails = {
+  interviewId: string;
+  interviewDate: string;
+  interviewVenue: string;
+  status: "scheduled" | "completed" | "cancelled" | "rescheduled";
+  createdAt: string;
+};
+
+export type ApplicationStatusResponse = {
+  applicationId: string;
+  identifier: string;
+  applicationStatus: "new" | "pending" | "approved" | "rejected";
+  applicationDate: string;
+  companyName: string;
+  hasInterview: boolean;
+  interview: InterviewDetails | null;
+};
