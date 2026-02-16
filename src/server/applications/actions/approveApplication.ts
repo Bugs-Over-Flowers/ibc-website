@@ -1,6 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import {
+  computeIdentifierLookupHash,
+  encryptIdentifier,
+} from "@/lib/security/identifierEncryption";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ApplicationDecisionInput } from "@/lib/validation/application/application";
 import { applicationDecisionSchema } from "@/lib/validation/application/application";
@@ -50,6 +54,12 @@ export async function approveApplication(input: ApplicationDecisionInput) {
     throw new Error("Sector ID is required to approve application");
   }
 
+  // Encrypt identifier and compute lookup hash
+  const encryptedIdentifier = encryptIdentifier(application.identifier);
+  const identifierLookupHash = computeIdentifierLookupHash(
+    application.identifier,
+  );
+
   // Create BusinessMember record
   const { data: newMember, error: memberError } = await supabase
     .from("BusinessMember")
@@ -59,7 +69,8 @@ export async function approveApplication(input: ApplicationDecisionInput) {
       websiteURL: application.websiteURL ?? "",
       logoImageURL: application.logoImageURL,
       joinDate: new Date().toISOString(),
-      identifier: application.identifier,
+      identifier: encryptedIdentifier,
+      identifierLookupHash,
     })
     .select("businessMemberId")
     .single();

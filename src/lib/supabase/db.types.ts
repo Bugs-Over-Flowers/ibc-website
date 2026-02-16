@@ -166,6 +166,7 @@ export type Database = {
           businessMemberId: string;
           businessName: string;
           identifier: string;
+          identifierLookupHash: string | null;
           joinDate: string;
           lastPaymentDate: string | null;
           logoImageURL: string | null;
@@ -181,6 +182,7 @@ export type Database = {
           businessMemberId?: string;
           businessName: string;
           identifier: string;
+          identifierLookupHash?: string | null;
           joinDate: string;
           lastPaymentDate?: string | null;
           logoImageURL?: string | null;
@@ -196,6 +198,7 @@ export type Database = {
           businessMemberId?: string;
           businessName?: string;
           identifier?: string;
+          identifierLookupHash?: string | null;
           joinDate?: string;
           lastPaymentDate?: string | null;
           logoImageURL?: string | null;
@@ -573,9 +576,9 @@ export type Database = {
     };
     Functions: {
       check_member_exists:
-        | { Args: { p_identifier: string }; Returns: Json }
+        | { Args: { p_lookup_hash: string }; Returns: Json }
         | {
-            Args: { p_application_type?: string; p_identifier: string };
+            Args: { p_application_type?: string; p_lookup_hash: string };
             Returns: Json;
           };
       check_membership_expiry: { Args: never; Returns: undefined };
