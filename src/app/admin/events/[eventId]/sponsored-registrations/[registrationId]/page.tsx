@@ -122,6 +122,7 @@ async function DetailContent({
       <DetailBackButton />
 
       <SponsoredRegistrationHeader
+        eventId={eventId}
         eventTitle={event.eventTitle}
         sponsoredRegistration={sponsoredRegistration}
       />

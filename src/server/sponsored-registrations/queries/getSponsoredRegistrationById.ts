@@ -17,7 +17,7 @@ export async function getSponsoredRegistrationById(
     .rpc("get_sponsored_registration_by_id", {
       registration_id: id,
     })
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("Error fetching sponsored registration:", error);

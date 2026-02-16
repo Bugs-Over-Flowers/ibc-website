@@ -23,8 +23,11 @@ export default function RegistrationForm({
   const step = useRegistrationStore((state) => state.step);
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
   const setSponsorInfo = useRegistrationStore((state) => state.setSponsorInfo);
+  const clearSponsorInfo = useRegistrationStore(
+    (state) => state.clearSponsorInfo,
+  );
 
-  // Store sponsor info if provided
+  // Sync sponsor info from validated URL params
   React.useEffect(() => {
     if (
       sponsorUuid &&
@@ -36,12 +39,16 @@ export default function RegistrationForm({
         sponsoredRegistrationId,
         feeDeduction: sponsorFeeDeduction,
       });
+      return;
     }
+
+    clearSponsorInfo();
   }, [
     sponsorUuid,
     sponsoredRegistrationId,
     sponsorFeeDeduction,
     setSponsorInfo,
+    clearSponsorInfo,
   ]);
 
   if (!eventDetails) {

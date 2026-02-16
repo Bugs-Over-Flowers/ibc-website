@@ -30,6 +30,7 @@ interface RegistrationStoreActions {
     sponsoredRegistrationId: string;
     feeDeduction: number;
   }) => void;
+  clearSponsorInfo: () => void;
   resetStore: () => void;
 }
 const initialState: RegistrationStore = {
@@ -93,6 +94,12 @@ const useRegistrationStore = create<
           sponsorUuid: info.sponsorUuid,
           sponsoredRegistrationId: info.sponsoredRegistrationId,
           sponsorFeeDeduction: info.feeDeduction,
+        }),
+      clearSponsorInfo: () =>
+        set({
+          sponsorUuid: undefined,
+          sponsoredRegistrationId: undefined,
+          sponsorFeeDeduction: undefined,
         }),
       resetStore: () =>
         set((state) => ({ ...initialState, eventDetails: state.eventDetails })),

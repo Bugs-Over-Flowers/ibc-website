@@ -13,6 +13,7 @@ import { Field, FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import useRegistrationStore from "@/hooks/registration.store";
+import { cn } from "@/lib/utils";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep4 } from "../../_hooks/useRegistrationStep4";
 import RegistrationStepHeader from "./RegistrationStepHeader";
@@ -223,6 +224,7 @@ function PaymentSummarySection({
   const sponsorFeeDeduction = useRegistrationStore(
     (state) => state.sponsorFeeDeduction,
   );
+  const sponsorUuid = useRegistrationStore((state) => state.sponsorUuid);
 
   const paymentProofUrl =
     step3Data.paymentMethod === "online" && step3Data.paymentProof
@@ -236,12 +238,23 @@ function PaymentSummarySection({
     ? sponsorFeeDeduction * participantCount
     : 0;
   const total = subtotal - totalSponsorDiscount;
+  const isSponsored = !!(sponsorUuid && sponsorFeeDeduction);
 
   return (
-    <Card className="border-dashed bg-muted/30">
+    <Card
+      className={cn(
+        "border-dashed bg-muted/30",
+        isSponsored && "border-green-600/50 bg-green-50/50",
+      )}
+    >
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="flex items-center gap-2">
           <h4>Payment Summary</h4>
+          {isSponsored && (
+            <span className="ml-auto rounded-full bg-green-600 px-2.5 py-0.5 font-semibold text-white text-xs">
+              Sponsored
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -294,29 +307,40 @@ function PaymentSummarySection({
           </div>
 
           {totalSponsorDiscount > 0 && (
-            <div className="flex items-center justify-between text-green-600">
-              <div className="flex flex-col">
-                <span className="text-muted-foreground">Sponsor Discount</span>
-                <span className="text-muted-foreground text-xs">
-                  ₱{sponsorFeeDeduction?.toLocaleString()} × {participantCount}{" "}
-                  heads
+            <>
+              <div className="flex items-center justify-between rounded-lg bg-green-600/10 px-3 py-2.5 text-green-700">
+                <div className="flex flex-col">
+                  <span className="font-medium">Sponsor Discount</span>
+                  <span className="text-green-700/70 text-xs">
+                    ₱{sponsorFeeDeduction?.toLocaleString()} ×{" "}
+                    {participantCount} heads
+                  </span>
+                </div>
+                <span className="font-semibold">
+                  -
+                  {Intl.NumberFormat("en-US", {
+                    currency: "PHP",
+                    style: "currency",
+                  }).format(totalSponsorDiscount)}
                 </span>
               </div>
-              <span>
-                -
-                {Intl.NumberFormat("en-US", {
-                  currency: "PHP",
-                  style: "currency",
-                }).format(totalSponsorDiscount)}
-              </span>
-            </div>
+              <Separator className="my-2 bg-border/50" />
+            </>
           )}
 
-          <Separator className="my-2 bg-border/50" />
-
-          <div className="flex items-center justify-between font-semibold text-base">
+          <div
+            className={cn(
+              "flex items-center justify-between font-semibold text-base",
+              isSponsored && "text-green-700",
+            )}
+          >
             <span>Total Amount</span>
-            <span className="text-lg text-primary">
+            <span
+              className={cn(
+                "text-lg text-primary",
+                isSponsored && "text-green-700",
+              )}
+            >
               {Intl.NumberFormat("en-US", {
                 currency: "PHP",
                 style: "currency",

@@ -644,6 +644,15 @@ export type Database = {
         Args: { p_member_id: string };
         Returns: string;
       };
+      create_sponsored_registration: {
+        Args: {
+          p_event_id: string;
+          p_fee_deduction: number;
+          p_max_sponsored_guests: number;
+          p_sponsored_by: string;
+        };
+        Returns: Json;
+      };
       delete_evaluation: {
         Args: { eval_id: string };
         Returns: {
@@ -704,7 +713,7 @@ export type Database = {
           max_sponsored_guests: number;
           sponsored_by: string;
           sponsored_registration_id: string;
-          status: string;
+          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
           updated_at: string;
           used_count: number;
           uuid: string;
@@ -742,6 +751,15 @@ export type Database = {
         };
       };
       get_event_status: { Args: { p_event_id: string }; Returns: Json };
+      get_events_for_select: {
+        Args: never;
+        Returns: {
+          event_end_date: string;
+          event_id: string;
+          event_start_date: string;
+          event_title: string;
+        }[];
+      };
       get_member_primary_application: {
         Args: { p_member_id: string };
         Returns: string;

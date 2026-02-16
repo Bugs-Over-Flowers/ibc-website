@@ -33,7 +33,9 @@ async function RegistrationPage({
   searchParams,
 }: RegistrationPageProps) {
   const { eventId } = await params;
-  const { sr: sponsorUuid } = await searchParams;
+  const { sr } = await searchParams;
+  const sponsorUuid =
+    typeof sr === "string" ? sr : Array.isArray(sr) ? sr[0] : undefined;
   const requestCookies = (await cookies()).getAll();
 
   // use a Promise.all to fetch event details and members concurrently
@@ -50,7 +52,7 @@ async function RegistrationPage({
     feeDeduction: number;
   } | null = null;
 
-  if (sponsorUuid && typeof sponsorUuid === "string") {
+  if (sponsorUuid) {
     const sponsoredRegistration =
       await getSponsoredRegistrationByUuid(sponsorUuid);
 

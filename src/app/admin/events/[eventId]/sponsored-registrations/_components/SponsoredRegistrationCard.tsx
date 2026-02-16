@@ -13,12 +13,11 @@ import {
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
-import { getStatusBadgeVariant } from "./utils";
+import { getStatusColor } from "./utils";
 
 type Event = Database["public"]["Tables"]["Event"]["Row"];
 type SponsoredRegistration =
@@ -107,12 +106,14 @@ export function SponsoredRegistrationCard({
                 <h3 className="font-semibold text-base text-foreground">
                   {registration.sponsoredBy}
                 </h3>
-                <Badge
-                  className="h-5 shrink-0 px-2 font-medium text-xs"
-                  variant={getStatusBadgeVariant(registration.status)}
+                <span
+                  className={cn(
+                    "inline-flex h-5 shrink-0 items-center rounded-full px-2 font-medium text-xs uppercase",
+                    getStatusColor(registration.status),
+                  )}
                 >
-                  {registration.status.toUpperCase()}
-                </Badge>
+                  {registration.status}
+                </span>
               </div>
               <p className="text-muted-foreground text-xs">
                 Created {format(createdAt, "MMM d, yyyy")} at{" "}

@@ -94,6 +94,13 @@ export function SponsoredRegistrationFilter({
   ).sort();
 
   const applyFilters = useCallback(() => {
+    console.log("[SponsoredRegistrationFilter] Applying filters:", {
+      searchTerm,
+      selectedEvent,
+      selectedStatus,
+      sortOrder,
+      selectedDatePreset,
+    });
     let filtered = registrations;
 
     // Search filter
@@ -141,6 +148,10 @@ export function SponsoredRegistrationFilter({
       return sortOrder === "latest" ? dateB - dateA : dateA - dateB;
     });
 
+    console.log("[SponsoredRegistrationFilter] Filtered results:", {
+      totalResults: filtered.length,
+      originalCount: registrations.length,
+    });
     onFilter(filtered);
   }, [
     searchTerm,
@@ -157,6 +168,7 @@ export function SponsoredRegistrationFilter({
   }, [applyFilters]);
 
   const handleClearAllFilters = () => {
+    console.log("[SponsoredRegistrationFilter] Clearing all filters");
     setSearchTerm("");
     setSelectedEvent("");
     setSelectedStatus("all");
@@ -172,39 +184,41 @@ export function SponsoredRegistrationFilter({
     sortOrder !== "latest";
 
   return (
-    <div className="rounded-xl border border-border bg-card p-3">
+    <div className="rounded-xl p-0">
       <div className="flex flex-col gap-3">
         {/* Search Bar */}
-        <div className="relative">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-            <Search className="h-5 w-5 text-muted-foreground/70" />
-          </div>
-          <Input
-            className="h-10 rounded-xl border-border/40 bg-background/80 pr-12 pl-12 text-base transition-all placeholder:text-muted-foreground/50 focus:border-primary/40 focus:ring-primary/20"
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by sponsor name, event, or registration UUID..."
-            type="text"
-            value={searchTerm}
-          />
-          <AnimatePresence>
-            {searchTerm && (
-              <motion.div
-                animate={{ opacity: 1, scale: 1 }}
-                className="absolute inset-y-0 right-2 flex items-center"
-                exit={{ opacity: 0, scale: 0.8 }}
-                initial={{ opacity: 0, scale: 0.8 }}
-              >
-                <Button
-                  className="h-8 w-8 rounded-full hover:bg-muted/60"
-                  onClick={() => setSearchTerm("")}
-                  size="icon"
-                  variant="ghost"
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+              <Search className="h-5 w-5 text-muted-foreground/70" />
+            </div>
+            <Input
+              className="h-12 rounded-xl border-border bg-card/80 pr-12 pl-12 text-base transition-all placeholder:text-muted-foreground/50 focus:border-primary/40 focus:ring-primary/20"
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by sponsor name, event, or registration UUID..."
+              type="text"
+              value={searchTerm}
+            />
+            <AnimatePresence>
+              {searchTerm && (
+                <motion.div
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="absolute inset-y-0 right-2 flex items-center"
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
                 >
-                  <X className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <Button
+                    className="h-8 w-8 rounded-full hover:bg-muted/60"
+                    onClick={() => setSearchTerm("")}
+                    size="icon"
+                    variant="ghost"
+                  >
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Filters Row */}
@@ -213,7 +227,7 @@ export function SponsoredRegistrationFilter({
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
                 selectedDatePreset !== "all" &&
                   "border-primary/40 bg-primary/5",
               )}
@@ -265,7 +279,7 @@ export function SponsoredRegistrationFilter({
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
                 selectedEvent && "border-primary/40 bg-primary/5",
               )}
             >
@@ -325,7 +339,7 @@ export function SponsoredRegistrationFilter({
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
                 selectedStatus !== "all" && "border-primary/40 bg-primary/5",
               )}
             >
@@ -383,7 +397,7 @@ export function SponsoredRegistrationFilter({
             <Button
               className="h-10 gap-2 rounded-xl text-xs sm:w-auto"
               onClick={handleClearAllFilters}
-              variant="outline"
+              variant="destructive"
             >
               <X className="h-4 w-4" />
               Clear Filters

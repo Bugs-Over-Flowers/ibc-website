@@ -39,3 +39,40 @@ export async function updateSRStatus(
 
   return (data as { result: SponsoredRegistration }).result;
 }
+
+const updateSRSponsorNameSchema = z.object({
+  sponsoredRegistrationId: z.string().uuid("Invalid ID format"),
+  eventId: z.string().uuid("Invalid Event ID format"),
+  sponsoredBy: z.string().min(1, "Sponsor name is required").max(255),
+});
+
+type UpdateSRSponsorNameInput = z.infer<typeof updateSRSponsorNameSchema>;
+
+export async function updateSRSponsorName(
+  input: UpdateSRSponsorNameInput,
+): Promise<SponsoredRegistration> {
+  const parsed = updateSRSponsorNameSchema.parse(input);
+
+  const supabase = await createActionClient();
+
+  const { data, error } = await supabase
+    .from("SponsoredRegistration")
+    .update({ sponsoredBy: parsed.sponsoredBy })
+    .eq("sponsoredRegistrationId", parsed.sponsoredRegistrationId)
+    .select()
+    .single();
+
+  if (error || !data) {
+    throw new Error(
+      `Failed to update sponsor name: ${error?.message || "Unknown error"}`,
+    );
+  }
+
+  revalidatePath(
+    `/admin/events/${parsed.eventId}/sponsored-registrations`,
+    "page",
+  );
+  revalidatePath("/admin/sponsored-registration", "page");
+
+  return data;
+}

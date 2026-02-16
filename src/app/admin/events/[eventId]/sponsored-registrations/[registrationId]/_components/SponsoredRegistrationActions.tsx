@@ -134,14 +134,14 @@ export function SponsoredRegistrationActions({
           </Button>
 
           <Button
-            className="h-10 w-10"
+            className="gap-2"
             disabled={isDeleting}
             onClick={() => setOpenDeleteDialog(true)}
-            size="icon"
             title="Delete sponsored registration"
             variant="destructive"
           >
             <Trash2 className="h-4 w-4" />
+            <span>Delete</span>
           </Button>
         </div>
       </div>
