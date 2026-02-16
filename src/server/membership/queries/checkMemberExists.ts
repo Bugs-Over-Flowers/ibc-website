@@ -1,5 +1,6 @@
 "use server";
 
+import { computeIdentifierLookupHash } from "@/lib/security/identifierEncryption";
 import { createActionClient } from "@/lib/supabase/server";
 
 type CheckMemberInput = {
@@ -30,8 +31,11 @@ export async function checkMemberExists(
 
   const supabase = await createActionClient();
 
+  // Compute lookup hash for encrypted identifier search
+  const lookupHash = computeIdentifierLookupHash(trimmedIdentifier);
+
   const { data, error } = await supabase.rpc("check_member_exists", {
-    p_identifier: trimmedIdentifier,
+    p_lookup_hash: lookupHash,
     p_application_type: input.applicationType,
   });
 
