@@ -95,12 +95,35 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     status: "scheduled" as const,
   }));
 
-  const { error: insertError } = await supabase
+  const { data: insertedInterviews, error: insertError } = await supabase
     .from("Interview")
-    .insert(interviewInserts);
+    .insert(interviewInserts)
+    .select("interviewId, applicationId");
 
   if (insertError) {
     throw new Error(`Failed to create interviews: ${insertError.message}`);
+  }
+
+  if (!insertedInterviews || insertedInterviews.length === 0) {
+    throw new Error("No interviews were created");
+  }
+
+  const interviewLinkPromises = insertedInterviews.map((interview) => {
+    if (!interview.applicationId) {
+      return Promise.resolve();
+    }
+
+    return supabase
+      .from("Application")
+      .update({ interviewId: interview.interviewId })
+      .eq("applicationId", interview.applicationId);
+  });
+
+  const interviewLinkResults = await Promise.all(interviewLinkPromises);
+
+  const linkError = interviewLinkResults.find((result) => result?.error);
+  if (linkError?.error) {
+    throw new Error(`Failed to link interviews: ${linkError.error.message}`);
   }
 
   revalidatePath("/admin/application");
