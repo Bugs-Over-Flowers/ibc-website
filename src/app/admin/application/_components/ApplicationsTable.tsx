@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -31,21 +32,48 @@ export function ApplicationsTable({
   applications,
   status,
 }: ApplicationsTableProps) {
-  const { selectAll, clearSelection, selectedApplicationIds } =
-    useSelectedApplicationsStore();
+  const {
+    selectAll,
+    clearSelection,
+    selectedApplicationIds,
+    removeApplication,
+  } = useSelectedApplicationsStore();
+
+  const isSelectable = (
+    application: ApplicationsTableProps["applications"][number],
+  ) =>
+    application.paymentMethod !== "BPI" ||
+    (application.paymentProofStatus ?? "pending") !== "pending";
+
+  const selectableApplicationIds = applications
+    .filter(isSelectable)
+    .map((app) => app.applicationId);
+
+  const selectedSelectableCount = selectableApplicationIds.filter((id) =>
+    selectedApplicationIds.has(id),
+  ).length;
 
   const allSelected =
-    applications.length > 0 &&
-    selectedApplicationIds.size === applications.length;
+    selectableApplicationIds.length > 0 &&
+    selectedSelectableCount === selectableApplicationIds.length;
   const someSelected =
-    selectedApplicationIds.size > 0 &&
-    selectedApplicationIds.size < applications.length;
+    selectedSelectableCount > 0 &&
+    selectedSelectableCount < selectableApplicationIds.length;
+
+  useEffect(() => {
+    const selectableSet = new Set(selectableApplicationIds);
+    selectedApplicationIds.forEach((id) => {
+      if (!selectableSet.has(id)) {
+        removeApplication(id);
+      }
+    });
+  }, [removeApplication, selectableApplicationIds, selectedApplicationIds]);
 
   const handleSelectAll = () => {
     if (allSelected) {
       clearSelection();
     } else {
-      selectAll(applications.map((app) => app.applicationId));
+      selectAll(selectableApplicationIds);
     }
   };
 
@@ -74,7 +102,7 @@ export function ApplicationsTable({
               <TableHead>Company Name</TableHead>
               <TableHead>Sector</TableHead>
               <TableHead>Application Type</TableHead>
-              <TableHead>Contact</TableHead>
+              {/* <TableHead>Contact</TableHead> */}
               <TableHead>Date Applied</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
