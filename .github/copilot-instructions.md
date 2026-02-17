@@ -621,103 +621,98 @@ function ItemsList() {
 
 Use the `"use cache"` directive only for queries with good cache reuse. Prefer explicit cache profiles and centralized tags.
 
-#### Project Cache Rules
+#### Cache Profiles
 
-- Use cache profiles from `next.config.ts`: `publicHours`, `admin5m`, `realtime60s`
-- Use centralized tags from `src/lib/cache/tags.ts`
-- In cached queries, pass `cookieStore.getAll()` from the caller into `createClient(requestCookies)`
-- In mutations, prefer `updateTag(...)` for admin-critical freshness
-- Use `revalidateTag(tag, "max")` only for eventual consistency in public flows
-- Use `revalidatePath(...)` only when route-level refresh is explicitly needed
+Profiles defined in `next.config.ts`:
+- `publicHours` - Public-facing data (1 hour revalidation)
+- `admin5m` - Admin dashboard data (5 minute revalidation)
+- `realtime60s` - Near real-time data (60 second revalidation)
 
-#### What to Cache
+#### Cached Query Pattern
 
-- Cache low-cardinality, shared, repeat-read queries (public lists, admin stats, registration/check-in lists)
-- Avoid caching high-cardinality search/filter/cursor queries unless proven reusable
-- Avoid caching time-dependent queries (`new Date()`, `Date.now()`) unless intentional staleness is acceptable
+Every cached query MUST declare both `cacheLife()` and `cacheTag()`:
 
-```tsx
-// page.tsx -- cached file
-"use cache";
-
-export default function GetItems({ searchParams }: PageProps<"/">) {
-  const items = await getItems(searchParams);
-
-  return items.map((item) => <ItemCard key={item.id} item={item} />);
-}
-
-// page.tsx -- cached component
-export default function GetItems({ searchParams }: PageProps<"/">) {
-  "use cache";
-  // cacheLife("default")
-  // cacheTag("items")
-  const items = await getItems(searchParams);
-
-  return items.map((item) => <ItemCard key={item.id} item={item} />);
-}
-
-// getItems.ts
+```typescript
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
-export async function getItems(
-  requestCookies: RequestCookie[],
-  searchParams: SearchParams,
-) {
+export async function getItems(requestCookies: RequestCookie[]) {
   "use cache";
+  cacheLife("admin5m");
+  cacheTag(CACHE_TAGS.items.all);
+  cacheTag(CACHE_TAGS.items.admin);
+
   const supabase = await createClient(requestCookies);
-
-  const { data: items } = await supabase
-    .from("items")
-    .select("*")
-    .eq("status", "active");
-
-  return items.map((item) => ({
-    ...item,
-    createdAt: new Date(item.createdAt),
-  }));
+  const { data } = await supabase.from("items").select("*");
+  return data;
 }
 ```
 
-In most cases, resolve cookies at the caller and pass `cookieStore.getAll()` into cached query functions.
+Pass cookies from the page level:
 
 ```tsx
 import { cookies } from "next/headers";
 
-export default async function GetItems({ searchParams }: PageProps<"/">) {
-  // get cookies from the component
+export default async function Page() {
   const cookieStore = await cookies();
-
-  // then pass the cookies to the getItems function
-  const items = await getItems(cookieStore.getAll(), searchParams);
-
-  return items.map((item) => <ItemCard key={item.id} item={item} />);
-}
-
-// getItems.ts
-import "server-only";
-
-export async function getItems(
-  requestCookies: RequestCookie[],
-  searchParams: SearchParams,
-) {
-  "use cache";
-  const supabase = await createClient(requestCookies);
-
-  const { data: items } = await supabase
-    .from("items")
-    .select("*")
-    .eq("status", "active");
-
-  return items.map((item) => ({
-    ...item,
-    createdAt: new Date(item.createdAt),
-  }));
+  const items = await getItems(cookieStore.getAll());
+  return <ItemList items={items} />;
 }
 ```
 
-- `cacheLife(...)` defines cache profile/lifetime
-- `cacheTag(...)` defines invalidation groups
-- `updateTag(...)` is preferred for immediate admin freshness after mutations
+#### Invalidation Strategy - Choose ONE Primary
+
+**1. Tag-Level Invalidation** (preferred for shared data)
+- Use when: Data is reused across multiple routes/components
+- Use when: You have tagged cached queries
+- Implementation: Call `updateTag(CACHE_TAGS.*)` after mutation
+- Allows partial invalidation of only affected tags
+
+```typescript
+"use server";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
+
+export async function updateItem(id: string, data: ItemUpdate) {
+  const supabase = await createActionClient();
+  await supabase.from("items").update(data).eq("id", id);
+
+  // Invalidate only affected tags
+  updateTag(CACHE_TAGS.items.all);
+  updateTag(CACHE_TAGS.items.admin);
+}
+```
+
+**2. Path-Level Invalidation** (use sparingly)
+- Use when: Freshness is strictly route/segment-driven
+- Use when: The affected view is not backed by tagged caches
+- Implementation: Call `revalidatePath("/path")` after mutation
+
+```typescript
+"use server";
+import { revalidatePath } from "next/cache";
+
+export async function updateItem(id: string, data: ItemUpdate) {
+  const supabase = await createActionClient();
+  await supabase.from("items").update(data).eq("id", id);
+
+  revalidatePath("/admin/items");
+  revalidatePath(`/admin/items/${id}`);
+}
+```
+
+**Rules:**
+- Choose one primary strategy per mutation (tag-level OR path-level)
+- Only combine both when intentionally needed
+- NO param tags: Don't create `items:${id}`; function args are auto-serialized into cache keys
+- Use `revalidateTag(tag, "max")` only for public flows with eventual consistency
+
+#### What to Cache
+
+- ✅ Cache low-cardinality, shared, repeat-read queries (public lists, admin stats, registration/check-in lists)
+- ❌ Avoid caching high-cardinality search/filter/cursor queries unless proven reusable
+- ❌ Avoid caching time-dependent queries (`new Date()`, `Date.now()`) unless intentional staleness is acceptable
 
 For more details, see [Next.js caching](https://nextjs.org/docs/app/building-your-application/caching),
 [CacheComponents](https://nextjs.org/docs/app/getting-started/cache-components)

@@ -153,7 +153,7 @@ const form = useAppForm({
 
 ### 5. Server Actions
 
-**✅ Correct:**
+**✅ Tag-Level Invalidation (preferred for shared data):**
 ```typescript
 "use server";
 
@@ -170,7 +170,7 @@ const schema = z.object({
 export async function createUser(input: z.infer<typeof schema>) {
   // 1. Validate
   const parsed = schema.parse(input);
-  
+
   // 2. Perform mutation
   const supabase = await createActionClient();
   const { data, error } = await supabase
@@ -178,11 +178,33 @@ export async function createUser(input: z.infer<typeof schema>) {
     .insert(parsed)
     .select("id")
     .single();
-  
+
   if (error) throw new Error(error.message);
-  
-  // 3. Invalidate cache
+
+  // 3. Invalidate cache (tag-level strategy)
+  updateTag(CACHE_TAGS.members.all);
   updateTag(CACHE_TAGS.members.admin);
+  return data;
+}
+```
+
+**✅ Path-Level Invalidation (use sparingly):**
+```typescript
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { createActionClient } from "@/lib/supabase/server";
+import { z } from "zod";
+
+export async function createUser(input: z.infer<typeof schema>) {
+  const parsed = schema.parse(input);
+  const supabase = await createActionClient();
+  const { data, error } = await supabase.from("users").insert(parsed).select("id").single();
+
+  if (error) throw new Error(error.message);
+
+  // Path-level strategy - only when route refresh is explicitly needed
+  revalidatePath("/admin/members");
   return data;
 }
 ```
@@ -206,26 +228,41 @@ export async function createUser(data: any) { // No validation!
 - [ ] Validates input with Zod (throws on failure)
 - [ ] Uses `createActionClient()` for mutations
 - [ ] Throws errors (not returns error objects)
-- [ ] Calls `updateTag(...)` for affected cache tags
-- [ ] Uses `revalidatePath(...)` only when route-level refresh is explicitly needed
+- [ ] **Chooses ONE primary invalidation strategy:**
+  - [ ] Tag-level: `updateTag(CACHE_TAGS.*)` for shared data (preferred)
+  - [ ] Path-level: `revalidatePath("/path")` for route-driven freshness
+- [ ] Only combines both when intentionally needed
+- [ ] NO param tags like `members:${id}` (function args are auto-serialized)
 
 ### 6. Server Queries
 
 **✅ Correct:**
 ```typescript
 import "server-only";
-
+import { cacheLife, cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
-export async function getUsers() {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
-  
+// Cached query
+export async function getCachedUsers(requestCookies: RequestCookie[]) {
+  "use cache";
+  cacheLife("admin5m");
+  cacheTag(CACHE_TAGS.members.all);
+  cacheTag(CACHE_TAGS.members.admin);
+
+  const supabase = await createClient(requestCookies);
   const { data, error } = await supabase.from("users").select("*");
   if (error) throw new Error(error.message);
-  
+
   return data;
+}
+
+// Used in page.tsx
+export default async function Page() {
+  const cookieStore = await cookies();
+  const users = await getCachedUsers(cookieStore.getAll());
+  return <UserList users={users} />;
 }
 ```
 
@@ -238,16 +275,25 @@ export async function getUsers() {
   const supabase = await createActionClient(); // Wrong client!
   // ...
 }
+
+// Cached query missing required metadata
+export async function getCachedUsers(requestCookies: RequestCookie[]) {
+  "use cache";
+  // Missing cacheLife() and cacheTag()!
+  const supabase = await createClient(requestCookies);
+  // ...
+}
 ```
 
 **Checklist:**
 - [ ] Uses `import "server-only"`
 - [ ] In correct folder: `src/server/[feature]/queries/`
 - [ ] Uses `createClient(requestCookies)` for queries
-- [ ] Gets cookies from `next/headers`
-- [ ] For cached queries: uses `"use cache"` and passes cookies from page level
+- [ ] Gets cookies from `next/headers` and passes to query function
+- [ ] For cached queries: MUST specify both `cacheLife("profile")` and `cacheTag(CACHE_TAGS.*)`
 - [ ] For cached queries: avoids high-cardinality filter/cursor/search inputs unless justified
 - [ ] For cached queries: avoids time-dependent logic (`new Date()`, `Date.now()`) unless intentional
+- [ ] NO param tags like `members:${id}` (function args are auto-serialized)
 
 ### 7. Supabase Client Usage
 
@@ -414,9 +460,10 @@ type DBUser = Database["public"]["Tables"]["users"]["Row"];
 **Critical (Must Fix):**
 1. Using wrong Supabase client type
 2. Not validating user input with Zod
-3. Missing cache invalidation (`updateTag(...)`) after mutations
-4. Security issues (auth checks in server actions)
-5. Not using `tryCatch` on client for throwing server actions
+3. Missing cache invalidation after mutations
+4. Incorrect invalidation strategy choice
+5. Security issues (auth checks in server actions)
+6. Not using `tryCatch` on client for throwing server actions
 
 **High (Should Fix):**
 1. Using relative imports instead of `@/`
@@ -424,6 +471,8 @@ type DBUser = Database["public"]["Tables"]["users"]["Row"];
 3. Adding `"use client"` unnecessarily
 4. Not following file structure conventions
 5. Missing type annotations on exports
+6. Cached query missing `cacheLife()` or `cacheTag()`
+7. Using param tags like `members:${id}` instead of broad tags
 
 **Medium (Nice to Have):**
 1. Missing tests for new features
@@ -461,10 +510,12 @@ type DBUser = Database["public"]["Tables"]["users"]["Row"];
 4. ❌ Using `createClient(requestCookies)` for mutations
 5. ❌ Not wrapping server actions with `tryCatch` on client
 6. ❌ Not validating with Zod before processing input
-7. ❌ Forgetting `updateTag(...)` after mutations
-8. ❌ Server actions returning errors instead of throwing
-9. ❌ Not using `useAppForm` for forms
-10. ❌ Using TanStack Form directly instead of the wrapped version
+7. ❌ Forgetting cache invalidation after mutations
+8. ❌ Using param tags like `members:${id}` instead of broad tags
+9. ❌ Mixing tag-level and path-level invalidation without intent
+10. ❌ Server actions returning errors instead of throwing
+11. ❌ Not using `useAppForm` for forms
+12. ❌ Using TanStack Form directly instead of the wrapped version
 
 ## Quick Reference
 
@@ -496,6 +547,9 @@ type DBUser = Database["public"]["Tables"]["users"]["Row"];
 
 **Caching:**
 - Use cache profiles (`publicHours`, `admin5m`, `realtime60s`) with `"use cache"`
+- Every cached query MUST specify both `cacheLife("profile")` and `cacheTag(CACHE_TAGS.*)`
 - Use centralized tags from `@/lib/cache/tags`
-- Mutations should invalidate with `updateTag(...)` first
-- Use `revalidatePath(...)` only when route-level refresh behavior is required
+- Choose ONE primary invalidation strategy per mutation:
+  - Tag-level: `updateTag(CACHE_TAGS.*)` for shared data (preferred)
+  - Path-level: `revalidatePath("/path")` for route-driven freshness
+- NO param tags like `members:${id}` (function args are auto-serialized)

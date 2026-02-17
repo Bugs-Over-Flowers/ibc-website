@@ -310,6 +310,58 @@ const fileSchema = z.instanceof(File)
   );
 ```
 
+## Validation and Caching
+
+### Schema Changes Affecting Cache Keys
+
+When you modify Zod schemas that are used in cached queries, remember:
+
+1. **Function arguments become cache keys**
+   - Next.js automatically serializes function arguments into cache keys
+   - Changing validation schemas doesn't invalidate existing cache entries
+   - Use cache tags for explicit invalidation instead
+
+```typescript
+// Cached query - arguments are serialized into cache key
+export async function getUsers(
+  requestCookies: RequestCookie[],
+  filters: UserFilterSchema  // Changes here affect cache key
+) {
+  "use cache";
+  cacheLife("admin5m");
+  cacheTag(CACHE_TAGS.users.all);  // Use tags for invalidation
+
+  const parsed = UserFilterSchema.parse(filters);
+  // ...
+}
+```
+
+2. **Validation in cached queries**
+   - Validate inputs BEFORE the cache boundary when possible
+   - Or validate inside the cached function after the `"use cache"` directive
+   - Invalid inputs won't be cached (they throw before reaching Supabase)
+
+### Validation in Mutations
+
+Always validate before cache invalidation:
+
+```typescript
+"use server";
+
+export async function updateUser(id: string, data: unknown) {
+  // 1. Validate FIRST
+  const parsed = updateUserSchema.parse(data);
+
+  // 2. Perform mutation
+  const supabase = await createActionClient();
+  await supabase.from("users").update(parsed).eq("id", id);
+
+  // 3. Then invalidate cache
+  updateTag(CACHE_TAGS.users.all);
+  updateTag(CACHE_TAGS.users.admin);
+}
+```
+
 ## Common Pitfalls
 
 1. **Always use `z.infer<typeof schema>`** for type inference

@@ -323,19 +323,49 @@ export function UserForm() {
 
 ### Caching Strategy (Next.js Cache Components)
 
-- **Use explicit cache profiles** from `next.config.ts`: `publicHours`, `admin5m`, `realtime60s`
-- **Centralize tags** in `src/lib/cache/tags.ts` (do not hardcode random tag strings)
-- **In cached queries** (`"use cache"`), use `createClient(requestCookies)` and pass `cookieStore.getAll()` from caller
-- **In mutations** (`"use server"`), use `createActionClient()` and prefer `updateTag(...)` for admin-critical freshness
-- Use `revalidateTag(tag, "max")` only for eventual-consistency/public flows where stale-while-revalidate is acceptable
-- Keep `revalidatePath(...)` only when route-level refresh behavior is explicitly required
+**Cache Profiles (in `next.config.ts`):**
+- `publicHours` - Public-facing data (1 hour revalidation)
+- `admin5m` - Admin dashboard data (5 minute revalidation)
+- `realtime60s` - Near real-time data (60 second revalidation)
 
-### Cache Design Rules
+**Centralized Tags:**
+All cache tags are defined in `src/lib/cache/tags.ts`. Use these constants; never hardcode tag strings.
 
-- **Do cache** low-cardinality, shared, and repeatedly-read queries (lists, stats, public sections)
-- **Avoid caching** high-cardinality filter/cursor/search queries unless there is proven reuse
-- **Avoid caching** queries with time-dependent logic (`new Date()`, `Date.now()`) unless staleness is acceptable and intentional
-- Query arguments become part of the cache key; avoid adding unnecessary inputs to cached function signatures
+**Cached Queries (`"use cache"`):**
+- Use `createClient(requestCookies)` with cookies passed from caller
+- Must specify both: `cacheLife("profileName")` and `cacheTag(CACHE_TAGS.*)`
+- Example:
+  ```typescript
+  "use cache";
+  cacheLife("admin5m");
+  cacheTag(CACHE_TAGS.members.all);
+  cacheTag(CACHE_TAGS.members.admin);
+  ```
+
+**Invalidation Strategy - Choose ONE Primary Approach:**
+
+1. **Tag-Level Invalidation** (preferred for shared data)
+   - Use when: Data is reused across multiple routes/components
+   - Use when: You have tagged cached queries that need updating
+   - Implementation: Call `updateTag(CACHE_TAGS.*)` after mutation
+   - Allows partial invalidation - only invalidate affected tags
+
+2. **Path-Level Invalidation** (use sparingly)
+   - Use when: Freshness is strictly route/segment-driven
+   - Use when: The affected view is not backed by tagged caches
+   - Implementation: Call `revalidatePath("/path")` after mutation
+   - Use only when route-level refresh is explicitly required
+
+**Rules:**
+- Choose one primary strategy per mutation (tag-level OR path-level)
+- Only combine both when intentionally needed for different purposes
+- NO param tags: Don't create dynamic tags like `members:${id}`; function arguments are automatically serialized into cache keys
+- Use `revalidateTag(tag, "max")` only for public flows with eventual consistency
+
+**What to Cache:**
+- ✅ Low-cardinality, shared, repeatedly-read queries (lists, stats, public sections)
+- ❌ High-cardinality filter/cursor/search queries (unless proven reusable)
+- ❌ Time-dependent queries using `new Date()`, `Date.now()` (unless intentional staleness)
 
 ## Validation
 
@@ -361,6 +391,8 @@ To bypass (not recommended): `git commit --no-verify`
 5. **Always wrap server actions with `tryCatch`** on the client side
 6. **Always validate with Zod** before processing user input
 7. **Don't forget cache invalidation after mutations** (`updateTag(...)` first, `revalidatePath(...)` only when needed)
+8. **Don't create param tags** like `members:${id}` - function arguments are automatically serialized into cache keys
+9. **Don't mix invalidation strategies** without intent - choose tag-level OR path-level as primary, combine only when needed
 
 ## Additional Resources
 

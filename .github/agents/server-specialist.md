@@ -29,7 +29,7 @@ const schema = z.object({
 export async function createUser(input: z.infer<typeof schema>) {
   // 1. Validate input (throws on failure)
   const parsed = schema.parse(input);
-  
+
   // 2. Perform mutation with createActionClient
   const supabase = await createActionClient();
   const { data, error } = await supabase
@@ -37,11 +37,13 @@ export async function createUser(input: z.infer<typeof schema>) {
     .insert(parsed)
     .select("id")
     .single();
-  
+
   if (error) throw new Error(error.message);
-  
-  // 3. Invalidate and return
+
+  // 3. Invalidate cache (choose ONE primary strategy)
+  updateTag(CACHE_TAGS.members.all);
   updateTag(CACHE_TAGS.members.admin);
+
   return data;
 }
 ```
@@ -53,8 +55,37 @@ export async function createUser(input: z.infer<typeof schema>) {
 - Can throw errors freely - use `tryCatch` on client to handle
 - **MUST** validate input with Zod schemas (throws on failure)
 - **MUST** use `createActionClient()` from `@/lib/supabase/server` for Supabase
-- **MUST** invalidate cache after mutations (`updateTag(...)` first)
-- `revalidatePath(...)` is optional and should only be used when route-level refresh behavior is required
+- **MUST** invalidate cache after mutations (choose primary strategy below)
+
+### Cache Invalidation Strategy
+
+**Choose ONE primary approach per mutation:**
+
+**1. Tag-Level Invalidation** (preferred for shared data)
+- Use when: Data is reused across multiple routes/components
+- Use when: You have tagged cached queries
+- Benefits: Allows partial invalidation, more granular control
+- Implementation:
+```typescript
+updateTag(CACHE_TAGS.members.all);
+updateTag(CACHE_TAGS.members.admin);
+```
+
+**2. Path-Level Invalidation** (use sparingly)
+- Use when: Freshness is strictly route/segment-driven
+- Use when: The affected view is not backed by tagged caches
+- Use when: Route-level refresh behavior is explicitly required
+- Implementation:
+```typescript
+revalidatePath("/admin/members");
+revalidatePath(`/admin/members/${id}`);
+```
+
+**Rules:**
+- Choose one primary strategy per mutation
+- Only combine both when intentionally needed for different purposes
+- NO param tags: Don't create `members:${id}` tags; function arguments are automatically serialized into cache keys
+- Use `revalidateTag(tag, "max")` only for public flows with eventual consistency
 
 ## Server Queries (Data Fetching)
 
@@ -81,11 +112,15 @@ export async function getUsers() {
 
 ```typescript
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function getCachedData(requestCookies: RequestCookie[]) {
   "use cache";
-  useAdmin5mCache();
+  cacheLife("admin5m");
+  cacheTag(CACHE_TAGS.members.all);
   cacheTag(CACHE_TAGS.members.admin);
+
   const supabase = await createClient(requestCookies);
   const { data, error } = await supabase.from("table").select("*");
   // ...
@@ -100,7 +135,8 @@ export async function getCachedData(requestCookies: RequestCookie[]) {
 - **MUST** use `createClient(requestCookies)` from `@/lib/supabase/server` for Supabase
 - Get cookies from `next/headers` and pass to `createClient()`
 - For cached queries, use `"use cache"` directive and pass cookies from page level
-- Prefer cache profiles (`publicHours`, `admin5m`, `realtime60s`) and centralized tags from `@/lib/cache/tags`
+- For cached queries, MUST specify both `cacheLife("profileName")` and `cacheTag(CACHE_TAGS.*)`
+- Use centralized tags from `@/lib/cache/tags` (never hardcode tag strings)
 - Avoid caching high-cardinality or time-dependent queries unless staleness is intentional
 
 ## Client-Side Error Handling
@@ -148,5 +184,7 @@ The result is a discriminated union based on the `success` property:
 2. **Don't use `createClient(requestCookies)`** for mutations
 3. **Always wrap server actions with `tryCatch`** on the client side
 4. **Always validate with Zod** before processing user input
-5. **Don't forget cache invalidation** after mutations (`updateTag(...)` first)
-6. Server actions can **throw errors freely** - the client handles them with `tryCatch`
+5. **Don't forget cache invalidation** after mutations (choose tag-level or path-level strategy)
+6. **Don't create param tags** like `members:${id}` - function arguments are automatically serialized into cache keys
+7. **Don't mix invalidation strategies** without intent - choose tag-level OR path-level as primary
+8. Server actions can **throw errors freely** - the client handles them with `tryCatch`
