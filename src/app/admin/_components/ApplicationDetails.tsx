@@ -9,7 +9,6 @@ import { ApplicationHeader } from "../application/[id]/_components/ApplicationHe
 import { CompanyInfoCard } from "../application/[id]/_components/CompanyInfoCard";
 import { ContactInfoCard } from "../application/[id]/_components/ContactInfoCard";
 import { PaymentInfoCard } from "../application/[id]/_components/PaymentInfoCard";
-import { ProofImagesCard } from "../application/[id]/_components/ProofImagesCard";
 import { RepresentativesCard } from "../application/[id]/_components/RepresentativesCard";
 
 interface ApplicationDetailsProps {
@@ -71,8 +70,6 @@ export async function ApplicationDetails({
         paymentMethod={application.paymentMethod}
         paymentStatus={application.paymentStatus}
       />
-
-      <ProofImagesCard proofImages={application.ProofImage} />
     </>
   );
 }

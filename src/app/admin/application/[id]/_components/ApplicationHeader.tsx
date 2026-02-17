@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { AlertTriangle, CircleCheckBig, XCircle } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -65,7 +65,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
   const getStatusIcon = (status: Enums<"PaymentProofStatus">) => {
     switch (status) {
       case "accepted":
-        return CheckCircle2;
+        return CircleCheckBig;
       case "rejected":
         return XCircle;
       default:
@@ -76,11 +76,11 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
   const getStatusClasses = (status: Enums<"PaymentProofStatus">) => {
     switch (status) {
       case "accepted":
-        return "bg-status-green/15 text-status-green";
+        return "bg-background/50 text-status-green";
       case "rejected":
-        return "bg-status-red/15 text-status-red";
+        return "bg-background/50 text-status-red";
       default:
-        return "bg-status-red/15 text-status-red";
+        return "bg-background/50 text-status-red";
     }
   };
 
@@ -117,11 +117,11 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                 />
                 <span
                   className={cn(
-                    "absolute top-2 right-2 rounded-full p-1 shadow-sm",
+                    "absolute m-auto rounded-full p-1 shadow-sm",
                     getStatusClasses(paymentProofStatus),
                   )}
                 >
-                  <StatusIcon className="h-4 w-4" />
+                  <StatusIcon className="h-10 w-10" />
                 </span>
               </DialogTrigger>
               <DialogContent className="max-w-3xl">
