@@ -60,7 +60,6 @@ export async function approveApplication(input: ApplicationDecisionInput) {
       websiteURL: application.websiteURL ?? "",
       logoImageURL: application.logoImageURL,
       joinDate: new Date().toISOString(),
-      identifier: application.identifier,
     })
     .select("businessMemberId")
     .single();

@@ -14,6 +14,9 @@ export type MembershipStatus = "paid" | "unpaid" | "cancelled";
 export interface ApplicationWithMembers
   extends Omit<Application, "logoImageURL"> {
   ApplicationMember: ApplicationMember[];
+  BusinessMember: {
+    identifier: string;
+  } | null;
   Sector: {
     sectorId: number;
     sectorName: string;
