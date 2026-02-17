@@ -4,13 +4,18 @@ import Image from "next/image";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
+import type { getMemberById } from "@/server/members/queries/getMemberById";
 import ExportPDFButton from "../../_components/ExportPDFButton";
 
 interface ApplicationHeaderProps {
   application: Awaited<ReturnType<typeof getApplicationDetailsById>>;
+  member?: Awaited<ReturnType<typeof getMemberById>>;
 }
 
-export function ApplicationHeader({ application }: ApplicationHeaderProps) {
+export function ApplicationHeader({
+  application,
+  member,
+}: ApplicationHeaderProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = application.logoImageURL && !imageError;
 
@@ -21,7 +26,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
           <div className="flex flex-col justify-end">
             <h1 className="font-bold text-3xl">{application.companyName}</h1>
             <p className="mt-1 text-muted-foreground">
-              Application #{application.applicationId.slice(0, 8)}
+              Application ID: {application.identifier}
             </p>
           </div>
           <div className="shrink-0">
@@ -43,14 +48,14 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
         </div>
       </div>
 
-      {application.businessMemberId && (
+      {member?.identifier && (
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <Badge className="text-sm" variant="default">
+            <Badge className="bg-status-green text-sm" variant="default">
               Approved
             </Badge>
             <span className="text-muted-foreground text-sm">
-              Member ID: {application.businessMemberId}
+              Member ID: {member.identifier}
             </span>
           </div>
           <div>

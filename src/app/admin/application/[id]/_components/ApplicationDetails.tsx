@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
+import { getMemberById } from "@/server/members/queries/getMemberById";
 import { ApplicationHeader } from "./ApplicationHeader";
 import { CompanyInfoCard } from "./CompanyInfoCard";
 import { ContactInfoCard } from "./ContactInfoCard";
@@ -31,6 +32,21 @@ export async function ApplicationDetails({
     notFound();
   }
 
+  let memberDetails: Awaited<ReturnType<typeof getMemberById>> | undefined;
+
+  if (application.businessMemberId) {
+    const { data: member, success: memberSuccess } = await tryCatch(
+      getMemberById(application.businessMemberId, cookieStore.getAll()),
+    );
+
+    if (
+      memberSuccess &&
+      member.primaryApplicationId === application.applicationId
+    ) {
+      memberDetails = member;
+    }
+  }
+
   return (
     <>
       <Link
@@ -46,7 +62,7 @@ export async function ApplicationDetails({
         </Button>
       </Link>
 
-      <ApplicationHeader application={application} />
+      <ApplicationHeader application={application} member={memberDetails} />
 
       <CompanyInfoCard
         applicationMemberType={application.applicationMemberType}

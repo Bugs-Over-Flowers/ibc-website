@@ -180,7 +180,7 @@ export type Database = {
         Insert: {
           businessMemberId?: string;
           businessName: string;
-          identifier: string;
+          identifier?: string;
           joinDate: string;
           lastPaymentDate?: string | null;
           logoImageURL?: string | null;
