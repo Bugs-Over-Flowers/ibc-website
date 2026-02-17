@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { ApplicationDetails } from "@/app/admin/application/[id]/_components/ApplicationDetails";
+import { ApplicationDetails } from "@/app/admin/_components/ApplicationDetails";
 import tryCatch from "@/lib/server/tryCatch";
 import { getMemberById } from "@/server/members/queries/getMemberById";
 

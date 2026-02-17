@@ -4,18 +4,13 @@ import Image from "next/image";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
-import type { getMemberById } from "@/server/members/queries/getMemberById";
 import ExportPDFButton from "../../_components/ExportPDFButton";
 
 interface ApplicationHeaderProps {
   application: Awaited<ReturnType<typeof getApplicationDetailsById>>;
-  member?: Awaited<ReturnType<typeof getMemberById>>;
 }
 
-export function ApplicationHeader({
-  application,
-  member,
-}: ApplicationHeaderProps) {
+export function ApplicationHeader({ application }: ApplicationHeaderProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = application.logoImageURL && !imageError;
 
@@ -48,15 +43,17 @@ export function ApplicationHeader({
         </div>
       </div>
 
-      {member?.identifier && (
+      {application.businessMemberId && (
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-4">
             <Badge className="bg-status-green text-sm" variant="default">
               Approved
             </Badge>
-            <span className="text-muted-foreground text-sm">
-              Member ID: {member.identifier}
-            </span>
+            {application.BusinessMember?.identifier && (
+              <span className="text-muted-foreground text-sm">
+                Member ID: {application.BusinessMember.identifier}
+              </span>
+            )}
           </div>
           <div>
             <ExportPDFButton application={application} />

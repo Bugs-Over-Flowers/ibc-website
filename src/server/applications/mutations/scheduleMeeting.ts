@@ -108,22 +108,29 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     throw new Error("No interviews were created");
   }
 
-  const interviewLinkPromises = insertedInterviews.map((interview) => {
-    if (!interview.applicationId) {
-      return Promise.resolve();
-    }
+  // Use RPC to atomically insert interviews and link them to applications
+  // This ensures all-or-nothing semantics and prevents partial updates
+  const interviewDataJson = insertedInterviews.map((interview) => ({
+    applicationId: interview.applicationId,
+    interviewDate: interviewDateUtcIso,
+    interviewVenue: parsed.interviewVenue,
+  }));
 
-    return supabase
-      .from("Application")
-      .update({ interviewId: interview.interviewId })
-      .eq("applicationId", interview.applicationId);
-  });
+  const { data: rpcResult, error: rpcError } = await supabase.rpc(
+    "schedule_interviews_batch",
+    {
+      p_interview_data: interviewDataJson,
+    },
+  );
 
-  const interviewLinkResults = await Promise.all(interviewLinkPromises);
+  if (rpcError) {
+    throw new Error(`Failed to link interviews: ${rpcError.message}`);
+  }
 
-  const linkError = interviewLinkResults.find((result) => result?.error);
-  if (linkError?.error) {
-    throw new Error(`Failed to link interviews: ${linkError.error.message}`);
+  if (!rpcResult || !rpcResult[0]?.success) {
+    throw new Error(
+      `Interview linking failed: ${rpcResult?.[0]?.message || "Unknown error"}`,
+    );
   }
 
   revalidatePath("/admin/application");
