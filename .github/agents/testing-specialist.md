@@ -236,6 +236,45 @@ Before submitting a PR:
 - [ ] No console errors/warnings
 - [ ] Mocks are properly cleaned up
 
+## Testing Cached Functions
+
+When testing cached queries (functions with `"use cache"`):
+
+```typescript
+// Test the data fetching logic, not the cache itself
+import { describe, it, expect, vi } from "vitest";
+import { getCachedUsers } from "@/server/users/queries";
+
+describe("getCachedUsers", () => {
+  it("should return users with correct structure", async () => {
+    // Pass mock cookies since function expects RequestCookie[]
+    const mockCookies: RequestCookie[] = [];
+    const users = await getCachedUsers(mockCookies);
+
+    expect(users).toBeDefined();
+    expect(Array.isArray(users)).toBe(true);
+  });
+});
+```
+
+**Important:** Don't test cache behavior (cache hits/misses) in unit tests. The cache is a Next.js framework concern.
+
+## Testing Mutations with Cache Invalidation
+
+```typescript
+describe("createUser mutation", () => {
+  it("should invalidate cache tags after creation", async () => {
+    const { updateTag } = await import("next/cache");
+    const updateTagSpy = vi.spyOn(await import("next/cache"), "updateTag");
+
+    await createUser({ name: "Test User", email: "test@example.com" });
+
+    expect(updateTagSpy).toHaveBeenCalledWith(CACHE_TAGS.members.all);
+    expect(updateTagSpy).toHaveBeenCalledWith(CACHE_TAGS.members.admin);
+  });
+});
+```
+
 ## Common Pitfalls
 
 - Don't test implementation details - test behavior and user-facing functionality

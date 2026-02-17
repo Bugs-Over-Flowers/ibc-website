@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { ServerFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
@@ -102,6 +103,10 @@ export const updateEvent: ServerFunction<
       data: null,
     };
   }
+
+  // updateTag(CACHE_TAGS.events.all);
+  // updateTag(CACHE_TAGS.events.admin);
+  // updateTag(CACHE_TAGS.events.public);
 
   revalidatePath("/admin/events");
   revalidatePath(`/admin/events/${data.eventId}`);

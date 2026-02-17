@@ -7,14 +7,16 @@
 - Can throw errors freely - use `tryCatch` on client to handle
 - **MUST** validate input with Zod schemas (throws on failure)
 - **MUST** use `createActionClient()` from `@/lib/supabase/server` for Supabase
-- **MUST** call `revalidatePath()` after mutations when needed
+- **MUST** invalidate affected cache tags with `updateTag(...)` after mutations
+- Use `revalidatePath(...)` only when route-level refresh behavior is explicitly needed
 
 **Example:**
 
 ```typescript
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
@@ -37,8 +39,8 @@ export async function createUser(input: z.infer<typeof schema>) {
   
   if (error) throw new Error(error.message);
   
-  // 3. Revalidate and return
-  revalidatePath("/users");
+  // 3. Invalidate and return
+  updateTag(CACHE_TAGS.members.admin);
   return data;
 }
 ```
@@ -50,6 +52,8 @@ export async function createUser(input: z.infer<typeof schema>) {
 - Can throw errors - use `tryCatch` on client to handle
 - **MUST** use `createClient(requestCookies)` from `@/lib/supabase/server` for Supabase
 - Get cookies from `next/headers` and pass to `createClient()`
+- For cached queries, use cache profiles from `next.config.ts` and cache tags from `@/lib/cache/tags`
+- Avoid caching high-cardinality or time-dependent queries unless staleness is intentional
 
 **Example:**
 

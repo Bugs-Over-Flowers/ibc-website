@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   UpdateCheckInTimeInput,
@@ -19,6 +20,10 @@ export async function updateCheckInTime(
     .eq("checkInId", parsed.checkInId);
 
   if (error) throw new Error(error.message);
+
+  // updateTag(CACHE_TAGS.checkIns.all);
+  // updateTag(CACHE_TAGS.checkIns.list);
+  // updateTag(CACHE_TAGS.checkIns.stats);
 
   revalidatePath(`/admin/events/[eventId]/check-in-list`);
 

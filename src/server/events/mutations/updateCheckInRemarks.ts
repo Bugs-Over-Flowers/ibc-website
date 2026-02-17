@@ -2,7 +2,8 @@
 
 import { createActionClient } from "@/lib/supabase/server";
 import "server-only";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
   UpdateCheckInRemarksInput,
   type UpdateCheckInRemarksOutput,
@@ -36,6 +37,10 @@ export async function updateCheckInRemarks(
       updatedCount++;
     }
   }
+
+  // updateTag(CACHE_TAGS.checkIns.all);
+  // updateTag(CACHE_TAGS.checkIns.list);
+  // updateTag(CACHE_TAGS.checkIns.eventDay(parsed.eventDayId));
 
   revalidatePath(`/admin/events/check-in/${parsed.eventDayId}`);
 

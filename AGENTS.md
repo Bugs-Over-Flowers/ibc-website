@@ -321,6 +321,52 @@ export function UserForm() {
 
 **Never mix client types incorrectly** - see `.cursor/rules/supabase-rules.mdc` for details.
 
+### Caching Strategy (Next.js Cache Components)
+
+**Cache Profiles (in `next.config.ts`):**
+- `publicHours` - Public-facing data (1 hour revalidation)
+- `admin5m` - Admin dashboard data (5 minute revalidation)
+- `realtime60s` - Near real-time data (60 second revalidation)
+
+**Centralized Tags:**
+All cache tags are defined in `src/lib/cache/tags.ts`. Use these constants; never hardcode tag strings.
+
+**Cached Queries (`"use cache"`):**
+- Use `createClient(requestCookies)` with cookies passed from caller
+- Must specify both: `cacheLife("profileName")` and `cacheTag(CACHE_TAGS.*)`
+- Example:
+  ```typescript
+  "use cache";
+  cacheLife("admin5m");
+  cacheTag(CACHE_TAGS.members.all);
+  cacheTag(CACHE_TAGS.members.admin);
+  ```
+
+**Invalidation Strategy - Choose ONE Primary Approach:**
+
+1. **Tag-Level Invalidation** (preferred for shared data)
+   - Use when: Data is reused across multiple routes/components
+   - Use when: You have tagged cached queries that need updating
+   - Implementation: Call `updateTag(CACHE_TAGS.*)` after mutation
+   - Allows partial invalidation - only invalidate affected tags
+
+2. **Path-Level Invalidation** (use sparingly)
+   - Use when: Freshness is strictly route/segment-driven
+   - Use when: The affected view is not backed by tagged caches
+   - Implementation: Call `revalidatePath("/path")` after mutation
+   - Use only when route-level refresh is explicitly required
+
+**Rules:**
+- Choose one primary strategy per mutation (tag-level OR path-level)
+- Only combine both when intentionally needed for different purposes
+- NO param tags: Don't create dynamic tags like `members:${id}`; function arguments are automatically serialized into cache keys
+- Use `revalidateTag(tag, "max")` only for public flows with eventual consistency
+
+**What to Cache:**
+- ✅ Low-cardinality, shared, repeatedly-read queries (lists, stats, public sections)
+- ❌ High-cardinality filter/cursor/search queries (unless proven reusable)
+- ❌ Time-dependent queries using `new Date()`, `Date.now()` (unless intentional staleness)
+
 ## Validation
 
 **MUST use Zod schemas** for all forms. Import reusable schemas from `@/lib/validation/utils`:
@@ -344,7 +390,9 @@ To bypass (not recommended): `git commit --no-verify`
 4. **Don't use `createClient(requestCookies)`** for mutations
 5. **Always wrap server actions with `tryCatch`** on the client side
 6. **Always validate with Zod** before processing user input
-7. **Don't forget `revalidatePath()`** after mutations that affect cached data
+7. **Don't forget cache invalidation after mutations** (`updateTag(...)` first, `revalidatePath(...)` only when needed)
+8. **Don't create param tags** like `members:${id}` - function arguments are automatically serialized into cache keys
+9. **Don't mix invalidation strategies** without intent - choose tag-level OR path-level as primary, combine only when needed
 
 ## Additional Resources
 

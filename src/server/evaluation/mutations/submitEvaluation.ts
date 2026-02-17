@@ -1,5 +1,7 @@
 "use server";
 
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import type { EvaluationFormData } from "@/lib/validation/evaluation/evaluation-form";
 import { EvaluationFormSchema } from "@/lib/validation/evaluation/evaluation-form";
@@ -58,4 +60,7 @@ export async function submitEvaluationForm(
   if (error) {
     throw new Error(error.message);
   }
+
+  updateTag(CACHE_TAGS.evaluations.all);
+  updateTag(CACHE_TAGS.evaluations.admin);
 }

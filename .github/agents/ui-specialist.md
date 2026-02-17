@@ -159,6 +159,61 @@ export function UserForm() {
 
 **Default to Server Components** - only add `"use client"` when needed
 
+## Caching Considerations
+
+When building UI that displays cached data:
+
+### Loading States with Cached Data
+
+```tsx
+import { Suspense } from "react";
+import { cookies } from "next/headers";
+
+export default async function Page() {
+  const cookieStore = await cookies();
+
+  return (
+    <Suspense fallback={<UsersSkeleton />}>
+      <UsersList cookies={cookieStore.getAll()} />
+    </Suspense>
+  );
+}
+
+async function UsersList({ cookies }: { cookies: RequestCookie[] }) {
+  const users = await getCachedUsers(cookies); // Uses "use cache"
+  return <UserGrid users={users} />;
+}
+```
+
+### When to Use "use cache" in Components
+
+- Server Components can use `"use cache"` at file or function level
+- Pass cookies from the page level to cached query functions
+- Don't add "use cache" to Client Components (it only works in Server Components)
+
+### Cache Invalidation from UI Actions
+
+When UI triggers mutations (e.g., button clicks):
+
+```tsx
+"use client";
+
+import { useAction } from "@/hooks/useAction";
+import tryCatch from "@/lib/server/tryCatch";
+import { deleteUser } from "@/server/users/mutations";
+
+export function DeleteButton({ userId }: { userId: string }) {
+  const { execute, isPending } = useAction(tryCatch(deleteUser), {
+    onSuccess: () => {
+      // Router refresh will trigger re-fetch of cached data
+      router.refresh();
+    },
+  });
+
+  return <button onClick={() => execute(userId)}>Delete</button>;
+}
+```
+
 ## Common Pitfalls
 
 - Don't use relative imports when `@/` alias is available

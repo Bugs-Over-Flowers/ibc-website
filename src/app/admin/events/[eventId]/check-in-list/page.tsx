@@ -53,7 +53,9 @@ async function CheckInPage({
     .single();
 
   // Fetch stats
-  const statsResult = await tryCatch(getCheckInStats(eventId));
+  const statsResult = await tryCatch(
+    getCheckInStats(cookieStore.getAll(), eventId),
+  );
 
   return (
     <div className="flex flex-col gap-4">
