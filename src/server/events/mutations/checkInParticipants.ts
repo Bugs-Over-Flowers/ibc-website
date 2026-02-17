@@ -40,6 +40,12 @@ export async function checkInParticipants(
     throw new Error(error.message);
   }
 
+  // updateTag(CACHE_TAGS.checkIns.all);
+  // updateTag(CACHE_TAGS.checkIns.list);
+  // updateTag(CACHE_TAGS.checkIns.stats);
+  // updateTag(CACHE_TAGS.checkIns.eventDay);
+  // updateTag(CACHE_TAGS.events.checkIns);
+
   revalidatePath(`/admin/events/check-in/${parsed.eventDayId}`);
 
   return {

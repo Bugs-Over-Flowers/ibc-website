@@ -27,8 +27,7 @@ export default async function EvaluationPage({
     );
   }
 
-  const cookieStore = await cookies();
-  const event = await getEventById(cookieStore.getAll(), { id: eventId });
+  const event = await getEventById((await cookies()).getAll(), { id: eventId });
 
   return (
     <main className="min-h-screen bg-background">

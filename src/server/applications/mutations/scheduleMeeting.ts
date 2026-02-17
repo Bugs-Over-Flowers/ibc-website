@@ -132,6 +132,8 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
       `Interview linking failed: ${rpcResult?.[0]?.message || "Unknown error"}`,
     );
   }
+  // updateTag(CACHE_TAGS.applications.all);
+  // updateTag(CACHE_TAGS.applications.admin);
 
   revalidatePath("/admin/application");
 

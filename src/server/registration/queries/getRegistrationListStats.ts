@@ -1,5 +1,7 @@
-import { cacheLife } from "next/cache";
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { useRealtime60sCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 import { RegistrationListStatsSchema } from "@/lib/validation/registration-management";
 
@@ -12,7 +14,10 @@ export const getRegistrationListStats = async (
   },
 ) => {
   "use cache";
-  cacheLife("seconds");
+  useRealtime60sCache();
+  cacheTag(CACHE_TAGS.registrations.all);
+  cacheTag(CACHE_TAGS.registrations.stats);
+  cacheTag(CACHE_TAGS.registrations.event);
 
   const supabase = await createClient(requestCookies);
 

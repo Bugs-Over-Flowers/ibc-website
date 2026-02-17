@@ -12,6 +12,10 @@ There are **three** different Supabase clients with specific use cases:
 - ✅ **REQUIRES** passing `requestCookies` from `cookies().getAll()`
 - ❌ **CANNOT** set cookies (read-only)
 - ❌ **NEVER** use for mutations
+- Prefer cache profiles from `next.config.ts`: `publicHours`, `admin5m`, `realtime60s`
+- Use centralized tags from `@/lib/cache/tags` (avoid ad-hoc string tags)
+- Avoid caching high-cardinality filter/cursor/search queries unless proven reusable
+- Avoid caching time-dependent queries (`new Date()`, `Date.now()`) unless staleness is intentional
 
 **Example:**
 
@@ -54,6 +58,8 @@ export async function getDynamicData() {
 - ✅ **CAN** set cookies (auth token refresh)
 - ❌ **NEVER** use inside `"use cache"` functions
 - ❌ **NEVER** import in `"use client"` components
+- After successful mutations, invalidate tags with `updateTag(...)` first
+- Use `revalidatePath(...)` only when route-level refresh behavior is explicitly needed
 
 **Example:**
 

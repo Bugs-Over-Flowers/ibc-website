@@ -133,6 +133,44 @@ onSubmit: async ({ value }) => {
 7. Export new field components from `src/components/form/index.ts`
 8. Register new field components in `src/hooks/_formHooks.ts` under `fieldComponents`
 
+## Caching Considerations
+
+When forms trigger mutations that affect cached data:
+
+**Tag-Level Invalidation (preferred):**
+```typescript
+"use server";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
+
+export async function submitForm(input: FormData) {
+  const supabase = await createActionClient();
+  await supabase.from("items").insert(input);
+
+  // Invalidate only affected tags
+  updateTag(CACHE_TAGS.items.all);
+  updateTag(CACHE_TAGS.items.admin);
+}
+```
+
+**Path-Level Invalidation (when route refresh is needed):**
+```typescript
+"use server";
+import { revalidatePath } from "next/cache";
+
+export async function submitForm(input: FormData) {
+  const supabase = await createActionClient();
+  await supabase.from("items").insert(input);
+
+  revalidatePath("/admin/items");
+}
+```
+
+**Key Points:**
+- Choose ONE primary strategy per mutation
+- Only combine both when intentionally needed
+- NO param tags like `items:${id}` (function args are auto-serialized into cache keys)
+
 ## Common Pitfalls
 
 - Don't forget to `e.preventDefault()` on form submit

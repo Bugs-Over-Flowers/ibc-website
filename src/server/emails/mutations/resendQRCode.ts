@@ -1,5 +1,5 @@
 "use server";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import ResendQRCodeTemplate from "@/lib/resend/templates/ResendQRCodeTemplate";
@@ -99,7 +99,9 @@ export const resendQRCode = async ({
       .eq("participantId", registrantDetails.participantId)
       .throwOnError();
   }
-  updateTag("getRegistrationData");
-  updateTag("getRegistrationEventDetails");
+  // updateTag(CACHE_TAGS.registrations.details);
+  // updateTag(CACHE_TAGS.registrations.list);
+  // updateTag(CACHE_TAGS.registrations.event);
+  // updateTag(CACHE_TAGS.events.registrations);
   revalidatePath("/admin/events/[eventId]/registration-list", "page");
 };

@@ -1,7 +1,6 @@
 import { Calendar, DollarSign, MapPin } from "lucide-react";
 import Image from "next/image";
 import { Suspense } from "react";
-import RichTextDisplay from "@/components/RichTextDisplay";
 import { formatFullDateTime } from "@/lib/events/eventUtils";
 import type { EventWithStatus } from "../../types/event";
 import EventActionsDropdown from "./EventActionsDropdown";
