@@ -22,6 +22,9 @@ export default function RegistrationForm({
 }: RegistrationFormProps) {
   const step = useRegistrationStore((state) => state.step);
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const currentEventId = useRegistrationStore(
+    (state) => state.eventDetails?.eventId,
+  );
   const setSponsorInfo = useRegistrationStore((state) => state.setSponsorInfo);
   const clearSponsorInfo = useRegistrationStore(
     (state) => state.clearSponsorInfo,
@@ -29,21 +32,27 @@ export default function RegistrationForm({
 
   // Sync sponsor info from validated URL params
   React.useEffect(() => {
+    if (!currentEventId) {
+      return;
+    }
+
     if (
       sponsorUuid &&
       sponsoredRegistrationId &&
-      sponsorFeeDeduction !== undefined
+      sponsorFeeDeduction !== undefined &&
+      sponsorFeeDeduction !== null
     ) {
       setSponsorInfo({
         sponsorUuid,
         sponsoredRegistrationId,
-        feeDeduction: sponsorFeeDeduction,
+        feeDeduction: Number(sponsorFeeDeduction),
       });
       return;
     }
 
     clearSponsorInfo();
   }, [
+    currentEventId,
     sponsorUuid,
     sponsoredRegistrationId,
     sponsorFeeDeduction,

@@ -39,7 +39,9 @@ async function EventHeader({
   return (
     <div>
       <div className="space-y-1">
-        <p className="text-muted-foreground text-sm">Sponsored Registration</p>
+        <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+          Sponsored Registrations
+        </p>
         <h1 className="font-bold text-3xl text-foreground">
           {event?.eventTitle || "Sponsored Registrations"}
         </h1>

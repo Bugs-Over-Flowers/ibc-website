@@ -8,28 +8,22 @@ export default function SponsoredRegistrationsLoading() {
 
       {/* Event Header Section */}
       <div className="space-y-1">
-        <div className="h-4 w-48 rounded bg-muted/70" />
+        <div className="h-3 w-44 rounded bg-muted/70" />
         <div className="h-10 w-80 rounded bg-muted" />
-        <div className="mt-2 h-4 w-96 rounded bg-muted/70" />
+        <div className="mt-2 h-5 w-full max-w-2xl rounded bg-muted/70" />
       </div>
 
       {/* Filter Section */}
-      <div className="space-y-3 rounded-xl border border-border bg-card p-3">
-        {/* Search Bar and Filters Row */}
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          {/* Search Bar */}
-          <div className="relative h-10 flex-1 rounded-xl bg-muted/50" />
-
-          {/* Filters Row */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="h-10 w-40 rounded-lg border bg-muted/50" />
-            <div className="h-10 w-40 rounded-lg border bg-muted/50" />
-          </div>
+      <div className="rounded-xl p-0">
+        <div className="flex items-center gap-3">
+          <div className="h-12 flex-1 rounded-xl border border-border bg-card/80" />
+          <div className="h-12 min-w-[160px] rounded-xl border border-border bg-card/80" />
+          <div className="h-12 min-w-[160px] rounded-xl border border-border bg-card/80" />
         </div>
       </div>
 
-      {/* Sponsored Registration Cards Grid */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1">
+      {/* Sponsored Registration Cards */}
+      <div className="space-y-3">
         {CARD_IDS.map((id) => (
           <div
             className="w-full space-y-5 rounded-xl border border-border bg-card p-5"
@@ -39,16 +33,16 @@ export default function SponsoredRegistrationsLoading() {
             <div className="flex items-start gap-4">
               {/* Name and Badge Section */}
               <div className="min-w-0 flex-1 space-y-2">
-                <div className="h-5 w-48 rounded bg-muted" />
-                <div className="h-4 w-32 rounded bg-muted/70" />
+                <div className="h-5 w-52 rounded bg-muted" />
+                <div className="h-3 w-28 rounded bg-muted/70" />
               </div>
 
               {/* Action Buttons (hidden on mobile) */}
-              <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <div className="hidden shrink-0 items-center gap-1 sm:flex">
+                <div className="h-9 w-9 rounded border bg-muted" />
                 <div className="h-9 w-9 rounded border bg-muted" />
                 <div className="h-9 w-9 rounded border bg-muted" />
                 <div className="mx-1 h-6 w-px bg-border" />
-                <div className="h-9 w-9 rounded border bg-muted" />
                 <div className="h-9 w-9 rounded border bg-muted" />
                 <div className="h-9 w-9 rounded border bg-muted" />
               </div>
@@ -59,17 +53,15 @@ export default function SponsoredRegistrationsLoading() {
 
             {/* Guest Utilization Section */}
             <div className="space-y-3">
-              {/* Stats Row */}
+              {/* Header with Icon and Stats */}
               <div className="flex items-center justify-between">
-                <div className="flex gap-6">
-                  <div className="space-y-1">
-                    <div className="h-4 w-20 rounded bg-muted/70" />
-                    <div className="h-5 w-12 rounded bg-muted" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="h-4 w-24 rounded bg-muted/70" />
-                    <div className="h-5 w-12 rounded bg-muted" />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-muted/60" />
+                  <div className="h-4 w-20 rounded bg-muted/70" />
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <div className="h-9 w-14 rounded bg-muted" />
+                  <div className="h-5 w-10 rounded bg-muted/70" />
                 </div>
               </div>
 

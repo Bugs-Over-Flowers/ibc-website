@@ -17,12 +17,15 @@ export default async function NewSponsoredRegistrationPage() {
     }));
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6 pb-8">
       <div>
         <BackButton />
       </div>
 
-      <div>
+      <div className="space-y-1">
+        <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+          Sponsored Registrations
+        </p>
         <h1 className="font-bold text-3xl text-foreground">
           Create Sponsored Registration
         </h1>

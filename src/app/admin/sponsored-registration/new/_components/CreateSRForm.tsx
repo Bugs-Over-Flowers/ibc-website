@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { useAppForm } from "@/hooks/_formHooks";
 import tryCatch from "@/lib/server/tryCatch";
 import { zodValidator } from "@/lib/utils";
@@ -53,17 +54,24 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
 
   return (
     <form
-      className="mx-auto max-w-7xl space-y-4"
+      className="mx-auto w-full max-w-7xl space-y-5"
       onSubmit={(e) => {
         e.preventDefault();
         form.handleSubmit();
       }}
     >
-      <div className="space-y-5 rounded-lg border bg-card p-5">
+      <div className="space-y-5 rounded-xl border bg-card p-5 sm:p-6">
+        <div className="space-y-1">
+          <h2 className="font-semibold text-base">Registration Details</h2>
+          <p className="text-muted-foreground text-sm">
+            Start by selecting an event and identifying the sponsor.
+          </p>
+        </div>
+
         <form.AppField name="eventId">
           {(field) => (
             <field.SelectField
-              description="Choose the event for this sponsored registration"
+              description="Pick the event this sponsored registration link will be attached to"
               label="Event"
               options={eventOptions}
               placeholder="Select an event"
@@ -73,20 +81,28 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
         <form.AppField name="sponsoredBy">
           {(field) => (
             <field.TextField
-              description="Organization, individual, or department providing the sponsorship"
+              description="Organization, individual, or department providing this sponsorship"
               label="Sponsored By"
-              placeholder="e.g., ACME Corp, John Doe, Department of CS"
+              placeholder="e.g., ACME Corp"
             />
           )}
         </form.AppField>
       </div>
 
-      <div className="rounded-lg border bg-card p-5">
+      <div className="space-y-5 rounded-xl border bg-card p-5 sm:p-6">
+        <div className="space-y-1">
+          <h2 className="font-semibold text-base">Sponsorship Limits</h2>
+          <p className="text-muted-foreground text-sm">
+            Set the discount value and how many guests can register using this
+            link.
+          </p>
+        </div>
+
         <div className="grid gap-5 md:grid-cols-2">
           <form.AppField name="feeDeduction">
             {(field) => (
               <field.NumberField
-                description="Amount to deduct from registration fee"
+                description="Discount amount deducted per registration (0 to 1500)"
                 label="Fee Deduction (₱)"
                 max={1500}
                 min={0}
@@ -99,7 +115,7 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
           <form.AppField name="maxSponsoredGuests">
             {(field) => (
               <field.NumberField
-                description="Total registrations allowed via this link"
+                description="Maximum number of successful registrations allowed"
                 label="Maximum Guests"
                 min={1}
                 placeholder="e.g., 10"
@@ -110,16 +126,22 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 rounded-lg border bg-muted/50 px-5 py-3">
+      <div className="flex flex-col gap-3 rounded-xl border bg-muted/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-muted-foreground text-sm">
           A unique link will be generated
         </span>
-        <form.AppForm>
-          <form.SubmitButton
-            isSubmittingLabel="Creating..."
-            label="Create Sponsored Registration"
-          />
-        </form.AppForm>
+        <div className="flex items-center justify-end gap-2">
+          <Button onClick={() => router.back()} type="button" variant="outline">
+            Cancel
+          </Button>
+          <form.AppForm>
+            <form.SubmitButton
+              className="min-w-[220px]"
+              isSubmittingLabel="Creating..."
+              label="Create Sponsored Registration"
+            />
+          </form.AppForm>
+        </div>
       </div>
     </form>
   );

@@ -1,22 +1,25 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 const skeletonCards = Array.from({ length: 5 }, (_, i) => `card-${i}`);
-const buttonSkeletons = Array.from({ length: 7 }, (_, i) => `button-${i}`);
+const buttonSkeletons = Array.from({ length: 5 }, (_, i) => `button-${i}`);
 
 export default function SponsoredRegistrationPageSkeleton() {
   return (
     <div className="space-y-6">
       {/* Header Skeleton */}
-      <div className="space-y-2">
-        <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-5 w-96" />
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-5 w-full max-w-md" />
+        </div>
+        <Skeleton className="h-12 w-60 rounded-xl" />
       </div>
 
       {/* Filter Bar Skeleton */}
-      <div className="rounded-xl border border-border bg-card p-3">
+      <div className="rounded-xl p-0">
         <div className="flex flex-col gap-3">
           {/* Search Input */}
-          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-12 w-full rounded-xl" />
 
           {/* Filter Dropdowns */}
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -38,8 +41,9 @@ export default function SponsoredRegistrationPageSkeleton() {
               {/* Header */}
               <div className="flex items-start gap-4">
                 <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-48" />
-                  <Skeleton className="h-4 w-64" />
+                  <Skeleton className="h-5 w-52" />
+                  <Skeleton className="h-4 w-56" />
+                  <Skeleton className="h-4 w-72" />
                 </div>
                 <div className="hidden gap-1 sm:flex">
                   {buttonSkeletons.map((btnKey) => (
@@ -61,6 +65,14 @@ export default function SponsoredRegistrationPageSkeleton() {
                   <Skeleton className="h-4 w-32" />
                   <Skeleton className="h-4 w-12" />
                 </div>
+              </div>
+
+              {/* Mobile Actions */}
+              <div className="flex items-center justify-end gap-1 border-t pt-2 sm:hidden">
+                <Skeleton className="h-8 w-16 rounded" />
+                <Skeleton className="h-8 w-16 rounded" />
+                <div className="mx-1 h-5 w-px bg-border" />
+                <Skeleton className="h-8 w-16 rounded" />
               </div>
             </div>
           </div>
