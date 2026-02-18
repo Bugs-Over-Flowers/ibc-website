@@ -76,27 +76,53 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
   const getStatusClasses = (status: Enums<"PaymentProofStatus">) => {
     switch (status) {
       case "accepted":
-        return "bg-background/50 text-status-green";
+        return "text-status-green";
       case "rejected":
-        return "bg-background/50 text-status-red";
+        return "text-status-red";
       default:
-        return "bg-background/50 text-status-red";
+        return "text-status-red";
     }
   };
 
   const StatusIcon = getStatusIcon(paymentProofStatus);
 
   return (
-    <>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col justify-end">
-          <h1 className="font-bold text-3xl">{application.companyName}</h1>
-          <p className="mt-1 text-muted-foreground">
-            Application ID: {application.identifier}
-          </p>
+    <div className="space-y-6">
+      {/* Main Header Section */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:justify-between">
+        {/* Company Info */}
+        <div className="flex flex-1 flex-row items-center gap-6">
+          <div className="shrink-0">
+            {showImage ? (
+              <Image
+                alt={`${application.companyName} logo`}
+                className="rounded-lg object-cover shadow-sm"
+                height={100}
+                onError={() => setImageError(true)}
+                src={application.logoImageURL as string}
+                unoptimized
+                width={100}
+              />
+            ) : (
+              <div className="flex h-[100px] w-[100px] shrink-0 items-center justify-center rounded-lg border-2 border-gray-300 bg-gray-100 font-semibold text-4xl text-gray-600 shadow-sm">
+                {application.companyName.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col justify-center gap-1">
+            <h1 className="font-bold text-3xl leading-tight">
+              {application.companyName}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Application ID:{" "}
+              <span className="font-medium">{application.identifier}</span>
+            </p>
+          </div>
         </div>
-        <div className="flex flex-wrap items-start gap-4">
-          {hasProofImage && (
+
+        {/* Payment Proof Section */}
+        {hasProofImage && (
+          <div className="flex flex-col gap-2">
             <Dialog
               onOpenChange={setIsProofDialogOpen}
               open={isProofDialogOpen}
@@ -104,24 +130,33 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
               <DialogTrigger
                 render={
                   <button
-                    className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-lg border bg-muted/30"
+                    className="group relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-lg border-2 bg-muted/30 shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
                     type="button"
                   />
                 }
               >
                 <Image
                   alt="Payment proof"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
                   fill
                   src={proofImage.path}
                 />
                 <span
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-background/50"
+                />
+                <span
                   className={cn(
-                    "absolute m-auto rounded-full p-1 shadow-sm",
+                    "absolute inset-0 flex -translate-y-4 items-center justify-center",
                     getStatusClasses(paymentProofStatus),
                   )}
                 >
-                  <StatusIcon className="h-10 w-10" />
+                  <span className="rounded-full p-1.5 shadow-lg">
+                    <StatusIcon className="h-10 w-10" />
+                  </span>
+                </span>
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-1 font-medium text-foreground/80 text-sm">
+                  Payment Proof
                 </span>
               </DialogTrigger>
               <DialogContent className="max-w-3xl">
@@ -157,43 +192,31 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          )}
-          <div className="shrink-0">
-            {showImage ? (
-              <Image
-                alt={`${application.companyName} logo`}
-                height={100}
-                onError={() => setImageError(true)}
-                src={application.logoImageURL as string}
-                unoptimized
-                width={100}
-              />
-            ) : (
-              <div className="flex h-[100px] w-[100px] shrink-0 items-center justify-center rounded-lg border-2 border-gray-300 bg-gray-100 font-semibold text-4xl text-gray-600">
-                {application.companyName.charAt(0).toUpperCase()}
-              </div>
-            )}
           </div>
-        </div>
+        )}
       </div>
 
+      {/* Approval Status Section */}
       {application.businessMemberId && (
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 rounded-lg border bg-muted/20 p-4 sm:flex-row sm:items-center">
+          <div className="flex flex-wrap items-center gap-3">
             <Badge className="bg-status-green text-sm" variant="default">
               Approved
             </Badge>
             {application.BusinessMember?.identifier && (
               <span className="text-muted-foreground text-sm">
-                Member ID: {application.BusinessMember.identifier}
+                Member ID:
+                <span className="font-medium text-foreground">
+                  {application.BusinessMember.identifier}
+                </span>
               </span>
             )}
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <ExportPDFButton application={application} />
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
