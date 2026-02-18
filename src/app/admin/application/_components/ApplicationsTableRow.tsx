@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -7,6 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { toPascalCaseWithSpaces } from "../_utils/formatters";
@@ -62,6 +68,10 @@ export function ApplicationsTableRow({
   const { borderColor, textColor } = getApplicationTypeColor(
     application.applicationType,
   );
+  const paymentProofStatus = application.paymentProofStatus ?? "pending";
+  const isPaymentProofPending =
+    application.paymentMethod === "BPI" && paymentProofStatus === "pending";
+  const isSelectionDisabled = isPaymentProofPending;
 
   return (
     <TableRow
@@ -72,24 +82,47 @@ export function ApplicationsTableRow({
         <Checkbox
           aria-label={`Select ${application.companyName}`}
           checked={isSelected}
-          onCheckedChange={() => toggleSelection(application.applicationId)}
+          disabled={isSelectionDisabled}
+          onCheckedChange={() => {
+            if (isSelectionDisabled) return;
+            toggleSelection(application.applicationId);
+          }}
         />
       </TableCell>
-      <TableCell className="font-medium">{application.companyName}</TableCell>
-      <TableCell>{application.Sector?.sectorName}</TableCell>
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-2">
+          {isPaymentProofPending && (
+            <Tooltip>
+              <TooltipTrigger
+                aria-label="Check payment proof"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-status-red/15 text-status-red"
+              >
+                <AlertTriangle className="h-4 w-4" />
+              </TooltipTrigger>
+              <TooltipContent>Check Payment Proof</TooltipContent>
+            </Tooltip>
+          )}
+          <span>{application.companyName}</span>
+        </div>
+      </TableCell>
+      <TableCell className="max-w-64">
+        <div className="line-clamp-2 truncate text-sm">
+          {application.Sector?.sectorName}
+        </div>
+      </TableCell>
       <TableCell>
         <Badge className={`${borderColor} ${textColor}`} variant="outline">
           {toPascalCaseWithSpaces(application.applicationType)}
         </Badge>
       </TableCell>
-      <TableCell>
+      {/* <TableCell>
         <div className="text-sm">
           <div>{application.emailAddress}</div>
           <div className="text-muted-foreground">
             {application.mobileNumber}
           </div>
         </div>
-      </TableCell>
+      </TableCell> */}
       <TableCell>
         <div className="space-y-1">
           <div>
