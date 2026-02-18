@@ -282,8 +282,7 @@ export function ApplicationStatusResult({
                   </h4>
                   <p className="text-emerald-200/70 text-sm leading-relaxed">
                     You will receive an email confirmation with your interview
-                    details. Please arrive at least 15 minutes before your
-                    scheduled interview time.
+                    details. We are looking forward to meeting you.
                   </p>
                 </div>
               </div>
