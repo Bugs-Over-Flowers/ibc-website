@@ -3,8 +3,7 @@
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 import "server-only";
-import { revalidatePath, updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import { revalidatePath } from "next/cache";
 import {
   CheckInParticipantsInput,
   type CheckInParticipantsOutput,
