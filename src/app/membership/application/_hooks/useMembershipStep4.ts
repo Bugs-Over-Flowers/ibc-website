@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { zodValidator } from "@/lib/utils";
 import { validateFileType } from "@/lib/validation/fileTypes";
 import { MembershipApplicationStep4Schema } from "@/lib/validation/membership/application";
-import { submitMembershipApplication } from "@/server/membership/actions/submitApplication";
+import { submitMembershipApplication } from "@/server/membership/mutations/submitApplication";
 
 interface UseMembershipStep4Props {
   onSuccess?: () => void;

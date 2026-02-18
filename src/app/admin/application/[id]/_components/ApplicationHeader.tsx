@@ -21,7 +21,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
           <div className="flex flex-col justify-end">
             <h1 className="font-bold text-3xl">{application.companyName}</h1>
             <p className="mt-1 text-muted-foreground">
-              Application #{application.applicationId.slice(0, 8)}
+              Application ID: {application.identifier}
             </p>
           </div>
           <div className="shrink-0">
@@ -46,12 +46,14 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
       {application.businessMemberId && (
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <Badge className="text-sm" variant="default">
+            <Badge className="bg-status-green text-sm" variant="default">
               Approved
             </Badge>
-            <span className="text-muted-foreground text-sm">
-              Member ID: {application.businessMemberId}
-            </span>
+            {application.BusinessMember?.identifier && (
+              <span className="text-muted-foreground text-sm">
+                Member ID: {application.BusinessMember.identifier}
+              </span>
+            )}
           </div>
           <div>
             <ExportPDFButton application={application} />

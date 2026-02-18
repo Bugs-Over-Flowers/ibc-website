@@ -1,16 +1,14 @@
 "use server";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import type { ApplicationWithMembers } from "@/lib/types/application";
 
 export async function getApplicationDetailsById(
   applicationId: string,
-  requestCookies?: RequestCookie[],
+  requestCookies: RequestCookie[],
 ) {
-  const cookieStore = requestCookies || (await cookies()).getAll();
-  const supabase = await createClient(cookieStore);
+  const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase
     .from("Application")
@@ -18,6 +16,7 @@ export async function getApplicationDetailsById(
       `
       *,
       ApplicationMember(*),
+      BusinessMember(identifier),
       Sector(sectorId, sectorName),
       ProofImage(proofImageId, path)
     `,

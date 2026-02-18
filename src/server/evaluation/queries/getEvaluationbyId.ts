@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cookies } from "next/headers";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -27,9 +27,9 @@ export type EvaluationWithEventRpc = {
 
 export async function getEvaluationByIdRpc(
   evaluationId: string,
+  requestCookies: RequestCookie[],
 ): Promise<EvaluationWithEventRpc | null> {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
+  const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase.rpc("get_evaluation_by_id", {
     eval_id: evaluationId,

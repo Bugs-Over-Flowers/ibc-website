@@ -1,7 +1,9 @@
 import "server-only";
 
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyRealtime60sCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 import {
   type RegistrationItem,
@@ -20,8 +22,10 @@ export const getEventRegistrationList = async (
   { eventId, searchString, paymentStatus }: GetRegistrationListParams,
 ): Promise<RegistrationItem[]> => {
   "use cache";
-  cacheLife("seconds");
-  cacheTag("registration-list");
+  applyRealtime60sCache();
+  cacheTag(CACHE_TAGS.registrations.all);
+  cacheTag(CACHE_TAGS.registrations.list);
+  cacheTag(CACHE_TAGS.registrations.event);
   const supabase = await createClient(requestCookies);
 
   const query = await supabase
