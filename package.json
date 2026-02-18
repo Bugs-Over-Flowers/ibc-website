@@ -43,6 +43,9 @@
     "@supabase/supabase-js": "^2.96.0",
     "@tanstack/react-form": "^1.28.3",
     "@tanstack/react-table": "^8.21.3",
+    "@tiptap/extension-placeholder": "^3.19.0",
+    "@tiptap/react": "^3.19.0",
+    "@tiptap/starter-kit": "^3.19.0",
     "@types/qrcode": "^1.5.6",
     "@yudiel/react-qr-scanner": "^2.5.1",
     "class-variance-authority": "^0.7.1",
@@ -53,6 +56,7 @@
     "file-type": "^21.3.0",
     "html-to-image": "^1.11.13",
     "input-otp": "^1.4.2",
+    "isomorphic-dompurify": "^2.36.0",
     "lucide-react": "^0.566.0",
     "motion": "^12.34.1",
     "next": "^16.1.6",
@@ -88,6 +92,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@types/dompurify": "^3.2.0",
     "@types/node": "^25.2.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -109,9 +114,10 @@
   },
   "overrides": {
     "@modelcontextprotocol/sdk": "^1.25.4",
+    "ajv": "^8.18.0",
     "qs": "^6.14.2",
     "svelte": "^5.46.4",
-    "tar": "^7.5.7",
+    "tar": "^7.5.8",
     "lodash": "^4.17.23",
     "@isaacs/brace-expansion": "^5.0.1"
   }
