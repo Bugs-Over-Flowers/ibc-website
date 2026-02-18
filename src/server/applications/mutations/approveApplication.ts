@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ApplicationDecisionInput } from "@/lib/validation/application/application";
 import { applicationDecisionSchema } from "@/lib/validation/application/application";
@@ -90,6 +91,12 @@ export async function approveApplication(input: ApplicationDecisionInput) {
   if (emailError) {
     throw new Error(emailError);
   }
+
+  // updateTag(CACHE_TAGS.applications.all);
+  // updateTag(CACHE_TAGS.applications.admin);
+  // updateTag(CACHE_TAGS.members.all);
+  // updateTag(CACHE_TAGS.members.admin);
+  // updateTag(CACHE_TAGS.members.public);
 
   revalidatePath("/admin/application");
   revalidatePath("/admin/members");
