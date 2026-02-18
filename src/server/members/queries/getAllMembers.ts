@@ -1,10 +1,17 @@
 import "server-only";
 
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { cache } from "react";
+import { usePublicHoursCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 
-export const getAllMembers = cache(async (cookieStore: RequestCookie[]) => {
+export async function getAllMembers(cookieStore: RequestCookie[]) {
+  "use cache";
+  usePublicHoursCache();
+  cacheTag(CACHE_TAGS.members.all);
+  cacheTag(CACHE_TAGS.members.public);
+
   const supabase = await createClient(cookieStore);
   const { data } = await supabase
     .from("BusinessMember")
@@ -19,4 +26,4 @@ export const getAllMembers = cache(async (cookieStore: RequestCookie[]) => {
     throw new Error("Failed to fetch members");
   }
   return data;
-});
+}

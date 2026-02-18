@@ -1,6 +1,7 @@
 "use server";
 
 import type { Route } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getEvaluationByIdRpc } from "@/server/evaluation/queries/getEvaluationbyId";
 import { EvaluationCard } from "./EvaluationCard";
@@ -13,7 +14,11 @@ export async function EvaluationDetails({
   evaluationId,
 }: EvaluationDetailsProps) {
   try {
-    const evaluation = await getEvaluationByIdRpc(evaluationId);
+    const cookieStore = await cookies();
+    const evaluation = await getEvaluationByIdRpc(
+      evaluationId,
+      cookieStore.getAll(),
+    );
 
     if (!evaluation) {
       redirect("/admin/evaluation" as Route);

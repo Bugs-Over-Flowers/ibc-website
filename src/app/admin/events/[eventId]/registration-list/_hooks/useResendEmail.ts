@@ -3,7 +3,7 @@ import { z } from "zod";
 import { useAppForm } from "@/hooks/_formHooks";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { resendQRCode } from "@/server/emails/actions/resendQRCode";
+import { resendQRCode } from "@/server/emails/mutations/resendQRCode";
 
 interface UseResendEmailProps {
   email: string;

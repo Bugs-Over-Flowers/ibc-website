@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import tryCatch from "@/lib/server/tryCatch";
-import { deleteEvaluation } from "@/server/evaluation/actions/deleteEvaluation";
+import { deleteEvaluation } from "@/server/evaluation/mutations/deleteEvaluation";
 import type { EvaluationWithEventRpc } from "@/server/evaluation/queries/getAllEvaluations";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { EvaluationCard } from "./EvaluationRow";

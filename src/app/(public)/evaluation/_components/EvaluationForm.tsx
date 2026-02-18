@@ -20,7 +20,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
 import { zodValidator } from "@/lib/utils";
 import { EvaluationFormSchema } from "@/lib/validation/evaluation/evaluation-form";
-import { submitEvaluationForm } from "@/server/evaluation/actions/submitEvaluation";
+import { submitEvaluationForm } from "@/server/evaluation/mutations/submitEvaluation";
 
 interface EvaluationFormProps {
   eventId: string;
