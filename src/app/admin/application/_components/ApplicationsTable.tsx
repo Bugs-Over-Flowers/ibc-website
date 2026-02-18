@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -39,19 +39,24 @@ export function ApplicationsTable({
     removeApplication,
   } = useSelectedApplicationsStore();
 
-  const isSelectable = (
-    application: ApplicationsTableProps["applications"][number],
-  ) =>
-    application.paymentMethod !== "BPI" ||
-    (application.paymentProofStatus ?? "pending") !== "pending";
+  const isSelectable = useCallback(
+    (application: ApplicationsTableProps["applications"][number]) =>
+      application.paymentMethod !== "BPI" ||
+      (application.paymentProofStatus ?? "pending") !== "pending",
+    [],
+  );
 
-  const selectableApplicationIds = applications
-    .filter(isSelectable)
-    .map((app) => app.applicationId);
+  const selectableApplicationIds = useMemo(
+    () => applications.filter(isSelectable).map((app) => app.applicationId),
+    [applications, isSelectable],
+  );
 
-  const selectedSelectableCount = selectableApplicationIds.filter((id) =>
-    selectedApplicationIds.has(id),
-  ).length;
+  const selectedSelectableCount = useMemo(
+    () =>
+      selectableApplicationIds.filter((id) => selectedApplicationIds.has(id))
+        .length,
+    [selectableApplicationIds, selectedApplicationIds],
+  );
 
   const allSelected =
     selectableApplicationIds.length > 0 &&

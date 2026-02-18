@@ -93,10 +93,11 @@ export function ApplicationsTableRow({
         <div className="flex items-center gap-2">
           {isPaymentProofPending && (
             <Tooltip>
-              <TooltipTrigger>
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-status-red/15 text-status-red">
-                  <AlertTriangle className="h-4 w-4" />
-                </span>
+              <TooltipTrigger
+                aria-label="Check payment proof"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-status-red/15 text-status-red"
+              >
+                <AlertTriangle className="h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>Check Payment Proof</TooltipContent>
             </Tooltip>

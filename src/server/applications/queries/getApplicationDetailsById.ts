@@ -68,8 +68,8 @@ export async function getApplicationDetailsById(
         }
       }
 
-      // If extraction failed, return original URL
-      return path;
+      // If extraction failed, return null to avoid invalid image src
+      return null;
     }
 
     // Handle relative paths
@@ -81,7 +81,7 @@ export async function getApplicationDetailsById(
       return signed.signedUrl;
     }
 
-    return path;
+    return null;
   };
 
   const proofImage = data.ProofImage?.[0];
