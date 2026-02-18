@@ -1,7 +1,6 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import { revalidatePath } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
 
 export const verifyPayment = async (registrationId: string) => {
