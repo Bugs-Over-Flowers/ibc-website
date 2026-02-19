@@ -1,24 +1,14 @@
 alter table if exists "public"."SponsoredRegistration"
   drop constraint if exists "SponsoredRegistration_uuid_unique";
-
 drop index if exists "public"."SponsoredRegistration_uuid_unique";
-
 alter table "public"."Registration" add column "sponsoredRegistrationId" uuid;
-
 alter table "public"."SponsoredRegistration" alter column "uuid" set data type text using "uuid"::text;
-
 CREATE INDEX idx_registration_sponsored ON public."Registration" USING btree ("sponsoredRegistrationId");
-
 CREATE INDEX idx_registration_sponsored_registration_id ON public."Registration" USING btree ("sponsoredRegistrationId");
-
 CREATE UNIQUE INDEX "SponsoredRegistration_uuid_unique" ON public."SponsoredRegistration" USING btree (uuid);
-
 alter table "public"."Registration" add constraint "Registration_sponsoredRegistrationId_fkey" FOREIGN KEY ("sponsoredRegistrationId") REFERENCES public."SponsoredRegistration"("sponsoredRegistrationId") ON DELETE CASCADE not valid;
-
 alter table "public"."Registration" validate constraint "Registration_sponsoredRegistrationId_fkey";
-
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.create_sponsored_registration(p_event_id uuid, p_sponsored_by text, p_fee_deduction double precision, p_max_sponsored_guests integer)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -75,9 +65,7 @@ exception when others then
     'success', false,
     'error', SQLERRM
   );
-end;$function$
-;
-
+end;$function$;
 CREATE OR REPLACE FUNCTION public.delete_sr(p_sponsored_registration_id uuid)
  RETURNS json
  LANGUAGE sql
@@ -89,9 +77,7 @@ AS $function$
       'success', true
     )
   );
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_all_sponsored_registrations()
  RETURNS TABLE(sponsored_registration_id uuid, event_id uuid, event_name text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, sponsored_by text, uuid uuid, max_sponsored_guests integer, used_count integer, status text, created_at timestamp with time zone, updated_at timestamp with time zone)
  LANGUAGE plpgsql
@@ -115,9 +101,7 @@ BEGIN
   LEFT JOIN "Event" e ON sr.event_id = e.event_id
   ORDER BY sr.created_at DESC;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_all_sponsored_registrations_with_event()
  RETURNS TABLE(sponsored_registration_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, sponsored_by text, uuid uuid, max_sponsored_guests bigint, used_count bigint, status public."SponsoredRegistrationStatus", created_at timestamp with time zone, updated_at timestamp with time zone)
  LANGUAGE sql
@@ -139,9 +123,7 @@ SELECT
 FROM "SponsoredRegistration" sr
 LEFT JOIN "Event" e ON sr."eventId" = e."eventId"
 ORDER BY sr."createdAt" DESC;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_events_for_select()
  RETURNS TABLE(event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone)
  LANGUAGE sql
@@ -155,9 +137,7 @@ SELECT
 FROM "Event" e
 WHERE e."eventStartDate" > now()
 ORDER BY e."eventStartDate" ASC;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_registrations_by_sponsored_id(p_sponsored_registration_id uuid)
  RETURNS TABLE("registrationId" uuid, "eventId" uuid, "businessMemberId" uuid, "sponsoredRegistrationId" uuid, "nonMemberName" text, "numberOfParticipants" integer, "paymentStatus" public."PaymentStatus", "paymentMethod" public."PaymentMethod", "registrationDate" timestamp with time zone, identifier text, participants jsonb)
  LANGUAGE sql
@@ -195,9 +175,7 @@ AS $function$
   FROM "Registration" r
   WHERE r."sponsoredRegistrationId" = p_sponsored_registration_id
   ORDER BY r."registrationDate" DESC;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_id(registration_id uuid)
  RETURNS SETOF public."SponsoredRegistration"
  LANGUAGE plpgsql
@@ -209,9 +187,7 @@ BEGIN
   FROM "SponsoredRegistration"
   WHERE "sponsoredRegistrationId" = registration_id;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_uuid(p_uuid uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -227,9 +203,7 @@ BEGIN
   
   RETURN result;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_sponsored_registrations_with_details(p_event_id uuid)
  RETURNS TABLE(id uuid, event_id uuid, sponsor_id uuid, registration_id uuid, status text, created_at timestamp with time zone, updated_at timestamp with time zone, sponsor_name text, registration_email text)
  LANGUAGE plpgsql
@@ -254,9 +228,7 @@ BEGIN
   WHERE sr.event_id = p_event_id
   ORDER BY sr.created_at DESC;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_sr_by_event_id(p_event_id uuid)
  RETURNS SETOF public."SponsoredRegistration"
  LANGUAGE sql
@@ -266,9 +238,7 @@ AS $function$
   FROM "SponsoredRegistration"
   WHERE "eventId" = p_event_id
   ORDER BY "createdAt" DESC;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.submit_event_registration(p_event_id uuid, p_member_type text, p_identifier text, p_business_member_id uuid DEFAULT NULL::uuid, p_non_member_name text DEFAULT NULL::text, p_payment_method text DEFAULT 'onsite'::text, p_payment_path text DEFAULT NULL::text, p_registrant jsonb DEFAULT '{}'::jsonb, p_other_participants jsonb DEFAULT '[]'::jsonb, p_sponsored_registration_id uuid DEFAULT NULL::uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -371,9 +341,7 @@ BEGIN
   );
 
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.toggle_sr_status(p_sponsored_registration_id uuid)
  RETURNS json
  LANGUAGE sql
@@ -399,9 +367,7 @@ AS $function$
       'updatedAt', "updatedAt"
     )
   );
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -464,9 +430,7 @@ BEGIN
     RETURN NEW;
   END IF;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count_from_participant()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -507,9 +471,7 @@ BEGIN
     RETURN NEW;
   END IF;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count_from_registration()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -574,9 +536,7 @@ BEGIN
     RETURN NEW;
   END IF;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_event_status(p_event_id uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -695,13 +655,9 @@ BEGIN
     'event_days', days_arr
   );
 END;
-$function$
-;
-
+$function$;
 CREATE TRIGGER tr_update_sponsored_registration_used_count_from_participant AFTER INSERT OR DELETE ON public."Participant" FOR EACH ROW EXECUTE FUNCTION public.update_sponsored_registration_used_count_from_participant();
-
 CREATE TRIGGER tr_update_sponsored_registration_used_count AFTER INSERT OR DELETE OR UPDATE OF "sponsoredRegistrationId" ON public."Registration" FOR EACH ROW EXECUTE FUNCTION public.update_sponsored_registration_used_count_from_registration();
-
 DO $$
 BEGIN
   IF to_regprocedure('storage.protect_delete()') IS NOT NULL THEN
@@ -716,7 +672,6 @@ BEGIN
   END IF;
 END
 $$;
-
 DO $$
 BEGIN
   IF to_regprocedure('storage.protect_delete()') IS NOT NULL THEN
@@ -731,4 +686,3 @@ BEGIN
   END IF;
 END
 $$;
-
