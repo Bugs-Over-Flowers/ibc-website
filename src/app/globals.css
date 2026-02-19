@@ -219,6 +219,16 @@
   --color-hero-text: var(--hero-text);
   --color-hero-text-muted: var(--hero-text-muted);
   --color-hero-overlay: var(--hero-overlay);
+
+  /* Custom Font Sizes */
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 1rem;
+  --text-3xs: 0.5rem;
+  --text-3xs--line-height: 0.75rem;
+  --text-4xs: 0.375rem;
+  --text-4xs--line-height: 0.5rem;
+  --text-5xs: 0.25rem;
+  --text-5xs--line-height: 0.5rem;
 }
 
 @layer base {
