@@ -632,6 +632,13 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      approve_membership_application: {
+        Args: { p_application_id: string };
+        Returns: {
+          business_member_id: string;
+          message: string;
+        }[];
+      };
       check_application_status: {
         Args: { p_application_identifier: string };
         Returns: Json;
@@ -651,7 +658,7 @@ export type Database = {
         Args: {
           p_event_id: string;
           p_fee_deduction: number;
-          p_max_sponsored_guests: number;
+          p_max_sponsored_guests?: number;
           p_sponsored_by: string;
         };
         Returns: Json;
