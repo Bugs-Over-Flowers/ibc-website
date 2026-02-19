@@ -49,9 +49,11 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
 
   const { step1, step3, eventId, step2 } = parsedData;
 
+  console.log(eventId);
+
   // Call database RPC function with transformed data
   const { data: rpcResults, error } = await supabase.rpc(
-    "submit_event_registration",
+    "submit_event_registration_standard",
     {
       p_event_id: eventId,
       // Member: send businessMemberId, Non-member: undefined
@@ -71,6 +73,7 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   );
 
   if (error) {
+    console.error(error);
     throw new Error("Failed to submit event registration");
   }
 

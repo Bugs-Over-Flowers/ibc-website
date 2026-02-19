@@ -909,36 +909,35 @@ export type Database = {
         };
         Returns: Json;
       };
-      submit_event_registration:
-        | {
-            Args: {
-              p_business_member_id?: string;
-              p_event_id: string;
-              p_identifier: string;
-              p_member_type: string;
-              p_non_member_name?: string;
-              p_other_participants?: Json;
-              p_payment_method?: string;
-              p_payment_path?: string;
-              p_registrant?: Json;
-            };
-            Returns: Json;
-          }
-        | {
-            Args: {
-              p_business_member_id?: string;
-              p_event_id: string;
-              p_identifier: string;
-              p_member_type: string;
-              p_non_member_name?: string;
-              p_other_participants?: Json;
-              p_payment_method?: string;
-              p_payment_path?: string;
-              p_registrant?: Json;
-              p_sponsored_registration_id?: string;
-            };
-            Returns: Json;
-          };
+      submit_event_registration: {
+        Args: {
+          p_business_member_id?: string;
+          p_event_id: string;
+          p_identifier: string;
+          p_member_type: string;
+          p_non_member_name?: string;
+          p_other_participants?: Json;
+          p_payment_method?: string;
+          p_payment_path?: string;
+          p_registrant?: Json;
+          p_sponsored_registration_id?: string;
+        };
+        Returns: Json;
+      };
+      submit_event_registration_standard: {
+        Args: {
+          p_business_member_id?: string;
+          p_event_id: string;
+          p_identifier: string;
+          p_member_type: string;
+          p_non_member_name?: string;
+          p_other_participants?: Json;
+          p_payment_method?: string;
+          p_payment_path?: string;
+          p_registrant?: Json;
+        };
+        Returns: Json;
+      };
       submit_membership_application: {
         Args: {
           p_application_member_type: string;
