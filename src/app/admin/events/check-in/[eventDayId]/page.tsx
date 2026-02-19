@@ -66,29 +66,37 @@ async function CheckInPage({
   return (
     <>
       <div className="space-y-4">
-        <EventDayDetails
-          eventDayData={{
-            eventTitle: data.event.eventTitle,
-            eventDate: data.eventDate,
-            label: data.label,
-            venue: data.event.venue,
-          }}
-        />
+        <div className="grid gap-6 lg:grid-cols-[350px_1fr] xl:grid-cols-[400px_1fr]">
+          <div className="flex flex-col gap-6">
+            <EventDayDetails
+              eventDayData={{
+                eventTitle: data.event.eventTitle,
+                eventDate: data.eventDate,
+                label: data.label,
+                venue: data.event.venue,
+              }}
+            />
+            <div className="sticky top-6">
+              <QRCodeScanner eventId={data.event.eventId} />
+            </div>
+          </div>
 
-        <div className="grid w-full gap-4 lg:grid-cols-[minmax(22rem,1fr)_minmax(26rem,1.2fr)]">
-          <QRCodeScanner eventId={data.event.eventId} />
-          <CheckInRegistrationPanel
-            errorMessage={
-              registrationListResult.success
-                ? undefined
-                : "Failed to load registration list."
-            }
-            eventDayId={eventDayId}
-            eventId={data.event.eventId}
-            registrationList={
-              registrationListResult.success ? registrationListResult.data : []
-            }
-          />
+          <div className="min-w-0">
+            <CheckInRegistrationPanel
+              errorMessage={
+                registrationListResult.success
+                  ? undefined
+                  : "Failed to load registration list."
+              }
+              eventDayId={eventDayId}
+              eventId={data.event.eventId}
+              registrationList={
+                registrationListResult.success
+                  ? registrationListResult.data
+                  : []
+              }
+            />
+          </div>
         </div>
       </div>
       <CheckInDataDialog eventId={data.event.eventId} />

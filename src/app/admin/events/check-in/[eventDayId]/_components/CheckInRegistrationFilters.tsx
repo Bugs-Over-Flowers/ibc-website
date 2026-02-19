@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   InputGroup,
   InputGroupAddon,
@@ -91,34 +92,34 @@ export default function CheckInRegistrationFilters() {
         }}
       >
         <div className="mb-1 text-sm">Search Registration</div>
-        <InputGroup className="rounded-md border border-neutral-300 bg-neutral-100">
-          <InputGroupInput
-            autoCapitalize="on"
-            autoComplete="off"
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Enter identifier, affiliation, name, or email"
-            value={searchQuery}
-          />
-          {searchQuery !== "" && (
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton
-                className="rounded-full"
-                onClick={() => {
-                  setSearchQuery("");
-                  updateSearchParams("", selectedPaymentStatus);
-                }}
-                size="icon-xs"
-              >
-                <X />
-              </InputGroupButton>
-            </InputGroupAddon>
-          )}
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton size="sm" type="submit" variant="outline">
-              Search
-            </InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
+        <div className="flex items-center gap-2">
+          <InputGroup className="rounded-md border border-neutral-300 bg-neutral-100">
+            <InputGroupInput
+              autoCapitalize="on"
+              autoComplete="off"
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Enter identifier, affiliation, name, or email"
+              value={searchQuery}
+            />
+            {searchQuery !== "" && (
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  className="rounded-full"
+                  onClick={() => {
+                    setSearchQuery("");
+                    updateSearchParams("", selectedPaymentStatus);
+                  }}
+                  size="icon-xs"
+                >
+                  <X />
+                </InputGroupButton>
+              </InputGroupAddon>
+            )}
+          </InputGroup>
+          <Button size="sm" type="submit" variant="outline">
+            Search
+          </Button>
+        </div>
       </form>
 
       <div>

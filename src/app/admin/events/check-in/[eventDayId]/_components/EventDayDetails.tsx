@@ -24,59 +24,63 @@ export default function EventDayDetails({
   eventDayData,
 }: EventDayDetailsProps) {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-2xl">{eventDayData.eventTitle}</CardTitle>
-        <CardDescription>Check-in details for this event day</CardDescription>
+    <Card className="overflow-hidden border-l-4 border-l-primary shadow-sm">
+      <CardHeader className="bg-muted/30 pt-6 pb-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <CardTitle className="text-xl leading-tight">
+              {eventDayData.eventTitle}
+            </CardTitle>
+            <CardDescription className="font-medium text-muted-foreground/80 text-xs uppercase tracking-wider">
+              Check-in Dashboard
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <Separator />
-      <CardContent className="pt-6">
-        <div className="grid gap-4 md:grid-cols-3">
-          {/* Event Day Label */}
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 rounded-full bg-primary/10 p-2">
-              <Tag className="h-4 w-4 text-primary" />
-            </div>
-            <div className="space-y-1">
-              <p className="font-medium text-muted-foreground text-sm">
-                Event Day
-              </p>
-              <p className="font-semibold text-foreground">
-                {eventDayData.label}
-              </p>
-            </div>
+      <CardContent className="grid gap-4 p-4">
+        {/* Event Day Label */}
+        <div className="flex items-center gap-3 rounded-lg border p-3 shadow-sm transition-colors hover:bg-muted/50">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <Tag className="h-5 w-5 text-primary" />
           </div>
-
-          {/* Date */}
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 rounded-full bg-blue-500/10 p-2">
-              <Calendar className="h-4 w-4 text-blue-600" />
-            </div>
-            <div className="space-y-1">
-              <p className="font-medium text-muted-foreground text-sm">Date</p>
-              <p className="font-semibold text-foreground">
-                {formatDate(eventDayData.eventDate)}
-              </p>
-            </div>
+          <div>
+            <p className="font-medium text-muted-foreground text-xs">
+              Event Day
+            </p>
+            <p className="font-semibold text-foreground">
+              {eventDayData.label}
+            </p>
           </div>
-
-          {/* Venue */}
-          {eventDayData.venue && (
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-full bg-green-500/10 p-2">
-                <MapPin className="h-4 w-4 text-green-600" />
-              </div>
-              <div className="space-y-1">
-                <p className="font-medium text-muted-foreground text-sm">
-                  Venue
-                </p>
-                <p className="font-semibold text-foreground">
-                  {eventDayData.venue}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Date */}
+        <div className="flex items-center gap-3 rounded-lg border p-3 shadow-sm transition-colors hover:bg-muted/50">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10">
+            <Calendar className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <p className="font-medium text-muted-foreground text-xs">Date</p>
+            <p className="font-semibold text-foreground">
+              {formatDate(eventDayData.eventDate)}
+            </p>
+          </div>
+        </div>
+
+        {/* Venue */}
+        {eventDayData.venue && (
+          <div className="flex items-center gap-3 rounded-lg border p-3 shadow-sm transition-colors hover:bg-muted/50">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10">
+              <MapPin className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <p className="font-medium text-muted-foreground text-xs">Venue</p>
+              <p className="font-semibold text-foreground">
+                {eventDayData.venue}
+              </p>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
