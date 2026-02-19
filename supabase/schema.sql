@@ -153,6 +153,16 @@ CREATE TYPE "public"."PaymentStatus" AS ENUM (
 ALTER TYPE "public"."PaymentStatus" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."PaymentProofStatus" AS ENUM (
+  'pending',
+  'accepted',
+  'rejected'
+);
+
+
+ALTER TYPE "public"."PaymentProofStatus" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."SponsoredRegistrationStatus" AS ENUM (
     'active',
     'full',
@@ -1795,6 +1805,7 @@ CREATE TABLE IF NOT EXISTS "public"."Application" (
     "paymentMethod" "public"."PaymentMethod" NOT NULL,
     "websiteURL" "text" NOT NULL,
     "paymentStatus" "public"."PaymentStatus" NOT NULL,
+    "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL,
     "applicationMemberType" "public"."ApplicationMemberType" NOT NULL,
     "applicationStatus" "public"."ApplicationStatus" DEFAULT 'new'::"public"."ApplicationStatus" NOT NULL,
     "interviewId" "uuid",

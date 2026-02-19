@@ -1,5 +1,7 @@
 "use server";
 
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 
 export async function deleteEvaluation(evaluationId: string) {
@@ -16,6 +18,9 @@ export async function deleteEvaluation(evaluationId: string) {
   if (!data?.[0]?.success) {
     throw new Error(data?.[0]?.message || "Failed to delete evaluation");
   }
+
+  updateTag(CACHE_TAGS.evaluations.all);
+  updateTag(CACHE_TAGS.evaluations.admin);
 
   return { success: true };
 }

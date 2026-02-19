@@ -22,9 +22,7 @@ export function MembersTableRow({ member }: MembersTableRowProps) {
     const timeSinceLastTap = now - lastTapRef.current;
 
     if (timeSinceLastTap < 300) {
-      router.push(
-        `/admin/application/${member.primaryApplicationId}?source=members` as Route,
-      );
+      router.push(`/admin/members/${member.businessMemberId}` as Route);
     }
 
     lastTapRef.current = now;
@@ -33,9 +31,7 @@ export function MembersTableRow({ member }: MembersTableRowProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      router.push(
-        `/admin/application/${member.primaryApplicationId}?source=members` as Route,
-      );
+      router.push(`/admin/members/${member.businessMemberId}` as Route);
     }
   };
 

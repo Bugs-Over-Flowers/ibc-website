@@ -32,6 +32,7 @@ export type Database = {
           logoImageURL: string;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
+          paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           sectorId: number | null;
           websiteURL: string;
@@ -53,6 +54,7 @@ export type Database = {
           logoImageURL: string;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
+          paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           sectorId?: number | null;
           websiteURL: string;
@@ -74,6 +76,7 @@ export type Database = {
           logoImageURL?: string;
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
+          paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           sectorId?: number | null;
           websiteURL?: string;
@@ -876,6 +879,14 @@ export type Database = {
       };
       january_first_reset: { Args: never; Returns: undefined };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
+      schedule_interviews_batch: {
+        Args: { p_interview_data: Json };
+        Returns: {
+          interview_count: number;
+          message: string;
+          success: boolean;
+        }[];
+      };
       submit_evaluation_form: {
         Args: {
           p_additional_comments?: string;
@@ -960,6 +971,7 @@ export type Database = {
       InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
       MembershipStatus: "paid" | "unpaid" | "cancelled";
       PaymentMethod: "BPI" | "ONSITE";
+      PaymentProofStatus: "pending" | "accepted" | "rejected";
       PaymentStatus: "pending" | "verified";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
       SponsoredRegistrationStatus: "active" | "full" | "disabled";
@@ -1137,6 +1149,7 @@ export const Constants = {
       InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
       MembershipStatus: ["paid", "unpaid", "cancelled"],
       PaymentMethod: ["BPI", "ONSITE"],
+      PaymentProofStatus: ["pending", "accepted", "rejected"],
       PaymentStatus: ["pending", "verified"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
       SponsoredRegistrationStatus: ["active", "full", "disabled"],

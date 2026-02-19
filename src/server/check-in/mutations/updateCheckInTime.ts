@@ -20,6 +20,10 @@ export async function updateCheckInTime(
 
   if (error) throw new Error(error.message);
 
+  // updateTag(CACHE_TAGS.checkIns.all);
+  // updateTag(CACHE_TAGS.checkIns.list);
+  // updateTag(CACHE_TAGS.checkIns.stats);
+
   revalidatePath(`/admin/events/[eventId]/check-in-list`);
 
   return { success: true };

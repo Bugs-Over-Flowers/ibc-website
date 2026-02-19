@@ -59,7 +59,6 @@ export async function approveApplication(input: ApplicationDecisionInput) {
       websiteURL: application.websiteURL ?? "",
       logoImageURL: application.logoImageURL,
       joinDate: new Date().toISOString(),
-      identifier: application.identifier,
     })
     .select("businessMemberId")
     .single();
@@ -91,6 +90,12 @@ export async function approveApplication(input: ApplicationDecisionInput) {
   if (emailError) {
     throw new Error(emailError);
   }
+
+  // updateTag(CACHE_TAGS.applications.all);
+  // updateTag(CACHE_TAGS.applications.admin);
+  // updateTag(CACHE_TAGS.members.all);
+  // updateTag(CACHE_TAGS.members.admin);
+  // updateTag(CACHE_TAGS.members.public);
 
   revalidatePath("/admin/application");
   revalidatePath("/admin/members");
