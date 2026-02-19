@@ -119,6 +119,7 @@
     "svelte": "^5.46.4",
     "tar": "^7.5.8",
     "lodash": "^4.17.23",
-    "@isaacs/brace-expansion": "^5.0.1"
+    "@isaacs/brace-expansion": "^5.0.1",
+    "minimatch": "^10.2.1"
   }
 }
