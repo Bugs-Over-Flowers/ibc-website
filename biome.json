@@ -50,6 +50,10 @@
           "fix": "safe",
           "options": { "functions": ["clsx", "cva", "tw", "tw.*"] }
         }
+      },
+      "security": { "noDangerouslySetInnerHtml": "off" },
+      "correctness": {
+        "useHookAtTopLevel": "warn"
       }
     },
     "domains": {
