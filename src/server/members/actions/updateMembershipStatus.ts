@@ -1,7 +1,6 @@
 "use server";
 
-import { updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import { revalidatePath } from "next/cache";
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 
@@ -37,9 +36,7 @@ export async function updateMembershipStatus(
     throw new Error(`Failed to update membership status: ${error.message}`);
   }
 
-  // Invalidate member caches
-  updateTag(CACHE_TAGS.members.all);
-  updateTag(CACHE_TAGS.members.admin);
+  revalidatePath("/admin/members");
 
   return {
     success: true,

@@ -54,7 +54,7 @@ export function MembersTableRow({
       >
         {/* Image with status badge and checkbox */}
         <div className="relative aspect-square h-auto w-full shrink-0 md:aspect-auto md:h-40 md:w-40">
-          {/* Checkbox - top right corner */}
+          {/* Checkbox - top left corner */}
           <div className="absolute top-2 left-2 z-10 rounded-sm bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
             <Checkbox
               checked={isSelected}
@@ -80,15 +80,13 @@ export function MembersTableRow({
               {member.businessName.charAt(0).toUpperCase()}
             </div>
           )}
-          {/* Status badge - top left corner */}
+          {/* Status badge - top right corner */}
           <div className="absolute top-2 right-2">
             <Badge
               className={
                 member.membershipStatus === "cancelled"
                   ? "bg-gray-900 text-white capitalize"
-                  : member.membershipStatus === "paid"
-                    ? "bg-background text-muted-foreground capitalize"
-                    : "bg-background text-muted-foreground capitalize"
+                  : "bg-background text-muted-foreground capitalize"
               }
               variant={
                 member.membershipStatus === "paid"
