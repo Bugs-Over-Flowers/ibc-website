@@ -25,6 +25,51 @@ const ParticipantWithCheckInSchema = z.object({
   }),
 });
 
+const RawCheckInForDateSchema = z.object({
+  event: z.object({
+    eventId: z.string(),
+  }),
+  registrationId: z.string(),
+  nonMemberName: z.string().nullable(),
+  registrationDate: z.string(),
+  paymentMethod: z.enum(["BPI", "ONSITE"]),
+  identifier: z.string(),
+  paymentStatus: PaymentStatusEnum,
+  businessMember: z
+    .object({
+      businessName: z.string(),
+    })
+    .nullable(),
+  participants: z.array(
+    z.object({
+      email: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      participantId: z.string(),
+      isPrincipal: z.boolean(),
+      contactNumber: z.string(),
+      checkIn: z.array(CheckInSchema),
+    }),
+  ),
+});
+
+export const normalizeCheckInForEventDay = (
+  rawData: unknown,
+  eventDayId: string,
+) => {
+  const parsed = RawCheckInForDateSchema.parse(rawData);
+
+  return {
+    ...parsed,
+    participants: parsed.participants.map((participant) => ({
+      ...participant,
+      checkIn: participant.checkIn.filter(
+        (item) => item.eventDayId === eventDayId,
+      ),
+    })),
+  };
+};
+
 export const GetCheckInForDateSchema = z
   .object({
     event: z.object({
