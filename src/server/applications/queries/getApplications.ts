@@ -1,4 +1,4 @@
-import "server-only";
+"use server";
 
 import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
