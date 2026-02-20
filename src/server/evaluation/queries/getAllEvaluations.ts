@@ -1,6 +1,9 @@
 import "server-only";
 
-import { cookies } from "next/headers";
+import { cacheTag } from "next/cache";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyAdmin5mCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,11 +28,15 @@ export type EvaluationWithEventRpc = {
   created_at: string;
 };
 
-export async function getAllEvaluationsRpc(): Promise<
-  EvaluationWithEventRpc[]
-> {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
+export async function getAllEvaluationsRpc(
+  requestCookies: RequestCookie[],
+): Promise<EvaluationWithEventRpc[]> {
+  "use cache";
+  applyAdmin5mCache();
+  cacheTag(CACHE_TAGS.evaluations.all);
+  cacheTag(CACHE_TAGS.evaluations.admin);
+
+  const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase.rpc("get_all_evaluations");
 

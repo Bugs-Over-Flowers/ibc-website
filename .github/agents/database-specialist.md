@@ -119,35 +119,72 @@ bun run gen:types
 
 ```typescript
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function getCachedData(requestCookies: RequestCookie[]) {
   "use cache";
-  cacheLife(60); // Cache for 60 seconds
-  cacheTag("users"); // Tag for invalidation
-  
+  cacheLife("admin5m");
+  cacheTag(CACHE_TAGS.members.all);
+  cacheTag(CACHE_TAGS.members.admin);
+
   const supabase = await createClient(requestCookies);
   const { data } = await supabase.from("users").select("*");
-  
+
   return data;
 }
 ```
 
-### Cache Invalidation
+### Cache Invalidation Strategy
+
+**Choose ONE primary approach per mutation:**
+
+**1. Tag-Level Invalidation** (preferred for shared data)
+- Use when: Data is reused across multiple routes/components
+- Use when: You have tagged cached queries
+- Benefits: Allows partial invalidation, more granular control
 
 ```typescript
 "use server";
-
-import { revalidatePath, revalidateTag } from "next/cache";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function updateUser(id: string, data: UserUpdate) {
   const supabase = await createActionClient();
   await supabase.from("users").update(data).eq("id", id);
-  
-  // Invalidate cache
-  revalidatePath("/users");
-  revalidateTag("users");
+
+  // Invalidate only affected tags (partial invalidation allowed)
+  updateTag(CACHE_TAGS.members.all);
+  updateTag(CACHE_TAGS.members.admin);
 }
 ```
+
+**2. Path-Level Invalidation** (use sparingly)
+- Use when: Freshness is strictly route/segment-driven
+- Use when: The affected view is not backed by tagged caches
+
+```typescript
+"use server";
+import { revalidatePath } from "next/cache";
+
+export async function updateUser(id: string, data: UserUpdate) {
+  const supabase = await createActionClient();
+  await supabase.from("users").update(data).eq("id", id);
+
+  revalidatePath("/admin/members");
+  revalidatePath(`/admin/members/${id}`);
+}
+```
+
+### Cache Design Rules
+
+- Cache profiles: `publicHours`, `admin5m`, `realtime60s` (from `next.config.ts`)
+- Use centralized tags from `src/lib/cache/tags.ts` only (avoid ad-hoc strings)
+- Every cached query MUST specify both `cacheLife("profile")` and `cacheTag(CACHE_TAGS.*)`
+- Cache low-cardinality, shared, repeat-read queries
+- Avoid caching high-cardinality filter/cursor/search queries unless proven reusable
+- Avoid caching time-dependent queries (`new Date()`, `Date.now()`) unless staleness is intentional
+- NO param tags: Don't create `members:${id}`; function arguments are automatically serialized into cache keys
 
 ## Query Patterns
 
@@ -223,6 +260,14 @@ const { error } = await supabase
 
 3. **Don't forget to regenerate types** after schema changes
 
-4. **Use proper cache invalidation** after mutations with `revalidatePath()` and `revalidateTag()`
+4. **Use proper cache invalidation** after mutations:
+   - Choose ONE primary strategy (tag-level OR path-level)
+   - Tag-level: `updateTag(CACHE_TAGS.*)` for shared data
+   - Path-level: `revalidatePath("/path")` for route-driven freshness
+   - Only combine both when intentionally needed
 
 5. **Pass cookies from page level** for cached queries - don't read cookies inside cached functions
+
+6. **NO param tags**: Don't create dynamic tags like `members:${id}`
+   - Function arguments are automatically serialized into cache keys by Next.js
+   - Use broad tags like `CACHE_TAGS.members.all` instead

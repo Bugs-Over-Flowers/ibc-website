@@ -3,7 +3,7 @@ import "server-only";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import type { Tables } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
-import { getEventStatus } from "../actions/helpers";
+import { getEventStatus } from "../mutations/helpers";
 
 const DEFAULT_LIMIT = 10;
 

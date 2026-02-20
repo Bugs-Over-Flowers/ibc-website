@@ -14,6 +14,9 @@ export type MembershipStatus = "paid" | "unpaid" | "cancelled";
 export interface ApplicationWithMembers
   extends Omit<Application, "logoImageURL"> {
   ApplicationMember: ApplicationMember[];
+  BusinessMember: {
+    identifier: string;
+  } | null;
   Sector: {
     sectorId: number;
     sectorName: string;
@@ -54,3 +57,21 @@ export interface MeetingDetails {
   interviewVenue: string;
   applicationIds: string[];
 }
+
+export type InterviewDetails = {
+  interviewId: string;
+  interviewDate: string;
+  interviewVenue: string;
+  status: "scheduled" | "completed" | "cancelled" | "rescheduled";
+  createdAt: string;
+};
+
+export type ApplicationStatusResponse = {
+  applicationId: string;
+  identifier: string;
+  applicationStatus: "new" | "pending" | "approved" | "rejected";
+  applicationDate: string;
+  companyName: string;
+  hasInterview: boolean;
+  interview: InterviewDetails | null;
+};
