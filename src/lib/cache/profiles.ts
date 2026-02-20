@@ -9,14 +9,14 @@ export const CACHE_PROFILES = {
 export type CacheProfileName =
   (typeof CACHE_PROFILES)[keyof typeof CACHE_PROFILES];
 
-export function usePublicHoursCache(): void {
+export function applyPublicHoursCache(): void {
   cacheLife(CACHE_PROFILES.publicHours);
 }
 
-export function useAdmin5mCache(): void {
+export function applyAdmin5mCache(): void {
   cacheLife(CACHE_PROFILES.admin5m);
 }
 
-export function useRealtime60sCache(): void {
+export function applyRealtime60sCache(): void {
   cacheLife(CACHE_PROFILES.realtime60s);
 }

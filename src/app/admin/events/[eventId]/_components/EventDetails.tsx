@@ -15,6 +15,7 @@ import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { EvaluationQRDownloader } from "@/components/qr/EvaluationQRDownloader";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -112,9 +113,18 @@ export default async function EventDetails({
               <p className="font-mono text-muted-foreground text-xs">
                 ID: {event.eventId}
               </p>
-              <p className="max-w-3xl text-muted-foreground">
-                {event.description}
-              </p>
+              {event.description ? (
+                <div className="max-w-3xl">
+                  <RichTextDisplay
+                    className="text-muted-foreground"
+                    content={event.description}
+                  />
+                </div>
+              ) : (
+                <p className="max-w-3xl text-muted-foreground italic">
+                  No description available.
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <EvaluationQRDownloader

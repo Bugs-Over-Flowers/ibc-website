@@ -1,7 +1,6 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import { revalidatePath } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ScheduleMeetingInput } from "@/lib/validation/application/application";
 import { scheduleMeetingSchema } from "@/lib/validation/application/application";

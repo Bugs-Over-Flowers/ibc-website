@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 
 interface ProofImagesCardProps {
@@ -22,21 +23,20 @@ export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
       <div className="p-6 pt-0">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           {proofImages.map((proof, index) => (
-            <a
-              className="overflow-hidden rounded-lg border transition-opacity hover:opacity-80"
-              href={proof.path}
+            <div
+              className="overflow-hidden rounded-lg border"
               key={proof.proofImageId}
-              rel="noopener noreferrer"
-              target="_blank"
             >
-              <Image
-                alt={`Payment proof ${index + 1} of ${proofImages.length}`}
-                className="h-48 w-full object-cover"
-                height={200}
-                src={proof.path}
-                width={300}
-              />
-            </a>
+              <ImageZoom className="h-48 w-full">
+                <Image
+                  alt={`Payment proof ${index + 1} of ${proofImages.length}`}
+                  className="h-48 w-full object-cover"
+                  height={200}
+                  src={proof.path}
+                  width={300}
+                />
+              </ImageZoom>
+            </div>
           ))}
         </div>
       </div>

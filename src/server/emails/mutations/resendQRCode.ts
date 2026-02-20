@@ -1,7 +1,6 @@
 "use server";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import ResendQRCodeTemplate from "@/lib/resend/templates/ResendQRCodeTemplate";
 import { createActionClient } from "@/lib/supabase/server";

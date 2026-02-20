@@ -1,11 +1,16 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ApplicationDecisionInput } from "@/lib/validation/application/application";
 import { applicationDecisionSchema } from "@/lib/validation/application/application";
 import { sendApplicationDecisionEmail } from "@/server/emails/mutations/sendApplicationDecisionEmail";
+
+const ApproveApplicationResponseSchema = z.object({
+  business_member_id: z.string().uuid(),
+  message: z.string(),
+});
 
 // Approve an application and create a BusinessMember record
 export async function approveApplication(input: ApplicationDecisionInput) {
@@ -51,35 +56,20 @@ export async function approveApplication(input: ApplicationDecisionInput) {
     throw new Error("Sector ID is required to approve application");
   }
 
-  // Create BusinessMember record
-  const { data: newMember, error: memberError } = await supabase
-    .from("BusinessMember")
-    .insert({
-      businessName: application.companyName,
-      sectorId: application.sectorId,
-      websiteURL: application.websiteURL ?? "",
-      logoImageURL: application.logoImageURL,
-      joinDate: new Date().toISOString(),
-    })
-    .select("businessMemberId")
-    .single();
+  const { data: rpcData, error: rpcError } = await supabase.rpc(
+    "approve_membership_application",
+    {
+      p_application_id: parsed.applicationId,
+    },
+  );
 
-  if (memberError || !newMember) {
-    throw new Error(`Failed to create member: ${memberError?.message}`);
+  if (rpcError) {
+    throw new Error(`Failed to approve application: ${rpcError.message}`);
   }
 
-  // Update application with businessMemberId and set status to approved
-  const { error: updateError } = await supabase
-    .from("Application")
-    .update({
-      businessMemberId: newMember.businessMemberId,
-      applicationStatus: "approved",
-    })
-    .eq("applicationId", parsed.applicationId);
-
-  if (updateError) {
-    throw new Error(`Failed to update application: ${updateError.message}`);
-  }
+  const rpcRow = ApproveApplicationResponseSchema.parse(
+    Array.isArray(rpcData) ? rpcData[0] : rpcData,
+  );
 
   const [emailError] = await sendApplicationDecisionEmail({
     to: recipientEmail,
@@ -104,6 +94,6 @@ export async function approveApplication(input: ApplicationDecisionInput) {
   return {
     success: true as const,
     message: "Application approved successfully",
-    businessMemberId: newMember.businessMemberId,
+    businessMemberId: rpcRow.business_member_id,
   };
 }

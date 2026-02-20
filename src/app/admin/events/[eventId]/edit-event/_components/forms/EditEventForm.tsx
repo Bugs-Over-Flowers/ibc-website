@@ -85,7 +85,7 @@ export function EditEventForm({ event }: EditEventFormProps) {
 
             <form.AppField name="description">
               {(field) => (
-                <field.TextareaField
+                <field.RichTextEditor
                   label="Description"
                   placeholder="Enter event description"
                 />
