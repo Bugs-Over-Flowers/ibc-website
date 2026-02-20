@@ -1,7 +1,9 @@
-import React from "react";
+import { Suspense } from "react";
+import CreateSectorButton from "../CreateSectorButton";
+import SectorFilters from "../SectorFilters";
 import SectorRow from "./SectorRow";
 
-const SectorContent = () => {
+const SectorContent = ({ search }: { search?: string }) => {
   return (
     <div className="select-none space-y-6 px-2">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -13,9 +15,18 @@ const SectorContent = () => {
             Manage and organize your sectors
           </p>
         </div>
+        <CreateSectorButton />
       </div>
 
-      <SectorRow />
+      <div className="rounded-lg border bg-background p-4 md:p-6">
+        <Suspense
+          fallback={<div className="h-12 animate-pulse rounded bg-muted" />}
+        >
+          <SectorFilters />
+        </Suspense>
+      </div>
+
+      <SectorRow search={search} />
     </div>
   );
 };

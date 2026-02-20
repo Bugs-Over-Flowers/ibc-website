@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -25,13 +26,19 @@ export const useCreateSectorForm = () => {
       const { error } = await tryCatch(createSector(value));
 
       if (error) {
-        form.setErrorMap({ onSubmit: error });
+        form.setErrorMap({
+          onSubmit: {
+            form: error,
+            fields: {},
+          },
+        });
+
         toast.error(error);
         return;
       }
 
       toast.success("Sector created successfully!");
-      router.push("/admin");
+      router.push("/admin/manage-sector" as Route);
     },
   });
 

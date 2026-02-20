@@ -1,10 +1,19 @@
 import { Suspense } from "react";
 import SectorContent from "./_components/sectorContainer/SectorContent";
 
-const page = () => {
+interface SearchParams {
+  search?: string;
+}
+
+const page = async ({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) => {
+  const sp = await searchParams;
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <SectorContent />
+      <SectorContent search={sp.search} />
     </Suspense>
   );
 };

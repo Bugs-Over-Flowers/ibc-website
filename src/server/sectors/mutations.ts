@@ -4,13 +4,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createActionClient } from "@/lib/supabase/server";
 
-const createSectorSchema = z.object({
-  sectorName: z.string().min(1, "Sector name is required"),
-});
+import {
+  createSectorSchema,
+  updateSectorSchema,
+} from "@/lib/validation/sector/sectorSchema";
 
-type CreateSectorInput = z.infer<typeof createSectorSchema>;
-
-export async function createSector(input: CreateSectorInput) {
+export async function createSector(input: z.infer<typeof createSectorSchema>) {
   const parsed = createSectorSchema.parse(input);
 
   const supabase = await createActionClient();
@@ -31,6 +30,29 @@ export async function createSector(input: CreateSectorInput) {
   revalidatePath("/admin");
   return { id: data.sectorId };
 }
+
+export async function updateSector(input: z.infer<typeof updateSectorSchema>) {
+  const parsed = updateSectorSchema.parse(input);
+
+  const supabase = await createActionClient();
+
+  const { data, error } = await supabase
+    .from("Sector")
+    .update({
+      sectorName: parsed.sectorName,
+    })
+    .eq("sectorId", parsed.id)
+    .select("sectorId")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/admin");
+  return { id: data.sectorId };
+}
+
 const deleteSectorSchema = z.object({
   id: z.number(),
 });

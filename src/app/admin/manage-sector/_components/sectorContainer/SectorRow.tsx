@@ -2,8 +2,22 @@ import { Building2 } from "lucide-react";
 import { getSectors } from "@/server/sectors/queries";
 import SectorActionsDropdown from "./SectorActionsDropdown";
 
-export default async function SectorRow() {
-  const sectors = await getSectors();
+export default async function SectorRow({ search }: { search?: string }) {
+  const sectors = await getSectors(search);
+
+  if (sectors.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border bg-background py-16 text-center shadow-sm">
+        <Building2 className="h-10 w-10 text-muted-foreground" />
+        <h3 className="font-semibold text-lg">No sectors found</h3>
+        <p className="text-muted-foreground text-sm">
+          {search
+            ? `No sectors matching "${search}"`
+            : "Get started by creating a new sector."}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -25,7 +39,10 @@ export default async function SectorRow() {
                 </div>
               </div>
 
-              <SectorActionsDropdown sectorId={sector.sectorId} />
+              <SectorActionsDropdown
+                sectorId={sector.sectorId}
+                sectorName={sector.sectorName}
+              />
             </div>
           </div>
         </article>
