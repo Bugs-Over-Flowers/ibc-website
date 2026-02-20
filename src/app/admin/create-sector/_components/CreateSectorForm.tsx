@@ -12,7 +12,7 @@ const CreateSectorForm = () => {
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-0">
       <Button
         className="mb-2"
-        onClick={() => router.push("admin/manage-sector" as Route)}
+        onClick={() => router.push("/admin/manage-sector" as Route)}
         type="button"
         variant="ghost"
       >
