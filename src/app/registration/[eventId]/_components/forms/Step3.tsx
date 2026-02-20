@@ -1,6 +1,6 @@
 import { Banknote, CreditCard, Users } from "lucide-react";
 import Image from "next/image";
-import { Activity, type FormEvent } from "react";
+import { Activity, type FormEvent, useEffect } from "react";
 import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import FormButtons from "@/components/FormButtons";
 import { Button } from "@/components/ui/button";
@@ -102,6 +102,29 @@ function PaymentDetails() {
     : 0;
   const total = subtotal - totalSponsorDiscount;
   const isSponsored = !!(sponsorUuid && sponsorFeeDeduction);
+
+  useEffect(() => {
+    console.log("[SponsoredDebug][Step3][PaymentDetails] Computed summary", {
+      sponsorUuid,
+      sponsorFeeDeduction,
+      participantCount,
+      baseFee,
+      subtotal,
+      totalSponsorDiscount,
+      total,
+      isSponsored,
+      willRenderSponsorDiscount: totalSponsorDiscount > 0,
+    });
+  }, [
+    sponsorUuid,
+    sponsorFeeDeduction,
+    participantCount,
+    baseFee,
+    subtotal,
+    totalSponsorDiscount,
+    total,
+    isSponsored,
+  ]);
 
   return (
     <Card

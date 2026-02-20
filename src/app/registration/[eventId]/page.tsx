@@ -2,6 +2,7 @@ import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
+import { z } from "zod";
 import RegistrationForm from "@/app/registration/[eventId]/_components/forms/RegistrationForm";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -28,14 +29,23 @@ interface RegistrationPageProps {
   searchParams: RegistrationRouteProps["searchParams"];
 }
 
+const sponsorUuidSchema = z.string().uuid();
+
 async function RegistrationPage({
   params,
   searchParams,
 }: RegistrationPageProps) {
   const { eventId } = await params;
   const { sr } = await searchParams;
-  const sponsorUuid =
+  const sponsorUuidRaw =
     typeof sr === "string" ? sr : Array.isArray(sr) ? sr[0] : undefined;
+  const sponsorUuid = sponsorUuidRaw?.trim() || undefined;
+  console.log("[SponsoredDebug][RegistrationPage] Parsed search params", {
+    eventId,
+    rawSr: sr,
+    normalizedSr: sponsorUuid,
+    sponsorUuid,
+  });
   const requestCookies = (await cookies()).getAll();
 
   // use a Promise.all to fetch event details and members concurrently
@@ -53,20 +63,77 @@ async function RegistrationPage({
   } | null = null;
 
   if (sponsorUuid) {
-    const sponsoredRegistration =
-      await getSponsoredRegistrationByUuid(sponsorUuid);
+    const isSponsorUuidValid = sponsorUuidSchema.safeParse(sponsorUuid).success;
 
-    if (
-      sponsoredRegistration &&
-      sponsoredRegistration.status === "active" &&
-      sponsoredRegistration.eventId === eventId
-    ) {
-      sponsorInfo = {
-        sponsorUuid,
-        sponsoredRegistrationId: sponsoredRegistration.sponsoredRegistrationId,
-        feeDeduction: Number(sponsoredRegistration.feeDeduction),
-      };
+    if (!isSponsorUuidValid) {
+      console.log("[SponsoredDebug][RegistrationPage] Sponsor info rejected", {
+        reason: {
+          invalidUuidFormat: true,
+          missing: false,
+          inactive: false,
+          eventMismatch: false,
+        },
+      });
+    } else {
+      const sponsoredRegistration =
+        await getSponsoredRegistrationByUuid(sponsorUuid);
+
+      console.log(
+        "[SponsoredDebug][RegistrationPage] Fetched sponsored registration",
+        {
+          sponsorUuid,
+          found: !!sponsoredRegistration,
+          sponsoredRegistrationId:
+            sponsoredRegistration?.sponsoredRegistrationId ?? null,
+          sponsoredEventId: sponsoredRegistration?.eventId ?? null,
+          status: sponsoredRegistration?.status ?? null,
+          feeDeduction: sponsoredRegistration?.feeDeduction ?? null,
+        },
+      );
+
+      if (
+        sponsoredRegistration &&
+        sponsoredRegistration.status === "active" &&
+        sponsoredRegistration.eventId === eventId
+      ) {
+        sponsorInfo = {
+          sponsorUuid,
+          sponsoredRegistrationId:
+            sponsoredRegistration.sponsoredRegistrationId,
+          feeDeduction: Number(sponsoredRegistration.feeDeduction),
+        };
+
+        console.log(
+          "[SponsoredDebug][RegistrationPage] Sponsor info accepted",
+          sponsorInfo,
+        );
+      } else {
+        const reason = !sponsoredRegistration
+          ? {
+              invalidUuidFormat: false,
+              missing: true,
+              inactive: false,
+              eventMismatch: false,
+            }
+          : {
+              invalidUuidFormat: false,
+              missing: false,
+              inactive: sponsoredRegistration.status !== "active",
+              eventMismatch: sponsoredRegistration.eventId !== eventId,
+            };
+
+        console.log(
+          "[SponsoredDebug][RegistrationPage] Sponsor info rejected",
+          {
+            reason,
+          },
+        );
+      }
     }
+  } else {
+    console.log(
+      "[SponsoredDebug][RegistrationPage] No sponsor UUID provided in query",
+    );
   }
 
   // Handle if event is draft

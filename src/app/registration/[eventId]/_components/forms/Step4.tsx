@@ -1,7 +1,7 @@
 import { formatDate } from "date-fns";
 import { CircleAlert, User } from "lucide-react";
 import Image from "next/image";
-import { type FormEvent, useMemo } from "react";
+import { type FormEvent, useEffect, useMemo } from "react";
 import FormButtons from "@/components/FormButtons";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -239,6 +239,29 @@ function PaymentSummarySection({
     : 0;
   const total = subtotal - totalSponsorDiscount;
   const isSponsored = !!(sponsorUuid && sponsorFeeDeduction);
+
+  useEffect(() => {
+    console.log("[SponsoredDebug][Step4][PaymentSummary] Computed summary", {
+      sponsorUuid,
+      sponsorFeeDeduction,
+      participantCount,
+      baseFee,
+      subtotal,
+      totalSponsorDiscount,
+      total,
+      isSponsored,
+      willRenderSponsorDiscount: totalSponsorDiscount > 0,
+    });
+  }, [
+    sponsorUuid,
+    sponsorFeeDeduction,
+    participantCount,
+    baseFee,
+    subtotal,
+    totalSponsorDiscount,
+    total,
+    isSponsored,
+  ]);
 
   return (
     <Card

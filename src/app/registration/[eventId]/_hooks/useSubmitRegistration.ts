@@ -41,6 +41,13 @@ export const useSubmitRegistration = () => {
         throw new Error("Event ID is missing");
       }
 
+      console.log("[SponsoredDebug][useSubmitRegistration] Submit start", {
+        eventId: eventDetails.eventId,
+        sponsoredRegistrationId,
+        paymentMethod: registrationData.step3.paymentMethod,
+        hasPaymentProof: !!registrationData.step3.paymentProof,
+      });
+
       const { step3 } = registrationData;
 
       /**
@@ -58,6 +65,16 @@ export const useSubmitRegistration = () => {
         paymentProofPath = await uploadPaymentProof(step3.paymentProof);
       }
 
+      console.log(
+        "[SponsoredDebug][useSubmitRegistration] Submitting RPC payload",
+        {
+          eventId: eventDetails.eventId,
+          paymentMethod: paymentProofPath ? "online" : "onsite",
+          hasPaymentProofPath: !!paymentProofPath,
+          sponsoredRegistrationId: sponsoredRegistrationId || null,
+        },
+      );
+
       // Submit registration with appropriate payment data
       const {
         rpcResults: { registrationId },
@@ -74,6 +91,15 @@ export const useSubmitRegistration = () => {
       });
 
       setCreatedRegistrationId(registrationId);
+
+      console.log(
+        "[SponsoredDebug][useSubmitRegistration] Registration created",
+        {
+          registrationId,
+          identifier,
+          sponsoredRegistrationId: sponsoredRegistrationId || null,
+        },
+      );
 
       return {
         returnedRegistrationId: registrationId,
