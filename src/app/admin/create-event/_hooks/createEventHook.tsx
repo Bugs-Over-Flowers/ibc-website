@@ -50,12 +50,6 @@ export const useCreateEventForm = () => {
         const file = value.eventImage[0];
         const fileExt = file.name.split(".").pop()?.toLowerCase();
         const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
-      let publicUrl: string | null | undefined = null;
-
-      if (value.eventImage && value.eventImage.length > 0) {
-        const file = value.eventImage[0];
-        const fileExt = file.name.split(".").pop()?.toLowerCase();
-        const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
 
         if (!fileExt || !allowedExtensions.includes(fileExt)) {
           toast.error(
@@ -63,17 +57,7 @@ export const useCreateEventForm = () => {
           );
           return;
         }
-        if (!fileExt || !allowedExtensions.includes(fileExt)) {
-          toast.error(
-            "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
-          );
-          return;
-        }
 
-        const fileName = `${Math.random()
-          .toString(36)
-          .substring(2)}_${Date.now()}.${fileExt}`;
-        const filePath = `event-headers/${fileName}`;
         const fileName = `${Math.random()
           .toString(36)
           .substring(2)}_${Date.now()}.${fileExt}`;
@@ -84,10 +68,6 @@ export const useCreateEventForm = () => {
           .from("headerimage")
           .upload(filePath, file);
 
-        if (uploadError) {
-          toast.error(`Image upload failed: ${uploadError.message}`);
-          return;
-        }
         if (uploadError) {
           toast.error(`Image upload failed: ${uploadError.message}`);
           return;

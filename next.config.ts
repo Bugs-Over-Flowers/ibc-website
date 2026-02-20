@@ -57,6 +57,7 @@ const nextConfig: NextConfig = {
     ],
     dangerouslyAllowLocalIP: true,
   },
+  serverExternalPackages: ["@react-email/components", "@react-email/render"],
 };
 
 export default nextConfig;
