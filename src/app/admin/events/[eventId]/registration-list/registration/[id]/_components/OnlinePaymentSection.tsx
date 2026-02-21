@@ -7,7 +7,7 @@ import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
-import { verifyPayment } from "@/server/registration/actions/verifyPayment";
+import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 
 type OnlinePaymentSectionProps = {
   paymentStatus: Enums<"PaymentStatus">;

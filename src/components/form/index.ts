@@ -6,6 +6,7 @@ export { default as FormDateTimePicker } from "./FormDateTimePicker";
 export { default as ImageField } from "./ImageField";
 export { default as NumberField } from "./NumberField";
 export { default as RadioGroupField } from "./RadioGroupField";
+export { default as RichTextEditor } from "./RichTextEditor";
 export { default as SelectField } from "./SelectField";
 export { default as TextareaField } from "./TextareaField";
 export { default as TextField } from "./TextField";

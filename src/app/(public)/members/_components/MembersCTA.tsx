@@ -27,7 +27,7 @@ export default function MembersCTA() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/contact">
+            <Link href="/membership/application">
               <Button
                 className="rounded-xl bg-primary px-6 font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/90 hover:shadow-primary/25 hover:shadow-xl"
                 size="lg"
@@ -36,7 +36,7 @@ export default function MembersCTA() {
               </Button>
             </Link>
 
-            <Link href="/contact">
+            <Link href="/membership/check-application-status">
               <Button
                 className="rounded-xl border-border bg-transparent px-6 font-semibold transition-all hover:scale-[1.02] hover:border-primary/50 hover:bg-primary/5"
                 size="lg"

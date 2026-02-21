@@ -106,21 +106,21 @@ enabled = true
 file_size_limit = "50MiB"
 
 # Uncomment to configure local storage buckets
-[storage.buckets.headerImage]
+[storage.buckets.headerimage]
 public = true
-file_size_limit = "50MiB"
+file_size_limit = "5MiB"
 allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
-objects_path = "./headerImage"
-[storage.buckets.paymentProofs]
+objects_path = "./headerimage"
+[storage.buckets.paymentproofs]
 public = false
 file_size_limit = "10MiB"
 allowed_mime_types = ["image/*"]
-objects_path = "./paymentProofs"
-[storage.buckets.logoImage]
+objects_path = "./paymentproofs"
+[storage.buckets.logoimage]
 public = false
-file_size_limit = "10MiB"
+file_size_limit = "5MiB"
 allowed_mime_types = ["image/*"]
-objects_path = "./logoImage"
+objects_path = "./logoimage"
 
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
