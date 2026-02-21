@@ -144,6 +144,16 @@ CREATE TYPE "public"."PaymentMethod" AS ENUM (
 ALTER TYPE "public"."PaymentMethod" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."PaymentProofStatus" AS ENUM (
+    'pending',
+    'accepted',
+    'rejected'
+);
+
+
+ALTER TYPE "public"."PaymentProofStatus" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."PaymentStatus" AS ENUM (
     'pending',
     'verified'
@@ -151,16 +161,6 @@ CREATE TYPE "public"."PaymentStatus" AS ENUM (
 
 
 ALTER TYPE "public"."PaymentStatus" OWNER TO "postgres";
-
-
-CREATE TYPE "public"."PaymentProofStatus" AS ENUM (
-  'pending',
-  'accepted',
-  'rejected'
-);
-
-
-ALTER TYPE "public"."PaymentProofStatus" OWNER TO "postgres";
 
 
 CREATE TYPE "public"."SponsoredRegistrationStatus" AS ENUM (
@@ -240,6 +240,64 @@ CREATE TYPE "public"."registration_stats" AS (
 
 
 ALTER TYPE "public"."registration_stats" OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."approve_membership_application"("p_application_id" "uuid") RETURNS TABLE("business_member_id" "uuid", "message" "text")
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+  v_application record;
+  v_member_id uuid;
+BEGIN
+  SELECT *
+  INTO v_application
+  FROM "public"."Application"
+  WHERE "applicationId" = p_application_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Application not found';
+  END IF;
+
+  IF v_application."businessMemberId" IS NOT NULL THEN
+    RAISE EXCEPTION 'Application has already been approved';
+  END IF;
+
+  IF v_application."sectorId" IS NULL THEN
+    RAISE EXCEPTION 'Sector ID is required to approve application';
+  END IF;
+
+  INSERT INTO "public"."BusinessMember" (
+    "businessName",
+    "sectorId",
+    "websiteURL",
+    "logoImageURL",
+    "joinDate",
+    "primaryApplicationId"
+  )
+  VALUES (
+    v_application."companyName",
+    v_application."sectorId",
+    COALESCE(v_application."websiteURL", ''),
+    v_application."logoImageURL",
+    CURRENT_DATE,
+    v_application."applicationId"
+  )
+  RETURNING "businessMemberId" INTO v_member_id;
+
+  UPDATE "public"."Application"
+  SET
+    "businessMemberId" = v_member_id,
+    "applicationStatus" = 'approved'
+  WHERE "applicationId" = p_application_id;
+
+  RETURN QUERY
+    SELECT v_member_id, 'Application approved successfully';
+END;
+$$;
+
+
+ALTER FUNCTION "public"."approve_membership_application"("p_application_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."check_application_status"("p_application_identifier" "text") RETURNS "jsonb"
@@ -442,6 +500,64 @@ $$;
 ALTER FUNCTION "public"."compute_primary_application_id"("p_member_id" "uuid") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."create_sponsored_registration"("p_event_id" "uuid", "p_sponsored_by" "text", "p_fee_deduction" numeric, "p_max_sponsored_guests" bigint DEFAULT NULL::bigint) RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_row public."SponsoredRegistration"%ROWTYPE;
+BEGIN
+  -- Validation: reject negative fee deduction
+  IF p_fee_deduction IS NULL THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'feeDeduction is required'
+    );
+  END IF;
+
+  IF p_fee_deduction < 0 THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'feeDeduction cannot be negative'
+    );
+  END IF;
+
+  INSERT INTO public."SponsoredRegistration" (
+    "eventId",
+    "sponsoredBy",
+    "feeDeduction",
+    "maxSponsoredGuests",
+    "status",
+    "uuid"
+  )
+  VALUES (
+    p_event_id,
+    p_sponsored_by,
+    p_fee_deduction,
+    p_max_sponsored_guests,
+    'active'::public."SponsoredRegistrationStatus",
+    gen_random_uuid()::text
+  )
+  RETURNING * INTO v_row;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'data', to_jsonb(v_row)
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', SQLERRM
+    );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."create_sponsored_registration"("p_event_id" "uuid", "p_sponsored_by" "text", "p_fee_deduction" numeric, "p_max_sponsored_guests" bigint) OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."delete_evaluation"("eval_id" "uuid") RETURNS TABLE("success" boolean, "message" "text")
     LANGUAGE "plpgsql"
     AS $$
@@ -463,6 +579,22 @@ $$;
 
 
 ALTER FUNCTION "public"."delete_evaluation"("eval_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."delete_sr"("p_sponsored_registration_id" "uuid") RETURNS json
+    LANGUAGE "sql"
+    AS $$
+  delete from public."SponsoredRegistration"
+  where "sponsoredRegistrationId" = p_sponsored_registration_id
+  returning json_build_object(
+    'result', json_build_object(
+      'success', true
+    )
+  );
+$$;
+
+
+ALTER FUNCTION "public"."delete_sr"("p_sponsored_registration_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."generate_member_identifier"() RETURNS "trigger"
@@ -513,6 +645,59 @@ $$;
 
 
 ALTER FUNCTION "public"."get_all_evaluations"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_all_sponsored_registrations"() RETURNS TABLE("sponsored_registration_id" "uuid", "event_id" "uuid", "event_name" "text", "event_start_date" timestamp with time zone, "event_end_date" timestamp with time zone, "sponsored_by" "text", "uuid" "uuid", "max_sponsored_guests" integer, "used_count" integer, "status" "text", "created_at" timestamp with time zone, "updated_at" timestamp with time zone)
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    sr.sponsored_registration_id,
+    sr.event_id,
+    e.event_title,
+    e.event_start_date,
+    e.event_end_date,
+    sr.sponsored_by,
+    sr.uuid,
+    sr.max_sponsored_guests,
+    sr.used_count,
+    sr.status,
+    sr.created_at,
+    sr.updated_at
+  FROM "SponsoredRegistration" sr
+  LEFT JOIN "Event" e ON sr.event_id = e.event_id
+  ORDER BY sr.created_at DESC;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_all_sponsored_registrations"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_all_sponsored_registrations_with_event"() RETURNS TABLE("sponsored_registration_id" "uuid", "event_id" "uuid", "event_title" "text", "event_start_date" timestamp with time zone, "event_end_date" timestamp with time zone, "sponsored_by" "text", "uuid" "uuid", "max_sponsored_guests" bigint, "used_count" bigint, "status" "public"."SponsoredRegistrationStatus", "created_at" timestamp with time zone, "updated_at" timestamp with time zone)
+    LANGUAGE "sql" STABLE
+    AS $$
+SELECT
+  sr."sponsoredRegistrationId"::uuid,
+  sr."eventId"::uuid,
+  e."eventTitle",
+  e."eventStartDate",
+  e."eventEndDate",
+  sr."sponsoredBy",
+  sr."uuid"::uuid,
+  sr."maxSponsoredGuests",
+  sr."usedCount",
+  sr."status"::"SponsoredRegistrationStatus",
+  sr."createdAt",
+  sr."updatedAt"
+FROM "SponsoredRegistration" sr
+LEFT JOIN "Event" e ON sr."eventId" = e."eventId"
+ORDER BY sr."createdAt" DESC;
+$$;
+
+
+ALTER FUNCTION "public"."get_all_sponsored_registrations_with_event"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_evaluation_by_id"("eval_id" "uuid") RETURNS TABLE("evaluation_id" "uuid", "event_id" "uuid", "event_title" "text", "event_start_date" timestamp with time zone, "event_end_date" timestamp with time zone, "venue" "text", "name" "text", "q1_rating" "public"."ratingScale", "q2_rating" "public"."ratingScale", "q3_rating" "public"."ratingScale", "q4_rating" "public"."ratingScale", "q5_rating" "public"."ratingScale", "q6_rating" "public"."ratingScale", "additional_comments" "text", "feedback" "text", "created_at" timestamp with time zone)
@@ -691,10 +876,10 @@ BEGIN
 
   IF has_event_days THEN
     FOR day_rec IN
-      SELECT ed."eventDayId" AS day_id, ed."label" AS day_label, ed."dayDate" AS day_date
+      SELECT ed."eventDayId" AS day_id, ed."label" AS day_label, ed."eventDate" AS day_date
       FROM "EventDay" ed
       WHERE ed."eventId" = p_event_id
-      ORDER BY ed."dayDate", ed."eventDayId"
+      ORDER BY ed."eventDate", ed."eventDayId"
     LOOP
       -- Participants who checked in on this day
       SELECT COUNT(DISTINCT ci."participantId") INTO participants_day
@@ -750,12 +935,11 @@ BEGIN
   END IF;
 
   RETURN jsonb_build_object(
-    'event_id', p_event_id::text,
     'total_registrations', coalesce(total_regs, 0),
     'verified_registrations', coalesce(verified_regs, 0),
     'pending_registrations', coalesce(pending_regs, 0),
-    'participants', coalesce(participants_total, 0),
-    'attended', coalesce(attended_total, 0),
+    'total_participants', coalesce(participants_total, 0),
+    'total_attended', coalesce(attended_total, 0),
     'event_days', days_arr
   );
 END;
@@ -763,6 +947,23 @@ $$;
 
 
 ALTER FUNCTION "public"."get_event_status"("p_event_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_events_for_select"() RETURNS TABLE("event_id" "uuid", "event_title" "text", "event_start_date" timestamp with time zone, "event_end_date" timestamp with time zone)
+    LANGUAGE "sql" STABLE
+    AS $$
+SELECT
+  e."eventId"::uuid,
+  e."eventTitle",
+  e."eventStartDate",
+  e."eventEndDate"
+FROM "Event" e
+WHERE e."eventStartDate" > now()
+ORDER BY e."eventStartDate" ASC;
+$$;
+
+
+ALTER FUNCTION "public"."get_events_for_select"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_member_primary_application"("p_member_id" "uuid") RETURNS "uuid"
@@ -1063,6 +1264,144 @@ $$;
 ALTER FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") RETURNS TABLE("registrationId" "uuid", "eventId" "uuid", "businessMemberId" "uuid", "sponsoredRegistrationId" "uuid", "nonMemberName" "text", "numberOfParticipants" integer, "paymentStatus" "public"."PaymentStatus", "paymentMethod" "public"."PaymentMethod", "registrationDate" timestamp with time zone, "identifier" "text", "participants" "jsonb")
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    AS $$
+  SELECT
+    r."registrationId",
+    r."eventId",
+    r."businessMemberId",
+    r."sponsoredRegistrationId",
+    r."nonMemberName",
+    r."numberOfParticipants",
+    r."paymentStatus",
+    r."paymentMethod",
+    r."registrationDate",
+    r."identifier",
+    COALESCE(
+      (
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'participantId', p."participantId",
+            'firstName', p."firstName",
+            'lastName', p."lastName",
+            'email', p."email",
+            'contactNumber', p."contactNumber",
+            'isPrincipal', p."isPrincipal",
+            'registrationId', p."registrationId"
+          )
+        )
+        FROM "Participant" p
+        WHERE p."registrationId" = r."registrationId"
+      ),
+      '[]'::jsonb
+    ) AS participants
+  FROM "Registration" r
+  WHERE r."sponsoredRegistrationId" = p_sponsored_registration_id
+  ORDER BY r."registrationDate" DESC;
+$$;
+
+
+ALTER FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") OWNER TO "postgres";
+
+SET default_tablespace = '';
+
+SET default_table_access_method = "heap";
+
+
+CREATE TABLE IF NOT EXISTS "public"."SponsoredRegistration" (
+    "sponsoredRegistrationId" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "uuid" "text" DEFAULT "gen_random_uuid"() NOT NULL,
+    "eventId" "uuid" NOT NULL,
+    "sponsoredBy" "text" NOT NULL,
+    "feeDeduction" numeric(10,2) DEFAULT 0 NOT NULL,
+    "maxSponsoredGuests" bigint,
+    "usedCount" bigint DEFAULT 0 NOT NULL,
+    "status" "public"."SponsoredRegistrationStatus" DEFAULT 'active'::"public"."SponsoredRegistrationStatus" NOT NULL,
+    "createdAt" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL,
+    "updatedAt" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL,
+    CONSTRAINT "SponsoredRegistration_used_check" CHECK ((("maxSponsoredGuests" IS NULL) OR ("usedCount" <= "maxSponsoredGuests")))
+);
+
+
+ALTER TABLE "public"."SponsoredRegistration" OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") RETURNS SETOF "public"."SponsoredRegistration"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT *
+  FROM "SponsoredRegistration"
+  WHERE "sponsoredRegistrationId" = registration_id;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  result jsonb;
+BEGIN
+  SELECT to_jsonb(sr.*)
+  INTO result
+  FROM public."SponsoredRegistration" sr
+  WHERE sr.uuid = p_uuid;
+  
+  RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_sponsored_registrations_with_details"("p_event_id" "uuid") RETURNS TABLE("id" "uuid", "event_id" "uuid", "sponsor_id" "uuid", "registration_id" "uuid", "status" "text", "created_at" timestamp with time zone, "updated_at" timestamp with time zone, "sponsor_name" "text", "registration_email" "text")
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    sr.id,
+    sr.event_id,
+    sr.sponsor_id,
+    sr.registration_id,
+    sr.status,
+    sr.created_at,
+    sr.updated_at,
+    s.name as sponsor_name,
+    r.email as registration_email
+  FROM sponsored_registrations sr
+  LEFT JOIN sponsors s ON sr.sponsor_id = s.id
+  LEFT JOIN registrations r ON sr.registration_id = r.id
+  WHERE sr.event_id = p_event_id
+  ORDER BY sr.created_at DESC;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_sponsored_registrations_with_details"("p_event_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_sr_by_event_id"("p_event_id" "uuid") RETURNS SETOF "public"."SponsoredRegistration"
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    AS $$
+  SELECT *
+  FROM "SponsoredRegistration"
+  WHERE "eventId" = p_event_id
+  ORDER BY "createdAt" DESC;
+$$;
+
+
+ALTER FUNCTION "public"."get_sr_by_event_id"("p_event_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."handle_event_days"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
@@ -1187,6 +1526,66 @@ $$;
 
 
 ALTER FUNCTION "public"."publish_event"("p_event_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."schedule_interviews_batch"("p_interview_data" "jsonb") RETURNS TABLE("success" boolean, "message" "text", "interview_count" integer)
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+  v_interview_count integer := 0;
+  v_updated_count integer := 0;
+BEGIN
+  -- Insert all interviews in a single operation
+  INSERT INTO "public"."Interview" (
+    "applicationId",
+    "interviewDate",
+    "interviewVenue",
+    "status"
+  )
+  SELECT
+    (item->>'applicationId')::uuid,
+    (item->>'interviewDate')::timestamptz,
+    item->>'interviewVenue',
+    'scheduled'
+  FROM jsonb_array_elements(p_interview_data) AS item
+  ON CONFLICT DO NOTHING;
+
+  GET DIAGNOSTICS v_interview_count = ROW_COUNT;
+
+  -- Link interviews to applications in a single bulk operation using a CTE
+  -- This ensures all targeted Application rows receive their interviewId atomically
+  WITH inserted_interviews AS (
+    SELECT
+      "interviewId",
+      "applicationId"
+    FROM "public"."Interview"
+    WHERE "applicationId" IN (
+      SELECT (item->>'applicationId')::uuid
+      FROM jsonb_array_elements(p_interview_data) AS item
+    )
+    AND "status" = 'scheduled'
+  )
+  UPDATE "public"."Application" app
+  SET "interviewId" = ii."interviewId"
+  FROM inserted_interviews ii
+  WHERE app."applicationId" = ii."applicationId";
+
+  GET DIAGNOSTICS v_updated_count = ROW_COUNT;
+
+  -- Verify row counts match to detect partial updates
+  IF v_updated_count <> v_interview_count THEN
+    RAISE EXCEPTION 'Interview linking mismatch: inserted %, updated %', v_interview_count, v_updated_count;
+  END IF;
+
+  RETURN QUERY SELECT
+    true,
+    format('Scheduled %s interview(s) and linked to applications', v_interview_count),
+    v_interview_count;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."schedule_interviews_batch"("p_interview_data" "jsonb") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."set_membership_expiry"() RETURNS "trigger"
@@ -1368,6 +1767,112 @@ $$;
 ALTER FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid" DEFAULT NULL::"uuid", "p_non_member_name" "text" DEFAULT NULL::"text", "p_payment_method" "text" DEFAULT 'onsite'::"text", "p_payment_path" "text" DEFAULT NULL::"text", "p_registrant" "jsonb" DEFAULT '{}'::"jsonb", "p_other_participants" "jsonb" DEFAULT '[]'::"jsonb", "p_sponsored_registration_id" "uuid" DEFAULT NULL::"uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_registration_id UUID;
+  v_event_title TEXT;
+  v_payment_status "PaymentStatus";
+  v_payment_method_enum "PaymentMethod";
+BEGIN
+
+  -- Convert and cast the payment method
+  v_payment_method_enum := (CASE 
+    WHEN p_payment_method = 'online' THEN 'BPI' 
+    ELSE 'ONSITE' 
+  END)::"PaymentMethod";
+
+  -- Determine payment status
+  v_payment_status := (CASE 
+    WHEN p_payment_method = 'online' THEN 'pending'
+    ELSE 'verified'
+  END)::"PaymentStatus";
+
+  -- Insert registration record
+  INSERT INTO "Registration" (
+    "eventId",
+    "paymentMethod",
+    "paymentStatus",
+    "businessMemberId",
+    "nonMemberName",
+    "identifier",
+    "registrationDate",
+    "sponsoredRegistrationId"
+  ) VALUES (
+    p_event_id,
+    v_payment_method_enum,
+    v_payment_status,
+    CASE WHEN p_member_type = 'member' THEN p_business_member_id ELSE NULL END,
+    CASE WHEN p_member_type = 'nonmember' THEN p_non_member_name ELSE NULL END,
+    p_identifier,
+    NOW(),
+    p_sponsored_registration_id
+  )
+  RETURNING "registrationId" INTO v_registration_id;
+
+  -- Get event title for response
+  SELECT "eventTitle" INTO v_event_title
+  FROM "Event"
+  WHERE "eventId" = p_event_id;
+
+  -- Handle proof of payment if online payment
+  IF p_payment_method = 'online' THEN
+    INSERT INTO "ProofImage" (path, "registrationId")
+    VALUES (p_payment_path, v_registration_id);
+  END IF;
+
+  -- Insert principal registrant
+  INSERT INTO "Participant" (
+    "registrationId",
+    "isPrincipal",
+    "firstName",
+    "lastName",
+    "contactNumber",
+    email
+  )
+  VALUES (
+    v_registration_id,
+    TRUE,
+    p_registrant->>'firstName',
+    p_registrant->>'lastName',
+    p_registrant->>'contactNumber',
+    p_registrant->>'email'
+  );
+
+  -- Insert other registrants if any exist
+  IF jsonb_array_length(p_other_participants) > 0 THEN
+    INSERT INTO "Participant" (
+      "registrationId",
+      "isPrincipal",
+      "firstName",
+      "lastName",
+      "contactNumber",
+      email
+    )
+    SELECT
+      v_registration_id,
+      FALSE,
+      registrant->>'firstName',
+      registrant->>'lastName',
+      registrant->>'contactNumber',
+      registrant->>'email'
+    FROM jsonb_array_elements(p_other_participants) AS registrant;
+  END IF;
+
+  -- Return success response with data
+  RETURN jsonb_build_object(
+    'registrationId', v_registration_id,
+    'message', 'Registration created successfully'
+  );
+
+END;
+$$;
+
+
+ALTER FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text" DEFAULT NULL::"text") RETURNS "jsonb"
     LANGUAGE "plpgsql"
     AS $$
@@ -1545,6 +2050,36 @@ COMMENT ON FUNCTION "public"."submit_membership_application"("p_application_type
 Returns both applicationId (UUID) and identifier (ibc-app-XXXXXXXX format).
 For renewal and updating: validates that the provided businessMemberId exists in the BusinessMember table.';
 
+
+
+CREATE OR REPLACE FUNCTION "public"."toggle_sr_status"("p_sponsored_registration_id" "uuid") RETURNS json
+    LANGUAGE "sql"
+    AS $$
+  update public."SponsoredRegistration"
+  set status = case
+    when status = 'active'::"SponsoredRegistrationStatus" then 'disabled'::"SponsoredRegistrationStatus"
+    else 'active'::"SponsoredRegistrationStatus"
+  end,
+  "updatedAt" = now() at time zone 'utc'
+  where "sponsoredRegistrationId" = p_sponsored_registration_id
+  returning json_build_object(
+    'result', json_build_object(
+      'sponsoredRegistrationId', "sponsoredRegistrationId",
+      'uuid', uuid,
+      'eventId', "eventId",
+      'sponsoredBy', "sponsoredBy",
+      'feeDeduction', "feeDeduction",
+      'maxSponsoredGuests', "maxSponsoredGuests",
+      'usedCount', "usedCount",
+      'status', status,
+      'createdAt', "createdAt",
+      'updatedAt', "updatedAt"
+    )
+  );
+$$;
+
+
+ALTER FUNCTION "public"."toggle_sr_status"("p_sponsored_registration_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."update_event_available_slots_trigger"() RETURNS "trigger"
@@ -1772,6 +2307,196 @@ $$;
 ALTER FUNCTION "public"."update_primary_application_for_member"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."update_sponsored_registration_used_count"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_sponsored_registration_id UUID;
+  v_new_count INT;
+BEGIN
+  -- Determine which sponsored registration ID to update
+  IF (TG_OP = 'DELETE') THEN
+    v_sponsored_registration_id := OLD."sponsoredRegistrationId";
+  ELSIF (TG_OP = 'UPDATE') THEN
+    -- Handle both old and new sponsored registration IDs if they differ
+    IF OLD."sponsoredRegistrationId" IS DISTINCT FROM NEW."sponsoredRegistrationId" THEN
+      -- Update count for old sponsored registration
+      IF OLD."sponsoredRegistrationId" IS NOT NULL THEN
+        UPDATE public."SponsoredRegistration"
+        SET "usedCount" = (
+          SELECT COUNT(*)::INT
+          FROM public."Registration"
+          WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId"
+        )
+        WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
+      END IF;
+      
+      -- Update count for new sponsored registration
+      IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
+        UPDATE public."SponsoredRegistration"
+        SET "usedCount" = (
+          SELECT COUNT(*)::INT
+          FROM public."Registration"
+          WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId"
+        )
+        WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
+      END IF;
+      
+      RETURN NEW;
+    END IF;
+    v_sponsored_registration_id := NEW."sponsoredRegistrationId";
+  ELSE -- INSERT
+    v_sponsored_registration_id := NEW."sponsoredRegistrationId";
+  END IF;
+
+  -- Update the usedCount for the affected sponsored registration
+  IF v_sponsored_registration_id IS NOT NULL THEN
+    UPDATE public."SponsoredRegistration"
+    SET "usedCount" = (
+      SELECT COUNT(*)::INT
+      FROM public."Registration"
+      WHERE "sponsoredRegistrationId" = v_sponsored_registration_id
+    )
+    WHERE "sponsoredRegistrationId" = v_sponsored_registration_id;
+  END IF;
+
+  -- Return appropriate row
+  IF (TG_OP = 'DELETE') THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_sponsored_registration_used_count"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."update_sponsored_registration_used_count"() IS 'Automatically updates the usedCount field in SponsoredRegistration table whenever a Registration is added, updated, or deleted. The count reflects the total number of registrations using the sponsored link.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."update_sponsored_registration_used_count_from_participant"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_sponsored_registration_id UUID;
+  v_registration_id UUID;
+BEGIN
+  -- Get the registration ID
+  IF (TG_OP = 'DELETE') THEN
+    v_registration_id := OLD."registrationId";
+  ELSE
+    v_registration_id := NEW."registrationId";
+  END IF;
+
+  -- Get the sponsored registration ID from the registration
+  SELECT "sponsoredRegistrationId" INTO v_sponsored_registration_id
+  FROM public."Registration"
+  WHERE "registrationId" = v_registration_id;
+
+  -- Update the usedCount if this registration is sponsored
+  IF v_sponsored_registration_id IS NOT NULL THEN
+    UPDATE public."SponsoredRegistration"
+    SET "usedCount" = (
+      SELECT COUNT(p."participantId")::INT
+      FROM public."Registration" r
+      INNER JOIN public."Participant" p ON r."registrationId" = p."registrationId"
+      WHERE r."sponsoredRegistrationId" = v_sponsored_registration_id
+    )
+    WHERE "sponsoredRegistrationId" = v_sponsored_registration_id;
+  END IF;
+
+  -- Return appropriate row
+  IF (TG_OP = 'DELETE') THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_sponsored_registration_used_count_from_participant"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."update_sponsored_registration_used_count_from_participant"() IS 'Automatically updates the usedCount field in SponsoredRegistration table when Participant records are added or deleted. The count reflects the total number of PARTICIPANTS using the sponsored link.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."update_sponsored_registration_used_count_from_registration"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_sponsored_registration_id UUID;
+BEGIN
+  -- Determine which sponsored registration ID to update
+  IF (TG_OP = 'DELETE') THEN
+    v_sponsored_registration_id := OLD."sponsoredRegistrationId";
+  ELSIF (TG_OP = 'UPDATE') THEN
+    -- Handle both old and new sponsored registration IDs if they differ
+    IF OLD."sponsoredRegistrationId" IS DISTINCT FROM NEW."sponsoredRegistrationId" THEN
+      -- Update count for old sponsored registration (count participants)
+      IF OLD."sponsoredRegistrationId" IS NOT NULL THEN
+        UPDATE public."SponsoredRegistration"
+        SET "usedCount" = (
+          SELECT COUNT(p."participantId")::INT
+          FROM public."Registration" r
+          INNER JOIN public."Participant" p ON r."registrationId" = p."registrationId"
+          WHERE r."sponsoredRegistrationId" = OLD."sponsoredRegistrationId"
+        )
+        WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
+      END IF;
+      
+      -- Update count for new sponsored registration (count participants)
+      IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
+        UPDATE public."SponsoredRegistration"
+        SET "usedCount" = (
+          SELECT COUNT(p."participantId")::INT
+          FROM public."Registration" r
+          INNER JOIN public."Participant" p ON r."registrationId" = p."registrationId"
+          WHERE r."sponsoredRegistrationId" = NEW."sponsoredRegistrationId"
+        )
+        WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
+      END IF;
+      
+      RETURN NEW;
+    END IF;
+    v_sponsored_registration_id := NEW."sponsoredRegistrationId";
+  ELSE -- INSERT
+    v_sponsored_registration_id := NEW."sponsoredRegistrationId";
+  END IF;
+
+  -- Update the usedCount for the affected sponsored registration (count participants)
+  IF v_sponsored_registration_id IS NOT NULL THEN
+    UPDATE public."SponsoredRegistration"
+    SET "usedCount" = (
+      SELECT COUNT(p."participantId")::INT
+      FROM public."Registration" r
+      INNER JOIN public."Participant" p ON r."registrationId" = p."registrationId"
+      WHERE r."sponsoredRegistrationId" = v_sponsored_registration_id
+    )
+    WHERE "sponsoredRegistrationId" = v_sponsored_registration_id;
+  END IF;
+
+  -- Return appropriate row
+  IF (TG_OP = 'DELETE') THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_sponsored_registration_used_count_from_registration"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."update_sponsored_registration_used_count_from_registration"() IS 'Automatically updates the usedCount field in SponsoredRegistration table when Registration records are added, updated, or deleted. The count reflects the total number of PARTICIPANTS using the sponsored link.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
@@ -1783,10 +2508,6 @@ $$;
 
 
 ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
-
-SET default_tablespace = '';
-
-SET default_table_access_method = "heap";
 
 
 CREATE TABLE IF NOT EXISTS "public"."Application" (
@@ -1805,11 +2526,11 @@ CREATE TABLE IF NOT EXISTS "public"."Application" (
     "paymentMethod" "public"."PaymentMethod" NOT NULL,
     "websiteURL" "text" NOT NULL,
     "paymentStatus" "public"."PaymentStatus" NOT NULL,
-    "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL,
     "applicationMemberType" "public"."ApplicationMemberType" NOT NULL,
     "applicationStatus" "public"."ApplicationStatus" DEFAULT 'new'::"public"."ApplicationStatus" NOT NULL,
     "interviewId" "uuid",
-    "identifier" "text" NOT NULL
+    "identifier" "text" NOT NULL,
+    "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL
 );
 
 
@@ -1978,7 +2699,8 @@ CREATE TABLE IF NOT EXISTS "public"."Registration" (
     "paymentStatus" "public"."PaymentStatus" NOT NULL,
     "paymentMethod" "public"."PaymentMethod" NOT NULL,
     "identifier" "text" NOT NULL,
-    "numberOfParticipants" bigint
+    "numberOfParticipants" bigint,
+    "sponsoredRegistrationId" "uuid"
 );
 
 
@@ -2007,24 +2729,6 @@ ALTER TABLE "public"."Sector" ALTER COLUMN "sectorId" ADD GENERATED BY DEFAULT A
     CACHE 1
 );
 
-
-
-CREATE TABLE IF NOT EXISTS "public"."SponsoredRegistration" (
-    "sponsoredRegistrationId" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "uuid" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "eventId" "uuid" NOT NULL,
-    "sponsoredBy" "text" NOT NULL,
-    "feeDeduction" numeric(10,2) DEFAULT 0 NOT NULL,
-    "maxSponsoredGuests" bigint,
-    "usedCount" bigint DEFAULT 0 NOT NULL,
-    "status" "public"."SponsoredRegistrationStatus" DEFAULT 'active'::"public"."SponsoredRegistrationStatus" NOT NULL,
-    "createdAt" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL,
-    "updatedAt" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL,
-    CONSTRAINT "SponsoredRegistration_used_check" CHECK ((("maxSponsoredGuests" IS NULL) OR ("usedCount" <= "maxSponsoredGuests")))
-);
-
-
-ALTER TABLE "public"."SponsoredRegistration" OWNER TO "postgres";
 
 
 ALTER TABLE ONLY "public"."ApplicationMember"
@@ -2139,6 +2843,14 @@ CREATE INDEX "idx_interview_status" ON "public"."Interview" USING "btree" ("stat
 
 
 
+CREATE INDEX "idx_registration_sponsored" ON "public"."Registration" USING "btree" ("sponsoredRegistrationId");
+
+
+
+CREATE INDEX "idx_registration_sponsored_registration_id" ON "public"."Registration" USING "btree" ("sponsoredRegistrationId");
+
+
+
 CREATE OR REPLACE TRIGGER "on_application_sync_primary" AFTER INSERT OR DELETE OR UPDATE ON "public"."Application" FOR EACH ROW EXECUTE FUNCTION "public"."update_primary_application_for_member"();
 
 
@@ -2156,6 +2868,14 @@ CREATE OR REPLACE TRIGGER "tr_update_event_available_slots" AFTER INSERT OR DELE
 
 
 CREATE OR REPLACE TRIGGER "tr_update_participant_count" AFTER INSERT OR DELETE OR UPDATE ON "public"."Participant" FOR EACH ROW EXECUTE FUNCTION "public"."update_participant_count_trigger"();
+
+
+
+CREATE OR REPLACE TRIGGER "tr_update_sponsored_registration_used_count" AFTER INSERT OR DELETE OR UPDATE OF "sponsoredRegistrationId" ON "public"."Registration" FOR EACH ROW EXECUTE FUNCTION "public"."update_sponsored_registration_used_count_from_registration"();
+
+
+
+CREATE OR REPLACE TRIGGER "tr_update_sponsored_registration_used_count_from_participant" AFTER INSERT OR DELETE ON "public"."Participant" FOR EACH ROW EXECUTE FUNCTION "public"."update_sponsored_registration_used_count_from_participant"();
 
 
 
@@ -2230,6 +2950,11 @@ ALTER TABLE ONLY "public"."Registration"
 
 ALTER TABLE ONLY "public"."Registration"
     ADD CONSTRAINT "Registration_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "public"."Event"("eventId") ON UPDATE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."Registration"
+    ADD CONSTRAINT "Registration_sponsoredRegistrationId_fkey" FOREIGN KEY ("sponsoredRegistrationId") REFERENCES "public"."SponsoredRegistration"("sponsoredRegistrationId") ON DELETE CASCADE;
 
 
 
@@ -2727,6 +3452,12 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."approve_membership_application"("p_application_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."approve_membership_application"("p_application_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."approve_membership_application"("p_application_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."check_application_status"("p_application_identifier" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."check_application_status"("p_application_identifier" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."check_application_status"("p_application_identifier" "text") TO "service_role";
@@ -2757,9 +3488,21 @@ GRANT ALL ON FUNCTION "public"."compute_primary_application_id"("p_member_id" "u
 
 
 
+GRANT ALL ON FUNCTION "public"."create_sponsored_registration"("p_event_id" "uuid", "p_sponsored_by" "text", "p_fee_deduction" numeric, "p_max_sponsored_guests" bigint) TO "anon";
+GRANT ALL ON FUNCTION "public"."create_sponsored_registration"("p_event_id" "uuid", "p_sponsored_by" "text", "p_fee_deduction" numeric, "p_max_sponsored_guests" bigint) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."create_sponsored_registration"("p_event_id" "uuid", "p_sponsored_by" "text", "p_fee_deduction" numeric, "p_max_sponsored_guests" bigint) TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."delete_evaluation"("eval_id" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."delete_evaluation"("eval_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."delete_evaluation"("eval_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."delete_sr"("p_sponsored_registration_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."delete_sr"("p_sponsored_registration_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."delete_sr"("p_sponsored_registration_id" "uuid") TO "service_role";
 
 
 
@@ -2772,6 +3515,18 @@ GRANT ALL ON FUNCTION "public"."generate_member_identifier"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."get_all_evaluations"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_all_evaluations"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_all_evaluations"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations_with_event"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations_with_event"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations_with_event"() TO "service_role";
 
 
 
@@ -2790,6 +3545,12 @@ GRANT ALL ON FUNCTION "public"."get_event_participant_list"("p_event_id" "uuid",
 GRANT ALL ON FUNCTION "public"."get_event_status"("p_event_id" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_event_status"("p_event_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_event_status"("p_event_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_events_for_select"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_events_for_select"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_events_for_select"() TO "service_role";
 
 
 
@@ -2817,6 +3578,42 @@ GRANT ALL ON FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid"
 
 
 
+GRANT ALL ON FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "anon";
+GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "authenticated";
+GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_sponsored_registrations_with_details"("p_event_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_sponsored_registrations_with_details"("p_event_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_sponsored_registrations_with_details"("p_event_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_sr_by_event_id"("p_event_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_sr_by_event_id"("p_event_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_sr_by_event_id"("p_event_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."handle_event_days"() TO "anon";
 GRANT ALL ON FUNCTION "public"."handle_event_days"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_event_days"() TO "service_role";
@@ -2832,6 +3629,12 @@ GRANT ALL ON FUNCTION "public"."january_first_reset"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."publish_event"("p_event_id" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."publish_event"("p_event_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."publish_event"("p_event_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."schedule_interviews_batch"("p_interview_data" "jsonb") TO "anon";
+GRANT ALL ON FUNCTION "public"."schedule_interviews_batch"("p_interview_data" "jsonb") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."schedule_interviews_batch"("p_interview_data" "jsonb") TO "service_role";
 
 
 
@@ -2853,9 +3656,21 @@ GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", 
 
 
 
+GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."toggle_sr_status"("p_sponsored_registration_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."toggle_sr_status"("p_sponsored_registration_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."toggle_sr_status"("p_sponsored_registration_id" "uuid") TO "service_role";
 
 
 
@@ -2880,6 +3695,24 @@ GRANT ALL ON FUNCTION "public"."update_participant_count_trigger"() TO "service_
 GRANT ALL ON FUNCTION "public"."update_primary_application_for_member"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_primary_application_for_member"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_primary_application_for_member"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_used_count"() TO "anon";
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_used_count"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_used_count"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_used_count_from_participant"() TO "anon";
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_used_count_from_participant"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_used_count_from_participant"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_used_count_from_registration"() TO "anon";
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_used_count_from_registration"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_used_count_from_registration"() TO "service_role";
 
 
 
@@ -2985,12 +3818,6 @@ GRANT ALL ON TABLE "public"."Sector" TO "service_role";
 GRANT ALL ON SEQUENCE "public"."Sector_sectorId_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."Sector_sectorId_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."Sector_sectorId_seq" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "anon";
-GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "authenticated";
-GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "service_role";
 
 
 
