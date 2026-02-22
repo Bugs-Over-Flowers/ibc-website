@@ -14,11 +14,7 @@ function SponsoredRegistrationTableContent({
 
 export async function SponsoredRegistrationTable() {
   try {
-    console.log("[SponsoredRegistrationTable] Loading sponsored registrations");
     const registrations = await getAllSponsoredRegistrationsWithEvent();
-    console.log("[SponsoredRegistrationTable] Loaded registrations:", {
-      count: registrations.length,
-    });
     return <SponsoredRegistrationTableContent registrations={registrations} />;
   } catch (_error) {
     console.error(

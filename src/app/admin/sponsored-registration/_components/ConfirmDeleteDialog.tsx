@@ -24,11 +24,6 @@ export function ConfirmDeleteDialog({
   isLoading,
   sponsorName,
 }: ConfirmDeleteDialogProps) {
-  console.log("[ConfirmDeleteDialog] State changed:", {
-    open,
-    isLoading,
-    sponsorName,
-  });
   return (
     <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
@@ -46,22 +41,11 @@ export function ConfirmDeleteDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex justify-end gap-3 pt-4">
-          <AlertDialogCancel
-            disabled={isLoading}
-            onClick={() => console.log("[ConfirmDeleteDialog] Cancel clicked")}
-          >
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             className="bg-destructive hover:bg-destructive/90"
             disabled={isLoading}
-            onClick={() => {
-              console.log(
-                "[ConfirmDeleteDialog] Confirm delete clicked for:",
-                sponsorName,
-              );
-              onConfirm();
-            }}
+            onClick={onConfirm}
           >
             {isLoading ? "Deleting..." : "Delete"}
           </AlertDialogAction>

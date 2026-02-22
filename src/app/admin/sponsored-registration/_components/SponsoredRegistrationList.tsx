@@ -30,11 +30,6 @@ export function SponsoredRegistrationList({
     useState<SponsoredRegistrationWithEvent | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
 
-  console.log("[SponsoredRegistrationList] Rendered with", {
-    totalRegistrations: registrations.length,
-    pageSize,
-  });
-
   // Intersection Observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -72,16 +67,11 @@ export function SponsoredRegistrationList({
 
   const handleCopyLink = (uuid: string, eventId: string) => {
     const link = `${window.location.origin}/events/${eventId}/register?sr=${uuid}`;
-    console.log("[SponsoredRegistrationList] Copying link:", link);
     navigator.clipboard.writeText(link);
     toast.success("Link copied to clipboard!");
   };
 
   const handleToggleStatus = async (id: string, eventId: string) => {
-    console.log("[SponsoredRegistrationList] Toggling status for:", {
-      sponsoredRegistrationId: id,
-      eventId,
-    });
     const toastId = toast.loading("Updating status...");
 
     const { error } = await tryCatch(
@@ -100,16 +90,11 @@ export function SponsoredRegistrationList({
       return;
     }
 
-    console.log("[SponsoredRegistrationList] Status updated successfully");
     toast.success("Status updated!", { id: toastId });
     router.refresh();
   };
 
   const handleDeleteClick = (registration: SponsoredRegistrationWithEvent) => {
-    console.log("[SponsoredRegistrationList] Delete clicked for:", {
-      id: registration.sponsoredRegistrationId,
-      sponsor: registration.sponsoredBy,
-    });
     setDeletingRegistration(registration);
     setOpenDeleteDialog(true);
   };
@@ -120,10 +105,6 @@ export function SponsoredRegistrationList({
       return;
     }
 
-    console.log("[SponsoredRegistrationList] Confirming delete for:", {
-      id: deletingRegistration.sponsoredRegistrationId,
-      sponsor: deletingRegistration.sponsoredBy,
-    });
     setIsDeletingId(deletingRegistration.sponsoredRegistrationId);
     const toastId = toast.loading("Deleting sponsored registration...");
 
@@ -141,7 +122,6 @@ export function SponsoredRegistrationList({
       return;
     }
 
-    console.log("[SponsoredRegistrationList] Delete successful");
     toast.success("Sponsored registration deleted!", { id: toastId });
     setOpenDeleteDialog(false);
     setDeletingRegistration(null);

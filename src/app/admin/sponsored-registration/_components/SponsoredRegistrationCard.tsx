@@ -46,34 +46,26 @@ export function SponsoredRegistrationCard({
   const createdAt = registration.createdAt;
 
   const handleDelete = (e: React.MouseEvent) => {
-    console.log("[SponsoredRegistrationCard] Delete button clicked");
     e.stopPropagation();
     onDeleteClick();
   };
 
   const handleToggleStatus = (e: React.MouseEvent) => {
-    console.log("[SponsoredRegistrationCard] Toggle status clicked");
     e.stopPropagation();
     onToggleStatus();
   };
 
   const handleCopyLink = (e: React.MouseEvent) => {
-    console.log("[SponsoredRegistrationCard] Copy link clicked");
     e.stopPropagation();
     onCopyLink();
   };
 
   const handleOpenLink = (e: React.MouseEvent) => {
-    console.log("[SponsoredRegistrationCard] Open link clicked");
     e.stopPropagation();
     onOpenLink();
   };
 
   const handleViewDetails = (e: React.MouseEvent) => {
-    console.log("[SponsoredRegistrationCard] View details clicked for:", {
-      sponsor: registration.sponsoredBy,
-      id: registration.sponsoredRegistrationId,
-    });
     e.stopPropagation();
     onViewDetails();
   };

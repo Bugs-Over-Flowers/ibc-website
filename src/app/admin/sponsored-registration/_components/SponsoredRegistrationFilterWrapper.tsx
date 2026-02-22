@@ -15,17 +15,6 @@ export function SponsoredRegistrationFilterWrapper({
   const [filteredRegistrations, setFilteredRegistrations] =
     useState(registrations);
 
-  console.log("[SponsoredRegistrationFilterWrapper] Initialized with", {
-    registrations: registrations.length,
-  });
-
-  console.log(
-    "[SponsoredRegistrationFilterWrapper] Filtered registrations updated:",
-    {
-      count: filteredRegistrations.length,
-    },
-  );
-
   return (
     <div className="space-y-6">
       <SponsoredRegistrationFilter

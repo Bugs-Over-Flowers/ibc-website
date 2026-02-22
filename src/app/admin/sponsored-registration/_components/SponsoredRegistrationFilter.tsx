@@ -94,13 +94,6 @@ export function SponsoredRegistrationFilter({
   ).sort();
 
   const applyFilters = useCallback(() => {
-    console.log("[SponsoredRegistrationFilter] Applying filters:", {
-      searchTerm,
-      selectedEvent,
-      selectedStatus,
-      sortOrder,
-      selectedDatePreset,
-    });
     let filtered = registrations;
 
     // Search filter
@@ -148,10 +141,6 @@ export function SponsoredRegistrationFilter({
       return sortOrder === "latest" ? dateB - dateA : dateA - dateB;
     });
 
-    console.log("[SponsoredRegistrationFilter] Filtered results:", {
-      totalResults: filtered.length,
-      originalCount: registrations.length,
-    });
     onFilter(filtered);
   }, [
     searchTerm,
@@ -168,7 +157,6 @@ export function SponsoredRegistrationFilter({
   }, [applyFilters]);
 
   const handleClearAllFilters = () => {
-    console.log("[SponsoredRegistrationFilter] Clearing all filters");
     setSearchTerm("");
     setSelectedEvent("");
     setSelectedStatus("all");
