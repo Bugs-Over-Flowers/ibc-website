@@ -89,7 +89,7 @@ async function SponsoredRegisterPageContent({
   }
 
   return (
-    <div className="flex w-full max-w-7xl flex-col gap-4 md:flex-row">
+    <div className="mt-16 flex w-full max-w-7xl flex-col gap-4 md:flex-row">
       <RegistrationInformation {...eventData} />
       <div className="flex w-full flex-col gap-4 p-5">
         <div className="flex items-center justify-between gap-2">

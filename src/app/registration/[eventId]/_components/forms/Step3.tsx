@@ -107,7 +107,8 @@ function PaymentDetails() {
     <Card
       className={cn(
         "border-dashed bg-muted/30",
-        isSponsored && "border-green-600/50 bg-green-50/50",
+        isSponsored &&
+          "border-green-600/40 bg-green-50/60 dark:border-green-500/30 dark:bg-green-950/20",
       )}
     >
       <CardHeader className="pb-3">
@@ -115,7 +116,7 @@ function PaymentDetails() {
           <Banknote className="size-4 text-muted-foreground" />
           Payment Summary
           {isSponsored && (
-            <span className="ml-auto rounded-full bg-green-600 px-2.5 py-0.5 font-semibold text-white text-xs">
+            <span className="ml-auto rounded-full bg-green-600 px-2.5 py-0.5 font-semibold text-white text-xs dark:bg-green-700">
               Sponsored
             </span>
           )}
@@ -153,10 +154,10 @@ function PaymentDetails() {
 
         {totalSponsorDiscount > 0 && (
           <>
-            <div className="flex w-full items-center justify-between rounded-lg bg-green-600/10 px-3 py-2.5 text-green-700">
+            <div className="flex w-full items-center justify-between rounded-lg bg-green-600/10 px-3 py-2.5 text-green-700 dark:bg-green-900/30 dark:text-green-300">
               <div className="flex flex-col">
                 <span className="font-medium">Sponsor Discount</span>
-                <span className="text-green-700/70 text-xs">
+                <span className="text-green-700/70 text-xs dark:text-green-300/80">
                   ₱{sponsorFeeDeduction?.toLocaleString()} × {participantCount}{" "}
                   heads
                 </span>
@@ -176,11 +177,18 @@ function PaymentDetails() {
         <div
           className={cn(
             "flex w-full items-center justify-between font-semibold",
-            isSponsored ? "text-green-700 text-lg" : "text-lg",
+            isSponsored
+              ? "text-green-700 text-lg dark:text-green-300"
+              : "text-lg",
           )}
         >
           <span>Total Amount</span>
-          <span className={cn("text-primary", isSponsored && "text-green-700")}>
+          <span
+            className={cn(
+              "text-primary",
+              isSponsored && "text-green-700 dark:text-green-300",
+            )}
+          >
             {Intl.NumberFormat("en-US", {
               currency: "PHP",
               style: "currency",
