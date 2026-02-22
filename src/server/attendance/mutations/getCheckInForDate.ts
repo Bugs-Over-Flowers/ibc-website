@@ -23,7 +23,7 @@ export const getCheckInForDate = async (
         registrationDate,
         paymentMethod,
         identifier,
-        paymentStatus,
+        paymentProofStatus,
         businessMember:BusinessMember(
           businessName
         ),
@@ -69,7 +69,7 @@ export const getCheckInForDate = async (
 
   let message: string | undefined;
 
-  if (parsedData.paymentStatus === "pending") {
+  if (parsedData.paymentProofStatus === "pending") {
     message = "The registration payment is still pending.";
   }
 

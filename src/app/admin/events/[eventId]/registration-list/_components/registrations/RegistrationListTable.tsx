@@ -130,7 +130,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
             : "bg-yellow-600",
         )}
       >
-        {row.getValue("paymentStatus")}
+        {row.original.paymentProofStatus}
       </Badge>
     ),
   },

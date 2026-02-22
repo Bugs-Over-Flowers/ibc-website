@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import CenterSpinner from "@/components/CenterSpinner";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
+import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
 import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import CheckInDataDialog from "./_components/CheckInDataDialog";
@@ -39,7 +40,7 @@ async function CheckInPage({
   const { eventDayId } = await params;
   const parsedSearchParams = await searchParams;
   const searchQuery = parseStringParam(parsedSearchParams.check_q);
-  const paymentStatus = parseStringParam(
+  const paymentProofStatus = parseStringParam(
     parsedSearchParams.check_paymentStatus,
   );
   const { data } = await tryCatch(
@@ -55,10 +56,9 @@ async function CheckInPage({
   const registrationListResult = await tryCatch(
     getEventRegistrationList(cookieStore.getAll(), {
       eventId: data.event.eventId,
-      paymentStatus:
-        paymentStatus === "pending" || paymentStatus === "verified"
-          ? paymentStatus
-          : undefined,
+      paymentProofStatus: paymentProofStatus as
+        | typeof PaymentProofStatusEnum
+        | undefined,
       searchString: searchQuery,
     }),
   );

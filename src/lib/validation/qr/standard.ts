@@ -1,5 +1,5 @@
 import z from "zod";
-import { PaymentStatusEnum } from "../utils";
+import { PaymentProofStatusEnum } from "../utils";
 
 const CheckInSchema = z.object({
   remarks: z.string().nullable(),
@@ -34,7 +34,7 @@ const RawCheckInForDateSchema = z.object({
   registrationDate: z.string(),
   paymentMethod: z.enum(["BPI", "ONSITE"]),
   identifier: z.string(),
-  paymentStatus: PaymentStatusEnum,
+  paymentStatus: PaymentProofStatusEnum,
   businessMember: z
     .object({
       businessName: z.string(),
@@ -61,6 +61,7 @@ export const normalizeCheckInForEventDay = (
 
   return {
     ...parsed,
+    paymentProofStatus: parsed.paymentStatus,
     participants: parsed.participants.map((participant) => ({
       ...participant,
       checkIn: participant.checkIn.filter(
@@ -80,7 +81,7 @@ export const GetCheckInForDateSchema = z
     registrationDate: z.string(),
     paymentMethod: z.enum(["BPI", "ONSITE"]),
     identifier: z.string(),
-    paymentStatus: PaymentStatusEnum,
+    paymentProofStatus: PaymentProofStatusEnum,
     businessMember: z
       .object({
         businessName: z.string(),

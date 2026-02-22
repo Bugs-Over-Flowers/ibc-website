@@ -43,12 +43,12 @@ const getColumns = ({
       <Badge
         className={cn(
           "rounded-full",
-          row.original.paymentStatus === "verified"
+          row.original.paymentProofStatus === "accepted"
             ? "bg-green-600"
             : "bg-yellow-600",
         )}
       >
-        {row.original.paymentStatus}
+        {row.original.paymentProofStatus}
       </Badge>
     ),
   },
