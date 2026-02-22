@@ -3986,6 +3986,3 @@ CREATE POLICY "allow all operations for admins 19dgg40_3" ON "storage"."objects"
 
 
 CREATE POLICY "insert for all 19dgg40_0" ON "storage"."objects" FOR INSERT WITH CHECK (("bucket_id" = 'logoimage'::"text"));
-
-
-

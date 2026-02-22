@@ -36,9 +36,18 @@ const draftEventClientSchema = z.object({
 const publishedEventClientSchema = z.object({
   eventTitle: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(1, "Description is required"),
-  eventStartDate: z.date({
-    message: "Event start date is required",
-  }),
+  eventStartDate: z
+    .date({
+      message: "Event start date is required",
+    })
+    .refine(
+      (date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return date >= today;
+      },
+      { message: "Event start date must be today or in the future" },
+    ),
   eventEndDate: z.date({
     message: "Event end date is required",
   }),
