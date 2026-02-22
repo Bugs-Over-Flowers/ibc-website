@@ -22,7 +22,7 @@ export default function Page({
   searchParams,
 }: SponsoredRegisterPageProps) {
   return (
-    <main className="flex h-screen w-full items-center justify-center p-5">
+    <main className="flex min-h-screen w-full items-start justify-center px-5 py-8">
       <Suspense fallback={<Spinner />}>
         <SponsoredRegisterPageContent
           params={params}
@@ -76,7 +76,7 @@ async function SponsoredRegisterPageContent({
 
   if (spotsRemaining <= 0) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
         <h1 className="font-bold text-2xl">No Spots Available</h1>
         <p className="text-muted-foreground">
           This sponsorship has reached its maximum number of guests.
@@ -89,9 +89,9 @@ async function SponsoredRegisterPageContent({
   }
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 md:flex-row">
+    <div className="flex w-full max-w-7xl flex-col gap-4 md:flex-row">
       <RegistrationInformation {...eventData} />
-      <div className="flex h-full w-full flex-col gap-4 p-5">
+      <div className="flex w-full flex-col gap-4 p-5">
         <div className="flex items-center justify-between gap-2">
           <Link href={`/events/${eventId}`}>
             <Button size="icon" variant="ghost">

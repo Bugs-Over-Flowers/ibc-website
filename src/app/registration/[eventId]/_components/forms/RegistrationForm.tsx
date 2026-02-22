@@ -33,23 +33,8 @@ export default function RegistrationForm({
   // Sync sponsor info from validated URL params
   React.useEffect(() => {
     if (!currentEventId) {
-      console.log(
-        "[SponsoredDebug][RegistrationForm] Skip sponsor sync: missing currentEventId",
-      );
       return;
     }
-
-    console.log("[SponsoredDebug][RegistrationForm] Sponsor sync inputs", {
-      currentEventId,
-      sponsorUuid,
-      sponsoredRegistrationId,
-      sponsorFeeDeduction,
-      hasValidSponsorPayload:
-        !!sponsorUuid &&
-        !!sponsoredRegistrationId &&
-        sponsorFeeDeduction !== undefined &&
-        sponsorFeeDeduction !== null,
-    });
 
     if (
       sponsorUuid &&
@@ -57,14 +42,6 @@ export default function RegistrationForm({
       sponsorFeeDeduction !== undefined &&
       sponsorFeeDeduction !== null
     ) {
-      console.log(
-        "[SponsoredDebug][RegistrationForm] Applying sponsor info to store",
-        {
-          sponsorUuid,
-          sponsoredRegistrationId,
-          feeDeduction: Number(sponsorFeeDeduction),
-        },
-      );
       setSponsorInfo({
         sponsorUuid,
         sponsoredRegistrationId,
@@ -72,10 +49,6 @@ export default function RegistrationForm({
       });
       return;
     }
-
-    console.log(
-      "[SponsoredDebug][RegistrationForm] Clearing sponsor info from store",
-    );
 
     clearSponsorInfo();
   }, [
