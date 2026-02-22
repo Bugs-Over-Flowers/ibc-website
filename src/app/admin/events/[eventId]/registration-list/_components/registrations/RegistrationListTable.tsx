@@ -125,7 +125,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
       <Badge
         className={cn(
           "rounded-full",
-          row.original.paymentStatus === "verified"
+          row.original.paymentProofStatus === "accepted"
             ? "bg-green-600"
             : "bg-yellow-600",
         )}
@@ -152,7 +152,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
         data={{
           affiliation: row.original.affiliation,
           registrationIdentifier: row.original.registrationIdentifier,
-          paymentStatus: row.original.paymentStatus,
+          paymentProofStatus: row.original.paymentProofStatus,
           email: row.original.registrant.email,
           registrationId: row.original.registrationId,
         }}
