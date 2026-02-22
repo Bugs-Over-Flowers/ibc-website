@@ -1,10 +1,16 @@
 # Dependencies
+# Dependencies
 node_modules
+
+# Build outputs
 
 # Build outputs
 .next
 out
 build
+dist
+
+# Environment files
 dist
 
 # Environment files
@@ -32,7 +38,28 @@ yarn-error.log*
 *~
 
 # OS files
+# IDE and editor files
+.cursor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Test and coverage
+coverage
+.nyc_output
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Docker files (don't need to copy these into the image)
 Thumbs.db
 
 # Test and coverage
@@ -47,7 +74,16 @@ __tests__
 # Docker files (don't need to copy these into the image)
 Dockerfile
 docker-compose.yaml
+docker-compose.yaml
 docker-compose.yml
+.dockerignore
+
+# Misc
+*.md
+!README.md
+.github
+.husky
+lefthook.yml
 .dockerignore
 
 # Misc

@@ -62,6 +62,7 @@ export async function deleteEvents(eventId: string) {
     // updateTag(CACHE_TAGS.events.public);
 
     revalidatePath("/admin/events");
+    revalidatePath("/admin/events");
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

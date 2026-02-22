@@ -40,6 +40,7 @@ interface MembershipApplicationStoreActions {
   setStep: (step: number) => void;
   setApplicationData: (
     applicationData: Partial<MembershipApplicationData>,
+    applicationData: Partial<MembershipApplicationData>,
   ) => void;
   setIsSubmitted: (isSubmitted: boolean) => void;
   resetStore: () => void;
@@ -76,6 +77,7 @@ const initialState: MembershipApplicationStore = {
   applicationData: {
     step1: {
       applicationType: "newMember",
+      businessMemberId: "",
       businessMemberId: "",
     },
     step2: {
@@ -129,6 +131,7 @@ const initialState: MembershipApplicationStore = {
       paymentProof: undefined,
     },
   },
+};
 };
 
 const useMembershipApplicationStore = create<
@@ -286,7 +289,13 @@ const useMembershipApplicationStore = create<
         }) as unknown as MembershipApplicationStore,
 
       // 3. Rehydrate logic - Handles the string-to-Date conversion
+        }) as unknown as MembershipApplicationStore,
+
+      // 3. Rehydrate logic - Handles the string-to-Date conversion
       onRehydrateStorage: () => (state) => {
+        if (!state) return;
+
+        if (state.applicationData?.step3?.representatives) {
         if (!state) return;
 
         if (state.applicationData?.step3?.representatives) {
@@ -307,11 +316,37 @@ const useMembershipApplicationStore = create<
                 }
               }
 
+              // At runtime, 'rep.birthdate' might be a string string despite the type definition
+              const serialized = rep as unknown as {
+                birthdate?: string | Date;
+              };
+
+              let birthdateVal: Date | undefined;
+
+              if (serialized.birthdate) {
+                if (serialized.birthdate instanceof Date) {
+                  birthdateVal = serialized.birthdate;
+                } else {
+                  birthdateVal = new Date(serialized.birthdate);
+                }
+              }
+
               return {
                 ...rep,
                 birthdate: birthdateVal as Date,
+                birthdate: birthdateVal as Date,
               };
             });
+        }
+
+        // Ensure File objects are explicitly undefined after rehydration
+        // This is defensive programming - partialize already excludes them,
+        // but this ensures type safety and prevents any confusion
+        if (state.applicationData?.step2) {
+          state.applicationData.step2.logoImage = undefined;
+        }
+        if (state.applicationData?.step4) {
+          state.applicationData.step4.paymentProof = undefined;
         }
 
         // Ensure File objects are explicitly undefined after rehydration

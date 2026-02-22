@@ -25,6 +25,8 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
 
   // Convert timestamptz to datetime-local format (YYYY-MM-DDTHH:mm)
   const formatForDateTimeLocal = (dateString: string | null) => {
+  // Convert timestamptz to datetime-local format (YYYY-MM-DDTHH:mm)
+  const formatForDateTimeLocal = (dateString: string | null) => {
     if (!dateString) return "";
     return formatDate(dateString, "yyyy-MM-dd'T'HH:mm");
   };

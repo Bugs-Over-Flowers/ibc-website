@@ -4,9 +4,12 @@ const ratingEnum = z.enum(["poor", "fair", "good", "veryGood", "excellent"]);
 
 // export const EvaluationFormSchema
 
+// export const EvaluationFormSchema
+
 export const EvaluationFormSchema = z
   .object({
     eventId: z.string(),
+    name: z.string().default(""),
     name: z.string().default(""),
 
     q1Rating: ratingEnum.nullable(),
@@ -16,6 +19,8 @@ export const EvaluationFormSchema = z
     q5Rating: ratingEnum.nullable(),
     q6Rating: ratingEnum.nullable(),
 
+    feedback: z.string().optional(),
+    additionalComments: z.string().optional(),
     feedback: z.string().optional(),
     additionalComments: z.string().optional(),
   })

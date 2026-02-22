@@ -23,19 +23,24 @@ CASCADE;
 -- =============================================================================
 -- Insert Test Sectors
 -- =============================================================================
-INSERT INTO "Sector" ("sectorId", "sectorName") VALUES
-  (1, 'Technology'),
-  (2, 'Manufacturing'),
-  (3, 'Services'),
-  (4, 'Retail'),
-  (5, 'Healthcare'),
-  (6, 'Finance'),
-  (7, 'Education'),
-  (8, 'Real Estate'),
-  (9, 'Transportation'),
-  (10, 'Hospitality')
-ON CONFLICT ("sectorId") DO UPDATE SET
-  "sectorName" = EXCLUDED."sectorName";
+INSERT INTO "Sector" ("sectorName") VALUES
+  ('Technology'),
+  ('Manufacturing'),
+  ('Services'),
+  ('Retail'),
+  ('Healthcare'),
+  ('Finance'),
+  ('Education'),
+  ('Real Estate'),
+  ('Transportation'),
+  ('Hospitality');
+
+-- Keep identity sequence aligned after explicit sectorId inserts
+SELECT setval(
+  pg_get_serial_sequence('"public"."Sector"', 'sectorId'),
+  COALESCE((SELECT MAX("sectorId") FROM "public"."Sector"), 0) + 1,
+  false
+);
 
 -- =============================================================================
 -- Insert Test Applications (matching actual schema from migrations)
@@ -57,7 +62,7 @@ INSERT INTO "Application" (
   "websiteURL",
   "applicationMemberType",
   "applicationStatus",
-  "paymentStatus"
+  "paymentProofStatus"
 ) VALUES
   (
     gen_random_uuid(),
@@ -95,7 +100,7 @@ INSERT INTO "Application" (
     'https://sample-corp.com',
     'corporate',
     'approved',
-    'verified'
+    'accepted'
   )
 RETURNING "applicationId";
 

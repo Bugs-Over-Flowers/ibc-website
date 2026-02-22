@@ -2,6 +2,9 @@ services:
   # Development service - for local development with hot reload
   ibc-dev:
     container_name: ibc-dev
+  # Development service - for local development with hot reload
+  ibc-dev:
+    container_name: ibc-dev
     build:
       context: .
       dockerfile: Dockerfile
@@ -15,6 +18,7 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
+      - /app/.next
       - /app/.next
     extra_hosts:
       - "host.docker.internal:host-gateway"
