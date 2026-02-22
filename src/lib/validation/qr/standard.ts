@@ -34,7 +34,7 @@ const RawCheckInForDateSchema = z.object({
   registrationDate: z.string(),
   paymentMethod: z.enum(["BPI", "ONSITE"]),
   identifier: z.string(),
-  paymentStatus: PaymentProofStatusEnum,
+  paymentProofStatus: PaymentProofStatusEnum,
   businessMember: z
     .object({
       businessName: z.string(),
@@ -61,7 +61,7 @@ export const normalizeCheckInForEventDay = (
 
   return {
     ...parsed,
-    paymentProofStatus: parsed.paymentStatus,
+    paymentProofStatus: parsed.paymentProofStatus,
     participants: parsed.participants.map((participant) => ({
       ...participant,
       checkIn: participant.checkIn.filter(
