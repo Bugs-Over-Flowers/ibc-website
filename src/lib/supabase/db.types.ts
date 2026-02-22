@@ -1012,7 +1012,7 @@ export type Database = {
         affiliation: string | null;
         registration_date: string | null;
         payment_proof_status:
-          | Database["public"]["Enums"]["PaymentStatus"]
+          | Database["public"]["Enums"]["PaymentProofStatus"]
           | null;
         payment_method: Database["public"]["Enums"]["PaymentMethod"] | null;
         business_member_id: string | null;
