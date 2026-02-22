@@ -37,6 +37,13 @@ INSERT INTO "Sector" ("sectorId", "sectorName") VALUES
 ON CONFLICT ("sectorId") DO UPDATE SET
   "sectorName" = EXCLUDED."sectorName";
 
+-- Keep identity sequence aligned after explicit sectorId inserts
+SELECT setval(
+  pg_get_serial_sequence('"public"."Sector"', 'sectorId'),
+  COALESCE((SELECT MAX("sectorId") FROM "public"."Sector"), 0) + 1,
+  false
+);
+
 -- =============================================================================
 -- Insert Test Applications (matching actual schema from migrations)
 -- =============================================================================
