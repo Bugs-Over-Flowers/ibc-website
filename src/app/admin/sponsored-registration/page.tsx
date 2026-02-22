@@ -1,7 +1,5 @@
-import { Plus } from "lucide-react";
-import Link from "next/link";
 import { Suspense } from "react";
-import { Button } from "@/components/ui/button";
+import { AddSponsoredRegistrationButton } from "./_components/AddSponsoredRegistrationButton";
 import { SponsoredRegistrationTable } from "./_components/SponsoredRegistrationTable";
 import SponsoredRegistrationPageSkeleton from "./loading";
 
@@ -24,12 +22,7 @@ export default function SponsoredRegistrationPage() {
               events
             </p>
           </div>
-          <Button className="h-12 rounded-xl" size="sm">
-            <Link href="/admin/sponsored-registration/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Sponsored Registration
-            </Link>
-          </Button>
+          <AddSponsoredRegistrationButton />
         </div>
 
         <SponsoredRegistrationTable />
