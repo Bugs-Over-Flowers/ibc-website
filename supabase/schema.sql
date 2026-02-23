@@ -154,15 +154,6 @@ CREATE TYPE "public"."PaymentProofStatus" AS ENUM (
 ALTER TYPE "public"."PaymentProofStatus" OWNER TO "postgres";
 
 
-CREATE TYPE "public"."PaymentStatus" AS ENUM (
-    'pending',
-    'verified'
-);
-
-
-ALTER TYPE "public"."PaymentStatus" OWNER TO "postgres";
-
-
 CREATE TYPE "public"."SponsoredRegistrationStatus" AS ENUM (
     'active',
     'full',
@@ -217,7 +208,7 @@ CREATE TYPE "public"."registration_list_item" AS (
 	"registration_id" "uuid",
 	"affiliation" "text",
 	"registration_date" timestamp with time zone,
-	"payment_proof_status" "public"."PaymentStatus",
+	"payment_proof_status" "public"."PaymentProofStatus",
 	"payment_method" "public"."PaymentMethod",
 	"business_member_id" "uuid",
 	"business_name" "text",
@@ -1798,31 +1789,30 @@ ALTER FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid"
 
 
 CREATE OR REPLACE FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text" DEFAULT NULL::"text") RETURNS "jsonb"
-    LANGUAGE "plpgsql"
+    LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
 DECLARE
   v_application_id uuid;
   v_identifier text;
   v_app_type_enum "ApplicationType";
   v_pay_method_enum "PaymentMethod";
-  v_pay_status_enum "PaymentStatus";
+  v_pay_status_enum "PaymentProofStatus";
   v_sector_id int;
   v_business_member_id uuid;
   v_member_exists boolean;
   representative jsonb;
   v_rep_type_text text;
 BEGIN
-
   -- Generate UUID for application ID
   v_application_id := gen_random_uuid();
-  
+
   -- Generate human-readable identifier: ibc-app-XXXXXXXX (first 8 chars of UUID)
   v_identifier := 'ibc-app-' || left(replace(v_application_id::text, '-', ''), 8);
 
   -- 1. Validate Inputs & Enums
   v_app_type_enum := p_application_type::"ApplicationType";
   v_pay_method_enum := p_payment_method::"PaymentMethod";
-  v_pay_status_enum := 'pending'::"PaymentStatus";
+  v_pay_status_enum := 'pending'::"PaymentProofStatus";
 
   -- Validate: Online payment requires proof (Checking against 'BPI')
   IF v_pay_method_enum = 'BPI' AND (p_payment_proof_url IS NULL OR p_payment_proof_url = '') THEN
@@ -1831,7 +1821,7 @@ BEGIN
 
   -- Extract Sector ID
   v_sector_id := (p_company_details->>'sectorId')::int;
-  
+
   -- Extract Business Member ID (for renewals and updates)
   IF p_company_details->>'businessMemberId' IS NOT NULL AND p_company_details->>'businessMemberId' != '' THEN
     v_business_member_id := (p_company_details->>'businessMemberId')::uuid;
@@ -1871,7 +1861,7 @@ BEGIN
     "faxNumber",
     "mobileNumber",
     "emailAddress",
-    "paymentStatus",
+    "paymentProofStatus",
     "paymentMethod",
     "websiteURL",
     "applicationMemberType"
@@ -1897,7 +1887,7 @@ BEGIN
 
   -- 4. Handle Proof of Payment
   IF v_pay_method_enum = 'BPI' THEN
-    INSERT INTO "ProofImage" ("applicationId", "path") 
+    INSERT INTO "ProofImage" ("applicationId", "path")
     VALUES (v_application_id, p_payment_proof_url);
   END IF;
 
@@ -1905,7 +1895,6 @@ BEGIN
   IF jsonb_array_length(p_representatives) > 0 THEN
     FOR representative IN SELECT * FROM jsonb_array_elements(p_representatives)
     LOOP
-      
       -- Extract the type (principal or alternate)
       v_rep_type_text := representative->>'memberType';
 

@@ -119,7 +119,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
     },
   },
   {
-    accessorKey: "paymentStatus",
+    accessorKey: "paymentProofStatus",
     header: "Payment Status",
     cell: ({ row }) => (
       <Badge

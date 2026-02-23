@@ -984,7 +984,6 @@ export type Database = {
       MembershipStatus: "paid" | "unpaid" | "cancelled";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentProofStatus: "pending" | "accepted" | "rejected";
-      PaymentStatus: "pending" | "verified";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
       SponsoredRegistrationStatus: "active" | "full" | "disabled";
     };
@@ -1164,7 +1163,6 @@ export const Constants = {
       MembershipStatus: ["paid", "unpaid", "cancelled"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentProofStatus: ["pending", "accepted", "rejected"],
-      PaymentStatus: ["pending", "verified"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
       SponsoredRegistrationStatus: ["active", "full", "disabled"],
     },

@@ -36,14 +36,12 @@ export async function updatePaymentProofStatus({
     throw new Error("Cannot accept payment proof without an uploaded image");
   }
 
-  const paymentStatus: Enums<"PaymentStatus"> =
-    status === "accepted" ? "verified" : "pending";
+  const paymentProofStatus: Enums<"PaymentProofStatus"> = status;
 
   const { error } = await supabase
     .from("Application")
     .update({
-      paymentProofStatus: status,
-      paymentStatus,
+      paymentProofStatus,
     })
     .eq("applicationId", applicationId);
 
