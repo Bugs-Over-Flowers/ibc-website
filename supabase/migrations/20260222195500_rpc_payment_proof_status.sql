@@ -1,27 +1,27 @@
 -- Align RPCs with Registration.paymentProofStatus
+-- Fix: The composite type registration_list_item had payment_status column
+-- of type PaymentStatus, but it should be payment_proof_status of type PaymentProofStatus
 
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM pg_attribute a
-    JOIN pg_type t ON t.typrelid = a.attrelid
-    JOIN pg_namespace n ON n.oid = t.typnamespace
-    WHERE n.nspname = 'public'
-      AND t.typname = 'registration_list_item'
-      AND a.attname = 'payment_status'
-      AND a.attnum > 0
-      AND NOT a.attisdropped
-  ) THEN
-    ALTER TYPE "public"."registration_list_item"
-      RENAME ATTRIBUTE "payment_status" TO "payment_proof_status";
-  END IF;
-END
-$$;
+-- Drop dependent function first (it references the type)
 DROP FUNCTION IF EXISTS "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_status" "public"."PaymentStatus"
+);
+-- Drop the old type and recreate with correct column type
+DROP TYPE IF EXISTS "public"."registration_list_item";
+CREATE TYPE "public"."registration_list_item" AS (
+  "registration_id" "uuid",
+  "affiliation" "text",
+  "registration_date" timestamp with time zone,
+  "payment_proof_status" "public"."PaymentProofStatus",
+  "payment_method" "public"."PaymentMethod",
+  "business_member_id" "uuid",
+  "business_name" "text",
+  "is_member" boolean,
+  "registrant" "jsonb",
+  "people" integer,
+  "registration_identifier" "text"
 );
 CREATE OR REPLACE FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",

@@ -11,7 +11,6 @@ import {
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { fadeInUp } from "@/lib/animations/fade";
@@ -43,12 +42,6 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       q4Rating: null,
       q5Rating: null,
       q6Rating: null,
-      q1Rating: null,
-      q2Rating: null,
-      q3Rating: null,
-      q4Rating: null,
-      q5Rating: null,
-      q6Rating: null,
       additionalComments: "",
       feedback: "",
     },
@@ -57,7 +50,6 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
     },
     onSubmit: async ({ value }) => {
       const completedQuestions = EVALUATION_QUESTIONS.filter(
-        (q) => value[q.field as keyof typeof value] !== null,
         (q) => value[q.field as keyof typeof value] !== null,
       ).length;
 
@@ -207,7 +199,6 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               EVALUATION_QUESTIONS.filter(
                 (q) =>
                   state.values[q.field as keyof typeof state.values] !== null,
-                  state.values[q.field as keyof typeof state.values] !== null,
               ).length
             }
           >
@@ -237,7 +228,6 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               className="py-3 first:pt-0 last:pb-0 sm:py-4 md:py-5 lg:py-6"
               key={q.field}
             >
-              {/* @ts-expect-error - Form infers type from defaultValues with null, but rating fields exist at runtime */}
               {/* @ts-expect-error - Form infers type from defaultValues with null, but rating fields exist at runtime */}
               <form.AppField name={q.field}>
                 {(field) => <field.RatingScale label={q.question} />}

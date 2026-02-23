@@ -9,7 +9,7 @@ export const verifyPayment = async (registrationId: string) => {
   const { error } = await supabase
     .from("Registration")
     .update({
-      paymentStatus: "verified",
+      paymentProofStatus: "accepted",
     })
     .eq("registrationId", registrationId);
   if (error) {

@@ -1,8 +1,5 @@
 # Dependencies
-# Dependencies
 node_modules
-
-# Build outputs
 
 # Build outputs
 .next
@@ -12,8 +9,6 @@ dist
 
 # Environment files
 dist
-
-# Environment files
 .env
 .env.local
 .env.*

@@ -1,12 +1,7 @@
 import { cookies } from "next/headers";
-import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { getSectors } from "@/server/membership/queries/getSectors";
 import { MembershipApplicationFormWrapper } from "./_components/MembershipApplicationFormWrapper";
-
-export default async function MembershipApplicationPage() {
-  const cookieStore = await cookies();
-  const sectors = await getSectors(cookieStore.getAll());
 
 export default async function MembershipApplicationPage() {
   const cookieStore = await cookies();

@@ -10,14 +10,14 @@ import { cn } from "@/lib/utils";
 import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 
 type OnlinePaymentSectionProps = {
-  paymentStatus: Enums<"PaymentStatus">;
+  paymentProofStatus: Enums<"PaymentProofStatus">;
   getStatusColor: (status: string) => string;
   proofImageURL?: string | null;
   registrationId: string;
 };
 
 export default function OnlinePaymentSection({
-  paymentStatus,
+  paymentProofStatus,
   getStatusColor,
   proofImageURL,
   registrationId,
@@ -30,9 +30,9 @@ export default function OnlinePaymentSection({
 
   const {
     execute: verify,
-    optimistic: optimisticPaymentStatus,
+    optimistic: optimisticPaymentProofStatus,
     isPending: isVerifyPending,
-  } = useOptimisticAction(tryCatch(verifyPayment), paymentStatus, {
+  } = useOptimisticAction(tryCatch(verifyPayment), paymentProofStatus, {
     optimisticUpdate: (prev) => prev,
     onSuccess: (msg) => {
       toast.success(msg);
@@ -62,19 +62,21 @@ export default function OnlinePaymentSection({
       )}
       <div>
         <Badge
-          className={cn("capitalize", getStatusColor(paymentStatus))}
+          className={cn("capitalize", getStatusColor(paymentProofStatus))}
           variant="outline"
         >
-          {isVerifyPending ? "Verifying..." : optimisticPaymentStatus}
+          {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
         </Badge>
       </div>
       <Button
-        disabled={isVerifyPending || optimisticPaymentStatus === "verified"}
+        disabled={
+          isVerifyPending || optimisticPaymentProofStatus === "accepted"
+        }
         onClick={() => verify(registrationId)}
       >
         {isVerifyPending
           ? "Verifying..."
-          : optimisticPaymentStatus === "verified"
+          : optimisticPaymentProofStatus === "accepted"
             ? "Verified"
             : "Verify Payment"}
       </Button>

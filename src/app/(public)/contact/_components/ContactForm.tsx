@@ -49,7 +49,6 @@ export function ContactForm() {
     e.preventDefault();
     if (!inquiryType) return;
 
-
     setIsLoading(true);
 
     const emailBody = `
@@ -84,7 +83,6 @@ Sent via Website Contact Form
     const mailto = `mailto:siaotongkj@gmail.com?subject=${encodeURIComponent(`Contact Form Inquiry — ${inquiryType}`)}&body=${encodeURIComponent(emailBody)}`;
 
     window.location.href = mailto;
-
 
     setFormData({
       firstName: "",
@@ -145,7 +143,6 @@ Sent via Website Contact Form
               <Label htmlFor="firstName">First Name</Label>
               <Input
                 className="rounded-xl placeholder:opacity-50"
-                className="rounded-xl placeholder:opacity-50"
                 id="firstName"
                 onChange={handleInputChange}
                 placeholder="Juan"
@@ -156,7 +153,6 @@ Sent via Website Contact Form
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
               <Input
-                className="rounded-xl placeholder:opacity-50"
                 className="rounded-xl placeholder:opacity-50"
                 id="lastName"
                 onChange={handleInputChange}
@@ -171,7 +167,6 @@ Sent via Website Contact Form
             <Label htmlFor="email">Email Address</Label>
             <Input
               className="rounded-xl placeholder:opacity-50"
-              className="rounded-xl placeholder:opacity-50"
               id="email"
               onChange={handleInputChange}
               placeholder="juan@example.com"
@@ -185,7 +180,6 @@ Sent via Website Contact Form
             <Label htmlFor="phone">Phone Number</Label>
             <Input
               className="rounded-xl placeholder:opacity-50"
-              className="rounded-xl placeholder:opacity-50"
               id="phone"
               onChange={handleInputChange}
               placeholder="+63 912 345 6789"
@@ -197,7 +191,6 @@ Sent via Website Contact Form
           <div className="space-y-2">
             <Label htmlFor="company">Company/Organization</Label>
             <Input
-              className="rounded-xl placeholder:opacity-50"
               className="rounded-xl placeholder:opacity-50"
               id="company"
               onChange={handleInputChange}
@@ -236,7 +229,6 @@ Sent via Website Contact Form
           <div className="space-y-2">
             <Label htmlFor="message">Your Message</Label>
             <Textarea
-              className="rounded-xl placeholder:opacity-50"
               className="rounded-xl placeholder:opacity-50"
               id="message"
               onChange={handleInputChange}

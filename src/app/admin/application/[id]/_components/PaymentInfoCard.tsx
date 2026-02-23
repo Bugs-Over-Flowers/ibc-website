@@ -3,13 +3,13 @@ import { DetailRow } from "./DetailRow";
 
 interface PaymentInfoCardProps {
   paymentMethod: string;
-  paymentStatus: string;
+  paymentProofStatus: string;
   applicationDate: Date;
 }
 
 export function PaymentInfoCard({
   paymentMethod,
-  paymentStatus,
+  paymentProofStatus,
   applicationDate,
 }: PaymentInfoCardProps) {
   return (
@@ -25,9 +25,11 @@ export function PaymentInfoCard({
           label="Payment Status"
           value={
             <Badge
-              variant={paymentStatus === "verified" ? "default" : "secondary"}
+              variant={
+                paymentProofStatus === "verified" ? "default" : "secondary"
+              }
             >
-              {paymentStatus}
+              {paymentProofStatus}
             </Badge>
           }
         />
