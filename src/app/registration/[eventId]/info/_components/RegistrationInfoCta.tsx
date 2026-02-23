@@ -31,7 +31,7 @@ export function RegistrationInfoCta({ eventId }: RegistrationInfoCtaProps) {
         </p>
       </div>
 
-      <Link href={`/events/${eventId}/registration/register` as Route}>
+      <Link href={`/registration/${eventId}`}>
         <Button className="shrink-0 gap-2" size="lg">
           Begin Registration
           <ArrowRight className="h-4 w-4" />
