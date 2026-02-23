@@ -1,7 +1,7 @@
 drop extension if exists "pg_net";
 drop policy "Enable insert for all users" on "public"."Participant";
 drop policy "Enable read access for all users" on "public"."Participant";
-drop type "public"."registration_list_item";
+drop type "public"."registration_list_item" cascade;
 set check_function_bodies = off;
 CREATE OR REPLACE FUNCTION public.check_application_status(p_application_identifier text)
  RETURNS jsonb
@@ -18,7 +18,7 @@ BEGIN
     'applicationDate', a."applicationDate",
     'companyName', a."companyName",
     'hasInterview', CASE WHEN a."interviewId" IS NOT NULL THEN true ELSE false END,
-    'interview', CASE 
+    'interview', CASE
       WHEN i."interviewId" IS NOT NULL THEN
         jsonb_build_object(
           'interviewId', i."interviewId",
@@ -34,12 +34,12 @@ BEGIN
   FROM "Application" a
   LEFT JOIN "Interview" i ON a."interviewId" = i."interviewId"
   WHERE a.identifier = p_application_identifier;
-  
+
   IF v_result IS NULL THEN
     RAISE EXCEPTION 'Application with identifier % does not exist.', p_application_identifier;
   END IF;
   RETURN v_result;
-  
+
 EXCEPTION
   WHEN OTHERS THEN
     RAISE EXCEPTION 'Failed to check application status: %', SQLERRM;
@@ -60,8 +60,8 @@ BEGIN
 
   -- Check if member exists and is not cancelled
   SELECT EXISTS(
-    SELECT 1 FROM "BusinessMember" 
-    WHERE "identifier" = p_identifier 
+    SELECT 1 FROM "BusinessMember"
+    WHERE "identifier" = p_identifier
       AND "membershipStatus" != 'cancelled'
   ) INTO v_member_exists;
 
@@ -99,14 +99,14 @@ BEGIN
   -- For renewal, any status is allowed
   IF p_application_type = 'updating' THEN
     SELECT EXISTS(
-      SELECT 1 FROM "BusinessMember" 
-      WHERE "identifier" = p_identifier 
+      SELECT 1 FROM "BusinessMember"
+      WHERE "identifier" = p_identifier
         AND "membershipStatus" != 'cancelled'
     ) INTO v_member_exists;
   ELSE
     -- Renewal allows any status
     SELECT EXISTS(
-      SELECT 1 FROM "BusinessMember" 
+      SELECT 1 FROM "BusinessMember"
       WHERE "identifier" = p_identifier
     ) INTO v_member_exists;
   END IF;
@@ -143,18 +143,18 @@ BEGIN
     -- Calculate January 1st of current year and next year
     current_year_start := DATE_TRUNC('year', NOW())::date;
     next_year_start := current_year_start + INTERVAL '1 year';
-    
+
     -- Step 1: First, cancel members who are already unpaid AND expired
     -- (These are members who were given a grace period last year and didn't pay)
-    UPDATE "BusinessMember" 
+    UPDATE "BusinessMember"
     SET "membershipStatus" = 'cancelled'
     WHERE "membershipExpiryDate" < NOW()
     AND "membershipStatus" = 'unpaid';
-    
+
     -- Step 2: Then, handle expired paid members
     -- Give them a grace period: become unpaid with new expiry
-    UPDATE "BusinessMember" 
-    SET 
+    UPDATE "BusinessMember"
+    SET
         "membershipStatus" = 'unpaid',
         "membershipExpiryDate" = next_year_start
     WHERE "membershipExpiryDate" < NOW()
@@ -169,7 +169,7 @@ AS $function$
   SELECT a."applicationId"
   FROM public."Application" a
   WHERE a."memberId" = p_member_id
-  ORDER BY 
+  ORDER BY
     CASE a."applicationStatus"
       WHEN 'approved' THEN 3
       WHEN 'pending' THEN 2
@@ -243,9 +243,9 @@ declare
 begin
   delete from "EvaluationForm"
   where "evaluationId" = eval_id;
-  
+
   get diagnostics deleted_count = row_count;
-  
+
   if deleted_count = 0 then
     return query select false, 'Evaluation not found'::text;
   else
@@ -411,7 +411,7 @@ BEGIN
   WITH
   -- registration and event details
   base_data AS (
-    SELECT 
+    SELECT
       r."registrationId",
       r."nonMemberName",
       r."businessMemberId",
@@ -433,13 +433,13 @@ BEGIN
   ),
 
   check_in_list AS (
-    SELECT 
+    SELECT
       p.*,
       ci.remarks,
       ci.date,
       -- Check if a CheckIn exists for this participant on the current event day(s)
       EXISTS (
-        SELECT 1 
+        SELECT 1
         FROM "CheckIn" ci
         JOIN current_event_day ced ON ci."eventDayId" = ced."eventDayId"
         WHERE ci."participantId" = p."participantId"
@@ -463,12 +463,12 @@ BEGIN
         to_jsonb(cil.*) || jsonb_build_object(
           'checkedIn', cil.is_checked_in
         )
-        ORDER BY 
-          "lastName" ASC,      
+        ORDER BY
+          "lastName" ASC,
           "firstName" ASC
       )
       FROM check_in_list cil
-     
+
     ),
     -- event day(s) details today
     (
@@ -484,7 +484,7 @@ BEGIN
       -- Check if today is within the event date range
       (p_today >= bd."eventStartDate" AND p_today <= bd."eventEndDate")
     )
-  INTO 
+  INTO
     v_result.registration_details,
     v_result.event_details,
     v_result.check_in_list,
@@ -494,7 +494,7 @@ BEGIN
 
   FROM base_data bd
   LEFT JOIN "BusinessMember" bm ON bd."businessMemberId" = bm."businessMemberId";
-  
+
   -- Check if registration exists
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Registration Not Found';
@@ -588,7 +588,7 @@ CREATE OR REPLACE FUNCTION public.get_sponsored_registrations_with_details(p_eve
 AS $function$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     sr.id,
     sr.event_id,
     sr.sponsor_id,
@@ -632,7 +632,7 @@ BEGIN
   -- Case 2: Event is inserted or updated with eventType = 'public' or 'private'
   -- Ensure dates are present before generating days
   IF (NEW."eventType" IN ('public', 'private') AND NEW."eventStartDate" IS NOT NULL AND NEW."eventEndDate" IS NOT NULL) THEN
-    
+
     -- 1. Delete days that are outside the new range
     DELETE FROM public."EventDay"
     WHERE "eventId" = NEW."eventId"
@@ -643,16 +643,16 @@ BEGIN
     WHILE day_date <= NEW."eventEndDate" LOOP
       -- Check if exists
       IF NOT EXISTS (
-        SELECT 1 FROM public."EventDay" 
+        SELECT 1 FROM public."EventDay"
         WHERE "eventId" = NEW."eventId" AND "eventDate" = day_date
       ) THEN
         -- Generate label (e.g., "Day 1")
         day_label := 'Day ' || (day_date - NEW."eventStartDate"::DATE + 1)::TEXT;
-        
+
         INSERT INTO public."EventDay" ("eventId", "eventDate", "label")
         VALUES (NEW."eventId", day_date, day_label);
       END IF;
-      
+
       day_date := day_date + 1;
     END LOOP;
 
@@ -661,7 +661,7 @@ BEGIN
     UPDATE public."EventDay"
     SET label = 'Day ' || ("eventDate" - NEW."eventStartDate"::DATE + 1)::TEXT
     WHERE "eventId" = NEW."eventId";
-    
+
   END IF;
 
   RETURN NEW;
@@ -675,13 +675,13 @@ BEGIN
     -- On Jan 1, update statuses:
     -- active → unpaid (if expired)
     -- unpaid → overdue
-    UPDATE "BusinessMember" 
-    SET "membershipStatus" = 
-        CASE 
-            WHEN "membershipStatus" = 'active'::"MembershipStatus" 
-                 AND "membershipExpiryDate" < NOW() 
+    UPDATE "BusinessMember"
+    SET "membershipStatus" =
+        CASE
+            WHEN "membershipStatus" = 'active'::"MembershipStatus"
+                 AND "membershipExpiryDate" < NOW()
             THEN 'unpaid'::"MembershipStatus"
-            WHEN "membershipStatus" = 'unpaid'::"MembershipStatus" 
+            WHEN "membershipStatus" = 'unpaid'::"MembershipStatus"
             THEN 'overdue'::"MembershipStatus"
             ELSE "membershipStatus"
         END
@@ -724,7 +724,7 @@ BEGIN
   WHILE v_current_date <= v_end_date LOOP
     INSERT INTO "EventDay" ("eventId", "eventDate", "label")
     VALUES (p_event_id, v_current_date, 'Day ' || v_day_number);
-    
+
     v_current_date := v_current_date + 1;
     v_day_number := v_day_number + 1;
   END LOOP;
@@ -792,8 +792,8 @@ CREATE OR REPLACE FUNCTION public.set_membership_expiry()
  LANGUAGE plpgsql
 AS $function$BEGIN
     IF NEW."lastPaymentDate" IS NOT NULL THEN
-        NEW."membershipExpiryDate" = 
-            DATE_TRUNC('year', NEW."lastPaymentDate") 
+        NEW."membershipExpiryDate" =
+            DATE_TRUNC('year', NEW."lastPaymentDate")
             + INTERVAL '1 year';
         NEW."membershipStatus" = 'paid'::"MembershipStatus";
     END IF;
@@ -874,7 +874,7 @@ BEGIN
 
   -- Generate UUID for application ID
   v_application_id := gen_random_uuid();
-  
+
   -- Generate human-readable identifier: ibc-app-XXXXXXXX (first 8 chars of UUID)
   v_identifier := 'ibc-app-' || left(replace(v_application_id::text, '-', ''), 8);
 
@@ -890,7 +890,7 @@ BEGIN
 
   -- Extract Sector ID
   v_sector_id := (p_company_details->>'sectorId')::int;
-  
+
   -- Extract Business Member ID (for renewals and updates)
   IF p_company_details->>'businessMemberId' IS NOT NULL AND p_company_details->>'businessMemberId' != '' THEN
     v_business_member_id := (p_company_details->>'businessMemberId')::uuid;
@@ -956,7 +956,7 @@ BEGIN
 
   -- 4. Handle Proof of Payment
   IF v_pay_method_enum = 'BPI' THEN
-    INSERT INTO "ProofImage" ("applicationId", "path") 
+    INSERT INTO "ProofImage" ("applicationId", "path")
     VALUES (v_application_id, p_payment_proof_url);
   END IF;
 
@@ -964,7 +964,7 @@ BEGIN
   IF jsonb_array_length(p_representatives) > 0 THEN
     FOR representative IN SELECT * FROM jsonb_array_elements(p_representatives)
     LOOP
-      
+
       -- Extract the type (principal or alternate)
       v_rep_type_text := representative->>'memberType';
 
@@ -1093,7 +1093,7 @@ CREATE OR REPLACE FUNCTION public.update_event_details(p_event_id uuid, p_title 
  LANGUAGE plpgsql
 AS $function$
 DECLARE
-  v_existing_event "Event"%ROWTYPE; 
+  v_existing_event "Event"%ROWTYPE;
   v_final_title text;
   v_final_description text;
   v_final_header_url text;
@@ -1106,8 +1106,8 @@ DECLARE
   v_is_finished boolean;
 BEGIN
   -- 1. Fetch the current event
-  SELECT * INTO v_existing_event 
-  FROM "Event" 
+  SELECT * INTO v_existing_event
+  FROM "Event"
   WHERE "eventId" = p_event_id;
 
   IF NOT FOUND THEN
@@ -1118,7 +1118,7 @@ BEGIN
   v_is_draft := (v_existing_event."eventType" IS NULL);
 
   -- 3. Determine if event is finished
-  v_is_finished := (v_existing_event."eventEndDate" IS NOT NULL 
+  v_is_finished := (v_existing_event."eventEndDate" IS NOT NULL
                     AND CURRENT_TIMESTAMP > v_existing_event."eventEndDate");
 
   -- 4. Calculate final values using COALESCE
@@ -1171,8 +1171,8 @@ BEGIN
   END IF;
 
   -- 6. PERFORM UPDATE
-  UPDATE "Event" 
-  SET 
+  UPDATE "Event"
+  SET
     "eventTitle" = v_final_title,
     "description" = v_final_description,
     "eventHeaderUrl" = v_final_header_url,
@@ -1182,7 +1182,7 @@ BEGIN
     "eventType" = v_final_event_type,
     "registrationFee" = v_final_registration_fee,
     "updatedAt" = NOW(),
-    "publishedAt" = CASE 
+    "publishedAt" = CASE
       WHEN v_is_draft AND v_final_event_type IS NOT NULL THEN NOW()
       ELSE "publishedAt"
     END
@@ -1241,7 +1241,7 @@ DECLARE
   affected_member uuid;
 BEGIN
   affected_member := COALESCE(NEW."businessMemberId", OLD."businessMemberId");
-  
+
   IF affected_member IS NOT NULL THEN
     UPDATE "BusinessMember"
     SET "primaryApplicationId" = (
@@ -1253,7 +1253,7 @@ BEGIN
     )
     WHERE "businessMemberId" = affected_member;
   END IF;
-  
+
   RETURN COALESCE(NEW, OLD);
 END;
 $function$;
@@ -1282,7 +1282,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
       END IF;
-      
+
       -- Update count for new sponsored registration
       IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
         UPDATE public."SponsoredRegistration"
@@ -1293,7 +1293,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
       END IF;
-      
+
       RETURN NEW;
     END IF;
     v_sponsored_registration_id := NEW."sponsoredRegistrationId";
@@ -1386,7 +1386,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
       END IF;
-      
+
       -- Update count for new sponsored registration (count participants)
       IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
         UPDATE public."SponsoredRegistration"
@@ -1398,7 +1398,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
       END IF;
-      
+
       RETURN NEW;
     END IF;
     v_sponsored_registration_id := NEW."sponsoredRegistrationId";
@@ -1466,5 +1466,3 @@ create policy "Allow all operations for anyone 11d98ol_3"
   for update
   to anon, authenticated
 using ((bucket_id = 'paymentproofs'::text));
-CREATE TRIGGER protect_buckets_delete BEFORE DELETE ON storage.buckets FOR EACH STATEMENT EXECUTE FUNCTION storage.protect_delete();
-CREATE TRIGGER protect_objects_delete BEFORE DELETE ON storage.objects FOR EACH STATEMENT EXECUTE FUNCTION storage.protect_delete();

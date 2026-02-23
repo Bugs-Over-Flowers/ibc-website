@@ -9,17 +9,17 @@ import {
   type RegistrationItem,
   RegistrationListRPCSchema,
 } from "@/lib/validation/registration-management";
-import { PaymentStatusEnum } from "@/lib/validation/utils";
+import { PaymentProofStatusEnum } from "@/lib/validation/utils";
 
 interface GetRegistrationListParams {
   eventId: string;
   searchString?: string;
-  paymentStatus?: string;
+  paymentProofStatus?: string;
 }
 
 export const getEventRegistrationList = async (
   requestCookies: RequestCookie[],
-  { eventId, searchString, paymentStatus }: GetRegistrationListParams,
+  { eventId, searchString, paymentProofStatus }: GetRegistrationListParams,
 ): Promise<RegistrationItem[]> => {
   "use cache";
   applyRealtime60sCache();
@@ -32,8 +32,8 @@ export const getEventRegistrationList = async (
     .rpc("get_registration_list", {
       p_event_id: eventId,
       p_search_text: searchString,
-      p_payment_status: paymentStatus
-        ? PaymentStatusEnum.parse(paymentStatus)
+      p_payment_proof_status: paymentProofStatus
+        ? PaymentProofStatusEnum.parse(paymentProofStatus)
         : undefined,
     })
     .throwOnError();

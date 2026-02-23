@@ -1,5 +1,5 @@
 import z from "zod";
-import { PaymentStatusEnum } from "../utils";
+import { PaymentProofStatusEnum } from "../utils";
 
 const CheckInSchema = z.object({
   remarks: z.string().nullable(),
@@ -35,7 +35,7 @@ export const GetCheckInForDateSchema = z
     registrationDate: z.string(),
     paymentMethod: z.enum(["BPI", "ONSITE"]),
     identifier: z.string(),
-    paymentStatus: PaymentStatusEnum,
+    paymentProofStatus: PaymentProofStatusEnum,
     businessMember: z
       .object({
         businessName: z.string(),
