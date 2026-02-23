@@ -98,7 +98,7 @@ export default function CheckInRegistrationFilters() {
               autoCapitalize="on"
               autoComplete="off"
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Enter identifier, affiliation, name, or email"
+              placeholder="Enter affiliation, name, or email"
               value={searchQuery}
             />
             {searchQuery !== "" && (

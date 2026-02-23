@@ -31,9 +31,6 @@ export default function EventDayDetails({
             <CardTitle className="text-xl leading-tight">
               {eventDayData.eventTitle}
             </CardTitle>
-            <CardDescription className="font-medium text-muted-foreground/80 text-xs uppercase tracking-wider">
-              Check-in Dashboard
-            </CardDescription>
           </div>
         </div>
       </CardHeader>

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import CenterSpinner from "@/components/CenterSpinner";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
+import type { RegistrationItem } from "@/lib/validation/registration-management";
 import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
 import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
@@ -53,48 +54,53 @@ async function CheckInPage({
     return <div>Event Day not found</div>;
   }
 
-  const registrationListResult = await tryCatch(
-    getEventRegistrationList(cookieStore.getAll(), {
-      eventId: data.event.eventId,
-      paymentProofStatus: paymentProofStatus as
-        | typeof PaymentProofStatusEnum
-        | undefined,
-      searchString: searchQuery,
-    }),
-  );
+  let registrationList: RegistrationItem[] = [];
+  let registrationError = false;
+
+  if (searchQuery) {
+    const result = await tryCatch(
+      getEventRegistrationList(cookieStore.getAll(), {
+        eventId: data.event.eventId,
+        paymentProofStatus: paymentProofStatus as
+          | typeof PaymentProofStatusEnum
+          | undefined,
+        searchString: searchQuery,
+        limit: 5,
+      }),
+    );
+    registrationList = result.success ? result.data : [];
+    registrationError = !result.success;
+  }
 
   return (
     <>
       <div className="space-y-4">
         <div className="grid gap-6 lg:grid-cols-[350px_1fr] xl:grid-cols-[400px_1fr]">
           <div className="flex flex-col gap-6">
-            <EventDayDetails
-              eventDayData={{
-                eventTitle: data.event.eventTitle,
-                eventDate: data.eventDate,
-                label: data.label,
-                venue: data.event.venue,
-              }}
-            />
-            <div className="sticky top-6">
-              <QRCodeScanner eventId={data.event.eventId} />
+            <QRCodeScanner eventId={data.event.eventId} />
+            <div className="sticky top-6 max-h-[calc(100vh-7.5rem)] overflow-auto">
+              <EventDayDetails
+                eventDayData={{
+                  eventTitle: data.event.eventTitle,
+                  eventDate: data.eventDate,
+                  label: data.label,
+                  venue: data.event.venue,
+                }}
+              />
             </div>
           </div>
 
           <div className="min-w-0">
             <CheckInRegistrationPanel
               errorMessage={
-                registrationListResult.success
-                  ? undefined
-                  : "Failed to load registration list."
+                registrationError
+                  ? "Failed to load registration list."
+                  : undefined
               }
               eventDayId={eventDayId}
               eventId={data.event.eventId}
-              registrationList={
-                registrationListResult.success
-                  ? registrationListResult.data
-                  : []
-              }
+              hasSearchQuery={!!searchQuery}
+              registrationList={registrationList}
             />
           </div>
         </div>
