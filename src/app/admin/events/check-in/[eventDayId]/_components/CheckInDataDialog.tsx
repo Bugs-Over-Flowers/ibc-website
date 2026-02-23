@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -99,29 +100,38 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
       open={!!scannedData}
     >
       <DialogContent
-        className={"w-full md:min-w-2xl md:max-w-2xl"}
+        className="flex max-h-[90vh] w-[95vw] flex-col overflow-hidden sm:max-w-3xl"
         showCloseButton={false}
       >
-        <DialogTitle>
-          <pre>{scannedData.identifier}</pre>
-        </DialogTitle>
-        <h4>{scannedData.affiliation}</h4>
+        <div className="flex flex-col gap-1 border-b pb-4">
+          <DialogTitle className="flex items-center gap-2 font-bold text-xl tracking-tight">
+            <span>Check-in Confirmation</span>
+            <Badge className="font-mono text-xs" variant="outline">
+              {scannedData.identifier}
+            </Badge>
+          </DialogTitle>
+          <div className="font-medium text-muted-foreground text-sm">
+            {scannedData.affiliation}
+          </div>
+        </div>
 
-        <div className="w-full overflow-auto">
+        <div className="flex-1 overflow-y-auto px-1 py-2">
           {/* Pass optimistic data to table, but prioritize fetched Data */}
           <CheckInTable data={scannedData || optimistic} />
         </div>
 
-        <DialogFooter className="flex justify-between sm:justify-between">
+        <DialogFooter className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-between">
           <Button
+            className="w-full sm:w-auto"
             disabled={isPending}
             onClick={() => setCheckInDialogOpen(false)}
             variant="outline"
           >
             Close
           </Button>
-          <div>
+          <div className="w-full sm:w-auto">
             <Button
+              className="w-full sm:w-auto"
               disabled={
                 (selectedCount === 0 && !hasCheckedInRemarkEdits()) || isPending
               }

@@ -45,23 +45,46 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
     }
   };
   return (
-    <div className="justify-baseline flex w-full flex-col items-center p-5 md:flex-row md:items-start">
-      <Card>
-        <CardContent className="flex h-full w-full flex-col items-center gap-4">
-          <div className="aspect-square w-100">
-            <Scanner
-              components={{
-                finder: false,
-                onOff: true,
-              }}
-              formats={["qr_code"]}
-              onScan={handleScan}
-              paused={isCameraPaused}
-            />
+    <Card className="h-fit w-full overflow-hidden border-2 border-primary/20 shadow-lg">
+      <CardContent className="p-0">
+        <div className="relative aspect-square w-full bg-black">
+          <Scanner
+            components={{
+              finder: false,
+              onOff: true,
+            }}
+            formats={["qr_code"]}
+            onScan={handleScan}
+            paused={isCameraPaused}
+            styles={{
+              container: { width: "100%", height: "100%" },
+              video: { objectFit: "cover" },
+            }}
+          />
+
+          {/* Status Overlay */}
+          <div className="absolute inset-x-0 bottom-0 flex justify-center bg-linear-to-t from-black/80 to-transparent p-4">
+            <div
+              className={`flex items-center gap-2 rounded-full px-4 py-1.5 font-medium text-white text-xs shadow-sm backdrop-blur-md ${
+                isCameraPaused ? "bg-yellow-500/80" : "bg-green-500/80"
+              }`}
+            >
+              <div
+                className={`h-2 w-2 rounded-full ${
+                  isCameraPaused
+                    ? "bg-yellow-200"
+                    : "animate-pulse bg-green-200"
+                }`}
+              />
+              {isCameraPaused
+                ? scanPending
+                  ? "Processing..."
+                  : "Paused"
+                : "Ready to Scan"}
+            </div>
           </div>
-          {scanPending && <p>Scanning...</p>}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
