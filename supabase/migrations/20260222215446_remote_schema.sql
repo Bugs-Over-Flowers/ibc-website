@@ -12,6 +12,7 @@ CREATE OR REPLACE FUNCTION public.check_application_status(p_application_identif
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
 DECLARE
   v_result jsonb;
@@ -52,10 +53,51 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+DECLARE
+  v_result jsonb;
+BEGIN
+  SELECT jsonb_build_object(
+    'applicationId', a."applicationId",
+    'identifier', a.identifier,
+    'applicationStatus', a."applicationStatus",
+    'applicationDate', a."applicationDate",
+    'companyName', a."companyName",
+    'hasInterview', CASE WHEN a."interviewId" IS NOT NULL THEN true ELSE false END,
+    'interview', CASE 
+      WHEN i."interviewId" IS NOT NULL THEN
+        jsonb_build_object(
+          'interviewId', i."interviewId",
+          'interviewDate', i."interviewDate",
+          'interviewVenue', i."interviewVenue",
+          'status', i.status,
+          'createdAt', i."createdAt"
+        )
+      ELSE NULL
+    END
+  )
+  INTO v_result
+  FROM "Application" a
+  LEFT JOIN "Interview" i ON a."interviewId" = i."interviewId"
+  WHERE a.identifier = p_application_identifier;
+  
+  IF v_result IS NULL THEN
+    RAISE EXCEPTION 'Application with identifier % does not exist.', p_application_identifier;
+  END IF;
+  RETURN v_result;
+  
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE EXCEPTION 'Failed to check application status: %', SQLERRM;
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.check_member_exists(p_identifier text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
 DECLARE
   v_member_exists boolean;
@@ -91,10 +133,46 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+DECLARE
+  v_member_exists boolean;
+  v_member_info jsonb;
+BEGIN
+  IF p_identifier IS NULL OR p_identifier = '' THEN
+    RETURN jsonb_build_object('exists', false, 'message', 'Member ID is required');
+  END IF;
+
+  -- Check if member exists and is not cancelled
+  SELECT EXISTS(
+    SELECT 1 FROM "BusinessMember" 
+    WHERE "identifier" = p_identifier 
+      AND "membershipStatus" != 'cancelled'
+  ) INTO v_member_exists;
+
+  IF v_member_exists THEN
+    SELECT jsonb_build_object(
+      'exists', true,
+      'companyName', "businessName",
+      'membershipStatus', "membershipStatus",
+      'businessMemberId', "businessMemberId"
+    ) INTO v_member_info
+    FROM "BusinessMember" WHERE "identifier" = p_identifier;
+    RETURN v_member_info;
+  ELSE
+    RETURN jsonb_build_object('exists', false, 'message', 'Member ID not found or membership is cancelled');
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN jsonb_build_object('exists', false, 'message', 'Unable to validate member ID at this time');
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.check_member_exists(p_identifier text, p_application_type text DEFAULT 'renewal'::text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
 DECLARE
   v_member_exists boolean;
@@ -174,10 +252,88 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+DECLARE
+  v_member_exists boolean;
+  v_member_info jsonb;
+BEGIN
+  IF p_identifier IS NULL OR p_identifier = '' THEN
+    RETURN jsonb_build_object('exists', false, 'message', 'Member ID is required');
+  END IF;
+
+  -- For updating, member must not be cancelled
+  -- For renewal, any status is allowed
+  IF p_application_type = 'updating' THEN
+    SELECT EXISTS(
+      SELECT 1 FROM "BusinessMember" 
+      WHERE "identifier" = p_identifier 
+        AND "membershipStatus" != 'cancelled'
+    ) INTO v_member_exists;
+  ELSE
+    -- Renewal allows any status
+    SELECT EXISTS(
+      SELECT 1 FROM "BusinessMember" 
+      WHERE "identifier" = p_identifier
+    ) INTO v_member_exists;
+  END IF;
+
+  IF v_member_exists THEN
+    SELECT jsonb_build_object(
+      'exists', true,
+      'companyName', "businessName",
+      'membershipStatus', "membershipStatus",
+      'businessMemberId', "businessMemberId"
+    ) INTO v_member_info
+    FROM "BusinessMember" WHERE "identifier" = p_identifier;
+    RETURN v_member_info;
+  ELSE
+    IF p_application_type = 'updating' THEN
+      RETURN jsonb_build_object('exists', false, 'message', 'Member ID not found or membership is cancelled. Cancelled members must renew first.');
+    ELSE
+      RETURN jsonb_build_object('exists', false, 'message', 'Member ID not found');
+    END IF;
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN jsonb_build_object('exists', false, 'message', 'Unable to validate member ID at this time');
+END;
+$function$;
+CREATE OR REPLACE FUNCTION public.check_membership_expiry()
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    current_year_start date;
+    next_year_start date;
+BEGIN
+    -- Calculate January 1st of current year and next year
+    current_year_start := DATE_TRUNC('year', NOW())::date;
+    next_year_start := current_year_start + INTERVAL '1 year';
+    
+    -- Step 1: First, cancel members who are already unpaid AND expired
+    -- (These are members who were given a grace period last year and didn't pay)
+    UPDATE "BusinessMember" 
+    SET "membershipStatus" = 'cancelled'
+    WHERE "membershipExpiryDate" < NOW()
+    AND "membershipStatus" = 'unpaid';
+    
+    -- Step 2: Then, handle expired paid members
+    -- Give them a grace period: become unpaid with new expiry
+    UPDATE "BusinessMember" 
+    SET 
+        "membershipStatus" = 'unpaid',
+        "membershipExpiryDate" = next_year_start
+    WHERE "membershipExpiryDate" < NOW()
+    AND "membershipStatus" = 'paid';
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.compute_primary_application_id(p_member_id uuid)
  RETURNS uuid
  LANGUAGE sql
  STABLE
+<<<<<<< HEAD
 AS $function$
   SELECT a."applicationId"
   FROM public."Application" a
@@ -194,11 +350,28 @@ AS $function$
 $function$
 ;
 
+=======
+AS $function$
+  SELECT a."applicationId"
+  FROM public."Application" a
+  WHERE a."memberId" = p_member_id
+  ORDER BY 
+    CASE a."applicationStatus"
+      WHEN 'approved' THEN 3
+      WHEN 'pending' THEN 2
+      WHEN 'new' THEN 1
+      ELSE 0
+    END DESC,
+    a."applicationDate" DESC
+  LIMIT 1;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.create_sponsored_registration(p_event_id uuid, p_sponsored_by text, p_fee_deduction numeric, p_max_sponsored_guests bigint DEFAULT NULL::bigint)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public'
+<<<<<<< HEAD
 AS $function$
 DECLARE
   v_row public."SponsoredRegistration"%ROWTYPE;
@@ -299,10 +472,105 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+DECLARE
+  v_row public."SponsoredRegistration"%ROWTYPE;
+BEGIN
+  -- Validation: reject negative fee deduction
+  IF p_fee_deduction IS NULL THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'feeDeduction is required'
+    );
+  END IF;
+
+  IF p_fee_deduction < 0 THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'feeDeduction cannot be negative'
+    );
+  END IF;
+
+  INSERT INTO public."SponsoredRegistration" (
+    "eventId",
+    "sponsoredBy",
+    "feeDeduction",
+    "maxSponsoredGuests",
+    "status",
+    "uuid"
+  )
+  VALUES (
+    p_event_id,
+    p_sponsored_by,
+    p_fee_deduction,
+    p_max_sponsored_guests,
+    'active'::public."SponsoredRegistrationStatus",
+    gen_random_uuid()::text
+  )
+  RETURNING * INTO v_row;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'data', to_jsonb(v_row)
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', SQLERRM
+    );
+END;
+$function$;
+CREATE OR REPLACE FUNCTION public.delete_evaluation(eval_id uuid)
+ RETURNS TABLE(success boolean, message text)
+ LANGUAGE plpgsql
+AS $function$
+declare
+  deleted_count int;
+begin
+  delete from "EvaluationForm"
+  where "evaluationId" = eval_id;
+  
+  get diagnostics deleted_count = row_count;
+  
+  if deleted_count = 0 then
+    return query select false, 'Evaluation not found'::text;
+  else
+    return query select true, 'Evaluation deleted successfully'::text;
+  end if;
+end;
+$function$;
+CREATE OR REPLACE FUNCTION public.delete_sr(p_sponsored_registration_id uuid)
+ RETURNS json
+ LANGUAGE sql
+AS $function$
+  delete from public."SponsoredRegistration"
+  where "sponsoredRegistrationId" = p_sponsored_registration_id
+  returning json_build_object(
+    'result', json_build_object(
+      'success', true
+    )
+  );
+$function$;
+CREATE OR REPLACE FUNCTION public.generate_member_identifier()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  IF NEW."identifier" IS NULL THEN
+    NEW."identifier" := 'ibc-mem-' || left(replace(NEW."businessMemberId"::text, '-', ''), 8);
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_all_evaluations()
  RETURNS TABLE(evaluation_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, venue text, name text, q1_rating public."ratingScale", q2_rating public."ratingScale", q3_rating public."ratingScale", q4_rating public."ratingScale", q5_rating public."ratingScale", q6_rating public."ratingScale", additional_comments text, feedback text, created_at timestamp with time zone)
  LANGUAGE sql
  STABLE
+<<<<<<< HEAD
 AS $function$
   select
     ef."evaluationId",
@@ -355,10 +623,61 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+  select
+    ef."evaluationId",
+    e."eventId",
+    e."eventTitle",
+    e."eventStartDate",
+    e."eventEndDate",
+    e."venue",
+    ef."name",
+    ef."q1Rating",
+    ef."q2Rating",
+    ef."q3Rating",
+    ef."q4Rating",
+    ef."q5Rating",
+    ef."q6Rating",
+    ef."additionalComments",
+    ef."feedback",
+    ef."createdAt"
+  from
+    "EvaluationForm" ef
+    left join "Event" e on ef."eventId" = e."eventId"
+  order by
+    ef."createdAt" desc;
+$function$;
+CREATE OR REPLACE FUNCTION public.get_all_sponsored_registrations()
+ RETURNS TABLE(sponsored_registration_id uuid, event_id uuid, event_name text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, sponsored_by text, uuid uuid, max_sponsored_guests integer, used_count integer, status text, created_at timestamp with time zone, updated_at timestamp with time zone)
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT
+    sr.sponsored_registration_id,
+    sr.event_id,
+    e.event_title,
+    e.event_start_date,
+    e.event_end_date,
+    sr.sponsored_by,
+    sr.uuid,
+    sr.max_sponsored_guests,
+    sr.used_count,
+    sr.status,
+    sr.created_at,
+    sr.updated_at
+  FROM "SponsoredRegistration" sr
+  LEFT JOIN "Event" e ON sr.event_id = e.event_id
+  ORDER BY sr.created_at DESC;
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_all_sponsored_registrations_with_event()
  RETURNS TABLE(sponsored_registration_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, sponsored_by text, uuid uuid, max_sponsored_guests bigint, used_count bigint, status public."SponsoredRegistrationStatus", created_at timestamp with time zone, updated_at timestamp with time zone)
  LANGUAGE sql
  STABLE
+<<<<<<< HEAD
 AS $function$
 SELECT
   sr."sponsoredRegistrationId"::uuid,
@@ -379,10 +698,31 @@ ORDER BY sr."createdAt" DESC;
 $function$
 ;
 
+=======
+AS $function$
+SELECT
+  sr."sponsoredRegistrationId"::uuid,
+  sr."eventId"::uuid,
+  e."eventTitle",
+  e."eventStartDate",
+  e."eventEndDate",
+  sr."sponsoredBy",
+  sr."uuid"::uuid,
+  sr."maxSponsoredGuests",
+  sr."usedCount",
+  sr."status"::"SponsoredRegistrationStatus",
+  sr."createdAt",
+  sr."updatedAt"
+FROM "SponsoredRegistration" sr
+LEFT JOIN "Event" e ON sr."eventId" = e."eventId"
+ORDER BY sr."createdAt" DESC;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_evaluation_by_id(eval_id uuid)
  RETURNS TABLE(evaluation_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, venue text, name text, q1_rating public."ratingScale", q2_rating public."ratingScale", q3_rating public."ratingScale", q4_rating public."ratingScale", q5_rating public."ratingScale", q6_rating public."ratingScale", additional_comments text, feedback text, created_at timestamp with time zone)
  LANGUAGE sql
  STABLE
+<<<<<<< HEAD
 AS $function$
   select
     ef."evaluationId",
@@ -409,10 +749,37 @@ AS $function$
 $function$
 ;
 
+=======
+AS $function$
+  select
+    ef."evaluationId",
+    e."eventId",
+    e."eventTitle",
+    e."eventStartDate",
+    e."eventEndDate",
+    e."venue",
+    ef."name",
+    ef."q1Rating",
+    ef."q2Rating",
+    ef."q3Rating",
+    ef."q4Rating",
+    ef."q5Rating",
+    ef."q6Rating",
+    ef."additionalComments",
+    ef."feedback",
+    ef."createdAt"
+  from
+    "EvaluationForm" ef
+    left join "Event" e on ef."eventId" = e."eventId"
+  where
+    ef."evaluationId" = eval_id;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_events_for_select()
  RETURNS TABLE(event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone)
  LANGUAGE sql
  STABLE
+<<<<<<< HEAD
 AS $function$
 SELECT
   e."eventId"::uuid,
@@ -425,15 +792,33 @@ ORDER BY e."eventStartDate" ASC;
 $function$
 ;
 
+=======
+AS $function$
+SELECT
+  e."eventId"::uuid,
+  e."eventTitle",
+  e."eventStartDate",
+  e."eventEndDate"
+FROM "Event" e
+WHERE e."eventStartDate" > now()
+ORDER BY e."eventStartDate" ASC;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_member_primary_application(p_member_id uuid)
  RETURNS uuid
  LANGUAGE sql
  STABLE
+<<<<<<< HEAD
 AS $function$
   SELECT public.compute_primary_application_id(p_member_id);
 $function$
 ;
 
+=======
+AS $function$
+  SELECT public.compute_primary_application_id(p_member_id);
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_registration_list_checkin(p_identifier text, p_today date DEFAULT CURRENT_DATE)
  RETURNS public.registration_details_result
  LANGUAGE plpgsql
@@ -474,7 +859,11 @@ BEGIN
       ci.date,
       -- Check if a CheckIn exists for this participant on the current event day(s)
       EXISTS (
+<<<<<<< HEAD
         SELECT 1
+=======
+        SELECT 1 
+>>>>>>> config/local-supabase
         FROM "CheckIn" ci
         JOIN current_event_day ced ON ci."eventDayId" = ced."eventDayId"
         WHERE ci."participantId" = p."participantId"
@@ -565,6 +954,7 @@ CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_id(registration_
  RETURNS SETOF public."SponsoredRegistration"
  LANGUAGE plpgsql
  SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
 BEGIN
   RETURN QUERY
@@ -575,10 +965,21 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT *
+  FROM "SponsoredRegistration"
+  WHERE "sponsoredRegistrationId" = registration_id;
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_uuid(p_uuid text)
  RETURNS TABLE("sponsoredRegistrationId" uuid, uuid text, "eventId" uuid, "sponsoredBy" text, "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, status public."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
  LANGUAGE plpgsql
  STABLE
+<<<<<<< HEAD
 AS $function$
 BEGIN
   RETURN QUERY
@@ -599,10 +1000,31 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT
+    sr."sponsoredRegistrationId",
+    sr."uuid",
+    sr."eventId",
+    sr."sponsoredBy",
+    sr."feeDeduction",
+    sr."maxSponsoredGuests",
+    sr."usedCount",
+    sr."status",
+    sr."createdAt",
+    sr."updatedAt"
+  FROM public."SponsoredRegistration" sr
+  WHERE sr."uuid" = p_uuid;
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_uuid(p_uuid uuid)
  RETURNS TABLE("sponsoredRegistrationId" uuid, uuid uuid, "eventId" uuid, "sponsoredBy" text, "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, status public."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
  LANGUAGE plpgsql
  STABLE
+<<<<<<< HEAD
 AS $function$
 BEGIN
   RETURN QUERY
@@ -623,11 +1045,32 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT
+    sr."sponsoredRegistrationId",
+    sr."uuid",
+    sr."eventId",
+    sr."sponsoredBy",
+    sr."feeDeduction",
+    sr."maxSponsoredGuests",
+    sr."usedCount",
+    sr."status",
+    sr."createdAt",
+    sr."updatedAt"
+  FROM public."SponsoredRegistration" sr
+  WHERE sr."uuid" = p_uuid;
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_sponsored_registrations_with_details(p_event_id uuid)
  RETURNS TABLE(id uuid, event_id uuid, sponsor_id uuid, registration_id uuid, status text, created_at timestamp with time zone, updated_at timestamp with time zone, sponsor_name text, registration_email text)
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public'
+<<<<<<< HEAD
 AS $function$
 BEGIN
   RETURN QUERY
@@ -650,10 +1093,33 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    sr.id,
+    sr.event_id,
+    sr.sponsor_id,
+    sr.registration_id,
+    sr.status,
+    sr.created_at,
+    sr.updated_at,
+    s.name as sponsor_name,
+    r.email as registration_email
+  FROM sponsored_registrations sr
+  LEFT JOIN sponsors s ON sr.sponsor_id = s.id
+  LEFT JOIN registrations r ON sr.registration_id = r.id
+  WHERE sr.event_id = p_event_id
+  ORDER BY sr.created_at DESC;
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_sr_by_event_id(p_event_id uuid)
  RETURNS SETOF public."SponsoredRegistration"
  LANGUAGE sql
  STABLE SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
   SELECT *
   FROM "SponsoredRegistration"
@@ -662,6 +1128,14 @@ AS $function$
 $function$
 ;
 
+=======
+AS $function$
+  SELECT *
+  FROM "SponsoredRegistration"
+  WHERE "eventId" = p_event_id
+  ORDER BY "createdAt" DESC;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.handle_event_days()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1114,6 +1588,7 @@ CREATE OR REPLACE FUNCTION public.update_event_available_slots_trigger()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
 DECLARE
     v_event_id UUID;
@@ -1277,10 +1752,172 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+DECLARE
+    v_event_id UUID;
+    v_total_participants BIGINT;
+    v_max_guest INTEGER;
+BEGIN
+    -- Determine which event was affected
+    IF (TG_OP = 'DELETE') THEN
+        v_event_id := OLD."eventId";
+    ELSE
+        v_event_id := NEW."eventId";
+    END IF;
+
+    -- Get total participants for this event across all registrations
+    SELECT COALESCE(SUM("numberOfParticipants"), 0)
+    INTO v_total_participants
+    FROM "Registration"
+    WHERE "eventId" = v_event_id;
+
+    -- Get maxGuest for this event
+    SELECT COALESCE("maxGuest", 0)
+    INTO v_max_guest
+    FROM "Event"
+    WHERE "eventId" = v_event_id;
+
+    -- Update availableSlots: maxGuest - total participants, ensuring it doesn't go below 0
+    UPDATE "Event"
+    SET "availableSlots" = GREATEST(0, v_max_guest - v_total_participants)
+    WHERE "eventId" = v_event_id;
+
+    -- Return appropriate record
+    IF (TG_OP = 'DELETE') THEN
+        RETURN OLD;
+    ELSE
+        RETURN NEW;
+    END IF;
+END;
+$function$;
+CREATE OR REPLACE FUNCTION public.update_event_details(p_event_id uuid, p_title text DEFAULT NULL::text, p_description text DEFAULT NULL::text, p_event_header_url text DEFAULT NULL::text, p_start_date timestamp without time zone DEFAULT NULL::timestamp without time zone, p_end_date timestamp without time zone DEFAULT NULL::timestamp without time zone, p_venue text DEFAULT NULL::text, p_event_type text DEFAULT NULL::text, p_registration_fee real DEFAULT NULL::real)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_existing_event "Event"%ROWTYPE; 
+  v_final_title text;
+  v_final_description text;
+  v_final_header_url text;
+  v_final_start_date timestamp;
+  v_final_end_date timestamp;
+  v_final_venue text;
+  v_final_event_type "EventType";
+  v_final_registration_fee float4;
+  v_is_draft boolean;
+  v_is_finished boolean;
+BEGIN
+  -- 1. Fetch the current event
+  SELECT * INTO v_existing_event 
+  FROM "Event" 
+  WHERE "eventId" = p_event_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Event with ID % not found', p_event_id;
+  END IF;
+
+  -- 2. Determine if draft (eventType is NULL means draft)
+  v_is_draft := (v_existing_event."eventType" IS NULL);
+
+  -- 3. Determine if event is finished
+  v_is_finished := (v_existing_event."eventEndDate" IS NOT NULL 
+                    AND CURRENT_TIMESTAMP > v_existing_event."eventEndDate");
+
+  -- 4. Calculate final values using COALESCE
+  v_final_title := COALESCE(p_title, v_existing_event."eventTitle");
+  v_final_description := COALESCE(p_description, v_existing_event."description");
+  v_final_header_url := COALESCE(p_event_header_url, v_existing_event."eventHeaderUrl");
+  v_final_start_date := COALESCE(p_start_date, v_existing_event."eventStartDate");
+  v_final_end_date := COALESCE(p_end_date, v_existing_event."eventEndDate");
+  v_final_venue := COALESCE(p_venue, v_existing_event."venue");
+  v_final_registration_fee := COALESCE(p_registration_fee, v_existing_event."registrationFee");
+
+  IF p_event_type IS NULL THEN
+    v_final_event_type := v_existing_event."eventType";
+  ELSIF p_event_type = 'draft' THEN
+    v_final_event_type := NULL;
+  ELSE
+    v_final_event_type := p_event_type::"EventType";
+  END IF;
+
+  -- 5. VALIDATION LOGIC
+
+  -- SCENARIO A: DRAFT EVENTS (eventType IS NULL)
+  IF v_is_draft THEN
+    IF v_final_event_type IS NOT NULL THEN
+      IF (v_final_title IS NULL OR v_final_title = '') OR
+         (v_final_description IS NULL OR v_final_description = '') OR
+         (v_final_start_date IS NULL) OR
+         (v_final_end_date IS NULL) OR
+         (v_final_venue IS NULL OR v_final_venue = '') THEN
+        RAISE EXCEPTION 'Publish Failed: Event Title, Description, Start Date, End Date, and Venue must all be populated.';
+      END IF;
+    END IF;
+
+  -- SCENARIO B: FINISHED EVENTS (end date has passed)
+  ELSIF v_is_finished THEN
+    RAISE EXCEPTION 'Cannot edit finished events.';
+
+  -- SCENARIO C: PUBLISHED EVENTS (Public/Private, not finished)
+  ELSE
+    IF p_registration_fee IS NOT NULL AND p_registration_fee IS DISTINCT FROM v_existing_event."registrationFee" THEN
+      RAISE EXCEPTION 'Cannot edit Registration Fee for published events.';
+    END IF;
+
+    IF v_final_event_type IS DISTINCT FROM v_existing_event."eventType" THEN
+       RAISE EXCEPTION 'Cannot change Event Type for published events. Once published, the type is locked.';
+    END IF;
+
+    v_final_registration_fee := v_existing_event."registrationFee";
+    v_final_event_type := v_existing_event."eventType";
+  END IF;
+
+  -- 6. PERFORM UPDATE
+  UPDATE "Event" 
+  SET 
+    "eventTitle" = v_final_title,
+    "description" = v_final_description,
+    "eventHeaderUrl" = v_final_header_url,
+    "eventStartDate" = v_final_start_date,
+    "eventEndDate" = v_final_end_date,
+    "venue" = v_final_venue,
+    "eventType" = v_final_event_type,
+    "registrationFee" = v_final_registration_fee,
+    "updatedAt" = NOW(),
+    "publishedAt" = CASE 
+      WHEN v_is_draft AND v_final_event_type IS NOT NULL THEN NOW()
+      ELSE "publishedAt"
+    END
+  WHERE "eventId" = p_event_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Event update failed. The event may have been deleted or you do not have permission to update it.';
+  END IF;
+
+  -- 7. Return Response
+  RETURN jsonb_build_object(
+    'success', true,
+    'eventId', p_event_id,
+    'eventType', COALESCE(v_final_event_type::text, 'draft'),
+    'message', 'Event updated successfully'
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'eventId', p_event_id,
+      'error', SQLERRM
+    );
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.update_participant_count_trigger()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
 BEGIN
     IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
@@ -1329,10 +1966,57 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+BEGIN
+    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+        UPDATE "Registration"
+        SET "numberOfParticipants" = (
+            SELECT COUNT(*) FROM "Participant" WHERE "registrationId" = NEW."registrationId"
+        )
+        WHERE "registrationId" = NEW."registrationId";
+        RETURN NEW;
+    ELSIF (TG_OP = 'DELETE') THEN
+        UPDATE "Registration"
+        SET "numberOfParticipants" = (
+            SELECT COUNT(*) FROM "Participant" WHERE "registrationId" = OLD."registrationId"
+        )
+        WHERE "registrationId" = OLD."registrationId";
+        RETURN OLD;
+    END IF;
+    RETURN NULL;
+END;
+$function$;
+CREATE OR REPLACE FUNCTION public.update_primary_application_for_member()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  affected_member uuid;
+BEGIN
+  affected_member := COALESCE(NEW."businessMemberId", OLD."businessMemberId");
+  
+  IF affected_member IS NOT NULL THEN
+    UPDATE "BusinessMember"
+    SET "primaryApplicationId" = (
+      SELECT "applicationId"
+      FROM "Application"
+      WHERE "businessMemberId" = affected_member
+      ORDER BY "applicationDate" DESC
+      LIMIT 1
+    )
+    WHERE "businessMemberId" = affected_member;
+  END IF;
+  
+  RETURN COALESCE(NEW, OLD);
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
 DECLARE
   v_sponsored_registration_id UUID;
@@ -1394,10 +2078,72 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+DECLARE
+  v_sponsored_registration_id UUID;
+  v_new_count INT;
+BEGIN
+  -- Determine which sponsored registration ID to update
+  IF (TG_OP = 'DELETE') THEN
+    v_sponsored_registration_id := OLD."sponsoredRegistrationId";
+  ELSIF (TG_OP = 'UPDATE') THEN
+    -- Handle both old and new sponsored registration IDs if they differ
+    IF OLD."sponsoredRegistrationId" IS DISTINCT FROM NEW."sponsoredRegistrationId" THEN
+      -- Update count for old sponsored registration
+      IF OLD."sponsoredRegistrationId" IS NOT NULL THEN
+        UPDATE public."SponsoredRegistration"
+        SET "usedCount" = (
+          SELECT COUNT(*)::INT
+          FROM public."Registration"
+          WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId"
+        )
+        WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
+      END IF;
+      
+      -- Update count for new sponsored registration
+      IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
+        UPDATE public."SponsoredRegistration"
+        SET "usedCount" = (
+          SELECT COUNT(*)::INT
+          FROM public."Registration"
+          WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId"
+        )
+        WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
+      END IF;
+      
+      RETURN NEW;
+    END IF;
+    v_sponsored_registration_id := NEW."sponsoredRegistrationId";
+  ELSE -- INSERT
+    v_sponsored_registration_id := NEW."sponsoredRegistrationId";
+  END IF;
+
+  -- Update the usedCount for the affected sponsored registration
+  IF v_sponsored_registration_id IS NOT NULL THEN
+    UPDATE public."SponsoredRegistration"
+    SET "usedCount" = (
+      SELECT COUNT(*)::INT
+      FROM public."Registration"
+      WHERE "sponsoredRegistrationId" = v_sponsored_registration_id
+    )
+    WHERE "sponsoredRegistrationId" = v_sponsored_registration_id;
+  END IF;
+
+  -- Return appropriate row
+  IF (TG_OP = 'DELETE') THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count_from_participant()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
 DECLARE
   v_sponsored_registration_id UUID;
@@ -1437,10 +2183,50 @@ END;
 $function$
 ;
 
+=======
+AS $function$
+DECLARE
+  v_sponsored_registration_id UUID;
+  v_registration_id UUID;
+BEGIN
+  -- Get the registration ID
+  IF (TG_OP = 'DELETE') THEN
+    v_registration_id := OLD."registrationId";
+  ELSE
+    v_registration_id := NEW."registrationId";
+  END IF;
+
+  -- Get the sponsored registration ID from the registration
+  SELECT "sponsoredRegistrationId" INTO v_sponsored_registration_id
+  FROM public."Registration"
+  WHERE "registrationId" = v_registration_id;
+
+  -- Update the usedCount if this registration is sponsored
+  IF v_sponsored_registration_id IS NOT NULL THEN
+    UPDATE public."SponsoredRegistration"
+    SET "usedCount" = (
+      SELECT COUNT(p."participantId")::INT
+      FROM public."Registration" r
+      INNER JOIN public."Participant" p ON r."registrationId" = p."registrationId"
+      WHERE r."sponsoredRegistrationId" = v_sponsored_registration_id
+    )
+    WHERE "sponsoredRegistrationId" = v_sponsored_registration_id;
+  END IF;
+
+  -- Return appropriate row
+  IF (TG_OP = 'DELETE') THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
+END;
+$function$;
+>>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count_from_registration()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
+<<<<<<< HEAD
 AS $function$
 DECLARE
   v_sponsored_registration_id UUID;
@@ -1506,20 +2292,89 @@ $function$
 
 
   create policy "Enable insert for all users"
+=======
+AS $function$
+DECLARE
+  v_sponsored_registration_id UUID;
+BEGIN
+  -- Determine which sponsored registration ID to update
+  IF (TG_OP = 'DELETE') THEN
+    v_sponsored_registration_id := OLD."sponsoredRegistrationId";
+  ELSIF (TG_OP = 'UPDATE') THEN
+    -- Handle both old and new sponsored registration IDs if they differ
+    IF OLD."sponsoredRegistrationId" IS DISTINCT FROM NEW."sponsoredRegistrationId" THEN
+      -- Update count for old sponsored registration (count participants)
+      IF OLD."sponsoredRegistrationId" IS NOT NULL THEN
+        UPDATE public."SponsoredRegistration"
+        SET "usedCount" = (
+          SELECT COUNT(p."participantId")::INT
+          FROM public."Registration" r
+          INNER JOIN public."Participant" p ON r."registrationId" = p."registrationId"
+          WHERE r."sponsoredRegistrationId" = OLD."sponsoredRegistrationId"
+        )
+        WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
+      END IF;
+      
+      -- Update count for new sponsored registration (count participants)
+      IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
+        UPDATE public."SponsoredRegistration"
+        SET "usedCount" = (
+          SELECT COUNT(p."participantId")::INT
+          FROM public."Registration" r
+          INNER JOIN public."Participant" p ON r."registrationId" = p."registrationId"
+          WHERE r."sponsoredRegistrationId" = NEW."sponsoredRegistrationId"
+        )
+        WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
+      END IF;
+      
+      RETURN NEW;
+    END IF;
+    v_sponsored_registration_id := NEW."sponsoredRegistrationId";
+  ELSE -- INSERT
+    v_sponsored_registration_id := NEW."sponsoredRegistrationId";
+  END IF;
+
+  -- Update the usedCount for the affected sponsored registration (count participants)
+  IF v_sponsored_registration_id IS NOT NULL THEN
+    UPDATE public."SponsoredRegistration"
+    SET "usedCount" = (
+      SELECT COUNT(p."participantId")::INT
+      FROM public."Registration" r
+      INNER JOIN public."Participant" p ON r."registrationId" = p."registrationId"
+      WHERE r."sponsoredRegistrationId" = v_sponsored_registration_id
+    )
+    WHERE "sponsoredRegistrationId" = v_sponsored_registration_id;
+  END IF;
+
+  -- Return appropriate row
+  IF (TG_OP = 'DELETE') THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
+END;
+$function$;
+create policy "Enable insert for all users"
+>>>>>>> config/local-supabase
   on "public"."Participant"
   as permissive
   for insert
   to anon, authenticated
 with check (true);
+<<<<<<< HEAD
 
 
 
   create policy "Enable read access for all users"
+=======
+create policy "Enable read access for all users"
+>>>>>>> config/local-supabase
   on "public"."Participant"
   as permissive
   for select
   to anon, authenticated
 using (true);
+<<<<<<< HEAD
 
 
 drop policy "Allow all operations for anyone 11d98ol_0" on "storage"."objects";
@@ -1532,15 +2387,26 @@ drop policy "Allow all operations for anyone 11d98ol_3" on "storage"."objects";
 
 
   create policy "Allow all operations for anyone 11d98ol_0"
+=======
+drop policy "Allow all operations for anyone 11d98ol_0" on "storage"."objects";
+drop policy "Allow all operations for anyone 11d98ol_1" on "storage"."objects";
+drop policy "Allow all operations for anyone 11d98ol_2" on "storage"."objects";
+drop policy "Allow all operations for anyone 11d98ol_3" on "storage"."objects";
+create policy "Allow all operations for anyone 11d98ol_0"
+>>>>>>> config/local-supabase
   on "storage"."objects"
   as permissive
   for insert
   to anon, authenticated
 with check ((bucket_id = 'paymentproofs'::text));
+<<<<<<< HEAD
 
 
 
   create policy "Allow all operations for anyone 11d98ol_1"
+=======
+create policy "Allow all operations for anyone 11d98ol_1"
+>>>>>>> config/local-supabase
   on "storage"."objects"
   as permissive
   for select

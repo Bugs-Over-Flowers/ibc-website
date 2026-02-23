@@ -113,13 +113,11 @@ BEGIN
     r."registrationDate" DESC;
 END;
 $$;
-
 ALTER FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) OWNER TO "postgres";
-
 CREATE OR REPLACE FUNCTION "public"."get_event_participant_list"(
   "p_event_id" "uuid",
   "p_search_text" "text" DEFAULT NULL::"text"
@@ -184,12 +182,10 @@ BEGIN
     r."registrationDate" DESC;
 END;
 $$;
-
 ALTER FUNCTION "public"."get_event_participant_list"(
   "p_event_id" "uuid",
   "p_search_text" "text"
 ) OWNER TO "postgres";
-
 CREATE OR REPLACE FUNCTION "public"."get_event_status"("p_event_id" "uuid") RETURNS "jsonb"
 LANGUAGE "plpgsql" STABLE
 AS $$
@@ -301,9 +297,7 @@ BEGIN
   );
 END;
 $$;
-
 ALTER FUNCTION "public"."get_event_status"("p_event_id" "uuid") OWNER TO "postgres";
-
 CREATE OR REPLACE FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") RETURNS "public"."registration_stats"
 LANGUAGE "plpgsql" STABLE SECURITY DEFINER
 AS $$
@@ -323,11 +317,8 @@ BEGIN
   RETURN v_result;
 END;
 $$;
-
 ALTER FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") OWNER TO "postgres";
-
 DROP FUNCTION IF EXISTS "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid");
-
 CREATE OR REPLACE FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") RETURNS TABLE(
   "registrationId" "uuid",
   "eventId" "uuid",
@@ -376,9 +367,7 @@ AS $$
   WHERE r."sponsoredRegistrationId" = p_sponsored_registration_id
   ORDER BY r."registrationDate" DESC;
 $$;
-
 ALTER FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") OWNER TO "postgres";
-
 CREATE OR REPLACE FUNCTION "public"."submit_event_registration"(
   "p_event_id" "uuid",
   "p_member_type" "text",
@@ -479,7 +468,6 @@ BEGIN
   );
 END;
 $$;
-
 ALTER FUNCTION "public"."submit_event_registration"(
   "p_event_id" "uuid",
   "p_member_type" "text",
@@ -492,7 +480,6 @@ ALTER FUNCTION "public"."submit_event_registration"(
   "p_other_participants" "jsonb",
   "p_sponsored_registration_id" "uuid"
 ) OWNER TO "postgres";
-
 CREATE OR REPLACE FUNCTION "public"."submit_event_registration_standard"(
   "p_event_id" "uuid",
   "p_member_type" "text",
@@ -590,7 +577,6 @@ BEGIN
   );
 END;
 $$;
-
 ALTER FUNCTION "public"."submit_event_registration_standard"(
   "p_event_id" "uuid",
   "p_member_type" "text",
@@ -602,19 +588,16 @@ ALTER FUNCTION "public"."submit_event_registration_standard"(
   "p_registrant" "jsonb",
   "p_other_participants" "jsonb"
 ) OWNER TO "postgres";
-
 GRANT ALL ON FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) TO "anon";
-
 GRANT ALL ON FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) TO "authenticated";
-
 GRANT ALL ON FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
