@@ -1,17 +1,23 @@
-import "server-only";
+"use server";
 
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { cookies } from "next/headers";
+import { applyAdmin5mCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 import type { ApplicationWithMembers } from "@/lib/types/application";
 
 type GetApplicationsResult = ApplicationWithMembers[];
 
 export async function getApplications(
-  requestCookies?: RequestCookie[],
+  requestCookies: RequestCookie[],
 ): Promise<GetApplicationsResult> {
-  const cookieStore = requestCookies || (await cookies()).getAll();
-  const supabase = await createClient(cookieStore);
+  "use cache";
+  applyAdmin5mCache();
+  cacheTag(CACHE_TAGS.applications.all);
+  cacheTag(CACHE_TAGS.applications.admin);
+
+  const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase
     .from("Application")
@@ -37,7 +43,7 @@ export async function getApplications(
     }
 
     const { data: signed, error } = await supabase.storage
-      .from("logoImage")
+      .from("logoimage")
       .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
 
     if (!error && signed?.signedUrl) {

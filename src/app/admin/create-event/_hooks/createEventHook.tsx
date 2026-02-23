@@ -11,8 +11,8 @@ import {
   type DraftEventInput,
   type PublishEventInput,
 } from "@/lib/validation/event/createEventSchema";
-import { draftEvent } from "@/server/events/actions/draftEvent";
-import { publishEvent } from "@/server/events/actions/publishEvent";
+import { draftEvent } from "@/server/events/mutations/draftEvent";
+import { publishEvent } from "@/server/events/mutations/publishEvent";
 
 export const useCreateEventForm = () => {
   const router = useRouter();
@@ -65,7 +65,7 @@ export const useCreateEventForm = () => {
 
         const supabase = await createClient();
         const { error: uploadError } = await supabase.storage
-          .from("headerImage")
+          .from("headerimage")
           .upload(filePath, file);
 
         if (uploadError) {
@@ -75,7 +75,7 @@ export const useCreateEventForm = () => {
 
         const {
           data: { publicUrl: url },
-        } = supabase.storage.from("headerImage").getPublicUrl(filePath);
+        } = supabase.storage.from("headerimage").getPublicUrl(filePath);
         publicUrl = url;
       }
 

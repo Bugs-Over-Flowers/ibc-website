@@ -1,6 +1,10 @@
 services:
-  ibc-web-app:
-    container_name: ibc-web-app
+  # Development service - for local development with hot reload
+  ibc-dev:
+    container_name: ibc-dev
+  # Development service - for local development with hot reload
+  ibc-dev:
+    container_name: ibc-dev
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,6 +18,35 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
-
+      - /app/.next
+      - /app/.next
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  
+  # Production service - optimized production build
+  ibc-prod:
+    container_name: ibc-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

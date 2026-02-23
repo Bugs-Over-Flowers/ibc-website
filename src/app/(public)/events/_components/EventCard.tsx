@@ -84,15 +84,6 @@ export function EventCard({ event, index }: EventCardProps) {
                   {event.eventTitle}
                 </h3>
               </div>
-
-              <div className="mt-2 h-10 overflow-hidden">
-                <p className="line-clamp-2 text-muted-foreground text-sm">
-                  {event.description}
-                </p>
-              </div>
-
-              <div className="mt-4 flex-1"></div>
-
               <div className="space-y-2 border-border border-t pt-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <Calendar className="h-4 w-4 text-primary" />

@@ -96,7 +96,7 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
     <Dialog
       disablePointerDismissal
       onOpenChange={setCheckInDialogOpen}
-      open={scannedData !== null}
+      open={!!scannedData}
     >
       <DialogContent
         className={"w-full md:min-w-2xl md:max-w-2xl"}
@@ -123,7 +123,7 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
           <div>
             <Button
               disabled={
-                (selectedCount === 0 && !hasCheckedInRemarkEdits) || isPending
+                (selectedCount === 0 && !hasCheckedInRemarkEdits()) || isPending
               }
               onClick={handleCheckIn}
             >

@@ -1,12 +1,13 @@
 "use client";
 
+import { formatDate } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/db.types";
-import { updateEvent } from "@/server/events/actions/updateEvent";
+import { updateEvent } from "@/server/events/mutations/updateEvent";
 
 type EventRow = Database["public"]["Tables"]["Event"]["Row"];
 
@@ -25,13 +26,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
   // Convert timestamptz to datetime-local format (YYYY-MM-DDTHH:mm)
   const formatForDateTimeLocal = (dateString: string | null) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return formatDate(dateString, "yyyy-MM-dd'T'HH:mm");
   };
 
   const form = useAppForm({
@@ -41,6 +36,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
       description: event.description || "",
       eventStartDate: formatForDateTimeLocal(event.eventStartDate),
       eventEndDate: formatForDateTimeLocal(event.eventEndDate),
+
       venue: event.venue || "",
       registrationFee: event.registrationFee,
       eventType: event.eventType as "public" | "private" | null,
@@ -79,7 +75,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
 
         const supabase = await createClient();
         const { error: uploadError } = await supabase.storage
-          .from("headerImage")
+          .from("headerimage")
           .upload(filePath, file);
 
         if (uploadError) {
@@ -89,7 +85,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
 
         const {
           data: { publicUrl },
-        } = supabase.storage.from("headerImage").getPublicUrl(filePath);
+        } = supabase.storage.from("headerimage").getPublicUrl(filePath);
 
         headerUrl = publicUrl;
 
@@ -97,12 +93,12 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
         if (event.eventHeaderUrl) {
           const oldUrl = event.eventHeaderUrl;
           // Extract the path from the public URL
-          // URL format: .../storage/v1/object/public/headerImage/event-headers/filename.ext
-          const pathParts = oldUrl.split("/headerImage/");
+          // URL format: .../storage/v1/object/public/headerimage/event-headers/filename.ext
+          const pathParts = oldUrl.split("/headerimage/");
           if (pathParts.length > 1) {
             const oldPath = pathParts[1];
             const { error: deleteError } = await supabase.storage
-              .from("headerImage")
+              .from("headerimage")
               .remove([oldPath]);
 
             if (deleteError) {
@@ -118,12 +114,15 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
         return;
       }
 
+      const isoStartDate = new Date(value.eventStartDate).toISOString();
+      const isoEndDate = new Date(value.eventEndDate).toISOString();
+
       const payload = {
         eventId: value.eventId,
         eventTitle: value.eventTitle,
         description: value.description,
-        eventStartDate: value.eventStartDate,
-        eventEndDate: value.eventEndDate,
+        eventStartDate: isoStartDate,
+        eventEndDate: isoEndDate,
         venue: value.venue,
         eventHeaderUrl: headerUrl || undefined,
         eventType: value.eventType,

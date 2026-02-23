@@ -5,26 +5,26 @@ const ratingEnum = z.enum(["poor", "fair", "good", "veryGood", "excellent"]);
 export const EvaluationFormSchema = z
   .object({
     eventId: z.string(),
-    name: z.string().optional().or(z.literal("")),
+    name: z.string().default(""),
 
-    q1Rating: ratingEnum.or(z.literal("")),
-    q2Rating: ratingEnum.or(z.literal("")),
-    q3Rating: ratingEnum.or(z.literal("")),
-    q4Rating: ratingEnum.or(z.literal("")),
-    q5Rating: ratingEnum.or(z.literal("")),
-    q6Rating: ratingEnum.or(z.literal("")),
+    q1Rating: ratingEnum.nullable(),
+    q2Rating: ratingEnum.nullable(),
+    q3Rating: ratingEnum.nullable(),
+    q4Rating: ratingEnum.nullable(),
+    q5Rating: ratingEnum.nullable(),
+    q6Rating: ratingEnum.nullable(),
 
-    feedback: z.string().optional().or(z.literal("")),
-    additionalComments: z.string().optional().or(z.literal("")),
+    feedback: z.string().optional(),
+    additionalComments: z.string().optional(),
   })
   .refine(
     (data) =>
-      data.q1Rating &&
-      data.q2Rating &&
-      data.q3Rating &&
-      data.q4Rating &&
-      data.q5Rating &&
-      data.q6Rating,
+      data.q1Rating !== null &&
+      data.q2Rating !== null &&
+      data.q3Rating !== null &&
+      data.q4Rating !== null &&
+      data.q5Rating !== null &&
+      data.q6Rating !== null,
     {
       message: "All ratings are required",
     },

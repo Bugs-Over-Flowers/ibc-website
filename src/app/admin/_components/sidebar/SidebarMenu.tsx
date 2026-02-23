@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Building2,
   Calendar,
   FileText,
   LayoutDashboard,
@@ -36,6 +37,11 @@ const menuItems = [
     title: "Evaluations",
     icon: MessageSquareDiff,
     href: "/admin/evaluation",
+  },
+  {
+    title: "Manage Sectors",
+    icon: Building2,
+    href: "/admin/manage-sector",
   },
 ];
 

@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import type { EvaluationWithEventRpc } from "@/server/evaluation/queries/getAllEvaluations";
 import { getAllEvaluationsRpc } from "@/server/evaluation/queries/getAllEvaluations";
 import { EvaluationFilterWrapper } from "./EvaluationFilterWrapper";
@@ -12,7 +13,8 @@ function EvaluationTableContent({ evaluations }: EvaluationTableProps) {
 
 export async function EvaluationTable() {
   try {
-    const rpcEvaluations = await getAllEvaluationsRpc();
+    const cookieStore = await cookies();
+    const rpcEvaluations = await getAllEvaluationsRpc(cookieStore.getAll());
     const evaluations = rpcEvaluations.filter(
       (evaluation) =>
         evaluation.event_id &&

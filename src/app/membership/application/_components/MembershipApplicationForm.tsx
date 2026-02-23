@@ -59,14 +59,20 @@ export function MembershipApplicationForm({
     applicationData,
   } = useMembershipStep4();
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleNext = (
     form: typeof step1Form.form | typeof step2Form | typeof step3Form,
   ) => {
     form.handleSubmit({ nextStep: true });
+    scrollToTop();
   };
 
   const handleBack = (targetStep: number) => {
     setStep(targetStep);
+    scrollToTop();
   };
 
   const isSubmitting = useStore(step4Form.store, (state) => state.isSubmitting);
@@ -79,27 +85,60 @@ export function MembershipApplicationForm({
   }
 
   return (
-    <div className="flex flex-col gap-8 lg:flex-row">
+    <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
       {/* Sidebar / Stepper */}
-      <div className="w-full space-y-6 lg:w-1/4">
+      <div className="w-full space-y-4 lg:w-1/4 lg:space-y-6">
         <Link href="/">
           <Button className="-ml-4" variant="ghost">
             <ChevronLeft />
             Back to Home
           </Button>
         </Link>
-        <div className="space-y-4">
-          <h2 className="font-bold text-primary text-xl">
+        <div className="space-y-2 lg:space-y-4">
+          <h2 className="font-bold text-lg text-primary lg:text-xl">
             Iloilo Business Club
           </h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-xs lg:text-sm">
             Membership Application
           </p>
         </div>
 
-        <div className="relative space-y-4">
+        {/* Mobile Stepper - Horizontal */}
+        <div className="flex items-center justify-between gap-2 lg:hidden">
+          {steps.map((step, index) => (
+            <div className="flex flex-1 items-center" key={step.id}>
+              <div
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-medium text-xs transition-colors",
+                  currentStep === step.id
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : currentStep > step.id
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-muted-foreground/30 text-muted-foreground",
+                )}
+              >
+                {currentStep > step.id ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  step.id
+                )}
+              </div>
+              {index < steps.length - 1 && (
+                <div
+                  className={cn(
+                    "mx-2 h-[2px] flex-1",
+                    currentStep > step.id ? "bg-primary" : "bg-muted",
+                  )}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Stepper - Vertical */}
+        <div className="relative hidden space-y-4 lg:block">
           {/* Progress Bar Background */}
-          <div className="absolute top-2 bottom-2 left-[15px] -z-10 hidden w-[2px] bg-muted lg:block" />
+          <div className="absolute top-2 bottom-2 left-[15px] -z-10 w-[2px] bg-muted" />
 
           {steps.map((step) => (
             <div
@@ -133,7 +172,7 @@ export function MembershipApplicationForm({
                 >
                   {step.title}
                 </p>
-                <p className="hidden text-muted-foreground text-xs md:block">
+                <p className="text-muted-foreground text-xs">
                   {step.description}
                 </p>
               </div>
@@ -252,10 +291,11 @@ export function MembershipApplicationForm({
             {currentStep === 4 && (
               <form
                 className="space-y-6"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  step4Form.handleSubmit();
+                  await step4Form.handleSubmit();
+                  scrollToTop();
                 }}
               >
                 <Step4Review
@@ -263,7 +303,14 @@ export function MembershipApplicationForm({
                   form={step4Form}
                 />
                 <div className="flex justify-between pt-6">
-                  <Button onClick={step4GoBack} type="button" variant="outline">
+                  <Button
+                    onClick={() => {
+                      step4GoBack();
+                      scrollToTop();
+                    }}
+                    type="button"
+                    variant="outline"
+                  >
                     Back
                   </Button>
                   <step4Form.AppForm>

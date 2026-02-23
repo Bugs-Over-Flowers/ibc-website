@@ -1,6 +1,9 @@
 import "server-only";
 
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyAdmin5mCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 import type { MemberFilterInput } from "@/lib/validation/application/application";
@@ -9,7 +12,6 @@ export async function getMembers(
   requestCookies: RequestCookie[],
   filters?: MemberFilterInput,
 ) {
-  "use cache";
   const supabase = await createClient(requestCookies);
 
   let query = supabase
@@ -59,7 +61,7 @@ export async function getMembers(
     }
 
     const { data: signed, error } = await supabase.storage
-      .from("logoImage")
+      .from("logoimage")
       .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
 
     if (!error && signed?.signedUrl) {
@@ -85,6 +87,9 @@ export async function getMembers(
 
 export async function getSectors(requestCookies: RequestCookie[]) {
   "use cache";
+  applyAdmin5mCache();
+  cacheTag(CACHE_TAGS.sectors.all);
+
   const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase

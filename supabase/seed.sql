@@ -5,43 +5,51 @@
 -- Run with: bun run db:seed
 -- =============================================================================
 
+SET search_path TO public;
+
 -- Clean up existing test data (if any)
 TRUNCATE TABLE
-  "Interview",
-  "ProofImage",
-  "ApplicationMember",
-  "Application",
-  "CheckIn",
-  "Participant",
-  "Registration",
-  "EventDay",
-  "Event",
-  "BusinessMember",
-  "Sector"
+  "public"."Interview",
+  "public"."ProofImage",
+  "public"."ApplicationMember",
+  "public"."Application",
+  "public"."CheckIn",
+  "public"."Participant",
+  "public"."Registration",
+  "public"."EventDay",
+  "public"."Event",
+  "public"."BusinessMember",
+  "public"."Sector"
 CASCADE;
 
 -- =============================================================================
 -- Insert Test Sectors
 -- =============================================================================
-INSERT INTO "Sector" ("sectorId", "sectorName") VALUES
-  (1, 'Technology'),
-  (2, 'Manufacturing'),
-  (3, 'Services'),
-  (4, 'Retail'),
-  (5, 'Healthcare'),
-  (6, 'Finance'),
-  (7, 'Education'),
-  (8, 'Real Estate'),
-  (9, 'Transportation'),
-  (10, 'Hospitality')
-ON CONFLICT ("sectorId") DO UPDATE SET
-  "sectorName" = EXCLUDED."sectorName";
+INSERT INTO "Sector" ("sectorName") VALUES
+  ('Technology'),
+  ('Manufacturing'),
+  ('Services'),
+  ('Retail'),
+  ('Healthcare'),
+  ('Finance'),
+  ('Education'),
+  ('Real Estate'),
+  ('Transportation'),
+  ('Hospitality');
+
+-- Keep identity sequence aligned after explicit sectorId inserts
+SELECT setval(
+  pg_get_serial_sequence('"public"."Sector"', 'sectorId'),
+  COALESCE((SELECT MAX("sectorId") FROM "public"."Sector"), 0) + 1,
+  false
+);
 
 -- =============================================================================
 -- Insert Test Applications (matching actual schema from migrations)
 -- =============================================================================
-INSERT INTO "Application" (
+INSERT INTO "public"."Application" (
   "applicationId",
+  "identifier",
   "businessMemberId",
   "sectorId",
   "logoImageURL",
@@ -56,10 +64,11 @@ INSERT INTO "Application" (
   "websiteURL",
   "applicationMemberType",
   "applicationStatus",
-  "paymentStatus"
+  "paymentProofStatus"
 ) VALUES
   (
     gen_random_uuid(),
+    'ibc-app-test001',
     NULL,
     1,
     'https://test-company.com/logo.png',
@@ -78,6 +87,7 @@ INSERT INTO "Application" (
   ),
   (
     gen_random_uuid(),
+    'ibc-app-test002',
     NULL,
     2,
     'https://sample-corp.com/logo.png',
@@ -92,7 +102,7 @@ INSERT INTO "Application" (
     'https://sample-corp.com',
     'corporate',
     'approved',
-    'verified'
+    'accepted'
   )
 RETURNING "applicationId";
 
@@ -104,20 +114,20 @@ DECLARE
 BEGIN
   -- Get the first application ID
   SELECT "applicationId" INTO app_id_1
-  FROM "Application"
+  FROM "public"."Application"
   WHERE "companyName" = 'Test Company Inc.'
   LIMIT 1;
 
   -- Get the second application ID
   SELECT "applicationId" INTO app_id_2
-  FROM "Application"
+  FROM "public"."Application"
   WHERE "companyName" = 'Sample Corp.'
   LIMIT 1;
 
   -- =============su================================================================
   -- Insert Test Application Members
   -- =============================================================================
-  INSERT INTO "ApplicationMember" (
+  INSERT INTO "public"."ApplicationMember" (
     "applicationMemberId",
     "applicationId",
     "firstName",
@@ -206,7 +216,7 @@ END $$;
 -- =============================================================================
 -- Insert Test Events
 -- =============================================================================
-INSERT INTO "Event" (
+INSERT INTO "public"."Event" (
   "eventId",
   "eventTitle",
   "description",
@@ -286,7 +296,7 @@ INSERT INTO auth.users (
   gen_random_uuid(),
   '00000000-0000-0000-0000-000000000000',
   'admin@test.local',
-  crypt('Test123!@#', gen_salt('bf')),
+  extensions.crypt('Test123!@#', extensions.gen_salt('bf')),
   NOW(),
   NOW(),
   NOW(),
@@ -304,7 +314,7 @@ INSERT INTO auth.users (
 -- =============================================================================
 -- Create Business Members
 -- =============================================================================
-INSERT INTO "BusinessMember" (
+INSERT INTO "public"."BusinessMember" (
   "sectorId",
   "logoImageURL",
   "joinDate",
@@ -357,9 +367,9 @@ INSERT INTO "BusinessMember" (
 DO $$
 BEGIN
   RAISE NOTICE '✅ Test data seeded successfully!';
-  RAISE NOTICE 'Sectors: %', (SELECT COUNT(*) FROM "Sector");
-  RAISE NOTICE 'Applications: %', (SELECT COUNT(*) FROM "Application");
-  RAISE NOTICE 'Application Members: %', (SELECT COUNT(*) FROM "ApplicationMember");
-  RAISE NOTICE 'Events: %', (SELECT COUNT(*) FROM "Event");
-  RAISE NOTICE 'Business Members: %', (SELECT COUNT(*) FROM "BusinessMember");
+  RAISE NOTICE 'Sectors: %', (SELECT COUNT(*) FROM "public"."Sector");
+  RAISE NOTICE 'Applications: %', (SELECT COUNT(*) FROM "public"."Application");
+  RAISE NOTICE 'Application Members: %', (SELECT COUNT(*) FROM "public"."ApplicationMember");
+  RAISE NOTICE 'Events: %', (SELECT COUNT(*) FROM "public"."Event");
+  RAISE NOTICE 'Business Members: %', (SELECT COUNT(*) FROM "public"."BusinessMember");
 END $$;

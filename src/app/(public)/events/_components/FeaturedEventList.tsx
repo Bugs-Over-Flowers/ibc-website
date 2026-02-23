@@ -118,12 +118,6 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
                 {currentEvent.eventTitle}
               </h2>
 
-              {currentEvent.description && (
-                <p className="mb-6 line-clamp-3 text-muted-foreground md:text-lg">
-                  {currentEvent.description}
-                </p>
-              )}
-
               <div className="mb-6 flex items-center gap-2 text-muted-foreground">
                 <MapPin className="h-4 w-4 text-primary" />
                 <span>{currentEvent.venue || "Venue TBA"}</span>

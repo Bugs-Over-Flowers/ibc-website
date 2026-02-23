@@ -20,7 +20,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { useAction } from "@/hooks/useAction";
-import { loginVerifyMfa } from "@/server/auth/actions/mfa";
+import { loginVerifyMfa } from "@/server/auth/mutations/mfa";
 
 export function MfaVerifyForm() {
   const router = useRouter();

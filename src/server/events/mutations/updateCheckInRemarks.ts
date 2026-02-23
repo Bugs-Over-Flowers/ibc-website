@@ -37,6 +37,10 @@ export async function updateCheckInRemarks(
     }
   }
 
+  // updateTag(CACHE_TAGS.checkIns.all);
+  // updateTag(CACHE_TAGS.checkIns.list);
+  // updateTag(CACHE_TAGS.checkIns.eventDay(parsed.eventDayId));
+
   revalidatePath(`/admin/events/check-in/${parsed.eventDayId}`);
 
   return {

@@ -75,35 +75,35 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
         </head>
         <body>
           <h1>Membership Application</h1>
-          
+
           <div class="info-grid">
             <div class="label">Application ID:</div>
             <div class="value">${application.applicationId}</div>
-            
+
             <div class="label">Application Date:</div>
             <div class="value">${new Date(application.applicationDate).toLocaleDateString()}</div>
-            
+
             <div class="label">Status:</div>
-            <div class="value">${application.memberId ? "Approved" : "Pending"}</div>
+            <div class="value">${application.businessMemberId ? "Approved" : "Pending"}</div>
           </div>
 
           <h2>Company Information</h2>
           <div class="info-grid">
             <div class="label">Company Name:</div>
             <div class="value">${application.companyName}</div>
-            
+
             <div class="label">Sector:</div>
             <div class="value">${application.Sector?.sectorName || "N/A"}</div>
-            
+
             <div class="label">Website:</div>
             <div class="value">${application.websiteURL}</div>
-            
+
             <div class="label">Address:</div>
             <div class="value">${application.companyAddress}</div>
-            
+
             <div class="label">Application Type:</div>
             <div class="value">${application.applicationType}</div>
-            
+
             <div class="label">Member Type:</div>
             <div class="value">${application.applicationMemberType}</div>
           </div>
@@ -112,13 +112,13 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
           <div class="info-grid">
             <div class="label">Email:</div>
             <div class="value">${application.emailAddress}</div>
-            
+
             <div class="label">Mobile:</div>
             <div class="value">${application.mobileNumber}</div>
-            
+
             <div class="label">Landline:</div>
             <div class="value">${application.landline}</div>
-            
+
             <div class="label">Fax:</div>
             <div class="value">${application.faxNumber}</div>
           </div>
@@ -131,22 +131,22 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
               <div class="info-grid">
                 <div class="label">Designation:</div>
                 <div class="value">${member.companyDesignation}</div>
-                
+
                 <div class="label">Email:</div>
                 <div class="value">${member.emailAddress}</div>
-                
+
                 <div class="label">Mobile:</div>
                 <div class="value">${member.mobileNumber}</div>
-                
+
                 <div class="label">Birthdate:</div>
                 <div class="value">${new Date(member.birthdate).toLocaleDateString()}</div>
-                
+
                 <div class="label">Nationality:</div>
                 <div class="value">${member.nationality}</div>
-                
+
                 <div class="label">Sex:</div>
                 <div class="value">${member.sex}</div>
-                
+
                 <div class="label">Mailing Address:</div>
                 <div class="value">${member.mailingAddress}</div>
               </div>
@@ -158,9 +158,9 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
           <div class="info-grid">
             <div class="label">Payment Method:</div>
             <div class="value">${application.paymentMethod}</div>
-            
+
             <div class="label">Payment Status:</div>
-            <div class="value">${application.paymentStatus}</div>
+            <div class="value">${application.paymentProofStatus}</div>
           </div>
 
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666;">

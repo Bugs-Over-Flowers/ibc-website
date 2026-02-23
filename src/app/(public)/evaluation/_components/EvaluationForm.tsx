@@ -20,7 +20,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
 import { zodValidator } from "@/lib/utils";
 import { EvaluationFormSchema } from "@/lib/validation/evaluation/evaluation-form";
-import { submitEvaluationForm } from "@/server/evaluation/actions/submitEvaluation";
+import { submitEvaluationForm } from "@/server/evaluation/mutations/submitEvaluation";
 
 interface EvaluationFormProps {
   eventId: string;
@@ -36,12 +36,12 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
     defaultValues: {
       eventId,
       name: "",
-      q1Rating: "" as const,
-      q2Rating: "" as const,
-      q3Rating: "" as const,
-      q4Rating: "" as const,
-      q5Rating: "" as const,
-      q6Rating: "" as const,
+      q1Rating: null,
+      q2Rating: null,
+      q3Rating: null,
+      q4Rating: null,
+      q5Rating: null,
+      q6Rating: null,
       additionalComments: "",
       feedback: "",
     },
@@ -50,7 +50,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
     },
     onSubmit: async ({ value }) => {
       const completedQuestions = EVALUATION_QUESTIONS.filter(
-        (q) => value[q.field as keyof typeof value] !== "",
+        (q) => value[q.field as keyof typeof value] !== null,
       ).length;
 
       if (completedQuestions < TOTAL_QUESTIONS) {
@@ -64,8 +64,6 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       const { error } = await tryCatch(submitEvaluationForm(value));
 
       if (error) {
-        const _message =
-          typeof error === "string" ? error : "Failed to submit form";
         toast.error("Failed to submit feedback. Please try again.");
         return undefined;
       }
@@ -200,7 +198,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
             selector={(state) =>
               EVALUATION_QUESTIONS.filter(
                 (q) =>
-                  state.values[q.field as keyof typeof state.values] !== "",
+                  state.values[q.field as keyof typeof state.values] !== null,
               ).length
             }
           >
@@ -230,6 +228,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               className="py-3 first:pt-0 last:pb-0 sm:py-4 md:py-5 lg:py-6"
               key={q.field}
             >
+              {/* @ts-expect-error - Form infers type from defaultValues with null, but rating fields exist at runtime */}
               <form.AppField name={q.field}>
                 {(field) => <field.RatingScale label={q.question} />}
               </form.AppField>
@@ -264,10 +263,8 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
                   <field.TextareaField
                     className="min-h-20 resize-none sm:min-h-24 md:min-h-28"
                     label="Comments"
+                    maxLength={500}
                     placeholder="Share any additional thoughts about the event..."
-                    textareaProps={{
-                      maxLength: 500,
-                    }}
                   />
                   <div className="flex justify-end text-muted-foreground text-xs">
                     {length}/{max} characters
@@ -286,10 +283,8 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
                   <field.TextareaField
                     className="min-h-20 resize-none sm:min-h-24 md:min-h-28"
                     label="Suggestions for Improvement"
+                    maxLength={500}
                     placeholder="How can we make our events even better?"
-                    textareaProps={{
-                      maxLength: 500,
-                    }}
                   />
                   <div className="flex justify-end text-muted-foreground text-xs">
                     {length}/{max} characters

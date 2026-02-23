@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { zodValidator } from "@/lib/utils";
 import { validateFileType } from "@/lib/validation/fileTypes";
 import { MembershipApplicationStep4Schema } from "@/lib/validation/membership/application";
-import { submitMembershipApplication } from "@/server/membership/actions/submitApplication";
+import { submitMembershipApplication } from "@/server/membership/mutations/submitApplication";
 
 interface UseMembershipStep4Props {
   onSuccess?: () => void;
@@ -82,7 +82,7 @@ export const useMembershipStep4 = ({
             const fileName = `logo-${createUUID}.${fileExt}`;
 
             const { data, error: uploadError } = await supabase.storage
-              .from("logoImage")
+              .from("logoimage")
               .upload(fileName, file);
 
             if (uploadError) {
@@ -180,6 +180,9 @@ export const useMembershipStep4 = ({
 
       // Reset the form data but preserve rate limiting data
       resetStore();
+
+      // Reset the form state
+      form.reset();
 
       // Set submitted flag to keep showing loading state during navigation
       setIsSubmitted(true);

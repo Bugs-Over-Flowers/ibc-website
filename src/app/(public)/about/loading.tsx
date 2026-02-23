@@ -1,8 +1,5 @@
 import { makeArray } from "@/lib/utils";
 
-const createIds = (length: number, prefix: string) =>
-  Array.from({ length }, () => `${prefix}-${crypto.randomUUID()}`);
-
 export default function Loading() {
   return (
     <main className="min-h-screen bg-background">
@@ -33,13 +30,15 @@ export default function Loading() {
             <div className="space-y-4">
               <div className="h-7 w-1/3 animate-pulse rounded bg-muted dark:bg-muted/70" />
               <div className="space-y-3">
-                {createIds(5, "about-line").map((key, i) => (
-                  <div
-                    className="h-4 animate-pulse rounded bg-muted dark:bg-muted/70"
-                    key={key}
-                    style={{ width: i === 4 ? "80%" : "100%" }}
-                  />
-                ))}
+                {Array.from({ length: 5 }, (n: number) => n).map(
+                  (number, i) => (
+                    <div
+                      className="h-4 animate-pulse rounded bg-muted dark:bg-muted/70"
+                      key={number}
+                      style={{ width: i === 4 ? "80%" : "100%" }}
+                    />
+                  ),
+                )}
               </div>
             </div>
             {/* Right: Image with stat cards */}

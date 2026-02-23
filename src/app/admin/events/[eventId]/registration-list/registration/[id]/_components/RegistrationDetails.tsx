@@ -81,7 +81,7 @@ export default function RegistrationDetails({
               registrationIdentifier: data.registrationIdentifier,
               email: data.registrant.email,
               registrationId: data.registrationId,
-              paymentStatus: data.paymentStatus,
+              paymentProofStatus: data.paymentProofStatus,
               proofOfPaymentImageURL: data.signedUrl,
             }}
             isDetailsPage
@@ -225,7 +225,7 @@ export default function RegistrationDetails({
                 data.signedUrl.trim() !== "" && (
                   <OnlinePaymentSection
                     getStatusColor={getStatusColor}
-                    paymentStatus={data.paymentStatus}
+                    paymentProofStatus={data.paymentProofStatus}
                     proofImageURL={data.signedUrl.trim()}
                     registrationId={data.registrationId}
                   />

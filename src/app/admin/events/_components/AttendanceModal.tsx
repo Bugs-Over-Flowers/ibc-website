@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
 import { ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ import {
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
-import { getEventDays } from "@/server/events/actions/getEventDays";
+import { getEventDays } from "@/server/events/mutations/getEventDays";
 
 type EventDay = Database["public"]["Tables"]["EventDay"]["Row"];
 
@@ -85,7 +85,7 @@ export default function AttendanceModal({
                 variant={"outline"}
               >
                 <div className="text-lg">{day.label}</div>
-                <div>{formatDate(day.eventDate, "EEEE, MMMM do, yyyy")}</div>
+                <div>{format(day.eventDate, "EEEE, MMMM do, yyyy")}</div>
               </Button>
             ))}
           </ul>
