@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Building2,
   Calendar,
   FileText,
   HandCoins,
@@ -42,6 +43,11 @@ const menuItems = [
     title: "Sponsored Registrations",
     icon: HandCoins,
     href: "/admin/sponsored-registration",
+  },
+  {
+    title: "Manage Sectors",
+    icon: Building2,
+    href: "/admin/manage-sector",
   },
 ];
 

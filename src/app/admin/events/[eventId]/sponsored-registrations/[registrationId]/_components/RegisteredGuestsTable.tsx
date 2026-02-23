@@ -7,6 +7,7 @@ import type { Database } from "@/lib/supabase/db.types";
 type RegistrationWithParticipants =
   Database["public"]["Tables"]["Registration"]["Row"] & {
     participants: Database["public"]["Tables"]["Participant"]["Row"][];
+    paymentStatus?: string;
   };
 
 interface RegisteredGuestsTableProps {
@@ -128,7 +129,7 @@ export function RegisteredGuestsTable({
                               : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                         }`}
                       >
-                        {registration.paymentStatus}
+                        {registration.paymentStatus || "N/A"}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-sm">
