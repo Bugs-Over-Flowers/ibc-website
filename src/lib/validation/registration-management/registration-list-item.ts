@@ -50,7 +50,7 @@ const RegistrationListRegistrantSchema = z.object({
  * - registrationId: UUID primary key
  * - affiliation: Organization/company name
  * - registrationDate: ISO 8601 datetime with timezone offset
- * - paymentStatus: Enum (verified, pending, etc.)
+ * - paymentProofStatus: Enum (pending, accepted, rejected)
  * - paymentMethod: Enum (onsite, gcash, bank_transfer)
  * - registrant: Nested schema with basic contact info
  * - registrationIdentifier: Unique QR code identifier (format: ibc-reg-XXXXXXXX)

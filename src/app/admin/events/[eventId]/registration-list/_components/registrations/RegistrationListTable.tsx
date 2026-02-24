@@ -119,7 +119,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
     },
   },
   {
-    accessorKey: "paymentStatus",
+    accessorKey: "paymentProofStatus",
     header: "Payment Status",
     cell: ({ row }) => (
       <Badge
@@ -130,7 +130,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
             : "bg-yellow-600",
         )}
       >
-        {row.getValue("paymentStatus")}
+        {row.original.paymentProofStatus}
       </Badge>
     ),
   },

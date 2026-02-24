@@ -3,6 +3,7 @@
 
 -- Drop the type with CASCADE to remove dependent function
 DROP TYPE IF EXISTS "public"."registration_list_item" CASCADE;
+
 -- Recreate the composite type with correct PaymentProofStatus enum
 CREATE TYPE "public"."registration_list_item" AS (
   "registration_id" "uuid",
@@ -17,7 +18,9 @@ CREATE TYPE "public"."registration_list_item" AS (
   "people" integer,
   "registration_identifier" "text"
 );
+
 ALTER TYPE "public"."registration_list_item" OWNER TO "postgres";
+
 -- Recreate get_registration_list function
 CREATE OR REPLACE FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
@@ -106,22 +109,26 @@ BEGIN
     r."registrationDate" DESC;
 END;
 $$;
+
 ALTER FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) OWNER TO "postgres";
+
 -- Grant permissions
 GRANT ALL ON FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) TO "anon";
+
 GRANT ALL ON FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) TO "authenticated";
+
 GRANT ALL ON FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
