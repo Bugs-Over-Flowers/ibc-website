@@ -163,8 +163,12 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
     header: "Affiliation", // Custom Excel header
   },
   {
-    accessorKey: "name",
-    header: "Full Name", // Custom Excel header
+    accessorKey: "firstName",
+    header: "First Name", // Custom Excel header
+  },
+  {
+    accessorKey: "lastName",
+    header: "Last Name", // Custom Excel header
   },
   {
     accessorKey: "email",
