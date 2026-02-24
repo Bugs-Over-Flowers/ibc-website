@@ -68,7 +68,7 @@ export async function ApplicationDetails({
       <PaymentInfoCard
         applicationDate={new Date(application.applicationDate)}
         paymentMethod={application.paymentMethod}
-        paymentStatus={application.paymentStatus}
+        paymentProofStatus={application.paymentProofStatus}
       />
     </>
   );
