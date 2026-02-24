@@ -128,10 +128,8 @@ export async function exportToExcel<TData extends Record<string, unknown>>(
     });
 
     // Generate filename
-    const defaultFilename = `export_${new Date().toISOString().split("T")[0]}`;
-    const finalFilename = filename
-      ? `${filename}_${new Date().toISOString().split("T")[0]}.xlsx`
-      : `${defaultFilename}.xlsx`;
+    const finalFilename =
+      filename ?? `export_${new Date().toISOString().split("T")[0]}.xlsx`;
 
     // Write file
     await writeXlsxFile(data, {

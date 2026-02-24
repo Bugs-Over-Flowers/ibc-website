@@ -11,8 +11,10 @@ import CheckInRowActions from "./CheckInRowActions";
 import RemarksDialog from "./RemarksDialog";
 
 interface CheckInTableProps {
+  eventTitle: string;
   checkIns: CheckInListItem[];
   eventDayId: string;
+  eventDayLabel: string;
 }
 
 type CheckInListRow = CheckInListItem & { name: string };
@@ -46,6 +48,38 @@ const getCheckInListColumns = (
     },
   },
   {
+    accessorKey: "firstName",
+    header: ({ column }) => (
+      <Button
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        variant="ghost"
+      >
+        First Name
+        {column.getIsSorted() === "asc" ? (
+          <ArrowDownAZ />
+        ) : column.getIsSorted() === "desc" ? (
+          <ArrowUpZA />
+        ) : null}
+      </Button>
+    ),
+  },
+  {
+    accessorKey: "lastName",
+    header: ({ column }) => (
+      <Button
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        variant="ghost"
+      >
+        Last Name
+        {column.getIsSorted() === "asc" ? (
+          <ArrowDownAZ />
+        ) : column.getIsSorted() === "desc" ? (
+          <ArrowUpZA />
+        ) : null}
+      </Button>
+    ),
+  },
+  {
     accessorKey: "affiliation",
     header: ({ column }) => (
       <Button
@@ -62,28 +96,7 @@ const getCheckInListColumns = (
     ),
     cell: ({ row }) => row.original.affiliation,
   },
-  {
-    accessorKey: "name",
-    sortingFn: (rowA, rowB) => {
-      const aName = `${rowA.original.firstName} ${rowA.original.lastName}`;
-      const bName = `${rowB.original.firstName} ${rowB.original.lastName}`;
-      return aName.localeCompare(bName);
-    },
-    header: ({ column }) => (
-      <Button
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
-      >
-        Name
-        {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
-        ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
-        ) : null}
-      </Button>
-    ),
-    cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
-  },
+
   {
     accessorKey: "email",
     header: ({ column }) => (
@@ -168,8 +181,10 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
 ];
 
 export default function CheckInTable({
+  eventTitle,
   checkIns,
   eventDayId,
+  eventDayLabel,
 }: CheckInTableProps) {
   const tableData: CheckInListRow[] = checkIns.map((checkIn) => ({
     ...checkIn,
@@ -180,7 +195,7 @@ export default function CheckInTable({
     await exportToExcel({
       data: tableData,
       columns: getExcelColumns(),
-      filename: "check-in-list",
+      filename: `${eventTitle}-${eventDayLabel}-CheckIns-${new Date().toISOString().split("T")[0]}.xlsx`,
       sheetName: "Check-In List",
       excludeColumns: ["actions"],
       formatters: {
