@@ -1,13 +1,20 @@
 "use server";
 
 import { cacheTag } from "next/cache";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
+import { z } from "zod";
 import { applyRealtime60sCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 
 const PAYMENT_PROOFS_BUCKET = "paymentproofs";
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+const getPaymentProofSignedUrlInputSchema = z.object({
+  registrationId: z.string().min(1),
+  proofPathHint: z.string().nullable().optional(),
+});
 
 function extractPaymentProofPath(path: string): string {
   const trimmedPath = path.trim();
@@ -41,14 +48,25 @@ function normalizeLegacyPaymentProofPath(path: string): string {
   return path.replace(/\.[A-Za-z0-9]+$/, "");
 }
 
-export async function getPaymentProofSignedUrl(registrationId: string) {
+export async function getPaymentProofSignedUrl(input: {
+  registrationId: string;
+}) {
+  const parsed = getPaymentProofSignedUrlInputSchema.parse(input);
+  const cookieStore = await cookies();
+  return getCachedPaymentProofSignedUrl(
+    cookieStore.getAll(),
+    parsed.registrationId,
+  );
+}
+
+async function getCachedPaymentProofSignedUrl(
+  cookies: RequestCookie[],
+  registrationId: string,
+) {
   "use cache";
   applyRealtime60sCache();
   cacheTag(CACHE_TAGS.registrations.details);
-
-  const cookieStore = await cookies();
-
-  const supabase = await createClient(cookieStore.getAll());
+  const supabase = await createClient(cookies);
 
   const { data: registration, error: registrationError } = await supabase
     .from("Registration")

@@ -138,6 +138,7 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
             {scannedData.paymentMethod === "BPI" && scannedData.proofImage && (
               <ProofDialog
                 paymentProofStatus={scannedData.paymentProofStatus}
+                proofImagePath={scannedData.proofImage.path}
                 registrationId={scannedData.registrationId}
               />
             )}
