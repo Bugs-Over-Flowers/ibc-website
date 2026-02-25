@@ -8,9 +8,9 @@ import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
 import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import CheckInDataDialog from "./_components/CheckInDataDialog";
-import CheckInRegistrationPanel from "./_components/CheckInRegistrationPanel";
 import EventDayDetails from "./_components/EventDayDetails";
-import QRCodeScanner from "./_components/QRCodeScanner";
+import QRCodeScanner from "./_components/qr-scanning/QRCodeScanner";
+import CheckInRegistrationPanel from "./_components/registration-list/CheckInRegistrationPanel";
 
 type CheckInPageProps = PageProps<"/admin/events/check-in/[eventDayId]">;
 

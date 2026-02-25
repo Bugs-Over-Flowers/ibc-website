@@ -13,6 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
 import { useCheckIn } from "../_hooks/useCheckIn";
 import CheckInTable from "./CheckInTable";
+import ProofDialog from "./proofResubmit/ProofDialog";
 
 interface CheckInDataDialogProps {
   eventId: string;
@@ -77,12 +78,6 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
 
     if (participantsToProcess.size === 0) return;
 
-    console.log("🚀 Check-in/Update started:", {
-      participantIds: Array.from(participantsToProcess),
-      eventDayId,
-      remarks: editedRemarks,
-    });
-
     // Execute optimistic action
     await execute({
       eventDayId,
@@ -113,6 +108,16 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
           <div className="font-medium text-muted-foreground text-sm">
             {scannedData.affiliation}
           </div>
+
+          {scannedData.paymentProofStatus === "pending" ? (
+            <div className="text-yellow-600">This payment is still pending</div>
+          ) : (
+            scannedData.paymentProofStatus === "rejected" && (
+              <div className="text-red-500">
+                The payment for this registration has been rejected.
+              </div>
+            )
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-1 py-2">
@@ -130,6 +135,12 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
             Close
           </Button>
           <div className="w-full sm:w-auto">
+            {scannedData.paymentMethod === "BPI" && scannedData.proofImage && (
+              <ProofDialog
+                paymentProofStatus={scannedData.paymentProofStatus}
+                registrationId={scannedData.registrationId}
+              />
+            )}
             <Button
               className="w-full sm:w-auto"
               disabled={
