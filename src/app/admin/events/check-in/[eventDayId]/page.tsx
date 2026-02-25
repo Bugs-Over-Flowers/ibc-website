@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import CenterSpinner from "@/components/CenterSpinner";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
-import type { RegistrationItem } from "@/lib/validation/registration-management";
 import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import CheckInDataDialog from "./_components/CheckInDataDialog";
@@ -43,30 +42,27 @@ async function CheckInPage({
   const paymentProofStatus = parseStringParam(
     parsedSearchParams.check_paymentStatus,
   );
-  const { data } = await tryCatch(
+  const { data: eventDayData } = await tryCatch(
     getEventDayDetails(cookieStore.getAll(), {
       eventDayId: eventDayId,
     }),
   );
 
-  if (!data || !data.event) {
+  if (!eventDayData || !eventDayData.event) {
     return <div>Event Day not found</div>;
   }
 
-  let registrationList: RegistrationItem[] = [];
-  let registrationError = false;
-
-  if (searchQuery) {
-    const result = await tryCatch(
+  const { data: registrationListData, error: registrationListError } =
+    await tryCatch(
       getEventRegistrationList(cookieStore.getAll(), {
-        eventId: data.event.eventId,
+        eventId: eventDayData.event.eventId,
         paymentProofStatus,
         searchString: searchQuery,
-        limit: 5,
       }),
     );
-    registrationList = result.success ? result.data : [];
-    registrationError = !result.success;
+
+  if (!registrationListData || !registrationListData) {
+    return <div>Failed to load registration list.</div>;
   }
 
   return (
@@ -74,14 +70,14 @@ async function CheckInPage({
       <div className="space-y-4">
         <div className="grid gap-6 lg:grid-cols-[350px_1fr] xl:grid-cols-[400px_1fr]">
           <div className="flex flex-col gap-6">
-            <QRCodeScanner eventId={data.event.eventId} />
+            <QRCodeScanner eventId={eventDayData.event.eventId} />
             <div className="sticky top-6 max-h-[calc(100vh-7.5rem)] overflow-auto">
               <EventDayDetails
                 eventDayData={{
-                  eventTitle: data.event.eventTitle,
-                  eventDate: data.eventDate,
-                  label: data.label,
-                  venue: data.event.venue,
+                  eventTitle: eventDayData.event.eventTitle,
+                  eventDate: eventDayData.eventDate,
+                  label: eventDayData.label,
+                  venue: eventDayData.event.venue,
                 }}
               />
             </div>
@@ -90,19 +86,18 @@ async function CheckInPage({
           <div className="min-w-0">
             <CheckInRegistrationPanel
               errorMessage={
-                registrationError
+                registrationListError
                   ? "Failed to load registration list."
                   : undefined
               }
               eventDayId={eventDayId}
-              eventId={data.event.eventId}
-              hasSearchQuery={!!searchQuery}
-              registrationList={registrationList}
+              eventId={eventDayData.event.eventId}
+              registrationList={registrationListData}
             />
           </div>
         </div>
       </div>
-      <CheckInDataDialog eventId={data.event.eventId} />
+      <CheckInDataDialog eventId={eventDayData.event.eventId} />
     </>
   );
 }

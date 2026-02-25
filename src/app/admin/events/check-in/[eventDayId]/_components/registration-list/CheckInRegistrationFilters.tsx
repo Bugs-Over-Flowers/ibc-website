@@ -141,7 +141,7 @@ export default function CheckInRegistrationFilters() {
                 <SelectLabel>Payment Status</SelectLabel>
                 {PaymentProofStatusFilterOptions.map((status) => (
                   <SelectItem key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                    {status}
                   </SelectItem>
                 ))}
               </SelectGroup>

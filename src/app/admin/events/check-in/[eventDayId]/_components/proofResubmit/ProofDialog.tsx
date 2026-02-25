@@ -23,7 +23,6 @@ import Camera from "./Camera";
 
 interface ProofDialogProps {
   paymentProofStatus: GetCheckInForDateSchema["paymentProofStatus"];
-  proofImagePath: string;
   registrationId: string;
 }
 
@@ -31,7 +30,6 @@ type CameraMode = "view" | "camera" | "preview";
 
 export default function ProofDialog({
   paymentProofStatus,
-  proofImagePath,
   registrationId,
 }: ProofDialogProps) {
   const [mode, setMode] = useState<CameraMode>("view");
@@ -148,7 +146,6 @@ export default function ProofDialog({
 
         if (open) {
           fetchSignedUrl({
-            proofPathHint: proofImagePath,
             registrationId,
           });
         }
