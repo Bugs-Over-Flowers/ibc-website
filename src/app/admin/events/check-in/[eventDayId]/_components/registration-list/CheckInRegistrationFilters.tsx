@@ -20,19 +20,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  PaymentProofStatusFilterEnum,
+  PaymentProofStatusFilterOptions,
+} from "@/lib/validation/utils";
 
-const PAYMENT_STATUS_FILTERS = ["all", "verified", "pending"] as const;
-
-type PaymentStatusFilter = (typeof PAYMENT_STATUS_FILTERS)[number];
+type PaymentStatusFilter = (typeof PaymentProofStatusFilterOptions)[number];
 
 function isPaymentStatusFilter(
   value: string | null,
 ): value is PaymentStatusFilter {
-  if (!value) {
-    return false;
-  }
-
-  return (PAYMENT_STATUS_FILTERS as readonly string[]).includes(value);
+  return PaymentProofStatusFilterEnum.safeParse(value).success;
 }
 
 export default function CheckInRegistrationFilters() {
@@ -98,7 +96,7 @@ export default function CheckInRegistrationFilters() {
               autoCapitalize="on"
               autoComplete="off"
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Enter affiliation, name, or email"
+              placeholder="Enter an identifier, affiliation, name, or email"
               value={searchQuery}
             />
             {searchQuery !== "" && (
@@ -141,9 +139,9 @@ export default function CheckInRegistrationFilters() {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Payment Status</SelectLabel>
-                {PAYMENT_STATUS_FILTERS.map((status) => (
+                {PaymentProofStatusFilterOptions.map((status) => (
                   <SelectItem key={status} value={status}>
-                    {status}
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
                   </SelectItem>
                 ))}
               </SelectGroup>

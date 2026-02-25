@@ -4,7 +4,6 @@ import CenterSpinner from "@/components/CenterSpinner";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
 import type { RegistrationItem } from "@/lib/validation/registration-management";
-import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
 import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import CheckInDataDialog from "./_components/CheckInDataDialog";
@@ -61,9 +60,7 @@ async function CheckInPage({
     const result = await tryCatch(
       getEventRegistrationList(cookieStore.getAll(), {
         eventId: data.event.eventId,
-        paymentProofStatus: paymentProofStatus as
-          | typeof PaymentProofStatusEnum
-          | undefined,
+        paymentProofStatus,
         searchString: searchQuery,
         limit: 5,
       }),

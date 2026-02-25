@@ -14,7 +14,7 @@ import { PaymentProofStatusEnum } from "@/lib/validation/utils";
 interface GetRegistrationListParams {
   eventId: string;
   searchString?: string;
-  paymentProofStatus?: typeof PaymentProofStatusEnum;
+  paymentProofStatus?: string;
   limit?: number;
 }
 
@@ -33,12 +33,15 @@ export const getEventRegistrationList = async (
   cacheTag(CACHE_TAGS.registrations.list);
   cacheTag(CACHE_TAGS.registrations.event);
   const supabase = await createClient(requestCookies);
+  const parsedPaymentProofStatus = paymentProofStatus
+    ? PaymentProofStatusEnum.safeParse(paymentProofStatus)
+    : undefined;
 
   let query = supabase.rpc("get_registration_list", {
     p_event_id: eventId,
     p_search_text: searchString,
-    p_payment_proof_status: paymentProofStatus
-      ? PaymentProofStatusEnum.parse(paymentProofStatus)
+    p_payment_proof_status: parsedPaymentProofStatus?.success
+      ? parsedPaymentProofStatus.data
       : undefined,
   });
 
