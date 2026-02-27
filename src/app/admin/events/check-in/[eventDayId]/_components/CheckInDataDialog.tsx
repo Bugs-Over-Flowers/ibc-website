@@ -134,7 +134,7 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
           >
             Close
           </Button>
-          <div className="w-full sm:w-auto">
+          <div className="w-full space-x-2 sm:w-auto">
             {scannedData.paymentMethod === "BPI" && scannedData.proofImage && (
               <ProofDialog
                 paymentProofStatus={scannedData.paymentProofStatus}
