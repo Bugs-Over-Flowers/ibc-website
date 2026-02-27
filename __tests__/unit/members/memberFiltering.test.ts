@@ -56,18 +56,23 @@ describe("parseStatusFilter (MembersList)", () => {
 // Membership status badge logic (mirrors MembersTableRow)
 // ---------------------------------------------------------------------------
 
-function getMembershipBadgeVariant(status: string): "default" | "destructive" {
-  if (status === "paid" || status === "cancelled") {
-    return "default";
-  }
-  return "destructive";
+function getMembershipBadgeVariant(status: string): "default" {
+  if (status === "paid") return "default";
+  if (status === "cancelled") return "default";
+  return "default";
 }
 
 function getMembershipBadgeClassName(status: string): string {
   if (status === "cancelled") {
-    return "bg-gray-900 text-white capitalize";
+    return "border border-background bg-status-red text-white capitalize";
   }
-  return "bg-background text-muted-foreground capitalize";
+  if (status === "paid") {
+    return "border border-background bg-status-green text-white capitalize";
+  }
+  if (status === "unpaid") {
+    return "border border-background bg-status-orange text-white capitalize";
+  }
+  return "";
 }
 
 describe("Membership status badge logic", () => {
@@ -76,9 +81,9 @@ describe("Membership status badge logic", () => {
     expect(getMembershipBadgeVariant("paid")).toBe("default");
   });
 
-  // ✅ HAPPY FLOW: Unpaid uses destructive variant
-  it('should use "destructive" variant for unpaid status', () => {
-    expect(getMembershipBadgeVariant("unpaid")).toBe("destructive");
+  // ✅ HAPPY FLOW: Unpaid uses default variant (visual differentiation via className)
+  it('should use "default" variant for unpaid status', () => {
+    expect(getMembershipBadgeVariant("unpaid")).toBe("default");
   });
 
   // ✅ HAPPY FLOW: Cancelled uses default variant
@@ -86,14 +91,19 @@ describe("Membership status badge logic", () => {
     expect(getMembershipBadgeVariant("cancelled")).toBe("default");
   });
 
-  // ✅ HAPPY FLOW: Cancelled has dark background styling
-  it("should apply dark background for cancelled status", () => {
-    expect(getMembershipBadgeClassName("cancelled")).toContain("bg-gray-900");
+  // ✅ HAPPY FLOW: Cancelled has red background styling
+  it("should apply red background for cancelled status", () => {
+    expect(getMembershipBadgeClassName("cancelled")).toContain("bg-status-red");
   });
 
-  // ✅ HAPPY FLOW: Non-cancelled statuses have default styling
-  it("should apply default background for paid status", () => {
-    expect(getMembershipBadgeClassName("paid")).toContain("bg-background");
+  // ✅ HAPPY FLOW: Paid has green background styling
+  it("should apply green background for paid status", () => {
+    expect(getMembershipBadgeClassName("paid")).toContain("bg-status-green");
+  });
+
+  // ✅ HAPPY FLOW: Unpaid has orange background styling
+  it("should apply orange background for unpaid status", () => {
+    expect(getMembershipBadgeClassName("unpaid")).toContain("bg-status-orange");
   });
 });
 
