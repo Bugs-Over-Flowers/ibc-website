@@ -56,7 +56,6 @@ function groupBySchedule(
     const day = interviewDate.getDate();
     const hours = interviewDate.getHours();
     const minutes = interviewDate.getMinutes();
-    const period = hours >= 12 ? "PM" : "AM";
 
     const groupKey = `${year}-${month}-${day}-${hours}-${minutes}-${venue}`;
 
@@ -101,7 +100,7 @@ function groupBySchedule(
 export function PendingApplicationsGrouped({
   applications,
 }: PendingApplicationsGroupedProps) {
-  const { selectedApplicationIds, selectAll, clearSelection } =
+  const { selectedApplicationIds, selectAll, toggleSelection } =
     useSelectedApplicationsStore();
 
   const { sortedGroups, unscheduled } = useMemo(
@@ -159,7 +158,9 @@ export function PendingApplicationsGrouped({
                         onCheckedChange={() => {
                           if (allInGroupSelected) {
                             // Deselect only this group's apps
-                            clearSelection();
+                            groupAppIds.forEach((id) => {
+                              toggleSelection(id);
+                            });
                           } else {
                             selectAll(groupAppIds);
                           }

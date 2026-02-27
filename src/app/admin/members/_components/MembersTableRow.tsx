@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
 interface MembersTableRowProps {
@@ -84,22 +85,13 @@ export function MembersTableRow({
           {/* Status badge - top right corner */}
           <div className="absolute top-2 right-2">
             <Badge
-              className={
-                member.membershipStatus === "cancelled"
-                  ? "border border-background bg-status-red text-white capitalize"
-                  : member.membershipStatus === "paid"
-                    ? "border border-background bg-status-green text-white capitalize"
-                    : member.membershipStatus === "unpaid"
-                      ? "border border-background bg-status-orange text-white capitalize"
-                      : ""
-              }
-              variant={
-                member.membershipStatus === "paid"
-                  ? "default"
-                  : member.membershipStatus === "cancelled"
-                    ? "default"
-                    : "default"
-              }
+              className={cn(
+                "border border-background text-white capitalize",
+                member.membershipStatus === "cancelled" && "bg-status-red",
+                member.membershipStatus === "paid" && "bg-status-green",
+                member.membershipStatus === "unpaid" && "bg-status-orange",
+              )}
+              variant="default"
             >
               {member.membershipStatus}
             </Badge>
