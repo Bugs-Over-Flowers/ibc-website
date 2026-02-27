@@ -7,23 +7,34 @@ import ErrorCheckInList from "./ErrorCheckInList";
 
 export default async function CheckInListContent({
   eventDayId,
+  eventTitle,
+  eventDayLabel,
 }: {
   eventDayId: string;
+  eventTitle: string;
+  eventDayLabel: string;
 }) {
   const cookieStore = await cookies();
-  const result = await tryCatch(
+  const checkInListResult = await tryCatch(
     getCheckInList(cookieStore.getAll(), eventDayId),
   );
 
-  if (!result.success) {
+  if (!checkInListResult.success) {
     return <ErrorCheckInList />;
   }
 
-  const checkIns = result.data;
+  const checkIns = checkInListResult.data;
 
   if (checkIns.length === 0) {
     return <EmptyCheckInList />;
   }
 
-  return <CheckInTable checkIns={checkIns} eventDayId={eventDayId} />;
+  return (
+    <CheckInTable
+      checkIns={checkIns}
+      eventDayId={eventDayId}
+      eventDayLabel={eventDayLabel}
+      eventTitle={eventTitle}
+    />
+  );
 }
