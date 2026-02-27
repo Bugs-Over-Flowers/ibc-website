@@ -24,6 +24,7 @@ vi.mock("@/lib/supabase/server", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 const mockSendEmail = vi.fn();
@@ -94,9 +95,9 @@ describe("approveApplication", () => {
     );
   });
 
-  // ✅ HAPPY FLOW: Revalidates paths after approval
+  // ✅ HAPPY FLOW: Revalidates paths and updates cache tags after approval
   it("should revalidate application and members paths", async () => {
-    const { revalidatePath } = await import("next/cache");
+    const { revalidatePath, updateTag } = await import("next/cache");
 
     mockSingle.mockResolvedValueOnce({
       data: {
@@ -125,6 +126,7 @@ describe("approveApplication", () => {
       action: "approve",
     });
 
+    expect(updateTag).toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith("/admin/application");
     expect(revalidatePath).toHaveBeenCalledWith("/admin/members");
   });
