@@ -68,6 +68,15 @@ export const useMembershipStep1 = () => {
           return;
         }
 
+        // If cooldown has expired, reset attempts so user gets a fresh set
+        if (
+          memberValidation.cooldownEndTime &&
+          now >= memberValidation.cooldownEndTime
+        ) {
+          setMemberValidationAttempt(0);
+          setMemberValidationCooldown(null);
+        }
+
         // Member ID is required for renewal/updating
         if (!refinedValue.businessMemberId?.trim()) {
           toast.error(
