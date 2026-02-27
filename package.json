@@ -32,7 +32,8 @@
     "test:e2e:local": "supabase start && playwright test",
     "test:e2e:codegen": "playwright codegen http://localhost:3000",
     "db:gen:types": "supabase gen types typescript --local > src/lib/supabase/db.types.ts",
-    "gen:types": "supabase gen types typescript --project-id rpdourwztdpwdebggkkc > src/lib/supabase/db.types.ts"
+    "gen:types": "supabase gen types typescript --project-id rpdourwztdpwdebggkkc > src/lib/supabase/db.types.ts",
+    "reset": "rm -rf node_modules bun.lock && rm -rf .next && bun install"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
