@@ -79,19 +79,19 @@ export default function OnlinePaymentSection({
 
   return (
     <>
-      {hasProofImage && (
+      {hasProofImage && validProofImageURL ? (
         <>
           <ImageZoom className="relative h-96 w-full touch-none select-none">
             <Image
               alt="Proof of Payment Image"
               className="object-contain"
               fill
-              src={validProofImageURL as string}
+              src={validProofImageURL}
             />
           </ImageZoom>
           <div className="text-neutral-600">click on the image to zoom in</div>
         </>
-      )}
+      ) : null}
       <div>
         <Badge
           className={cn(

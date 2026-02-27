@@ -4,7 +4,6 @@ import {
   Head,
   Hr,
   Html,
-  Img,
   Preview,
   Row,
   Section,
@@ -51,8 +50,8 @@ export default function PaymentRejectedTemplate({
                   other issues with the provided proof.
                 </Text>
                 <Text className="text-gray-700">
-                  Please contact us or re-upload your payment proof to complete
-                  your registration.
+                  Please contact us or you can pay onsite to complete your
+                  registration.
                 </Text>
               </Row>
               <Row className="mt-8">

@@ -41,7 +41,6 @@ export const rejectPayment = async (registrationId: string) => {
     throw new Error("Principal registrant email not found");
   }
 
-  // @ts-expect-error - Supabase type inference for joined tables can be tricky
   const eventTitle = registration.event?.eventTitle || "Event";
   const registrantName = `${principal.firstName} ${principal.lastName}`;
 
