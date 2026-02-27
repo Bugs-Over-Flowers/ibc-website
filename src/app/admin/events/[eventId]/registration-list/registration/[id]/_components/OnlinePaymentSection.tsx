@@ -1,12 +1,25 @@
 import Image from "next/image";
+import { useState } from "react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
-import { useOptimisticAction } from "@/hooks/useAction";
+import { useAction, useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
+import { rejectPayment } from "@/server/registration/mutations/rejectPayment";
 import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 
 type OnlinePaymentSectionProps = {
@@ -22,6 +35,8 @@ export default function OnlinePaymentSection({
   proofImageURL,
   registrationId,
 }: OnlinePaymentSectionProps) {
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+
   // Early validation - ensure URL is valid before any rendering
   const validProofImageURL =
     proofImageURL && typeof proofImageURL === "string"
@@ -33,7 +48,7 @@ export default function OnlinePaymentSection({
     optimistic: optimisticPaymentProofStatus,
     isPending: isVerifyPending,
   } = useOptimisticAction(tryCatch(verifyPayment), paymentProofStatus, {
-    optimisticUpdate: (prev) => prev,
+    optimisticUpdate: (_prev) => "accepted",
     onSuccess: (msg) => {
       toast.success(msg);
     },
@@ -41,9 +56,26 @@ export default function OnlinePaymentSection({
       toast.error(error);
     },
   });
+
+  const { execute: reject, isPending: isRejectPending } = useAction(
+    tryCatch(rejectPayment),
+    {
+      onSuccess: (msg) => {
+        toast.success(msg);
+        setIsAlertOpen(false);
+      },
+      onError: (error) => {
+        toast.error(error);
+        setIsAlertOpen(false);
+      },
+    },
+  );
+
   const hasProofImage = Boolean(
     validProofImageURL && validProofImageURL.length > 0,
   );
+
+  const isPending = isVerifyPending || isRejectPending;
 
   return (
     <>
@@ -62,24 +94,73 @@ export default function OnlinePaymentSection({
       )}
       <div>
         <Badge
-          className={cn("capitalize", getStatusColor(paymentProofStatus))}
+          className={cn(
+            "capitalize",
+            getStatusColor(optimisticPaymentProofStatus),
+          )}
           variant="outline"
         >
-          {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
+          {isVerifyPending
+            ? "Verifying..."
+            : isRejectPending
+              ? "Rejecting..."
+              : optimisticPaymentProofStatus}
         </Badge>
       </div>
-      <Button
-        disabled={
-          isVerifyPending || optimisticPaymentProofStatus === "accepted"
-        }
-        onClick={() => verify(registrationId)}
-      >
-        {isVerifyPending
-          ? "Verifying..."
-          : optimisticPaymentProofStatus === "accepted"
-            ? "Verified"
-            : "Verify Payment"}
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          disabled={
+            isPending ||
+            optimisticPaymentProofStatus === "accepted" ||
+            optimisticPaymentProofStatus === "rejected"
+          }
+          onClick={() => verify(registrationId)}
+        >
+          {isVerifyPending
+            ? "Verifying..."
+            : optimisticPaymentProofStatus === "accepted"
+              ? "Verified"
+              : "Verify Payment"}
+        </Button>
+        <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
+          <AlertDialogTrigger
+            className={buttonVariants({ variant: "destructive" })}
+            disabled={
+              isPending ||
+              optimisticPaymentProofStatus === "rejected" ||
+              optimisticPaymentProofStatus === "accepted"
+            }
+          >
+            {isRejectPending
+              ? "Rejecting..."
+              : optimisticPaymentProofStatus === "rejected"
+                ? "Rejected"
+                : "Reject Payment"}
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Reject Payment?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to reject this payment proof? This action
+                cannot be undone and the user will be notified via email.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700 data-[disabled]:opacity-50"
+                disabled={isRejectPending}
+                onClick={(e) => {
+                  e.preventDefault();
+                  reject(registrationId);
+                }}
+              >
+                {isRejectPending ? "Rejecting..." : "Reject"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </>
   );
 }
