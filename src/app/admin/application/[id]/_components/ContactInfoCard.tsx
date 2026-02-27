@@ -4,14 +4,12 @@ interface ContactInfoCardProps {
   emailAddress: string;
   mobileNumber: string;
   landline: string;
-  faxNumber: string;
 }
 
 export function ContactInfoCard({
   emailAddress,
   mobileNumber,
   landline,
-  faxNumber,
 }: ContactInfoCardProps) {
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -24,7 +22,6 @@ export function ContactInfoCard({
         <DetailRow label="Email" value={emailAddress} />
         <DetailRow label="Mobile" value={mobileNumber} />
         <DetailRow label="Landline" value={landline} />
-        <DetailRow label="Fax" value={faxNumber} />
       </div>
     </div>
   );
