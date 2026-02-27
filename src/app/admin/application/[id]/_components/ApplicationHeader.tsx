@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { EditMemberButton } from "@/app/admin/_components/EditMemberButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -212,7 +213,12 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
               </span>
             )}
           </div>
-          <div className="w-full sm:w-auto">
+          <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
+            {application.BusinessMember && (
+              <EditMemberButton
+                memberId={application.BusinessMember.businessMemberId}
+              />
+            )}
             <ExportPDFButton application={application} />
           </div>
         </div>
