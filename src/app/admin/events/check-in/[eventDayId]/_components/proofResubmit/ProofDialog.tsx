@@ -331,7 +331,7 @@ function ProofDialogFooter({
     <DialogFooter>
       <DialogClose render={<Button variant="outline">Cancel</Button>} />
       <Button
-        disabled={isAnyActionPending || isAccepted}
+        disabled={isAnyActionPending}
         onClick={() => {
           clearCapturedPreview();
           setMode("camera");
