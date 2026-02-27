@@ -5,6 +5,7 @@ export const CheckInListItemSchema = z.object({
   checkInTime: z.iso.datetime({ offset: true }),
   remarks: z.string().nullable(),
   eventDayId: z.uuid(),
+  eventDayLabel: z.string(),
   participantId: z.uuid(),
   firstName: z.string(),
   lastName: z.string(),

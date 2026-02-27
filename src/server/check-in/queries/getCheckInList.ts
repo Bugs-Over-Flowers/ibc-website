@@ -26,7 +26,10 @@ export async function getCheckInList(
       checkInId,
       checkInTime,
       remarks,
-      eventDayId,
+      eventDay:EventDay(
+        eventDayId,
+        label
+      ),
       participant:Participant (
         participantId,
         firstName,
@@ -52,18 +55,13 @@ export async function getCheckInList(
     throw new Error(error.message);
   }
 
-  console.log("Fetched check-in data:", data);
-  console.log(
-    "Identifier:",
-    data.map((i) => i.participant.registration.identifier),
-  );
-
   // Transform nested data to flat structure
   const transformed = data.map((item) => ({
     checkInId: item.checkInId,
     checkInTime: item.checkInTime,
     remarks: item.remarks,
-    eventDayId: item.eventDayId,
+    eventDayId: item.eventDay.eventDayId,
+    eventDayLabel: item.eventDay.label,
     participantId: item.participant.participantId,
     firstName: item.participant.firstName,
     lastName: item.participant.lastName,
