@@ -1,6 +1,11 @@
 import z from "zod";
 import { titleCase } from "@/lib/utils";
-import { MemberTypeEnum, PaymentMethodEnum, phoneSchema } from "../utils";
+import {
+  landlineSchema,
+  MemberTypeEnum,
+  PaymentMethodEnum,
+  phoneSchema,
+} from "../utils";
 
 export const StandardRegistrationStep1Schema = z.discriminatedUnion("member", [
   z.object({
@@ -32,7 +37,16 @@ export const RegistrantDetailsSchema = z
       .string()
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    contactNumber: phoneSchema,
+    contactNumber: z
+      .string()
+      .refine(
+        (data) =>
+          z.union([phoneSchema, landlineSchema]).safeParse(data).success,
+        {
+          error:
+            "Contact number must be a valid Philippine phone or landline number",
+        },
+      ),
     email: z.email().trim(),
   })
   .transform((data) => ({
