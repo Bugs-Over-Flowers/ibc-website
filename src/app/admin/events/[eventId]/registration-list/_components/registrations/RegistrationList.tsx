@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationListPageProps } from "@/lib/types/route";
 import { parseStringParam } from "@/lib/utils";
-import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import RegistrationListTable from "./RegistrationListTable";
 
@@ -18,9 +17,7 @@ export default async function RegistrationList({
     getEventRegistrationList(cookieStore.getAll(), {
       eventId,
       searchString: parseStringParam(reg_q),
-      paymentProofStatus: parseStringParam(reg_paymentStatus) as
-        | typeof PaymentProofStatusEnum
-        | undefined,
+      paymentProofStatus: parseStringParam(reg_paymentStatus),
     }),
   );
 

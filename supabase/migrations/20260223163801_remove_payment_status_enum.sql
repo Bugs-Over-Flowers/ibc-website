@@ -3,10 +3,8 @@
 
 -- Drop the old enum type
 DROP TYPE IF EXISTS "public"."PaymentStatus";
-
 -- Fix registration_list_item composite type (was created with wrong enum in remote_schema)
 DROP TYPE IF EXISTS "public"."registration_list_item" CASCADE;
-
 CREATE TYPE "public"."registration_list_item" AS (
   "registration_id" "uuid",
   "affiliation" "text",
@@ -20,9 +18,7 @@ CREATE TYPE "public"."registration_list_item" AS (
   "people" integer,
   "registration_identifier" "text"
 );
-
 ALTER TYPE "public"."registration_list_item" OWNER TO "postgres";
-
 -- Recreate get_registration_list function (was dropped by CASCADE)
 CREATE OR REPLACE FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
@@ -111,13 +107,11 @@ BEGIN
     r."registrationDate" DESC;
 END;
 $$;
-
 ALTER FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) OWNER TO "postgres";
-
 -- Fix submit_membership_application function (was using PaymentStatus and wrong column name)
 CREATE OR REPLACE FUNCTION "public"."submit_membership_application"(
   "p_application_type" "text",
@@ -288,7 +282,6 @@ EXCEPTION
     RAISE EXCEPTION 'Application submission failed: %', SQLERRM;
 END;
 $$;
-
 ALTER FUNCTION "public"."submit_membership_application"(
   "p_application_type" "text",
   "p_company_details" "jsonb",
@@ -297,20 +290,17 @@ ALTER FUNCTION "public"."submit_membership_application"(
   "p_application_member_type" "text",
   "p_payment_proof_url" "text"
 ) OWNER TO "postgres";
-
 -- Grant permissions for get_registration_list
 GRANT ALL ON FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) TO "anon";
-
 GRANT ALL ON FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) TO "authenticated";
-
 GRANT ALL ON FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",

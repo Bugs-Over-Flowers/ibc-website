@@ -1,16 +1,12 @@
 drop extension if exists "pg_net";
-
 drop policy "Enable insert for all users" on "public"."Participant";
-
 drop policy "Enable read access for all users" on "public"."Participant";
 drop type "public"."registration_list_item" cascade;
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.check_application_status(p_application_identifier text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
-<<<<<<< HEAD
 AS $function$
 DECLARE
   v_result jsonb;
@@ -49,12 +45,10 @@ EXCEPTION
     RAISE EXCEPTION 'Failed to check application status: %', SQLERRM;
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.check_member_exists(p_identifier text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
-<<<<<<< HEAD
 AS $function$
 DECLARE
   v_member_exists boolean;
@@ -88,12 +82,10 @@ EXCEPTION
     RETURN jsonb_build_object('exists', false, 'message', 'Unable to validate member ID at this time');
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.check_member_exists(p_identifier text, p_application_type text DEFAULT 'renewal'::text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
-<<<<<<< HEAD
 AS $function$
 DECLARE
   v_member_exists boolean;
@@ -169,12 +161,10 @@ BEGIN
     AND "membershipStatus" = 'paid';
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.compute_primary_application_id(p_member_id uuid)
  RETURNS uuid
  LANGUAGE sql
  STABLE
-<<<<<<< HEAD
 AS $function$
   SELECT a."applicationId"
   FROM public."Application" a
@@ -189,13 +179,11 @@ AS $function$
     a."applicationDate" DESC
   LIMIT 1;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.create_sponsored_registration(p_event_id uuid, p_sponsored_by text, p_fee_deduction numeric, p_max_sponsored_guests bigint DEFAULT NULL::bigint)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public'
-<<<<<<< HEAD
 AS $function$
 DECLARE
   v_row public."SponsoredRegistration"%ROWTYPE;
@@ -288,12 +276,10 @@ BEGIN
   RETURN NEW;
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_all_evaluations()
  RETURNS TABLE(evaluation_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, venue text, name text, q1_rating public."ratingScale", q2_rating public."ratingScale", q3_rating public."ratingScale", q4_rating public."ratingScale", q5_rating public."ratingScale", q6_rating public."ratingScale", additional_comments text, feedback text, created_at timestamp with time zone)
  LANGUAGE sql
  STABLE
-<<<<<<< HEAD
 AS $function$
   select
     ef."evaluationId",
@@ -342,12 +328,10 @@ BEGIN
   ORDER BY sr.created_at DESC;
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_all_sponsored_registrations_with_event()
  RETURNS TABLE(sponsored_registration_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, sponsored_by text, uuid uuid, max_sponsored_guests bigint, used_count bigint, status public."SponsoredRegistrationStatus", created_at timestamp with time zone, updated_at timestamp with time zone)
  LANGUAGE sql
  STABLE
-<<<<<<< HEAD
 AS $function$
 SELECT
   sr."sponsoredRegistrationId"::uuid,
@@ -366,12 +350,10 @@ FROM "SponsoredRegistration" sr
 LEFT JOIN "Event" e ON sr."eventId" = e."eventId"
 ORDER BY sr."createdAt" DESC;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_evaluation_by_id(eval_id uuid)
  RETURNS TABLE(evaluation_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, venue text, name text, q1_rating public."ratingScale", q2_rating public."ratingScale", q3_rating public."ratingScale", q4_rating public."ratingScale", q5_rating public."ratingScale", q6_rating public."ratingScale", additional_comments text, feedback text, created_at timestamp with time zone)
  LANGUAGE sql
  STABLE
-<<<<<<< HEAD
 AS $function$
   select
     ef."evaluationId",
@@ -396,12 +378,10 @@ AS $function$
   where
     ef."evaluationId" = eval_id;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_events_for_select()
  RETURNS TABLE(event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone)
  LANGUAGE sql
  STABLE
-<<<<<<< HEAD
 AS $function$
 SELECT
   e."eventId"::uuid,
@@ -412,16 +392,13 @@ FROM "Event" e
 WHERE e."eventStartDate" > now()
 ORDER BY e."eventStartDate" ASC;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_member_primary_application(p_member_id uuid)
  RETURNS uuid
  LANGUAGE sql
  STABLE
-<<<<<<< HEAD
 AS $function$
   SELECT public.compute_primary_application_id(p_member_id);
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_registration_list_checkin(p_identifier text, p_today date DEFAULT CURRENT_DATE)
  RETURNS public.registration_details_result
  LANGUAGE plpgsql
@@ -546,14 +523,11 @@ BEGIN
   RETURN v_result;
 
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_id(registration_id uuid)
  RETURNS SETOF public."SponsoredRegistration"
  LANGUAGE plpgsql
  SECURITY DEFINER
-<<<<<<< HEAD
 AS $function$
 BEGIN
   RETURN QUERY
@@ -562,12 +536,10 @@ BEGIN
   WHERE "sponsoredRegistrationId" = registration_id;
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_uuid(p_uuid text)
  RETURNS TABLE("sponsoredRegistrationId" uuid, uuid text, "eventId" uuid, "sponsoredBy" text, "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, status public."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
  LANGUAGE plpgsql
  STABLE
-<<<<<<< HEAD
 AS $function$
 BEGIN
   RETURN QUERY
@@ -586,12 +558,10 @@ BEGIN
   WHERE sr."uuid" = p_uuid;
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_uuid(p_uuid uuid)
  RETURNS TABLE("sponsoredRegistrationId" uuid, uuid uuid, "eventId" uuid, "sponsoredBy" text, "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, status public."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
  LANGUAGE plpgsql
  STABLE
-<<<<<<< HEAD
 AS $function$
 BEGIN
   RETURN QUERY
@@ -610,13 +580,11 @@ BEGIN
   WHERE sr."uuid" = p_uuid;
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_sponsored_registrations_with_details(p_event_id uuid)
  RETURNS TABLE(id uuid, event_id uuid, sponsor_id uuid, registration_id uuid, status text, created_at timestamp with time zone, updated_at timestamp with time zone, sponsor_name text, registration_email text)
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public'
-<<<<<<< HEAD
 AS $function$
 BEGIN
   RETURN QUERY
@@ -637,19 +605,16 @@ BEGIN
   ORDER BY sr.created_at DESC;
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.get_sr_by_event_id(p_event_id uuid)
  RETURNS SETOF public."SponsoredRegistration"
  LANGUAGE sql
  STABLE SECURITY DEFINER
-<<<<<<< HEAD
 AS $function$
   SELECT *
   FROM "SponsoredRegistration"
   WHERE "eventId" = p_event_id
   ORDER BY "createdAt" DESC;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.handle_event_days()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -701,9 +666,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$function$
-;
-
+$function$;
 CREATE OR REPLACE FUNCTION public.january_first_reset()
  RETURNS void
  LANGUAGE plpgsql
@@ -768,7 +731,6 @@ BEGIN
 END;
 $function$;
 create type "public"."registration_list_item" as ("registration_id" uuid, "affiliation" text, "registration_date" timestamp with time zone, "payment_proof_status" public."PaymentStatus", "payment_method" public."PaymentMethod", "business_member_id" uuid, "business_name" text, "is_member" boolean, "registrant" jsonb, "people" integer, "registration_identifier" text);
-
 CREATE OR REPLACE FUNCTION public.schedule_interviews_batch(p_interview_data jsonb)
  RETURNS TABLE(success boolean, message text, interview_count integer)
  LANGUAGE plpgsql
@@ -1088,7 +1050,6 @@ CREATE OR REPLACE FUNCTION public.update_event_available_slots_trigger()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
-<<<<<<< HEAD
 AS $function$
 DECLARE
     v_event_id UUID;
@@ -1248,64 +1209,10 @@ EXCEPTION
     );
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.update_participant_count_trigger()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
-<<<<<<< HEAD
-<<<<<<< HEAD
-AS $function$
-BEGIN
-    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-        UPDATE "Registration"
-        SET "numberOfParticipants" = (
-            SELECT COUNT(*) FROM "Participant" WHERE "registrationId" = NEW."registrationId"
-        )
-        WHERE "registrationId" = NEW."registrationId";
-        RETURN NEW;
-    ELSIF (TG_OP = 'DELETE') THEN
-        UPDATE "Registration"
-        SET "numberOfParticipants" = (
-            SELECT COUNT(*) FROM "Participant" WHERE "registrationId" = OLD."registrationId"
-        )
-        WHERE "registrationId" = OLD."registrationId";
-        RETURN OLD;
-    END IF;
-    RETURN NULL;
-END;
-$function$
-;
-
-CREATE OR REPLACE FUNCTION public.update_primary_application_for_member()
- RETURNS trigger
- LANGUAGE plpgsql
-AS $function$
-DECLARE
-  affected_member uuid;
-BEGIN
-  affected_member := COALESCE(NEW."businessMemberId", OLD."businessMemberId");
-
-  IF affected_member IS NOT NULL THEN
-    UPDATE "BusinessMember"
-    SET "primaryApplicationId" = (
-      SELECT "applicationId"
-      FROM "Application"
-      WHERE "businessMemberId" = affected_member
-      ORDER BY "applicationDate" DESC
-      LIMIT 1
-    )
-    WHERE "businessMemberId" = affected_member;
-  END IF;
-
-  RETURN COALESCE(NEW, OLD);
-END;
-$function$
-;
-
-=======
-=======
->>>>>>> 118d83c11c0668faab0f21ccbd2a87a5c9ff4368
 AS $function$
 BEGIN
     IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
@@ -1350,12 +1257,10 @@ BEGIN
   RETURN COALESCE(NEW, OLD);
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
-<<<<<<< HEAD
 AS $function$
 DECLARE
   v_sponsored_registration_id UUID;
@@ -1415,12 +1320,10 @@ BEGIN
   END IF;
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count_from_participant()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
-<<<<<<< HEAD
 AS $function$
 DECLARE
   v_sponsored_registration_id UUID;
@@ -1458,12 +1361,10 @@ BEGIN
   END IF;
 END;
 $function$;
->>>>>>> config/local-supabase
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count_from_registration()
  RETURNS trigger
  LANGUAGE plpgsql
  SECURITY DEFINER
-<<<<<<< HEAD
 AS $function$
 DECLARE
   v_sponsored_registration_id UUID;
@@ -1526,7 +1427,6 @@ BEGIN
 END;
 $function$;
 create policy "Enable insert for all users"
->>>>>>> config/local-supabase
   on "public"."Participant"
   as permissive
   for insert
@@ -1554,19 +1454,13 @@ create policy "Allow all operations for anyone 11d98ol_1"
   for select
   to anon, authenticated
 using ((bucket_id = 'paymentproofs'::text));
-
-
-
-  create policy "Allow all operations for anyone 11d98ol_2"
+create policy "Allow all operations for anyone 11d98ol_2"
   on "storage"."objects"
   as permissive
   for delete
   to anon, authenticated
 using ((bucket_id = 'paymentproofs'::text));
-
-
-
-  create policy "Allow all operations for anyone 11d98ol_3"
+create policy "Allow all operations for anyone 11d98ol_3"
   on "storage"."objects"
   as permissive
   for update

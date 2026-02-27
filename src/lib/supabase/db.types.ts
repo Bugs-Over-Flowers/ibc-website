@@ -25,7 +25,6 @@ export type Database = {
           companyAddress: string;
           companyName: string;
           emailAddress: string;
-          faxNumber: string;
           identifier: string;
           interviewId: string | null;
           landline: string;
@@ -46,7 +45,6 @@ export type Database = {
           companyAddress: string;
           companyName: string;
           emailAddress: string;
-          faxNumber: string;
           identifier: string;
           interviewId?: string | null;
           landline: string;
@@ -67,7 +65,6 @@ export type Database = {
           companyAddress?: string;
           companyName?: string;
           emailAddress?: string;
-          faxNumber?: string;
           identifier?: string;
           interviewId?: string | null;
           landline?: string;
@@ -110,7 +107,6 @@ export type Database = {
           companyDesignation: string;
           companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
-          faxNumber: string;
           firstName: string;
           landline: string;
           lastName: string;
@@ -126,7 +122,6 @@ export type Database = {
           companyDesignation: string;
           companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
-          faxNumber: string;
           firstName: string;
           landline: string;
           lastName: string;
@@ -142,7 +137,6 @@ export type Database = {
           companyDesignation?: string;
           companyMemberType?: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress?: string;
-          faxNumber?: string;
           firstName?: string;
           landline?: string;
           lastName?: string;

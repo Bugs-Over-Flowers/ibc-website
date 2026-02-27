@@ -1,24 +1,4 @@
--- Fix: Recreate registration_list_item type and get_registration_list function
--- The remote_schema migration recreated the type with wrong enum (PaymentStatus instead of PaymentProofStatus)
-
--- Drop the type with CASCADE to remove dependent function
-DROP TYPE IF EXISTS "public"."registration_list_item" CASCADE;
--- Recreate the composite type with correct PaymentProofStatus enum
-CREATE TYPE "public"."registration_list_item" AS (
-  "registration_id" "uuid",
-  "affiliation" "text",
-  "registration_date" timestamp with time zone,
-  "payment_proof_status" "public"."PaymentProofStatus",
-  "payment_method" "public"."PaymentMethod",
-  "business_member_id" "uuid",
-  "business_name" "text",
-  "is_member" boolean,
-  "registrant" "jsonb",
-  "people" integer,
-  "registration_identifier" "text"
-);
-ALTER TYPE "public"."registration_list_item" OWNER TO "postgres";
--- Recreate get_registration_list function
+-- Include registration identifier in get_registration_list search matching.
 CREATE OR REPLACE FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text" DEFAULT NULL::"text",
@@ -75,7 +55,8 @@ BEGIN
         WHEN p_search_text IS NOT NULL THEN
           GREATEST(
             similarity(COALESCE(bm."businessName", r."nonMemberName"), p_search_text),
-            similarity(p_data.p_first_name || ' ' || p_data.p_last_name, p_search_text)
+            similarity(p_data.p_first_name || ' ' || p_data.p_last_name, p_search_text),
+            similarity(r."identifier", p_search_text)
           )
         ELSE 0
       END AS sim_score,
@@ -85,6 +66,7 @@ BEGIN
             COALESCE(bm."businessName", r."nonMemberName") ILIKE v_search_pattern
             OR (p_data.p_first_name || ' ' || p_data.p_last_name) ILIKE v_search_pattern
             OR p_data.p_email ILIKE v_search_pattern
+            OR r."identifier" ILIKE v_search_pattern
           )
         ELSE FALSE
       END AS is_exact_match
@@ -106,24 +88,9 @@ BEGIN
     r."registrationDate" DESC;
 END;
 $$;
+
 ALTER FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text",
   "p_payment_proof_status" "public"."PaymentProofStatus"
 ) OWNER TO "postgres";
--- Grant permissions
-GRANT ALL ON FUNCTION "public"."get_registration_list"(
-  "p_event_id" "uuid",
-  "p_search_text" "text",
-  "p_payment_proof_status" "public"."PaymentProofStatus"
-) TO "anon";
-GRANT ALL ON FUNCTION "public"."get_registration_list"(
-  "p_event_id" "uuid",
-  "p_search_text" "text",
-  "p_payment_proof_status" "public"."PaymentProofStatus"
-) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_registration_list"(
-  "p_event_id" "uuid",
-  "p_search_text" "text",
-  "p_payment_proof_status" "public"."PaymentProofStatus"
-) TO "service_role";

@@ -82,7 +82,6 @@ const initialState: MembershipApplicationStore = {
       companyAddress: "",
       sectorId: "",
       landline: "",
-      faxNumber: "",
       mobileNumber: "",
       emailAddress: "",
       websiteURL: "",
@@ -101,7 +100,6 @@ const initialState: MembershipApplicationStore = {
           birthdate: undefined as unknown as Date,
           companyDesignation: "",
           landline: "",
-          faxNumber: "",
           mobileNumber: "",
           emailAddress: "",
         },
@@ -115,7 +113,6 @@ const initialState: MembershipApplicationStore = {
           birthdate: undefined as unknown as Date,
           companyDesignation: "",
           landline: "",
-          faxNumber: "",
           mobileNumber: "",
           emailAddress: "",
         },
@@ -215,9 +212,9 @@ const useMembershipApplicationStore = create<
     }),
     {
       name: "membership-application-storage",
-      version: 3,
+      version: 4,
       migrate: (persistedState, version) => {
-        if (version < 3) {
+        if (version < 4) {
           const oldState =
             persistedState as Partial<MembershipApplicationStore>;
           return {
@@ -244,7 +241,6 @@ const useMembershipApplicationStore = create<
               companyAddress: state.applicationData.step2.companyAddress,
               sectorId: state.applicationData.step2.sectorId,
               landline: state.applicationData.step2.landline,
-              faxNumber: state.applicationData.step2.faxNumber,
               mobileNumber: state.applicationData.step2.mobileNumber,
               emailAddress: state.applicationData.step2.emailAddress,
               websiteURL: state.applicationData.step2.websiteURL,
