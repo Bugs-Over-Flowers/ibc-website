@@ -3,7 +3,10 @@ import { Constants } from "../supabase/db.types";
 
 export const phoneSchema = z
   .string()
-  .regex(/^(\+63|0)?9\d{9}$/, "Invalid Philippine Phone Number");
+  .regex(
+    /^(\+63|0)9\d{9}$/,
+    "Invalid Philippine Phone Number (e.g. +639######### or 09#########)",
+  );
 
 // TODO : Need to verify this format
 export const telefaxSchema = z
