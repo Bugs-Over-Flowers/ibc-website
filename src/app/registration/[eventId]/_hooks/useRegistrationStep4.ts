@@ -47,8 +47,6 @@ export const useRegistrationStep4 = () => {
     (state) => state.setRegistrationData,
   );
 
-  // const eventDetails = useRegistrationStore((state) => state.eventDetails);
-
   const { execute: submitRegistration } = useSubmitRegistration();
   const { execute: sendEmail } = useSendRegistrationEmail();
   const form = useAppForm({
@@ -56,7 +54,6 @@ export const useRegistrationStep4 = () => {
     validationLogic: revalidateLogic(),
     validators: {
       onDynamic: StandardRegistrationStep4Schema,
-      // onSubmit: zodValidator(StandardRegistrationStep4Schema),
     },
     onSubmit: async ({ value }) => {
       const refinedValue = StandardRegistrationStep4Schema.parse(value);

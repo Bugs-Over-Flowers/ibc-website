@@ -7,6 +7,7 @@ import type { Tables } from "@/lib/supabase/db.types";
 type Event = Tables<"Event">;
 
 import { Calendar, Clock, MapPin, Sparkles } from "lucide-react";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fadeInUp } from "@/lib/animations/fade";
@@ -78,13 +79,15 @@ export function EventInfoCard({ event }: EventInfoCardProps) {
 
       {/* Description */}
       <motion.div variants={fadeInUp}>
-        <p
-          className={`text-muted-foreground leading-relaxed ${
-            !expanded && "line-clamp-4"
-          }`}
-        >
-          {event.description || "No description available for this event."}
-        </p>
+        {event.description ? (
+          <div className={!expanded ? "line-clamp-4" : ""}>
+            <RichTextDisplay content={event.description} />
+          </div>
+        ) : (
+          <p className="text-muted-foreground italic">
+            No description available for this event.
+          </p>
+        )}
         {event.description && event.description.length > 300 && (
           <Button
             className="mt-2 px-2 font-medium text-primary text-sm transition-colors hover:text-primary/80"

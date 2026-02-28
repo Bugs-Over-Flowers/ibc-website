@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { deleteEvents } from "@/server/events/actions/deleteEvents";
+import { deleteEvents } from "@/server/events/mutations/deleteEvents";
 
 interface ConfirmDialogProps {
   eventId: string;

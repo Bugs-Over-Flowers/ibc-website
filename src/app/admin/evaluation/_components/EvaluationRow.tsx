@@ -12,7 +12,7 @@ import { renderStars } from "@/lib/evaluation/ratingStarsClient";
 import { calculateOverallRating } from "@/lib/evaluation/ratingUtils";
 import tryCatch from "@/lib/server/tryCatch";
 import { cn } from "@/lib/utils";
-import { deleteEvaluation } from "@/server/evaluation/actions/deleteEvaluation";
+import { deleteEvaluation } from "@/server/evaluation/mutations/deleteEvaluation";
 import type { EvaluationWithEventRpc } from "@/server/evaluation/queries/getEvaluationbyId";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 

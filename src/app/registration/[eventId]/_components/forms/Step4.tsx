@@ -1,7 +1,7 @@
 import { formatDate } from "date-fns";
 import { CircleAlert, User } from "lucide-react";
 import Image from "next/image";
-import { type FormEvent, useMemo } from "react";
+import { useMemo } from "react";
 import FormButtons from "@/components/FormButtons";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -41,7 +41,7 @@ export default function Step4({ members }: Step4Props) {
     return "";
   }, [members, step1Data]);
 
-  const onNext = (e?: FormEvent) => {
+  const onNext = (e?: React.SubmitEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();

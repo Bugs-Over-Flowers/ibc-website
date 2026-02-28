@@ -1,5 +1,5 @@
 import z from "zod";
-import { PaymentStatusEnum } from "../utils";
+import { PaymentProofStatusEnum } from "../utils";
 
 const CheckInSchema = z.object({
   remarks: z.string().nullable(),
@@ -25,6 +25,59 @@ const ParticipantWithCheckInSchema = z.object({
   }),
 });
 
+const RawCheckInForDateSchema = z.object({
+  event: z.object({
+    eventId: z.string(),
+  }),
+  registrationId: z.string(),
+  nonMemberName: z.string().nullable(),
+  registrationDate: z.string(),
+  paymentMethod: z.enum(["BPI", "ONSITE"]),
+  identifier: z.string(),
+  paymentProofStatus: PaymentProofStatusEnum,
+  businessMember: z
+    .object({
+      businessName: z.string(),
+    })
+    .nullable(),
+  participants: z.array(
+    z.object({
+      email: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      participantId: z.string(),
+      isPrincipal: z.boolean(),
+      contactNumber: z.string(),
+      checkIn: z.array(CheckInSchema),
+    }),
+  ),
+  proofImage: z.array(
+    z.object({
+      path: z.string(),
+      proofImageId: z.string(),
+    }),
+  ),
+});
+
+export const normalizeCheckInForEventDay = (
+  rawData: unknown,
+  eventDayId: string,
+) => {
+  const parsed = RawCheckInForDateSchema.parse(rawData);
+
+  return {
+    ...parsed,
+    paymentProofStatus: parsed.paymentProofStatus,
+    participants: parsed.participants.map((participant) => ({
+      ...participant,
+      checkIn: participant.checkIn.filter(
+        (item) => item.eventDayId === eventDayId,
+      ),
+    })),
+    proofImage: parsed.proofImage.length > 0 ? parsed.proofImage[0] : null,
+  };
+};
+
 export const GetCheckInForDateSchema = z
   .object({
     event: z.object({
@@ -35,13 +88,19 @@ export const GetCheckInForDateSchema = z
     registrationDate: z.string(),
     paymentMethod: z.enum(["BPI", "ONSITE"]),
     identifier: z.string(),
-    paymentStatus: PaymentStatusEnum,
+    paymentProofStatus: PaymentProofStatusEnum,
     businessMember: z
       .object({
         businessName: z.string(),
       })
       .nullable(),
     participants: z.array(ParticipantWithCheckInSchema),
+    proofImage: z
+      .object({
+        path: z.string(),
+        proofImageId: z.string(),
+      })
+      .nullable(),
   })
   .transform((data) => ({
     ...data,

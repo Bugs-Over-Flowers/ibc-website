@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { getEventDays } from "@/server/events/actions/getEventDays";
+import type { getEventDays } from "@/server/events/mutations/getEventDays";
 import CheckInListStats from "./CheckInListStats";
 
 interface CheckInListTabWrapperProps {
@@ -42,7 +42,7 @@ export default function CheckInListTabWrapper({
         <TabsList className="gap-3">
           {tabs?.map((eventDay) => (
             <TabsTrigger key={eventDay.eventDayId} value={eventDay.eventDayId}>
-              {eventDay.label} ({checkInCounts[eventDay.eventDayId] ?? 0})
+              {eventDay.label}
             </TabsTrigger>
           ))}
         </TabsList>

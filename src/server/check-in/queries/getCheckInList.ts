@@ -1,6 +1,9 @@
 import "server-only";
 
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyRealtime60sCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 import { CheckInListSchema } from "@/lib/validation/check-in/check-in-list";
 
@@ -8,6 +11,12 @@ export async function getCheckInList(
   cookies: RequestCookie[],
   eventDayId: string,
 ) {
+  "use cache";
+  applyRealtime60sCache();
+  cacheTag(CACHE_TAGS.checkIns.all);
+  cacheTag(CACHE_TAGS.checkIns.list);
+  cacheTag(CACHE_TAGS.checkIns.eventDay);
+
   const supabase = await createClient(cookies);
 
   const { data, error } = await supabase
@@ -17,7 +26,10 @@ export async function getCheckInList(
       checkInId,
       checkInTime,
       remarks,
-      eventDayId,
+      eventDay:EventDay(
+        eventDayId,
+        label
+      ),
       participant:Participant (
         participantId,
         firstName,
@@ -43,18 +55,13 @@ export async function getCheckInList(
     throw new Error(error.message);
   }
 
-  console.log("Fetched check-in data:", data);
-  console.log(
-    "Identifier:",
-    data.map((i) => i.participant.registration.identifier),
-  );
-
   // Transform nested data to flat structure
   const transformed = data.map((item) => ({
     checkInId: item.checkInId,
     checkInTime: item.checkInTime,
     remarks: item.remarks,
-    eventDayId: item.eventDayId,
+    eventDayId: item.eventDay.eventDayId,
+    eventDayLabel: item.eventDay.label,
     participantId: item.participant.participantId,
     firstName: item.participant.firstName,
     lastName: item.participant.lastName,

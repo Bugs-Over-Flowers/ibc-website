@@ -96,7 +96,7 @@ export function Step2Company({ form, sectors }: StepProps) {
           )}
         </form.AppField>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <form.AppField name="landline">
             {(field) => (
               <field.TextField
@@ -131,40 +131,6 @@ export function Step2Company({ form, sectors }: StepProps) {
             )}
           </form.AppField>
 
-          <form.AppField name="faxNumber">
-            {(field) => (
-              <field.TextField
-                label="Telefax"
-                onKeyDown={(e) => {
-                  // Allow: backspace, delete, tab, escape, enter, home, end, arrows
-                  if (
-                    [
-                      "Backspace",
-                      "Delete",
-                      "Tab",
-                      "Escape",
-                      "Enter",
-                      "Home",
-                      "End",
-                      "ArrowLeft",
-                      "ArrowRight",
-                    ].includes(e.key) ||
-                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                    ((e.ctrlKey || e.metaKey) &&
-                      ["a", "c", "v", "x"].includes(e.key))
-                  ) {
-                    return;
-                  }
-                  // Block if not a number or hyphen
-                  if (!/[0-9-]/.test(e.key)) {
-                    e.preventDefault();
-                  }
-                }}
-                placeholder="XXXX-XXXX"
-              />
-            )}
-          </form.AppField>
-
           <form.AppField name="mobileNumber">
             {(field) => (
               <field.TextField
@@ -194,7 +160,7 @@ export function Step2Company({ form, sectors }: StepProps) {
                     e.preventDefault();
                   }
                 }}
-                placeholder="09XXXXXXXXX"
+                placeholder="+639######### or 09#########"
               />
             )}
           </form.AppField>

@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,7 +15,7 @@ import {
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
-import { getEventDays } from "@/server/events/actions/getEventDays";
+import { getEventDays } from "@/server/events/mutations/getEventDays";
 
 type EventDay = Database["public"]["Tables"]["EventDay"]["Row"];
 
@@ -35,12 +35,16 @@ export default function AttendanceModal({
   // Fetch event days when modal opens (no tryCatch - getEventDays already returns ServerFunctionResult)
   const { execute, data, error, isPending } = useAction(tryCatch(getEventDays));
 
-  // Fetch data when modal opens or eventId changes
-  useEffect(() => {
+  const handleExecute = useEffectEvent((isOpen: boolean, eventId: string) => {
     if (isOpen && eventId) {
       execute({ eventId });
     }
-  }, [isOpen, eventId, execute]);
+  });
+
+  // Fetch data when modal opens or eventId changes
+  useEffect(() => {
+    handleExecute(isOpen, eventId);
+  }, [isOpen, eventId]);
 
   const handleClick = (eventDayId: string) => {
     setIsOpen(false);

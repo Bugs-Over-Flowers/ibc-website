@@ -4,8 +4,8 @@ import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 
 import { setCookieData } from "@/server/actions.utils";
-import { sendRegistrationConfirmationEmail } from "@/server/emails/actions/sendRegistrationConfirmationEmail";
-import { deleteRegistration } from "@/server/registration/actions/deleteRegistration";
+import { sendRegistrationConfirmationEmail } from "@/server/emails/mutations/sendRegistrationConfirmationEmail";
+import { deleteRegistration } from "@/server/registration/mutations/deleteRegistration";
 
 /**
  * Hook for sending registration confirmation email with QR code.
