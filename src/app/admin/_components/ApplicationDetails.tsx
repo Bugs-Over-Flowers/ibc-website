@@ -1,4 +1,5 @@
 import { ChevronLeft } from "lucide-react";
+import type { Route } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,12 +14,34 @@ import { RepresentativesCard } from "../application/[id]/_components/Representat
 
 interface ApplicationDetailsProps {
   applicationId: string;
-  source: "applications" | "members";
+  source: "applications" | "members" | "history";
+  memberId?: string;
+}
+
+function getBackLink(
+  source: ApplicationDetailsProps["source"],
+  memberId?: string,
+): { href: Route; label: string } {
+  switch (source) {
+    case "history":
+      return {
+        href: `/admin/members/${memberId}/history` as Route,
+        label: "Back to Application History",
+      };
+    case "members":
+      return { href: "/admin/members" as Route, label: "Back to Members" };
+    default:
+      return {
+        href: "/admin/application" as Route,
+        label: "Back to Applications",
+      };
+  }
 }
 
 export async function ApplicationDetails({
   applicationId,
   source,
+  memberId,
 }: ApplicationDetailsProps) {
   const cookieStore = await cookies();
 
@@ -30,18 +53,18 @@ export async function ApplicationDetails({
     notFound();
   }
 
+  const backLink = getBackLink(source, memberId);
+
   return (
     <>
-      <Link
-        href={source === "members" ? "/admin/members" : "/admin/application"}
-      >
+      <Link href={backLink.href}>
         <Button
           className="mb-4 border border-border active:scale-95 active:opacity-80"
           size="sm"
           variant="ghost"
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
-          {source === "members" ? "Back to Members" : "Back to Applications"}
+          {backLink.label}
         </Button>
       </Link>
 

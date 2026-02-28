@@ -665,6 +665,10 @@ export type Database = {
         Args: { p_sponsored_registration_id: string };
         Returns: Json;
       };
+      get_application_history: {
+        Args: { p_member_id: string };
+        Returns: Json;
+      };
       get_all_evaluations: {
         Args: never;
         Returns: {
