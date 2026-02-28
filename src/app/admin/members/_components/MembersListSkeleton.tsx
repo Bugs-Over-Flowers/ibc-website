@@ -9,7 +9,7 @@ export default function MembersListSkeleton() {
           <Skeleton className="h-6 w-48" />
         </CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-3">
+      <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 5 }, (_, i) => `skeleton-${i}`).map((key) => (
           <div className="space-y-3" key={key}>
             <Skeleton className="aspect-square w-full" />

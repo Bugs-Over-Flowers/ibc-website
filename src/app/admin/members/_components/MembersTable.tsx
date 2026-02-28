@@ -66,7 +66,7 @@ export function MembersTable({ members }: MembersTableProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-3">
+      <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {members.map((member) => (
           <MembersTableRow
             isSelected={selectedMembers.has(member.businessMemberId)}
