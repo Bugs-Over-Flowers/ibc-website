@@ -1,11 +1,13 @@
 "use client";
 
+import { ExternalLink } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
 interface MembersTableRowProps {
@@ -43,19 +45,19 @@ export function MembersTableRow({
   };
 
   return (
-    <div className="flex w-full flex-col gap-3 overflow-hidden rounded-lg border bg-background p-3 shadow-sm md:flex-row md:items-center md:gap-4">
+    <div className="flex w-full flex-col gap-3 overflow-hidden rounded-lg border bg-background p-3 shadow-sm md:flex-row md:items-stretch">
       {/* Clickable area */}
       <button
-        className="flex w-full cursor-pointer flex-col gap-3 overflow-hidden text-left md:flex-row md:items-center md:gap-4"
+        className="flex w-full cursor-pointer flex-col gap-3 overflow-hidden text-left md:w-72 md:shrink-0"
         onClick={handleDoubleTap}
         onKeyDown={handleKeyDown}
         tabIndex={0}
         type="button"
       >
         {/* Image with status badge and checkbox */}
-        <div className="relative aspect-square h-auto w-full shrink-0 md:aspect-auto md:h-40 md:w-40">
+        <div className="relative aspect-square h-72 w-full shrink-0">
           {/* Checkbox - top left corner */}
-          <div className="absolute top-2 left-2 z-10 rounded-sm bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
+          <div className="absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
             <Checkbox
               checked={isSelected}
               className="size-5"
@@ -83,18 +85,13 @@ export function MembersTableRow({
           {/* Status badge - top right corner */}
           <div className="absolute top-2 right-2">
             <Badge
-              className={
-                member.membershipStatus === "cancelled"
-                  ? "bg-gray-900 text-white capitalize"
-                  : "bg-background text-muted-foreground capitalize"
-              }
-              variant={
-                member.membershipStatus === "paid"
-                  ? "default"
-                  : member.membershipStatus === "cancelled"
-                    ? "default"
-                    : "destructive"
-              }
+              className={cn(
+                "border border-background text-white capitalize",
+                member.membershipStatus === "cancelled" && "bg-status-red",
+                member.membershipStatus === "paid" && "bg-status-green",
+                member.membershipStatus === "unpaid" && "bg-status-orange",
+              )}
+              variant="default"
             >
               {member.membershipStatus}
             </Badge>
@@ -102,33 +99,41 @@ export function MembersTableRow({
         </div>
 
         {/* Middle content */}
-        <div className="relative flex w-full flex-1 flex-col gap-2">
-          <div className="absolute top-0 right-0">
-            <p className="text-muted-foreground text-xs italic opacity-50">
-              {member.identifier}
-            </p>
+        <div className="relative flex w-full flex-1 flex-col gap-2 md:py-4">
+          {/* Company name with website icon on right */}
+          <div className="flex items-start justify-between gap-2 pt-4 md:pt-0">
+            <h3 className="line-clamp-1 flex-1 font-semibold text-lg md:text-2xl">
+              {member.businessName}
+            </h3>
+            {member.websiteURL && (
+              <a
+                className="inline-flex shrink-0 text-blue-600 transition-colors hover:text-blue-700"
+                href={member.websiteURL}
+                onClick={(e) => e.stopPropagation()}
+                rel="noopener noreferrer"
+                target="_blank"
+                title={member.websiteURL}
+              >
+                <ExternalLink className="mt-1 size-4" />
+              </a>
+            )}
           </div>
-          <h3 className="line-clamp-1 pt-4 font-semibold text-lg md:text-2xl">
-            {member.businessName}
-          </h3>
-          <p className="line-clamp-1 text-sm">
+
+          {/* Sector with fixed 2 line height */}
+          <p className="line-clamp-2 h-[2.8em] text-muted-foreground text-sm opacity-60">
             {member.Sector?.sectorName || "—"}
           </p>
           <div className="h-px w-full bg-border" />
-          {member.websiteURL && (
-            <a
-              className="inline-block max-w-fit truncate text-blue-600 text-xs hover:underline md:text-sm"
-              href={member.websiteURL}
-              onClick={(e) => e.stopPropagation()}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              {member.websiteURL}
-            </a>
-          )}
-          <p className="text-muted-foreground text-xs">
-            Join Date: {new Date(member.joinDate).toLocaleDateString()}
-          </p>
+
+          {/* Identifier and date at bottom */}
+          <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+            <p className="text-muted-foreground text-xs opacity-60">
+              {member.identifier}
+            </p>
+            <p className="text-muted-foreground text-xs opacity-60">
+              {new Date(member.joinDate).toLocaleDateString()}
+            </p>
+          </div>
 
           <div className="flex justify-center pt-2">
             <p className="text-muted-foreground text-xs italic opacity-50">
@@ -136,9 +141,6 @@ export function MembersTableRow({
             </p>
           </div>
         </div>
-
-        {/* Divider on desktop */}
-        <div className="hidden h-full w-px bg-border md:block" />
       </button>
     </div>
   );
