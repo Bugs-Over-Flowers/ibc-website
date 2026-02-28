@@ -149,7 +149,6 @@ export const useMembershipStep4 = ({
             emailAddress: applicationData.step2.emailAddress,
             landline: applicationData.step2.landline,
             mobileNumber: applicationData.step2.mobileNumber,
-            faxNumber: applicationData.step2.faxNumber,
             logoImageURL,
             representatives: applicationData.step3.representatives,
             paymentMethod: refinedValue.paymentMethod,

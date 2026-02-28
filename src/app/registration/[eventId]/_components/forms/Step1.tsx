@@ -1,5 +1,4 @@
 import { Building, CircleAlert } from "lucide-react";
-import type { FormEvent } from "react";
 import FormButtons from "@/components/FormButtons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,7 +24,7 @@ interface Step1Props {
 const Step1 = ({ members }: Step1Props) => {
   const form = useRegistrationStep1();
 
-  const onNext = async (e?: FormEvent) => {
+  const onNext = async (e?: React.SubmitEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();

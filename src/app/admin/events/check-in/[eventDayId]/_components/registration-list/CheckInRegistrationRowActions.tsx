@@ -10,7 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useScanQR } from "../_hooks/useScanQR";
+import { useScanQR } from "../../_hooks/useScanQR";
 
 interface CheckInRegistrationRowActionsProps {
   eventDayId: string;

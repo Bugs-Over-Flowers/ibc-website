@@ -132,7 +132,7 @@ export function Step3Representatives({ form }: StepProps) {
                       )}
                     </form.AppField>
 
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <form.AppField
                         name={`representatives[${index}].landline`}
                       >
@@ -170,42 +170,6 @@ export function Step3Representatives({ form }: StepProps) {
                       </form.AppField>
 
                       <form.AppField
-                        name={`representatives[${index}].faxNumber`}
-                      >
-                        {(subField) => (
-                          <subField.TextField
-                            label="Telefax"
-                            onKeyDown={(e) => {
-                              // Allow: backspace, delete, tab, escape, enter, home, end, arrows
-                              if (
-                                [
-                                  "Backspace",
-                                  "Delete",
-                                  "Tab",
-                                  "Escape",
-                                  "Enter",
-                                  "Home",
-                                  "End",
-                                  "ArrowLeft",
-                                  "ArrowRight",
-                                ].includes(e.key) ||
-                                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                                ((e.ctrlKey || e.metaKey) &&
-                                  ["a", "c", "v", "x"].includes(e.key))
-                              ) {
-                                return;
-                              }
-                              // Block if not a number or hyphen
-                              if (!/[0-9-]/.test(e.key)) {
-                                e.preventDefault();
-                              }
-                            }}
-                            placeholder="XXXX-XXXX"
-                          />
-                        )}
-                      </form.AppField>
-
-                      <form.AppField
                         name={`representatives[${index}].mobileNumber`}
                       >
                         {(subField) => (
@@ -236,7 +200,7 @@ export function Step3Representatives({ form }: StepProps) {
                                 e.preventDefault();
                               }
                             }}
-                            placeholder="09XXXXXXXXX"
+                            placeholder="+639######### or 09#########"
                           />
                         )}
                       </form.AppField>

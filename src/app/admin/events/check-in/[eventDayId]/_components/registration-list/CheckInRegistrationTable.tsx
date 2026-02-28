@@ -39,18 +39,23 @@ const getColumns = ({
   {
     accessorKey: "paymentStatus",
     header: "Payment Status",
-    cell: ({ row }) => (
-      <Badge
-        className={cn(
-          "rounded-full",
-          row.original.paymentProofStatus === "accepted"
-            ? "bg-green-600"
-            : "bg-yellow-600",
-        )}
-      >
-        {row.original.paymentProofStatus}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const paymentProofStatus = row.original.paymentProofStatus;
+      return (
+        <Badge
+          className={cn(
+            "rounded-full",
+            paymentProofStatus === "accepted"
+              ? "bg-green-600"
+              : paymentProofStatus === "pending"
+                ? "bg-yellow-600"
+                : "bg-red-600",
+          )}
+        >
+          {row.original.paymentProofStatus}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "people",
