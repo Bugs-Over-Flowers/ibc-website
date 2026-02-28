@@ -55,7 +55,11 @@ export async function ApplicationDetails({
         applicationType={toPascalCaseWithSpaces(application.applicationType)}
         companyAddress={toPascalCaseWithSpaces(application.companyAddress)}
         companyName={application.companyName}
-        sectorName={toPascalCaseWithSpaces(application.Sector?.sectorName)}
+        sectorName={
+          application.Sector?.sectorName
+            ? toPascalCaseWithSpaces(application.Sector.sectorName)
+            : undefined
+        }
         websiteURL={application.websiteURL}
       />
 
