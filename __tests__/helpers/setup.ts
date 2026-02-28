@@ -3,13 +3,26 @@ import "@testing-library/jest-dom/vitest";
 import { checkTestEnvironment } from "./env";
 
 function isUsableStorage(value: unknown): value is Storage {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as Storage).getItem === "function" &&
-    typeof (value as Storage).setItem === "function" &&
-    typeof (value as Storage).removeItem === "function"
-  );
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    typeof (value as Storage).getItem !== "function" ||
+    typeof (value as Storage).setItem !== "function" ||
+    typeof (value as Storage).removeItem !== "function"
+  ) {
+    return false;
+  }
+
+  // Node 25+ exposes a localStorage stub that has setItem but throws at runtime
+  // unless --localstorage-file is provided. Guard against that.
+  try {
+    const testKey = "__vitest_storage_probe__";
+    (value as Storage).setItem(testKey, "1");
+    (value as Storage).removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function createMemoryStorage(): Storage {
