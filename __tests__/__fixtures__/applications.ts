@@ -54,6 +54,7 @@ export function createMockApplication(
     faxNumber: null,
     logoPath: null,
     interviewId: null,
+    Interview: null,
     updatedAt: "2025-06-01T10:00:00Z",
     ...overrides,
   } as unknown as ApplicationWithMembers;

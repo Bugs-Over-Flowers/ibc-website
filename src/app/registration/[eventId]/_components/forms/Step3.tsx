@@ -1,6 +1,6 @@
 import { Banknote, CreditCard, Users } from "lucide-react";
 import Image from "next/image";
-import { Activity, type FormEvent } from "react";
+import { Activity } from "react";
 import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import FormButtons from "@/components/FormButtons";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export default function Step3() {
     });
   };
 
-  const onNext = async (e?: FormEvent) => {
+  const onNext = async (e?: React.SubmitEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();

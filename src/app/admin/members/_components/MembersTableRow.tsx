@@ -48,7 +48,7 @@ export function MembersTableRow({
     <div className="flex w-full flex-col gap-3 overflow-hidden rounded-lg border bg-background p-3 shadow-sm md:flex-row md:items-stretch">
       {/* Clickable area */}
       <button
-        className="flex w-full cursor-pointer flex-col gap-3 overflow-hidden text-left md:w-72 md:flex-shrink-0"
+        className="flex w-full cursor-pointer flex-col gap-3 overflow-hidden text-left md:w-72 md:shrink-0"
         onClick={handleDoubleTap}
         onKeyDown={handleKeyDown}
         tabIndex={0}
@@ -107,7 +107,7 @@ export function MembersTableRow({
             </h3>
             {member.websiteURL && (
               <a
-                className="inline-flex flex-shrink-0 text-blue-600 transition-colors hover:text-blue-700"
+                className="inline-flex shrink-0 text-blue-600 transition-colors hover:text-blue-700"
                 href={member.websiteURL}
                 onClick={(e) => e.stopPropagation()}
                 rel="noopener noreferrer"

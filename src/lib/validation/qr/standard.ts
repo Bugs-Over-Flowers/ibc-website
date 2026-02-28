@@ -51,6 +51,12 @@ const RawCheckInForDateSchema = z.object({
       checkIn: z.array(CheckInSchema),
     }),
   ),
+  proofImage: z.array(
+    z.object({
+      path: z.string(),
+      proofImageId: z.string(),
+    }),
+  ),
 });
 
 export const normalizeCheckInForEventDay = (
@@ -68,6 +74,7 @@ export const normalizeCheckInForEventDay = (
         (item) => item.eventDayId === eventDayId,
       ),
     })),
+    proofImage: parsed.proofImage.length > 0 ? parsed.proofImage[0] : null,
   };
 };
 
@@ -88,6 +95,12 @@ export const GetCheckInForDateSchema = z
       })
       .nullable(),
     participants: z.array(ParticipantWithCheckInSchema),
+    proofImage: z
+      .object({
+        path: z.string(),
+        proofImageId: z.string(),
+      })
+      .nullable(),
   })
   .transform((data) => ({
     ...data,

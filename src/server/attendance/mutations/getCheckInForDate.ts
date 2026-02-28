@@ -27,6 +27,10 @@ export const getCheckInForDate = async (
         businessMember:BusinessMember(
           businessName
         ),
+        proofImage:ProofImage(
+          path,
+          proofImageId
+        ),
         participants:Participant (
           email,
           firstName,
