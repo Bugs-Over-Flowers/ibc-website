@@ -1,11 +1,10 @@
 "use client";
 import { type IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { useParams } from "next/navigation";
-import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { RegistrationIdentifier } from "@/lib/validation/utils";
-import useAttendanceStore from "../_hooks/useAttendanceStore";
-import { useScanQR } from "../_hooks/useScanQR";
+import useAttendanceStore from "../../_hooks/useAttendanceStore";
+import { useScanQR } from "../../_hooks/useScanQR";
 
 interface QRCodeScannerProps {
   eventId: string;
@@ -35,13 +34,9 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
       return;
     }
 
-    const { error, data } = await scanQRData(code, eventDayId);
+    const { error } = await scanQRData(code, eventDayId);
     if (error) {
       return;
-    }
-
-    if (data?.message) {
-      toast.warning(data.message);
     }
   };
   return (

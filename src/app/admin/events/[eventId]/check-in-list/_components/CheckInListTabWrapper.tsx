@@ -42,7 +42,7 @@ export default function CheckInListTabWrapper({
         <TabsList className="gap-3">
           {tabs?.map((eventDay) => (
             <TabsTrigger key={eventDay.eventDayId} value={eventDay.eventDayId}>
-              {eventDay.label} ({checkInCounts[eventDay.eventDayId] ?? 0})
+              {eventDay.label}
             </TabsTrigger>
           ))}
         </TabsList>

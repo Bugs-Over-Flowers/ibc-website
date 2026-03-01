@@ -36,7 +36,7 @@ export default function CheckInListStats({
           icon: <CheckCircle />,
         },
         {
-          label: "Attendance Rate",
+          label: `Attendance Rate (${eventDayLabel})`,
           data: `${percentage}%`,
           className: "text-purple-600",
           icon: <BarChart />,

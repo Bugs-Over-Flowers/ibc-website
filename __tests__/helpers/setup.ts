@@ -2,6 +2,71 @@ import { afterAll, afterEach, beforeAll, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { checkTestEnvironment } from "./env";
 
+function isUsableStorage(value: unknown): value is Storage {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    typeof (value as Storage).getItem !== "function" ||
+    typeof (value as Storage).setItem !== "function" ||
+    typeof (value as Storage).removeItem !== "function"
+  ) {
+    return false;
+  }
+
+  // Node 25+ exposes a localStorage stub that has setItem but throws at runtime
+  // unless --localstorage-file is provided. Guard against that.
+  try {
+    const testKey = "__vitest_storage_probe__";
+    (value as Storage).setItem(testKey, "1");
+    (value as Storage).removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function createMemoryStorage(): Storage {
+  const store = new Map<string, string>();
+
+  return {
+    get length() {
+      return store.size;
+    },
+    clear: () => {
+      store.clear();
+    },
+    getItem: (key: string) => {
+      return store.get(key) ?? null;
+    },
+    key: (index: number) => {
+      return [...store.keys()][index] ?? null;
+    },
+    removeItem: (key: string) => {
+      store.delete(key);
+    },
+    setItem: (key: string, value: string) => {
+      store.set(key, value);
+    },
+  };
+}
+
+function ensureStorage(storageKey: "localStorage" | "sessionStorage"): void {
+  const currentStorage = globalThis[storageKey];
+  if (isUsableStorage(currentStorage)) {
+    return;
+  }
+
+  Object.defineProperty(globalThis, storageKey, {
+    configurable: true,
+    enumerable: true,
+    value: createMemoryStorage(),
+    writable: true,
+  });
+}
+
+ensureStorage("localStorage");
+ensureStorage("sessionStorage");
+
 // Setup runs before all tests
 beforeAll(() => {
   console.log("🔧 Initializing test environment...");
@@ -30,6 +95,8 @@ beforeAll(() => {
 afterEach(() => {
   // Clear all mocks after each test
   vi.clearAllMocks();
+  localStorage.clear();
+  sessionStorage.clear();
 });
 
 // Cleanup after all tests
