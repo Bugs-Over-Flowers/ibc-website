@@ -1,11 +1,5 @@
 import { Calendar, MapPin, Tag } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/events/eventUtils";
 import type { Database } from "@/lib/supabase/db.types";
