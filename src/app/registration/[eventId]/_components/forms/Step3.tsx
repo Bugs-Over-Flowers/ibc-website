@@ -88,6 +88,7 @@ function PaymentDetails() {
     (s) => s.sponsorFeeDeduction,
   );
   const sponsorUuid = useRegistrationStore((s) => s.sponsorUuid);
+  const sponsoredBy = useRegistrationStore((s) => s.sponsoredBy);
 
   const baseFee = eventDetails?.registrationFee || 0;
   const otherParticipantsCount =
@@ -121,6 +122,9 @@ function PaymentDetails() {
             </span>
           )}
         </CardTitle>
+        {isSponsored && sponsoredBy ? (
+          <CardDescription>Sponsored by {sponsoredBy}</CardDescription>
+        ) : null}
       </CardHeader>
       <CardContent className="grid gap-4 text-sm">
         <div className="grid gap-2">

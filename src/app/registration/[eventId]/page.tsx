@@ -52,6 +52,7 @@ async function RegistrationPage({
     sponsorUuid: string;
     sponsoredRegistrationId: string;
     feeDeduction: number;
+    sponsoredBy: string;
   } | null = null;
 
   if (sponsorUuid) {
@@ -72,6 +73,7 @@ async function RegistrationPage({
           sponsoredRegistrationId:
             sponsoredRegistration.sponsoredRegistrationId,
           feeDeduction: Number(sponsoredRegistration.feeDeduction),
+          sponsoredBy: sponsoredRegistration.sponsoredBy,
         };
       }
     }
@@ -93,7 +95,9 @@ async function RegistrationPage({
             </Button>
           </Link>
           <span className="text-muted-foreground text-sm">
-            Standard Registration
+            {sponsorInfo
+              ? `Sponsored by ${sponsorInfo.sponsoredBy}`
+              : "Standard Registration"}
           </span>
         </div>
 
@@ -101,6 +105,7 @@ async function RegistrationPage({
           members={members}
           sponsoredRegistrationId={sponsorInfo?.sponsoredRegistrationId}
           sponsorFeeDeduction={sponsorInfo?.feeDeduction}
+          sponsorName={sponsorInfo?.sponsoredBy}
           sponsorUuid={sponsorInfo?.sponsorUuid}
         />
       </div>

@@ -14,6 +14,7 @@ interface RegistrationStore {
   registrationData: StandardRegistrationSchema;
   createdRegistrationId?: string;
   sponsorUuid?: string;
+  sponsoredBy?: string;
   sponsoredRegistrationId?: string;
   sponsorFeeDeduction?: number;
 }
@@ -28,6 +29,7 @@ interface RegistrationStoreActions {
   setSponsorInfo: (info: {
     sponsorUuid: string;
     sponsoredRegistrationId: string;
+    sponsoredBy: string;
     feeDeduction: number;
   }) => void;
   clearSponsorInfo: () => void;
@@ -58,6 +60,7 @@ const initialState: RegistrationStore = {
     },
   },
   sponsorUuid: undefined,
+  sponsoredBy: undefined,
   sponsoredRegistrationId: undefined,
   sponsorFeeDeduction: undefined,
 };
@@ -88,16 +91,19 @@ const useRegistrationStore = create<
       setSponsorInfo: (info: {
         sponsorUuid: string;
         sponsoredRegistrationId: string;
+        sponsoredBy: string;
         feeDeduction: number;
       }) =>
         set({
           sponsorUuid: info.sponsorUuid,
           sponsoredRegistrationId: info.sponsoredRegistrationId,
+          sponsoredBy: info.sponsoredBy,
           sponsorFeeDeduction: info.feeDeduction,
         }),
       clearSponsorInfo: () =>
         set({
           sponsorUuid: undefined,
+          sponsoredBy: undefined,
           sponsoredRegistrationId: undefined,
           sponsorFeeDeduction: undefined,
         }),

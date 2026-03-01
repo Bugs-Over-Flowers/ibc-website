@@ -12,6 +12,7 @@ interface RegistrationFormProps {
   sponsorUuid?: string;
   sponsoredRegistrationId?: string;
   sponsorFeeDeduction?: number;
+  sponsorName?: string;
 }
 
 export default function RegistrationForm({
@@ -19,6 +20,7 @@ export default function RegistrationForm({
   sponsorUuid,
   sponsoredRegistrationId,
   sponsorFeeDeduction,
+  sponsorName,
 }: RegistrationFormProps) {
   const step = useRegistrationStore((state) => state.step);
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
@@ -39,12 +41,14 @@ export default function RegistrationForm({
     if (
       sponsorUuid &&
       sponsoredRegistrationId &&
+      sponsorName &&
       sponsorFeeDeduction !== undefined &&
       sponsorFeeDeduction !== null
     ) {
       setSponsorInfo({
         sponsorUuid,
         sponsoredRegistrationId,
+        sponsoredBy: sponsorName,
         feeDeduction: Number(sponsorFeeDeduction),
       });
       return;
@@ -56,6 +60,7 @@ export default function RegistrationForm({
     sponsorUuid,
     sponsoredRegistrationId,
     sponsorFeeDeduction,
+    sponsorName,
     setSponsorInfo,
     clearSponsorInfo,
   ]);
