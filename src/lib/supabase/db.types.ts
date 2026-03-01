@@ -720,6 +720,7 @@ export type Database = {
           uuid: string;
         }[];
       };
+      get_application_history: { Args: { p_member_id: string }; Returns: Json };
       get_evaluation_by_id: {
         Args: { eval_id: string };
         Returns: {

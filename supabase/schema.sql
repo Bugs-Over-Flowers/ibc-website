@@ -304,7 +304,7 @@ BEGIN
     'applicationDate', a."applicationDate",
     'companyName', a."companyName",
     'hasInterview', CASE WHEN a."interviewId" IS NOT NULL THEN true ELSE false END,
-    'interview', CASE
+    'interview', CASE 
       WHEN i."interviewId" IS NOT NULL THEN
         jsonb_build_object(
           'interviewId', i."interviewId",
@@ -320,12 +320,12 @@ BEGIN
   FROM "Application" a
   LEFT JOIN "Interview" i ON a."interviewId" = i."interviewId"
   WHERE a.identifier = p_application_identifier;
-
+  
   IF v_result IS NULL THEN
     RAISE EXCEPTION 'Application with identifier % does not exist.', p_application_identifier;
   END IF;
   RETURN v_result;
-
+  
 EXCEPTION
   WHEN OTHERS THEN
     RAISE EXCEPTION 'Failed to check application status: %', SQLERRM;
@@ -349,8 +349,8 @@ BEGIN
 
   -- Check if member exists and is not cancelled
   SELECT EXISTS(
-    SELECT 1 FROM "BusinessMember"
-    WHERE "identifier" = p_identifier
+    SELECT 1 FROM "BusinessMember" 
+    WHERE "identifier" = p_identifier 
       AND "membershipStatus" != 'cancelled'
   ) INTO v_member_exists;
 
@@ -376,7 +376,7 @@ $$;
 ALTER FUNCTION "public"."check_member_exists"("p_identifier" "text") OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."check_member_exists"("p_identifier" "text") IS 'Validates if a business member identifier exists and is active.
+COMMENT ON FUNCTION "public"."check_member_exists"("p_identifier" "text") IS 'Validates if a business member identifier exists and is active. 
 Accepts identifier in format ibc-mem-XXXXXXXX.
 Returns member existence status and basic info for confirmation.
 Used during renewal and update applications to verify member identity.
@@ -399,14 +399,14 @@ BEGIN
   -- For renewal, any status is allowed
   IF p_application_type = 'updating' THEN
     SELECT EXISTS(
-      SELECT 1 FROM "BusinessMember"
-      WHERE "identifier" = p_identifier
+      SELECT 1 FROM "BusinessMember" 
+      WHERE "identifier" = p_identifier 
         AND "membershipStatus" != 'cancelled'
     ) INTO v_member_exists;
   ELSE
     -- Renewal allows any status
     SELECT EXISTS(
-      SELECT 1 FROM "BusinessMember"
+      SELECT 1 FROM "BusinessMember" 
       WHERE "identifier" = p_identifier
     ) INTO v_member_exists;
   END IF;
@@ -447,18 +447,18 @@ BEGIN
     -- Calculate January 1st of current year and next year
     current_year_start := DATE_TRUNC('year', NOW())::date;
     next_year_start := current_year_start + INTERVAL '1 year';
-
+    
     -- Step 1: First, cancel members who are already unpaid AND expired
     -- (These are members who were given a grace period last year and didn't pay)
-    UPDATE "BusinessMember"
+    UPDATE "BusinessMember" 
     SET "membershipStatus" = 'cancelled'
     WHERE "membershipExpiryDate" < NOW()
     AND "membershipStatus" = 'unpaid';
-
+    
     -- Step 2: Then, handle expired paid members
     -- Give them a grace period: become unpaid with new expiry
-    UPDATE "BusinessMember"
-    SET
+    UPDATE "BusinessMember" 
+    SET 
         "membershipStatus" = 'unpaid',
         "membershipExpiryDate" = next_year_start
     WHERE "membershipExpiryDate" < NOW()
@@ -476,7 +476,7 @@ CREATE OR REPLACE FUNCTION "public"."compute_primary_application_id"("p_member_i
   SELECT a."applicationId"
   FROM public."Application" a
   WHERE a."memberId" = p_member_id
-  ORDER BY
+  ORDER BY 
     CASE a."applicationStatus"
       WHEN 'approved' THEN 3
       WHEN 'pending' THEN 2
@@ -557,9 +557,9 @@ declare
 begin
   delete from "EvaluationForm"
   where "evaluationId" = eval_id;
-
+  
   get diagnostics deleted_count = row_count;
-
+  
   if deleted_count = 0 then
     return query select false, 'Evaluation not found'::text;
   else
@@ -689,6 +689,79 @@ $$;
 
 
 ALTER FUNCTION "public"."get_all_sponsored_registrations_with_event"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_application_history"("p_member_id" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    AS $$
+DECLARE
+  v_result jsonb;
+  v_business_name text;
+  v_applications jsonb;
+BEGIN
+  -- Get business name
+  SELECT "businessName" INTO v_business_name
+  FROM "BusinessMember"
+  WHERE "businessMemberId" = p_member_id;
+
+  IF v_business_name IS NULL THEN
+    RAISE EXCEPTION 'Business member not found';
+  END IF;
+
+  -- Get all applications for this member with related data
+  SELECT COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'applicationId', a."applicationId",
+      'identifier', a."identifier",
+      'companyName', a."companyName",
+      'applicationDate', a."applicationDate",
+      'applicationType', a."applicationType",
+      'applicationStatus', a."applicationStatus",
+      'applicationMemberType', a."applicationMemberType",
+      'companyAddress', a."companyAddress",
+      'emailAddress', a."emailAddress",
+      'mobileNumber', a."mobileNumber",
+      'landline', a."landline",
+      'websiteURL', a."websiteURL",
+      'paymentMethod', a."paymentMethod",
+      'paymentProofStatus', a."paymentProofStatus",
+      'sectorName', COALESCE(s."sectorName", 'N/A'),
+      'members', (
+        SELECT COALESCE(jsonb_agg(
+          jsonb_build_object(
+            'applicationMemberId', am."applicationMemberId",
+            'firstName', am."firstName",
+            'lastName', am."lastName",
+            'companyDesignation', am."companyDesignation",
+            'companyMemberType', am."companyMemberType",
+            'emailAddress', am."emailAddress"
+          )
+        ), '[]'::jsonb)
+        FROM "ApplicationMember" am
+        WHERE am."applicationId" = a."applicationId"
+      )
+    ) ORDER BY a."applicationDate" DESC
+  ), '[]'::jsonb)
+  INTO v_applications
+  FROM "Application" a
+  LEFT JOIN "Sector" s ON a."sectorId" = s."sectorId"
+  WHERE a."businessMemberId" = p_member_id;
+
+  v_result := jsonb_build_object(
+    'businessName', v_business_name,
+    'applications', v_applications
+  );
+
+  RETURN v_result;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE EXCEPTION 'Failed to fetch application history: %', SQLERRM;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_application_history"("p_member_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_evaluation_by_id"("eval_id" "uuid") RETURNS TABLE("evaluation_id" "uuid", "event_id" "uuid", "event_title" "text", "event_start_date" timestamp with time zone, "event_end_date" timestamp with time zone, "venue" "text", "name" "text", "q1_rating" "public"."ratingScale", "q2_rating" "public"."ratingScale", "q3_rating" "public"."ratingScale", "q4_rating" "public"."ratingScale", "q5_rating" "public"."ratingScale", "q6_rating" "public"."ratingScale", "additional_comments" "text", "feedback" "text", "created_at" timestamp with time zone)
@@ -983,7 +1056,8 @@ BEGIN
         WHEN p_search_text IS NOT NULL THEN
           GREATEST(
             similarity(COALESCE(bm."businessName", r."nonMemberName"), p_search_text),
-            similarity(p_data.p_first_name || ' ' || p_data.p_last_name, p_search_text)
+            similarity(p_data.p_first_name || ' ' || p_data.p_last_name, p_search_text),
+            similarity(r."identifier", p_search_text)
           )
         ELSE 0
       END AS sim_score,
@@ -993,6 +1067,7 @@ BEGIN
             COALESCE(bm."businessName", r."nonMemberName") ILIKE v_search_pattern
             OR (p_data.p_first_name || ' ' || p_data.p_last_name) ILIKE v_search_pattern
             OR p_data.p_email ILIKE v_search_pattern
+            OR r."identifier" ILIKE v_search_pattern
           )
         ELSE FALSE
       END AS is_exact_match
@@ -1029,7 +1104,7 @@ BEGIN
   WITH
   -- registration and event details
   base_data AS (
-    SELECT
+    SELECT 
       r."registrationId",
       r."nonMemberName",
       r."businessMemberId",
@@ -1051,13 +1126,13 @@ BEGIN
   ),
 
   check_in_list AS (
-    SELECT
+    SELECT 
       p.*,
       ci.remarks,
       ci.date,
       -- Check if a CheckIn exists for this participant on the current event day(s)
       EXISTS (
-        SELECT 1
+        SELECT 1 
         FROM "CheckIn" ci
         JOIN current_event_day ced ON ci."eventDayId" = ced."eventDayId"
         WHERE ci."participantId" = p."participantId"
@@ -1081,12 +1156,12 @@ BEGIN
         to_jsonb(cil.*) || jsonb_build_object(
           'checkedIn', cil.is_checked_in
         )
-        ORDER BY
-          "lastName" ASC,
+        ORDER BY 
+          "lastName" ASC,      
           "firstName" ASC
       )
       FROM check_in_list cil
-
+     
     ),
     -- event day(s) details today
     (
@@ -1102,7 +1177,7 @@ BEGIN
       -- Check if today is within the event date range
       (p_today >= bd."eventStartDate" AND p_today <= bd."eventEndDate")
     )
-  INTO
+  INTO 
     v_result.registration_details,
     v_result.event_details,
     v_result.check_in_list,
@@ -1112,7 +1187,7 @@ BEGIN
 
   FROM base_data bd
   LEFT JOIN "BusinessMember" bm ON bd."businessMemberId" = bm."businessMemberId";
-
+  
   -- Check if registration exists
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Registration Not Found';
@@ -1305,7 +1380,7 @@ CREATE OR REPLACE FUNCTION "public"."get_sponsored_registrations_with_details"("
     AS $$
 BEGIN
   RETURN QUERY
-  SELECT
+  SELECT 
     sr.id,
     sr.event_id,
     sr.sponsor_id,
@@ -1356,7 +1431,7 @@ BEGIN
   -- Case 2: Event is inserted or updated with eventType = 'public' or 'private'
   -- Ensure dates are present before generating days
   IF (NEW."eventType" IN ('public', 'private') AND NEW."eventStartDate" IS NOT NULL AND NEW."eventEndDate" IS NOT NULL) THEN
-
+    
     -- 1. Delete days that are outside the new range
     DELETE FROM public."EventDay"
     WHERE "eventId" = NEW."eventId"
@@ -1367,16 +1442,16 @@ BEGIN
     WHILE day_date <= NEW."eventEndDate" LOOP
       -- Check if exists
       IF NOT EXISTS (
-        SELECT 1 FROM public."EventDay"
+        SELECT 1 FROM public."EventDay" 
         WHERE "eventId" = NEW."eventId" AND "eventDate" = day_date
       ) THEN
         -- Generate label (e.g., "Day 1")
         day_label := 'Day ' || (day_date - NEW."eventStartDate"::DATE + 1)::TEXT;
-
+        
         INSERT INTO public."EventDay" ("eventId", "eventDate", "label")
         VALUES (NEW."eventId", day_date, day_label);
       END IF;
-
+      
       day_date := day_date + 1;
     END LOOP;
 
@@ -1385,7 +1460,7 @@ BEGIN
     UPDATE public."EventDay"
     SET label = 'Day ' || ("eventDate" - NEW."eventStartDate"::DATE + 1)::TEXT
     WHERE "eventId" = NEW."eventId";
-
+    
   END IF;
 
   RETURN NEW;
@@ -1403,13 +1478,13 @@ BEGIN
     -- On Jan 1, update statuses:
     -- active → unpaid (if expired)
     -- unpaid → overdue
-    UPDATE "BusinessMember"
-    SET "membershipStatus" =
-        CASE
-            WHEN "membershipStatus" = 'active'::"MembershipStatus"
-                 AND "membershipExpiryDate" < NOW()
+    UPDATE "BusinessMember" 
+    SET "membershipStatus" = 
+        CASE 
+            WHEN "membershipStatus" = 'active'::"MembershipStatus" 
+                 AND "membershipExpiryDate" < NOW() 
             THEN 'unpaid'::"MembershipStatus"
-            WHEN "membershipStatus" = 'unpaid'::"MembershipStatus"
+            WHEN "membershipStatus" = 'unpaid'::"MembershipStatus" 
             THEN 'overdue'::"MembershipStatus"
             ELSE "membershipStatus"
         END
@@ -1455,7 +1530,7 @@ BEGIN
   WHILE v_current_date <= v_end_date LOOP
     INSERT INTO "EventDay" ("eventId", "eventDate", "label")
     VALUES (p_event_id, v_current_date, 'Day ' || v_day_number);
-
+    
     v_current_date := v_current_date + 1;
     v_day_number := v_day_number + 1;
   END LOOP;
@@ -1530,8 +1605,8 @@ CREATE OR REPLACE FUNCTION "public"."set_membership_expiry"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$BEGIN
     IF NEW."lastPaymentDate" IS NOT NULL THEN
-        NEW."membershipExpiryDate" =
-            DATE_TRUNC('year', NEW."lastPaymentDate")
+        NEW."membershipExpiryDate" = 
+            DATE_TRUNC('year', NEW."lastPaymentDate") 
             + INTERVAL '1 year';
         NEW."membershipStatus" = 'paid'::"MembershipStatus";
     END IF;
@@ -1789,7 +1864,7 @@ ALTER FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid"
 
 
 CREATE OR REPLACE FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text" DEFAULT NULL::"text") RETURNS "jsonb"
-    LANGUAGE "plpgsql" SECURITY DEFINER
+    LANGUAGE "plpgsql"
     AS $$
 DECLARE
   v_application_id uuid;
@@ -1803,9 +1878,10 @@ DECLARE
   representative jsonb;
   v_rep_type_text text;
 BEGIN
+
   -- Generate UUID for application ID
   v_application_id := gen_random_uuid();
-
+  
   -- Generate human-readable identifier: ibc-app-XXXXXXXX (first 8 chars of UUID)
   v_identifier := 'ibc-app-' || left(replace(v_application_id::text, '-', ''), 8);
 
@@ -1821,7 +1897,7 @@ BEGIN
 
   -- Extract Sector ID
   v_sector_id := (p_company_details->>'sectorId')::int;
-
+  
   -- Extract Business Member ID (for renewals and updates)
   IF p_company_details->>'businessMemberId' IS NOT NULL AND p_company_details->>'businessMemberId' != '' THEN
     v_business_member_id := (p_company_details->>'businessMemberId')::uuid;
@@ -1858,7 +1934,6 @@ BEGIN
     "companyName",
     "companyAddress",
     "landline",
-    "faxNumber",
     "mobileNumber",
     "emailAddress",
     "paymentProofStatus",
@@ -1876,7 +1951,6 @@ BEGIN
     p_company_details->>'name',
     p_company_details->>'address',
     p_company_details->>'landline',
-    p_company_details->>'fax',
     p_company_details->>'mobile',
     p_company_details->>'email',
     v_pay_status_enum,
@@ -1887,7 +1961,7 @@ BEGIN
 
   -- 4. Handle Proof of Payment
   IF v_pay_method_enum = 'BPI' THEN
-    INSERT INTO "ProofImage" ("applicationId", "path")
+    INSERT INTO "ProofImage" ("applicationId", "path") 
     VALUES (v_application_id, p_payment_proof_url);
   END IF;
 
@@ -1895,6 +1969,7 @@ BEGIN
   IF jsonb_array_length(p_representatives) > 0 THEN
     FOR representative IN SELECT * FROM jsonb_array_elements(p_representatives)
     LOOP
+      
       -- Extract the type (principal or alternate)
       v_rep_type_text := representative->>'memberType';
 
@@ -1909,7 +1984,6 @@ BEGIN
         "birthdate",
         "companyDesignation",
         "landline",
-        "faxNumber",
         "mobileNumber",
         "emailAddress"
       ) VALUES (
@@ -1923,7 +1997,6 @@ BEGIN
         (representative->>'birthdate')::timestamp,
         representative->>'position',
         representative->>'landline',
-        representative->>'fax',
         representative->>'mobileNumber',
         representative->>'email'
       );
@@ -2044,7 +2117,7 @@ CREATE OR REPLACE FUNCTION "public"."update_event_details"("p_event_id" "uuid", 
     LANGUAGE "plpgsql"
     AS $$
 DECLARE
-  v_existing_event "Event"%ROWTYPE;
+  v_existing_event "Event"%ROWTYPE; 
   v_final_title text;
   v_final_description text;
   v_final_header_url text;
@@ -2057,8 +2130,8 @@ DECLARE
   v_is_finished boolean;
 BEGIN
   -- 1. Fetch the current event
-  SELECT * INTO v_existing_event
-  FROM "Event"
+  SELECT * INTO v_existing_event 
+  FROM "Event" 
   WHERE "eventId" = p_event_id;
 
   IF NOT FOUND THEN
@@ -2069,7 +2142,7 @@ BEGIN
   v_is_draft := (v_existing_event."eventType" IS NULL);
 
   -- 3. Determine if event is finished
-  v_is_finished := (v_existing_event."eventEndDate" IS NOT NULL
+  v_is_finished := (v_existing_event."eventEndDate" IS NOT NULL 
                     AND CURRENT_TIMESTAMP > v_existing_event."eventEndDate");
 
   -- 4. Calculate final values using COALESCE
@@ -2122,8 +2195,8 @@ BEGIN
   END IF;
 
   -- 6. PERFORM UPDATE
-  UPDATE "Event"
-  SET
+  UPDATE "Event" 
+  SET 
     "eventTitle" = v_final_title,
     "description" = v_final_description,
     "eventHeaderUrl" = v_final_header_url,
@@ -2133,7 +2206,7 @@ BEGIN
     "eventType" = v_final_event_type,
     "registrationFee" = v_final_registration_fee,
     "updatedAt" = NOW(),
-    "publishedAt" = CASE
+    "publishedAt" = CASE 
       WHEN v_is_draft AND v_final_event_type IS NOT NULL THEN NOW()
       ELSE "publishedAt"
     END
@@ -2199,7 +2272,7 @@ DECLARE
   affected_member uuid;
 BEGIN
   affected_member := COALESCE(NEW."businessMemberId", OLD."businessMemberId");
-
+  
   IF affected_member IS NOT NULL THEN
     UPDATE "BusinessMember"
     SET "primaryApplicationId" = (
@@ -2211,7 +2284,7 @@ BEGIN
     )
     WHERE "businessMemberId" = affected_member;
   END IF;
-
+  
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
@@ -2243,7 +2316,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
       END IF;
-
+      
       -- Update count for new sponsored registration
       IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
         UPDATE public."SponsoredRegistration"
@@ -2254,7 +2327,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
       END IF;
-
+      
       RETURN NEW;
     END IF;
     v_sponsored_registration_id := NEW."sponsoredRegistrationId";
@@ -2361,7 +2434,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
       END IF;
-
+      
       -- Update count for new sponsored registration (count participants)
       IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
         UPDATE public."SponsoredRegistration"
@@ -2373,7 +2446,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
       END IF;
-
+      
       RETURN NEW;
     END IF;
     v_sponsored_registration_id := NEW."sponsoredRegistrationId";
@@ -2433,7 +2506,6 @@ CREATE TABLE IF NOT EXISTS "public"."Application" (
     "companyName" "text" NOT NULL,
     "companyAddress" "text" NOT NULL,
     "landline" "text" NOT NULL,
-    "faxNumber" "text" NOT NULL,
     "mobileNumber" "text" NOT NULL,
     "emailAddress" "text" NOT NULL,
     "paymentMethod" "public"."PaymentMethod" NOT NULL,
@@ -2459,7 +2531,6 @@ CREATE TABLE IF NOT EXISTS "public"."ApplicationMember" (
     "birthdate" "date" NOT NULL,
     "companyDesignation" "text" NOT NULL,
     "landline" "text" NOT NULL,
-    "faxNumber" "text" NOT NULL,
     "mobileNumber" "text" NOT NULL,
     "emailAddress" "text" NOT NULL,
     "lastName" "text" NOT NULL,
@@ -3446,6 +3517,12 @@ GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations_with_event"() TO
 
 
 
+GRANT ALL ON FUNCTION "public"."get_application_history"("p_member_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_application_history"("p_member_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_application_history"("p_member_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_evaluation_by_id"("eval_id" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_evaluation_by_id"("eval_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_evaluation_by_id"("eval_id" "uuid") TO "service_role";
@@ -3773,3 +3850,34 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
