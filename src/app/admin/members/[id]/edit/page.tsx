@@ -53,7 +53,6 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
     // Contact Information
     emailAddress: application.emailAddress,
     landline: application.landline,
-    // faxNumber: application.faxNumber || "",
     mobileNumber: application.mobileNumber || "",
 
     // Membership Details
