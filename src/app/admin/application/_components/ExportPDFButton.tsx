@@ -118,9 +118,6 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
 
             <div class="label">Landline:</div>
             <div class="value">${application.landline}</div>
-
-            <div class="label">Fax:</div>
-            <div class="value">${application.faxNumber}</div>
           </div>
 
           <h2>Company Representatives</h2>

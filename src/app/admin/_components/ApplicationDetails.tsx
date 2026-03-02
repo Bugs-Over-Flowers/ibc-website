@@ -58,7 +58,6 @@ export async function ApplicationDetails({
 
       <ContactInfoCard
         emailAddress={application.emailAddress}
-        faxNumber={application.faxNumber}
         landline={application.landline}
         mobileNumber={application.mobileNumber}
       />
