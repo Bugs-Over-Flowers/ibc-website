@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
+import { toPascalCaseWithSpaces } from "../../_utils/formatters";
 import { DetailRow } from "./DetailRow";
 
 interface RepresentativesCardProps {
@@ -30,7 +31,9 @@ export function RepresentativesCard({ members }: RepresentativesCardProps) {
               <h3 className="font-semibold">
                 {member.firstName} {member.lastName}
               </h3>
-              <Badge variant="secondary">{member.companyMemberType}</Badge>
+              <Badge variant="secondary">
+                {toPascalCaseWithSpaces(member.companyMemberType)}
+              </Badge>
             </div>
             <div className="grid gap-2 text-sm">
               <DetailRow
@@ -43,11 +46,17 @@ export function RepresentativesCard({ members }: RepresentativesCardProps) {
                 label="Birthdate"
                 value={new Date(member.birthdate).toLocaleDateString()}
               />
-              <DetailRow label="Nationality" value={member.nationality} />
-              <DetailRow label="Sex" value={member.sex} />
+              <DetailRow
+                label="Nationality"
+                value={toPascalCaseWithSpaces(member.nationality)}
+              />
+              <DetailRow
+                label="Sex"
+                value={toPascalCaseWithSpaces(member.sex)}
+              />
               <DetailRow
                 label="Mailing Address"
-                value={member.mailingAddress}
+                value={toPascalCaseWithSpaces(member.mailingAddress)}
               />
             </div>
           </div>
