@@ -2,6 +2,7 @@ import {
   Body,
   Container,
   Head,
+  Heading,
   Hr,
   Html,
   Preview,
@@ -10,7 +11,6 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
-import type * as React from "react";
 
 interface PaymentRejectedTemplateProps {
   eventTitle: string;
@@ -65,15 +65,4 @@ export default function PaymentRejectedTemplate({
       </Tailwind>
     </Html>
   );
-}
-
-// Helper component for Heading since it was missing in imports in previous file but used here
-function Heading({
-  className,
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return <h1 className={className}>{children}</h1>;
 }

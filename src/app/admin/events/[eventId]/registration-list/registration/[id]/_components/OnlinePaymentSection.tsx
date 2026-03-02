@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
-import { useAction, useOptimisticAction } from "@/hooks/useAction";
+import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,9 @@ export default function OnlinePaymentSection({
   registrationId,
 }: OnlinePaymentSectionProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<
+    "accepted" | "rejected" | null
+  >(null);
 
   // Early validation - ensure URL is valid before any rendering
   const validProofImageURL =
@@ -43,39 +46,65 @@ export default function OnlinePaymentSection({
       ? proofImageURL.trim()
       : null;
 
+  const paymentAction = async (
+    registration: string,
+    nextStatus: "accepted" | "rejected",
+  ) => {
+    if (nextStatus === "accepted") {
+      return verifyPayment(registration);
+    }
+
+    return rejectPayment(registration);
+  };
+
   const {
-    execute: verify,
+    execute: updatePaymentStatus,
     optimistic: optimisticPaymentProofStatus,
-    isPending: isVerifyPending,
-  } = useOptimisticAction(tryCatch(verifyPayment), paymentProofStatus, {
-    optimisticUpdate: (_prev) => "accepted",
-    onSuccess: (msg) => {
-      toast.success(msg);
-    },
-    onError: (error) => {
-      toast.error(error);
-    },
+    isPending,
+  } = useOptimisticAction(tryCatch(paymentAction), paymentProofStatus, {
+    optimisticUpdate: (_prev, _registrationId, nextStatus) => nextStatus,
   });
 
-  const { execute: reject, isPending: isRejectPending } = useAction(
-    tryCatch(rejectPayment),
-    {
-      onSuccess: (msg) => {
-        toast.success(msg);
+  const handleStatusChange = async (nextStatus: "accepted" | "rejected") => {
+    if (
+      isPending ||
+      optimisticPaymentProofStatus === nextStatus ||
+      (nextStatus === "accepted" &&
+        optimisticPaymentProofStatus === "rejected") ||
+      (nextStatus === "rejected" && optimisticPaymentProofStatus === "accepted")
+    ) {
+      // prevent duplicate submissions or conflicting transitions
+      if (nextStatus === "rejected") {
         setIsAlertOpen(false);
-      },
-      onError: (error) => {
-        toast.error(error);
+      }
+      return;
+    }
+
+    setPendingAction(nextStatus);
+
+    const result = await updatePaymentStatus(registrationId, nextStatus);
+
+    if (!result.success) {
+      toast.error(result.error);
+      if (nextStatus === "rejected") {
         setIsAlertOpen(false);
-      },
-    },
-  );
+      }
+    } else {
+      toast.success(result.data);
+      if (nextStatus === "rejected") {
+        setIsAlertOpen(false);
+      }
+    }
+
+    setPendingAction(null);
+  };
 
   const hasProofImage = Boolean(
     validProofImageURL && validProofImageURL.length > 0,
   );
 
-  const isPending = isVerifyPending || isRejectPending;
+  const isVerifyPending = isPending && pendingAction === "accepted";
+  const isRejectPending = isPending && pendingAction === "rejected";
 
   return (
     <>
@@ -114,7 +143,7 @@ export default function OnlinePaymentSection({
             optimisticPaymentProofStatus === "accepted" ||
             optimisticPaymentProofStatus === "rejected"
           }
-          onClick={() => verify(registrationId)}
+          onClick={() => handleStatusChange("accepted")}
         >
           {isVerifyPending
             ? "Verifying..."
@@ -152,7 +181,7 @@ export default function OnlinePaymentSection({
                 disabled={isRejectPending}
                 onClick={(e) => {
                   e.preventDefault();
-                  reject(registrationId);
+                  void handleStatusChange("rejected");
                 }}
               >
                 {isRejectPending ? "Rejecting..." : "Reject"}
