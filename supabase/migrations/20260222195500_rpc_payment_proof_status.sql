@@ -8,10 +8,8 @@ DROP FUNCTION IF EXISTS "public"."get_registration_list"(
   "p_search_text" "text",
   "p_payment_status" "public"."PaymentStatus"
 );
-
 -- Drop the old type and recreate with correct column type
 DROP TYPE IF EXISTS "public"."registration_list_item";
-
 CREATE TYPE "public"."registration_list_item" AS (
   "registration_id" "uuid",
   "affiliation" "text",
@@ -25,7 +23,6 @@ CREATE TYPE "public"."registration_list_item" AS (
   "people" integer,
   "registration_identifier" "text"
 );
-
 CREATE OR REPLACE FUNCTION "public"."get_registration_list"(
   "p_event_id" "uuid",
   "p_search_text" "text" DEFAULT NULL::"text",

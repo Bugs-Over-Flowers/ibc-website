@@ -60,14 +60,20 @@ export function MembershipApplicationForm({
   } = useMembershipStep4();
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   };
 
-  const handleNext = (
+  const handleNext = async (
     form: typeof step1Form.form | typeof step2Form | typeof step3Form,
   ) => {
-    form.handleSubmit({ nextStep: true });
-    scrollToTop();
+    const stepBefore = useMembershipApplicationStore.getState().step;
+    await form.handleSubmit({ nextStep: true });
+    const stepAfter = useMembershipApplicationStore.getState().step;
+    if (stepAfter !== stepBefore) {
+      scrollToTop();
+    }
   };
 
   const handleBack = (targetStep: number) => {

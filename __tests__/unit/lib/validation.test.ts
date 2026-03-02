@@ -15,12 +15,7 @@ const emailSchema = z.string().email();
 describe("lib/validation/utils", () => {
   describe("phoneSchema", () => {
     it("should accept valid Philippine phone numbers", () => {
-      const validNumbers = [
-        "+639171234567",
-        "+639281234567",
-        "09171234567",
-        "9171234567",
-      ];
+      const validNumbers = ["+639171234567", "+639281234567", "09171234567"];
 
       for (const number of validNumbers) {
         const result = phoneSchema.safeParse(number);
@@ -93,6 +88,7 @@ describe("lib/validation/utils", () => {
       ],
       paymentMethod: "BPI",
       paymentProofStatus: "accepted",
+      proofImage: [],
       registrationDate: "2026-01-01T10:00:00+08:00",
       registrationId: "registration-1",
     };

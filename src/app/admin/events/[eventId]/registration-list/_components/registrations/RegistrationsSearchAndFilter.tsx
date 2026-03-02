@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useMemo } from "react";
 import { useSearchForm } from "@/app/admin/events/[eventId]/registration-list/_hooks/useSearchForm";
 import useSetFilter from "@/app/admin/events/[eventId]/registration-list/_hooks/useSetFilter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,11 +20,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  PaymentProofStatusFilterEnum,
+  PaymentProofStatusFilterOptions,
+} from "@/lib/validation/utils";
+
+type PaymentStatusFilter = (typeof PaymentProofStatusFilterOptions)[number];
 
 export default function RegistrationSearchAndFilter() {
   const form = useSearchForm({ scope: "registrations" });
 
   const { filter, setFilter } = useSetFilter({ scope: "registrations" });
+  const selectedPaymentStatus = useMemo<PaymentStatusFilter>(() => {
+    const parsedFilter = PaymentProofStatusFilterEnum.safeParse(filter);
+
+    if (!parsedFilter.success) {
+      return "all";
+    }
+
+    return parsedFilter.data;
+  }, [filter]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -46,7 +62,7 @@ export default function RegistrationSearchAndFilter() {
                       field.handleBlur();
                     }}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    placeholder="Enter an affiliation, name, or email"
+                    placeholder="Enter an identifier, affiliation, name, or email"
                     value={field.state.value}
                   />
                   {field.state.value !== "" && (
@@ -76,14 +92,26 @@ export default function RegistrationSearchAndFilter() {
         <div className="w-full">
           <div> Payment Status</div>
           <InputGroup className="w-full rounded-md bg-neutral-100 ring-1 ring-neutral-300">
-            <Select onValueChange={setFilter} value={filter}>
+            <Select
+              onValueChange={(value) => {
+                const parsedFilter =
+                  PaymentProofStatusFilterEnum.safeParse(value);
+
+                if (!parsedFilter.success) {
+                  return;
+                }
+
+                setFilter(parsedFilter.data);
+              }}
+              value={selectedPaymentStatus}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue data-placeholder="Select Payment Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Payment Status</SelectLabel>
-                  {["all", "verified", "pending"].map((status) => (
+                  {PaymentProofStatusFilterOptions.map((status) => (
                     <SelectItem key={status} value={status}>
                       {status}
                     </SelectItem>
