@@ -53,7 +53,7 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
     // Contact Information
     emailAddress: application.emailAddress,
     landline: application.landline,
-    faxNumber: application.faxNumber || "",
+    // faxNumber: application.faxNumber || "",
     mobileNumber: application.mobileNumber || "",
 
     // Membership Details
@@ -61,8 +61,7 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
       | "paid"
       | "unpaid"
       | "cancelled"
-      | "expired"
-      | "pending",
+      | null,
     joinDate: application.BusinessMember.joinDate,
     membershipExpiryDate: application.BusinessMember.membershipExpiryDate
       ? new Date(application.BusinessMember.membershipExpiryDate)

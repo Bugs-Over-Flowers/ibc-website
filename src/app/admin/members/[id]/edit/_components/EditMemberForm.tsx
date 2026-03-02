@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAppForm } from "@/hooks/_formHooks";
 import tryCatch from "@/lib/server/tryCatch";
+import { zodValidator } from "@/lib/utils";
 import { UpdateMemberSchema } from "@/lib/validation/members/update";
 import { updateMember } from "@/server/members/mutations/updateMember";
 
@@ -20,13 +21,7 @@ interface EditMemberFormProps {
     faxNumber?: string | null;
     mobileNumber?: string | null;
     sectorId: string;
-    membershipStatus?:
-      | "paid"
-      | "unpaid"
-      | "cancelled"
-      | "expired"
-      | "pending"
-      | null;
+    membershipStatus?: "paid" | "unpaid" | "cancelled" | null;
     joinDate?: string | null;
     membershipExpiryDate?: string | null;
   };
@@ -36,10 +31,22 @@ interface EditMemberFormProps {
 export function EditMemberForm({ member, sectors }: EditMemberFormProps) {
   const router = useRouter();
 
+  const defaultValues = {
+    ...member,
+    websiteURL: member.websiteURL ?? undefined,
+    faxNumber: member.faxNumber ?? undefined,
+    mobileNumber: member.mobileNumber ?? undefined,
+    membershipStatus: member.membershipStatus ?? undefined,
+    joinDate: member.joinDate ? new Date(member.joinDate) : undefined,
+    membershipExpiryDate: member.membershipExpiryDate
+      ? new Date(member.membershipExpiryDate)
+      : undefined,
+  };
+
   const form = useAppForm({
-    defaultValues: member,
+    defaultValues,
     validators: {
-      onSubmit: UpdateMemberSchema as never,
+      onSubmit: zodValidator(UpdateMemberSchema),
     },
     onSubmit: async ({ value }) => {
       const dataToSubmit = {
@@ -52,8 +59,6 @@ export function EditMemberForm({ member, sectors }: EditMemberFormProps) {
           | "paid"
           | "unpaid"
           | "cancelled"
-          | "expired"
-          | "pending"
           | undefined,
         joinDate: value.joinDate ? new Date(value.joinDate) : undefined,
         membershipExpiryDate: value.membershipExpiryDate
@@ -161,8 +166,6 @@ export function EditMemberForm({ member, sectors }: EditMemberFormProps) {
                   { label: "Paid", value: "paid" },
                   { label: "Unpaid", value: "unpaid" },
                   { label: "Cancelled", value: "cancelled" },
-                  { label: "Expired", value: "expired" },
-                  { label: "Pending", value: "pending" },
                 ]}
               />
             )}

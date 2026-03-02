@@ -19,9 +19,7 @@ export const UpdateMemberSchema = z.object({
   mobileNumber: phoneSchema.optional(),
 
   // Membership Details
-  membershipStatus: z
-    .enum(["paid", "unpaid", "cancelled", "expired", "pending"])
-    .optional(), // Adjust based on DB enum
+  membershipStatus: z.enum(["paid", "unpaid", "cancelled"]).optional(),
   joinDate: z.coerce.date().optional(),
   membershipExpiryDate: z.coerce.date().optional().nullable(),
 });

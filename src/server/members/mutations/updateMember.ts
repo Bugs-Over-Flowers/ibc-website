@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import type { z } from "zod";
+import { revalidatePath, updateTag } from "next/cache";
+import type { ZodIssue, z } from "zod";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import { UpdateMemberSchema } from "@/lib/validation/members/update";
 
@@ -11,7 +12,14 @@ export async function updateMember(input: UpdateMemberInput) {
   const result = UpdateMemberSchema.safeParse(input);
 
   if (!result.success) {
-    throw new Error("Validation failed");
+    const message = result.error.issues
+      .map((issue: ZodIssue) => {
+        const path = issue.path.join(".") || "form";
+        return `${path}: ${issue.message}`;
+      })
+      .join(", ");
+
+    throw new Error(message);
   }
 
   const {
@@ -39,7 +47,6 @@ export async function updateMember(input: UpdateMemberInput) {
       businessName,
       websiteURL,
       sectorId,
-      // @ts-expect-error: Enumerated types might be tricky with generated types sometimes
       membershipStatus,
       joinDate: joinDate ? new Date(joinDate).toISOString() : undefined,
       membershipExpiryDate: membershipExpiryDate
@@ -73,6 +80,10 @@ export async function updateMember(input: UpdateMemberInput) {
       `Failed to update application: ${JSON.stringify(appError)}`,
     );
   }
+
+  updateTag(CACHE_TAGS.members.all);
+  updateTag(CACHE_TAGS.members.admin);
+  updateTag(CACHE_TAGS.members.public);
 
   revalidatePath("/admin/members");
   revalidatePath(`/admin/members/${memberId}`);
