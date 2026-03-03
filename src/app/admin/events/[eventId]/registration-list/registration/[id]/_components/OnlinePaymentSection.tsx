@@ -66,20 +66,6 @@ export default function OnlinePaymentSection({
   });
 
   const handleStatusChange = async (nextStatus: "accepted" | "rejected") => {
-    if (
-      isPending ||
-      optimisticPaymentProofStatus === nextStatus ||
-      (nextStatus === "accepted" &&
-        optimisticPaymentProofStatus === "rejected") ||
-      (nextStatus === "rejected" && optimisticPaymentProofStatus === "accepted")
-    ) {
-      // prevent duplicate submissions or conflicting transitions
-      if (nextStatus === "rejected") {
-        setIsAlertOpen(false);
-      }
-      return;
-    }
-
     setPendingAction(nextStatus);
 
     const result = await updatePaymentStatus(registrationId, nextStatus);
