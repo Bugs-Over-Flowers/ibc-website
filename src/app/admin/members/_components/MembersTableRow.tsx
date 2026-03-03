@@ -45,17 +45,17 @@ export function MembersTableRow({
   };
 
   return (
-    <div className="flex w-full flex-col gap-3 overflow-hidden rounded-lg border bg-background p-3 shadow-sm md:flex-row md:items-stretch">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border bg-background p-3 shadow-sm">
       {/* Clickable area */}
       <button
-        className="flex w-full cursor-pointer flex-col gap-3 overflow-hidden text-left md:w-72 md:shrink-0"
+        className="flex w-full flex-1 cursor-pointer flex-col gap-3 overflow-hidden text-left"
         onClick={handleDoubleTap}
         onKeyDown={handleKeyDown}
         tabIndex={0}
         type="button"
       >
         {/* Image with status badge and checkbox */}
-        <div className="relative aspect-square h-72 w-full shrink-0">
+        <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded">
           {/* Checkbox - top left corner */}
           <div className="absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
             <Checkbox
@@ -68,14 +68,13 @@ export function MembersTableRow({
           {showImage ? (
             <Image
               alt={member.businessName}
-              className="h-full w-full rounded object-cover"
-              height={160}
+              className="absolute inset-0 h-full w-full object-cover"
+              fill
               onError={() => setImageError(true)}
               priority={false}
-              sizes="(max-width: 768px) 100vw, 160px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
               src={member.logoImageURL as string}
               unoptimized
-              width={160}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center rounded bg-muted font-semibold text-3xl text-muted-foreground">
@@ -86,7 +85,7 @@ export function MembersTableRow({
           <div className="absolute top-2 right-2">
             <Badge
               className={cn(
-                "border border-background text-white capitalize",
+                "border border-popover font-semibold text-card capitalize",
                 member.membershipStatus === "cancelled" && "bg-status-red",
                 member.membershipStatus === "paid" && "bg-status-green",
                 member.membershipStatus === "unpaid" && "bg-status-orange",
@@ -99,10 +98,10 @@ export function MembersTableRow({
         </div>
 
         {/* Middle content */}
-        <div className="relative flex w-full flex-1 flex-col gap-2 md:py-4">
+        <div className="relative flex w-full flex-1 flex-col gap-2">
           {/* Company name with website icon on right */}
-          <div className="flex items-start justify-between gap-2 pt-4 md:pt-0">
-            <h3 className="line-clamp-1 flex-1 font-semibold text-lg md:text-2xl">
+          <div className="flex h-7 items-start justify-between gap-2">
+            <h3 className="line-clamp-1 flex-1 font-semibold text-base">
               {member.businessName}
             </h3>
             {member.websiteURL && (
