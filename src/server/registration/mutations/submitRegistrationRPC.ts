@@ -47,13 +47,11 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
 
   const registrationIdentifier = createRegistrationIdentifier();
 
-  const { step1, step3, eventId, step2 } = parsedData;
-
-  console.log(eventId);
+  const { step1, step3, eventId, step2, sponsoredRegistrationId } = parsedData;
 
   // Call database RPC function with transformed data
   const { data: rpcResults, error } = await supabase.rpc(
-    "submit_event_registration_standard",
+    "submit_event_registration",
     {
       p_event_id: eventId,
       // Member: send businessMemberId, Non-member: undefined
@@ -69,6 +67,8 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
         step1.member === "nonmember" ? step1.nonMemberName : undefined,
       p_member_type: step1.member,
       p_identifier: registrationIdentifier,
+      // Sponsored registration: send ID if exists, otherwise undefined
+      p_sponsored_registration_id: sponsoredRegistrationId || undefined,
     },
   );
 

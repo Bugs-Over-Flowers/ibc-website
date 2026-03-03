@@ -13,6 +13,7 @@ import { Field, FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import useRegistrationStore from "@/hooks/registration.store";
+import { cn } from "@/lib/utils";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep4 } from "../../_hooks/useRegistrationStep4";
 import RegistrationStepHeader from "./RegistrationStepHeader";
@@ -193,7 +194,10 @@ function ParticipantInformationSection({
                   {otherParticipants?.map((person, i) => (
                     <div
                       className="flex items-center justify-between rounded-lg border bg-muted/50 p-3 text-sm"
-                      key={`${person.firstName}-${i}`}
+                      key={`${person.firstName}-${
+                        // biome-ignore lint/suspicious/noArrayIndexKey: Used for uniqueness in case of duplicate names, not for reordering
+                        i
+                      }`}
                     >
                       <span className="font-medium">
                         {person.firstName} {person.lastName}
@@ -220,17 +224,41 @@ function PaymentSummarySection({
   otherParticipants,
 }: PaymentSummarySectionProps) {
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const sponsorFeeDeduction = useRegistrationStore(
+    (state) => state.sponsorFeeDeduction,
+  );
+  const sponsorUuid = useRegistrationStore((state) => state.sponsorUuid);
 
   const paymentProofUrl =
     step3Data.paymentMethod === "online" && step3Data.paymentProof
       ? URL.createObjectURL(step3Data.paymentProof)
       : null;
 
+  const participantCount = otherParticipants.length + 1;
+  const baseFee = eventDetails?.registrationFee ?? 0;
+  const subtotal = baseFee * participantCount;
+  const totalSponsorDiscount = sponsorFeeDeduction
+    ? sponsorFeeDeduction * participantCount
+    : 0;
+  const total = subtotal - totalSponsorDiscount;
+  const isSponsored = !!(sponsorUuid && sponsorFeeDeduction);
+
   return (
-    <Card className="border-dashed bg-muted/30">
+    <Card
+      className={cn(
+        "border-dashed bg-muted/30",
+        isSponsored &&
+          "border-green-600/40 bg-green-50/60 dark:border-green-500/30 dark:bg-green-950/20",
+      )}
+    >
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="flex items-center gap-2">
           <h4>Payment Summary</h4>
+          {isSponsored && (
+            <span className="ml-auto rounded-full bg-green-600 px-2.5 py-0.5 font-semibold text-white text-xs dark:bg-green-700">
+              Sponsored
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -260,23 +288,67 @@ function PaymentSummarySection({
               {Intl.NumberFormat("en-US", {
                 currency: "PHP",
                 style: "currency",
-              }).format(eventDetails?.registrationFee ?? 0)}
+              }).format(baseFee)}
               <span className="ml-1 text-muted-foreground text-xs">/ head</span>
             </span>
           </div>
 
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Total Participants</span>
+            <span>{participantCount}</span>
+          </div>
+
           <Separator className="my-2 bg-border/50" />
 
-          <div className="flex items-center justify-between font-semibold text-base">
-            <span>Total Amount</span>
-            <span className="text-lg text-primary">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span>
               {Intl.NumberFormat("en-US", {
                 currency: "PHP",
                 style: "currency",
-              }).format(
-                (eventDetails?.registrationFee ?? 0) *
-                  (otherParticipants.length + 1),
+              }).format(subtotal)}
+            </span>
+          </div>
+
+          {totalSponsorDiscount > 0 && (
+            <>
+              <div className="flex items-center justify-between rounded-lg bg-green-600/10 px-3 py-2.5 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                <div className="flex flex-col">
+                  <span className="font-medium">Sponsor Discount</span>
+                  <span className="text-green-700/70 text-xs dark:text-green-300/80">
+                    ₱{sponsorFeeDeduction?.toLocaleString()} ×{" "}
+                    {participantCount} heads
+                  </span>
+                </div>
+                <span className="font-semibold">
+                  -
+                  {Intl.NumberFormat("en-US", {
+                    currency: "PHP",
+                    style: "currency",
+                  }).format(totalSponsorDiscount)}
+                </span>
+              </div>
+              <Separator className="my-2 bg-border/50" />
+            </>
+          )}
+
+          <div
+            className={cn(
+              "flex items-center justify-between font-semibold text-base",
+              isSponsored && "text-green-700 dark:text-green-300",
+            )}
+          >
+            <span>Total Amount</span>
+            <span
+              className={cn(
+                "text-lg text-primary",
+                isSponsored && "text-green-700 dark:text-green-300",
               )}
+            >
+              {Intl.NumberFormat("en-US", {
+                currency: "PHP",
+                style: "currency",
+              }).format(total)}
             </span>
           </div>
         </div>

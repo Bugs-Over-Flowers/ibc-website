@@ -148,7 +148,10 @@ function FileDropzoneField({
           {files.map((file, index) => (
             <FilePreview
               file={file}
-              key={`${file.name}-${index}`}
+              key={`${file.name}-${
+                // biome-ignore lint/suspicious/noArrayIndexKey: Using index as key is acceptable here since files are not reordered and only added/removed at the end
+                index
+              }`}
               layout={layout}
               onRemove={() => removeFile(index)}
             />
