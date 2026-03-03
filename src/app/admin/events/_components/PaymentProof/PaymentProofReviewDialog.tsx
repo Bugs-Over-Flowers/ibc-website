@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-// fetchSignedUrl from useAction is not memoized, so we store it in a ref
-// to keep a stable reference and prevent the useEffect from looping.
-import { toast } from "sonner";
+import { usePaymentProofDecisionActions } from "@/app/admin/events/_hooks/usePaymentProofDecisionActions";
+import { usePaymentProofDialogState } from "@/app/admin/events/_hooks/usePaymentProofDialogState";
+import { usePaymentProofSignedUrlAction } from "@/app/admin/events/_hooks/usePaymentProofSignedUrlAction";
+import { useReplacePaymentProofAction } from "@/app/admin/events/_hooks/useReplacePaymentProofAction";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,20 +13,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useAction } from "@/hooks/useAction";
-import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
-import { getPaymentProofSignedUrl } from "@/server/registration/mutations/getPaymentProofSignedUrl";
-import { replacePaymentProofAndAccept } from "@/server/registration/mutations/replacePaymentProofAndAccept";
-import { updateRegistrationPaymentProofStatus } from "@/server/registration/mutations/updateRegistrationPaymentProofStatus";
 import CameraCapture from "./CameraCapture";
 import PaymentProofPreviewPanel from "./PaymentProofPreviewPanel";
 import PaymentProofUploadPanel from "./PaymentProofUploadPanel";
 import PaymentProofViewPanel from "./PaymentProofViewPanel";
 
-type CameraMode = "view" | "camera" | "upload" | "preview";
-type PreviewSource = "camera" | "upload";
 type PaymentProofStatus = Enums<"PaymentProofStatus">;
 
 interface PaymentProofReviewDialogProps {
@@ -68,68 +61,6 @@ function getStatusClassName(status: PaymentProofStatus): string {
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function getNextStatus(
-  result: unknown,
-  fallback: PaymentProofStatus,
-): PaymentProofStatus {
-  if (isRecord(result) && typeof result.status === "string") {
-    if (
-      result.status === "pending" ||
-      result.status === "accepted" ||
-      result.status === "rejected"
-    ) {
-      return result.status;
-    }
-  }
-
-  return fallback;
-}
-
-function getResultMessage(result: unknown, fallback: string): string {
-  if (typeof result === "string" && result.trim()) {
-    return result;
-  }
-
-  if (isRecord(result) && typeof result.message === "string") {
-    return result.message;
-  }
-
-  return fallback;
-}
-
-function getResultPath(result: unknown): string | null {
-  if (isRecord(result) && typeof result.path === "string" && result.path) {
-    return result.path;
-  }
-
-  return null;
-}
-
-function convertFileToDataUrl(file: File): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-        return;
-      }
-
-      reject(new Error("Failed to read image"));
-    };
-
-    reader.onerror = () => {
-      reject(new Error("Failed to read image"));
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function PaymentProofReviewDialog({
   open,
   onOpenChange,
@@ -143,192 +74,56 @@ export default function PaymentProofReviewDialog({
   onStatusChange,
   onProofPathChange,
 }: PaymentProofReviewDialogProps) {
-  const uploadSubmitRef = useRef<(() => void) | null>(null);
+  // UI state: mode, preview file, dialog open/close reset
+  const {
+    uploadSubmitRef,
+    mode,
+    setMode,
+    paymentProofStatus,
+    setPaymentProofStatus,
+    selectedFile,
+    previewSource,
+    previewUrl,
+    dialogTitle,
+    clearPreview,
+    resetToView,
+    handleOpenChange,
+    handleCapture,
+    handleFileSelect,
+  } = usePaymentProofDialogState({ initialPaymentProofStatus, onOpenChange });
 
-  // Local UI state: mode, payment proof status, signed URL for viewing, and file preview states.
-  const [mode, setMode] = useState<CameraMode>("view");
-  const [paymentProofStatus, setPaymentProofStatus] = useState(
-    initialPaymentProofStatus,
-  );
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
-  const [isSignedUrlImageError, setIsSignedUrlImageError] = useState(false);
+  // Fetch signed URL when dialog opens
+  const {
+    signedUrl,
+    isSignedUrlImageError,
+    setIsSignedUrlImageError,
+    isFetchingSignedUrl,
+  } = usePaymentProofSignedUrlAction({ open, registrationId });
 
-  // File preview states
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewSource, setPreviewSource] = useState<PreviewSource | null>(
-    null,
-  );
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Accept / Reject actions
+  const { acceptProof, rejectProof, isAccepting, isRejecting } =
+    usePaymentProofDecisionActions({
+      registrationId,
+      onAcceptAction,
+      onRejectAction,
+      onStatusChange,
+      onStatusResolved: setPaymentProofStatus,
+    });
 
-  const [isReplacing, setIsReplacing] = useState(false);
-
-  // Sync paymentProofStatus with initialPaymentProofStatus prop changes.
-  // This ensures the dialog reflects external status updates when reopened.
-  useEffect(() => {
-    setPaymentProofStatus(initialPaymentProofStatus);
-  }, [initialPaymentProofStatus]);
-
-  // Revoke object URL on cleanup to prevent memory leaks.
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
-  const { execute: fetchSignedUrl, isPending: isFetchingSignedUrl } = useAction(
-    tryCatch(getPaymentProofSignedUrl),
-    {
-      onSuccess: ({ signedUrl: nextSignedUrl }) => {
-        setSignedUrl(nextSignedUrl);
-        setIsSignedUrlImageError(false);
-      },
-      onError: (error) => {
-        setSignedUrl(null);
-        setIsSignedUrlImageError(false);
-        toast.error(error);
-      },
-      persist: true,
+  // Replace proof + accept action
+  const { isReplacing, handleReplaceAndAccept } = useReplacePaymentProofAction({
+    registrationId,
+    onReplaceAction,
+    onStatusChange,
+    onProofPathChange,
+    onStatusResolved: setPaymentProofStatus,
+    onCompleted: () => {
+      resetToView();
+      onOpenChange?.(false);
     },
-  );
-
-  // Store fetchSignedUrl in a ref so the effect below has a stable reference
-  // and won't re-run every time useAction recreates the execute function.
-  const fetchSignedUrlRef = useRef(fetchSignedUrl);
-  useEffect(() => {
-    fetchSignedUrlRef.current = fetchSignedUrl;
   });
 
-  // Trigger fetchSignedUrl on the false→true edge of `open`.
-  useEffect(() => {
-    if (!open) return;
-
-    setSignedUrl(null);
-    setIsSignedUrlImageError(false);
-    fetchSignedUrlRef.current({ registrationId });
-  }, [open, registrationId]);
-
-  // Accept Proof of Payment Action
-  const { execute: acceptProof, isPending: isAccepting } = useAction(
-    tryCatch(async () =>
-      onAcceptAction
-        ? onAcceptAction(registrationId)
-        : updateRegistrationPaymentProofStatus({
-            registrationId,
-            status: "accepted",
-          }),
-    ),
-    {
-      onSuccess: (result) => {
-        const nextStatus = getNextStatus(result, "accepted");
-        setPaymentProofStatus(nextStatus);
-        onStatusChange?.(nextStatus);
-        toast.success(getResultMessage(result, "Payment proof accepted"));
-      },
-      onError: (error) => toast.error(error),
-    },
-  );
-
-  // Reject Proof of Payment Action
-  const { execute: rejectProof, isPending: isRejecting } = useAction(
-    tryCatch(async () =>
-      onRejectAction
-        ? onRejectAction(registrationId)
-        : updateRegistrationPaymentProofStatus({
-            registrationId,
-            status: "rejected",
-          }),
-    ),
-    {
-      onSuccess: (result) => {
-        const nextStatus = getNextStatus(result, "rejected");
-        setPaymentProofStatus(nextStatus);
-        onStatusChange?.(nextStatus);
-        toast.success(getResultMessage(result, "Payment proof rejected"));
-      },
-      onError: (error) => toast.error(error),
-    },
-  );
-
-  const clearPreview = () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setSelectedFile(null);
-    setPreviewUrl(null);
-    setPreviewSource(null);
-  };
-
-  const resetDialogState = () => {
-    clearPreview();
-    setMode("view");
-  };
-
-  const handleOpenChange = (nextOpen: boolean) => {
-    onOpenChange?.(nextOpen);
-    if (!nextOpen) {
-      resetDialogState();
-    }
-  };
-
-  const handleCapture = (file: File) => {
-    clearPreview();
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-    setPreviewSource("camera");
-    setMode("preview");
-  };
-
-  // Called by PaymentProofUploadPanel when "Review Selected File" is clicked.
-  const handleFileSelect = (file: File) => {
-    clearPreview();
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-    setPreviewSource("upload");
-    setMode("preview");
-  };
-
-  const handleReplaceAndAccept = async () => {
-    if (!selectedFile) {
-      toast.error("No image selected");
-      return;
-    }
-
-    setIsReplacing(true);
-
-    try {
-      const imageDataUrl = await convertFileToDataUrl(selectedFile);
-      const result = await tryCatch(
-        onReplaceAction
-          ? onReplaceAction({ registrationId, imageDataUrl })
-          : replacePaymentProofAndAccept({ registrationId, imageDataUrl }),
-      );
-
-      if (!result.success) {
-        toast.error(result.error);
-        return;
-      }
-
-      const nextStatus = getNextStatus(result.data, "accepted");
-      setPaymentProofStatus(nextStatus);
-      onStatusChange?.(nextStatus);
-
-      const path = getResultPath(result.data);
-      if (path) {
-        onProofPathChange?.(path);
-      }
-
-      toast.success(getResultMessage(result.data, "Payment proof replaced"));
-      resetDialogState();
-      onOpenChange?.(false);
-    } catch {
-      toast.error("Failed to process selected image");
-    } finally {
-      setIsReplacing(false);
-    }
-  };
-
+  // Derived flags
   const isAnyActionPending =
     isFetchingSignedUrl || isAccepting || isRejecting || isReplacing;
   const isDecisionLocked =
@@ -338,15 +133,6 @@ export default function PaymentProofReviewDialog({
     !isDecisionLocked &&
     paymentProofStatus !== "rejected" &&
     paymentProofStatus !== "accepted";
-
-  const dialogTitle =
-    mode === "camera"
-      ? "Capture New Proof of Payment"
-      : mode === "upload"
-        ? "Upload New Proof of Payment"
-        : mode === "preview"
-          ? "Review New Proof of Payment"
-          : "Proof of Payment";
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
@@ -459,14 +245,14 @@ export default function PaymentProofReviewDialog({
               </Button>
               <Button
                 disabled={isAnyActionPending || !selectedFile}
-                onClick={handleReplaceAndAccept}
+                onClick={() => handleReplaceAndAccept(selectedFile)}
               >
                 {isReplacing ? "Saving..." : "Save and Accept"}
               </Button>
             </>
           )}
 
-          {/* View Proof of Payment Buttons*/}
+          {/* View Proof of Payment Buttons */}
           {mode === "view" && (
             <>
               <Button

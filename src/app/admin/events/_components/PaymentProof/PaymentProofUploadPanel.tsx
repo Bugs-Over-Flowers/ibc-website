@@ -1,7 +1,7 @@
 "use client";
 
 import type { RefObject } from "react";
-import { useAppForm } from "@/hooks/_formHooks";
+import { usePaymentProofUploadForm } from "@/app/admin/events/_hooks/usePaymentProofUploadForm";
 
 interface PaymentProofUploadPanelProps {
   submitRef: RefObject<(() => void) | null>;
@@ -12,21 +12,7 @@ export default function PaymentProofUploadPanel({
   submitRef,
   onFileSelect,
 }: PaymentProofUploadPanelProps) {
-  const form = useAppForm({
-    defaultValues: {
-      proofFiles: [] as File[],
-    },
-    onSubmit: async ({ value }) => {
-      const file = value.proofFiles[0];
-      if (file) {
-        onFileSelect(file);
-      }
-    },
-  });
-
-  // Expose handleSubmit to the parent via submitRef so the
-  // "Review Selected File" button in the dialog footer can trigger it.
-  submitRef.current = form.handleSubmit;
+  const form = usePaymentProofUploadForm({ onFileSelect, submitRef });
 
   return (
     <form

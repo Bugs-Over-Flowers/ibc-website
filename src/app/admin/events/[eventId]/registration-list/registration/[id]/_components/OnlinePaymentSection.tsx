@@ -25,7 +25,7 @@ import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 type OnlinePaymentSectionProps = {
   paymentProofStatus: Enums<"PaymentProofStatus">;
   getStatusColor: (status: string) => string;
-  proofImageURL?: string | null;
+  proofImageURL: string;
   registrationId: string;
 };
 
@@ -39,12 +39,6 @@ export default function OnlinePaymentSection({
   const [pendingAction, setPendingAction] = useState<
     "accepted" | "rejected" | null
   >(null);
-
-  // Early validation - ensure URL is valid before any rendering
-  const validProofImageURL =
-    proofImageURL && typeof proofImageURL === "string"
-      ? proofImageURL.trim()
-      : null;
 
   const paymentAction = async (
     registration: string,
@@ -85,23 +79,19 @@ export default function OnlinePaymentSection({
     setPendingAction(null);
   };
 
-  const hasProofImage = Boolean(
-    validProofImageURL && validProofImageURL.length > 0,
-  );
-
   const isVerifyPending = isPending && pendingAction === "accepted";
   const isRejectPending = isPending && pendingAction === "rejected";
 
   return (
     <>
-      {hasProofImage && (
+      {proofImageURL && (
         <>
           <ImageZoom className="relative h-96 w-full touch-none select-none">
             <Image
               alt="Proof of Payment Image"
               className="object-contain"
               fill
-              src={validProofImageURL as string}
+              src={proofImageURL}
             />
           </ImageZoom>
           <div className="text-neutral-600">click on the image to zoom in</div>
@@ -131,7 +121,11 @@ export default function OnlinePaymentSection({
           {/* Reject Button */}
           <AlertDialogTrigger
             className={buttonVariants({ variant: "destructive" })}
-            disabled={isPending || optimisticPaymentProofStatus === "rejected"}
+            disabled={
+              isPending ||
+              optimisticPaymentProofStatus === "rejected" ||
+              optimisticPaymentProofStatus === "accepted"
+            }
           >
             {isRejectPending
               ? "Rejecting..."

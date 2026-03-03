@@ -5,7 +5,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import RegistrationProofDialog from "@/app/admin/events/_components/PaymentProof/RegistrationProofDialog";
+import PaymentProofReviewDialog from "@/app/admin/events/_components/PaymentProof/PaymentProofReviewDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Enums } from "@/lib/supabase/db.types";
+import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 import QRCodeDialog from "./QRCodeDialog";
 
 interface RegistrationRowActionsProps {
@@ -91,13 +92,21 @@ export default function RegistrationRowActions({
       />
 
       {shouldShowPaymentProofAction && (
-        <RegistrationProofDialog
+        <PaymentProofReviewDialog
+          enforcePendingDecision={false}
+          initialPaymentProofStatus={data.paymentProofStatus}
+          onAcceptAction={async (id) => {
+            const result = await verifyPayment(id);
+            return {
+              message: result,
+              status: "accepted" as const,
+            };
+          }}
           onOpenChange={setPaymentProofDialog}
           onStatusChange={() => {
             setPaymentProofDialog(false);
           }}
           open={paymentProofDialog}
-          paymentProofStatus={data.paymentProofStatus}
           registrationId={data.registrationId}
         />
       )}
