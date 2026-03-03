@@ -125,9 +125,9 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
       <Badge
         className={cn(
           "rounded-full",
-          row.original.paymentProofStatus === "accepted"
-            ? "bg-green-600"
-            : "bg-yellow-600",
+          row.original.paymentProofStatus === "accepted" && "bg-green-600",
+          row.original.paymentProofStatus === "pending" && "bg-yellow-600",
+          row.original.paymentProofStatus === "rejected" && "bg-destructive",
         )}
       >
         {row.original.paymentProofStatus}
