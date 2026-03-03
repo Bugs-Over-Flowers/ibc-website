@@ -182,6 +182,7 @@ export const ServerRegistrationSchema = z.object({
   step1: StandardRegistrationStep1Schema,
   step2: StandardRegistrationStep2Schema,
   step4: StandardRegistrationStep4Schema,
+  sponsoredRegistrationId: z.string().uuid().optional().nullable(),
   step3: z.discriminatedUnion("paymentMethod", [
     z.object({
       paymentMethod: z.literal("online"),

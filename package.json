@@ -32,8 +32,7 @@
     "test:e2e:local": "supabase start && playwright test",
     "test:e2e:codegen": "playwright codegen http://localhost:3000",
     "db:gen:types": "supabase gen types typescript --local > src/lib/supabase/db.types.ts",
-    "gen:types": "supabase gen types typescript --project-id rpdourwztdpwdebggkkc > src/lib/supabase/db.types.ts",
-    "reset": "rm -rf node_modules bun.lock && rm -rf .next && bun install"
+    "gen:types": "supabase gen types typescript --project-id rpdourwztdpwdebggkkc > src/lib/supabase/db.types.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
@@ -57,8 +56,8 @@
     "file-type": "^21.3.0",
     "html-to-image": "^1.11.13",
     "input-otp": "^1.4.2",
-    "isomorphic-dompurify": "^3.0.0",
-    "lucide-react": "^0.575.0",
+    "isomorphic-dompurify": "^2.36.0",
+    "lucide-react": "^0.566.0",
     "motion": "^12.34.3",
     "next": "^16.1.6",
     "next-themes": "^0.4.6",
@@ -72,7 +71,7 @@
     "react-medium-image-zoom": "^5.4.1",
     "react-scan": "^0.5.3",
     "react-to-print": "^3.3.0",
-    "resend": "^6.9.2",
+    "resend": "^6.9.3",
     "server-only": "^0.0.1",
     "shadcn": "^3.8.5",
     "sharp": "^0.34.5",
@@ -82,19 +81,19 @@
     "tabs": "^0.2.0",
     "tailwind-merge": "^3.5.0",
     "uuid": "^13.0.0",
-    "write-excel-file": "^3.0.5",
+    "write-excel-file": "^2.3.10",
     "zod": "^4.3.6",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.4",
+    "@biomejs/biome": "2.4.2",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/dompurify": "^3.2.0",
-    "@types/node": "^25.3.2",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^4.0.18",
@@ -114,14 +113,15 @@
     "hono": "4.11.10"
   },
   "overrides": {
-    "hono": "4.11.10",
     "@modelcontextprotocol/sdk": "^1.25.4",
     "ajv": "^8.18.0",
     "qs": "^6.14.2",
-    "svelte": "^5.46.4",
     "tar": "^7.5.8",
     "lodash": "^4.17.23",
     "@isaacs/brace-expansion": "^5.0.1",
-    "minimatch": "^10.2.1"
+    "hono": "^4.11.10",
+    "minimatch": "^10.2.3",
+    "rollup": "^4.59.0",
+    "svelte": "^5.53.5"
   }
 }
