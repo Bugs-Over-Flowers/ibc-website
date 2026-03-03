@@ -71,7 +71,7 @@ export default function EventTable({
 
       {/* Intersection observer target for infinite scroll */}
       {initialNextCursor && (
-        <div className="flex justify-center py-8" ref={observerTarget}>
+        <div className="flex justify-center py-8" href={observerTarget}>
           {isLoading && (
             <div className="flex items-center gap-2">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

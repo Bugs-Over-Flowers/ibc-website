@@ -38,8 +38,6 @@ async function SuccessPage() {
   return (
     <ResetRegistrationWrapper>
       <main className="h-full p-5 md:p-10">
-        <h1>Registration Successful!</h1>
-
         <Suspense
           fallback={
             <div className="h-full pt-5 pb-5 md:pb-10">

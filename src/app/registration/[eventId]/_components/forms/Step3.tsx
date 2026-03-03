@@ -1,14 +1,22 @@
 import { Banknote, Building, CreditCard, Upload, Users, X } from "lucide-react";
 import Image from "next/image";
-import type { FormEvent } from "react";
+import type { DragEvent, FormEvent } from "react";
 import { useCallback, useState } from "react";
 import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import FormButtons from "@/components/FormButtons";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import useRegistrationStore from "@/hooks/registration.store";
+import { cn } from "@/lib/utils";
 import { PaymentMethodEnum } from "@/lib/validation/utils";
 import { useRegistrationStep3 } from "../../_hooks/useRegistrationStep3";
 import RegistrationStepHeader from "./RegistrationStepHeader";
@@ -34,7 +42,7 @@ export default function Step3() {
     });
   };
 
-  const onNext = async (e?: FormEvent) => {
+  const onNext = async (e?: FormEvent<HTMLFormElement>) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -42,7 +50,7 @@ export default function Step3() {
     form.handleSubmit({ nextStep: true });
   };
 
-  const handleDrag = useCallback((e: React.DragEvent) => {
+  const handleDrag = useCallback((e: DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -52,22 +60,11 @@ export default function Step3() {
     }
   }, []);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setDragActive(false);
-      if (e.dataTransfer.files?.[0]) {
-        form.getFieldValue("paymentProof");
-        // Access field through form context to update
-        const field = form.state.fieldMeta.paymentProof;
-        if (field) {
-          e.dataTransfer.files[0];
-        }
-      }
-    },
-    [form],
-  );
+  const handleDrop = useCallback((e: DragEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  }, []);
 
   return (
     <form className="space-y-6" onSubmit={onNext}>
@@ -96,37 +93,123 @@ export default function Step3() {
 function PaymentDetails() {
   const registrationData = useRegistrationStore((s) => s.registrationData);
   const eventDetails = useRegistrationStore((s) => s.eventDetails);
+  const sponsorFeeDeduction = useRegistrationStore(
+    (s) => s.sponsorFeeDeduction,
+  );
+  const sponsorUuid = useRegistrationStore((s) => s.sponsorUuid);
+  const sponsoredBy = useRegistrationStore((s) => s.sponsoredBy);
 
   const baseFee = eventDetails?.registrationFee || 0;
   const otherParticipantsCount =
     registrationData?.step2?.otherParticipants?.length || 0;
   const participantCount = otherParticipantsCount + 1;
 
-  const total = baseFee * participantCount;
+  const subtotal = baseFee * participantCount;
+
+  // Apply sponsor deduction to each participant
+  const totalSponsorDiscount = sponsorFeeDeduction
+    ? sponsorFeeDeduction * participantCount
+    : 0;
+  const total = subtotal - totalSponsorDiscount;
+  const isSponsored = !!(sponsorUuid && sponsorFeeDeduction);
 
   return (
-    <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">Registration Fee</span>
-        <span>
-          {Intl.NumberFormat("en-US", {
-            currency: "PHP",
-            style: "currency",
-          }).format(baseFee)}{" "}
-          × {participantCount}
-        </span>
-      </div>
-      <Separator className="bg-border/50" />
-      <div className="flex items-center justify-between">
-        <span className="font-medium">Total Amount</span>
-        <span className="font-semibold text-lg text-primary">
-          {Intl.NumberFormat("en-US", {
-            currency: "PHP",
-            style: "currency",
-          }).format(total)}
-        </span>
-      </div>
-    </div>
+    <Card
+      className={cn(
+        "border-dashed bg-muted/30",
+        isSponsored &&
+          "border-green-600/40 bg-green-50/60 dark:border-green-500/30 dark:bg-green-950/20",
+      )}
+    >
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 font-medium text-base">
+          <Banknote className="size-4 text-muted-foreground" />
+          Payment Summary
+          {isSponsored && (
+            <span className="ml-auto rounded-full bg-green-600 px-2.5 py-0.5 font-semibold text-white text-xs dark:bg-green-700">
+              Sponsored
+            </span>
+          )}
+        </CardTitle>
+        {isSponsored && sponsoredBy ? (
+          <CardDescription>Sponsored by {sponsoredBy}</CardDescription>
+        ) : null}
+      </CardHeader>
+      <CardContent className="grid gap-4 text-sm">
+        <div className="grid gap-2">
+          <div className="flex w-full items-center justify-between">
+            <span className="text-muted-foreground">Registration Fee</span>
+            <span>
+              {Intl.NumberFormat("en-US", {
+                currency: "PHP",
+                style: "currency",
+              }).format(baseFee)}
+              <span className="ml-1 text-muted-foreground text-xs">/ head</span>
+            </span>
+          </div>
+          <div className="flex w-full items-center justify-between">
+            <span className="text-muted-foreground">Total Participants</span>
+            <span>{participantCount}</span>
+          </div>
+        </div>
+
+        <Separator className="bg-border/50" />
+
+        <div className="flex w-full items-center justify-between">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span>
+            {Intl.NumberFormat("en-US", {
+              currency: "PHP",
+              style: "currency",
+            }).format(subtotal)}
+          </span>
+        </div>
+
+        {totalSponsorDiscount > 0 && (
+          <>
+            <div className="flex w-full items-center justify-between rounded-lg bg-green-600/10 px-3 py-2.5 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+              <div className="flex flex-col">
+                <span className="font-medium">Sponsor Discount</span>
+                <span className="text-green-700/70 text-xs dark:text-green-300/80">
+                  ₱{sponsorFeeDeduction?.toLocaleString()} × {participantCount}{" "}
+                  heads
+                </span>
+              </div>
+              <span className="font-semibold">
+                -
+                {Intl.NumberFormat("en-US", {
+                  currency: "PHP",
+                  style: "currency",
+                }).format(totalSponsorDiscount)}
+              </span>
+            </div>
+            <Separator className="bg-border/50" />
+          </>
+        )}
+
+        <div
+          className={cn(
+            "flex w-full items-center justify-between font-semibold",
+            isSponsored
+              ? "text-green-700 text-lg dark:text-green-300"
+              : "text-lg",
+          )}
+        >
+          <span>Total Amount</span>
+          <span
+            className={cn(
+              "text-primary",
+              isSponsored && "text-green-700 dark:text-green-300",
+            )}
+          >
+            {Intl.NumberFormat("en-US", {
+              currency: "PHP",
+              style: "currency",
+            }).format(total)}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -141,7 +224,7 @@ function PaymentMethodSelection({ form }: PaymentMethodSelectionProps) {
       <form.AppField
         listeners={{
           onChange: () => {
-            if (!form.getFieldValue("paymentProof")) {
+            if (form.getFieldValue("paymentProof")) {
               form.resetField("paymentProof");
             }
           },
@@ -208,8 +291,8 @@ function PaymentMethodSelection({ form }: PaymentMethodSelectionProps) {
 interface PaymentProofUploadProps {
   form: ReturnType<typeof useRegistrationStep3>;
   dragActive: boolean;
-  handleDrag: (e: React.DragEvent) => void;
-  handleDrop: (e: React.DragEvent) => void;
+  handleDrag: (e: DragEvent<HTMLButtonElement>) => void;
+  handleDrop: (e: DragEvent<HTMLButtonElement>) => void;
 }
 
 function PaymentProofUpload({

@@ -20,7 +20,7 @@ export async function getMembers(
       `
       *,
       Sector!inner(sectorId, sectorName),
-      Application!inner(applicationId, applicationStatus)
+      Application(applicationId, applicationStatus)
     `,
     )
     .neq("Application.applicationStatus", "rejected")
@@ -50,7 +50,7 @@ export async function getMembers(
       Application: Array<{
         applicationId: string;
         applicationStatus: string;
-      }>;
+      }> | null;
     };
 
   const signLogoUrl = async (path: string | null) => {

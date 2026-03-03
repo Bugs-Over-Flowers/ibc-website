@@ -15,11 +15,17 @@ interface GetRegistrationListParams {
   eventId: string;
   searchString?: string;
   paymentProofStatus?: string;
+  limit?: number;
 }
 
 export const getEventRegistrationList = async (
   requestCookies: RequestCookie[],
-  { eventId, searchString, paymentProofStatus }: GetRegistrationListParams,
+  {
+    eventId,
+    searchString,
+    paymentProofStatus,
+    limit,
+  }: GetRegistrationListParams,
 ): Promise<RegistrationItem[]> => {
   "use cache";
   applyRealtime60sCache();
@@ -27,16 +33,28 @@ export const getEventRegistrationList = async (
   cacheTag(CACHE_TAGS.registrations.list);
   cacheTag(CACHE_TAGS.registrations.event);
   const supabase = await createClient(requestCookies);
+  const parsedPaymentProofStatus = paymentProofStatus
+    ? PaymentProofStatusEnum.safeParse(paymentProofStatus)
+    : undefined;
 
-  const query = await supabase
-    .rpc("get_registration_list", {
-      p_event_id: eventId,
-      p_search_text: searchString,
-      p_payment_proof_status: paymentProofStatus
-        ? PaymentProofStatusEnum.parse(paymentProofStatus)
-        : undefined,
-    })
-    .throwOnError();
+  let query = supabase.rpc("get_registration_list", {
+    p_event_id: eventId,
+    p_search_text: searchString,
+    p_payment_proof_status: parsedPaymentProofStatus?.success
+      ? parsedPaymentProofStatus.data
+      : undefined,
+  });
 
-  return RegistrationListRPCSchema.array().parse(query.data);
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error(error);
+    throw new Error("Failed to fetch registration list");
+  }
+
+  return RegistrationListRPCSchema.array().parse(data);
 };
