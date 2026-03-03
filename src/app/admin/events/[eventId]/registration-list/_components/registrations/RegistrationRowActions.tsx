@@ -5,7 +5,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import RegistrationProofDialog from "@/components/payment-proof/RegistrationProofDialog";
+import RegistrationProofDialog from "@/app/admin/events/_components/PaymentProof/RegistrationProofDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,10 +1,18 @@
 "use client";
 
-import { useStore } from "@tanstack/react-form";
-import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+// fetchSignedUrl from useAction is not memoized, so we store it in a ref
+// to keep a stable reference and prevent the useEffect from looping.
 import { toast } from "sonner";
-import { useAppForm } from "@/hooks/_formHooks";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
@@ -12,17 +20,10 @@ import { cn } from "@/lib/utils";
 import { getPaymentProofSignedUrl } from "@/server/registration/mutations/getPaymentProofSignedUrl";
 import { replacePaymentProofAndAccept } from "@/server/registration/mutations/replacePaymentProofAndAccept";
 import { updateRegistrationPaymentProofStatus } from "@/server/registration/mutations/updateRegistrationPaymentProofStatus";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import { ImageZoom } from "../ui/shadcn-io/image-zoom";
 import CameraCapture from "./CameraCapture";
+import PaymentProofPreviewPanel from "./PaymentProofPreviewPanel";
+import PaymentProofUploadPanel from "./PaymentProofUploadPanel";
+import PaymentProofViewPanel from "./PaymentProofViewPanel";
 
 type CameraMode = "view" | "camera" | "upload" | "preview";
 type PreviewSource = "camera" | "upload";
@@ -30,12 +31,10 @@ type PaymentProofStatus = Enums<"PaymentProofStatus">;
 
 interface PaymentProofReviewDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange?: (open: boolean) => void;
   registrationId: string;
   initialPaymentProofStatus: PaymentProofStatus;
   trigger?: React.ReactElement;
-  allowReject?: boolean;
-  allowUpload?: boolean;
   enforcePendingDecision?: boolean;
   onAcceptAction?: (registrationId: string) => Promise<unknown>;
   onRejectAction?: (registrationId: string) => Promise<unknown>;
@@ -110,14 +109,33 @@ function getResultPath(result: unknown): string | null {
   return null;
 }
 
+function convertFileToDataUrl(file: File): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("Failed to read image"));
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Failed to read image"));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function PaymentProofReviewDialog({
   open,
   onOpenChange,
   registrationId,
   initialPaymentProofStatus,
   trigger,
-  allowReject = false,
-  allowUpload = false,
   enforcePendingDecision = true,
   onAcceptAction,
   onRejectAction,
@@ -125,38 +143,32 @@ export default function PaymentProofReviewDialog({
   onStatusChange,
   onProofPathChange,
 }: PaymentProofReviewDialogProps) {
+  const uploadSubmitRef = useRef<(() => void) | null>(null);
+
+  // Local UI state: mode, payment proof status, signed URL for viewing, and file preview states.
   const [mode, setMode] = useState<CameraMode>("view");
   const [paymentProofStatus, setPaymentProofStatus] = useState(
     initialPaymentProofStatus,
   );
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [isSignedUrlImageError, setIsSignedUrlImageError] = useState(false);
+
+  // File preview states
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewSource, setPreviewSource] = useState<PreviewSource | null>(
     null,
   );
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isAccepting, setIsAccepting] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
+
   const [isReplacing, setIsReplacing] = useState(false);
 
-  const uploadForm = useAppForm({
-    defaultValues: {
-      proofFiles: [] as File[],
-    },
-    onSubmit: async () => {},
-  });
-
-  const uploadedFiles = useStore(
-    uploadForm.store,
-    (state) => state.values.proofFiles,
-  );
-  const selectedUploadFile = uploadedFiles[0] ?? null;
-
+  // Sync paymentProofStatus with initialPaymentProofStatus prop changes.
+  // This ensures the dialog reflects external status updates when reopened.
   useEffect(() => {
     setPaymentProofStatus(initialPaymentProofStatus);
   }, [initialPaymentProofStatus]);
 
+  // Revoke object URL on cleanup to prevent memory leaks.
   useEffect(() => {
     return () => {
       if (previewUrl) {
@@ -174,130 +186,89 @@ export default function PaymentProofReviewDialog({
       },
       onError: (error) => {
         setSignedUrl(null);
+        setIsSignedUrlImageError(false);
         toast.error(error);
       },
       persist: true,
     },
   );
 
-  const clearPreview = useCallback(() => {
+  // Store fetchSignedUrl in a ref so the effect below has a stable reference
+  // and won't re-run every time useAction recreates the execute function.
+  const fetchSignedUrlRef = useRef(fetchSignedUrl);
+  useEffect(() => {
+    fetchSignedUrlRef.current = fetchSignedUrl;
+  });
+
+  // Trigger fetchSignedUrl on the false→true edge of `open`.
+  useEffect(() => {
+    if (!open) return;
+
+    setSignedUrl(null);
+    setIsSignedUrlImageError(false);
+    fetchSignedUrlRef.current({ registrationId });
+  }, [open, registrationId]);
+
+  // Accept Proof of Payment Action
+  const { execute: acceptProof, isPending: isAccepting } = useAction(
+    tryCatch(async () =>
+      onAcceptAction
+        ? onAcceptAction(registrationId)
+        : updateRegistrationPaymentProofStatus({
+            registrationId,
+            status: "accepted",
+          }),
+    ),
+    {
+      onSuccess: (result) => {
+        const nextStatus = getNextStatus(result, "accepted");
+        setPaymentProofStatus(nextStatus);
+        onStatusChange?.(nextStatus);
+        toast.success(getResultMessage(result, "Payment proof accepted"));
+      },
+      onError: (error) => toast.error(error),
+    },
+  );
+
+  // Reject Proof of Payment Action
+  const { execute: rejectProof, isPending: isRejecting } = useAction(
+    tryCatch(async () =>
+      onRejectAction
+        ? onRejectAction(registrationId)
+        : updateRegistrationPaymentProofStatus({
+            registrationId,
+            status: "rejected",
+          }),
+    ),
+    {
+      onSuccess: (result) => {
+        const nextStatus = getNextStatus(result, "rejected");
+        setPaymentProofStatus(nextStatus);
+        onStatusChange?.(nextStatus);
+        toast.success(getResultMessage(result, "Payment proof rejected"));
+      },
+      onError: (error) => toast.error(error),
+    },
+  );
+
+  const clearPreview = () => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
     setSelectedFile(null);
     setPreviewUrl(null);
     setPreviewSource(null);
-  }, [previewUrl]);
+  };
 
-  const resetDialogState = useCallback(() => {
+  const resetDialogState = () => {
     clearPreview();
-    uploadForm.setFieldValue("proofFiles", []);
     setMode("view");
-  }, [clearPreview, uploadForm]);
-
-  // Trigger fetchSignedUrl on the false→true edge of `open` (handles controlled mode).
-  const prevOpenRef = useRef(open);
-  useEffect(() => {
-    const wasOpen = prevOpenRef.current;
-    prevOpenRef.current = open;
-
-    if (!wasOpen && open) {
-      setSignedUrl(null);
-      setIsSignedUrlImageError(false);
-      fetchSignedUrl({ registrationId });
-    }
-  });
-
-  const convertFileToDataUrl = async (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          resolve(reader.result);
-          return;
-        }
-
-        reject(new Error("Failed to read image"));
-      };
-
-      reader.onerror = () => {
-        reject(new Error("Failed to read image"));
-      };
-
-      reader.readAsDataURL(file);
-    });
+  };
 
   const handleOpenChange = (nextOpen: boolean) => {
-    onOpenChange(nextOpen);
+    onOpenChange?.(nextOpen);
     if (!nextOpen) {
       resetDialogState();
-    }
-  };
-
-  const runAction = async <T,>(promise: Promise<T>): Promise<T | null> => {
-    const result = await tryCatch(promise);
-
-    if (!result.success) {
-      toast.error(result.error);
-      return null;
-    }
-
-    return result.data;
-  };
-
-  const syncStatus = (status: PaymentProofStatus) => {
-    setPaymentProofStatus(status);
-    onStatusChange?.(status);
-  };
-
-  const handleAccept = async () => {
-    setIsAccepting(true);
-
-    try {
-      const result = await runAction(
-        onAcceptAction
-          ? onAcceptAction(registrationId)
-          : updateRegistrationPaymentProofStatus({
-              registrationId,
-              status: "accepted",
-            }),
-      );
-
-      if (!result) {
-        return;
-      }
-
-      const nextStatus = getNextStatus(result, "accepted");
-      syncStatus(nextStatus);
-      toast.success(getResultMessage(result, "Payment proof accepted"));
-    } finally {
-      setIsAccepting(false);
-    }
-  };
-
-  const handleReject = async () => {
-    setIsRejecting(true);
-
-    try {
-      const result = await runAction(
-        onRejectAction
-          ? onRejectAction(registrationId)
-          : updateRegistrationPaymentProofStatus({
-              registrationId,
-              status: "rejected",
-            }),
-      );
-
-      if (!result) {
-        return;
-      }
-
-      const nextStatus = getNextStatus(result, "rejected");
-      syncStatus(nextStatus);
-      toast.success(getResultMessage(result, "Payment proof rejected"));
-    } finally {
-      setIsRejecting(false);
     }
   };
 
@@ -309,15 +280,11 @@ export default function PaymentProofReviewDialog({
     setMode("preview");
   };
 
-  const handleReviewUpload = () => {
-    if (!selectedUploadFile) {
-      toast.error("Select an image first");
-      return;
-    }
-
+  // Called by PaymentProofUploadPanel when "Review Selected File" is clicked.
+  const handleFileSelect = (file: File) => {
     clearPreview();
-    setSelectedFile(selectedUploadFile);
-    setPreviewUrl(URL.createObjectURL(selectedUploadFile));
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
     setPreviewSource("upload");
     setMode("preview");
   };
@@ -332,33 +299,29 @@ export default function PaymentProofReviewDialog({
 
     try {
       const imageDataUrl = await convertFileToDataUrl(selectedFile);
-      const result = await runAction(
+      const result = await tryCatch(
         onReplaceAction
-          ? onReplaceAction({
-              registrationId,
-              imageDataUrl,
-            })
-          : replacePaymentProofAndAccept({
-              registrationId,
-              imageDataUrl,
-            }),
+          ? onReplaceAction({ registrationId, imageDataUrl })
+          : replacePaymentProofAndAccept({ registrationId, imageDataUrl }),
       );
 
-      if (!result) {
+      if (!result.success) {
+        toast.error(result.error);
         return;
       }
 
-      const nextStatus = getNextStatus(result, "accepted");
-      syncStatus(nextStatus);
+      const nextStatus = getNextStatus(result.data, "accepted");
+      setPaymentProofStatus(nextStatus);
+      onStatusChange?.(nextStatus);
 
-      const path = getResultPath(result);
+      const path = getResultPath(result.data);
       if (path) {
         onProofPathChange?.(path);
       }
 
-      toast.success(getResultMessage(result, "Payment proof replaced"));
+      toast.success(getResultMessage(result.data, "Payment proof replaced"));
       resetDialogState();
-      onOpenChange(false);
+      onOpenChange?.(false);
     } catch {
       toast.error("Failed to process selected image");
     } finally {
@@ -370,11 +333,8 @@ export default function PaymentProofReviewDialog({
     isFetchingSignedUrl || isAccepting || isRejecting || isReplacing;
   const isDecisionLocked =
     enforcePendingDecision && paymentProofStatus !== "pending";
-  const canAccept = isDecisionLocked
-    ? false
-    : paymentProofStatus !== "accepted";
+  const canAccept = !isDecisionLocked && paymentProofStatus !== "accepted";
   const canReject =
-    allowReject &&
     !isDecisionLocked &&
     paymentProofStatus !== "rejected" &&
     paymentProofStatus !== "accepted";
@@ -417,69 +377,27 @@ export default function PaymentProofReviewDialog({
         )}
 
         {mode === "upload" && (
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-            }}
-          >
-            <uploadForm.AppField name="proofFiles">
-              {(field) => (
-                <field.FileDropzoneField
-                  accept={{
-                    "image/jpeg": [],
-                    "image/jpg": [],
-                    "image/png": [],
-                  }}
-                  description="Upload JPG or PNG proof of payment."
-                  label="Proof of Payment"
-                  layout="banner"
-                  maxFiles={1}
-                />
-              )}
-            </uploadForm.AppField>
-          </form>
+          <PaymentProofUploadPanel
+            onFileSelect={handleFileSelect}
+            submitRef={uploadSubmitRef}
+          />
         )}
 
-        {mode === "preview" &&
-          (previewUrl ? (
-            <ImageZoom className="h-[420px] w-full">
-              <Image
-                alt="Selected proof of payment"
-                className="h-full w-full object-contain"
-                fill
-                src={previewUrl}
-              />
-            </ImageZoom>
-          ) : (
-            <div className="flex h-[420px] items-center justify-center rounded-md border text-muted-foreground text-sm">
-              No preview available.
-            </div>
-          ))}
+        {mode === "preview" && (
+          <PaymentProofPreviewPanel previewUrl={previewUrl} />
+        )}
 
-        {mode === "view" &&
-          (isFetchingSignedUrl ? (
-            <div className="flex h-[420px] items-center justify-center rounded-md border text-muted-foreground text-sm">
-              Loading payment proof...
-            </div>
-          ) : signedUrl && !isSignedUrlImageError ? (
-            <ImageZoom className="h-[420px] w-full">
-              <Image
-                alt="Proof of Payment"
-                className="h-full w-full object-contain"
-                fill
-                onError={() => {
-                  setIsSignedUrlImageError(true);
-                }}
-                src={signedUrl}
-              />
-            </ImageZoom>
-          ) : (
-            <div className="flex h-[420px] items-center justify-center rounded-md border text-muted-foreground text-sm">
-              Unable to load payment proof.
-            </div>
-          ))}
+        {mode === "view" && (
+          <PaymentProofViewPanel
+            isFetchingSignedUrl={isFetchingSignedUrl}
+            isImageError={isSignedUrlImageError}
+            onImageError={() => setIsSignedUrlImageError(true)}
+            signedUrl={signedUrl}
+          />
+        )}
 
         <DialogFooter className="mt-1 flex-wrap border-t pt-4">
+          {/* Camera or Upload mode Buttons */}
           {(mode === "camera" || mode === "upload") && (
             <>
               <Button
@@ -493,36 +411,32 @@ export default function PaymentProofReviewDialog({
                 Back to Proof
               </Button>
 
-              {allowUpload && mode === "camera" && (
-                <Button
-                  disabled={isAnyActionPending}
-                  onClick={() => {
-                    clearPreview();
-                    setMode("upload");
-                  }}
-                  variant="outline"
-                >
-                  Use Upload
-                </Button>
-              )}
+              <Button
+                disabled={isAnyActionPending}
+                onClick={() => {
+                  clearPreview();
+                  setMode("upload");
+                }}
+                variant="outline"
+              >
+                Use Upload
+              </Button>
 
-              {allowUpload && mode === "upload" && (
-                <Button
-                  disabled={isAnyActionPending}
-                  onClick={() => {
-                    clearPreview();
-                    setMode("camera");
-                  }}
-                  variant="outline"
-                >
-                  Use Camera
-                </Button>
-              )}
+              <Button
+                disabled={isAnyActionPending}
+                onClick={() => {
+                  clearPreview();
+                  setMode("camera");
+                }}
+                variant="outline"
+              >
+                Use Camera
+              </Button>
 
               {mode === "upload" && (
                 <Button
-                  disabled={isAnyActionPending || !selectedUploadFile}
-                  onClick={handleReviewUpload}
+                  disabled={isAnyActionPending}
+                  onClick={() => uploadSubmitRef.current?.()}
                 >
                   Review Selected File
                 </Button>
@@ -530,6 +444,7 @@ export default function PaymentProofReviewDialog({
             </>
           )}
 
+          {/* Preview Mode Buttons */}
           {mode === "preview" && (
             <>
               <Button
@@ -551,6 +466,7 @@ export default function PaymentProofReviewDialog({
             </>
           )}
 
+          {/* View Proof of Payment Buttons*/}
           {mode === "view" && (
             <>
               <Button
@@ -572,32 +488,28 @@ export default function PaymentProofReviewDialog({
                 Use Camera
               </Button>
 
-              {allowUpload && (
-                <Button
-                  disabled={isAnyActionPending}
-                  onClick={() => {
-                    clearPreview();
-                    setMode("upload");
-                  }}
-                  variant="outline"
-                >
-                  Upload File
-                </Button>
-              )}
+              <Button
+                disabled={isAnyActionPending}
+                onClick={() => {
+                  clearPreview();
+                  setMode("upload");
+                }}
+                variant="outline"
+              >
+                Upload File
+              </Button>
 
-              {allowReject && (
-                <Button
-                  disabled={isAnyActionPending || !canReject}
-                  onClick={handleReject}
-                  variant="outline"
-                >
-                  {isRejecting ? "Rejecting..." : "Reject"}
-                </Button>
-              )}
+              <Button
+                disabled={isAnyActionPending || !canReject}
+                onClick={() => rejectProof()}
+                variant="outline"
+              >
+                {isRejecting ? "Rejecting..." : "Reject"}
+              </Button>
 
               <Button
                 disabled={isAnyActionPending || !canAccept}
-                onClick={handleAccept}
+                onClick={() => acceptProof()}
               >
                 {isAccepting ? "Accepting..." : "Accept"}
               </Button>

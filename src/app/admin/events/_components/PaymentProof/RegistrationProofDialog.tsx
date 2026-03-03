@@ -30,14 +30,10 @@ export default function RegistrationProofDialog({
 
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
-  const onOpenChange = isControlled
-    ? (controlledOnOpenChange ?? (() => {}))
-    : setInternalOpen;
+  const onOpenChange = isControlled ? controlledOnOpenChange : setInternalOpen;
 
   return (
     <PaymentProofReviewDialog
-      allowReject={false}
-      allowUpload={false}
       enforcePendingDecision={false}
       initialPaymentProofStatus={paymentProofStatus}
       onAcceptAction={async (id) => {

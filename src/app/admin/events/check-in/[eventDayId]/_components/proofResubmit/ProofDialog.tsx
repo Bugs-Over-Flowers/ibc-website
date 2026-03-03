@@ -1,6 +1,6 @@
 "use client";
 
-import RegistrationProofDialog from "@/components/payment-proof/RegistrationProofDialog";
+import RegistrationProofDialog from "@/app/admin/events/_components/PaymentProof/RegistrationProofDialog";
 import { Button } from "@/components/ui/button";
 import type { GetCheckInForDateSchema } from "@/lib/validation/qr/standard";
 import useAttendanceStore from "../../_hooks/useAttendanceStore";
