@@ -33,7 +33,6 @@ export default function RegistrationDetails({
 }) {
   const router = useRouter();
 
-  // Helper to determine badge color for payment status
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "accepted":
@@ -208,7 +207,7 @@ export default function RegistrationDetails({
             </CardContent>
           </Card>
 
-          {/* Payment Details Section*/}
+          {/* Payment Details Section */}
           <Card>
             <CardHeader>
               <CardTitle>Payment Details</CardTitle>
@@ -227,6 +226,7 @@ export default function RegistrationDetails({
                     getStatusColor={getStatusColor}
                     paymentProofStatus={data.paymentProofStatus}
                     proofImageURL={data.signedUrl.trim()}
+                    registrationId={data.registrationId}
                   />
                 )}
             </CardContent>

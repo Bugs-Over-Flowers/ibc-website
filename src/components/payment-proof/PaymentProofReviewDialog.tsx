@@ -2,7 +2,7 @@
 
 import { useStore } from "@tanstack/react-form";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { useAction } from "@/hooks/useAction";
@@ -180,20 +180,33 @@ export default function PaymentProofReviewDialog({
     },
   );
 
-  const clearPreview = () => {
+  const clearPreview = useCallback(() => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
     setSelectedFile(null);
     setPreviewUrl(null);
     setPreviewSource(null);
-  };
+  }, [previewUrl]);
 
-  const resetDialogState = () => {
+  const resetDialogState = useCallback(() => {
     clearPreview();
     uploadForm.setFieldValue("proofFiles", []);
     setMode("view");
-  };
+  }, [clearPreview, uploadForm]);
+
+  // Trigger fetchSignedUrl on the false→true edge of `open` (handles controlled mode).
+  const prevOpenRef = useRef(open);
+  useEffect(() => {
+    const wasOpen = prevOpenRef.current;
+    prevOpenRef.current = open;
+
+    if (!wasOpen && open) {
+      setSignedUrl(null);
+      setIsSignedUrlImageError(false);
+      fetchSignedUrl({ registrationId });
+    }
+  });
 
   const convertFileToDataUrl = async (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -217,15 +230,9 @@ export default function PaymentProofReviewDialog({
 
   const handleOpenChange = (nextOpen: boolean) => {
     onOpenChange(nextOpen);
-
-    if (nextOpen) {
-      setSignedUrl(null);
-      setIsSignedUrlImageError(false);
-      fetchSignedUrl({ registrationId });
-      return;
+    if (!nextOpen) {
+      resetDialogState();
     }
-
-    resetDialogState();
   };
 
   const runAction = async <T,>(promise: Promise<T>): Promise<T | null> => {

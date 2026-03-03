@@ -1,10 +1,11 @@
 "use client";
+
 import { ChevronRight, Images, MoreHorizontal, QrCodeIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import PaymentProofReviewDialog from "@/components/payment-proof/PaymentProofReviewDialog";
+import RegistrationProofDialog from "@/components/payment-proof/RegistrationProofDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,6 +79,7 @@ export default function RegistrationRowActions({
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <QRCodeDialog
         affiliation={data.affiliation}
         email={data.email}
@@ -87,14 +89,15 @@ export default function RegistrationRowActions({
         registrationIdentifier={data.registrationIdentifier}
         setOpen={setQrcodeDialog}
       />
+
       {shouldShowPaymentProofAction && (
-        <PaymentProofReviewDialog
-          allowReject
-          allowUpload
-          enforcePendingDecision
-          initialPaymentProofStatus={data.paymentProofStatus}
+        <RegistrationProofDialog
           onOpenChange={setPaymentProofDialog}
+          onStatusChange={() => {
+            setPaymentProofDialog(false);
+          }}
           open={paymentProofDialog}
+          paymentProofStatus={data.paymentProofStatus}
           registrationId={data.registrationId}
         />
       )}

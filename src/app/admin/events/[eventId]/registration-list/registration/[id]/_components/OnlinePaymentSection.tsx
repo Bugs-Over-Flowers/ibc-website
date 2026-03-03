@@ -1,25 +1,45 @@
 import Image from "next/image";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
+import { useOptimisticAction } from "@/hooks/useAction";
+import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
+import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 
 type OnlinePaymentSectionProps = {
   paymentProofStatus: Enums<"PaymentProofStatus">;
   getStatusColor: (status: string) => string;
   proofImageURL?: string | null;
+  registrationId: string;
 };
 
 export default function OnlinePaymentSection({
+  registrationId,
   paymentProofStatus,
   getStatusColor,
   proofImageURL,
 }: OnlinePaymentSectionProps) {
-  // Early validation - ensure URL is valid before any rendering
   const validProofImageURL =
     proofImageURL && typeof proofImageURL === "string"
       ? proofImageURL.trim()
       : null;
+
+  const {
+    execute: verify,
+    optimistic: optimisticPaymentProofStatus,
+    isPending: isVerifyPending,
+  } = useOptimisticAction(tryCatch(verifyPayment), paymentProofStatus, {
+    optimisticUpdate: (prev) => prev,
+    onSuccess: (msg) => {
+      toast.success(msg);
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
 
   const hasProofImage = Boolean(
     validProofImageURL && validProofImageURL.length > 0,
@@ -45,9 +65,21 @@ export default function OnlinePaymentSection({
           className={cn("capitalize", getStatusColor(paymentProofStatus))}
           variant="outline"
         >
-          {paymentProofStatus}
+          {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
         </Badge>
       </div>
+      <Button
+        disabled={
+          isVerifyPending || optimisticPaymentProofStatus === "accepted"
+        }
+        onClick={() => verify(registrationId)}
+      >
+        {isVerifyPending
+          ? "Verifying..."
+          : optimisticPaymentProofStatus === "accepted"
+            ? "Verified"
+            : "Verify Payment"}
+      </Button>
     </>
   );
 }
