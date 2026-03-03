@@ -1,9 +1,10 @@
 "use client";
-import { ChevronRight, MoreHorizontal, QrCodeIcon } from "lucide-react";
+import { ChevronRight, Images, MoreHorizontal, QrCodeIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import PaymentProofReviewDialog from "@/components/payment-proof/PaymentProofReviewDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,8 +21,8 @@ interface RegistrationRowActionsProps {
     registrationIdentifier: string;
     registrationId: string;
     email: string;
+    paymentMethod: Enums<"PaymentMethod">;
     paymentProofStatus: Enums<"PaymentProofStatus">;
-    proofOfPaymentImageURL?: string;
     affiliation: string;
   };
   isDetailsPage: boolean;
@@ -34,6 +35,8 @@ export default function RegistrationRowActions({
   const { eventId } = useParams<{ eventId: string }>();
 
   const [qrcodeDialog, setQrcodeDialog] = useState(false);
+  const [paymentProofDialog, setPaymentProofDialog] = useState(false);
+  const shouldShowPaymentProofAction = data.paymentMethod === "BPI";
 
   return (
     <>
@@ -65,6 +68,13 @@ export default function RegistrationRowActions({
               <QrCodeIcon />
               QR Code
             </DropdownMenuItem>
+
+            {shouldShowPaymentProofAction && (
+              <DropdownMenuItem onClick={() => setPaymentProofDialog(true)}>
+                <Images />
+                Review Payment Proof
+              </DropdownMenuItem>
+            )}
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -77,6 +87,17 @@ export default function RegistrationRowActions({
         registrationIdentifier={data.registrationIdentifier}
         setOpen={setQrcodeDialog}
       />
+      {shouldShowPaymentProofAction && (
+        <PaymentProofReviewDialog
+          allowReject
+          allowUpload
+          enforcePendingDecision
+          initialPaymentProofStatus={data.paymentProofStatus}
+          onOpenChange={setPaymentProofDialog}
+          open={paymentProofDialog}
+          registrationId={data.registrationId}
+        />
+      )}
     </>
   );
 }
