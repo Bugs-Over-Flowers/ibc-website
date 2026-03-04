@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
 type RegistrationInfoTopNavProps = {
@@ -12,11 +12,11 @@ export function RegistrationInfoTopNav({
     <div className="sticky top-0 z-10 border-border border-b bg-card/80 backdrop-blur-sm">
       <div className="mx-auto flex h-13 max-w-7xl items-center px-6">
         <Link
-          className="group inline-flex items-center gap-1.5 text-muted text-sm transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
           href={`/events/${eventId}`}
         >
-          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-          Back to Event
+          <ChevronLeft className="h-5 w-5" />
+          Back to Events
         </Link>
       </div>
     </div>

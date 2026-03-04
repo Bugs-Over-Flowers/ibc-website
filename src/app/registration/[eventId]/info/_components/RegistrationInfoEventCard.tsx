@@ -1,6 +1,7 @@
 import { formatDate } from "date-fns";
 import { CalendarDays } from "lucide-react";
 import Image from "next/image";
+import RichTextDisplay from "@/components/RichTextDisplay";
 
 type RegistrationInfoEventCardProps = {
   title: string;
@@ -50,9 +51,10 @@ export function RegistrationInfoEventCard({
         <h1 className="mb-3 text-foreground leading-tight">{title}</h1>
 
         {description && (
-          <p className="max-w-2xl text-muted-foreground text-sm leading-relaxed">
-            {description}
-          </p>
+          <RichTextDisplay
+            className="max-w-2xl text-muted-foreground text-sm"
+            content={description}
+          />
         )}
       </div>
     </div>
