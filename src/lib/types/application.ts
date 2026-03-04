@@ -32,6 +32,12 @@ export interface ApplicationWithMembers
     proofImageId: string;
     path: string;
   }[];
+  Interview: {
+    interviewId: string;
+    interviewDate: string;
+    interviewVenue: string;
+    status: "scheduled" | "completed" | "cancelled" | "rescheduled" | null;
+  } | null;
   logoImageURL: string | null;
 }
 
