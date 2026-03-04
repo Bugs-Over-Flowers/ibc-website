@@ -1,21 +1,15 @@
 import { formatDate } from "date-fns";
-import { Check, CircleAlert, User } from "lucide-react";
+import { CircleAlert, User } from "lucide-react";
 import Image from "next/image";
-import type { FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import FormButtons from "@/components/FormButtons";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FieldError } from "@/components/ui/field";
+import { Field, FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import useRegistrationStore from "@/hooks/registration.store";
@@ -28,34 +22,6 @@ interface Step4Props {
   members: Awaited<ReturnType<typeof getAllMembers>>;
 }
 
-type Step1Data = {
-  member: string;
-  businessMemberId?: string;
-  nonMemberName?: string;
-};
-
-type RegistrantData = {
-  firstName: string;
-  lastName: string;
-  email: string;
-};
-
-type ParticipantData = {
-  firstName: string;
-  lastName: string;
-};
-
-type Step3Data = {
-  paymentMethod: "online" | "onsite";
-  paymentProof?: File;
-};
-
-const formatCurrency = (amount: number) =>
-  Intl.NumberFormat("en-US", {
-    currency: "PHP",
-    style: "currency",
-  }).format(amount);
-
 export default function Step4({ members }: Step4Props) {
   const form = useRegistrationStep4();
   const setStep = useRegistrationStore((state) => state.setStep);
@@ -63,49 +29,46 @@ export default function Step4({ members }: Step4Props) {
     (state) => state.registrationData,
   );
 
-  const step1Data = registrationData.step1 as Step1Data;
+  const step1Data = registrationData.step1;
   const step2Data = registrationData.step2;
-  const step3Data = registrationData.step3 as Step3Data;
+  const step3Data = registrationData.step3;
 
   const memberName = useMemo(() => {
     if (step1Data.member === "member") {
       return members.find(
-        (member) => member.businessMemberId === step1Data.businessMemberId,
+        (m) => m.businessMemberId === step1Data.businessMemberId,
       )?.businessName;
     }
-
     return "";
   }, [members, step1Data]);
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    form.handleSubmit({ nextStep: true });
-  };
-
-  const onNext = () => {
+  const onNext = (e?: React.SubmitEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     form.handleSubmit({ nextStep: true });
   };
 
   return (
-    <form className="space-y-6" onSubmit={onSubmit}>
+    <form className="space-y-3" onSubmit={onNext}>
       <RegistrationStepHeader
-        description="Please review your registration details before submitting."
+        description="Please review your registration details below."
         Icon={User}
-        title="Review & Confirm"
+        title="Confirm Registration"
       />
 
       <EventDetailsSection />
 
       <ParticipantInformationSection
         memberName={memberName}
-        otherParticipants={step2Data.otherParticipants ?? []}
-        registrant={step2Data.registrant as RegistrantData}
+        otherParticipants={step2Data.otherParticipants}
+        registrant={step2Data.registrant}
         step1Data={step1Data}
       />
 
       <PaymentSummarySection
-        otherParticipants={step2Data.otherParticipants ?? []}
+        otherParticipants={step2Data.otherParticipants}
         step3Data={step3Data}
       />
 
@@ -134,18 +97,22 @@ function EventDetailsSection() {
   return (
     <Card className="border-dashed bg-muted/30">
       <CardHeader>
-        <CardTitle className="text-base">Event Details</CardTitle>
+        <CardTitle>
+          <h4>Event Details</h4>
+        </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3">
-        <p className="text-muted-foreground text-sm">
-          Review the event you are registering for.
-        </p>
-
+        <div className="flex flex-col gap-1">
+          <p className="text-muted-foreground text-sm">
+            Review the implementation details.
+          </p>
+        </div>
         <div className="grid gap-1">
           <p className="font-medium text-primary">{eventDetails?.eventTitle}</p>
+
           <div className="flex items-center text-muted-foreground text-sm">
             {eventDetails?.eventStartDate &&
-              formatDate(eventDetails.eventStartDate, "MMMM d, yyyy")}
+              formatDate(eventDetails?.eventStartDate, "MMMM d, yyyy")}
           </div>
         </div>
       </CardContent>
@@ -154,10 +121,14 @@ function EventDetailsSection() {
 }
 
 interface ParticipantInformationSectionProps {
-  step1Data: Step1Data;
+  step1Data: {
+    member: string;
+    businessMemberId?: string;
+    nonMemberName?: string;
+  };
   memberName: string | undefined;
-  registrant: RegistrantData;
-  otherParticipants: ParticipantData[];
+  registrant: { firstName: string; lastName: string; email: string };
+  otherParticipants: Array<{ firstName: string; lastName: string }>;
 }
 
 function ParticipantInformationSection({
@@ -169,15 +140,19 @@ function ParticipantInformationSection({
   return (
     <Card className="border-dashed bg-muted/30">
       <CardHeader>
-        <CardTitle className="text-base">Participant Information</CardTitle>
+        <CardTitle>
+          <h4>Participant Information</h4>
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <p className="text-muted-foreground text-sm">
-          Verify your affiliation and participant list before submission.
-        </p>
+        <div className="flex flex-col gap-1">
+          <p className="text-muted-foreground text-sm">
+            Verify your personal and group information.
+          </p>
+        </div>
 
         <div className="grid gap-4">
-          <div className="flex items-center justify-between rounded-lg border bg-card p-3">
+          <div className="flex items-center justify-between">
             <span className="font-medium">Affiliation</span>
             <span className="text-muted-foreground text-sm">
               {step1Data.member === "member"
@@ -194,6 +169,7 @@ function ParticipantInformationSection({
           </div>
 
           <div className="space-y-3">
+            {/* Primary Registrant */}
             <div className="rounded-lg border bg-card p-3 text-card-foreground shadow-sm">
               <div className="flex flex-col gap-1">
                 <span className="font-semibold text-muted-foreground text-xs uppercase">
@@ -208,26 +184,29 @@ function ParticipantInformationSection({
               </div>
             </div>
 
-            {otherParticipants && otherParticipants.length > 0 ? (
+            {/* Other Participants */}
+            {otherParticipants && otherParticipants.length > 0 && (
               <div className="space-y-2">
                 <div className="pt-2 font-semibold text-muted-foreground text-xs uppercase">
                   Additional Participants
                 </div>
                 <div className="grid gap-2">
-                  {otherParticipants.map((person, index) => (
+                  {otherParticipants?.map((person, i) => (
                     <div
                       className="flex items-center justify-between rounded-lg border bg-muted/50 p-3 text-sm"
-                      key={`${person.firstName}-${index}`}
+                      key={`${person.firstName}-${
+                        // biome-ignore lint/suspicious/noArrayIndexKey: Tanstack Form handles keying generation
+                        i
+                      }`}
                     >
                       <span className="font-medium">
                         {person.firstName} {person.lastName}
                       </span>
-                      <Check className="h-4 w-4 text-green-600" />
                     </div>
                   ))}
                 </div>
               </div>
-            ) : null}
+            )}
           </div>
         </div>
       </CardContent>
@@ -236,8 +215,8 @@ function ParticipantInformationSection({
 }
 
 interface PaymentSummarySectionProps {
-  step3Data: Step3Data;
-  otherParticipants: ParticipantData[];
+  step3Data: { paymentMethod: string; paymentProof?: File };
+  otherParticipants: Array<unknown>;
 }
 
 function PaymentSummarySection({
@@ -249,23 +228,11 @@ function PaymentSummarySection({
     (state) => state.sponsorFeeDeduction,
   );
   const sponsorUuid = useRegistrationStore((state) => state.sponsorUuid);
-  const sponsoredBy = useRegistrationStore((state) => state.sponsoredBy);
 
-  const [paymentProofUrl, setPaymentProofUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (step3Data.paymentMethod !== "online" || !step3Data.paymentProof) {
-      setPaymentProofUrl(null);
-      return;
-    }
-
-    const objectUrl = URL.createObjectURL(step3Data.paymentProof);
-    setPaymentProofUrl(objectUrl);
-
-    return () => {
-      URL.revokeObjectURL(objectUrl);
-    };
-  }, [step3Data.paymentMethod, step3Data.paymentProof]);
+  const paymentProofUrl =
+    step3Data.paymentMethod === "online" && step3Data.paymentProof
+      ? URL.createObjectURL(step3Data.paymentProof)
+      : null;
 
   const participantCount = otherParticipants.length + 1;
   const baseFee = eventDetails?.registrationFee ?? 0;
@@ -273,8 +240,8 @@ function PaymentSummarySection({
   const totalSponsorDiscount = sponsorFeeDeduction
     ? sponsorFeeDeduction * participantCount
     : 0;
-  const total = Math.max(subtotal - totalSponsorDiscount, 0);
-  const isSponsored = Boolean(sponsorUuid && sponsorFeeDeduction);
+  const total = subtotal - totalSponsorDiscount;
+  const isSponsored = !!(sponsorUuid && sponsorFeeDeduction);
 
   return (
     <Card
@@ -285,19 +252,22 @@ function PaymentSummarySection({
       )}
     >
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          Payment Summary
-          {isSponsored ? (
+        <CardTitle className="flex items-center gap-2">
+          <h4>Payment Summary</h4>
+          {isSponsored && (
             <span className="ml-auto rounded-full bg-green-600 px-2.5 py-0.5 font-semibold text-white text-xs dark:bg-green-700">
               Sponsored
             </span>
-          ) : null}
+          )}
         </CardTitle>
-        {isSponsored && sponsoredBy ? (
-          <CardDescription>Sponsored by {sponsoredBy}</CardDescription>
-        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex flex-col gap-1">
+          <p className="text-muted-foreground text-sm">
+            Confirm your payment method and total.
+          </p>
+        </div>
+
         <div className="grid gap-2 text-sm">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Payment Method</span>
@@ -307,7 +277,7 @@ function PaymentSummarySection({
               }
             >
               {step3Data.paymentMethod === "online"
-                ? "Bank Transfer"
+                ? "Online Payment"
                 : "Onsite Payment"}
             </Badge>
           </div>
@@ -315,7 +285,10 @@ function PaymentSummarySection({
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Registration Fee</span>
             <span>
-              {formatCurrency(baseFee)}
+              {Intl.NumberFormat("en-US", {
+                currency: "PHP",
+                style: "currency",
+              }).format(baseFee)}
               <span className="ml-1 text-muted-foreground text-xs">/ head</span>
             </span>
           </div>
@@ -329,10 +302,15 @@ function PaymentSummarySection({
 
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Subtotal</span>
-            <span>{formatCurrency(subtotal)}</span>
+            <span>
+              {Intl.NumberFormat("en-US", {
+                currency: "PHP",
+                style: "currency",
+              }).format(subtotal)}
+            </span>
           </div>
 
-          {totalSponsorDiscount > 0 ? (
+          {totalSponsorDiscount > 0 && (
             <>
               <div className="flex items-center justify-between rounded-lg bg-green-600/10 px-3 py-2.5 text-green-700 dark:bg-green-900/30 dark:text-green-300">
                 <div className="flex flex-col">
@@ -343,12 +321,16 @@ function PaymentSummarySection({
                   </span>
                 </div>
                 <span className="font-semibold">
-                  -{formatCurrency(totalSponsorDiscount)}
+                  -
+                  {Intl.NumberFormat("en-US", {
+                    currency: "PHP",
+                    style: "currency",
+                  }).format(totalSponsorDiscount)}
                 </span>
               </div>
               <Separator className="my-2 bg-border/50" />
             </>
-          ) : null}
+          )}
 
           <div
             className={cn(
@@ -363,17 +345,20 @@ function PaymentSummarySection({
                 isSponsored && "text-green-700 dark:text-green-300",
               )}
             >
-              {formatCurrency(total)}
+              {Intl.NumberFormat("en-US", {
+                currency: "PHP",
+                style: "currency",
+              }).format(total)}
             </span>
           </div>
         </div>
 
-        {paymentProofUrl ? (
+        {paymentProofUrl && (
           <div className="flex flex-col gap-2 pt-2">
             <span className="font-semibold text-muted-foreground text-xs uppercase">
               Payment Proof
             </span>
-            <div className="relative aspect-video w-full max-w-[220px] overflow-hidden rounded-md border bg-muted">
+            <div className="relative aspect-video w-full max-w-[200px] self-start overflow-hidden rounded-md border bg-muted">
               <Image
                 alt="Payment Proof"
                 className="object-cover"
@@ -382,7 +367,7 @@ function PaymentSummarySection({
               />
             </div>
           </div>
-        ) : null}
+        )}
       </CardContent>
     </Card>
   );
@@ -406,8 +391,8 @@ function PaymentNoteAlert({ paymentMethod }: PaymentNoteAlertProps) {
           </>
         ) : (
           <>
-            Please ensure to settle the full payment before the event. You may
-            opt to pay on the event proper or at the IBC Office.
+            Please ensure to be able to settle the full payment before the
+            event. You may opt to pay on the event proper or on the IBC Office.
           </>
         )}
       </AlertDescription>
@@ -425,14 +410,12 @@ function TermsAndConditionsField({ form }: TermsAndConditionsFieldProps) {
       {(field) => {
         const isInvalid =
           field.state.meta.isTouched && !field.state.meta.isValid;
-
         return (
-          <div className="space-y-3">
-            <div className="flex items-start gap-3 rounded-lg border p-4">
+          <div className="py-3">
+            <Field orientation="horizontal">
               <Checkbox
                 aria-invalid={isInvalid}
                 checked={field.state.value}
-                className="mt-0.5"
                 id={field.name}
                 name={field.name}
                 onBlur={field.handleBlur}
@@ -440,44 +423,33 @@ function TermsAndConditionsField({ form }: TermsAndConditionsFieldProps) {
                   field.handleChange(checked === true)
                 }
               />
-              <div>
-                <Label
-                  className="cursor-pointer font-medium text-sm"
-                  htmlFor={field.name}
-                >
-                  I agree to the Terms and Conditions
-                </Label>
-                <p className="mt-0.5 text-muted-foreground text-xs">
-                  By checking this box, you agree to our terms of service and
-                  privacy policy.
-                </p>
-              </div>
+              <Label htmlFor={field.name}>
+                I have read the Terms and Conditions.{" "}
+              </Label>
+              <FieldError errors={field.state.meta.errors} />
+            </Field>
+            <div className="pt-2">
+              <TermsAndConditions
+                customAcceptButton={(closeTermsAndConditions) => (
+                  <Button
+                    onClick={() => {
+                      field.handleChange(true);
+                      closeTermsAndConditions();
+                    }}
+                  >
+                    Accept
+                  </Button>
+                )}
+                triggerOverride={
+                  <button
+                    className="text-medium text-sm hover:underline"
+                    type="button"
+                  >
+                    Read Terms and Conditions here
+                  </button>
+                }
+              />
             </div>
-
-            <TermsAndConditions
-              customAcceptButton={(closeTermsAndConditions) => (
-                <button
-                  className="font-medium text-primary text-sm hover:underline"
-                  onClick={() => {
-                    field.handleChange(true);
-                    closeTermsAndConditions();
-                  }}
-                  type="button"
-                >
-                  Read Terms and Conditions here
-                </button>
-              )}
-              triggerOverride={
-                <button
-                  className="font-medium text-primary text-sm hover:underline"
-                  type="button"
-                >
-                  Read Terms and Conditions here
-                </button>
-              }
-            />
-
-            <FieldError errors={field.state.meta.errors} />
           </div>
         );
       }}
