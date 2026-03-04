@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { zodValidator } from "@/lib/utils";
 import { validateFileType } from "@/lib/validation/fileTypes";
 import { MembershipApplicationStep4Schema } from "@/lib/validation/membership/application";
-import { submitMembershipApplication } from "@/server/membership/actions/submitApplication";
+import { submitMembershipApplication } from "@/server/membership/mutations/submitApplication";
 
 interface UseMembershipStep4Props {
   onSuccess?: () => void;
@@ -149,7 +149,6 @@ export const useMembershipStep4 = ({
             emailAddress: applicationData.step2.emailAddress,
             landline: applicationData.step2.landline,
             mobileNumber: applicationData.step2.mobileNumber,
-            faxNumber: applicationData.step2.faxNumber,
             logoImageURL,
             representatives: applicationData.step3.representatives,
             paymentMethod: refinedValue.paymentMethod,

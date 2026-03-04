@@ -3,14 +3,7 @@ import { CheckCircle, Clock, Users2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 /**
  *
@@ -49,13 +42,6 @@ export function TableSkeleton({ columns }: TableSkeletonProps) {
   return (
     <div className="rounded-md border">
       <Table>
-        <TableHeader>
-          <TableRow>
-            {Array.from({ length: columns }).map((_, index) => (
-              <TableHead key={index}>Column {index + 1}</TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
         <TableBody>
           {Array.from({ length: 5 }).map((_, index) => (
             <TableRow key={index}>

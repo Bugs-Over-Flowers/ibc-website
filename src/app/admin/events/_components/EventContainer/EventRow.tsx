@@ -59,9 +59,6 @@ export default function EventRow({ event }: EventRowProps) {
           <h3 className="line-clamp-2 font-semibold text-lg md:text-xl">
             {event.eventTitle}
           </h3>
-          <p className="line-clamp-2 text-muted-foreground text-sm md:line-clamp-2">
-            {event.description}
-          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 border-t pt-2 sm:grid-cols-2 xl:grid-cols-3">

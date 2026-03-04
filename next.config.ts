@@ -4,6 +4,23 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
   cacheComponents: true,
+  cacheLife: {
+    publicHours: {
+      stale: 300,
+      revalidate: 3600,
+      expire: 86400,
+    },
+    admin5m: {
+      stale: 30,
+      revalidate: 300,
+      expire: 3600,
+    },
+    realtime60s: {
+      stale: 30,
+      revalidate: 60,
+      expire: 300,
+    },
+  },
   typedRoutes: true,
   reactCompiler: true,
   images: {
@@ -57,6 +74,7 @@ const nextConfig: NextConfig = {
     ],
     dangerouslyAllowLocalIP: true,
   },
+  serverExternalPackages: ["@react-email/components", "@react-email/render"],
 };
 
 export default nextConfig;

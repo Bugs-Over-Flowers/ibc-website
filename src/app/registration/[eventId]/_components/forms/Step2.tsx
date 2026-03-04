@@ -1,6 +1,5 @@
 "use client";
 import { Plus, Trash2, Users } from "lucide-react";
-import type { FormEvent } from "react";
 import FormButtons from "@/components/FormButtons";
 import {
   AlertDialog,
@@ -25,18 +24,21 @@ import { FieldGroup, FieldTitle } from "@/components/ui/field";
 import { Item, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/item";
 import { useFieldContext } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
-import type { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
+import type {
+  RegistrantDetails,
+  StandardRegistrationStep2Schema,
+} from "@/lib/validation/registration/standard";
 import { useRegistrationStep2 } from "../../_hooks/useRegistrationStep2";
 import RegistrationStepHeader from "./RegistrationStepHeader";
 
 const MAX_OTHER_PARTICIPANTS = 9;
 
-const EMPTY_REGISTRANT = {
+const EMPTY_REGISTRANT: RegistrantDetails = {
   firstName: "",
   lastName: "",
   email: "",
   contactNumber: "",
-} as const;
+};
 
 export default function Step2() {
   const form = useRegistrationStep2();
@@ -52,7 +54,7 @@ export default function Step2() {
     });
   };
 
-  const onNext = async (e?: FormEvent) => {
+  const onNext = async (e?: React.SubmitEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -212,7 +214,10 @@ function ParticipantFields({ form, index }: ParticipantFieldsProps) {
       </form.AppField>
       <form.AppField name={`${prefix}.contactNumber` as Step2FieldName}>
         {(field) => (
-          <field.TextField label="Contact Number" placeholder="09171234567" />
+          <field.TextField
+            label="Contact Number / Landline"
+            placeholder="09######### / 0####-####"
+          />
         )}
       </form.AppField>
     </div>

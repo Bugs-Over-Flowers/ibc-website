@@ -1,0 +1,83 @@
+import { ChevronLeft } from "lucide-react";
+import { cookies } from "next/headers";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import tryCatch from "@/lib/server/tryCatch";
+import { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
+import { toPascalCaseWithSpaces } from "../application/_utils/formatters";
+import { ApplicationHeader } from "../application/[id]/_components/ApplicationHeader";
+import { CompanyInfoCard } from "../application/[id]/_components/CompanyInfoCard";
+import { ContactInfoCard } from "../application/[id]/_components/ContactInfoCard";
+import { PaymentInfoCard } from "../application/[id]/_components/PaymentInfoCard";
+import { RepresentativesCard } from "../application/[id]/_components/RepresentativesCard";
+
+interface ApplicationDetailsProps {
+  applicationId: string;
+  source: "applications" | "members";
+}
+
+export async function ApplicationDetails({
+  applicationId,
+  source,
+}: ApplicationDetailsProps) {
+  const cookieStore = await cookies();
+
+  const { data: application, success } = await tryCatch(
+    getApplicationDetailsById(applicationId, cookieStore.getAll()),
+  );
+
+  if (!success) {
+    notFound();
+  }
+
+  return (
+    <>
+      <Link
+        href={source === "members" ? "/admin/members" : "/admin/application"}
+      >
+        <Button
+          className="mb-4 border border-border active:scale-95 active:opacity-80"
+          size="sm"
+          variant="ghost"
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          {source === "members" ? "Back to Members" : "Back to Applications"}
+        </Button>
+      </Link>
+
+      <ApplicationHeader application={application} />
+
+      <CompanyInfoCard
+        applicationMemberType={toPascalCaseWithSpaces(
+          application.applicationMemberType,
+        )}
+        applicationType={toPascalCaseWithSpaces(application.applicationType)}
+        companyAddress={toPascalCaseWithSpaces(application.companyAddress)}
+        companyName={application.companyName}
+        sectorName={
+          application.Sector?.sectorName
+            ? toPascalCaseWithSpaces(application.Sector.sectorName)
+            : undefined
+        }
+        websiteURL={application.websiteURL}
+      />
+
+      <ContactInfoCard
+        emailAddress={application.emailAddress}
+        landline={application.landline}
+        mobileNumber={application.mobileNumber}
+      />
+
+      <RepresentativesCard members={application.ApplicationMember} />
+
+      <PaymentInfoCard
+        applicationDate={new Date(application.applicationDate)}
+        paymentMethod={application.paymentMethod}
+        paymentProofStatus={toPascalCaseWithSpaces(
+          application.paymentProofStatus,
+        )}
+      />
+    </>
+  );
+}

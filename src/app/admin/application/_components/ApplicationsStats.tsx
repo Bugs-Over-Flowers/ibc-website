@@ -50,7 +50,7 @@ export default async function ApplicationsStats() {
       <CardContent className="flex flex-1 flex-col justify-center gap-4">
         {items.map(({ label, value, icon: Icon, colorClass }) => (
           <div className="flex items-center gap-4" key={label}>
-            <div className="rounded-md bg-muted p-2">
+            <div className="rounded-md border border-foreground/10 bg-primary-foreground p-2">
               <Icon className={`h-6 w-6 ${colorClass}`} />
             </div>
             <div>

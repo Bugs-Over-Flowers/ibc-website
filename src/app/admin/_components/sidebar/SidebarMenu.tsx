@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  Building2,
   Calendar,
   FileText,
+  HandCoins,
   LayoutDashboard,
   MessageSquareDiff,
   Users,
@@ -36,6 +38,16 @@ const menuItems = [
     title: "Evaluations",
     icon: MessageSquareDiff,
     href: "/admin/evaluation",
+  },
+  {
+    title: "Sponsored Registrations",
+    icon: HandCoins,
+    href: "/admin/sponsored-registration",
+  },
+  {
+    title: "Manage Sectors",
+    icon: Building2,
+    href: "/admin/manage-sector",
   },
 ];
 

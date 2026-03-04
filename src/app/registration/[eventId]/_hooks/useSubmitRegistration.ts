@@ -4,7 +4,7 @@ import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import { uploadPaymentProof } from "@/lib/storage/uploadPaymentProof";
 import type { StandardRegistrationSchema } from "@/lib/validation/registration/standard";
-import { submitRegistrationRPC } from "@/server/registration/actions/submitRegistrationRPC";
+import { submitRegistrationRPC } from "@/server/registration/mutations/submitRegistrationRPC";
 
 /**
  * Hook for submitting event registration data to the server.
@@ -26,6 +26,9 @@ import { submitRegistrationRPC } from "@/server/registration/actions/submitRegis
  */
 export const useSubmitRegistration = () => {
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const sponsoredRegistrationId = useRegistrationStore(
+    (state) => state.sponsoredRegistrationId,
+  );
 
   const setCreatedRegistrationId = useRegistrationStore(
     (state) => state.setCreatedRegistrationId,
@@ -67,6 +70,7 @@ export const useSubmitRegistration = () => {
           ? { paymentMethod: "online", path: paymentProofPath }
           : { paymentMethod: "onsite" },
         step4: registrationData.step4,
+        sponsoredRegistrationId: sponsoredRegistrationId || null,
       });
 
       setCreatedRegistrationId(registrationId);

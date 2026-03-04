@@ -268,20 +268,21 @@ export function Step4Review({ form, applicationData }: StepProps) {
             )}
           </form.AppField>
 
-          {/* Conditional: Onsite Payment Info */}
+          {/* Conditional Onsite Location Info */}
           <form.Subscribe selector={(state) => state.values.paymentMethod}>
             {(paymentMethod) =>
               paymentMethod === "ONSITE" && (
-                <Alert className="border-primary/30 bg-primary/5">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <AlertTitle className="text-primary">
-                    IBC Office Location
-                  </AlertTitle>
-                  <AlertDescription className="text-muted-foreground">
-                    GF Rm. 105-B Maryville Bldg., Marymart Mall, Delgado St.,
-                    Iloilo City 5000
-                  </AlertDescription>
-                </Alert>
+                <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed bg-muted/30 p-5 text-center">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <p className="font-medium text-sm">IBC Office Location</p>
+                  <p className="text-muted-foreground text-sm">
+                    Rm 105-B, G/F Maryville Bldg., Marymart Mall,
+                    <br />
+                    Delgado Street, Iloilo City, Philippines
+                  </p>
+                </div>
               )
             }
           </form.Subscribe>

@@ -4,7 +4,7 @@ import { TabsContent } from "@/components/ui/tabs";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/server";
 import { getCheckInStats } from "@/server/check-in/queries/getCheckInStats";
-import { getEventDays } from "@/server/events/actions/getEventDays";
+import { getEventDays } from "@/server/events/mutations/getEventDays";
 import BackButton from "../_components/BackButton";
 import CheckInListContent from "./_components/CheckInListContent";
 import CheckInListTabWrapper from "./_components/CheckInListTabWrapper";
@@ -53,7 +53,15 @@ async function CheckInPage({
     .single();
 
   // Fetch stats
-  const statsResult = await tryCatch(getCheckInStats(eventId));
+  const statsResult = await tryCatch(
+    getCheckInStats(cookieStore.getAll(), eventId),
+  );
+
+  if (!statsResult.success || !event) {
+    return (
+      <div className="text-destructive">Failed to load check-in stats.</div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -78,7 +86,11 @@ async function CheckInPage({
               value={eventDay.eventDayId}
             >
               <Suspense fallback={<div>Loading check-ins...</div>}>
-                <CheckInListContent eventDayId={eventDay.eventDayId} />
+                <CheckInListContent
+                  eventDayId={eventDay.eventDayId}
+                  eventDayLabel={eventDay.label}
+                  eventTitle={event?.eventTitle}
+                />
               </Suspense>
             </TabsContent>
           ))}
