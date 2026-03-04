@@ -95,6 +95,13 @@ export function SponsoredRegistrationList({
   };
 
   const handleDeleteClick = (registration: SponsoredRegistrationWithEvent) => {
+    if (Number(registration.usedCount) > 0) {
+      toast.error(
+        "Cannot delete this sponsored registration because it has already been used.",
+      );
+      return;
+    }
+
     setDeletingRegistration(registration);
     setOpenDeleteDialog(true);
   };
