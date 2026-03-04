@@ -1,14 +1,11 @@
 import type { Route } from "next";
-import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
 import BackButton from "@/app/admin/events/[eventId]/_components/BackButton";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
-import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationListPageProps } from "@/lib/types/route";
-import { getEventById } from "@/server/events/queries/getEventById";
 import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
 import ParticipantList from "./_components/participants/ParticipantList";
 import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";

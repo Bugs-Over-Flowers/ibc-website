@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cookies } from "next/headers";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,11 +20,10 @@ export type SponsoredRegistrationWithEvent = {
   updatedAt: string;
 };
 
-export async function getAllSponsoredRegistrationsWithEvent(): Promise<
-  SponsoredRegistrationWithEvent[]
-> {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
+export async function getAllSponsoredRegistrationsWithEvent(
+  cookies: RequestCookie[],
+): Promise<SponsoredRegistrationWithEvent[]> {
+  const supabase = await createClient(cookies);
 
   const { data, error } = await supabase.rpc(
     "get_all_sponsored_registrations_with_event",

@@ -178,7 +178,7 @@ export default function ApplicationsTabs({
         <div className="relative">
           <div
             className="relative grid grid-cols-3 gap-0.5 overflow-hidden rounded-md border border-border bg-background p-1 sm:gap-0"
-            href={containerRef}
+            ref={containerRef}
           >
             {indicatorStyle.width > 0 && (
               <motion.div
@@ -207,7 +207,9 @@ export default function ApplicationsTabs({
                     : "text-muted-foreground hover:text-foreground"
                 }
                 `}
-                href={(el) => {
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                ref={(el) => {
                   buttonRefs.current[tab.id] = el;
                   // Update indicator when active tab's ref is set
                   if (el && tab.id === activeTab) {
@@ -217,8 +219,6 @@ export default function ApplicationsTabs({
                     });
                   }
                 }}
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
                 title={tab.label}
                 type="button"
               >
