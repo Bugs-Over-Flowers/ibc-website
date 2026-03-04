@@ -194,7 +194,10 @@ function ParticipantInformationSection({
                   {otherParticipants?.map((person, i) => (
                     <div
                       className="flex items-center justify-between rounded-lg border bg-muted/50 p-3 text-sm"
-                      key={`${person.firstName}-${i}`}
+                      key={`${person.firstName}-${
+                        // biome-ignore lint/suspicious/noArrayIndexKey: Tanstack Form handles keying generation
+                        i
+                      }`}
                     >
                       <span className="font-medium">
                         {person.firstName} {person.lastName}
