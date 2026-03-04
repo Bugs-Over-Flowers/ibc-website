@@ -18,6 +18,7 @@ export const rejectPayment = async (registrationId: string) => {
     .select(
       `
       eventId,
+      sponsoredRegistrationId,
       event:Event(eventTitle),
       participants:Participant(email, firstName, lastName, isPrincipal)
     `,
@@ -45,6 +46,7 @@ export const rejectPayment = async (registrationId: string) => {
   const eventTitle = registration.event?.eventTitle || "Event";
   const registrantName = `${principal.firstName} ${principal.lastName}`;
   const eventId = registration.eventId;
+  const sponsoredRegistrationId = registration.sponsoredRegistrationId;
 
   // 3. Update status to rejected before notifying registrant
   const { error: updateError } = await supabase
@@ -92,6 +94,15 @@ export const rejectPayment = async (registrationId: string) => {
 
   if (eventId) {
     revalidatePath(`/admin/events/${eventId}/registration-list`, "page");
+  }
+
+  if (eventId && sponsoredRegistrationId) {
+    revalidatePath(`/admin/events/${eventId}/sponsored-registrations`, "page");
+    revalidatePath(
+      `/admin/events/${eventId}/sponsored-registrations/${sponsoredRegistrationId}`,
+      "page",
+    );
+    revalidatePath("/admin/sponsored-registration", "page");
   }
 
   return "Payment rejected and email sent.";

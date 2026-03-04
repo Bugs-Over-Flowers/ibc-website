@@ -1,13 +1,17 @@
 "use client";
 
 import { ChevronDown, Mail, Phone } from "lucide-react";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import type { Database } from "@/lib/supabase/db.types";
 
 type RegistrationWithParticipants =
   Database["public"]["Tables"]["Registration"]["Row"] & {
     participants: Database["public"]["Tables"]["Participant"]["Row"][];
     paymentStatus?: string;
+    paymentProofStatus?: "pending" | "rejected" | "accepted";
   };
 
 interface RegisteredGuestsTableProps {
@@ -20,6 +24,7 @@ export function RegisteredGuestsTable({
   registrations,
   error,
 }: RegisteredGuestsTableProps) {
+  const router = useRouter();
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   if (error) {
     return (
@@ -64,6 +69,9 @@ export function RegisteredGuestsTable({
               </th>
               <th className="px-4 py-3 text-left font-semibold text-sm">
                 Date
+              </th>
+              <th className="px-4 py-3 text-left font-semibold text-sm">
+                Actions
               </th>
             </tr>
           </thead>
@@ -120,17 +128,26 @@ export function RegisteredGuestsTable({
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-medium text-xs ${
-                          registration.paymentStatus === "verified"
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            : registration.paymentStatus === "pending"
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                        }`}
-                      >
-                        {registration.paymentStatus || "N/A"}
-                      </span>
+                      {(() => {
+                        const displayStatus =
+                          registration.paymentProofStatus ||
+                          registration.paymentStatus;
+
+                        return (
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-medium text-xs ${
+                              displayStatus === "accepted" ||
+                              displayStatus === "verified"
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                : displayStatus === "pending"
+                                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            }`}
+                          >
+                            {displayStatus || "N/A"}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-sm">
                       {new Date(
@@ -141,10 +158,25 @@ export function RegisteredGuestsTable({
                         year: "numeric",
                       })}
                     </td>
+                    <td className="px-4 py-3">
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(
+                            `/admin/events/${registration.eventId}/registration-list/registration/${registration.registrationId}` as Route,
+                          );
+                        }}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        View Registration
+                      </Button>
+                    </td>
                   </tr>
                   {isExpanded && (
                     <tr className="border-b bg-muted/10">
-                      <td className="px-4 py-4" colSpan={7}>
+                      <td className="px-4 py-4" colSpan={8}>
                         <div>
                           <div className="mb-3 flex items-center justify-between">
                             <h4 className="font-semibold text-base">
