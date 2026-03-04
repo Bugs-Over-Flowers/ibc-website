@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAppForm } from "@/hooks/_formHooks";
 import tryCatch from "@/lib/server/tryCatch";
@@ -34,9 +35,19 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
       const { error, data, success } = await tryCatch(createSR(value));
 
       if (!success) {
+        const errorMessage = String(error);
+
+        if (errorMessage.toLowerCase().includes("cannot exceed")) {
+          toast.error(
+            "Fee deduction cannot exceed the event registration fee.",
+          );
+        } else {
+          toast.error(errorMessage);
+        }
+
         form.setFieldMeta("eventId", (prev) => ({
           ...prev,
-          errors: [String(error)],
+          errors: [errorMessage],
         }));
         return;
       }
@@ -102,7 +113,7 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
           <form.AppField name="feeDeduction">
             {(field) => (
               <field.NumberField
-                description="Discount amount deducted per registration (0 to 1500)"
+                description="Discount amount deducted per registration must be not higher than the selected event registration fee"
                 label="Fee Deduction (₱)"
                 max={1500}
                 min={0}
