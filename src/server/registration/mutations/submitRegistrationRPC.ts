@@ -74,7 +74,24 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
 
   if (error) {
     console.error(error);
-    throw new Error("Failed to submit event registration");
+
+    const combinedErrorText = [error.message, error.details, error.hint]
+      .filter(Boolean)
+      .join(" ");
+
+    const isSponsoredSlotExceeded =
+      error.code === "23514" &&
+      /SponsoredRegistration_used_check|maxSponsoredGuests|usedCount|sponsored\s+slot/i.test(
+        combinedErrorText,
+      );
+
+    if (isSponsoredSlotExceeded) {
+      throw new Error(
+        "Not enough sponsored registration slots. This registration would exceed the maximum sponsored slots.",
+      );
+    }
+
+    throw new Error(error.message || "Failed to submit event registration");
   }
 
   if (!rpcResults) {

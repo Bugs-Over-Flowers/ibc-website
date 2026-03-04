@@ -104,7 +104,7 @@ export function SponsoredRegistrationsList({
     }
 
     toast.success("Deleted successfully!", { id: toastId });
-    router.refresh();
+    router.push("/admin/sponsored-registration");
   };
 
   return (
