@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import type { SponsoredRegistrationWithEvent } from "@/server/sponsored-registrations/queries/getAllSponsoredRegistrations";
 import { getAllSponsoredRegistrationsWithEvent } from "@/server/sponsored-registrations/queries/getAllSponsoredRegistrations";
 import { SponsoredRegistrationFilterWrapper } from "./SponsoredRegistrationFilterWrapper";
@@ -13,8 +14,11 @@ function SponsoredRegistrationTableContent({
 }
 
 export async function SponsoredRegistrationTable() {
+  const cookieStore = await cookies();
   try {
-    const registrations = await getAllSponsoredRegistrationsWithEvent();
+    const registrations = await getAllSponsoredRegistrationsWithEvent(
+      cookieStore.getAll(),
+    );
     return <SponsoredRegistrationTableContent registrations={registrations} />;
   } catch (_error) {
     console.error(
