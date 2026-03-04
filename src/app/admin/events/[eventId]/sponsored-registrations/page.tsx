@@ -1,0 +1,63 @@
+import { cookies } from "next/headers";
+import { Suspense } from "react";
+import tryCatch from "@/lib/server/tryCatch";
+import { getEventById } from "@/server/events/queries/getEventById";
+import { BackButton } from "./_components/BackButton";
+import { SponsoredRegistrationsTableWrapper } from "./_components/SponsoredRegistrationsTableWrapper";
+import SponsoredRegistrationsLoading from "./loading";
+
+type SponsoredRegistrationsPageProps =
+  PageProps<"/admin/events/[eventId]/sponsored-registrations">;
+
+export default function SponsoredRegistrationsPage({
+  params,
+}: SponsoredRegistrationsPageProps) {
+  return (
+    <div className="space-y-6">
+      <Suspense fallback={<SponsoredRegistrationsLoading />}>
+        <BackButtonWrapper params={params} />
+        <EventHeader params={params} />
+        <SponsoredRegistrationsTableWrapper params={params} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function EventHeader({
+  params,
+}: {
+  params: SponsoredRegistrationsPageProps["params"];
+}) {
+  const { eventId } = await params;
+  const cookieStore = await cookies();
+  const requestCookies = cookieStore.getAll();
+
+  const { data: event } = await tryCatch(
+    getEventById(requestCookies, { id: eventId }),
+  );
+
+  return (
+    <div>
+      <div className="space-y-1">
+        <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+          Sponsored Registrations
+        </p>
+        <h1 className="font-bold text-3xl text-foreground">
+          {event?.eventTitle || "Sponsored Registrations"}
+        </h1>
+      </div>
+      <p className="mt-2 text-muted-foreground">
+        Manage sponsored registration links and track sponsored guest usage
+      </p>
+    </div>
+  );
+}
+
+async function BackButtonWrapper({
+  params,
+}: {
+  params: SponsoredRegistrationsPageProps["params"];
+}) {
+  const { eventId } = await params;
+  return <BackButton eventId={eventId} />;
+}

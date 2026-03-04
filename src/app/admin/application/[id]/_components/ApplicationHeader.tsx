@@ -143,7 +143,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                 />
                 <span
                   aria-hidden="true"
-                  className="absolute inset-0 bg-background/50"
+                  className="absolute inset-0 bg-background/85"
                 />
                 <span
                   className={cn(
@@ -155,7 +155,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                     <StatusIcon className="h-10 w-10" />
                   </span>
                 </span>
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-1 font-medium text-foreground/80 text-sm">
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-1 text-foreground text-sm">
                   Payment Proof
                 </span>
               </DialogTrigger>

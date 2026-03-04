@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/shadcn-io/dropzone";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import useRegistrationStore from "@/hooks/registration.store";
+import { cn } from "@/lib/utils";
 import { PaymentMethodEnum } from "@/lib/validation/utils";
 import { useRegistrationStep3 } from "../../_hooks/useRegistrationStep3";
 import RegistrationStepHeader from "./RegistrationStepHeader";
@@ -83,21 +84,47 @@ export default function Step3() {
 function PaymentDetails() {
   const registrationData = useRegistrationStore((s) => s.registrationData);
   const eventDetails = useRegistrationStore((s) => s.eventDetails);
+  const sponsorFeeDeduction = useRegistrationStore(
+    (s) => s.sponsorFeeDeduction,
+  );
+  const sponsorUuid = useRegistrationStore((s) => s.sponsorUuid);
+  const sponsoredBy = useRegistrationStore((s) => s.sponsoredBy);
 
   const baseFee = eventDetails?.registrationFee || 0;
   const otherParticipantsCount =
     registrationData?.step2?.otherParticipants?.length || 0;
   const participantCount = otherParticipantsCount + 1;
 
-  const total = baseFee * participantCount;
+  const subtotal = baseFee * participantCount;
+
+  // Apply sponsor deduction to each participant
+  const totalSponsorDiscount = sponsorFeeDeduction
+    ? sponsorFeeDeduction * participantCount
+    : 0;
+  const total = subtotal - totalSponsorDiscount;
+  const isSponsored = !!(sponsorUuid && sponsorFeeDeduction);
 
   return (
-    <Card className="border-dashed bg-muted/30">
+    <Card
+      className={cn(
+        "border-dashed bg-muted/30",
+        isSponsored &&
+          "border-green-600/40 bg-green-50/60 dark:border-green-500/30 dark:bg-green-950/20",
+      )}
+    >
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 font-medium text-base">
           <Banknote className="size-4 text-muted-foreground" />
           Payment Summary
+          {isSponsored && (
+            <span className="ml-auto rounded-full bg-green-600 px-2.5 py-0.5 font-semibold text-white text-xs dark:bg-green-700">
+              Sponsored
+            </span>
+          )}
         </CardTitle>
+        {isSponsored && sponsoredBy ? (
+          <CardDescription>Sponsored by {sponsoredBy}</CardDescription>
+        ) : null}
       </CardHeader>
       <CardContent className="grid gap-4 text-sm">
         <div className="grid gap-2">
@@ -119,9 +146,53 @@ function PaymentDetails() {
 
         <Separator className="bg-border/50" />
 
-        <div className="flex w-full items-center justify-between font-semibold text-lg">
+        <div className="flex w-full items-center justify-between">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span>
+            {Intl.NumberFormat("en-US", {
+              currency: "PHP",
+              style: "currency",
+            }).format(subtotal)}
+          </span>
+        </div>
+
+        {totalSponsorDiscount > 0 && (
+          <>
+            <div className="flex w-full items-center justify-between rounded-lg bg-green-600/10 px-3 py-2.5 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+              <div className="flex flex-col">
+                <span className="font-medium">Sponsor Discount</span>
+                <span className="text-green-700/70 text-xs dark:text-green-300/80">
+                  ₱{sponsorFeeDeduction?.toLocaleString()} × {participantCount}{" "}
+                  heads
+                </span>
+              </div>
+              <span className="font-semibold">
+                -
+                {Intl.NumberFormat("en-US", {
+                  currency: "PHP",
+                  style: "currency",
+                }).format(totalSponsorDiscount)}
+              </span>
+            </div>
+            <Separator className="bg-border/50" />
+          </>
+        )}
+
+        <div
+          className={cn(
+            "flex w-full items-center justify-between font-semibold",
+            isSponsored
+              ? "text-green-700 text-lg dark:text-green-300"
+              : "text-lg",
+          )}
+        >
           <span>Total Amount</span>
-          <span className="text-primary">
+          <span
+            className={cn(
+              "text-primary",
+              isSponsored && "text-green-700 dark:text-green-300",
+            )}
+          >
             {Intl.NumberFormat("en-US", {
               currency: "PHP",
               style: "currency",

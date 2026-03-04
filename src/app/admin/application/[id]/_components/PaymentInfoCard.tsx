@@ -12,6 +12,14 @@ export function PaymentInfoCard({
   paymentProofStatus,
   applicationDate,
 }: PaymentInfoCardProps) {
+  const normalizedStatus = paymentProofStatus.toLowerCase();
+  const statusClassName =
+    normalizedStatus === "accepted"
+      ? "bg-status-green"
+      : normalizedStatus === "rejected"
+        ? "bg-status-red"
+        : "bg-status-orange";
+
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="flex flex-col space-y-1.5 p-6">
@@ -25,8 +33,9 @@ export function PaymentInfoCard({
           label="Payment Status"
           value={
             <Badge
+              className={statusClassName}
               variant={
-                paymentProofStatus === "verified" ? "default" : "secondary"
+                normalizedStatus === "accepted" ? "default" : "secondary"
               }
             >
               {paymentProofStatus}
