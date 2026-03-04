@@ -200,7 +200,7 @@ export function Step3Representatives({ form }: StepProps) {
                                 e.preventDefault();
                               }
                             }}
-                            placeholder="+639######### or 09#########"
+                            placeholder="+639XXXXXXXXX or 09XXXXXXXXX"
                           />
                         )}
                       </form.AppField>

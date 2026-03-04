@@ -216,7 +216,7 @@ function ParticipantFields({ form, index }: ParticipantFieldsProps) {
         {(field) => (
           <field.TextField
             label="Contact Number / Landline"
-            placeholder="09######### / 0####-####"
+            placeholder="09XXXXXXXXX / +639XXXXXXXXX / 0XXXX-XXXX"
           />
         )}
       </form.AppField>
