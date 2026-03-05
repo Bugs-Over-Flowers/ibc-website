@@ -8,11 +8,7 @@ interface FormButtonsProps {
   submitting?: boolean;
 }
 
-export default function FormButtons({
-  onBack,
-  onNext,
-  submitting,
-}: FormButtonsProps) {
+export default function FormButtons({ onBack, submitting }: FormButtonsProps) {
   const step = useRegistrationStore((s) => s.step);
 
   return (
@@ -28,12 +24,7 @@ export default function FormButtons({
         Previous
       </Button>
 
-      <Button
-        className="min-w-[140px]"
-        disabled={submitting}
-        onClick={onNext}
-        type="submit"
-      >
+      <Button className="min-w-[140px]" disabled={submitting} type="submit">
         {submitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

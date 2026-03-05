@@ -91,14 +91,15 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
       );
     }
 
-    throw new Error(error.message || "Failed to submit event registration");
+    throw new Error(
+      "Failed to submit event registration. Please try again or contact support if the problem persists.",
+    );
   }
 
   if (!rpcResults) {
     throw new Error("No data returned from registration");
   }
 
-  // Validate RPC response with Zod for type safety
   const validatedResponse = SubmitRegistrationResponseSchema.parse(rpcResults);
 
   return {

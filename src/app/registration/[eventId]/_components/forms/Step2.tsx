@@ -1,7 +1,7 @@
 "use client";
-import { Plus, Trash2, Users } from "lucide-react";
+
+import { ArrowLeft, ArrowRight, Plus, Trash2, Users } from "lucide-react";
 import type { FormEvent } from "react";
-import FormButtons from "@/components/FormButtons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,17 +15,23 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { useFieldContext } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
 import type { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
 import { useRegistrationStep2 } from "../../_hooks/useRegistrationStep2";
-import RegistrationStepHeader from "./RegistrationStepHeader";
 
 const MAX_OTHER_PARTICIPANTS = 9;
 
 const EMPTY_REGISTRANT = {
+  id: crypto.randomUUID(),
   firstName: "",
   lastName: "",
   email: "",
@@ -55,99 +61,127 @@ export default function Step2() {
   };
 
   return (
-    <form className="space-y-6" onSubmit={onNext}>
-      <div className="flex items-start justify-between">
-        <RegistrationStepHeader
-          description={`Register up to ${MAX_OTHER_PARTICIPANTS + 1} participants including yourself.`}
-          Icon={Users}
-          title="Participant Details"
-        />
-        <Badge className="shrink-0" variant="secondary">
-          <form.Subscribe
-            selector={(s) => s.values.otherParticipants?.length ?? 0}
-          >
-            {(otherParticipantsCount) => (
-              <>
-                {otherParticipantsCount + 1} / {MAX_OTHER_PARTICIPANTS + 1}
-              </>
-            )}
-          </form.Subscribe>
-        </Badge>
-      </div>
+    <form onSubmit={onNext}>
+      <Card className="w-full overflow-hidden rounded-2xl border-border bg-card/10 shadow-md ring-0">
+        <CardHeader className="border-border/50 border-b bg-card/10 pb-6">
+          <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
+            <Users className="h-6 w-6 text-primary" />
+            Participant Details
+          </CardTitle>
+          <CardDescription className="text-base text-muted-foreground">
+            Enter the details of the primary registrant and any additional
+            attendees.
+          </CardDescription>
+        </CardHeader>
 
-      {/* Primary Registrant */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-foreground text-sm">
-            Registrant (You)
-          </h3>
-          <Badge className="text-xs">Primary</Badge>
-        </div>
-        <ParticipantFields form={form} />
-      </div>
-
-      {/* Other Registrants */}
-      <form.AppField mode="array" name="otherParticipants">
-        {(field) => {
-          const otherParticipantsCount = field.state.value?.length ?? 0;
-          const canAddMore = otherParticipantsCount < MAX_OTHER_PARTICIPANTS;
-
-          return (
-            <div className="space-y-6">
-              {field.state.value?.map((registrant, idx) => {
-                const hasData =
-                  registrant.firstName ||
-                  registrant.lastName ||
-                  registrant.email ||
-                  registrant.contactNumber;
-
-                return (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: getting index is okay, handled by tanstack form
-                  <div className="space-y-4" key={idx}>
-                    <Separator />
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-foreground text-sm">
-                        Participant {idx + 2}
-                      </h3>
-                      {hasData ? (
-                        <RemoveParticipantDialog idx={idx} />
-                      ) : (
-                        <Button
-                          className="h-8 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          onClick={() => field.removeValue(idx)}
-                          size="sm"
-                          type="button"
-                          variant="ghost"
-                        >
-                          <Trash2 className="mr-1 h-4 w-4" />
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                    <ParticipantFields form={form} index={idx} />
-                  </div>
-                );
-              })}
-
-              {/* Button for adding another participant */}
-              <Button
-                className="h-11 w-full border-dashed"
-                disabled={!canAddMore}
-                onClick={() => field.pushValue({ ...EMPTY_REGISTRANT })}
-                type="button"
-                variant="outline"
+        <CardContent className="space-y-6 px-6">
+          <div className="flex items-start justify-between">
+            <h3 className="pb-2 font-semibold text-foreground text-lg">
+              Primary Registrant
+            </h3>
+            <Badge className="shrink-0" variant="secondary">
+              <form.Subscribe
+                selector={(s) => s.values.otherParticipants?.length ?? 0}
               >
-                <Plus className="mr-2 h-4 w-4" />
-                {canAddMore
-                  ? "Add Another Participant"
-                  : `Maximum ${MAX_OTHER_PARTICIPANTS + 1} participants reached`}
-              </Button>
-            </div>
-          );
-        }}
-      </form.AppField>
+                {(otherParticipantsCount) => (
+                  <>
+                    {otherParticipantsCount + 1} / {MAX_OTHER_PARTICIPANTS + 1}
+                  </>
+                )}
+              </form.Subscribe>
+            </Badge>
+          </div>
 
-      <FormButtons onBack={onBack} onNext={onNext} />
+          <ParticipantFields form={form} />
+
+          <form.AppField mode="array" name="otherParticipants">
+            {(field) => {
+              const otherParticipantsCount = field.state.value?.length ?? 0;
+              const canAddMore =
+                otherParticipantsCount < MAX_OTHER_PARTICIPANTS;
+
+              return (
+                <div className="space-y-6">
+                  {field.state.value?.map((registrant, idx) => {
+                    const hasData =
+                      registrant.firstName ||
+                      registrant.lastName ||
+                      registrant.email ||
+                      registrant.contactNumber;
+
+                    return (
+                      <div
+                        className="slide-in-from-top-2 fade-in relative animate-in space-y-4 rounded-xl border-0 border-border bg-background p-6 shadow-sm"
+                        key={registrant.id}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-foreground text-lg">
+                            Additional Participant #{idx + 1}
+                          </h4>
+                          {hasData ? (
+                            <RemoveParticipantDialog idx={idx} />
+                          ) : (
+                            <Button
+                              className="h-8 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => field.removeValue(idx)}
+                              size="sm"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Trash2 className="mr-1 h-4 w-4" />
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                        <ParticipantFields form={form} index={idx} />
+                      </div>
+                    );
+                  })}
+
+                  <Button
+                    className="h-12 w-full rounded-xl border-2 border-dashed transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+                    disabled={!canAddMore}
+                    onClick={() =>
+                      field.pushValue({
+                        ...EMPTY_REGISTRANT,
+                        id: crypto.randomUUID(),
+                      })
+                    }
+                    type="button"
+                    variant="outline"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    {canAddMore
+                      ? "Add Another Participant"
+                      : `Maximum ${MAX_OTHER_PARTICIPANTS + 1} participants reached`}
+                  </Button>
+                </div>
+              );
+            }}
+          </form.AppField>
+
+          <div className="flex items-center justify-between border-border/50 border-t pt-4">
+            <Button
+              className="rounded-xl"
+              onClick={onBack}
+              size="lg"
+              type="button"
+              variant="ghost"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <Button
+              className="rounded-xl px-8 shadow-md"
+              size="lg"
+              type="submit"
+            >
+              Continue to Payment
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </form>
   );
 }
@@ -167,67 +201,72 @@ function ParticipantFields({ form, index }: ParticipantFieldsProps) {
 
   return (
     <div className="space-y-4">
-      {/* Name Row - Two Columns */}
       <div className="grid gap-4 sm:grid-cols-2">
         <form.AppField name={`${prefix}.firstName` as Step2FieldName}>
           {(field) => (
             <div className="space-y-2">
-              <Label className="text-sm">First Name</Label>
-              <field.TextField className="h-11" placeholder="Juan" />
+              <Label className="text-sm">
+                First Name <span className="text-destructive">*</span>
+              </Label>
+              <field.TextField className="h-11 rounded-xl" placeholder="Juan" />
             </div>
           )}
         </form.AppField>
         <form.AppField name={`${prefix}.lastName` as Step2FieldName}>
           {(field) => (
             <div className="space-y-2">
-              <Label className="text-sm">Last Name</Label>
-              <field.TextField className="h-11" placeholder="Dela Cruz" />
+              <Label className="text-sm">
+                Last Name <span className="text-destructive">*</span>
+              </Label>
+              <field.TextField
+                className="h-11 rounded-xl"
+                placeholder="Dela Cruz"
+              />
             </div>
           )}
         </form.AppField>
       </div>
 
-      {/* Email - Single Column */}
-      <form.AppField name={`${prefix}.email` as Step2FieldName}>
-        {(field) => (
-          <div className="space-y-2">
-            <Label className="text-sm">Email Address</Label>
-            <field.TextField
-              className="h-11"
-              placeholder="juan.delacruz@example.com"
-              type="email"
-            />
-          </div>
-        )}
-      </form.AppField>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <form.AppField name={`${prefix}.email` as Step2FieldName}>
+          {(field) => (
+            <div className="space-y-2">
+              <Label className="text-sm">Email Address</Label>
+              <field.TextField
+                className="h-11 rounded-xl"
+                placeholder="juan.delacruz@example.com"
+                type="email"
+              />
+            </div>
+          )}
+        </form.AppField>
 
-      {/* Phone - Single Column */}
-      <form.AppField name={`${prefix}.contactNumber` as Step2FieldName}>
-        {(field) => (
-          <div className="space-y-2">
-            <Label className="text-sm">Contact Number</Label>
-            <field.TextField className="h-11" placeholder="09171234567" />
-          </div>
-        )}
-      </form.AppField>
+        <form.AppField name={`${prefix}.contactNumber` as Step2FieldName}>
+          {(field) => (
+            <div className="space-y-2">
+              <Label className="text-sm">Contact Number</Label>
+              <field.TextField
+                className="h-11 rounded-xl"
+                placeholder="09171234567"
+              />
+            </div>
+          )}
+        </form.AppField>
+      </div>
     </div>
   );
 }
 
 function RemoveParticipantDialog({ idx }: { idx: number }) {
   const field = useFieldContext();
+
   return (
     <AlertDialog>
-      <AlertDialogTrigger>
-        <Button
-          className="h-8 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
+      <AlertDialogTrigger className="h-8 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive">
+        <span className="flex items-center">
           <Trash2 className="mr-1 h-4 w-4" />
           Remove
-        </Button>
+        </span>
       </AlertDialogTrigger>
 
       <AlertDialogContent>

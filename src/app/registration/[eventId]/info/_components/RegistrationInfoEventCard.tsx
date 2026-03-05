@@ -9,6 +9,7 @@ type RegistrationInfoEventCardProps = {
   headerUrl: string | null;
   eventStartDate: string;
   eventEndDate: string;
+  fee: number;
 };
 
 export function RegistrationInfoEventCard({
@@ -17,6 +18,7 @@ export function RegistrationInfoEventCard({
   headerUrl,
   eventStartDate,
   eventEndDate,
+  fee,
 }: RegistrationInfoEventCardProps) {
   const formattedStartDate = formatDate(
     new Date(eventStartDate),
@@ -29,33 +31,38 @@ export function RegistrationInfoEventCard({
       : `${formattedStartDate} – ${formattedEndDate}`;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+    <div className="overflow-hidden border-none shadow-md">
       {headerUrl && (
-        <div className="relative h-52 w-full bg-muted/30 md:h-68">
+        <div className="relative h-64 w-full bg-muted/30 md:h-80">
           <Image alt={title} className="object-cover" fill src={headerUrl} />
-          <div
-            className="absolute inset-0"
-            style={{ background: "var(--hero-overlay)" }}
-          />
         </div>
       )}
 
-      <div className="p-7 md:p-9">
-        <div className="mb-4 inline-flex items-center gap-1.5 rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1">
+      <div className="p-8 md:p-10">
+        <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1">
           <CalendarDays className="h-3.5 w-3.5 text-primary" />
           <span className="font-semibold text-primary text-xs tracking-wide">
             {dateDisplay}
           </span>
         </div>
 
-        <h1 className="mb-3 text-foreground leading-tight">{title}</h1>
+        <h1 className="mb-3 font-extrabold text-3xl text-foreground md:text-4xl">
+          {title}
+        </h1>
 
         {description && (
           <RichTextDisplay
-            className="max-w-2xl text-muted-foreground text-sm"
+            className="max-w-2xl text-muted-foreground text-sm md:text-base"
             content={description}
           />
         )}
+        <p className="mt-4 text-muted-foreground">
+          Registration fee:{" "}
+          <span className="font-bold text-foreground">
+            Php {fee.toLocaleString()}
+          </span>{" "}
+          per participant.
+        </p>
       </div>
     </div>
   );

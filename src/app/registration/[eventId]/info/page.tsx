@@ -38,14 +38,15 @@ export default async function InfoPageWrapper({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       <RegistrationInfoTopNav eventId={eventId} />
 
-      <div className="mx-auto max-w-7xl space-y-6 px-6 py-10">
+      <div className="mx-auto max-w-5xl space-y-8 px-6 pt-8">
         <RegistrationInfoEventCard
           description={data.description}
           eventEndDate={data.eventEndDate}
           eventStartDate={data.eventStartDate}
+          fee={data.registrationFee}
           headerUrl={data.eventHeaderUrl}
           title={data.eventTitle ?? "Event Header"}
         />

@@ -89,9 +89,10 @@ export default async function EventDetails({
     },
   ];
 
+  // Copilot AI 2026-03-05: The parent success page already renders a <main> wrapper. To avoid nested <main> landmarks (invalid HTML semantics and confusing for screen readers), use <section> as the root here.
   return (
-    <main className="bg-background px-4 py-6 sm:px-6 lg:px-8">
-      <section className="mx-auto w-full max-w-7xl space-y-6 rounded-3xl p-6 sm:space-y-7 sm:p-8">
+    <section className="bg-background px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl space-y-6 rounded-3xl p-6 sm:space-y-7 sm:p-8">
         {/* ── Event Header Image ── */}
         {data.registeredEvent.eventHeaderUrl && (
           <div
@@ -248,7 +249,7 @@ export default async function EventDetails({
             </Button>
           </Link>
         </div>
-      </section>
-    </main>
+      </div>
+    </section>
   );
 }
