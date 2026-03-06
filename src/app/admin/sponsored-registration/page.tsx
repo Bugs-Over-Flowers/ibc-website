@@ -1,9 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AddSponsoredRegistrationButton } from "./_components/AddSponsoredRegistrationButton";
 import { SponsoredRegistrationTable } from "./_components/SponsoredRegistrationTable";
 import SponsoredRegistrationPageSkeleton from "./loading";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Sponsored Registrations | Admin",
   description: "View and manage all sponsored registrations",
 };

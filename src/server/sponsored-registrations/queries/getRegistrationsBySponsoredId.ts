@@ -10,12 +10,13 @@ type Participant = Database["public"]["Tables"]["Participant"]["Row"];
 type RpcRow = {
   registrationId: string;
   eventId: string;
-  businessMemberId: string;
-  sponsoredRegistrationId: string;
-  nonMemberName: string;
-  numberOfParticipants: number;
+  businessMemberId: string | null;
+  sponsoredRegistrationId: string | null;
+  nonMemberName: string | null;
+  numberOfParticipants: number | null;
   paymentStatus: "pending" | "verified";
   paymentMethod: "BPI" | "ONSITE";
+  paymentProofStatus: "pending" | "rejected" | "accepted";
   registrationDate: string;
   identifier: string;
   participants: Json;
@@ -47,19 +48,20 @@ export async function getRegistrationsBySponsoredId(
     return [];
   }
 
-  return data.map((row: RpcRow) => ({
+  return data.map((row) => ({
     registrationId: row.registrationId,
     eventId: row.eventId,
     businessMemberId: row.businessMemberId,
     sponsoredRegistrationId: row.sponsoredRegistrationId,
     nonMemberName: row.nonMemberName,
     numberOfParticipants: row.numberOfParticipants,
-    paymentStatus: row.paymentStatus,
+    paymentStatus: (row as RpcRow).paymentStatus,
     paymentMethod: row.paymentMethod,
+    paymentProofStatus: row.paymentProofStatus,
     registrationDate: row.registrationDate,
     identifier: row.identifier,
     participants: Array.isArray(row.participants)
-      ? row.participants
+      ? (row.participants as Participant[])
       : (JSON.parse(
           typeof row.participants === "string" ? row.participants : "[]",
         ) as Participant[]),

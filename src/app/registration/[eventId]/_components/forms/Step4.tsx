@@ -195,7 +195,7 @@ function ParticipantInformationSection({
                     <div
                       className="flex items-center justify-between rounded-lg border bg-muted/50 p-3 text-sm"
                       key={`${person.firstName}-${
-                        // biome-ignore lint/suspicious/noArrayIndexKey: Used for uniqueness in case of duplicate names, not for reordering
+                        // biome-ignore lint/suspicious/noArrayIndexKey: Tanstack Form handles keying generation
                         i
                       }`}
                     >

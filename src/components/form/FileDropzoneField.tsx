@@ -149,7 +149,7 @@ function FileDropzoneField({
             <FilePreview
               file={file}
               key={`${file.name}-${
-                // biome-ignore lint/suspicious/noArrayIndexKey: Using index as key is acceptable here since files are not reordered and only added/removed at the end
+                // biome-ignore lint/suspicious/noArrayIndexKey: Generated key based on file name and index
                 index
               }`}
               layout={layout}

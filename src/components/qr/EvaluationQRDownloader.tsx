@@ -107,7 +107,7 @@ export function EvaluationQRDownloader({
 
         <div className="flex flex-col items-center gap-5 py-4">
           {/* QR Card for Download */}
-          <Card className="w-full max-w-xs bg-white" href={ref}>
+          <Card className="w-full max-w-xs bg-white" ref={ref}>
             <CardContent className="flex flex-col items-center gap-4 p-6">
               <div className="text-center">
                 <p className="font-semibold text-neutral-900 text-sm">

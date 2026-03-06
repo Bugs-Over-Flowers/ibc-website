@@ -203,7 +203,7 @@ export function EvaluationList({
       </div>
 
       {displayedCount < evaluations.length && (
-        <div className="flex justify-center py-8" href={loaderRef}>
+        <div className="flex justify-center py-8" ref={loaderRef}>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 animate-bounce rounded-full bg-primary/50" />
             <div
