@@ -86,12 +86,32 @@ export async function getAdminEventsPage(
 
   if (status === "draft") {
     query = query.is("publishedAt", null);
-  } else if (status === "finished") {
+  } else if (
+    status === "finished" ||
+    status === "finished-public" ||
+    status === "finished-private"
+  ) {
     query = query.not("publishedAt", "is", null).lt("eventEndDate", nowIso);
-  } else if (status === "published") {
+
+    if (status === "finished-public") {
+      query = query.eq("eventType", "public");
+    } else if (status === "finished-private") {
+      query = query.eq("eventType", "private");
+    }
+  } else if (
+    status === "published" ||
+    status === "published-public" ||
+    status === "published-private"
+  ) {
     query = query
       .not("publishedAt", "is", null)
       .or(`eventEndDate.gte.${nowIso},eventEndDate.is.null`);
+
+    if (status === "published-public") {
+      query = query.eq("eventType", "public");
+    } else if (status === "published-private") {
+      query = query.eq("eventType", "private");
+    }
   }
 
   // Apply cursor filter for keyset pagination
