@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, MoreVertical } from "lucide-react";
+import { Edit, MoreVertical, Trash } from "lucide-react";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import DeleteButton from "./DeleteButton";
+import DeleteSectorDialog from "./DeleteSectorDialog";
 import EditSectorDialog from "./EditSectorDialog";
 
 interface SectorActionsDropdownProps {
@@ -22,6 +22,7 @@ export default function SectorActionsDropdown({
   sectorName,
 }: SectorActionsDropdownProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   return (
     <>
@@ -30,6 +31,12 @@ export default function SectorActionsDropdown({
         id={sectorId}
         onOpenChange={setIsEditOpen}
         open={isEditOpen}
+      />
+      <DeleteSectorDialog
+        id={sectorId}
+        onOpenChange={setIsDeleteOpen}
+        open={isDeleteOpen}
+        sectorName={sectorName}
       />
 
       <DropdownMenu>
@@ -46,7 +53,17 @@ export default function SectorActionsDropdown({
             <span>Edit</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DeleteButton id={sectorId} />
+          <DropdownMenuItem
+            className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              setIsDeleteOpen(true);
+            }}
+          >
+            <Trash className="mr-2 h-4 w-4" />
+            <span>Delete</span>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

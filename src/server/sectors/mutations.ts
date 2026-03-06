@@ -53,14 +53,85 @@ export async function updateSector(input: z.infer<typeof updateSectorSchema>) {
   return { id: data.sectorId };
 }
 
+const sectorDeletionPreviewSchema = z.object({
+  id: z.number(),
+});
+
+export async function getSectorDeletionPreview(
+  input: z.infer<typeof sectorDeletionPreviewSchema>,
+) {
+  const parsed = sectorDeletionPreviewSchema.parse(input);
+
+  const supabase = await createActionClient();
+
+  const [membersResult, sectorsResult] = await Promise.all([
+    supabase
+      .from("BusinessMember")
+      .select("businessMemberId, businessName")
+      .eq("sectorId", parsed.id)
+      .order("businessName", { ascending: true }),
+    supabase
+      .from("Sector")
+      .select("sectorId, sectorName")
+      .neq("sectorId", parsed.id)
+      .order("sectorName", { ascending: true }),
+  ]);
+
+  if (membersResult.error) {
+    throw new Error(membersResult.error.message);
+  }
+
+  if (sectorsResult.error) {
+    throw new Error(sectorsResult.error.message);
+  }
+
+  return {
+    members: membersResult.data ?? [],
+    alternativeSectors: sectorsResult.data ?? [],
+  };
+}
+
 const deleteSectorSchema = z.object({
   id: z.number(),
+  reassignSectorId: z.number().optional(),
 });
 
 export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
   const parsed = deleteSectorSchema.parse(input);
 
   const supabase = await createActionClient();
+
+  const { count: memberCount, error: memberCountError } = await supabase
+    .from("BusinessMember")
+    .select("businessMemberId", { count: "exact", head: true })
+    .eq("sectorId", parsed.id);
+
+  if (memberCountError) {
+    throw new Error(memberCountError.message);
+  }
+
+  const hasMembers = typeof memberCount === "number" && memberCount > 0;
+
+  if (
+    hasMembers &&
+    (!parsed.reassignSectorId || parsed.reassignSectorId === parsed.id)
+  ) {
+    throw new Error(
+      "Please choose a new sector for the affected members before deleting.",
+    );
+  }
+
+  if (hasMembers && parsed.reassignSectorId) {
+    const { error: reassignmentError } = await supabase
+      .from("BusinessMember")
+      .update({ sectorId: parsed.reassignSectorId })
+      .eq("sectorId", parsed.id);
+
+    if (reassignmentError) {
+      throw new Error(reassignmentError.message);
+    }
+  }
+
   const { error } = await supabase
     .from("Sector")
     .delete()
