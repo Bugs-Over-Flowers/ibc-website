@@ -1,38 +1,60 @@
 import "server-only";
 
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyRealtime60sCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 import {
   type RegistrationItem,
   RegistrationListRPCSchema,
 } from "@/lib/validation/registration-management";
-import { PaymentStatusEnum } from "@/lib/validation/utils";
+import { PaymentProofStatusEnum } from "@/lib/validation/utils";
 
 interface GetRegistrationListParams {
   eventId: string;
   searchString?: string;
-  paymentStatus?: string;
+  paymentProofStatus?: string;
+  limit?: number;
 }
 
 export const getEventRegistrationList = async (
   requestCookies: RequestCookie[],
-  { eventId, searchString, paymentStatus }: GetRegistrationListParams,
+  {
+    eventId,
+    searchString,
+    paymentProofStatus,
+    limit,
+  }: GetRegistrationListParams,
 ): Promise<RegistrationItem[]> => {
   "use cache";
-  cacheLife("seconds");
-  cacheTag("registration-list");
+  applyRealtime60sCache();
+  cacheTag(CACHE_TAGS.registrations.all);
+  cacheTag(CACHE_TAGS.registrations.list);
+  cacheTag(CACHE_TAGS.registrations.event);
   const supabase = await createClient(requestCookies);
+  const parsedPaymentProofStatus = paymentProofStatus
+    ? PaymentProofStatusEnum.safeParse(paymentProofStatus)
+    : undefined;
 
-  const query = await supabase
-    .rpc("get_registration_list", {
-      p_event_id: eventId,
-      p_search_text: searchString,
-      p_payment_status: paymentStatus
-        ? PaymentStatusEnum.parse(paymentStatus)
-        : undefined,
-    })
-    .throwOnError();
+  let query = supabase.rpc("get_registration_list", {
+    p_event_id: eventId,
+    p_search_text: searchString,
+    p_payment_proof_status: parsedPaymentProofStatus?.success
+      ? parsedPaymentProofStatus.data
+      : undefined,
+  });
 
-  return RegistrationListRPCSchema.array().parse(query.data);
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error(error);
+    throw new Error("Failed to fetch registration list");
+  }
+
+  return RegistrationListRPCSchema.array().parse(data);
 };

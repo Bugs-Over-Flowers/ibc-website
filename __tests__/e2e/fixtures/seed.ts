@@ -67,6 +67,7 @@ export async function seedE2ERegistrationData(options?: {
   if (options?.createBusinessMember) {
     const memberData: BusinessMemberInsert = {
       businessName: `E2E Test Company ${timestamp}`,
+      identifier: `e2e-${timestamp}`,
       sectorId: 1, // Technology (from seed.sql)
       websiteURL: "https://e2e-test.local",
       logoImageURL: "https://picsum.photos/200/200",

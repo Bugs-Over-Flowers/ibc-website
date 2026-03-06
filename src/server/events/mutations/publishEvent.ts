@@ -60,6 +60,10 @@ export const publishEvent: ServerFunction<
     };
   }
 
+  // updateTag(CACHE_TAGS.events.all);
+  // updateTag(CACHE_TAGS.events.admin);
+  // updateTag(CACHE_TAGS.events.public);
+
   revalidatePath("/admin/events");
   return { success: true, data: { eventId: eventData.eventId }, error: null };
 };

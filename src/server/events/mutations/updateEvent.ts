@@ -103,6 +103,10 @@ export const updateEvent: ServerFunction<
     };
   }
 
+  // updateTag(CACHE_TAGS.events.all);
+  // updateTag(CACHE_TAGS.events.admin);
+  // updateTag(CACHE_TAGS.events.public);
+
   revalidatePath("/admin/events");
   revalidatePath(`/admin/events/${data.eventId}`);
 

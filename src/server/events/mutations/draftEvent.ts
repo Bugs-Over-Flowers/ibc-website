@@ -49,6 +49,9 @@ export const draftEvent: ServerFunction<
     };
   }
 
+  // updateTag(CACHE_TAGS.events.all);
+  // updateTag(CACHE_TAGS.events.admin);
+
   revalidatePath("/admin");
   return { success: true, data: { eventId: eventData.eventId }, error: null };
 };

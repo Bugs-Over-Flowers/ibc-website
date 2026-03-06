@@ -20,7 +20,7 @@ interface RegistrationRowActionsProps {
     registrationIdentifier: string;
     registrationId: string;
     email: string;
-    paymentStatus: Enums<"PaymentStatus">;
+    paymentProofStatus: Enums<"PaymentProofStatus">;
     proofOfPaymentImageURL?: string;
     affiliation: string;
   };

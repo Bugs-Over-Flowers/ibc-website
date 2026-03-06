@@ -1,11 +1,14 @@
 import {
   Body,
+  Column,
   Container,
   Head,
   Heading,
   Hr,
   Html,
+  Link,
   Preview,
+  Row,
   Section,
   Text,
 } from "@react-email/components";
@@ -19,175 +22,180 @@ interface MembershipApplicationConfirmationProps {
   contactEmail: string;
 }
 
+const typeConfig: Record<
+  ApplicationType,
+  {
+    preview: string;
+    heading: string;
+    subheading: string;
+    bodyText: string;
+    nextStepTitle: string;
+    nextStepText: string;
+  }
+> = {
+  newMember: {
+    preview: "Your IBC Membership Application has been received",
+    heading: "Application Received",
+    subheading: "Thank you for applying to the Iloilo Business Club.",
+    bodyText:
+      "We have successfully received your membership application. We will review your submission and reach out to you regarding the next steps.",
+    nextStepTitle: "What happens next?",
+    nextStepText:
+      "We will be checking your application details and verifying your information. If everything is in order, you will be scheduled for an interview with us. You will receive a separate email notification once the interview date and time have been decided. You may also track your application status at any time using your Application Identifier above at our website.",
+  },
+  renewal: {
+    preview: "Your IBC Membership Renewal Request has been received",
+    heading: "Renewal Request Received",
+    subheading: "Welcome back to the Iloilo Business Club.",
+    bodyText:
+      "We have successfully received your membership renewal request. Our team is now processing your submission and will notify you once it has been reviewed.",
+    nextStepTitle: "Processing Time",
+    nextStepText:
+      "Your renewal request is being reviewed by us. This may take a few business days to complete. If you have provided payment proof, our finance team will verify it as part of the renewal process. You will receive a confirmation email once your renewal has been approved.",
+  },
+  updating: {
+    preview: "Your IBC Member Information Update Request has been received",
+    heading: "Update Request Received",
+    subheading: "Your update request is being reviewed.",
+    bodyText:
+      "We have received your request to update your membership information. Our team will review the changes and update your records accordingly. Please note that certain changes may require verification or additional documentation.",
+    nextStepTitle: "Processing Time",
+    nextStepText:
+      "Information updates typically take 3\u20135 business days to process. Some updates may require additional review by us and may take longer to complete. You will receive a confirmation email once your information has been successfully updated in our system.",
+  },
+};
+
 export default function MembershipApplicationConfirmation({
   companyName,
   applicationType,
   applicationIdentifier,
   contactEmail,
 }: MembershipApplicationConfirmationProps) {
-  const getPreview = () => {
-    switch (applicationType) {
-      case "newMember":
-        return "Your IBC Membership Application has been received";
-      case "renewal":
-        return "Your IBC Membership Renewal Request has been received";
-      case "updating":
-        return "Your IBC Member Information Update Request has been received";
-      default:
-        return "Your IBC Application has been received";
-    }
-  };
-
-  const getHeading = () => {
-    switch (applicationType) {
-      case "newMember":
-        return "Application Received!";
-      case "renewal":
-        return "Welcome Back!";
-      case "updating":
-        return "Update Request Received";
-      default:
-        return "Application Received";
-    }
-  };
+  const config = typeConfig[applicationType];
 
   return (
-    <Html>
-      <Head />
-      <Preview>{getPreview()}</Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Heading style={h1}>{getHeading()}</Heading>
-          <Text style={text}>Dear {companyName},</Text>
+    <Html lang="en">
+      <Head>
+        <title>{config.preview}</title>
+      </Head>
+      <Preview>{config.preview}</Preview>
+      <Body style={styles.body}>
+        {/* Header bar */}
+        <Section style={styles.header}>
+          <Container style={styles.headerContainer}>
+            <Text style={styles.headerTitle}>Iloilo Business Club</Text>
+          </Container>
+        </Section>
 
-          {applicationType === "newMember" && (
-            <Section>
-              <Text style={text}>
-                Thank you for applying for membership at the Iloilo Business
-                Club. We have successfully received your application and our
-                team is now reviewing your submission.
-              </Text>
-              <Text style={text}>
-                <strong>What happens next?</strong>
-              </Text>
-              <Text style={text}>
-                Our Membership Committee will review your application. If
-                approved for the next step, you will be scheduled for an
-                interview with our committee members. You will receive a
-                separate email notification once the interview date and time
-                have been decided.
-              </Text>
-            </Section>
-          )}
+        {/* Blue accent bar */}
+        <Section style={styles.accentBar} />
 
-          {applicationType === "renewal" && (
-            <Section>
-              <Text style={text}>
-                It is great to have you back! We have received your membership
-                renewal request and our team is now processing it.
-              </Text>
-              <Text style={text}>
-                Thank you for your continued trust and support of the Iloilo
-                Business Club. Your membership renewal helps strengthen our
-                business community.
-              </Text>
-            </Section>
-          )}
+        {/* Main card */}
+        <Container style={styles.card}>
+          <Section style={styles.cardTop}>
+            {/* Status badge */}
+            <Text style={styles.badge}>&#10003; Received</Text>
 
-          {applicationType === "updating" && (
-            <Section>
-              <Text style={text}>
-                We have received your request to update your membership
-                information. Our team will review the changes and update your
-                records accordingly.
-              </Text>
-              <Text style={text}>
-                Please note that certain changes may require verification or
-                additional documentation.
-              </Text>
-            </Section>
-          )}
-
-          <Section style={detailsSection}>
-            <Text style={detailLabel}>Application Identifier:</Text>
-            <Text style={detailValue}>{applicationIdentifier}</Text>
-
-            <Text style={detailLabel}>Company Name:</Text>
-            <Text style={detailValue}>{companyName}</Text>
-
-            <Text style={detailLabel}>Contact Email:</Text>
-            <Text style={detailValue}>{contactEmail}</Text>
+            {/* Heading */}
+            <Heading as="h1" style={styles.heading}>
+              {config.heading}
+            </Heading>
+            <Text style={styles.subheading}>{config.subheading}</Text>
           </Section>
 
-          <Hr style={hr} />
+          <Hr style={styles.divider} />
 
-          {applicationType === "newMember" && (
-            <Section>
-              <Text style={text}>
-                <strong>Track Your Application</strong>
-              </Text>
-              <Text style={text}>
-                You can check the status of your application anytime using your
-                Application Identifier. The application tracking page will show
-                your current application status, interview schedule (once
-                confirmed), and any updates or requirements.
-              </Text>
-              <Text style={text}>
-                Please check the application tracking regularly for updates on
-                your membership application status.
+          {/* Greeting + body */}
+          <Section style={styles.section}>
+            <Text style={styles.text}>
+              Dear <strong>{companyName}</strong>,
+            </Text>
+            <Text style={styles.bodyText}>{config.bodyText}</Text>
+          </Section>
+
+          {/* Application details card */}
+          <Section style={styles.section}>
+            <Section style={styles.detailsCard}>
+              <Text style={styles.detailsTitle}>Application Details</Text>
+              <Hr style={styles.detailsDivider} />
+
+              <Row style={{ marginBottom: "12px" }}>
+                <Column style={styles.detailLabel}>
+                  <Text style={styles.detailLabelText}>Identifier</Text>
+                </Column>
+                <Column>
+                  <Text style={styles.detailValueMono}>
+                    {applicationIdentifier}
+                  </Text>
+                </Column>
+              </Row>
+
+              <Row style={{ marginBottom: "12px" }}>
+                <Column style={styles.detailLabel}>
+                  <Text style={styles.detailLabelText}>Company</Text>
+                </Column>
+                <Column>
+                  <Text style={styles.detailValue}>{companyName}</Text>
+                </Column>
+              </Row>
+
+              <Row>
+                <Column style={styles.detailLabel}>
+                  <Text style={styles.detailLabelText}>Contact Email</Text>
+                </Column>
+                <Column>
+                  <Link
+                    href={`mailto:${contactEmail}`}
+                    style={styles.emailLink}
+                  >
+                    {contactEmail}
+                  </Link>
+                </Column>
+              </Row>
+            </Section>
+          </Section>
+
+          {/* Next steps section */}
+          <Section style={styles.section}>
+            <Row>
+              <Column style={styles.accentBorder} />
+              <Column style={{ paddingLeft: "16px" }}>
+                <Text style={styles.nextStepTitle}>{config.nextStepTitle}</Text>
+              </Column>
+            </Row>
+            <Text style={styles.bodyText}>{config.nextStepText}</Text>
+          </Section>
+
+          {/* Help section */}
+          <Section style={styles.section}>
+            <Section style={styles.helpBox}>
+              <Text style={styles.helpText}>
+                <strong>Need assistance?</strong> If you have any questions
+                about your application, please do not hesitate to contact our
+                Office. We are happy to help. You can get our contact details at
+                our website.
               </Text>
             </Section>
-          )}
+          </Section>
 
-          {applicationType === "renewal" && (
-            <Section>
-              <Text style={text}>
-                <strong>Processing Time</strong>
-              </Text>
-              <Text style={text}>
-                Your renewal request is being processed by our Membership
-                Committee. This may take a few business days to complete. You
-                will receive a confirmation email once your renewal has been
-                approved and processed.
-              </Text>
-              <Text style={text}>
-                If you have provided payment proof, our finance team will verify
-                it as part of the renewal process.
-              </Text>
-            </Section>
-          )}
+          {/* Signature */}
+          <Section style={styles.signatureSection}>
+            <Text style={styles.signatureRegards}>Best regards,</Text>
+            <Text style={styles.signatureName}>Iloilo Business Club</Text>
+          </Section>
+        </Container>
 
-          {applicationType === "updating" && (
-            <Section>
-              <Text style={text}>
-                <strong>Processing Time</strong>
-              </Text>
-              <Text style={text}>
-                Information updates typically take 3-5 business days to process.
-                Some updates may require additional review by our Membership
-                Committee and may take longer to complete.
-              </Text>
-              <Text style={text}>
-                You will receive a confirmation email once your information has
-                been successfully updated in our system.
-              </Text>
-            </Section>
-          )}
-
-          <Text style={text}>
-            If you have any questions or need assistance, please do not hesitate
-            to contact us.
-          </Text>
-
-          <Text style={footer}>
-            Best regards,
+        {/* Footer */}
+        <Container style={styles.footerContainer}>
+          <Hr style={styles.footerDivider} />
+          <Text style={styles.footerText}>
+            This is an automated message from the Iloilo Business Club.
             <br />
-            Iloilo Business Club
+            Please do not reply directly to this email.
           </Text>
-
-          <Text style={footerNote}>
-            This is an automated message. Please do not reply directly to this
-            email.
+          <Text style={styles.footerCopyright}>
+            &copy; {new Date().getFullYear()} Iloilo Business Club. All rights
+            reserved.
           </Text>
         </Container>
       </Body>
@@ -195,76 +203,262 @@ export default function MembershipApplicationConfirmation({
   );
 }
 
-const main: React.CSSProperties = {
-  backgroundColor: "#f6f9fc",
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
+const fontFamily =
+  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, sans-serif';
 
-const container: React.CSSProperties = {
-  backgroundColor: "#ffffff",
-  margin: "0 auto",
-  padding: "20px 0 48px",
-  marginBottom: "64px",
-  maxWidth: "600px",
-};
+const styles = {
+  body: {
+    backgroundColor: "#f1f5f9",
+    fontFamily,
+    margin: 0,
+    padding: 0,
+  } as React.CSSProperties,
 
-const h1: React.CSSProperties = {
-  color: "#333",
-  fontSize: "24px",
-  fontWeight: "bold",
-  margin: "40px 0 20px",
-  padding: "0 40px",
-};
+  header: {
+    backgroundColor: "#0f1729",
+    padding: 0,
+  } as React.CSSProperties,
 
-const text: React.CSSProperties = {
-  color: "#333",
-  fontSize: "16px",
-  lineHeight: "26px",
-  padding: "0 40px",
-};
+  headerContainer: {
+    maxWidth: "600px",
+    margin: "0 auto",
+    padding: "24px 40px",
+  } as React.CSSProperties,
 
-const detailsSection: React.CSSProperties = {
-  backgroundColor: "#f4f4f5",
-  borderRadius: "4px",
-  margin: "24px 40px",
-  padding: "24px",
-};
+  headerTitle: {
+    color: "#ffffff",
+    fontSize: "18px",
+    fontWeight: "bold" as const,
+    margin: 0,
+    letterSpacing: "0.025em",
+    fontFamily,
+  } as React.CSSProperties,
 
-const detailLabel: React.CSSProperties = {
-  color: "#71717a",
-  fontSize: "14px",
-  fontWeight: 600,
-  marginBottom: "4px",
-  marginTop: "16px",
-};
+  headerSubtitle: {
+    color: "#7dd3fc",
+    fontSize: "12px",
+    margin: 0,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.1em",
+    fontFamily,
+  } as React.CSSProperties,
 
-const detailValue: React.CSSProperties = {
-  color: "#18181b",
-  fontSize: "18px",
-  fontWeight: 600,
-  margin: "0 0 8px 0",
-};
+  accentBar: {
+    backgroundColor: "#0284c5",
+    height: "4px",
+    margin: 0,
+    padding: 0,
+  } as React.CSSProperties,
 
-const hr: React.CSSProperties = {
-  borderColor: "#e6ebf1",
-  margin: "20px 40px",
-};
+  card: {
+    maxWidth: "600px",
+    margin: "0 auto",
+    backgroundColor: "#ffffff",
+  } as React.CSSProperties,
 
-const footer: React.CSSProperties = {
-  color: "#8898aa",
-  fontSize: "14px",
-  lineHeight: "24px",
-  padding: "0 40px",
-  marginTop: "32px",
-};
+  cardTop: {
+    padding: "48px 40px 8px",
+  } as React.CSSProperties,
 
-const footerNote: React.CSSProperties = {
-  color: "#a0aec0",
-  fontSize: "12px",
-  fontStyle: "italic",
-  padding: "0 40px",
-  marginTop: "16px",
+  badge: {
+    display: "inline-block" as const,
+    backgroundColor: "#dcfce7",
+    color: "#166534",
+    fontSize: "12px",
+    fontWeight: 600,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.1em",
+    padding: "4px 12px",
+    borderRadius: "9999px",
+    margin: 0,
+    fontFamily,
+  } as React.CSSProperties,
+
+  heading: {
+    color: "#0f1729",
+    fontSize: "28px",
+    fontWeight: "bold" as const,
+    margin: "16px 0 0 0",
+    lineHeight: "1.2",
+    fontFamily,
+  } as React.CSSProperties,
+
+  subheading: {
+    color: "#0284c5",
+    fontSize: "16px",
+    margin: "6px 0 0 0",
+    fontFamily,
+  } as React.CSSProperties,
+
+  divider: {
+    borderColor: "#e2e8f0",
+    margin: "24px 40px",
+  } as React.CSSProperties,
+
+  section: {
+    padding: "0 40px",
+    marginBottom: "0",
+  } as React.CSSProperties,
+
+  text: {
+    color: "#0f1729",
+    fontSize: "16px",
+    margin: 0,
+    fontFamily,
+  } as React.CSSProperties,
+
+  bodyText: {
+    color: "#334155",
+    fontSize: "15px",
+    lineHeight: "26px",
+    margin: "12px 0 0 0",
+    fontFamily,
+  } as React.CSSProperties,
+
+  detailsCard: {
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e2e8f0",
+    borderRadius: "8px",
+    padding: "20px 24px",
+    marginTop: "28px",
+  } as React.CSSProperties,
+
+  detailsTitle: {
+    color: "#0284c5",
+    fontSize: "11px",
+    fontWeight: "bold" as const,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.1em",
+    margin: 0,
+    fontFamily,
+  } as React.CSSProperties,
+
+  detailsDivider: {
+    borderColor: "#e2e8f0",
+    margin: "12px 0",
+  } as React.CSSProperties,
+
+  detailLabel: {
+    width: "40%",
+  } as React.CSSProperties,
+
+  detailLabelText: {
+    color: "#64748b",
+    fontSize: "12px",
+    fontWeight: 600,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.05em",
+    margin: 0,
+    fontFamily,
+  } as React.CSSProperties,
+
+  detailValueMono: {
+    color: "#0f1729",
+    fontSize: "14px",
+    fontWeight: "bold" as const,
+    fontFamily:
+      '"Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+    margin: 0,
+  } as React.CSSProperties,
+
+  detailValue: {
+    color: "#0f1729",
+    fontSize: "14px",
+    fontWeight: 600,
+    margin: 0,
+    fontFamily,
+  } as React.CSSProperties,
+
+  emailLink: {
+    color: "#0284c5",
+    fontSize: "14px",
+    fontWeight: 600,
+    textDecoration: "none",
+    fontFamily,
+  } as React.CSSProperties,
+
+  accentBorder: {
+    width: "4px",
+    backgroundColor: "#0284c5",
+    borderRadius: "9999px",
+  } as React.CSSProperties,
+
+  nextStepTitle: {
+    color: "#0f1729",
+    fontSize: "16px",
+    fontWeight: "bold" as const,
+    margin: "32px 0 0 0",
+    fontFamily,
+  } as React.CSSProperties,
+
+  helpBox: {
+    backgroundColor: "#f0f9ff",
+    border: "1px solid #bae6fd",
+    borderRadius: "8px",
+    padding: "16px 20px",
+    marginTop: "32px",
+  } as React.CSSProperties,
+
+  helpText: {
+    color: "#0369a1",
+    fontSize: "14px",
+    margin: 0,
+    fontFamily,
+  } as React.CSSProperties,
+
+  signatureSection: {
+    padding: "32px 40px 40px",
+  } as React.CSSProperties,
+
+  signatureRegards: {
+    color: "#334155",
+    fontSize: "14px",
+    margin: 0,
+    fontFamily,
+  } as React.CSSProperties,
+
+  signatureName: {
+    color: "#0f1729",
+    fontSize: "15px",
+    fontWeight: "bold" as const,
+    margin: "4px 0 0 0",
+    fontFamily,
+  } as React.CSSProperties,
+
+  signatureOrg: {
+    color: "#0284c5",
+    fontSize: "14px",
+    margin: 0,
+    fontFamily,
+  } as React.CSSProperties,
+
+  footerContainer: {
+    maxWidth: "600px",
+    margin: "0 auto",
+    padding: "24px 40px",
+  } as React.CSSProperties,
+
+  footerDivider: {
+    borderColor: "#cbd5e1",
+    margin: "0 0 20px 0",
+  } as React.CSSProperties,
+
+  footerText: {
+    color: "#94a3b8",
+    fontSize: "12px",
+    textAlign: "center" as const,
+    margin: 0,
+    lineHeight: "20px",
+    fontFamily,
+  } as React.CSSProperties,
+
+  footerCopyright: {
+    color: "#cbd5e1",
+    fontSize: "11px",
+    textAlign: "center" as const,
+    margin: "8px 0 0 0",
+    fontFamily,
+  } as React.CSSProperties,
 };
 
 MembershipApplicationConfirmation.PreviewProps = {

@@ -29,21 +29,12 @@ export async function sendMembershipApplicationEmail({
   };
 
   try {
-    console.log("Creating email template for:", {
-      toEmail,
-      companyName,
-      applicationType,
-      applicationIdentifier,
-    });
-
     const emailTemplate = MembershipApplicationConfirmation({
       companyName,
       applicationType,
       applicationIdentifier,
       contactEmail: toEmail,
     });
-
-    console.log("Email template created, sending email...");
 
     const { error, data } = await resend.emails.send({
       to: toEmail,

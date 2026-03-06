@@ -23,7 +23,7 @@ import { RegistrationIdentifier } from "@/lib/validation/utils";
 // Import enums from generated Supabase types to ensure type safety
 //
 const PaymentMethod = Constants.public.Enums.PaymentMethod;
-const PaymentStatus = Constants.public.Enums.PaymentStatus;
+const PaymentProofStatus = Constants.public.Enums.PaymentProofStatus;
 
 /**
  * Registrant Information (Partial)
@@ -50,7 +50,7 @@ const RegistrationListRegistrantSchema = z.object({
  * - registrationId: UUID primary key
  * - affiliation: Organization/company name
  * - registrationDate: ISO 8601 datetime with timezone offset
- * - paymentStatus: Enum (verified, pending, etc.)
+ * - paymentProofStatus: Enum (pending, accepted, rejected)
  * - paymentMethod: Enum (onsite, gcash, bank_transfer)
  * - registrant: Nested schema with basic contact info
  * - registrationIdentifier: Unique QR code identifier (format: ibc-reg-XXXXXXXX)
@@ -62,7 +62,7 @@ export const RegistrationDataBaseSchema = z.object({
   registrationId: z.uuid(),
   affiliation: z.string(),
   registrationDate: z.iso.datetime({ offset: true }),
-  paymentStatus: z.enum(PaymentStatus),
+  paymentProofStatus: z.enum(PaymentProofStatus),
   paymentMethod: z.enum(PaymentMethod),
   registrant: RegistrationListRegistrantSchema,
   registrationIdentifier: RegistrationIdentifier,
@@ -135,7 +135,7 @@ export const RegistrationListRPCSchema = z
     registration_id: z.uuid(),
     affiliation: z.string(),
     registration_date: z.iso.datetime({ offset: true }),
-    payment_status: z.string(),
+    payment_proof_status: z.string(),
     payment_method: z.string(),
     business_member_id: z.uuid().nullable(),
     business_name: z.string().nullable(),
@@ -150,7 +150,8 @@ export const RegistrationListRPCSchema = z
         registrationId: val.registration_id,
         affiliation: val.affiliation,
         registrationDate: val.registration_date,
-        paymentStatus: val.payment_status as Enums<"PaymentStatus">,
+        paymentProofStatus:
+          val.payment_proof_status as Enums<"PaymentProofStatus">,
         paymentMethod: val.payment_method as Enums<"PaymentMethod">,
         businessMemberId: val.business_member_id,
         businessName: val.business_name,

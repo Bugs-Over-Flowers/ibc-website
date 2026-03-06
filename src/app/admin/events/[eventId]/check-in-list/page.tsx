@@ -53,7 +53,15 @@ async function CheckInPage({
     .single();
 
   // Fetch stats
-  const statsResult = await tryCatch(getCheckInStats(eventId));
+  const statsResult = await tryCatch(
+    getCheckInStats(cookieStore.getAll(), eventId),
+  );
+
+  if (!statsResult.success || !event) {
+    return (
+      <div className="text-destructive">Failed to load check-in stats.</div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -78,7 +86,11 @@ async function CheckInPage({
               value={eventDay.eventDayId}
             >
               <Suspense fallback={<div>Loading check-ins...</div>}>
-                <CheckInListContent eventDayId={eventDay.eventDayId} />
+                <CheckInListContent
+                  eventDayId={eventDay.eventDayId}
+                  eventDayLabel={eventDay.label}
+                  eventTitle={event?.eventTitle}
+                />
               </Suspense>
             </TabsContent>
           ))}

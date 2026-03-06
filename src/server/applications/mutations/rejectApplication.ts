@@ -61,6 +61,9 @@ export async function rejectApplication(input: ApplicationDecisionInput) {
     throw new Error(emailError);
   }
 
+  // updateTag(CACHE_TAGS.applications.all);
+  // updateTag(CACHE_TAGS.applications.admin);
+
   revalidatePath("/admin/application");
 
   return {

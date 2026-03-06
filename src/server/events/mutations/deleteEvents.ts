@@ -57,6 +57,11 @@ export async function deleteEvents(eventId: string) {
       throw new Error(deleteError.message || "Failed to delete event");
     }
 
+    // updateTag(CACHE_TAGS.events.all);
+    // updateTag(CACHE_TAGS.events.admin);
+    // updateTag(CACHE_TAGS.events.public);
+
+    revalidatePath("/admin/events");
     revalidatePath("/admin/events");
     return { success: true };
   } catch (err) {
