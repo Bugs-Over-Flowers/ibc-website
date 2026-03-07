@@ -3,20 +3,20 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  convertFileToDataUrl,
   getNextStatus,
   getResultMessage,
   getResultPath,
   type PaymentProofStatus,
 } from "@/app/admin/events/_hooks/paymentProofReviewHelpers";
 import tryCatch from "@/lib/server/tryCatch";
+import { uploadPaymentProof } from "@/lib/storage/uploadPaymentProof";
 import { replacePaymentProofAndAccept } from "@/server/registration/mutations/replacePaymentProofAndAccept";
 
 interface UseReplacePaymentProofActionProps {
   registrationId: string;
   onReplaceAction?: (input: {
     registrationId: string;
-    imageDataUrl: string;
+    uploadedPath: string;
   }) => Promise<unknown>;
   onStatusChange?: (status: PaymentProofStatus) => void;
   onProofPathChange?: (path: string) => void;
@@ -43,11 +43,11 @@ export function useReplacePaymentProofAction({
     setIsReplacing(true);
 
     try {
-      const imageDataUrl = await convertFileToDataUrl(selectedFile);
+      const uploadedPath = await uploadPaymentProof(selectedFile);
       const result = await tryCatch(
         onReplaceAction
-          ? onReplaceAction({ registrationId, imageDataUrl })
-          : replacePaymentProofAndAccept({ registrationId, imageDataUrl }),
+          ? onReplaceAction({ registrationId, uploadedPath })
+          : replacePaymentProofAndAccept({ registrationId, uploadedPath }),
       );
 
       if (!result.success) {

@@ -12,7 +12,7 @@ export default function PaymentProofPreviewPanel({
 }: PaymentProofPreviewPanelProps) {
   if (previewUrl) {
     return (
-      <ImageZoom className="h-[420px] w-full">
+      <ImageZoom className="h-[min(50vh,420px)] min-h-72 w-full sm:h-[420px]">
         <Image
           alt="Selected proof of payment"
           className="h-full w-full object-contain"
@@ -24,7 +24,7 @@ export default function PaymentProofPreviewPanel({
   }
 
   return (
-    <div className="flex h-[420px] items-center justify-center rounded-md border text-muted-foreground text-sm">
+    <div className="flex h-[min(50vh,420px)] min-h-72 items-center justify-center rounded-md border text-muted-foreground text-sm sm:h-[420px]">
       No preview available.
     </div>
   );

@@ -33,7 +33,7 @@ interface PaymentProofReviewDialogProps {
   onRejectAction?: (registrationId: string) => Promise<unknown>;
   onReplaceAction?: (input: {
     registrationId: string;
-    imageDataUrl: string;
+    uploadedPath: string;
   }) => Promise<unknown>;
   onStatusChange?: (status: PaymentProofStatus) => void;
   onProofPathChange?: (path: string) => void;
@@ -137,52 +137,59 @@ export default function PaymentProofReviewDialog({
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
       {trigger && <DialogTrigger render={trigger} />}
-      <DialogContent className="flex max-h-[90vh] w-[95vw] flex-col sm:max-w-3xl">
-        <DialogTitle>{dialogTitle}</DialogTitle>
+      <DialogContent
+        className="flex w-[95vw] flex-col p-4 sm:max-w-3xl sm:p-6"
+        outsideScroll
+      >
+        <div className="space-y-3 pr-8">
+          <DialogTitle>{dialogTitle}</DialogTitle>
 
-        <div className="space-y-3">
-          <Badge
-            className={cn(
-              "w-fit capitalize",
-              getStatusClassName(paymentProofStatus),
-            )}
-            variant="outline"
-          >
-            {paymentProofStatus}
-          </Badge>
-          <div className="text-muted-foreground text-sm">
-            {getStatusMessage(paymentProofStatus)}
+          <div className="space-y-3">
+            <Badge
+              className={cn(
+                "w-fit capitalize",
+                getStatusClassName(paymentProofStatus),
+              )}
+              variant="outline"
+            >
+              {paymentProofStatus}
+            </Badge>
+            <div className="text-muted-foreground text-sm">
+              {getStatusMessage(paymentProofStatus)}
+            </div>
           </div>
         </div>
 
-        {mode === "camera" && (
-          <CameraCapture
-            disabled={isAnyActionPending}
-            onCapture={handleCapture}
-          />
-        )}
+        <div className="py-4">
+          {mode === "camera" && (
+            <CameraCapture
+              disabled={isAnyActionPending}
+              onCapture={handleCapture}
+            />
+          )}
 
-        {mode === "upload" && (
-          <PaymentProofUploadPanel
-            onFileSelect={handleFileSelect}
-            submitRef={uploadSubmitRef}
-          />
-        )}
+          {mode === "upload" && (
+            <PaymentProofUploadPanel
+              onFileSelect={handleFileSelect}
+              submitRef={uploadSubmitRef}
+            />
+          )}
 
-        {mode === "preview" && (
-          <PaymentProofPreviewPanel previewUrl={previewUrl} />
-        )}
+          {mode === "preview" && (
+            <PaymentProofPreviewPanel previewUrl={previewUrl} />
+          )}
 
-        {mode === "view" && (
-          <PaymentProofViewPanel
-            isFetchingSignedUrl={isFetchingSignedUrl}
-            isImageError={isSignedUrlImageError}
-            onImageError={() => setIsSignedUrlImageError(true)}
-            signedUrl={signedUrl}
-          />
-        )}
+          {mode === "view" && (
+            <PaymentProofViewPanel
+              isFetchingSignedUrl={isFetchingSignedUrl}
+              isImageError={isSignedUrlImageError}
+              onImageError={() => setIsSignedUrlImageError(true)}
+              signedUrl={signedUrl}
+            />
+          )}
+        </div>
 
-        <DialogFooter className="mt-1 flex-wrap border-t pt-4">
+        <DialogFooter className="mt-1 flex-wrap border-t pt-4 max-sm:[&>*]:w-full">
           {/* Camera or Upload mode Buttons */}
           {(mode === "camera" || mode === "upload") && (
             <>

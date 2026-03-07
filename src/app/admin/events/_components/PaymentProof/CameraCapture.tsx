@@ -112,7 +112,7 @@ export default function CameraCapture({
 
   return (
     <div className="space-y-3">
-      <div className="relative h-[420px] w-full overflow-hidden rounded-md border bg-black">
+      <div className="relative h-[min(50vh,420px)] min-h-72 w-full overflow-hidden rounded-md border bg-black sm:h-[420px]">
         {isStarting && (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-white/80">
             Starting camera...

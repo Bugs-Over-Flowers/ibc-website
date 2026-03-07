@@ -24,15 +24,12 @@ export default function PaymentProofUploadPanel({
       <form.AppField name="proofFiles">
         {(field) => (
           <field.FileDropzoneField
-            accept={{
-              "image/jpeg": [],
-              "image/jpg": [],
-              "image/png": [],
-            }}
-            description="Upload JPG or PNG proof of payment."
+            accept={{ "image/*": [] }}
+            description="Upload one proof-of-payment image. Accepted files are any image type up to 10 MB. After review, the new image will replace the current stored proof."
             label="Proof of Payment"
             layout="banner"
             maxFiles={1}
+            maxSize={10 * 1024 * 1024}
           />
         )}
       </form.AppField>

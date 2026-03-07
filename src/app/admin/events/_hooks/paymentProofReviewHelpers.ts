@@ -42,24 +42,3 @@ export function getResultPath(result: unknown): string | null {
 
   return null;
 }
-
-export function convertFileToDataUrl(file: File): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-        return;
-      }
-
-      reject(new Error("Failed to read image"));
-    };
-
-    reader.onerror = () => {
-      reject(new Error("Failed to read image"));
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
