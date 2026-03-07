@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { getMembers } from "@/server/members/queries/getMembers";
+import { FeatureMemberDialog } from "./FeatureMemberDialog";
 
 interface MembersTableRowProps {
   member: Awaited<ReturnType<typeof getMembers>>[number];
@@ -141,6 +142,10 @@ export function MembersTableRow({
           </div>
         </div>
       </button>
+
+      <div className="mt-3">
+        <FeatureMemberDialog member={member} />
+      </div>
     </div>
   );
 }
