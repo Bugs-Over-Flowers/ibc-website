@@ -6,7 +6,7 @@
       "name": "ibc_project",
       "dependencies": {
         "@base-ui/react": "^1.2.0",
-        "@react-email/components": "1.0.8",
+        "@react-email/components": "^1.0.8",
         "@react-email/render": "^2.0.4",
         "@react-pdf/renderer": "^4.3.2",
         "@supabase/ssr": "^0.9.0",
