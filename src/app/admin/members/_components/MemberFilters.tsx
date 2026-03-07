@@ -149,12 +149,15 @@ export default function MemberFilters({ sectors }: MemberFiltersProps) {
             value={currentSector}
           >
             <SelectTrigger className="w-full sm:w-44">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 truncate">
                 <span className="text-muted-foreground text-xs">Sector:</span>
-                <SelectValue aria-label="Filter by sector" />
+                <SelectValue
+                  aria-label="Filter by sector"
+                  className="truncate"
+                />
               </div>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-auto min-w-72">
               <SelectGroup>
                 <SelectLabel>Business Sector</SelectLabel>
                 <SelectItem value="all">All</SelectItem>
