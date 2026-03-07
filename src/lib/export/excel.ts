@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import writeXlsxFile from "write-excel-file/browser";
+import writeXlsxFile from "write-excel-file";
 
 export interface ExportToExcelOptions<TData> {
   /**
