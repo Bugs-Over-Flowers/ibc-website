@@ -94,6 +94,14 @@ export async function getSectorDeletionPreview(
 const deleteSectorSchema = z.object({
   id: z.number(),
   reassignSectorId: z.number().optional(),
+  memberReassignments: z
+    .array(
+      z.object({
+        memberId: z.string().min(1),
+        sectorId: z.number(),
+      }),
+    )
+    .optional(),
 });
 
 export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
@@ -101,34 +109,74 @@ export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
 
   const supabase = await createActionClient();
 
-  const { count: memberCount, error: memberCountError } = await supabase
+  const { data: members, error: membersError } = await supabase
     .from("BusinessMember")
-    .select("businessMemberId", { count: "exact", head: true })
+    .select("businessMemberId")
     .eq("sectorId", parsed.id);
 
-  if (memberCountError) {
-    throw new Error(memberCountError.message);
+  if (membersError) {
+    throw new Error(membersError.message);
   }
 
-  const hasMembers = typeof memberCount === "number" && memberCount > 0;
+  const membersToReassign = members ?? [];
+  const hasMembers = membersToReassign.length > 0;
+  const hasBulkReassign = Boolean(parsed.reassignSectorId);
+  const memberReassignments = parsed.memberReassignments ?? [];
+  const hasMemberSpecificAssignments = memberReassignments.length > 0;
 
-  if (
-    hasMembers &&
-    (!parsed.reassignSectorId || parsed.reassignSectorId === parsed.id)
-  ) {
-    throw new Error(
-      "Please choose a new sector for the affected members before deleting.",
-    );
-  }
+  if (hasMembers) {
+    if (!hasBulkReassign && !hasMemberSpecificAssignments) {
+      throw new Error(
+        "Assign every member to a different sector before deleting this one.",
+      );
+    }
 
-  if (hasMembers && parsed.reassignSectorId) {
-    const { error: reassignmentError } = await supabase
-      .from("BusinessMember")
-      .update({ sectorId: parsed.reassignSectorId })
-      .eq("sectorId", parsed.id);
+    if (hasBulkReassign && parsed.reassignSectorId === parsed.id) {
+      throw new Error("Members cannot be moved to the sector being deleted.");
+    }
 
-    if (reassignmentError) {
-      throw new Error(reassignmentError.message);
+    if (hasMemberSpecificAssignments) {
+      const assignedIds = new Set(
+        memberReassignments.map((assignment) => assignment.memberId),
+      );
+
+      const missingAssignments = membersToReassign.filter(
+        (member) => !assignedIds.has(member.businessMemberId),
+      );
+
+      if (missingAssignments.length > 0) {
+        throw new Error(
+          "Provide a new sector for every member in this sector before deleting.",
+        );
+      }
+
+      await Promise.all(
+        memberReassignments.map(async (assignment) => {
+          if (assignment.sectorId === parsed.id) {
+            throw new Error(
+              "Members cannot be moved to the sector being deleted.",
+            );
+          }
+
+          const { error: updateError } = await supabase
+            .from("BusinessMember")
+            .update({ sectorId: assignment.sectorId })
+            .eq("businessMemberId", assignment.memberId);
+
+          if (updateError) {
+            throw new Error(updateError.message);
+          }
+        }),
+      );
+    } else if (parsed.reassignSectorId) {
+      const { error: reassignmentError } = await supabase
+        .from("BusinessMember")
+        .update({ sectorId: parsed.reassignSectorId })
+        .eq("sectorId", parsed.id);
+
+      if (reassignmentError) {
+        throw new Error(reassignmentError.message);
+      }
     }
   }
 

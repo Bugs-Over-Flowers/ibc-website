@@ -1,8 +1,8 @@
 "use client";
-
-import { Trash } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -50,6 +50,9 @@ export default function DeleteSectorDialog({
   onOpenChange,
 }: DeleteSectorDialogProps) {
   const [selectedSectorId, setSelectedSectorId] = useState<string>("");
+  const [memberAssignments, setMemberAssignments] = useState<
+    Record<string, string>
+  >({});
 
   const handlePreviewError = useCallback((error: string | Error) => {
     toast.error(error instanceof Error ? error.message : error);
@@ -58,6 +61,7 @@ export default function DeleteSectorDialog({
   const handleDeleteSuccess = useCallback(() => {
     toast.success("Sector deleted successfully");
     setSelectedSectorId("");
+    setMemberAssignments({});
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -76,9 +80,15 @@ export default function DeleteSectorDialog({
     onError: handlePreviewError,
   });
 
-  const handleSectorChange = useCallback((value: string | null) => {
-    setSelectedSectorId(value ?? "");
-  }, []);
+  const handleMemberAssignmentChange = useCallback(
+    (memberId: string, value: string | null) => {
+      setMemberAssignments((prev) => ({
+        ...prev,
+        [memberId]: value ?? "",
+      }));
+    },
+    [],
+  );
 
   const { execute: submitDelete, isPending: isDeleting } = useAction(
     tryCatch(deleteSector),
@@ -95,28 +105,55 @@ export default function DeleteSectorDialog({
     }
 
     setSelectedSectorId("");
+    setMemberAssignments({});
     resetPreview();
   }, [id, loadPreview, open, resetPreview]);
 
   const members = (previewData?.members as MemberPreview[]) ?? [];
   const alternativeSectors =
     (previewData?.alternativeSectors as SectorOption[]) ?? [];
-  const selectedSectorName = useMemo(() => {
-    if (!selectedSectorId) {
-      return "";
+
+  const handleGeneralSectorChange = useCallback(
+    (value: string | null, _event?: unknown) => {
+      setSelectedSectorId(value ?? "");
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!open) {
+      return;
     }
 
-    const match = alternativeSectors.find(
-      (sector) => String(sector.sectorId) === selectedSectorId,
-    );
+    setMemberAssignments((prev) => {
+      const next: Record<string, string> = {};
+      members.forEach((member) => {
+        if (prev[member.businessMemberId]) {
+          next[member.businessMemberId] = prev[member.businessMemberId];
+        }
+      });
+      return next;
+    });
+  }, [members, open]);
 
-    return match?.sectorName ?? "";
-  }, [alternativeSectors, selectedSectorId]);
+  const resolveMemberSector = useCallback(
+    (memberId: string) => memberAssignments[memberId] ?? selectedSectorId ?? "",
+    [memberAssignments, selectedSectorId],
+  );
 
   const requiresReassignment = members.length > 0;
   const noAlternativeSectors =
     requiresReassignment && alternativeSectors.length === 0;
   const hasPreviewError = Boolean(previewError);
+  const hasIncompleteAssignments = useMemo(() => {
+    if (!requiresReassignment) {
+      return false;
+    }
+
+    return members.some(
+      (member) => !resolveMemberSector(member.businessMemberId),
+    );
+  }, [members, requiresReassignment, resolveMemberSector]);
   const disableSubmit = useMemo(() => {
     if (isDeleting || isLoadingPreview || hasPreviewError) {
       return true;
@@ -130,26 +167,125 @@ export default function DeleteSectorDialog({
       return true;
     }
 
-    return selectedSectorId.length === 0;
+    return hasIncompleteAssignments;
   }, [
     hasPreviewError,
+    hasIncompleteAssignments,
     isDeleting,
     isLoadingPreview,
     noAlternativeSectors,
     requiresReassignment,
-    selectedSectorId,
   ]);
 
+  const disableMemberSelection =
+    isDeleting || isLoadingPreview || hasPreviewError || noAlternativeSectors;
+
+  const memberColumns = useMemo<ColumnDef<MemberPreview>[]>(
+    () => [
+      {
+        accessorKey: "businessName",
+        header: "Member",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const member = row.original;
+          // const memberValue = resolveMemberSector(member.businessMemberId);
+          // const selectedOption = alternativeSectors.find(
+          //   (sector) => String(sector.sectorId) === memberValue,
+          // );
+
+          return (
+            <div className="flex flex-col gap-1">
+              <p className="font-semibold text-sm">{member.businessName}</p>
+            </div>
+          );
+        },
+      },
+      {
+        id: "sector",
+        header: () => (
+          <div className="flex justify-end">
+            <span>Assign To</span>
+          </div>
+        ),
+        enableSorting: false,
+        cell: ({ row }) => {
+          const member = row.original;
+          const memberValue = resolveMemberSector(member.businessMemberId);
+
+          return (
+            <div className="flex justify-end">
+              <Select
+                disabled={disableMemberSelection}
+                onValueChange={(value) =>
+                  handleMemberAssignmentChange(member.businessMemberId, value)
+                }
+                value={memberValue ?? ""}
+              >
+                <SelectTrigger
+                  aria-label="Choose sector"
+                  className="w-full sm:w-[200px]"
+                >
+                  <SelectValue placeholder="Choose a sector" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {alternativeSectors.map((sector) => (
+                    <SelectItem
+                      key={sector.sectorId}
+                      value={String(sector.sectorName)}
+                    >
+                      {sector.sectorName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          );
+        },
+      },
+    ],
+    [
+      alternativeSectors,
+      disableMemberSelection,
+      handleMemberAssignmentChange,
+      resolveMemberSector,
+    ],
+  );
+
   const handleDelete = async () => {
-    if (requiresReassignment && selectedSectorId.length === 0) {
-      toast.error("Please choose a new sector for the affected members.");
+    if (requiresReassignment) {
+      if (noAlternativeSectors) {
+        toast.error("Create another sector before deleting this one.");
+        return;
+      }
+
+      if (hasIncompleteAssignments) {
+        toast.error("Assign a new sector for every member listed.");
+        return;
+      }
+
+      const hasOverrides = Object.values(memberAssignments).some((value) =>
+        Boolean(value?.length),
+      );
+      const generalSectorIdNumber = selectedSectorId
+        ? Number(selectedSectorId)
+        : undefined;
+      const finalAssignments = members.map((member) => ({
+        memberId: member.businessMemberId,
+        sectorId: Number(resolveMemberSector(member.businessMemberId)),
+      }));
+      const useBulkReassign =
+        !hasOverrides && typeof generalSectorIdNumber === "number";
+
+      await submitDelete({
+        id,
+        reassignSectorId: useBulkReassign ? generalSectorIdNumber : undefined,
+        memberReassignments: useBulkReassign ? undefined : finalAssignments,
+      });
       return;
     }
 
-    await submitDelete({
-      id,
-      reassignSectorId: selectedSectorId ? Number(selectedSectorId) : undefined,
-    });
+    await submitDelete({ id });
   };
 
   const description = isLoadingPreview
@@ -160,11 +296,10 @@ export default function DeleteSectorDialog({
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Trash className="h-4 w-4" />
-            Delete {sectorName}
+            {sectorName}
           </DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
@@ -189,18 +324,12 @@ export default function DeleteSectorDialog({
               <div className="space-y-3">
                 <p className="font-medium text-sm">
                   {members.length} {members.length === 1 ? "member" : "members"}{" "}
-                  will be affected:
+                  will be affected. Select a new sector per member here or use
+                  the dropdown below to move everyone at once.
                 </p>
-                <ul className="max-h-48 space-y-2 overflow-y-auto pr-2">
-                  {members.map((member) => (
-                    <li
-                      className="rounded-md border bg-muted/40 px-3 py-2 text-sm"
-                      key={member.businessMemberId}
-                    >
-                      {member.businessName}
-                    </li>
-                  ))}
-                </ul>
+                <div className="max-h-[calc(3*6.5rem+2rem)] overflow-y-auto pr-1">
+                  <DataTable columns={memberColumns} data={members} />
+                </div>
               </div>
             )}
           </section>
@@ -225,21 +354,17 @@ export default function DeleteSectorDialog({
                 isDeleting ||
                 hasPreviewError
               }
-              onValueChange={handleSectorChange}
-              value={selectedSectorId}
+              onValueChange={handleGeneralSectorChange}
+              value={selectedSectorId ?? ""}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Choose the new sector">
-                  {selectedSectorName ? (
-                    <span className="truncate">{selectedSectorName}</span>
-                  ) : null}
-                </SelectValue>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose the new sector" />
               </SelectTrigger>
               <SelectContent>
                 {alternativeSectors.map((sector) => (
                   <SelectItem
                     key={sector.sectorId}
-                    value={String(sector.sectorId)}
+                    value={String(sector.sectorName)}
                   >
                     {sector.sectorName}
                   </SelectItem>
@@ -253,6 +378,15 @@ export default function DeleteSectorDialog({
                 before deleting this one.
               </p>
             )}
+
+            {hasIncompleteAssignments &&
+            requiresReassignment &&
+            !noAlternativeSectors ? (
+              <p className="text-destructive text-xs">
+                Select a sector for every member in the list above or choose one
+                from this dropdown.
+              </p>
+            ) : null}
           </section>
         </div>
 
