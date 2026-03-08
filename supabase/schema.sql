@@ -691,6 +691,79 @@ $$;
 ALTER FUNCTION "public"."get_all_sponsored_registrations_with_event"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_application_history"("p_member_id" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    AS $$
+DECLARE
+  v_result jsonb;
+  v_business_name text;
+  v_applications jsonb;
+BEGIN
+  -- Get business name
+  SELECT "businessName" INTO v_business_name
+  FROM "BusinessMember"
+  WHERE "businessMemberId" = p_member_id;
+
+  IF v_business_name IS NULL THEN
+    RAISE EXCEPTION 'Business member not found';
+  END IF;
+
+  -- Get all applications for this member with related data
+  SELECT COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'applicationId', a."applicationId",
+      'identifier', a."identifier",
+      'companyName', a."companyName",
+      'applicationDate', a."applicationDate",
+      'applicationType', a."applicationType",
+      'applicationStatus', a."applicationStatus",
+      'applicationMemberType', a."applicationMemberType",
+      'companyAddress', a."companyAddress",
+      'emailAddress', a."emailAddress",
+      'mobileNumber', a."mobileNumber",
+      'landline', a."landline",
+      'websiteURL', a."websiteURL",
+      'paymentMethod', a."paymentMethod",
+      'paymentProofStatus', a."paymentProofStatus",
+      'sectorName', COALESCE(s."sectorName", 'N/A'),
+      'members', (
+        SELECT COALESCE(jsonb_agg(
+          jsonb_build_object(
+            'applicationMemberId', am."applicationMemberId",
+            'firstName', am."firstName",
+            'lastName', am."lastName",
+            'companyDesignation', am."companyDesignation",
+            'companyMemberType', am."companyMemberType",
+            'emailAddress', am."emailAddress"
+          )
+        ), '[]'::jsonb)
+        FROM "ApplicationMember" am
+        WHERE am."applicationId" = a."applicationId"
+      )
+    ) ORDER BY a."applicationDate" DESC
+  ), '[]'::jsonb)
+  INTO v_applications
+  FROM "Application" a
+  LEFT JOIN "Sector" s ON a."sectorId" = s."sectorId"
+  WHERE a."businessMemberId" = p_member_id;
+
+  v_result := jsonb_build_object(
+    'businessName', v_business_name,
+    'applications', v_applications
+  );
+
+  RETURN v_result;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE EXCEPTION 'Failed to fetch application history: %', SQLERRM;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_application_history"("p_member_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_evaluation_by_id"("eval_id" "uuid") RETURNS TABLE("evaluation_id" "uuid", "event_id" "uuid", "event_title" "text", "event_start_date" timestamp with time zone, "event_end_date" timestamp with time zone, "venue" "text", "name" "text", "q1_rating" "public"."ratingScale", "q2_rating" "public"."ratingScale", "q3_rating" "public"."ratingScale", "q4_rating" "public"."ratingScale", "q5_rating" "public"."ratingScale", "q6_rating" "public"."ratingScale", "additional_comments" "text", "feedback" "text", "created_at" timestamp with time zone)
     LANGUAGE "sql" STABLE
     AS $$
@@ -983,7 +1056,8 @@ BEGIN
         WHEN p_search_text IS NOT NULL THEN
           GREATEST(
             similarity(COALESCE(bm."businessName", r."nonMemberName"), p_search_text),
-            similarity(p_data.p_first_name || ' ' || p_data.p_last_name, p_search_text)
+            similarity(p_data.p_first_name || ' ' || p_data.p_last_name, p_search_text),
+            similarity(r."identifier", p_search_text)
           )
         ELSE 0
       END AS sim_score,
@@ -993,6 +1067,7 @@ BEGIN
             COALESCE(bm."businessName", r."nonMemberName") ILIKE v_search_pattern
             OR (p_data.p_first_name || ' ' || p_data.p_last_name) ILIKE v_search_pattern
             OR p_data.p_email ILIKE v_search_pattern
+            OR r."identifier" ILIKE v_search_pattern
           )
         ELSE FALSE
       END AS is_exact_match
@@ -1789,7 +1864,7 @@ ALTER FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid"
 
 
 CREATE OR REPLACE FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text" DEFAULT NULL::"text") RETURNS "jsonb"
-    LANGUAGE "plpgsql" SECURITY DEFINER
+    LANGUAGE "plpgsql"
     AS $$
 DECLARE
   v_application_id uuid;
@@ -1803,9 +1878,10 @@ DECLARE
   representative jsonb;
   v_rep_type_text text;
 BEGIN
+
   -- Generate UUID for application ID
   v_application_id := gen_random_uuid();
-
+  
   -- Generate human-readable identifier: ibc-app-XXXXXXXX (first 8 chars of UUID)
   v_identifier := 'ibc-app-' || left(replace(v_application_id::text, '-', ''), 8);
 
@@ -1821,7 +1897,7 @@ BEGIN
 
   -- Extract Sector ID
   v_sector_id := (p_company_details->>'sectorId')::int;
-
+  
   -- Extract Business Member ID (for renewals and updates)
   IF p_company_details->>'businessMemberId' IS NOT NULL AND p_company_details->>'businessMemberId' != '' THEN
     v_business_member_id := (p_company_details->>'businessMemberId')::uuid;
@@ -1858,7 +1934,6 @@ BEGIN
     "companyName",
     "companyAddress",
     "landline",
-    "faxNumber",
     "mobileNumber",
     "emailAddress",
     "paymentProofStatus",
@@ -1876,7 +1951,6 @@ BEGIN
     p_company_details->>'name',
     p_company_details->>'address',
     p_company_details->>'landline',
-    p_company_details->>'fax',
     p_company_details->>'mobile',
     p_company_details->>'email',
     v_pay_status_enum,
@@ -1887,7 +1961,7 @@ BEGIN
 
   -- 4. Handle Proof of Payment
   IF v_pay_method_enum = 'BPI' THEN
-    INSERT INTO "ProofImage" ("applicationId", "path")
+    INSERT INTO "ProofImage" ("applicationId", "path") 
     VALUES (v_application_id, p_payment_proof_url);
   END IF;
 
@@ -1895,6 +1969,7 @@ BEGIN
   IF jsonb_array_length(p_representatives) > 0 THEN
     FOR representative IN SELECT * FROM jsonb_array_elements(p_representatives)
     LOOP
+      
       -- Extract the type (principal or alternate)
       v_rep_type_text := representative->>'memberType';
 
@@ -1909,7 +1984,6 @@ BEGIN
         "birthdate",
         "companyDesignation",
         "landline",
-        "faxNumber",
         "mobileNumber",
         "emailAddress"
       ) VALUES (
@@ -1923,7 +1997,6 @@ BEGIN
         (representative->>'birthdate')::timestamp,
         representative->>'position',
         representative->>'landline',
-        representative->>'fax',
         representative->>'mobileNumber',
         representative->>'email'
       );
@@ -2433,7 +2506,6 @@ CREATE TABLE IF NOT EXISTS "public"."Application" (
     "companyName" "text" NOT NULL,
     "companyAddress" "text" NOT NULL,
     "landline" "text" NOT NULL,
-    "faxNumber" "text" NOT NULL,
     "mobileNumber" "text" NOT NULL,
     "emailAddress" "text" NOT NULL,
     "paymentMethod" "public"."PaymentMethod" NOT NULL,
@@ -2459,7 +2531,6 @@ CREATE TABLE IF NOT EXISTS "public"."ApplicationMember" (
     "birthdate" "date" NOT NULL,
     "companyDesignation" "text" NOT NULL,
     "landline" "text" NOT NULL,
-    "faxNumber" "text" NOT NULL,
     "mobileNumber" "text" NOT NULL,
     "emailAddress" "text" NOT NULL,
     "lastName" "text" NOT NULL,
@@ -2952,6 +3023,10 @@ CREATE POLICY "Delete evaluation" ON "public"."EvaluationForm" FOR DELETE TO "au
 
 
 
+CREATE POLICY "Enable Update for admins only" ON "public"."ProofImage" FOR UPDATE TO "authenticated" USING (true);
+
+
+
 CREATE POLICY "Enable admins to update data" ON "public"."Participant" FOR UPDATE TO "authenticated" USING (true);
 
 
@@ -3439,6 +3514,12 @@ GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations"() TO "service_r
 GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations_with_event"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations_with_event"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_all_sponsored_registrations_with_event"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_application_history"("p_member_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_application_history"("p_member_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_application_history"("p_member_id" "uuid") TO "service_role";
 
 
 

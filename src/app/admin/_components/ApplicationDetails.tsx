@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
+import { toPascalCaseWithSpaces } from "../application/_utils/formatters";
 import { ApplicationHeader } from "../application/[id]/_components/ApplicationHeader";
 import { CompanyInfoCard } from "../application/[id]/_components/CompanyInfoCard";
 import { ContactInfoCard } from "../application/[id]/_components/ContactInfoCard";
@@ -71,11 +72,17 @@ export async function ApplicationDetails({
       <ApplicationHeader application={application} />
 
       <CompanyInfoCard
-        applicationMemberType={application.applicationMemberType}
-        applicationType={application.applicationType}
-        companyAddress={application.companyAddress}
+        applicationMemberType={toPascalCaseWithSpaces(
+          application.applicationMemberType,
+        )}
+        applicationType={toPascalCaseWithSpaces(application.applicationType)}
+        companyAddress={toPascalCaseWithSpaces(application.companyAddress)}
         companyName={application.companyName}
-        sectorName={application.Sector?.sectorName}
+        sectorName={
+          application.Sector?.sectorName
+            ? toPascalCaseWithSpaces(application.Sector.sectorName)
+            : undefined
+        }
         websiteURL={application.websiteURL}
       />
 
@@ -90,7 +97,9 @@ export async function ApplicationDetails({
       <PaymentInfoCard
         applicationDate={new Date(application.applicationDate)}
         paymentMethod={application.paymentMethod}
-        paymentProofStatus={application.paymentProofStatus}
+        paymentProofStatus={toPascalCaseWithSpaces(
+          application.paymentProofStatus,
+        )}
       />
     </>
   );

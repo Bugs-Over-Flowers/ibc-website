@@ -292,7 +292,7 @@ export default async function EventDetails({
       </div>
 
       {/* Action Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <Card className="flex flex-col">
           <CardContent className="flex flex-1 flex-col p-6">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
@@ -325,6 +325,28 @@ export default async function EventDetails({
               <Button className="w-full" variant="outline">
                 <CheckSquare className="mr-2 h-4 w-4" />
                 View Check-in List
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+        <Card className="flex flex-col">
+          <CardContent className="flex flex-1 flex-col p-6">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
+              <Users className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 font-semibold text-lg">
+              Sponsored Registrations
+            </h3>
+            <p className="mb-6 flex-1 text-muted-foreground text-sm">
+              Manage sponsored registration links and track sponsored guest
+              usage
+            </p>
+            <Link
+              href={`/admin/events/${eventId}/sponsored-registrations` as Route}
+            >
+              <Button className="w-full" variant="outline">
+                <Users className="mr-2 h-4 w-4" />
+                View Sponsored Registrations
               </Button>
             </Link>
           </CardContent>

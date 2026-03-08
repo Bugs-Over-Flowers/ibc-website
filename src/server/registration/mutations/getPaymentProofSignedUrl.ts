@@ -89,19 +89,34 @@ async function getCachedPaymentProofSignedUrl(
   }
 
   const extractedPath = extractPaymentProofPath(rawProofPath);
-  const normalizedPath = normalizeLegacyPaymentProofPath(extractedPath);
+  const candidatePaths = Array.from(
+    new Set([extractedPath, normalizeLegacyPaymentProofPath(extractedPath)]),
+  );
 
-  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-    .from(PAYMENT_PROOFS_BUCKET)
-    .createSignedUrl(normalizedPath, SIGNED_URL_TTL_SECONDS);
+  let signedUrl: string | null = null;
+  let lastSignedUrlError: string | null = null;
 
-  if (signedUrlError || !signedUrlData?.signedUrl) {
+  for (const candidatePath of candidatePaths) {
+    const { data: signedUrlData, error: signedUrlError } =
+      await supabase.storage
+        .from(PAYMENT_PROOFS_BUCKET)
+        .createSignedUrl(candidatePath, SIGNED_URL_TTL_SECONDS);
+
+    if (!signedUrlError && signedUrlData?.signedUrl) {
+      signedUrl = signedUrlData.signedUrl;
+      break;
+    }
+
+    lastSignedUrlError = signedUrlError?.message ?? null;
+  }
+
+  if (!signedUrl) {
     throw new Error(
-      signedUrlError?.message || "Failed to generate payment proof URL",
+      lastSignedUrlError || "Failed to generate payment proof URL",
     );
   }
 
   return {
-    signedUrl: signedUrlData.signedUrl,
+    signedUrl,
   };
 }
