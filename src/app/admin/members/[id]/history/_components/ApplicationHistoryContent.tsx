@@ -6,8 +6,9 @@
  * 1. Reads cookies for the authenticated Supabase client
  * 2. Calls `getApplicationHistory` (cached RPC query) with the member ID
  * 3. On failure, triggers a 404 (member not found or RPC error)
- * 4. On success, displays the business name heading and a list of
- *    ApplicationHistoryCard components (or an empty state message)
+ * 4. On success, displays the business name heading and delegates rendering
+ *    to ApplicationHistoryList (client component) which handles search,
+ *    filtering by application type, and date range filtering.
  *
  * Wrapped in <Suspense> by the parent page.tsx for streaming.
  */
@@ -19,7 +20,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationHistory } from "@/server/applications/queries/getApplicationHistory";
-import { ApplicationHistoryCard } from "./ApplicationHistoryCard";
+import { ApplicationHistoryList } from "./ApplicationHistoryList";
 
 interface ApplicationHistoryContentProps {
   memberId: string;
@@ -56,23 +57,10 @@ export async function ApplicationHistoryContent({
         <h2 className="text-lg text-muted-foreground">Application History</h2>
       </div>
 
-      {history.applications.length === 0 ? (
-        <div className="rounded-lg border bg-muted/20 p-8 text-center">
-          <p className="text-muted-foreground">
-            No applications found for this member.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-4">
-          {history.applications.map((application) => (
-            <ApplicationHistoryCard
-              application={application}
-              key={application.applicationId}
-              memberId={memberId}
-            />
-          ))}
-        </div>
-      )}
+      <ApplicationHistoryList
+        applications={history.applications}
+        memberId={memberId}
+      />
     </>
   );
 }
