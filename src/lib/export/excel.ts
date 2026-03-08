@@ -1,5 +1,7 @@
+"use client";
+
 import type { ColumnDef } from "@tanstack/react-table";
-import writeXlsxFile from "write-excel-file";
+import writeXlsxFile from "write-excel-file/browser";
 
 export interface ExportToExcelOptions<TData> {
   /**
