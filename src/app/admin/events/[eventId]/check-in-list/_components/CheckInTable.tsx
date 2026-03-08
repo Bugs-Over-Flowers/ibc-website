@@ -19,6 +19,9 @@ interface CheckInTableProps {
 
 type CheckInListRow = CheckInListItem & { name: string };
 
+const SORTABLE_HEADER_CLASS =
+  "inline-flex items-center gap-1 rounded-sm p-0 text-left font-medium hover:text-foreground/80";
+
 const getCheckInListColumns = (
   eventDayId: string,
 ): ColumnDef<CheckInListRow>[] => [
@@ -26,17 +29,18 @@ const getCheckInListColumns = (
     accessorKey: "checkInTime",
     sortingFn: "datetime",
     header: ({ column }) => (
-      <Button
+      <button
+        className={SORTABLE_HEADER_CLASS}
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
       >
         Check-In Time
         {column.getIsSorted() === "asc" ? (
-          <Clock className="rotate-180" />
+          <Clock className="size-4 rotate-180" />
         ) : column.getIsSorted() === "desc" ? (
-          <Clock />
+          <Clock className="size-4" />
         ) : null}
-      </Button>
+      </button>
     ),
     cell: ({ row }) =>
       formatDate(new Date(row.original.checkInTime), "h:mm aaa"),
@@ -50,49 +54,52 @@ const getCheckInListColumns = (
   {
     accessorKey: "firstName",
     header: ({ column }) => (
-      <Button
+      <button
+        className={SORTABLE_HEADER_CLASS}
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
       >
         First Name
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
-      </Button>
+      </button>
     ),
   },
   {
     accessorKey: "lastName",
     header: ({ column }) => (
-      <Button
+      <button
+        className={SORTABLE_HEADER_CLASS}
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
       >
         Last Name
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
-      </Button>
+      </button>
     ),
   },
   {
     accessorKey: "affiliation",
     header: ({ column }) => (
-      <Button
+      <button
+        className={SORTABLE_HEADER_CLASS}
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
       >
         Affiliation
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
-      </Button>
+      </button>
     ),
     cell: ({ row }) => row.original.affiliation,
   },
@@ -100,17 +107,18 @@ const getCheckInListColumns = (
   {
     accessorKey: "email",
     header: ({ column }) => (
-      <Button
+      <button
+        className={SORTABLE_HEADER_CLASS}
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
       >
         Email
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
-      </Button>
+      </button>
     ),
     cell: ({ row }) => row.original.email,
   },
@@ -221,7 +229,11 @@ export default function CheckInTable({
           </Button>
         </div>
       </div>
-      <DataTable columns={getCheckInListColumns(eventDayId)} data={tableData} />
+      <DataTable
+        columns={getCheckInListColumns(eventDayId)}
+        data={tableData}
+        enableClearSorting
+      />
     </div>
   );
 }

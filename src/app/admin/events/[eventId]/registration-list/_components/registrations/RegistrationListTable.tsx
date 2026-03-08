@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -24,6 +23,9 @@ interface RegistrationListProps {
   registrationList: RegistrationItem[];
 }
 
+const SORTABLE_HEADER_CLASS =
+  "inline-flex items-center gap-1 rounded-sm p-0 text-left font-medium hover:text-foreground/80";
+
 export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   {
     accessorKey: "registrationIdentifer",
@@ -34,17 +36,18 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
     accessorKey: "affiliation",
     header: ({ column }) => {
       return (
-        <Button
+        <button
+          className={SORTABLE_HEADER_CLASS}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
+          type="button"
         >
           Affiliation
           {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
+            <ArrowDownAZ className="size-4" />
           ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
+            <ArrowUpZA className="size-4" />
           ) : null}
-        </Button>
+        </button>
       );
     },
     cell: ({ row }) => {
@@ -73,17 +76,18 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
     },
     header: ({ column }) => {
       return (
-        <Button
+        <button
+          className={SORTABLE_HEADER_CLASS}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
+          type="button"
         >
           Registrant
           {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
+            <ArrowDownAZ className="size-4" />
           ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
+            <ArrowUpZA className="size-4" />
           ) : null}
-        </Button>
+        </button>
       );
     },
     cell: ({ row }) => {
@@ -100,17 +104,18 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
     sortingFn: "datetime",
     header: ({ column }) => {
       return (
-        <Button
+        <button
+          className={SORTABLE_HEADER_CLASS}
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
+          type="button"
         >
           Registration Date
           {column.getIsSorted() === "asc" ? (
-            <CalendarArrowDown />
+            <CalendarArrowDown className="size-4" />
           ) : column.getIsSorted() === "desc" ? (
-            <CalendarArrowUp />
+            <CalendarArrowUp className="size-4" />
           ) : null}
-        </Button>
+        </button>
       );
     },
     cell: ({ row }) => {
@@ -169,6 +174,10 @@ export default function RegistrationListTable({
   registrationList,
 }: RegistrationListProps) {
   return (
-    <DataTable columns={registrationListColumns} data={registrationList} />
+    <DataTable
+      columns={registrationListColumns}
+      data={registrationList}
+      enableClearSorting
+    />
   );
 }
