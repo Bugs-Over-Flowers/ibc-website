@@ -1,3 +1,21 @@
+/**
+ * ApplicationDetails — Shared Server Component for the full application detail view.
+ *
+ * Used by the `/admin/application/[id]` route which can be reached from three sources:
+ * - "applications" — the main applications dashboard (default)
+ * - "members" — the members list page
+ * - "history" — the member's application history timeline
+ *
+ * The `source` prop controls the back-navigation link text and destination.
+ * When `source === "history"`, the back link points to `/admin/members/[memberId]/history`.
+ *
+ * Fetches full application data via `getApplicationDetailsById`, then renders:
+ * - ApplicationHeader (status, title, logo)
+ * - CompanyInfoCard (name, address, sector, type)
+ * - ContactInfoCard (email, phone, landline)
+ * - RepresentativesCard (list of ApplicationMembers)
+ * - PaymentInfoCard (method, proof status, proof images)
+ */
 import { ChevronLeft } from "lucide-react";
 import type { Route } from "next";
 import { cookies } from "next/headers";
@@ -19,6 +37,13 @@ interface ApplicationDetailsProps {
   memberId?: string;
 }
 
+/**
+ * Resolves the back-navigation link based on where the user came from.
+ * The `source` query param is set when navigating into the detail view:
+ * - "history"      → back to the member's application history timeline
+ * - "members"      → back to the admin members list
+ * - "applications" → back to the main applications dashboard (default)
+ */
 function getBackLink(
   source: ApplicationDetailsProps["source"],
   memberId?: string,

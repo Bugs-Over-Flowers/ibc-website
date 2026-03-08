@@ -1,3 +1,16 @@
+/**
+ * ApplicationHistoryContent — Async Server Component that fetches and renders
+ * the full application history for a business member.
+ *
+ * Flow:
+ * 1. Reads cookies for the authenticated Supabase client
+ * 2. Calls `getApplicationHistory` (cached RPC query) with the member ID
+ * 3. On failure, triggers a 404 (member not found or RPC error)
+ * 4. On success, displays the business name heading and a list of
+ *    ApplicationHistoryCard components (or an empty state message)
+ *
+ * Wrapped in <Suspense> by the parent page.tsx for streaming.
+ */
 import { ChevronLeft } from "lucide-react";
 import type { Route } from "next";
 import { cookies } from "next/headers";

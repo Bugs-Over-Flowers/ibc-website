@@ -1,3 +1,14 @@
+/**
+ * ApplicationHistoryCard — Clickable card that renders a single application
+ * in the member's history timeline.
+ *
+ * Displays: status badge, application type/membership type, date, company info,
+ * contact details, sector, principal member name, and representative count.
+ *
+ * Clicking navigates to the full application detail page at:
+ *   /admin/application/[applicationId]?source=history&memberId=[memberId]
+ * The `source=history` param tells the detail page to render a "Back to Application History" link.
+ */
 import { Calendar, Mail, MapPin, Phone } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
@@ -10,6 +21,7 @@ interface ApplicationHistoryCardProps {
   memberId: string;
 }
 
+/** Maps an application status to its corresponding badge color class. */
 function getStatusBadgeClass(status: string): string {
   switch (status) {
     case "approved":
@@ -23,6 +35,7 @@ function getStatusBadgeClass(status: string): string {
   }
 }
 
+/** Converts enum-style application type values (e.g. "newMember") to human-readable labels. */
 function getApplicationTypeLabel(type: string): string {
   switch (type) {
     case "newMember":

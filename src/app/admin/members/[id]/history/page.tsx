@@ -1,3 +1,12 @@
+/**
+ * Application History Page — `/admin/members/[id]/history`
+ *
+ * Entry point for viewing all past applications submitted by a business member.
+ * The `id` param is the `businessMemberId` from the BusinessMember table.
+ *
+ * Uses Suspense with skeleton fallback to stream the history content
+ * while the cached RPC query resolves.
+ */
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApplicationHistoryContent } from "./_components/ApplicationHistoryContent";
