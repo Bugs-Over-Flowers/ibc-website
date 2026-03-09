@@ -4,6 +4,41 @@ import { applyRealtime60sCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 
+const PAYMENT_PROOFS_BUCKET = "paymentproofs";
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+function extractPaymentProofPath(path: string): string {
+  const trimmedPath = path.trim();
+
+  if (trimmedPath === "") {
+    throw new Error("Payment proof path is empty");
+  }
+
+  if (trimmedPath.startsWith("http://") || trimmedPath.startsWith("https://")) {
+    const url = new URL(trimmedPath);
+    const marker = `/paymentproofs/`;
+    const markerIndex = url.pathname.indexOf(marker);
+
+    if (markerIndex < 0) {
+      throw new Error("Invalid payment proof URL");
+    }
+
+    const extractedPath = url.pathname.slice(markerIndex + marker.length);
+
+    if (!extractedPath) {
+      throw new Error("Invalid payment proof URL path");
+    }
+
+    return extractedPath;
+  }
+
+  return trimmedPath;
+}
+
+function normalizeLegacyPaymentProofPath(path: string): string {
+  return path.replace(/\.[A-Za-z0-9]+$/, "");
+}
+
 export const getRegistrationData = async (
   requestCookies: RequestCookie[],
   {
@@ -28,7 +63,8 @@ export const getRegistrationData = async (
        registrationDate,
        businessMember:BusinessMember(businessMemberId, businessName),
        nonMemberName,
-       identifier
+       identifier,
+       ProofImage(path)
        `,
     )
     .eq("registrationId", registrationId)
@@ -47,11 +83,43 @@ export const getRegistrationData = async (
     throw new Error("Cannot find affiliation");
   }
 
+  // Generate signed URL for payment proof if available
+  let signedUrl: string | null = null;
+  if (data.paymentMethod === "BPI") {
+    const rawProofPath = data.ProofImage?.[0]?.path;
+    if (rawProofPath) {
+      try {
+        const extractedPath = extractPaymentProofPath(rawProofPath);
+        const candidatePaths = Array.from(
+          new Set([
+            extractedPath,
+            normalizeLegacyPaymentProofPath(extractedPath),
+          ]),
+        );
+
+        for (const candidatePath of candidatePaths) {
+          const { data: signedUrlData, error: signedUrlError } =
+            await supabase.storage
+              .from(PAYMENT_PROOFS_BUCKET)
+              .createSignedUrl(candidatePath, SIGNED_URL_TTL_SECONDS);
+
+          if (!signedUrlError && signedUrlData?.signedUrl) {
+            signedUrl = signedUrlData.signedUrl;
+            break;
+          }
+        }
+      } catch {
+        // signedUrl stays null — OnlinePaymentSection handles null gracefully
+      }
+    }
+  }
+
   const mappedData = {
     ...data,
     isMember: !!data.businessMember,
     affiliation,
     registrationIdentifier: data.identifier,
+    signedUrl,
   };
 
   if (!affiliation) {
@@ -72,25 +140,6 @@ export const getRegistrationData = async (
     .eq("registrationId", registrationId)
     .throwOnError();
 
-  // get proof of payment under registration
-  const { data: proofOfPayment } = await supabase
-    .from("ProofImage")
-    .select(`path`)
-    .eq("registrationId", registrationId)
-    .maybeSingle()
-    .throwOnError();
-
-  console.log(proofOfPayment?.path);
-
-  let signedUrl: string | undefined;
-  if (proofOfPayment?.path) {
-    const { data: signedUrlData } = await supabase.storage
-      .from("paymentproofs")
-      .createSignedUrl(proofOfPayment.path.split(".")[0], 3600);
-
-    signedUrl = signedUrlData?.signedUrl;
-  }
-
   return {
     ...mappedData,
     registrant: participants.filter(
@@ -99,6 +148,5 @@ export const getRegistrationData = async (
     otherParticipants: participants.filter(
       (participant) => !participant.isPrincipal,
     ),
-    signedUrl: signedUrl,
   };
 };

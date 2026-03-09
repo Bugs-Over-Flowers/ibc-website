@@ -214,7 +214,11 @@ export default function ParticipantListTable({
           Export to Excel
         </Button>
       </div>
-      <DataTable columns={participantListColumns} data={participantList} />
+      <DataTable
+        columns={participantListColumns}
+        data={participantList}
+        enableClearSorting
+      />
     </div>
   );
 }

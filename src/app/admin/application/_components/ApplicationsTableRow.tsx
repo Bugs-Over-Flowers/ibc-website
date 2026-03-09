@@ -132,7 +132,7 @@ export function ApplicationsTableRow({
       </TableCell>
       <TableCell>
         <Button
-          className="active:scale-95 active:opacity-80"
+          className="active:scale-95 active:opacity-80 dark:hover:bg-muted"
           size="sm"
           variant="outline"
         >
