@@ -13,14 +13,14 @@ import { getPublicEvents } from "@/server/events/queries/getPublicEvents";
 export default async function FeaturedEventsSection() {
   const events = await getPublicEvents((await cookies()).getAll(), {});
   const now = new Date();
-  const oneWeekFromNow = new Date();
-  oneWeekFromNow.setDate(now.getDate() + 7);
+  const sixMonthsFromNow = new Date();
+  sixMonthsFromNow.setMonth(now.getMonth() + 6);
 
   const upcomingEvents = (events || [])
     .filter((event) => {
       if (!event.eventStartDate) return false;
       const eventDate = new Date(event.eventStartDate);
-      return eventDate >= now && eventDate <= oneWeekFromNow;
+      return eventDate >= now && eventDate <= sixMonthsFromNow;
     })
     .slice(0, 3);
 
