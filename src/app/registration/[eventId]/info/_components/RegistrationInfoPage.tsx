@@ -10,6 +10,7 @@ import {
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { Button } from "@/components/ui/button";
 import {
@@ -130,7 +131,13 @@ export default async function RegistrationInfoPage({
         </CardHeader>
         <Separator />
         <CardContent className="space-y-2">
-          <div>{data.description}</div>
+          {data.description ? (
+            <RichTextDisplay content={data.description} />
+          ) : (
+            <p className="text-muted-foreground italic">
+              No description available for this event.
+            </p>
+          )}
         </CardContent>
         <Separator />
         <CardContent>
