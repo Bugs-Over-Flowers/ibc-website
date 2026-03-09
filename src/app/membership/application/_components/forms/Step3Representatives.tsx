@@ -48,7 +48,7 @@ export function Step3Representatives({ form }: StepProps) {
                 className="gap-0 overflow-hidden rounded-xl border-border/50 bg-background shadow-sm"
                 key={getRepresentativeKey(representative)}
               >
-                <div className="border-b bg-slate-50/50 px-5 py-4 pt-0 sm:px-6">
+                <div className="border-b px-5 py-4 pt-0 sm:px-6">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <CardTitle className="flex min-w-0 items-center gap-2 font-bold text-base text-primary leading-snug">
                       <User className="h-4 w-4" />
@@ -74,7 +74,7 @@ export function Step3Representatives({ form }: StepProps) {
 
                 <CardContent className="p-5 sm:p-6">
                   <FieldGroup className="gap-3">
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
                       <form.AppField
                         name={`representatives[${index}].firstName`}
                       >
@@ -98,7 +98,7 @@ export function Step3Representatives({ form }: StepProps) {
                       </form.AppField>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
                       <form.AppField
                         name={`representatives[${index}].companyDesignation`}
                       >
@@ -119,7 +119,7 @@ export function Step3Representatives({ form }: StepProps) {
                       </form.AppField>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
                       <form.AppField
                         name={`representatives[${index}].emailAddress`}
                       >
@@ -167,7 +167,7 @@ export function Step3Representatives({ form }: StepProps) {
                       </form.AppField>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
                       <form.AppField name={`representatives[${index}].sex`}>
                         {(subField) => (
                           <subField.RadioGroupField
@@ -192,7 +192,7 @@ export function Step3Representatives({ form }: StepProps) {
                       </form.AppField>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
                       <form.AppField
                         name={`representatives[${index}].mailingAddress`}
                       >

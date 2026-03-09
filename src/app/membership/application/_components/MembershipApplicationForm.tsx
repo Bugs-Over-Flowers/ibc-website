@@ -90,8 +90,8 @@ function MembershipStepCard({
 }: MembershipStepCardProps) {
   return (
     <Card className="w-full overflow-hidden rounded-2xl bg-transparent shadow-none ring-0">
-      <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
-        <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
+      <CardHeader className="border-border/30 border-b bg-card/5 pb-4 sm:pb-6">
+        <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
           <Icon className="h-6 w-6 text-primary" />
           {title}
         </CardTitle>
@@ -100,7 +100,7 @@ function MembershipStepCard({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6 px-6">{children}</CardContent>
+      <CardContent className="space-y-6 px-0 sm:px-6">{children}</CardContent>
     </Card>
   );
 }
@@ -173,9 +173,9 @@ export function MembershipApplicationForm({
             memberValidation={step1Form.memberValidation}
             resetMemberValidation={step1Form.resetMemberValidation}
           />
-          <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+          <div className="mt-8 flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
             <Button
-              className="rounded-xl"
+              className="w-full rounded-xl sm:w-auto"
               onClick={() => {
                 resetStore();
                 window.location.assign("/");
@@ -190,7 +190,7 @@ export function MembershipApplicationForm({
             <step1Form.form.Subscribe selector={(state) => state.isSubmitting}>
               {(nextSubmitting) => (
                 <Button
-                  className="rounded-xl px-8 shadow-md"
+                  className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
                   disabled={nextSubmitting}
                   size="lg"
                   type="submit"
@@ -217,9 +217,9 @@ export function MembershipApplicationForm({
           title={currentStepMeta.title}
         >
           <Step2Company form={step2Form} sectors={sectors} />
-          <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+          <div className="mt-8 flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
             <Button
-              className="rounded-xl"
+              className="w-full rounded-xl sm:w-auto"
               onClick={() => handleBack(1)}
               size="lg"
               type="button"
@@ -231,7 +231,7 @@ export function MembershipApplicationForm({
             <step2Form.Subscribe selector={(state) => state.isSubmitting}>
               {(nextSubmitting) => (
                 <Button
-                  className="rounded-xl px-8 shadow-md"
+                  className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
                   disabled={nextSubmitting}
                   size="lg"
                   type="submit"
@@ -258,9 +258,9 @@ export function MembershipApplicationForm({
           title={currentStepMeta.title}
         >
           <Step3Representatives form={step3Form} />
-          <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+          <div className="mt-8 flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
             <Button
-              className="rounded-xl"
+              className="w-full rounded-xl sm:w-auto"
               onClick={() => handleBack(2)}
               size="lg"
               type="button"
@@ -272,7 +272,7 @@ export function MembershipApplicationForm({
             <step3Form.Subscribe selector={(state) => state.isSubmitting}>
               {(nextSubmitting) => (
                 <Button
-                  className="rounded-xl px-8 shadow-md"
+                  className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
                   disabled={nextSubmitting}
                   size="lg"
                   type="submit"
@@ -296,9 +296,9 @@ export function MembershipApplicationForm({
           form={step4Form}
           sectors={sectors}
         />
-        <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+        <div className="mt-8 flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
           <Button
-            className="rounded-xl"
+            className="w-full rounded-xl sm:w-auto"
             onClick={() => handleBack(3)}
             size="lg"
             type="button"
@@ -308,7 +308,7 @@ export function MembershipApplicationForm({
             Back
           </Button>
           <Button
-            className="rounded-xl px-8 shadow-md"
+            className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
             onClick={() => handleBack(5)}
             size="lg"
             type="button"
@@ -333,9 +333,9 @@ export function MembershipApplicationForm({
           title={currentStepMeta.title}
         >
           <Step5Payment applicationData={applicationData} form={step4Form} />
-          <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+          <div className="mt-8 flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
             <Button
-              className="rounded-xl"
+              className="w-full rounded-xl sm:w-auto"
               onClick={() => {
                 step4GoBack();
                 scrollToTop();
@@ -347,28 +347,30 @@ export function MembershipApplicationForm({
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-            <step4Form.AppForm>
-              <step4Form.SubmitButton
-                className="rounded-xl px-8 shadow-lg shadow-primary/25 transition-all hover:-translate-y-0.5 hover:shadow-xl"
-                isSubmittingLabel="Submitting..."
-                label={
-                  <span className="inline-flex items-center gap-2">
-                    Submit Application
-                    <CheckCircle2 className="h-4 w-4" />
-                  </span>
-                }
-              />
-            </step4Form.AppForm>
+            <div className="w-full sm:w-auto">
+              <step4Form.AppForm>
+                <step4Form.SubmitButton
+                  className="w-full rounded-xl shadow-lg shadow-primary/25 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:w-auto sm:px-8"
+                  isSubmittingLabel="Submitting..."
+                  label={
+                    <span className="inline-flex items-center gap-2">
+                      Submit Application
+                      <CheckCircle2 className="h-4 w-4" />
+                    </span>
+                  }
+                />
+              </step4Form.AppForm>
+            </div>
           </div>
         </MembershipStepCard>
       </form>
     );
 
   return (
-    <Card className="w-full overflow-hidden rounded-2xl border border-border/50 bg-background p-6 pb-3 shadow-xl md:p-8 md:pb-4">
+    <Card className="w-full overflow-hidden rounded-2xl border border-border/50 bg-background p-4 pb-2 shadow-xl sm:p-6 sm:pb-3 md:p-8 md:pb-4">
       <CardContent className="px-0">
         <MembershipStepper currentStep={currentStep} steps={steps} />
-        <div className="mt-8">{stepContent}</div>
+        <div className="mt-6 sm:mt-8">{stepContent}</div>
       </CardContent>
     </Card>
   );

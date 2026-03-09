@@ -1,5 +1,7 @@
+"use client";
+
 import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type RegistrationInfoTopNavProps = {
   eventId: string;
@@ -8,16 +10,19 @@ type RegistrationInfoTopNavProps = {
 export function RegistrationInfoTopNav({
   eventId,
 }: RegistrationInfoTopNavProps) {
+  const router = useRouter();
+
   return (
-    <div className="sticky top-0 z-10 border-border border-b bg-card/80 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-7xl items-center px-6">
-        <Link
-          className="inline-flex items-center gap-1 font-medium text-primary text-sm transition-colors hover:text-primary/80"
-          href={`/events/${eventId}`}
+    <div className="mx-auto w-full max-w-5xl px-6 pt-8">
+      <div className="flex items-center">
+        <button
+          className="inline-flex items-center gap-1 rounded-md py-2 font-medium text-md text-primary transition-colors hover:text-primary/80"
+          onClick={() => router.push(`/events/${eventId}`)}
+          type="button"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
           Back to Events
-        </Link>
+        </button>
       </div>
     </div>
   );

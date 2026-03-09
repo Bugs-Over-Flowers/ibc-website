@@ -91,7 +91,7 @@ export default function Step4({ members }: Step4Props) {
     <form onSubmit={onSubmit}>
       <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent pb-0 shadow-none ring-0">
         <CardHeader className="border-border/30 border-b bg-card/5">
-          <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
+          <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
             <CheckCircle2 className="h-6 w-6 text-primary" />
             Review & Confirm
           </CardTitle>
@@ -101,7 +101,7 @@ export default function Step4({ members }: Step4Props) {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6 px-6">
+        <CardContent className="space-y-6 px-0 sm:px-6">
           <Card className="rounded-2xl border border-border/50 bg-background">
             <CardContent className="space-y-6 px-7 py-0">
               <div className="flex items-center gap-2 font-bold text-primary">
@@ -243,7 +243,7 @@ export default function Step4({ members }: Step4Props) {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-between border-border/50 border-t pt-4">
+              <div className="mt-4 flex flex-col items-start gap-2 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
                   Payment Method
                 </span>
@@ -286,9 +286,9 @@ export default function Step4({ members }: Step4Props) {
           <TermsAndConditionsField form={form} />
         </CardContent>
 
-        <CardFooter className="flex items-center justify-between border-border/50 border-t px-6 pt-6 pb-6">
+        <CardFooter className="flex flex-col-reverse gap-3 border-border/50 border-t px-0 pt-6 pb-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <Button
-            className="rounded-xl"
+            className="w-full rounded-xl sm:w-auto"
             onClick={() => setStep(3)}
             size="lg"
             type="button"
@@ -301,7 +301,7 @@ export default function Step4({ members }: Step4Props) {
           <form.Subscribe selector={(state) => state.isSubmitting}>
             {(isSubmitting) => (
               <Button
-                className="rounded-xl px-8 shadow-lg shadow-primary/25 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                className="w-full rounded-xl shadow-lg shadow-primary/25 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:w-auto sm:px-8"
                 disabled={isSubmitting}
                 size="lg"
                 type="submit"

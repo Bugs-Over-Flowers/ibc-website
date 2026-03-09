@@ -12,7 +12,6 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -87,12 +86,12 @@ export function Step5Payment({ form, applicationData }: StepProps) {
   return (
     <div className="space-y-8">
       {isUpdateInfo && (
-        <Alert className="rounded-xl border-amber-500/40 bg-amber-50">
-          <AlertCircle className="h-4 w-4 text-amber-600" />
-          <AlertTitle className="text-amber-800">
+        <Alert className="rounded-xl border-amber-500/40 bg-amber-50 dark:border-amber-400/50 dark:bg-amber-500/15">
+          <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-300" />
+          <AlertTitle className="text-amber-800 dark:text-amber-200">
             Information Update Fee
           </AlertTitle>
-          <AlertDescription className="text-amber-700">
+          <AlertDescription className="text-amber-700 dark:text-amber-100/90">
             Updating your membership information requires a processing fee of{" "}
             <span className="font-semibold">P2,000.00</span>. Please complete
             the payment using one of the methods below.
@@ -126,7 +125,7 @@ export function Step5Payment({ form, applicationData }: StepProps) {
 
               return (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {options.map((option) => {
                       const Icon = option.icon;
 
@@ -205,7 +204,7 @@ export function Step5Payment({ form, applicationData }: StepProps) {
 
             return (
               <div className="space-y-3">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {options.map((option) => {
                     const Icon = option.icon;
 
@@ -340,7 +339,8 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                           <button
                             className={cn(
                               "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors",
-                              selectedFile && "border-green-500 bg-green-50/50",
+                              selectedFile &&
+                                "border-emerald-500 bg-emerald-50/60 dark:border-emerald-400/70 dark:bg-emerald-500/15",
                               !selectedFile &&
                                 "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
                               dragActive &&
@@ -389,7 +389,7 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                                     width={48}
                                   />
                                 ) : null}
-                                <span className="font-medium text-green-600">
+                                <span className="font-medium text-emerald-700 dark:text-emerald-300">
                                   Proof Uploaded Successfully
                                 </span>
                                 <Badge className="mt-2" variant="outline">
@@ -435,7 +435,7 @@ export function Step5Payment({ form, applicationData }: StepProps) {
         </form.Subscribe>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center">
+      <div className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center sm:p-8">
         <CheckCircle2 className="mx-auto h-12 w-12 text-primary/60" />
         <div className="font-bold text-xl">Final Verification</div>
         <p className="mx-auto max-w-xl text-muted-foreground text-sm leading-relaxed">

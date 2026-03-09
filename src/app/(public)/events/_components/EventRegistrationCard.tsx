@@ -46,8 +46,8 @@ export default function EventRegistrationCard({
       variants={staggerContainer}
     >
       <motion.div variants={fadeInUp}>
-        <Card className="sticky top-24 rounded-2xl border-0 bg-card/80 shadow-lg ring-1 ring-border/50 backdrop-blur-xl">
-          <CardContent className="rounded-2xl">
+        <Card className="rounded-2xl border-0 bg-card/80 py-0 shadow-lg ring-1 ring-border/50 backdrop-blur-xl lg:sticky lg:top-24">
+          <CardContent className="rounded-2xl p-4 sm:p-6">
             <h3 className="mb-4 font-semibold text-foreground text-lg">
               Registration
             </h3>
@@ -83,7 +83,7 @@ export default function EventRegistrationCard({
                 <Share2 className="h-4 w-4" />
                 Share this event
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {[
                   { icon: Facebook, label: "Facebook" },
                   { icon: Twitter, label: "Twitter" },

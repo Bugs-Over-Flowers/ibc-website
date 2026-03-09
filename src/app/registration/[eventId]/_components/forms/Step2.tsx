@@ -63,8 +63,8 @@ export default function Step2() {
   return (
     <form onSubmit={onNext}>
       <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
-        <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
-          <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
+        <CardHeader className="border-border/30 border-b bg-card/5 pb-4 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
             <Users className="h-6 w-6 text-primary" />
             Participant Details
           </CardTitle>
@@ -74,8 +74,8 @@ export default function Step2() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6 px-6">
-          <div className="flex items-start justify-between">
+        <CardContent className="space-y-6 px-0 sm:px-6">
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:gap-3">
             <h3 className="pb-2 font-semibold text-foreground text-lg">
               Primary Registrant
             </h3>
@@ -111,7 +111,7 @@ export default function Step2() {
 
                     return (
                       <div
-                        className="slide-in-from-top-2 fade-in relative animate-in space-y-4 rounded-xl border-0 border-border bg-background p-6 shadow-sm"
+                        className="slide-in-from-top-2 fade-in relative animate-in space-y-4 rounded-xl border-0 border-border bg-background p-4 shadow-sm sm:p-6"
                         key={registrant.id}
                       >
                         <div className="flex items-center justify-between">
@@ -160,9 +160,9 @@ export default function Step2() {
             }}
           </form.AppField>
 
-          <div className="flex items-center justify-between border-border/50 border-t pt-4">
+          <div className="flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
             <Button
-              className="rounded-xl"
+              className="w-full rounded-xl sm:w-auto"
               onClick={onBack}
               size="lg"
               type="button"
@@ -172,7 +172,7 @@ export default function Step2() {
               Back
             </Button>
             <Button
-              className="rounded-xl px-8 shadow-md"
+              className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
               size="lg"
               type="submit"
             >

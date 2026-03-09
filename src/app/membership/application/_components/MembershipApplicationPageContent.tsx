@@ -22,7 +22,7 @@ export async function MembershipApplicationPageContent() {
             </Link>
           </div>
 
-          <h1 className="mb-4 font-extrabold text-4xl text-white tracking-tight md:text-5xl">
+          <h1 className="mb-4 font-extrabold text-4xl text-primary-foreground tracking-tight md:text-5xl">
             Membership Application
           </h1>
           <p className="max-w-2xl font-medium text-lg text-primary-foreground/90 leading-relaxed">

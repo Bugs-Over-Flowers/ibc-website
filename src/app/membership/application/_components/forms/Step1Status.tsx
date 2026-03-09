@@ -145,7 +145,7 @@ export function Step1Status({
             ];
 
             return (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {options.map((option) => {
                   const Icon = option.icon;
 
@@ -206,7 +206,7 @@ export function Step1Status({
                       className={cn(
                         "h-12 rounded-lg pr-11",
                         memberValidation.validationStatus === "valid" &&
-                          "border-emerald-400 bg-emerald-50",
+                          "border-emerald-400 bg-emerald-50 dark:border-emerald-500/70 dark:bg-emerald-500/15",
                         memberValidation.validationStatus === "invalid" &&
                           "border-destructive/60 bg-destructive/5",
                       )}
@@ -224,7 +224,7 @@ export function Step1Status({
 
                   {memberValidation.validationStatus === "valid" &&
                     memberValidation.memberInfo.companyName && (
-                      <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3 font-medium text-emerald-700 text-sm">
+                      <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3 font-medium text-emerald-700 text-sm dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-200">
                         <CheckCircle2 className="h-4 w-4" />
                         <span>
                           Verified: {memberValidation.memberInfo.companyName}
@@ -249,7 +249,7 @@ export function Step1Status({
                   )}
 
                   {isInCooldown && (
-                    <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700 text-sm">
+                    <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700 text-sm dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-200">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       <span>
                         Too many failed attempts. Try again in {remainingTime}{" "}

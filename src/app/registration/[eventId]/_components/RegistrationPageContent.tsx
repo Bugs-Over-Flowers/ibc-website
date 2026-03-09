@@ -97,7 +97,7 @@ export async function RegistrationPageContent({
             {eventData.eventType}
           </div>
 
-          <h1 className="mb-4 font-extrabold text-4xl text-white tracking-tight md:text-5xl">
+          <h1 className="mb-4 font-extrabold text-4xl text-primary-foreground tracking-tight md:text-5xl">
             {eventData.eventTitle}
           </h1>
 

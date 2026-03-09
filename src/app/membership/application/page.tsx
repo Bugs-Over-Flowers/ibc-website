@@ -4,7 +4,7 @@ import { MembershipApplicationPageContent } from "./_components/MembershipApplic
 
 export default function MembershipApplicationPage() {
   return (
-    <main className="min-h-screen w-full bg-slate-50/50 pb-20">
+    <main className="min-h-screen w-full bg-linear-to-b from-background via-background to-muted/30 pb-20">
       <Suspense fallback={<Spinner />}>
         <MembershipApplicationPageContent />
       </Suspense>

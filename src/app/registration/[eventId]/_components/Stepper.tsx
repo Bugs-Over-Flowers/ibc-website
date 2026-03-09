@@ -24,7 +24,7 @@ export default function Stepper() {
   const progressWidth = ((currentStep - 1) / (STEPS.length - 1)) * 100;
 
   return (
-    <div className="mb-8 w-full">
+    <div className="mb-6 w-full sm:mb-8">
       <div className="relative flex items-center justify-between">
         <div className="absolute top-1/2 left-0 -z-10 h-1 w-full -translate-y-1/2 rounded-full bg-secondary" />
         <div
@@ -41,7 +41,7 @@ export default function Stepper() {
             <div className="flex flex-col items-center" key={step.label}>
               <div
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full border-2 font-semibold transition-all duration-300",
+                  "flex h-8 w-8 items-center justify-center rounded-full border-2 font-semibold text-xs transition-all duration-300 sm:h-10 sm:w-10 sm:text-sm",
                   isCompleted &&
                     "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/25",
                   isActive &&
@@ -51,12 +51,16 @@ export default function Stepper() {
                     "border-muted bg-background text-muted-foreground",
                 )}
               >
-                {isCompleted ? <Check className="h-5 w-5" /> : stepNumber}
+                {isCompleted ? (
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5" />
+                ) : (
+                  stepNumber
+                )}
               </div>
 
               <span
                 className={cn(
-                  "mt-2 text-center font-medium text-xs transition-colors sm:text-sm",
+                  "mt-1 hidden text-center font-medium text-xs transition-colors sm:mt-2 sm:block sm:text-sm",
                   isActive || isCompleted
                     ? "text-foreground"
                     : "text-muted-foreground",

@@ -5,7 +5,7 @@ import { RegistrationPageContent } from "./_components/RegistrationPageContent";
 
 export default function Page({ params, searchParams }: RegistrationRouteProps) {
   return (
-    <main className="min-h-screen w-full bg-slate-50/50 pb-20">
+    <main className="min-h-screen w-full bg-linear-to-b from-background via-background to-muted/30 pb-20">
       <Suspense fallback={<Spinner />}>
         <RegistrationPageContent params={params} searchParams={searchParams} />
       </Suspense>

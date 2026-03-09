@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { ArrowRight, Calendar, ClipboardList, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { getStatusBadge } from "@/components/BadgeEvents";
 import {
   formatDate,
@@ -21,35 +20,7 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, index }: EventCardProps) {
-  const router = useRouter();
   const status = getEventStatus(event.eventStartDate, event.eventEndDate);
-
-  const handleCardClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const target = e.target as HTMLElement;
-    const isInteractiveElement =
-      target.closest("a") ||
-      target.closest("button") ||
-      target.tagName === "A" ||
-      target.tagName === "BUTTON";
-
-    if (!isInteractiveElement) {
-      router.push(`/events/${event.eventId}`);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-    const target = e.target as HTMLElement;
-    const isInteractiveElement =
-      target.closest("a") ||
-      target.closest("button") ||
-      target.tagName === "A" ||
-      target.tagName === "BUTTON";
-
-    if (!isInteractiveElement && (e.key === "Enter" || e.key === " ")) {
-      e.preventDefault();
-      router.push(`/events/${event.eventId}`);
-    }
-  };
 
   return (
     <motion.div
@@ -57,14 +28,15 @@ export function EventCard({ event, index }: EventCardProps) {
       initial={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.5, delay: 0.1 * index }}
     >
-      <div className="h-full">
-        <button
-          className="group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-background text-left transition-shadow hover:shadow-lg hover:shadow-primary/10"
-          onClick={handleCardClick}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-          type="button"
-        >
+      <div className="relative h-full">
+        {/* Card clickable overlay */}
+        <Link
+          aria-label={`View details for ${event.eventTitle}`}
+          className="absolute inset-0 z-10"
+          href={`/events/${event.eventId}`}
+        />
+
+        <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-background text-left transition-all hover:shadow-lg hover:shadow-primary/10">
           <div className="flex-1">
             <div className="relative aspect-16/10 overflow-hidden">
               <Image
@@ -132,25 +104,20 @@ export function EventCard({ event, index }: EventCardProps) {
               </span>
               {status !== "past" && (
                 <Link
-                  className="ml-auto flex w-auto items-center gap-2 rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90 hover:text-white"
+                  className="relative z-20 ml-auto inline-flex w-auto items-center gap-2 rounded-xl bg-primary px-4 py-2 font-semibold text-primary-foreground text-sm shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                   href={`/registration/${event.eventId}/info`}
-                  tabIndex={0}
                 >
                   <ClipboardList className="h-4 w-4" />
                   Register Now
                 </Link>
               )}
             </div>
-            <Link
-              className="group/readmore flex w-full items-center justify-center gap-2 rounded-xl border border-primary/50 bg-card px-4 py-2.5 font-medium text-primary text-sm transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:shadow-md hover:shadow-primary/20"
-              href={`/events/${event.eventId}`}
-              tabIndex={0}
-            >
+            <span className="group/readmore relative z-20 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-semibold text-foreground text-sm shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
               Read More
               <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/readmore:translate-x-1" />
-            </Link>
+            </span>
           </div>
-        </button>
+        </div>
       </div>
     </motion.div>
   );

@@ -1,5 +1,5 @@
 import { formatDate } from "date-fns";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, CircleDollarSign } from "lucide-react";
 import Image from "next/image";
 import RichTextDisplay from "@/components/RichTextDisplay";
 
@@ -31,38 +31,65 @@ export function RegistrationInfoEventCard({
       : `${formattedStartDate} – ${formattedEndDate}`;
 
   return (
-    <div className="overflow-hidden border-none shadow-md">
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-black/5 shadow-xl">
       {headerUrl && (
-        <div className="relative h-64 w-full bg-muted/30 md:h-80">
-          <Image alt={title} className="object-cover" fill src={headerUrl} />
+        <div
+          className="relative w-full overflow-hidden rounded-xl bg-muted/30"
+          style={{ aspectRatio: "4 / 1" }}
+        >
+          <Image
+            alt={title}
+            className="object-contain"
+            fill
+            priority
+            sizes="(max-width: 1600px) 100vw, 1600px"
+            src={headerUrl}
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-black/25 via-black/5 to-transparent" />
         </div>
       )}
 
-      <div className="p-8 md:p-10">
-        <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1">
-          <CalendarDays className="h-3.5 w-3.5 text-primary" />
-          <span className="font-semibold text-primary text-xs tracking-wide">
+      <div className="space-y-6 p-7 md:p-10">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5">
+          <CalendarDays className="h-4 w-4 text-primary" />
+          <span className="font-semibold text-primary text-xs tracking-wide md:text-sm">
             {dateDisplay}
           </span>
         </div>
 
-        <h1 className="mb-3 font-extrabold text-3xl text-foreground md:text-4xl">
+        <h1 className="max-w-4xl font-extrabold text-3xl text-foreground leading-tight md:text-4xl">
           {title}
         </h1>
 
         {description && (
           <RichTextDisplay
-            className="max-w-2xl text-muted-foreground text-sm md:text-base"
+            className="max-w-3xl text-muted-foreground text-sm leading-relaxed md:text-base"
             content={description}
           />
         )}
-        <p className="mt-4 text-muted-foreground">
-          Registration fee:{" "}
-          <span className="font-bold text-foreground">
-            Php {fee.toLocaleString()}
-          </span>{" "}
-          per participant.
-        </p>
+
+        <div className="rounded-2xl border border-primary/20 bg-linear-to-r from-primary/12 via-primary/8 to-primary/5 p-4 md:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="inline-flex items-center gap-2 font-semibold text-foreground text-sm md:text-base">
+                <CircleDollarSign className="h-4 w-4 text-primary" />
+                Registration Fee
+              </p>
+              <p className="mt-1 text-muted-foreground text-xs md:text-sm">
+                Charged per participant
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p className="font-extrabold text-2xl text-foreground tracking-tight md:text-3xl">
+                ₱ {fee.toLocaleString()}
+              </p>
+              <p className="text-muted-foreground text-xs md:text-sm">
+                / person
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

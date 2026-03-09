@@ -46,7 +46,7 @@ export function QRCodeSection({
           email={email}
           registrationIdentifier={registrationIdentifier}
         >
-          <div className="mx-auto shrink-0 cursor-pointer rounded-2xl border-2 border-border bg-white p-3 shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md sm:mx-0">
+          <div className="mx-auto shrink-0 cursor-pointer rounded-2xl border-2 border-border bg-background p-3 shadow-sm transition-all duration-200 hover:border-primary hover:shadow-md sm:mx-0">
             <div className="relative size-44">
               <QRCodeItem encodedRegistrationData={registrationIdentifier} />
             </div>

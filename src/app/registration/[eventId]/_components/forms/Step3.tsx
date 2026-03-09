@@ -1,7 +1,6 @@
 import {
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
   CreditCard,
   UploadCloud,
   Wallet,
@@ -76,8 +75,8 @@ export default function Step3() {
   return (
     <form onSubmit={onNext}>
       <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
-        <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
-          <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
+        <CardHeader className="border-border/30 border-b bg-card/5 pb-4 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
             <CreditCard className="h-6 w-6 text-primary" />
             Payment Information
           </CardTitle>
@@ -87,7 +86,7 @@ export default function Step3() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6 px-6">
+        <CardContent className="space-y-6 px-0 sm:px-6">
           <PaymentSummary />
           <PaymentMethodSelection form={form} />
           <PaymentProofUpload
@@ -97,9 +96,9 @@ export default function Step3() {
             handleDrop={handleDrop}
           />
 
-          <div className="flex items-center justify-between border-border/50 border-t pt-4">
+          <div className="flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
             <Button
-              className="rounded-xl"
+              className="w-full rounded-xl sm:w-auto"
               onClick={onBack}
               size="lg"
               type="button"
@@ -109,7 +108,7 @@ export default function Step3() {
               Back
             </Button>
             <Button
-              className="rounded-xl px-8 shadow-md"
+              className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
               size="lg"
               type="submit"
             >
@@ -148,17 +147,17 @@ function PaymentSummary() {
       </h3>
 
       <div className="space-y-3 text-base">
-        <div className="flex justify-between">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-muted-foreground">Number of Participants</span>
           <span className="font-medium">{participantCount}</span>
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-muted-foreground">Fee per Participant</span>
           <span className="font-medium">PHP {baseFee.toLocaleString()}</span>
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-muted-foreground">
             Subtotal ({participantCount} × PHP {baseFee.toLocaleString()})
           </span>
@@ -166,7 +165,7 @@ function PaymentSummary() {
         </div>
 
         {sponsorDiscount > 0 && (
-          <div className="flex justify-between text-green-600">
+          <div className="flex flex-col gap-1 text-green-600 sm:flex-row sm:items-center sm:justify-between">
             <span>Sponsor Discount ({sponsoredBy})</span>
             <span className="font-medium">
               -PHP {sponsorDiscount.toLocaleString()}
@@ -174,7 +173,7 @@ function PaymentSummary() {
           </div>
         )}
 
-        <div className="flex justify-between border-primary/20 border-t pt-3 font-bold text-foreground text-lg">
+        <div className="flex flex-col gap-1 border-primary/20 border-t pt-3 font-bold text-foreground text-lg sm:flex-row sm:items-center sm:justify-between">
           <span>Total Amount to Pay</span>
           <span>PHP {total.toLocaleString()}</span>
         </div>
@@ -221,7 +220,7 @@ function PaymentMethodSelection({ form }: PaymentMethodSelectionProps) {
           <div className="space-y-4">
             <Label className="text-base">Payment Method</Label>
             <RadioGroup
-              className="grid grid-cols-1 gap-4 md:grid-cols-2"
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
               onValueChange={(value) => {
                 const parsedPaymentMethodValue =
                   PaymentMethodEnum.safeParse(value);
@@ -381,7 +380,8 @@ function PaymentProofUpload({
                       <button
                         className={cn(
                           "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors",
-                          selectedFile && "border-green-500 bg-green-50/50",
+                          selectedFile &&
+                            "border-emerald-500 bg-emerald-50/60 dark:border-emerald-400/70 dark:bg-emerald-500/15",
                           !selectedFile &&
                             "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
                           dragActive &&
@@ -431,7 +431,7 @@ function PaymentProofUpload({
                                 width={48}
                               />
                             ) : null}
-                            <span className="font-medium text-green-600">
+                            <span className="font-medium text-emerald-700 dark:text-emerald-300">
                               Proof Uploaded Successfully
                             </span>
                             <Badge className="mt-2" variant="outline">

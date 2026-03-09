@@ -40,8 +40,8 @@ const Step1 = ({ members }: Step1Props) => {
   return (
     <form onSubmit={onNext}>
       <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
-        <CardHeader className="border-border/30 border-b pb-6">
-          <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
+        <CardHeader className="border-border/30 border-b pb-4 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
             <CheckCircle2 className="h-6 w-6 text-primary" />
             Member Verification
           </CardTitle>
@@ -50,12 +50,12 @@ const Step1 = ({ members }: Step1Props) => {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6 px-6">
+        <CardContent className="space-y-6 px-0 sm:px-6">
           <MemberTypeSelection form={form} membersOptions={membersOptions} />
 
-          <div className="flex justify-end border-border/50 border-t pt-6">
+          <div className="flex border-border/50 border-t pt-6 sm:justify-end">
             <Button
-              className="rounded-xl px-8 shadow-md"
+              className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
               size="lg"
               type="submit"
             >
@@ -120,7 +120,7 @@ function MemberTypeSelection({
                 onValueChange={(value) => field.handleChange(value)}
                 value={field.state.value}
               >
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {[
                     {
                       id: "member",

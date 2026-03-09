@@ -56,7 +56,7 @@ export function Step2Company({ form, sectors }: StepProps) {
     <div className="space-y-8">
       <div className="rounded-xl p-0 shadow-none">
         <FieldGroup>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <form.AppField name="companyName">
               {(field) => (
                 <field.TextField
@@ -86,7 +86,7 @@ export function Step2Company({ form, sectors }: StepProps) {
             )}
           </form.AppField>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <form.AppField name="websiteURL">
               {(field) => (
                 <field.TextField
@@ -109,7 +109,7 @@ export function Step2Company({ form, sectors }: StepProps) {
             </form.AppField>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <form.AppField name="landline">
               {(field) => (
                 <field.TextField
@@ -224,7 +224,8 @@ export function Step2Company({ form, sectors }: StepProps) {
                               <button
                                 className={cn(
                                   "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors",
-                                  hasFile && "border-green-500 bg-green-50/50",
+                                  hasFile &&
+                                    "border-emerald-500 bg-emerald-50/60 dark:border-emerald-400/70 dark:bg-emerald-500/15",
                                   !hasFile &&
                                     "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
                                   dragActive &&
@@ -305,7 +306,7 @@ export function Step2Company({ form, sectors }: StepProps) {
                                         width={48}
                                       />
                                     ) : null}
-                                    <span className="font-medium text-green-600">
+                                    <span className="font-medium text-emerald-700 dark:text-emerald-300">
                                       Logo Uploaded Successfully
                                     </span>
                                     <Badge className="mt-2" variant="outline">

@@ -41,7 +41,7 @@ async function SuccessPage() {
     <ResetRegistrationWrapper>
       <Suspense
         fallback={
-          <Skeleton className="mx-auto h-[720px] w-full max-w-4xl rounded-2xl bg-neutral-200" />
+          <Skeleton className="mx-auto h-[720px] w-full max-w-4xl rounded-2xl bg-muted" />
         }
       >
         <EventDetails
