@@ -2,7 +2,7 @@ import { Trash2, User, UserPlus } from "lucide-react";
 import { useRef } from "react";
 import type { useMembershipStep3 } from "@/app/membership/application/_hooks/useMembershipStep3";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 
 interface StepProps {
@@ -39,28 +39,18 @@ export function Step3Representatives({ form }: StepProps) {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
-        <h3 className="font-bold text-primary text-sm uppercase tracking-wider">
-          Representative Assignment
-        </h3>
-        <p className="mt-2 text-muted-foreground text-sm">
-          The first representative is treated as the principal member. You may
-          add more alternate representatives as needed.
-        </p>
-      </div>
-
+    <div className="space-y-6">
       <form.AppField mode="array" name="representatives">
         {(field) => (
-          <div className="space-y-6">
+          <div className="space-y-5 sm:space-y-6">
             {field.state.value.map((representative, index) => (
               <Card
-                className="overflow-hidden rounded-xl border-border/50 bg-background shadow-sm"
+                className="gap-0 overflow-hidden rounded-xl border-border/50 bg-background shadow-sm"
                 key={getRepresentativeKey(representative)}
               >
-                <CardHeader className="border-b bg-slate-50/50 px-6 py-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <CardTitle className="flex items-center gap-2 font-bold text-primary text-sm">
+                <div className="border-b bg-slate-50/50 px-5 py-4 pt-0 sm:px-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <CardTitle className="flex min-w-0 items-center gap-2 font-bold text-base text-primary leading-snug">
                       <User className="h-4 w-4" />
                       {index === 0
                         ? "Principal Member"
@@ -69,7 +59,7 @@ export function Step3Representatives({ form }: StepProps) {
 
                     {index > 1 && (
                       <Button
-                        className="h-8 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="h-9 self-start px-3 text-destructive hover:bg-destructive/10 hover:text-destructive sm:self-auto"
                         onClick={() => field.removeValue(index)}
                         size="sm"
                         type="button"
@@ -80,11 +70,11 @@ export function Step3Representatives({ form }: StepProps) {
                       </Button>
                     )}
                   </div>
-                </CardHeader>
+                </div>
 
-                <CardContent className="space-y-6 p-6">
-                  <FieldGroup>
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <CardContent className="p-5 sm:p-6">
+                  <FieldGroup className="gap-3">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
                       <form.AppField
                         name={`representatives[${index}].firstName`}
                       >
@@ -108,7 +98,7 @@ export function Step3Representatives({ form }: StepProps) {
                       </form.AppField>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
                       <form.AppField
                         name={`representatives[${index}].companyDesignation`}
                       >
@@ -129,7 +119,7 @@ export function Step3Representatives({ form }: StepProps) {
                       </form.AppField>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
                       <form.AppField
                         name={`representatives[${index}].emailAddress`}
                       >
@@ -171,13 +161,13 @@ export function Step3Representatives({ form }: StepProps) {
                                 e.preventDefault();
                               }
                             }}
-                            placeholder="+639######### or 09#########"
+                            placeholder="+639XXXXXXXX or 09XXXXXXXXX"
                           />
                         )}
                       </form.AppField>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
                       <form.AppField name={`representatives[${index}].sex`}>
                         {(subField) => (
                           <subField.RadioGroupField
@@ -202,48 +192,52 @@ export function Step3Representatives({ form }: StepProps) {
                       </form.AppField>
                     </div>
 
-                    <form.AppField
-                      name={`representatives[${index}].mailingAddress`}
-                    >
-                      {(subField) => (
-                        <subField.TextField
-                          label="Mailing Address"
-                          placeholder="Enter mailing address"
-                        />
-                      )}
-                    </form.AppField>
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+                      <form.AppField
+                        name={`representatives[${index}].mailingAddress`}
+                      >
+                        {(subField) => (
+                          <subField.TextField
+                            label="Mailing Address"
+                            placeholder="Enter mailing address"
+                          />
+                        )}
+                      </form.AppField>
 
-                    <form.AppField name={`representatives[${index}].landline`}>
-                      {(subField) => (
-                        <subField.TextField
-                          label="Landline"
-                          onKeyDown={(e) => {
-                            if (
-                              [
-                                "Backspace",
-                                "Delete",
-                                "Tab",
-                                "Escape",
-                                "Enter",
-                                "Home",
-                                "End",
-                                "ArrowLeft",
-                                "ArrowRight",
-                              ].includes(e.key) ||
-                              ((e.ctrlKey || e.metaKey) &&
-                                ["a", "c", "v", "x"].includes(e.key))
-                            ) {
-                              return;
-                            }
+                      <form.AppField
+                        name={`representatives[${index}].landline`}
+                      >
+                        {(subField) => (
+                          <subField.TextField
+                            label="Landline"
+                            onKeyDown={(e) => {
+                              if (
+                                [
+                                  "Backspace",
+                                  "Delete",
+                                  "Tab",
+                                  "Escape",
+                                  "Enter",
+                                  "Home",
+                                  "End",
+                                  "ArrowLeft",
+                                  "ArrowRight",
+                                ].includes(e.key) ||
+                                ((e.ctrlKey || e.metaKey) &&
+                                  ["a", "c", "v", "x"].includes(e.key))
+                              ) {
+                                return;
+                              }
 
-                            if (!/[0-9()\-\s]/.test(e.key)) {
-                              e.preventDefault();
-                            }
-                          }}
-                          placeholder="(033) XXX-XXXX"
-                        />
-                      )}
-                    </form.AppField>
+                              if (!/[0-9()\-\s]/.test(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+                            placeholder="(033) XXX-XXXX"
+                          />
+                        )}
+                      </form.AppField>
+                    </div>
                   </FieldGroup>
                 </CardContent>
               </Card>

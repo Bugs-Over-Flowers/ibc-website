@@ -16,6 +16,7 @@ import { Step1Status } from "@/app/membership/application/_components/forms/Step
 import { Step2Company } from "@/app/membership/application/_components/forms/Step2Company";
 import { Step3Representatives } from "@/app/membership/application/_components/forms/Step3Representatives";
 import { Step4Review } from "@/app/membership/application/_components/forms/Step4Review";
+import { Step5Payment } from "@/app/membership/application/_components/forms/Step5Payment";
 import { MembershipStepper } from "@/app/membership/application/_components/MembershipStepper";
 import { useMembershipStep1 } from "@/app/membership/application/_hooks/useMembershipStep1";
 import { useMembershipStep2 } from "@/app/membership/application/_hooks/useMembershipStep2";
@@ -43,19 +44,29 @@ const steps = [
   {
     id: 2,
     title: "Company",
-    description: "Business details",
+    description:
+      "Provide your company details for verification and correspondence.",
     icon: Building2,
   },
   {
     id: 3,
     title: "Representatives",
-    description: "Add authorized people",
+    description:
+      "The first representative is the principal member. You may add alternate representatives as needed.",
     icon: Users,
   },
   {
     id: 4,
     title: "Review",
-    description: "Confirm and submit",
+    description:
+      "Review all your application details before proceeding to payment.",
+    icon: CheckCircle2,
+  },
+  {
+    id: 5,
+    title: "Payment",
+    description:
+      "Choose your payment method and upload proof of payment before final submission.",
     icon: CreditCard,
   },
 ];
@@ -78,7 +89,7 @@ function MembershipStepCard({
   title,
 }: MembershipStepCardProps) {
   return (
-    <Card className="w-full overflow-hidden rounded-2xl border border-border/30">
+    <Card className="w-full overflow-hidden rounded-2xl bg-transparent shadow-none ring-0">
       <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
         <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
           <Icon className="h-6 w-6 text-primary" />
@@ -274,6 +285,39 @@ export function MembershipApplicationForm({
           </div>
         </MembershipStepCard>
       </form>
+    ) : currentStep === 4 ? (
+      <MembershipStepCard
+        description={currentStepMeta.description}
+        icon={currentStepMeta.icon}
+        title={currentStepMeta.title}
+      >
+        <Step4Review
+          applicationData={applicationData}
+          form={step4Form}
+          sectors={sectors}
+        />
+        <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+          <Button
+            className="rounded-xl"
+            onClick={() => handleBack(3)}
+            size="lg"
+            type="button"
+            variant="ghost"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <Button
+            className="rounded-xl px-8 shadow-md"
+            onClick={() => handleBack(5)}
+            size="lg"
+            type="button"
+          >
+            Continue to Payment
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </MembershipStepCard>
     ) : (
       <form
         onSubmit={async (e) => {
@@ -288,7 +332,7 @@ export function MembershipApplicationForm({
           icon={currentStepMeta.icon}
           title={currentStepMeta.title}
         >
-          <Step4Review applicationData={applicationData} form={step4Form} />
+          <Step5Payment applicationData={applicationData} form={step4Form} />
           <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
             <Button
               className="rounded-xl"

@@ -92,10 +92,10 @@ export function Step1Status({
 
   return (
     <div className="space-y-8">
-      <div className="space-y-4 rounded-xl border border-primary/20 bg-p5 p-6">
+      <div className="space-y-4 rounded-xl border-0 bg-p5 p-0">
         <div className="flex items-center gap-2 font-bold text-primary">
           <Info className="h-5 w-5" />
-          <h3>Membership Guidelines</h3>
+          <span className="font-medium text-lg">Membership Guidelines</span>
         </div>
 
         <ul className="list-disc space-y-2 pl-5 text-muted-foreground text-sm">

@@ -7,7 +7,7 @@ import type {
   MembershipApplicationStep4Schema,
 } from "@/lib/validation/membership/application";
 
-export const MAX_STEPS = 4;
+export const MAX_STEPS = 5;
 
 export interface MembershipApplicationData {
   step1: MembershipApplicationStep1Schema;

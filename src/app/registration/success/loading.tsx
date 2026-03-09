@@ -7,8 +7,8 @@ const infoRowKeys = Array.from(
 
 export default function RegistrationSuccessLoading() {
   return (
-    <main className="bg-background px-4 py-6 sm:px-6 lg:px-8">
-      <section className="mx-auto w-full max-w-7xl space-y-4 rounded-3xl border border-primary/15 bg-card p-6 shadow-primary/5 shadow-xl sm:p-8">
+    <main className="min-h-screen bg-background px-4 py-8 sm:px-6 lg:px-8">
+      <section className="mx-auto w-full max-w-4xl space-y-6 sm:space-y-7">
         <Skeleton className="mb-3 h-36 w-full rounded-xl" />
 
         <div className="flex items-start gap-4">
@@ -21,13 +21,13 @@ export default function RegistrationSuccessLoading() {
 
         <div className="h-px bg-linear-to-r from-transparent via-primary/20 to-transparent" />
 
-        <div className="space-y-3 rounded-2xl bg-linear-to-br from-primary/10 via-primary/[0.07] to-transparent p-5 ring-1 ring-primary/25 sm:p-6">
+        <div className="space-y-3 rounded-2xl bg-linear-to-br from-primary/10 via-primary/[0.07] to-transparent p-6 ring-1 ring-primary/25 sm:p-8">
           <Skeleton className="h-3 w-32" />
           <Skeleton className="h-7 w-2/3" />
           <Skeleton className="h-4 w-56" />
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-background/60 p-5 sm:p-6">
+        <div className="rounded-2xl border border-border/60 bg-background/60 p-6 sm:p-8">
           <Skeleton className="mb-4 h-6 w-52" />
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {infoRowKeys.map((key) => (
@@ -42,7 +42,7 @@ export default function RegistrationSuccessLoading() {
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-background/60 p-5 sm:p-6">
+        <div className="rounded-2xl border border-border/60 bg-background/60 p-6 sm:p-8">
           <div className="mb-5 flex items-center gap-2">
             <Skeleton className="h-8 w-8 rounded-xl" />
             <div className="space-y-1">
@@ -58,7 +58,7 @@ export default function RegistrationSuccessLoading() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 pt-0.5 sm:flex-row">
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row">
           <Skeleton className="h-10 w-full sm:flex-1" />
           <Skeleton className="h-10 w-full sm:flex-1" />
         </div>

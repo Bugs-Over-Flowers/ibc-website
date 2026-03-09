@@ -54,35 +54,28 @@ export function Step2Company({ form, sectors }: StepProps) {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-xl border border-border/50 bg-background p-5">
-        <h3 className="font-bold text-muted-foreground text-sm uppercase tracking-wider">
-          Company Information
-        </h3>
-        <p className="mt-2 text-muted-foreground text-sm">
-          Provide your company details for verification and correspondence.
-        </p>
-      </div>
-
-      <div className="rounded-xl border border-border/50 bg-background p-5 shadow-sm">
+      <div className="rounded-xl p-0 shadow-none">
         <FieldGroup>
-          <form.AppField name="companyName">
-            {(field) => (
-              <field.TextField
-                label="Company Name"
-                placeholder="Enter your company name"
-              />
-            )}
-          </form.AppField>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <form.AppField name="companyName">
+              {(field) => (
+                <field.TextField
+                  label="Company Name"
+                  placeholder="Enter your company name"
+                />
+              )}
+            </form.AppField>
 
-          <form.AppField name="sectorId">
-            {(field) => (
-              <field.SelectField
-                label="Industry/Sector"
-                options={sectorOptions}
-                placeholder="Select industry"
-              />
-            )}
-          </form.AppField>
+            <form.AppField name="sectorId">
+              {(field) => (
+                <field.SelectField
+                  label="Industry/Sector"
+                  options={sectorOptions}
+                  placeholder="Select industry"
+                />
+              )}
+            </form.AppField>
+          </div>
 
           <form.AppField name="companyAddress">
             {(field) => (
@@ -93,26 +86,28 @@ export function Step2Company({ form, sectors }: StepProps) {
             )}
           </form.AppField>
 
-          <form.AppField name="websiteURL">
-            {(field) => (
-              <field.TextField
-                description="Enter your company's website or profile URL"
-                label="Company Profile / Website"
-                placeholder="https://www.example.com"
-              />
-            )}
-          </form.AppField>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <form.AppField name="websiteURL">
+              {(field) => (
+                <field.TextField
+                  description="Enter your company's website or profile URL"
+                  label="Company Profile / Website"
+                  placeholder="https://www.example.com"
+                />
+              )}
+            </form.AppField>
 
-          <form.AppField name="emailAddress">
-            {(field) => (
-              <field.TextField
-                description="We'll send confirmation to this email"
-                label="Email Address"
-                placeholder="company@example.com"
-                type="email"
-              />
-            )}
-          </form.AppField>
+            <form.AppField name="emailAddress">
+              {(field) => (
+                <field.TextField
+                  description="We'll send confirmation to this email"
+                  label="Email Address"
+                  placeholder="company@example.com"
+                  type="email"
+                />
+              )}
+            </form.AppField>
+          </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <form.AppField name="landline">
@@ -178,7 +173,7 @@ export function Step2Company({ form, sectors }: StepProps) {
                       e.preventDefault();
                     }
                   }}
-                  placeholder="+639######### or 09#########"
+                  placeholder="+63 9XX XXX XXXX"
                 />
               )}
             </form.AppField>
