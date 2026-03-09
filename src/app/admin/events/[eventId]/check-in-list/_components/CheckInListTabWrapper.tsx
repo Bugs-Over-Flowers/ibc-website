@@ -1,14 +1,6 @@
 "use client";
 
-import { CircleAlert } from "lucide-react";
 import { useState } from "react";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { getEventDays } from "@/server/events/mutations/getEventDays";
 import CheckInListStats from "./CheckInListStats";
