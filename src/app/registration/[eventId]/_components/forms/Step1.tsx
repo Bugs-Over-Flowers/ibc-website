@@ -1,5 +1,6 @@
 import { ArrowRight, Building, CheckCircle2, UserCircle } from "lucide-react";
 import type { FormEvent } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -38,8 +39,8 @@ const Step1 = ({ members }: Step1Props) => {
 
   return (
     <form onSubmit={onNext}>
-      <Card className="w-full overflow-hidden rounded-2xl border border-border/30">
-        <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
+      <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
+        <CardHeader className="border-border/30 border-b pb-6">
           <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
             <CheckCircle2 className="h-6 w-6 text-primary" />
             Member Verification
@@ -80,107 +81,128 @@ function MemberTypeSelection({
   membersOptions,
 }: MemberTypeSelectionProps) {
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const normalizedEventType = eventDetails?.eventType?.toLowerCase();
+  const isPrivateEvent = normalizedEventType === "private";
+  const isPublicEvent = normalizedEventType === "public";
+
+  useEffect(() => {
+    if (!isPrivateEvent) {
+      return;
+    }
+
+    if (form.getFieldValue("member") !== "member") {
+      form.setFieldValue("member", "member");
+    }
+
+    if (form.getFieldValue("nonMemberName")) {
+      form.setFieldValue("nonMemberName", "");
+    }
+  }, [form, isPrivateEvent]);
 
   return (
     <form.AppField name="member">
       {(field) => (
         <FieldSet className="space-y-3">
-          <RadioGroup
-            className="space-y-0"
-            onValueChange={(value) => field.handleChange(value)}
-            value={field.state.value}
-          >
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {[
-                {
-                  id: "member",
-                  value: "member",
-                  icon: Building,
-                  title: "Corporate Member",
-                  description: "I belong to a registered organization.",
-                  show: true,
-                },
-                {
-                  id: "nonmember",
-                  value: "nonmember",
-                  icon: UserCircle,
-                  title: "Non-member",
-                  description: "I am registering independently.",
-                  show: eventDetails?.eventType === "public",
-                },
-              ]
-                .filter((option) => option.show)
-                .map((option) => {
-                  const Icon = option.icon;
-                  return (
-                    <div className="flex-1" key={option.id}>
-                      <Label
-                        className={cn(
-                          "flex min-h-30 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
-                          field.state.value === option.value &&
-                            "border-primary bg-primary/5",
-                        )}
-                        htmlFor={option.id}
-                      >
-                        <RadioGroupItem
-                          className="peer sr-only"
-                          id={option.id}
-                          value={option.value}
-                        />
-                        <span
-                          className={cn(
-                            "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/40 text-muted-foreground",
-                            field.state.value === option.value &&
-                              "border-primary/30 bg-primary/10 text-primary",
-                          )}
-                        >
-                          <Icon className="h-5 w-5" />
-                        </span>
-                        <span className="font-semibold text-lg">
-                          {option.title}
-                        </span>
-                        <span className="mt-1 text-muted-foreground text-sm">
-                          {option.description}
-                        </span>
-                      </Label>
-                    </div>
-                  );
-                })}
-            </div>
-          </RadioGroup>
+          {isPrivateEvent ? (
+            <form.AppField name="businessMemberId">
+              {(field) => (
+                <field.SingleComboBoxField
+                  label="Select Organization"
+                  options={membersOptions}
+                  placeholder="Choose your organization"
+                />
+              )}
+            </form.AppField>
+          ) : (
+            <>
+              <RadioGroup
+                className="space-y-0"
+                onValueChange={(value) => field.handleChange(value)}
+                value={field.state.value}
+              >
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {[
+                    {
+                      id: "member",
+                      value: "member",
+                      icon: Building,
+                      title: "Corporate Member",
+                      description: "I belong to a registered organization.",
+                      show: true,
+                    },
+                    {
+                      id: "nonmember",
+                      value: "nonmember",
+                      icon: UserCircle,
+                      title: "Non-member",
+                      description: "I am registering independently.",
+                      show: isPublicEvent,
+                    },
+                  ]
+                    .filter((option) => option.show)
+                    .map((option) => {
+                      const Icon = option.icon;
+                      return (
+                        <div className="flex-1" key={option.id}>
+                          <Label
+                            className={cn(
+                              "flex min-h-30 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
+                              field.state.value === option.value &&
+                                "border-primary bg-primary/5",
+                            )}
+                            htmlFor={option.id}
+                          >
+                            <RadioGroupItem
+                              className="peer sr-only"
+                              id={option.id}
+                              value={option.value}
+                            />
+                            <span
+                              className={cn(
+                                "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/40 text-muted-foreground",
+                                field.state.value === option.value &&
+                                  "border-primary/30 bg-primary/10 text-primary",
+                              )}
+                            >
+                              <Icon className="h-5 w-5" />
+                            </span>
+                            <span className="font-semibold text-lg">
+                              {option.title}
+                            </span>
+                            <span className="mt-1 text-muted-foreground text-sm">
+                              {option.description}
+                            </span>
+                          </Label>
+                        </div>
+                      );
+                    })}
+                </div>
+              </RadioGroup>
 
-          {/* Unified Field Below Columns */}
-          <div className="slide-in-from-top-2 fade-in mt-6 animate-in space-y-3 duration-300">
-            {field.state.value === "member" ? (
-              <form.AppField name="businessMemberId">
-                {(field) => (
-                  <field.SingleComboBoxField
-                    label="Select Organization"
-                    options={membersOptions}
-                    placeholder="Choose your organization"
-                  />
-                )}
-              </form.AppField>
-            ) : eventDetails?.eventType === "public" &&
-              field.state.value === "nonmember" ? (
-              <form.AppField name="nonMemberName">
-                {(field) => (
-                  <field.TextField
-                    label="Organization or Company Name"
-                    placeholder="Acme Corp, Independent, etc."
-                  />
-                )}
-              </form.AppField>
-            ) : null}
-          </div>
-
-          {/* Private Event Notice */}
-          {eventDetails?.eventType === "private" &&
-            field.state.value === "nonmember" && (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-destructive text-sm">
-                This is a private event. Only IBC members can attend.
+              <div className="slide-in-from-top-2 fade-in mt-6 animate-in space-y-3 duration-300">
+                {field.state.value === "member" ? (
+                  <form.AppField name="businessMemberId">
+                    {(field) => (
+                      <field.SingleComboBoxField
+                        label="Select Organization"
+                        options={membersOptions}
+                        placeholder="Choose your organization"
+                      />
+                    )}
+                  </form.AppField>
+                ) : isPublicEvent && field.state.value === "nonmember" ? (
+                  <form.AppField name="nonMemberName">
+                    {(field) => (
+                      <field.TextField
+                        label="Organization or Company Name"
+                        placeholder="Acme Corp, Independent, etc."
+                      />
+                    )}
+                  </form.AppField>
+                ) : null}
               </div>
-            )}
+            </>
+          )}
         </FieldSet>
       )}
     </form.AppField>

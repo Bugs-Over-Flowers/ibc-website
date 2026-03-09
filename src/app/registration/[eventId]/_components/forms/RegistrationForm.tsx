@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import useRegistrationStore from "@/hooks/registration.store";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import Step1 from "./Step1";
@@ -9,6 +10,7 @@ import Step4 from "./Step4";
 
 interface RegistrationFormProps {
   members: Awaited<ReturnType<typeof getAllMembers>>;
+  initialEventDetails: RegistrationStoreEventDetails;
   sponsorUuid?: string;
   sponsoredRegistrationId?: string;
   sponsorFeeDeduction?: number;
@@ -17,6 +19,7 @@ interface RegistrationFormProps {
 
 export default function RegistrationForm({
   members,
+  initialEventDetails,
   sponsorUuid,
   sponsoredRegistrationId,
   sponsorFeeDeduction,
@@ -27,10 +30,22 @@ export default function RegistrationForm({
   const currentEventId = useRegistrationStore(
     (state) => state.eventDetails?.eventId,
   );
+  const setEventDetails = useRegistrationStore(
+    (state) => state.setEventDetails,
+  );
+  const resetStore = useRegistrationStore((state) => state.resetStore);
   const setSponsorInfo = useRegistrationStore((state) => state.setSponsorInfo);
   const clearSponsorInfo = useRegistrationStore(
     (state) => state.clearSponsorInfo,
   );
+
+  React.useEffect(() => {
+    if (initialEventDetails.eventId !== currentEventId) {
+      resetStore();
+    }
+
+    setEventDetails(initialEventDetails);
+  }, [initialEventDetails, currentEventId, resetStore, setEventDetails]);
 
   // Sync sponsor info from validated URL params
   React.useEffect(() => {

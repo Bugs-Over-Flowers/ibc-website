@@ -36,6 +36,15 @@ function DetailRow({
   );
 }
 
+function formatEnumValue(value: string): string {
+  return value
+    .replace(/([A-Z])/g, " $1")
+    .trim()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export function Step4Review({ form, applicationData, sectors }: StepProps) {
   const representativeKeysRef = useRef(new WeakMap<object, string>());
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -108,11 +117,7 @@ export function Step4Review({ form, applicationData, sectors }: StepProps) {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <DetailRow
                   label="Application Type"
-                  value={
-                    <span className="capitalize">
-                      {applicationData.step1.applicationType}
-                    </span>
-                  }
+                  value={formatEnumValue(applicationData.step1.applicationType)}
                 />
                 <DetailRow label="Industry Sector" value={sectorName} />
               </div>

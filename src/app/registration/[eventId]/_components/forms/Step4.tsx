@@ -1,6 +1,14 @@
 import { formatDate } from "date-fns";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { useMemo } from "react";
+import {
+  ArrowLeft,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
+  CreditCard,
+  Users,
+} from "lucide-react";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +42,7 @@ export default function Step4({ members }: Step4Props) {
   const registrationData = useRegistrationStore(
     (state) => state.registrationData,
   );
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
 
   const step1Data = registrationData.step1;
   const step2Data = registrationData.step2;
@@ -55,6 +64,20 @@ export default function Step4({ members }: Step4Props) {
     ? sponsorFeeDeduction * participantCount
     : 0;
   const finalTotal = subtotal - totalSponsorDiscount;
+  const selectedPaymentProof =
+    step3Data.paymentMethod === "online" ? step3Data.paymentProof : undefined;
+
+  useEffect(() => {
+    if (!selectedPaymentProof) {
+      setProofPreview(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedPaymentProof);
+    setProofPreview(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [selectedPaymentProof]);
 
   const onSubmit = (e?: React.SubmitEvent) => {
     if (e) {
@@ -66,8 +89,8 @@ export default function Step4({ members }: Step4Props) {
 
   return (
     <form onSubmit={onSubmit}>
-      <Card className="w-full overflow-hidden rounded-2xl border border-border/30">
-        <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
+      <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent pb-0 shadow-none ring-0">
+        <CardHeader className="border-border/30 border-b bg-card/5">
           <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
             <CheckCircle2 className="h-6 w-6 text-primary" />
             Review & Confirm
@@ -79,107 +102,186 @@ export default function Step4({ members }: Step4Props) {
         </CardHeader>
 
         <CardContent className="space-y-6 px-6">
-          <div className="rounded-xl border border-border/50 bg-background p-5">
-            <h3 className="mb-3 font-bold text-muted-foreground text-sm uppercase tracking-wider">
-              Event
-            </h3>
-            <p className="font-semibold text-foreground text-lg">
-              {eventDetails?.eventTitle}
-            </p>
-            <p className="text-muted-foreground">
-              {eventDetails?.eventStartDate
-                ? formatDate(eventDetails.eventStartDate, "MMMM d, yyyy")
-                : "Date TBA"}
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-border/50 bg-background p-5">
-            <h3 className="mb-3 font-bold text-muted-foreground text-sm uppercase tracking-wider">
-              Registration Type
-            </h3>
-            <p className="font-medium text-foreground text-lg capitalize">
-              {step1Data.member === "member"
-                ? "Corporate Member"
-                : "Non-member"}
-            </p>
-            <p className="mt-1 text-muted-foreground">{memberName}</p>
-          </div>
-
-          <div className="rounded-xl border border-border/50 bg-background p-5">
-            <h3 className="mb-3 font-bold text-muted-foreground text-sm uppercase tracking-wider">
-              Participants ({participantCount})
-            </h3>
-            <ul className="space-y-3">
-              <li className="flex items-center justify-between border-border/50 border-b pb-2">
-                <span className="font-medium text-foreground">
-                  {step2Data.registrant.firstName}{" "}
-                  {step2Data.registrant.lastName}
-                </span>
-                <Badge
-                  className="bg-primary/10 text-primary hover:bg-primary/20"
-                  variant="secondary"
-                >
-                  Primary
-                </Badge>
-              </li>
-              {step2Data.otherParticipants?.map((participant) => (
-                <li
-                  className="flex items-center justify-between border-border/50 border-b pb-2 last:border-0 last:pb-0"
-                  key={participant.id}
-                >
-                  <span className="text-foreground">
-                    {participant.firstName} {participant.lastName}
-                  </span>
-                  <span className="text-muted-foreground text-sm">
-                    Additional
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
-            <h3 className="mb-4 font-bold text-primary text-sm uppercase tracking-wider">
-              Payment Summary
-            </h3>
-
-            <div className="space-y-2 text-base">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Base Fee x {participantCount}
-                </span>
-                <span className="font-medium">
-                  Php {subtotal.toLocaleString()}
-                </span>
+          <Card className="rounded-2xl border border-border/50 bg-background">
+            <CardContent className="space-y-6 px-7 py-0">
+              <div className="flex items-center gap-2 font-bold text-primary">
+                <CalendarDays className="h-5 w-5" />
+                <span className="text-base uppercase tracking-wide">Event</span>
               </div>
-
-              {totalSponsorDiscount > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Sponsor Discount ({sponsoredBy})</span>
-                  <span className="font-medium">
-                    -Php {totalSponsorDiscount.toLocaleString()}
+              <div className="grid grid-cols-1 gap-4">
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                    Event Name
+                  </span>
+                  <span className="font-semibold text-base leading-tight">
+                    {eventDetails?.eventTitle}
                   </span>
                 </div>
-              )}
-
-              <div className="flex justify-between border-primary/20 border-t pt-3 font-bold text-foreground text-lg">
-                <span>Total Amount</span>
-                <span>Php {finalTotal.toLocaleString()}</span>
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                    Event Date
+                  </span>
+                  <span className="font-semibold text-base leading-tight">
+                    {eventDetails?.eventStartDate
+                      ? formatDate(eventDetails.eventStartDate, "MMMM d, yyyy")
+                      : "Date TBA"}
+                  </span>
+                </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="mt-4 flex items-center justify-between border-primary/20 border-t pt-4">
-              <span className="text-muted-foreground text-sm">
-                Payment Method:
-              </span>
-              <Badge
-                className="font-medium text-sm capitalize"
-                variant="outline"
-              >
-                {step3Data.paymentMethod}
-              </Badge>
-            </div>
-          </div>
+          <Card className="rounded-2xl border border-border/50 bg-background">
+            <CardContent className="space-y-6 px-7 py-0">
+              <div className="flex items-center gap-2 font-bold text-primary">
+                <Building2 className="h-5 w-5" />
+                <span className="text-base uppercase tracking-wide">
+                  Registration Type
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                    Type
+                  </span>
+                  <span className="font-semibold text-base capitalize leading-tight">
+                    {step1Data.member === "member"
+                      ? "Corporate Member"
+                      : "Non-member"}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                    Organization
+                  </span>
+                  <span className="font-semibold text-base leading-tight">
+                    {memberName}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl border border-border/50 bg-background">
+            <CardContent className="space-y-6 px-7 py-0">
+              <div className="flex items-center gap-2 font-bold text-primary">
+                <Users className="h-5 w-5" />
+                <span className="text-base uppercase tracking-wide">
+                  Participants ({participantCount})
+                </span>
+              </div>
+              <ul className="space-y-3">
+                <li className="grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-xl border border-primary/60 bg-primary/5 p-4 shadow-primary/10 shadow-sm transition-colors">
+                  <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 text-center font-bold text-primary text-sm leading-10">
+                    {step2Data.registrant.firstName?.[0] || ""}
+                    {step2Data.registrant.lastName?.[0] || ""}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm leading-tight">
+                      {step2Data.registrant.firstName}{" "}
+                      {step2Data.registrant.lastName}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-md border border-primary/50 bg-primary/10 px-2.5 py-1 font-semibold text-primary text-xs">
+                    Primary
+                  </span>
+                </li>
+                {step2Data.otherParticipants?.map((participant) => (
+                  <li
+                    className="grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-xl border border-border/50 bg-background p-4 shadow-sm transition-colors"
+                    key={participant.id}
+                  >
+                    <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 text-center font-bold text-primary text-sm leading-10">
+                      {participant.firstName?.[0] || ""}
+                      {participant.lastName?.[0] || ""}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm leading-tight">
+                        {participant.firstName} {participant.lastName}
+                      </p>
+                    </div>
+                    <span className="shrink-0 rounded-md border border-border px-2.5 py-1 font-medium text-muted-foreground text-xs">
+                      Additional
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl border border-border/50 bg-background">
+            <CardContent className="space-y-6 px-7 py-0">
+              <div className="flex items-center gap-2 font-bold text-primary">
+                <CreditCard className="h-5 w-5" />
+                <span className="text-base uppercase tracking-wide">
+                  Payment Summary
+                </span>
+              </div>
+
+              <div className="space-y-2 text-base">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Base Fee x {participantCount}
+                  </span>
+                  <span className="font-semibold text-base leading-tight">
+                    Php {subtotal.toLocaleString()}
+                  </span>
+                </div>
+
+                {totalSponsorDiscount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Sponsor Discount ({sponsoredBy})</span>
+                    <span className="font-semibold text-base leading-tight">
+                      -Php {totalSponsorDiscount.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex justify-between border-border/50 border-t pt-3 font-bold text-foreground text-lg">
+                  <span>Total Amount</span>
+                  <span>Php {finalTotal.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between border-border/50 border-t pt-4">
+                <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                  Payment Method
+                </span>
+                <Badge
+                  className="font-medium text-sm capitalize"
+                  variant="outline"
+                >
+                  {step3Data.paymentMethod}
+                </Badge>
+              </div>
+
+              {step3Data.paymentMethod === "online" && selectedPaymentProof ? (
+                <div className="mt-4 rounded-xl border border-border/50 bg-background p-4">
+                  <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                    Payment Proof
+                  </p>
+                  <div className="flex flex-col items-start gap-2">
+                    {proofPreview ? (
+                      <Image
+                        alt="Payment proof preview"
+                        className="h-12 w-12 rounded-md border border-border/60 bg-muted/20 object-contain p-0.5"
+                        height={48}
+                        src={proofPreview}
+                        unoptimized
+                        width={48}
+                      />
+                    ) : null}
+                    <span className="font-medium text-green-600">
+                      Proof Uploaded Successfully
+                    </span>
+                    <Badge className="mt-1 max-w-full" variant="outline">
+                      {selectedPaymentProof.name}
+                    </Badge>
+                  </div>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
 
           <TermsAndConditionsField form={form} />
         </CardContent>

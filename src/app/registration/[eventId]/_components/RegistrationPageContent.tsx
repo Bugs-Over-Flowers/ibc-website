@@ -119,6 +119,7 @@ export async function RegistrationPageContent({
           <Stepper />
           <div className="mt-8">
             <RegistrationForm
+              initialEventDetails={eventData}
               members={members}
               sponsoredRegistrationId={sponsorInfo?.sponsoredRegistrationId}
               sponsorFeeDeduction={sponsorInfo?.feeDeduction}

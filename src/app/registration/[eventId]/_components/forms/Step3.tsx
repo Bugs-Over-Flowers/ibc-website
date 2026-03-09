@@ -5,10 +5,11 @@ import {
   CreditCard,
   UploadCloud,
   Wallet,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import type { DragEvent, FormEvent } from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
@@ -28,7 +30,7 @@ import { useRegistrationStep3 } from "../../_hooks/useRegistrationStep3";
 
 const BANK_DETAILS = {
   bankName: "BPI",
-  accountName: "Iloilo Business Club",
+  accountName: "Iloilo Business Club, Inc.",
   accountNumber: "000XXXXXXXX",
 } as const;
 
@@ -73,7 +75,7 @@ export default function Step3() {
 
   return (
     <form onSubmit={onNext}>
-      <Card className="w-full overflow-hidden rounded-2xl border border-border/30">
+      <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
         <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
           <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
             <CreditCard className="h-6 w-6 text-primary" />
@@ -287,93 +289,184 @@ function PaymentProofUpload({
   handleDrag,
   handleDrop,
 }: PaymentProofUploadProps) {
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+
+  const isValidPaymentProof = (file: File): boolean => {
+    const allowedMimeTypes = ["image/png", "image/jpeg", "image/jpg"];
+    const maxFileSize = 5 * 1024 * 1024;
+    return allowedMimeTypes.includes(file.type) && file.size <= maxFileSize;
+  };
+
+  useEffect(() => {
+    const paymentMethod = form.state.values.paymentMethod;
+    const selectedFile =
+      paymentMethod === PaymentMethodEnum.enum.online
+        ? form.state.values.paymentProof
+        : undefined;
+
+    if (!selectedFile) {
+      setProofPreview(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedFile);
+    setProofPreview(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [form.state.values.paymentMethod, form.state.values]);
+
   return (
     <form.Subscribe selector={(state) => state.values.paymentMethod}>
       {(paymentMethod) =>
-        paymentMethod === "online" ? (
-          <div className="slide-in-from-top-4 fade-in animate-in space-y-4 duration-300">
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
-              <h4 className="mb-1 font-bold text-primary">
-                Bank Transfer Details:
-              </h4>
-              <p className="text-foreground">Bank: {BANK_DETAILS.bankName}</p>
-              <p className="text-foreground">
-                Account: {BANK_DETAILS.accountNumber}
-              </p>
-              <p className="text-foreground">
-                Name: {BANK_DETAILS.accountName}
-              </p>
-            </div>
+        paymentMethod === PaymentMethodEnum.enum.online ? (
+          <div className="space-y-4">
+            <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-linear-to-br from-primary/5 to-primary/2 p-6">
+              <div className="flex items-start gap-3">
+                <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-foreground">
+                    Bank Transfer Details
+                  </h4>
+                  <p className="mt-1 text-muted-foreground text-xs">
+                    Use your registration ID as payment reference
+                  </p>
+                </div>
+              </div>
 
-            <div className="relative h-40 w-40 overflow-hidden rounded-lg border border-border">
-              <Image
-                alt="qr code"
-                className="object-cover"
-                fill
-                src={IBCBPIQRCode}
-              />
+              <div className="space-y-2 rounded-lg border border-border/40 bg-background/50 p-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Bank</span>
+                  <span className="font-medium text-foreground">
+                    (BPI) Bank of the Philippine Islands
+                  </span>
+                </div>
+                <div className="border-border/20 border-t" />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Account Number</span>
+                  <span className="font-medium font-mono text-foreground">
+                    {BANK_DETAILS.accountNumber}
+                  </span>
+                </div>
+                <div className="border-border/20 border-t" />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Account Name</span>
+                  <span className="font-medium text-foreground">
+                    {BANK_DETAILS.accountName}
+                  </span>
+                </div>
+              </div>
+
+              <div className="relative h-40 w-40 overflow-hidden rounded-lg border border-border">
+                <Image
+                  alt="BPI QR code"
+                  className="object-cover"
+                  fill
+                  src={IBCBPIQRCode}
+                />
+              </div>
             </div>
 
             <form.AppField name="paymentProof">
               {(field) => {
-                const hasFile = field.state.value;
+                const selectedFile = field.state.value as File | undefined;
 
                 return (
                   <div className="space-y-2">
-                    <Label>Upload Payment Receipt</Label>
-                    <button
-                      className={cn(
-                        "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors",
-                        hasFile && "border-green-500 bg-green-50/50",
-                        !hasFile &&
-                          "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
-                        dragActive && !hasFile && "border-primary bg-primary/5",
-                      )}
-                      onDragEnter={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                      onDrop={(e) => {
-                        handleDrop(e);
-                        if (e.dataTransfer.files?.[0]) {
-                          field.handleChange(e.dataTransfer.files[0]);
-                        }
-                      }}
-                      type="button"
-                    >
-                      <input
-                        accept="image/png,image/jpeg,image/jpg"
-                        className="absolute inset-0 cursor-pointer opacity-0"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) {
-                            field.handleChange(e.target.files[0]);
+                    <Label className="font-semibold text-foreground text-sm">
+                      Upload Proof of Payment *
+                    </Label>
+                    <div className="space-y-2 rounded-xl bg-background p-0">
+                      <button
+                        className={cn(
+                          "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors",
+                          selectedFile && "border-green-500 bg-green-50/50",
+                          !selectedFile &&
+                            "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
+                          dragActive &&
+                            !selectedFile &&
+                            "border-primary bg-primary/5",
+                        )}
+                        onDragEnter={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDragOver={handleDrag}
+                        onDrop={(e) => {
+                          handleDrop(e);
+                          if (e.dataTransfer.files?.[0]) {
+                            const droppedFile = e.dataTransfer.files[0];
+                            if (!isValidPaymentProof(droppedFile)) {
+                              return;
+                            }
+
+                            field.handleChange(droppedFile);
                           }
                         }}
-                        tabIndex={-1}
-                        type="file"
-                      />
+                        type="button"
+                      >
+                        <input
+                          accept="image/png,image/jpeg,image/jpg"
+                          className="absolute inset-0 cursor-pointer opacity-0"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file || !isValidPaymentProof(file)) {
+                              return;
+                            }
 
-                      {hasFile ? (
-                        <>
-                          <CheckCircle2 className="mb-2 h-8 w-8 text-green-600" />
-                          <span className="font-medium text-green-600">
-                            Receipt Uploaded Successfully
-                          </span>
-                          <Badge className="mt-2" variant="outline">
-                            {hasFile.name}
-                          </Badge>
-                        </>
-                      ) : (
-                        <>
-                          <UploadCloud className="mb-2 h-8 w-8 text-muted-foreground" />
-                          <span className="font-medium text-muted-foreground">
-                            Click to upload or drag and drop
-                          </span>
-                          <span className="mt-1 text-muted-foreground text-xs">
-                            PNG, JPG up to 5MB
-                          </span>
-                        </>
-                      )}
-                    </button>
+                            field.handleChange(file);
+                          }}
+                          tabIndex={-1}
+                          type="file"
+                        />
+
+                        {selectedFile ? (
+                          <>
+                            {proofPreview ? (
+                              <Image
+                                alt="Payment proof preview"
+                                className="mt-3 h-12 w-12 rounded-md object-contain"
+                                height={48}
+                                src={proofPreview}
+                                unoptimized
+                                width={48}
+                              />
+                            ) : null}
+                            <span className="font-medium text-green-600">
+                              Proof Uploaded Successfully
+                            </span>
+                            <Badge className="mt-2" variant="outline">
+                              {selectedFile.name}
+                            </Badge>
+                          </>
+                        ) : (
+                          <>
+                            <UploadCloud className="mb-2 h-8 w-8 text-muted-foreground" />
+                            <span className="font-medium text-muted-foreground">
+                              Click to upload or drag and drop
+                            </span>
+                            <span className="mt-1 text-muted-foreground text-xs">
+                              PNG, JPG up to 5MB
+                            </span>
+                          </>
+                        )}
+                      </button>
+
+                      {selectedFile ? (
+                        <div className="mt-3 flex justify-center">
+                          <Button
+                            className="h-9 rounded-lg border-destructive/30 px-4 font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => field.handleChange(undefined)}
+                            size="sm"
+                            type="button"
+                            variant="outline"
+                          >
+                            <X className="mr-1 h-4 w-4" />
+                            Remove payment proof
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                    <FieldError errors={field.state.meta.errors} />
                   </div>
                 );
               }}

@@ -62,7 +62,7 @@ export default function Step2() {
 
   return (
     <form onSubmit={onNext}>
-      <Card className="w-full overflow-hidden rounded-2xl border border-border/30">
+      <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
         <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
           <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
             <Users className="h-6 w-6 text-primary" />
