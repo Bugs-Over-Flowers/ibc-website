@@ -1,5 +1,13 @@
+import { CircleAlert } from "lucide-react";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { TabsContent } from "@/components/ui/tabs";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/server";
@@ -8,6 +16,7 @@ import { getEventDays } from "@/server/events/mutations/getEventDays";
 import BackButton from "../_components/BackButton";
 import CheckInListContent from "./_components/CheckInListContent";
 import CheckInListTabWrapper from "./_components/CheckInListTabWrapper";
+import DraftEventEmptyComponent from "./_components/DraftEventEmptyComponent";
 
 type CheckInPageWrapperProps =
   PageProps<"/admin/events/[eventId]/check-in-list">;
@@ -52,12 +61,22 @@ async function CheckInPage({
     .eq("eventId", eventId)
     .single();
 
+  if (!event) {
+    return (
+      <div className="text-destructive">Failed to load event details.</div>
+    );
+  }
+
+  if (!eventDays?.length) {
+    return <DraftEventEmptyComponent />;
+  }
+
   // Fetch stats
   const statsResult = await tryCatch(
     getCheckInStats(cookieStore.getAll(), eventId),
   );
 
-  if (!statsResult.success || !event) {
+  if (!statsResult.success) {
     return (
       <div className="text-destructive">Failed to load check-in stats.</div>
     );
