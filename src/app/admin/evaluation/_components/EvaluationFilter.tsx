@@ -80,11 +80,15 @@ const truncateText = (text: string, maxLength: number = 50): string => {
 interface EvaluationFilterProps {
   evaluations: EvaluationWithEventRpc[];
   onFilter: (filtered: EvaluationWithEventRpc[]) => void;
+  hideEventFilter?: boolean;
+  searchPlaceholder?: string;
 }
 
 export function EvaluationFilter({
   evaluations,
   onFilter,
+  hideEventFilter = false,
+  searchPlaceholder = "Search evaluations by event name or respondent name...",
 }: EvaluationFilterProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<string>("");
@@ -183,7 +187,7 @@ export function EvaluationFilter({
 
   const hasActiveFilters =
     searchTerm ||
-    selectedEvent ||
+    (!hideEventFilter && selectedEvent) ||
     selectedRating !== "all" ||
     selectedDatePreset !== "all" ||
     sortOrder !== "latest";
@@ -199,7 +203,7 @@ export function EvaluationFilter({
           <Input
             className="h-10 rounded-xl border-border/40 bg-background/80 pr-12 pl-12 text-base transition-all placeholder:text-muted-foreground/50 focus:border-primary/40 focus:ring-primary/20"
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search evaluations by event name or respondent name..."
+            placeholder={searchPlaceholder}
             type="text"
             value={searchTerm}
           />
@@ -279,64 +283,68 @@ export function EvaluationFilter({
           </DropdownMenu>
 
           {/* Event Filter Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className={cn(
-                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
-                selectedEvent && "border-primary/40 bg-primary/5",
-              )}
-            >
-              <div className="flex items-center gap-2">
-                <Filter
-                  className={cn(
-                    "h-4 w-4",
-                    selectedEvent ? "text-primary" : "text-muted-foreground/70",
-                  )}
-                />
-                <span
-                  className={cn(
-                    "text-sm",
-                    selectedEvent
-                      ? "text-foreground"
-                      : "text-muted-foreground/70",
-                  )}
-                >
-                  {truncateText(selectedEvent) || "All Events"}
-                </span>
-              </div>
-              <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-[220px] rounded-xl border-border/50 bg-card p-1 shadow-2xl"
-            >
-              <DropdownMenuItem
+          {!hideEventFilter ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
                 className={cn(
-                  "cursor-pointer rounded-lg text-sm transition-colors",
-                  !selectedEvent
-                    ? "bg-primary/10 font-medium text-primary"
-                    : "hover:bg-muted/50",
+                  "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border/40 bg-background/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                  selectedEvent && "border-primary/40 bg-primary/5",
                 )}
-                onClick={() => setSelectedEvent("")}
               >
-                All Events
-              </DropdownMenuItem>
-              {uniqueEvents.map((event) => (
+                <div className="flex items-center gap-2">
+                  <Filter
+                    className={cn(
+                      "h-4 w-4",
+                      selectedEvent
+                        ? "text-primary"
+                        : "text-muted-foreground/70",
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "text-sm",
+                      selectedEvent
+                        ? "text-foreground"
+                        : "text-muted-foreground/70",
+                    )}
+                  >
+                    {truncateText(selectedEvent) || "All Events"}
+                  </span>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-[220px] rounded-xl border-border/50 bg-card p-1 shadow-2xl"
+              >
                 <DropdownMenuItem
                   className={cn(
                     "cursor-pointer rounded-lg text-sm transition-colors",
-                    selectedEvent === event
+                    !selectedEvent
                       ? "bg-primary/10 font-medium text-primary"
                       : "hover:bg-muted/50",
                   )}
-                  key={event}
-                  onClick={() => setSelectedEvent(event)}
+                  onClick={() => setSelectedEvent("")}
                 >
-                  {truncateText(event)}
+                  All Events
                 </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {uniqueEvents.map((event) => (
+                  <DropdownMenuItem
+                    className={cn(
+                      "cursor-pointer rounded-lg text-sm transition-colors",
+                      selectedEvent === event
+                        ? "bg-primary/10 font-medium text-primary"
+                        : "hover:bg-muted/50",
+                    )}
+                    key={event}
+                    onClick={() => setSelectedEvent(event)}
+                  >
+                    {truncateText(event)}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
 
           {/* Rating Filter Dropdown */}
           <DropdownMenu>
@@ -491,7 +499,7 @@ export function EvaluationFilter({
                   </button>
                 </motion.span>
               )}
-              {selectedEvent && (
+              {!hideEventFilter && selectedEvent && (
                 <motion.span
                   animate={{ opacity: 1, scale: 1 }}
                   className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-sm"
