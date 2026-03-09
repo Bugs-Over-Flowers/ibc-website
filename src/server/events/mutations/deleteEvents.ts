@@ -29,17 +29,17 @@ export async function deleteEvents(eventId: string) {
     // Delete associated header image from Supabase Storage
     if (
       event.eventHeaderUrl?.includes(
-        "/storage/v1/object/public/headerImage/event-headers/",
+        "/storage/v1/object/public/headerimage/event-headers/",
       )
     ) {
       // Extract the file path from the URL
       const match = event.eventHeaderUrl.match(
-        /headerImage\/event-headers\/(.+)$/,
+        /headerimage\/event-headers\/(.+)$/,
       );
       if (match?.[1]) {
         const filePath = `event-headers/${match[1]}`;
         const { error: storageError } = await supabase.storage
-          .from("headerImage")
+          .from("headerimage")
           .remove([filePath]);
         if (storageError) {
           // Log but do not block event deletion
