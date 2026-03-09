@@ -62,13 +62,13 @@ export default function Step2() {
 
   return (
     <form onSubmit={onNext}>
-      <Card className="w-full overflow-hidden rounded-2xl border-border bg-card/10 shadow-md ring-0">
-        <CardHeader className="border-border/50 border-b bg-card/10 pb-6">
+      <Card className="w-full overflow-hidden rounded-2xl border border-border/30">
+        <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
           <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
             <Users className="h-6 w-6 text-primary" />
             Participant Details
           </CardTitle>
-          <CardDescription className="text-base text-muted-foreground">
+          <CardDescription className="text-muted-foreground text-sm">
             Enter the details of the primary registrant and any additional
             attendees.
           </CardDescription>

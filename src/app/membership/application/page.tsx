@@ -1,17 +1,13 @@
-import { cookies } from "next/headers";
 import { Suspense } from "react";
-import { getSectors } from "@/server/membership/queries/getSectors";
-import { MembershipApplicationFormWrapper } from "./_components/MembershipApplicationFormWrapper";
+import { Spinner } from "@/components/ui/spinner";
+import { MembershipApplicationPageContent } from "./_components/MembershipApplicationPageContent";
 
-export default async function MembershipApplicationPage() {
-  const cookieStore = await cookies();
-  const sectors = await getSectors(cookieStore.getAll());
-
+export default function MembershipApplicationPage() {
   return (
-    <div className="container mx-auto px-4 py-8 md:py-25">
-      <Suspense>
-        <MembershipApplicationFormWrapper sectors={sectors} />
+    <main className="min-h-screen w-full bg-slate-50/50 pb-20">
+      <Suspense fallback={<Spinner />}>
+        <MembershipApplicationPageContent />
       </Suspense>
-    </div>
+    </main>
   );
 }

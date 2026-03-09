@@ -38,13 +38,13 @@ const Step1 = ({ members }: Step1Props) => {
 
   return (
     <form onSubmit={onNext}>
-      <Card className="w-full overflow-hidden rounded-2xl border-border bg-card/10 shadow-md ring-0">
-        <CardHeader className="border-border/50 border-b bg-card/10 pb-6">
+      <Card className="w-full overflow-hidden rounded-2xl border border-border/30">
+        <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
           <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
             <CheckCircle2 className="h-6 w-6 text-primary" />
             Member Verification
           </CardTitle>
-          <CardDescription className="text-base text-muted-foreground">
+          <CardDescription className="text-muted-foreground text-sm">
             Please identify your affiliation with the organization.
           </CardDescription>
         </CardHeader>
@@ -116,7 +116,7 @@ function MemberTypeSelection({
                     <div className="flex-1" key={option.id}>
                       <Label
                         className={cn(
-                          "flex min-h-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-border bg-transparent p-3 text-center transition-all md:min-h-20",
+                          "flex min-h-30 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
                           field.state.value === option.value &&
                             "border-primary bg-primary/5",
                         )}
@@ -127,7 +127,15 @@ function MemberTypeSelection({
                           id={option.id}
                           value={option.value}
                         />
-                        <Icon className="mb-3 h-8 w-8 text-primary" />
+                        <span
+                          className={cn(
+                            "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/40 text-muted-foreground",
+                            field.state.value === option.value &&
+                              "border-primary/30 bg-primary/10 text-primary",
+                          )}
+                        >
+                          <Icon className="h-5 w-5" />
+                        </span>
                         <span className="font-semibold text-lg">
                           {option.title}
                         </span>

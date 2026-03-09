@@ -66,13 +66,13 @@ export default function Step4({ members }: Step4Props) {
 
   return (
     <form onSubmit={onSubmit}>
-      <Card className="w-full overflow-hidden rounded-2xl border-border bg-card/10 shadow-md ring-0">
-        <CardHeader className="border-border/50 border-b bg-card/10 pb-6">
+      <Card className="w-full overflow-hidden rounded-2xl border border-border/30">
+        <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
           <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
             <CheckCircle2 className="h-6 w-6 text-primary" />
             Review & Confirm
           </CardTitle>
-          <CardDescription className="text-base text-muted-foreground">
+          <CardDescription className="text-muted-foreground text-sm">
             Please review your details before submitting your final
             registration.
           </CardDescription>

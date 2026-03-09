@@ -73,7 +73,7 @@ export default function RegistrationForm({
     );
   }
   return (
-    <main className="pb-10">
+    <main>
       {step === 1 ? (
         <Step1 members={members} />
       ) : step === 2 ? (

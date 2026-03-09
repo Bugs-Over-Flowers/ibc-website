@@ -1,51 +1,102 @@
 "use client";
 
 import { useStore } from "@tanstack/react-form";
-import { CheckCircle2, ChevronLeft } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  CreditCard,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
+import type { ReactNode } from "react";
+import { Step1Status } from "@/app/membership/application/_components/forms/Step1Status";
+import { Step2Company } from "@/app/membership/application/_components/forms/Step2Company";
+import { Step3Representatives } from "@/app/membership/application/_components/forms/Step3Representatives";
+import { Step4Review } from "@/app/membership/application/_components/forms/Step4Review";
+import { MembershipStepper } from "@/app/membership/application/_components/MembershipStepper";
 import { useMembershipStep1 } from "@/app/membership/application/_hooks/useMembershipStep1";
 import { useMembershipStep2 } from "@/app/membership/application/_hooks/useMembershipStep2";
 import { useMembershipStep3 } from "@/app/membership/application/_hooks/useMembershipStep3";
 import { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
 import CenterSpinner from "@/components/CenterSpinner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import useMembershipApplicationStore from "@/hooks/membershipApplication.store";
-import { cn } from "@/lib/utils";
 import type { Sector } from "@/server/membership/queries/getSectors";
-import { Step1Status } from "./forms/Step1Status";
-import { Step2Company } from "./forms/Step2Company";
-import { Step3Representatives } from "./forms/Step3Representatives";
-import { Step4Review } from "./forms/Step4Review";
 
 const steps = [
   {
     id: 1,
-    title: "Membership Status",
-    description: "Select your membership type",
+    title: "Status",
+    description: "Select membership type",
+    icon: ShieldCheck,
   },
   {
     id: 2,
-    title: "Company Info",
-    description: "Provide your company information",
+    title: "Company",
+    description: "Business details",
+    icon: Building2,
   },
   {
     id: 3,
     title: "Representatives",
-    description: "Add authorized representatives",
+    description: "Add authorized people",
+    icon: Users,
   },
-  { id: 4, title: "Review & Submit", description: "Confirm and submit" },
+  {
+    id: 4,
+    title: "Review",
+    description: "Confirm and submit",
+    icon: CreditCard,
+  },
 ];
 
 interface MembershipApplicationFormProps {
   sectors: Sector[];
 }
 
+interface MembershipStepCardProps {
+  children: ReactNode;
+  description: string;
+  icon: LucideIcon;
+  title: string;
+}
+
+function MembershipStepCard({
+  children,
+  description,
+  icon: Icon,
+  title,
+}: MembershipStepCardProps) {
+  return (
+    <Card className="w-full overflow-hidden rounded-2xl border border-border/30">
+      <CardHeader className="border-border/30 border-b bg-card/5 pb-6">
+        <CardTitle className="flex items-center gap-2 font-semibold text-2xl">
+          <Icon className="h-6 w-6 text-primary" />
+          {title}
+        </CardTitle>
+        <CardDescription className="text-muted-foreground text-sm">
+          {description}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-6 px-6">{children}</CardContent>
+    </Card>
+  );
+}
+
 export function MembershipApplicationForm({
   sectors,
 }: MembershipApplicationFormProps) {
-  const router = useRouter();
   const currentStep = useMembershipApplicationStore((state) => state.step);
   const setStep = useMembershipApplicationStore((state) => state.setStep);
   const resetStore = useMembershipApplicationStore((state) => state.resetStore);
@@ -90,247 +141,191 @@ export function MembershipApplicationForm({
     return <CenterSpinner scale={10} />;
   }
 
-  return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-      {/* Sidebar / Stepper */}
-      <div className="w-full space-y-4 lg:w-1/4 lg:space-y-6">
-        <Link href="/">
-          <Button className="-ml-4" variant="ghost">
-            <ChevronLeft />
-            Back to Home
-          </Button>
-        </Link>
-        <div className="space-y-2 lg:space-y-4">
-          <h2 className="font-bold text-lg text-primary lg:text-xl">
-            Iloilo Business Club
-          </h2>
-          <p className="text-muted-foreground text-xs lg:text-sm">
-            Membership Application
-          </p>
-        </div>
+  const currentStepMeta = steps[currentStep - 1];
 
-        {/* Mobile Stepper - Horizontal */}
-        <div className="flex items-center justify-between gap-2 lg:hidden">
-          {steps.map((step, index) => (
-            <div className="flex flex-1 items-center" key={step.id}>
-              <div
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-medium text-xs transition-colors",
-                  currentStep === step.id
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : currentStep > step.id
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-muted-foreground/30 text-muted-foreground",
-                )}
-              >
-                {currentStep > step.id ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : (
-                  step.id
-                )}
-              </div>
-              {index < steps.length - 1 && (
-                <div
-                  className={cn(
-                    "mx-2 h-[2px] flex-1",
-                    currentStep > step.id ? "bg-primary" : "bg-muted",
-                  )}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop Stepper - Vertical */}
-        <div className="relative hidden space-y-4 lg:block">
-          {/* Progress Bar Background */}
-          <div className="absolute top-2 bottom-2 left-[15px] -z-10 w-[2px] bg-muted" />
-
-          {steps.map((step) => (
-            <div
-              className="relative flex items-start gap-4 bg-background"
-              key={step.id}
+  const stepContent =
+    currentStep === 1 ? (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleNext(step1Form.form);
+        }}
+      >
+        <MembershipStepCard
+          description={currentStepMeta.description}
+          icon={currentStepMeta.icon}
+          title={currentStepMeta.title}
+        >
+          <Step1Status
+            form={step1Form.form}
+            memberValidation={step1Form.memberValidation}
+            resetMemberValidation={step1Form.resetMemberValidation}
+          />
+          <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+            <Button
+              className="rounded-xl"
+              onClick={() => {
+                resetStore();
+                window.location.assign("/");
+              }}
+              size="lg"
+              type="button"
+              variant="ghost"
             >
-              <div
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-medium text-sm transition-colors",
-                  currentStep === step.id
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : currentStep > step.id
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-muted-foreground/30 text-muted-foreground",
-                )}
-              >
-                {currentStep > step.id ? (
-                  <CheckCircle2 className="h-5 w-5" />
-                ) : (
-                  step.id
-                )}
-              </div>
-              <div className="space-y-1 pt-1">
-                <p
-                  className={cn(
-                    "font-medium text-sm leading-none",
-                    currentStep === step.id
-                      ? "text-foreground"
-                      : "text-muted-foreground",
-                  )}
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
+            <step1Form.form.Subscribe selector={(state) => state.isSubmitting}>
+              {(nextSubmitting) => (
+                <Button
+                  className="rounded-xl px-8 shadow-md"
+                  disabled={nextSubmitting}
+                  size="lg"
+                  type="submit"
                 >
-                  {step.title}
-                </p>
-                <p className="text-muted-foreground text-xs">
-                  {step.description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+                  {nextSubmitting ? "Saving..." : "Continue to Company"}
+                  {!nextSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+              )}
+            </step1Form.form.Subscribe>
+          </div>
+        </MembershipStepCard>
+      </form>
+    ) : currentStep === 2 ? (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleNext(step2Form);
+        }}
+      >
+        <MembershipStepCard
+          description={currentStepMeta.description}
+          icon={currentStepMeta.icon}
+          title={currentStepMeta.title}
+        >
+          <Step2Company form={step2Form} sectors={sectors} />
+          <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+            <Button
+              className="rounded-xl"
+              onClick={() => handleBack(1)}
+              size="lg"
+              type="button"
+              variant="ghost"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <step2Form.Subscribe selector={(state) => state.isSubmitting}>
+              {(nextSubmitting) => (
+                <Button
+                  className="rounded-xl px-8 shadow-md"
+                  disabled={nextSubmitting}
+                  size="lg"
+                  type="submit"
+                >
+                  {nextSubmitting ? "Saving..." : "Continue to Representatives"}
+                  {!nextSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+              )}
+            </step2Form.Subscribe>
+          </div>
+        </MembershipStepCard>
+      </form>
+    ) : currentStep === 3 ? (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleNext(step3Form);
+        }}
+      >
+        <MembershipStepCard
+          description={currentStepMeta.description}
+          icon={currentStepMeta.icon}
+          title={currentStepMeta.title}
+        >
+          <Step3Representatives form={step3Form} />
+          <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+            <Button
+              className="rounded-xl"
+              onClick={() => handleBack(2)}
+              size="lg"
+              type="button"
+              variant="ghost"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <step3Form.Subscribe selector={(state) => state.isSubmitting}>
+              {(nextSubmitting) => (
+                <Button
+                  className="rounded-xl px-8 shadow-md"
+                  disabled={nextSubmitting}
+                  size="lg"
+                  type="submit"
+                >
+                  {nextSubmitting ? "Saving..." : "Continue to Review"}
+                  {!nextSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+              )}
+            </step3Form.Subscribe>
+          </div>
+        </MembershipStepCard>
+      </form>
+    ) : (
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          await step4Form.handleSubmit();
+          scrollToTop();
+        }}
+      >
+        <MembershipStepCard
+          description={currentStepMeta.description}
+          icon={currentStepMeta.icon}
+          title={currentStepMeta.title}
+        >
+          <Step4Review applicationData={applicationData} form={step4Form} />
+          <div className="mt-8 flex items-center justify-between border-border/50 border-t pt-4">
+            <Button
+              className="rounded-xl"
+              onClick={() => {
+                step4GoBack();
+                scrollToTop();
+              }}
+              size="lg"
+              type="button"
+              variant="ghost"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <step4Form.AppForm>
+              <step4Form.SubmitButton
+                className="rounded-xl px-8 shadow-lg shadow-primary/25 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                isSubmittingLabel="Submitting..."
+                label={
+                  <span className="inline-flex items-center gap-2">
+                    Submit Application
+                    <CheckCircle2 className="h-4 w-4" />
+                  </span>
+                }
+              />
+            </step4Form.AppForm>
+          </div>
+        </MembershipStepCard>
+      </form>
+    );
 
-      {/* Main Content */}
-      <div className="flex-1">
-        <Card>
-          <CardHeader>
-            <CardTitle>{steps[currentStep - 1].title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Step 1 */}
-            {currentStep === 1 && (
-              <form
-                className="space-y-6"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleNext(step1Form.form);
-                }}
-              >
-                <Step1Status
-                  form={step1Form.form}
-                  memberValidation={step1Form.memberValidation}
-                  resetMemberValidation={step1Form.resetMemberValidation}
-                />
-                <div className="flex justify-between pt-6">
-                  <Button
-                    onClick={() => {
-                      resetStore();
-                      router.push("/");
-                    }}
-                    type="button"
-                    variant="outline"
-                  >
-                    Cancel
-                  </Button>
-                  <step1Form.form.Subscribe
-                    selector={(state) => state.isSubmitting}
-                  >
-                    {(isSubmitting) => (
-                      <Button disabled={isSubmitting} type="submit">
-                        {isSubmitting ? "Saving..." : "Next"}
-                      </Button>
-                    )}
-                  </step1Form.form.Subscribe>
-                </div>
-              </form>
-            )}
-
-            {/* Step 2 */}
-            {currentStep === 2 && (
-              <form
-                className="space-y-6"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleNext(step2Form);
-                }}
-              >
-                <Step2Company form={step2Form} sectors={sectors} />
-                <div className="flex justify-between pt-6">
-                  <Button
-                    onClick={() => handleBack(1)}
-                    type="button"
-                    variant="outline"
-                  >
-                    Back
-                  </Button>
-                  <step2Form.Subscribe selector={(state) => state.isSubmitting}>
-                    {(isSubmitting) => (
-                      <Button disabled={isSubmitting} type="submit">
-                        {isSubmitting ? "Saving..." : "Next"}
-                      </Button>
-                    )}
-                  </step2Form.Subscribe>
-                </div>
-              </form>
-            )}
-
-            {/* Step 3 */}
-            {currentStep === 3 && (
-              <form
-                className="space-y-6"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleNext(step3Form);
-                }}
-              >
-                <Step3Representatives form={step3Form} />
-                <div className="flex justify-between pt-6">
-                  <Button
-                    onClick={() => handleBack(2)}
-                    type="button"
-                    variant="outline"
-                  >
-                    Back
-                  </Button>
-                  <step3Form.Subscribe selector={(state) => state.isSubmitting}>
-                    {(isSubmitting) => (
-                      <Button disabled={isSubmitting} type="submit">
-                        {isSubmitting ? "Saving..." : "Next"}
-                      </Button>
-                    )}
-                  </step3Form.Subscribe>
-                </div>
-              </form>
-            )}
-
-            {/* Step 4 */}
-            {currentStep === 4 && (
-              <form
-                className="space-y-6"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  await step4Form.handleSubmit();
-                  scrollToTop();
-                }}
-              >
-                <Step4Review
-                  applicationData={applicationData}
-                  form={step4Form}
-                />
-                <div className="flex justify-between pt-6">
-                  <Button
-                    onClick={() => {
-                      step4GoBack();
-                      scrollToTop();
-                    }}
-                    type="button"
-                    variant="outline"
-                  >
-                    Back
-                  </Button>
-                  <step4Form.AppForm>
-                    <step4Form.SubmitButton
-                      isSubmittingLabel="Submitting..."
-                      label="Submit Application"
-                    />
-                  </step4Form.AppForm>
-                </div>
-              </form>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+  return (
+    <Card className="w-full overflow-hidden rounded-2xl border border-border/50 bg-background p-6 pb-3 shadow-xl md:p-8 md:pb-4">
+      <CardContent className="px-0">
+        <MembershipStepper currentStep={currentStep} steps={steps} />
+        <div className="mt-8">{stepContent}</div>
+      </CardContent>
+    </Card>
   );
 }

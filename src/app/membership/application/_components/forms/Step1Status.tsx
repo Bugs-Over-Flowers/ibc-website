@@ -1,5 +1,14 @@
 import { useStore } from "@tanstack/react-form";
-import { CheckCircle2, X } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Loader2,
+  RefreshCw,
+  UserRoundPen,
+  UserRoundPlus,
+} from "lucide-react";
 import { useEffect } from "react";
 import type { useMembershipStep1 } from "@/app/membership/application/_hooks/useMembershipStep1";
 import { useMemberValidationTimer } from "@/app/membership/application/_hooks/useMemberValidationTimer";
@@ -31,19 +40,16 @@ export function Step1Status({
     (state) => state.values.businessMemberId,
   );
 
-  // Use persistent timer hook that survives navigation
   const { remainingTime, isInCooldown: hookIsInCooldown } =
     useMemberValidationTimer();
 
   const showMemberIdInput =
     applicationType === "renewal" || applicationType === "updating";
 
-  // Reset validation when member ID changes to a different value
   useEffect(() => {
     const currentMemberId = businessMemberId?.trim() || null;
     const lastValidatedId = memberValidation.lastValidatedMemberId;
 
-    // Only reset if we have a different member ID than what was last validated
     if (
       lastValidatedId &&
       currentMemberId !== lastValidatedId &&
@@ -58,18 +64,14 @@ export function Step1Status({
     memberValidation.validationStatus,
   ]);
 
-  // Reset when application type changes to new member - clear member ID and validation
   useEffect(() => {
     if (applicationType === "newMember") {
       resetMemberValidation();
-      // Clear the businessMemberId field value and reset its validation state
       form.setFieldValue("businessMemberId", "");
       form.resetField("businessMemberId");
     }
   }, [applicationType, resetMemberValidation, form]);
 
-  // Reset validation when switching between renewal and update info
-  // This prevents the loophole of validating on one type and using on another
   useEffect(() => {
     if (
       (applicationType === "renewal" || applicationType === "updating") &&
@@ -86,98 +88,104 @@ export function Step1Status({
     resetMemberValidation,
   ]);
 
-  // Use the isInCooldown value from the persistent timer hook
   const isInCooldown = hookIsInCooldown;
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-lg border bg-blue-50 p-4 text-blue-900">
-        <h3 className="mb-2 flex items-center gap-2 font-semibold">
-          ℹ️ Membership Guidelines
-        </h3>
-        <ul className="list-disc space-y-2 pl-5 text-sm">
+    <div className="space-y-8">
+      <div className="space-y-4 rounded-xl border border-primary/20 bg-p5 p-6">
+        <div className="flex items-center gap-2 font-bold text-primary">
+          <Info className="h-5 w-5" />
+          <h3>Membership Guidelines</h3>
+        </div>
+
+        <ul className="list-disc space-y-2 pl-5 text-muted-foreground text-sm">
+          <li>Memberships are dated on the first day of the payment month.</li>
           <li>
-            All new or renewed memberships shall be dated on the first day of
-            the month during which the membership fee was paid.
+            Corporate members may request representative updates if reassigned.
           </li>
           <li>
-            Memberships are by invitation, but may be proposed by any member,
-            subject to endorsement by the Membership Committee and Board
-            approval.
+            Memberships remain subject to Membership Committee endorsement and
+            Board approval.
           </li>
           <li>
-            Corporate members may request representation changes in case of
-            re-assignment or death of the primary member.
-          </li>
-          <li>
-            No refund will be given if membership is terminated before the next
-            anniversary date.
+            By continuing, you consent to processing under the Data Privacy Act
+            of 2012.
           </li>
         </ul>
-        <p className="mt-4 text-blue-700 text-xs">
-          By proceeding, you consent to the collection and processing of your
-          personal information in accordance with Republic Act No. 10173 (Data
-          Privacy Act of 2012).
-        </p>
       </div>
 
       <div className="space-y-4">
-        <Label className="text-base">Select Membership Status *</Label>
+        <Label className="font-bold text-base">Select Membership Status</Label>
         <form.AppField name="applicationType">
           {(field) => {
             const options: {
               value: MembershipApplicationStep1Schema["applicationType"];
               label: string;
               description: string;
+              icon: LucideIcon;
             }[] = [
               {
                 value: "newMember",
                 label: "New Member",
                 description: "First time joining",
+                icon: UserRoundPlus,
               },
               {
                 value: "renewal",
                 label: "Renewal",
                 description: "Renewing membership",
+                icon: RefreshCw,
               },
               {
                 value: "updating",
                 label: "Update Info",
-                description: "Updating details",
+                description: "Changing details",
+                icon: UserRoundPen,
               },
             ];
 
             return (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {options.map((option) => (
-                  <button
-                    className={cn(
-                      "flex cursor-pointer flex-col items-center justify-between rounded-md border-2 bg-popover p-4 transition-colors hover:bg-accent hover:text-accent-foreground",
-                      field.state.value === option.value
-                        ? "border-primary bg-primary/5"
-                        : "border-muted",
-                    )}
-                    key={option.value}
-                    onClick={() => field.handleChange(option.value)}
-                    type="button"
-                  >
-                    <span className="font-semibold text-lg">
-                      {option.label}
-                    </span>
-                    <span className="text-muted-foreground text-sm">
-                      {option.description}
-                    </span>
-                  </button>
-                ))}
+                {options.map((option) => {
+                  const Icon = option.icon;
+
+                  return (
+                    <button
+                      className={cn(
+                        "flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
+                        field.state.value === option.value &&
+                          "border-primary bg-primary/5",
+                      )}
+                      key={option.value}
+                      onClick={() => field.handleChange(option.value)}
+                      type="button"
+                    >
+                      <span
+                        className={cn(
+                          "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/40 text-muted-foreground",
+                          field.state.value === option.value &&
+                            "border-primary/30 bg-primary/10 text-primary",
+                        )}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="font-semibold text-foreground text-lg">
+                        {option.label}
+                      </span>
+                      <span className="mt-1 text-muted-foreground text-sm">
+                        {option.description}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             );
           }}
         </form.AppField>
       </div>
 
-      {/* Member ID Input for Renewal and Update Info */}
       {showMemberIdInput && (
-        <div className="space-y-4">
+        <div className="fade-in slide-in-from-top-2 animate-in space-y-4 pt-2 duration-300">
           <form.AppField name="businessMemberId">
             {(field) => {
               const isInvalid =
@@ -186,27 +194,37 @@ export function Step1Status({
 
               return (
                 <Field className="space-y-2">
-                  <Label htmlFor="businessMemberId">Member ID *</Label>
-                  <Input
-                    aria-invalid={isInvalid}
-                    className={cn(
-                      memberValidation.validationStatus === "valid" &&
-                        "border-green-500 bg-green-50",
-                      memberValidation.validationStatus === "invalid" &&
-                        "border-red-500 bg-red-50",
+                  <Label
+                    className="font-bold text-base"
+                    htmlFor="businessMemberId"
+                  >
+                    Business Member ID
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      aria-invalid={isInvalid}
+                      className={cn(
+                        "h-12 rounded-lg pr-11",
+                        memberValidation.validationStatus === "valid" &&
+                          "border-emerald-400 bg-emerald-50",
+                        memberValidation.validationStatus === "invalid" &&
+                          "border-destructive/60 bg-destructive/5",
+                      )}
+                      data-invalid={isInvalid}
+                      id="businessMemberId"
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="ibc-mem-xxxxxxxx"
+                      type="text"
+                      value={field.state.value ?? ""}
+                    />
+                    {isInCooldown && (
+                      <Loader2 className="absolute top-3.5 right-3 h-5 w-5 animate-spin text-primary" />
                     )}
-                    data-invalid={isInvalid}
-                    id="businessMemberId"
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    placeholder="ibc-mem-xxxxxxxx"
-                    type="text"
-                    value={field.state.value ?? ""}
-                  />
+                  </div>
 
-                  {/* Validation Status Display */}
                   {memberValidation.validationStatus === "valid" &&
                     memberValidation.memberInfo.companyName && (
-                      <div className="flex items-center gap-2 rounded-md bg-green-50 p-2 text-green-800 text-sm">
+                      <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3 font-medium text-emerald-700 text-sm">
                         <CheckCircle2 className="h-4 w-4" />
                         <span>
                           Verified: {memberValidation.memberInfo.companyName}
@@ -217,24 +235,26 @@ export function Step1Status({
                     )}
 
                   {memberValidation.validationStatus === "invalid" && (
-                    <div className="flex items-center gap-2 rounded-md bg-red-50 p-2 text-red-800 text-sm">
-                      <X className="h-4 w-4" />
+                    <div className="flex items-center gap-2 rounded-lg border border-destructive/10 bg-destructive/5 p-3 font-medium text-destructive text-sm">
+                      <AlertCircle className="h-4 w-4" />
                       <span>
                         {memberValidation.memberInfo.companyName &&
                         memberValidation.memberInfo.membershipStatus
                           ? applicationType === "renewal"
                             ? `${memberValidation.memberInfo.companyName} is currently "${memberValidation.memberInfo.membershipStatus}" and does not need renewal.`
                             : `${memberValidation.memberInfo.companyName} membership is cancelled. Please renew first.`
-                          : "Member ID not found"}
+                          : "Member ID not found or invalid for this application type."}
                       </span>
                     </div>
                   )}
 
-                  {/* Rate Limiting Display */}
                   {isInCooldown && (
-                    <div className="rounded-md bg-yellow-50 p-2 text-sm text-yellow-800">
-                      Too many failed attempts. Try again in {remainingTime}{" "}
-                      seconds.
+                    <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700 text-sm">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>
+                        Too many failed attempts. Try again in {remainingTime}{" "}
+                        seconds.
+                      </span>
                       {memberValidation.attemptCount < 3 &&
                         ` (${memberValidation.attemptCount}/3 attempts used)`}
                     </div>
@@ -243,18 +263,16 @@ export function Step1Status({
                   {memberValidation.attemptCount > 0 &&
                     !isInCooldown &&
                     memberValidation.attemptCount < 3 && (
-                      <div className="text-amber-600 text-xs">
+                      <div className="flex items-center gap-2 rounded-md bg-amber-50 px-2.5 py-1.5 text-amber-700 text-xs">
+                        <AlertCircle className="h-3.5 w-3.5" />
                         {memberValidation.attemptCount}/3 verification attempts
                         used
                       </div>
                     )}
 
                   <p className="text-muted-foreground text-xs">
-                    Enter your existing IBC Member ID (e.g., ibc-mem-xxxxxxxx).
-                    <strong>
-                      {" "}
-                      Verification will happen when you click Next.
-                    </strong>
+                    Enter your existing IBC Member ID. Verification will happen
+                    when you click Next.
                   </p>
                   <FieldError errors={field.state.meta.errors} />
                 </Field>

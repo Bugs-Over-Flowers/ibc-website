@@ -1,15 +1,21 @@
 import { useStore } from "@tanstack/react-form";
-import { AlertCircle, FileIcon, MapPin, X } from "lucide-react";
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle2,
+  FileIcon,
+  MapPin,
+  X,
+} from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import {
   Dropzone,
   DropzoneEmptyState,
@@ -28,8 +34,21 @@ export function Step4Review({ form, applicationData }: StepProps) {
     (state) => state.values.paymentProof,
   );
   const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const representativeKeysRef = useRef(new WeakMap<object, string>());
 
   const isUpdateInfo = applicationData.step1.applicationType === "updating";
+
+  const getRepresentativeKey = (representative: object) => {
+    const existingKey = representativeKeysRef.current.get(representative);
+
+    if (existingKey) {
+      return existingKey;
+    }
+
+    const nextKey = crypto.randomUUID();
+    representativeKeysRef.current.set(representative, nextKey);
+    return nextKey;
+  };
 
   useEffect(() => {
     if (
@@ -45,79 +64,129 @@ export function Step4Review({ form, applicationData }: StepProps) {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
-        <h3 className="font-medium text-lg">Review Application</h3>
-        <p className="text-muted-foreground text-sm">
-          Please review your information before submitting.
-        </p>
-      </div>
-
       <div className="space-y-6">
-        {/* Summary Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Application Summary</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 text-sm">
-            <div className="grid grid-cols-2 gap-1">
-              <span className="text-muted-foreground">Type:</span>
-              <span className="font-medium capitalize">
-                {applicationData.step1.applicationType}
-              </span>
-            </div>
-            <Separator />
-            <div className="grid grid-cols-2 gap-1">
-              <span className="text-muted-foreground">Company:</span>
-              <span className="font-medium">
-                {applicationData.step2.companyName}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-1">
-              <span className="text-muted-foreground">Email:</span>
-              <span className="font-medium">
-                {applicationData.step2.emailAddress}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-1">
-              <span className="text-muted-foreground">Phone:</span>
-              <span className="font-medium">
-                {applicationData.step2.mobileNumber}
-              </span>
-            </div>
-            <Separator />
-            <div>
-              <span className="mb-2 block text-muted-foreground">
-                Representatives:
-              </span>
-              <ul className="space-y-2">
-                {applicationData.step3.representatives.map((rep, i) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: Index is used as key because items don't have stable IDs yet
-                  <li className="rounded-md bg-muted/50 p-2" key={i}>
-                    <span className="block font-semibold">
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card className="border-border/50 bg-background shadow-sm">
+            <CardContent className="space-y-4 p-6">
+              <div className="mb-2 flex items-center gap-2 font-bold text-primary">
+                <Building2 className="h-5 w-5" />
+                <h3>Company Profile</h3>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-muted-foreground">Company Name</span>
+                  <span className="text-right font-bold">
+                    {applicationData.step2.companyName}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-muted-foreground">
+                    Application Type
+                  </span>
+                  <span className="font-bold capitalize">
+                    {applicationData.step1.applicationType}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-muted-foreground">Industry Sector</span>
+                  <span className="font-medium">
+                    Sector #{applicationData.step2.sectorId}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 bg-background shadow-sm">
+            <CardContent className="space-y-4 p-6">
+              <div className="mb-2 flex items-center gap-2 font-bold text-primary">
+                <MapPin className="h-5 w-5" />
+                <h3>Contact Info</h3>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-muted-foreground">Email</span>
+                  <span className="text-right font-medium">
+                    {applicationData.step2.emailAddress}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-muted-foreground">Mobile</span>
+                  <span className="font-medium">
+                    {applicationData.step2.mobileNumber}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-muted-foreground">Website</span>
+                  <span className="max-w-[180px] truncate font-medium">
+                    {applicationData.step2.websiteURL || "N/A"}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="font-bold">Representatives</h3>
+          <div className="grid gap-4">
+            {applicationData.step3.representatives.map((rep) => (
+              <div
+                className="flex items-center justify-between rounded-xl border border-border/50 bg-background p-4 shadow-sm"
+                key={getRepresentativeKey(rep)}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
+                    {rep.firstName?.[0] || ""}
+                    {rep.lastName?.[0] || ""}
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm">
                       {rep.firstName} {rep.lastName}
-                    </span>
-                    <span className="text-muted-foreground text-xs capitalize">
-                      {rep.companyMemberType} - {rep.companyDesignation}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {rep.companyDesignation}
+                    </p>
+                  </div>
+                </div>
+                <span className="rounded-md border px-2 py-1 font-medium text-xs">
+                  {rep.companyMemberType === "principal"
+                    ? "Principal"
+                    : "Alternate"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center">
+          <CheckCircle2 className="mx-auto h-12 w-12 text-primary/60" />
+          <h3 className="font-bold text-xl">Final Verification</h3>
+          <p className="mx-auto max-w-xl text-muted-foreground text-sm leading-relaxed">
+            Please ensure all uploaded documents and provided details are
+            accurate. Once submitted, your application will undergo review by
+            the Membership Committee.
+          </p>
+        </div>
 
         {/* Membership Type Section - Only show for New Member and Renewal */}
         {!isUpdateInfo && (
-          <div className="space-y-4">
-            <h3 className="font-medium text-lg">Membership Type</h3>
+          <div className="space-y-4 rounded-xl border border-border/50 bg-background p-5">
+            <h3 className="font-semibold text-foreground text-lg">
+              Membership Type
+            </h3>
             <form.AppField name="applicationMemberType">
               {(field) => (
                 <div className="space-y-3">
-                  <Label>Select Membership Type *</Label>
+                  <Label className="font-medium">
+                    Select Membership Type *
+                  </Label>
                   <div className="flex flex-col space-y-2">
                     <button
                       className={cn(
-                        "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
+                        "flex items-center gap-3 rounded-xl border border-border p-4 text-left transition-colors hover:bg-accent",
                         field.state.value === "corporate"
                           ? "border-primary bg-primary/5"
                           : "border-input",
@@ -143,7 +212,7 @@ export function Step4Review({ form, applicationData }: StepProps) {
                     </button>
                     <button
                       className={cn(
-                        "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
+                        "flex items-center gap-3 rounded-xl border border-border p-4 text-left transition-colors hover:bg-accent",
                         field.state.value === "personal"
                           ? "border-primary bg-primary/5"
                           : "border-input",
@@ -177,7 +246,7 @@ export function Step4Review({ form, applicationData }: StepProps) {
 
         {/* Update Info Fee Notice */}
         {isUpdateInfo && (
-          <Alert className="border-amber-500 bg-amber-50">
+          <Alert className="rounded-xl border-amber-500/40 bg-amber-50">
             <AlertCircle className="h-4 w-4 text-amber-600" />
             <AlertTitle className="text-amber-800">
               Information Update Fee
@@ -191,8 +260,10 @@ export function Step4Review({ form, applicationData }: StepProps) {
         )}
 
         {/* Payment Section */}
-        <div className="space-y-4">
-          <h3 className="font-medium text-lg">Payment Details</h3>
+        <div className="space-y-4 rounded-xl border border-border/50 bg-background p-5">
+          <h3 className="font-semibold text-foreground text-lg">
+            Payment Details
+          </h3>
 
           <form.AppField
             listeners={{
@@ -208,11 +279,11 @@ export function Step4Review({ form, applicationData }: StepProps) {
           >
             {(field) => (
               <div className="space-y-3">
-                <Label>Select Payment Method *</Label>
+                <Label className="font-medium">Select Payment Method *</Label>
                 <div className="flex flex-col space-y-2">
                   <button
                     className={cn(
-                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
+                      "flex items-center gap-3 rounded-xl border border-border p-4 text-left transition-colors hover:bg-accent",
                       field.state.value === "ONSITE"
                         ? "border-primary bg-primary/5"
                         : "border-input",
@@ -238,7 +309,7 @@ export function Step4Review({ form, applicationData }: StepProps) {
                   </button>
                   <button
                     className={cn(
-                      "flex items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent",
+                      "flex items-center gap-3 rounded-xl border border-border p-4 text-left transition-colors hover:bg-accent",
                       field.state.value === "BPI"
                         ? "border-primary bg-primary/5"
                         : "border-input",
@@ -272,7 +343,7 @@ export function Step4Review({ form, applicationData }: StepProps) {
           <form.Subscribe selector={(state) => state.values.paymentMethod}>
             {(paymentMethod) =>
               paymentMethod === "ONSITE" && (
-                <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed bg-muted/30 p-5 text-center">
+                <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-muted/30 p-5 text-center">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
                     <MapPin className="h-5 w-5 text-primary" />
                   </div>
@@ -293,7 +364,7 @@ export function Step4Review({ form, applicationData }: StepProps) {
               paymentMethod === "BPI" && (
                 <div className="space-y-4">
                   {/* Bank Transfer Details */}
-                  <div className="flex flex-col items-center space-y-3 rounded-lg border bg-muted/30 p-6">
+                  <div className="flex flex-col items-center space-y-3 rounded-xl border border-border/50 bg-muted/30 p-6">
                     <h4 className="font-medium text-lg">
                       Bank Transfer Details
                     </h4>
@@ -313,10 +384,12 @@ export function Step4Review({ form, applicationData }: StepProps) {
                   <form.AppField name="paymentProof">
                     {(field) => (
                       <div className="space-y-2">
-                        <Label>Upload Proof of Payment *</Label>
-                        <div className="rounded-lg border bg-background p-4">
+                        <Label className="font-medium">
+                          Upload Proof of Payment *
+                        </Label>
+                        <div className="rounded-xl border border-border/60 bg-background p-4">
                           {field.state.value ? (
-                            <div className="flex items-center justify-between rounded border bg-muted/20 p-3">
+                            <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-3">
                               <div className="flex items-center gap-3 overflow-hidden">
                                 {proofPreview ? (
                                   <Image
