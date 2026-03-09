@@ -217,8 +217,10 @@ INSERT INTO "public"."Event" (
   "venue",
   "eventType",
   "registrationFee",
-  "eventHeaderUrl"
+  "eventHeaderUrl",
+  "publishedAt"
 ) VALUES
+  -- CHANGED: Published events now include publishedAt timestamp.
   -- Event for Tech Summit 2025
   -- 30 - 32 days from now
   -- Sample Public Event
@@ -231,8 +233,10 @@ INSERT INTO "public"."Event" (
     'Manila Convention Center',
     'public',
     1500.00,
-    'https://example.com/tech-summit.jpg'
+    'https://example.com/tech-summit.jpg',
+    TIMEZONE('UTC', NOW()) - INTERVAL '1 day'
   ),
+  -- CHANGED: Use local Supabase storage image for seeded published event.
   -- Sample Private Event
   (
     gen_random_uuid(),
@@ -243,8 +247,10 @@ INSERT INTO "public"."Event" (
     'Makati Business Club',
     'private',
     500.00,
-    'https://example.com/networking.jpg'
+    'http://127.0.0.1:54321/storage/v1/object/public/headerimage/dinagyang.jpeg',
+    TIMEZONE('UTC', NOW()) - INTERVAL '2 days'
   ),
+  -- CHANGED: Draft event intentionally has no header image and no published timestamp.
   -- Sample Draft Event
   (
     gen_random_uuid(),
@@ -255,7 +261,8 @@ INSERT INTO "public"."Event" (
     'SMX Convention Center',
     null,
     2000.00,
-    'https://example.com/retail-expo.jpg'
+    NULL,
+    NULL
   );
 
 -- There should also be data for event days for these events
@@ -351,6 +358,62 @@ INSERT INTO "public"."BusinessMember" (
     'paid'
   );
 
+-- =============================================================================
+-- CHANGED: Ensure every BusinessMember has a primaryApplicationId
+-- =============================================================================
+DO $$
+DECLARE
+  members_missing_primary integer;
+BEGIN
+  SELECT COUNT(*) INTO members_missing_primary
+  FROM "BusinessMember"
+  WHERE "primaryApplicationId" IS NULL;
+
+  -- Insert one application per member without a primary application.
+  -- Trigger on "Application" insert updates "BusinessMember"."primaryApplicationId".
+  INSERT INTO "Application" (
+    "applicationId",
+    "identifier",
+    "businessMemberId",
+    "sectorId",
+    "logoImageURL",
+    "applicationType",
+    "companyName",
+    "companyAddress",
+    "landline",
+    "faxNumber",
+    "mobileNumber",
+    "emailAddress",
+    "paymentMethod",
+    "websiteURL",
+    "applicationMemberType",
+    "applicationStatus",
+    "paymentStatus"
+  )
+  SELECT
+    gen_random_uuid(),
+    'ibc-app-seed-' || replace(gen_random_uuid()::text, '-', ''),
+    bm."businessMemberId",
+    bm."sectorId",
+    COALESCE(NULLIF(bm."logoImageURL", ''), 'https://example.com/default-business-logo.jpg'),
+    'renewal',
+    bm."businessName",
+    'Seed address for ' || bm."businessName",
+    '02-0000-0000',
+    '02-0000-0001',
+    '+639000000000',
+    lower(replace(bm."businessName", ' ', '.')) || '.seed@example.com',
+    'BPI',
+    bm."websiteURL",
+    'corporate',
+    'approved',
+    'verified'
+  FROM "BusinessMember" bm
+  WHERE bm."primaryApplicationId" IS NULL;
+
+  RAISE NOTICE 'Business members initially missing primaryApplicationId: %', members_missing_primary;
+END $$;
+
 -- There should also be data for event days for these events
 
 -- =============================================================================
@@ -359,9 +422,27 @@ INSERT INTO "public"."BusinessMember" (
 DO $$
 BEGIN
   RAISE NOTICE '✅ Test data seeded successfully!';
-  RAISE NOTICE 'Sectors: %', (SELECT COUNT(*) FROM "public"."Sector");
-  RAISE NOTICE 'Applications: %', (SELECT COUNT(*) FROM "public"."Application");
-  RAISE NOTICE 'Application Members: %', (SELECT COUNT(*) FROM "public"."ApplicationMember");
-  RAISE NOTICE 'Events: %', (SELECT COUNT(*) FROM "public"."Event");
-  RAISE NOTICE 'Business Members: %', (SELECT COUNT(*) FROM "public"."BusinessMember");
+  RAISE NOTICE 'Sectors: %', (SELECT COUNT(*) FROM "Sector");
+  RAISE NOTICE 'Applications: %', (SELECT COUNT(*) FROM "Application");
+  RAISE NOTICE 'Application Members: %', (SELECT COUNT(*) FROM "ApplicationMember");
+  RAISE NOTICE 'Events: %', (SELECT COUNT(*) FROM "Event");
+  RAISE NOTICE 'Published events with publishedAt: %', (
+    SELECT COUNT(*)
+    FROM "Event"
+    WHERE "eventType" IS NOT NULL
+      AND "publishedAt" IS NOT NULL
+  );
+  RAISE NOTICE 'Draft events with no header image: %', (
+    SELECT COUNT(*)
+    FROM "Event"
+    WHERE "eventType" IS NULL
+      AND "eventHeaderUrl" IS NULL
+      AND "publishedAt" IS NULL
+  );
+  RAISE NOTICE 'Business Members: %', (SELECT COUNT(*) FROM "BusinessMember");
+  RAISE NOTICE 'Business Members with primaryApplicationId: %', (
+    SELECT COUNT(*)
+    FROM "BusinessMember"
+    WHERE "primaryApplicationId" IS NOT NULL
+  );
 END $$;
