@@ -9,9 +9,9 @@ import {
   formatTime,
   getEventCategory,
 } from "@/lib/events/eventUtils";
-import { getAllEvents } from "@/server/events/queries/getAllEvents";
+import { getPublicEvents } from "@/server/events/queries/getPublicEvents";
 export default async function FeaturedEventsSection() {
-  const events = await getAllEvents((await cookies()).getAll(), {});
+  const events = await getPublicEvents((await cookies()).getAll(), {});
   const now = new Date();
   const oneWeekFromNow = new Date();
   oneWeekFromNow.setDate(now.getDate() + 7);

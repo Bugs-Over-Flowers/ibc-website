@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import { getEventStatus } from "./helpers";
 
@@ -57,12 +58,10 @@ export async function deleteEvents(eventId: string) {
       throw new Error(deleteError.message || "Failed to delete event");
     }
 
-    // updateTag(CACHE_TAGS.events.all);
-    // updateTag(CACHE_TAGS.events.admin);
-    // updateTag(CACHE_TAGS.events.public);
+    updateTag(CACHE_TAGS.events.all);
+    updateTag(CACHE_TAGS.events.admin);
+    updateTag(CACHE_TAGS.events.public);
 
-    revalidatePath("/admin/events");
-    revalidatePath("/admin/events");
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
