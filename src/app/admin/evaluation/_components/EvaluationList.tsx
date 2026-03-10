@@ -190,7 +190,7 @@ export function EvaluationList({
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-3 gap-4">
         {displayed.map((evaluation) => (
           <EvaluationCard
             evaluation={evaluation}
@@ -201,22 +201,6 @@ export function EvaluationList({
           />
         ))}
       </div>
-
-      {displayedCount < evaluations.length && (
-        <div className="flex justify-center py-8" ref={loaderRef}>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 animate-bounce rounded-full bg-primary/50" />
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-primary/50"
-              style={{ animationDelay: "0.1s" }}
-            />
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-primary/50"
-              style={{ animationDelay: "0.2s" }}
-            />
-          </div>
-        </div>
-      )}
 
       <ConfirmDeleteDialog
         count={selectedIds.size}

@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { ArrowRight, Calendar, Trash2 } from "lucide-react";
+import { Eye, Star, Trash2 } from "lucide-react";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -52,8 +52,13 @@ export function EvaluationCard({
     setOpenDeleteDialog(true);
   };
 
-  const handleViewDetails = () => {
+  const goToDetails = () => {
     router.push(`/admin/evaluation/${evaluation.evaluation_id}` as Route);
+  };
+
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    goToDetails();
   };
 
   const handleConfirmDelete = async () => {
@@ -76,83 +81,128 @@ export function EvaluationCard({
 
   return (
     <>
-      <article
+      <div
         className={cn(
-          "relative w-full rounded-lg border p-5",
-          "flex items-center gap-3",
-          "border-border bg-card hover:border-primary hover:shadow-lg",
+          "group relative w-full rounded-xl border border-border bg-card text-left",
+          "transition-all duration-200",
+          "hover:border-primary/50 hover:bg-accent/5 hover:shadow-lg",
         )}
       >
-        <div className="relative z-10 flex w-full items-center gap-3">
-          {showCheckbox && (
-            <button
-              className="inline-flex h-auto p-0"
-              data-checkbox
-              onClick={(e) => e.stopPropagation()}
-              type="button"
-            >
-              <Checkbox
-                checked={isSelected}
-                onCheckedChange={() => onSelect(evaluation)}
-              />
-            </button>
-          )}
+        {/* Action Buttons - Desktop */}
+        <div className="absolute top-5 right-5 z-10 hidden shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 sm:flex">
+          <Button
+            className="h-9 w-9 text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={handleViewDetails}
+            size="icon"
+            title="View details"
+            type="button"
+            variant="ghost"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
 
-          <div className="min-w-0 flex-1">
-            <h3 className="mb-0.5 truncate font-semibold text-base text-primary">
-              {eventTitle}
-            </h3>
-            <p className="mb-1 truncate text-foreground text-xs">
-              Evaluation from {userName}
-            </p>
-            <div className="flex flex-wrap gap-2 text-muted-foreground text-xs">
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                <span className="truncate">
-                  {format(createdAt, "MMM d, yyyy, h:mm a")}
-                </span>
+          <Button
+            className="h-9 w-9 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+            disabled={isDeleting}
+            onClick={handleDelete}
+            size="icon"
+            title="Delete evaluation"
+            type="button"
+            variant="ghost"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <button
+          className="w-full cursor-pointer text-left"
+          onClick={goToDetails}
+          type="button"
+        >
+          <div className="flex flex-col gap-5 p-5">
+            {/* Header Row */}
+            <div className="flex items-start gap-4">
+              {/* Checkbox */}
+              {showCheckbox && (
+                <div className="mt-0.5 inline-flex h-auto shrink-0 p-0">
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => onSelect(evaluation)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
+
+              {/* Evaluation Info */}
+              <div className="min-w-0 flex-1 space-y-1">
+                <h3 className="font-semibold text-base text-foreground">
+                  {eventTitle}
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  Evaluation from {userName}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  {format(createdAt, "MMM d, yyyy 'at' h:mm a")}
+                </p>
               </div>
             </div>
-            <div className="mt-2">
-              <Button
-                className="h-auto p-0 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewDetails();
-                }}
-                size="sm"
-                variant="link"
-              >
-                View Details
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </Button>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-2">
+            {/* Divider */}
+            <div className="-mx-5 border-t" />
+
+            {/* Overall Rating Section */}
             {overallRating && (
-              <div className="flex min-w-[60px] flex-col items-end gap-1 rounded bg-primary/10 px-2 py-1">
-                <div className="flex items-center gap-1">
-                  {renderStars(overallRating)}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                    <Star className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-medium text-foreground text-sm">
+                    Overall Rating
+                  </span>
                 </div>
-                <span className="font-semibold text-foreground text-xs">
-                  {overallRating}/5
-                </span>
+
+                <div className="ml-10 flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    {renderStars(overallRating)}
+                  </div>
+                  <span className="font-bold text-foreground text-lg">
+                    {overallRating}/5
+                  </span>
+                </div>
               </div>
             )}
-
-            <Button
-              className="h-8 w-8"
-              disabled={isDeleting}
-              onClick={handleDelete}
-              size="icon"
-              variant="ghost"
-            >
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
           </div>
+        </button>
+
+        {/* Mobile Actions */}
+        <div className="flex items-center justify-end gap-1 border-t px-5 pt-2 pb-3 sm:hidden">
+          <Button
+            className="h-8 gap-1.5 text-xs"
+            onClick={handleViewDetails}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            <Eye className="h-3.5 w-3.5" />
+            View
+          </Button>
+
+          <div className="mx-1 h-5 w-px bg-border" />
+
+          <Button
+            className="h-8 gap-1.5 text-destructive text-xs hover:bg-destructive/10 hover:text-destructive"
+            disabled={isDeleting}
+            onClick={handleDelete}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete
+          </Button>
         </div>
-      </article>
+      </div>
 
       <ConfirmDeleteDialog
         isLoading={isDeleting}

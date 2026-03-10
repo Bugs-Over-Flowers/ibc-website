@@ -94,10 +94,6 @@ export default function EventEvaluationsTable({
       />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="font-medium text-muted-foreground text-sm">
-          {filteredEvaluations.length} of {evaluations.length} evaluation
-          {evaluations.length !== 1 ? "s" : ""} shown
-        </p>
         <Button
           disabled={evaluations.length === 0}
           onClick={handleExport}

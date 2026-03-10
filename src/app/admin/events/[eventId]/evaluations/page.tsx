@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
-import BackButton from "../_components/BackButton";
+import { BackButton } from "../_components/BackButton";
 import { EventEvaluationsTableWrapper } from "./_components/EventEvaluationsTableWrapper";
 
 type EventEvaluationsPageProps =
@@ -14,13 +14,22 @@ export default function EventEvaluationsPage({
 }: EventEvaluationsPageProps) {
   return (
     <div className="space-y-6">
+      <BackButtonWrapper params={params} />
       <Suspense fallback={<EventEvaluationsPageSkeleton />}>
-        <BackButton params={params} />
         <EventHeader params={params} />
         <EventEvaluationsTableWrapper params={params} />
       </Suspense>
     </div>
   );
+}
+
+async function BackButtonWrapper({
+  params,
+}: {
+  params: EventEvaluationsPageProps["params"];
+}) {
+  const { eventId } = await params;
+  return <BackButton eventId={eventId} />;
 }
 
 async function EventHeader({
@@ -36,17 +45,13 @@ async function EventHeader({
 
   return (
     <div>
-      <div className="space-y-1">
-        <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-          Event Evaluations
-        </p>
-        <h1 className="font-bold text-3xl text-foreground">
+      <div className="space-y-0">
+        <h1 className="font-bold text-2xl text-foreground">
           {event?.eventTitle || "Evaluations"}
         </h1>
       </div>
-      <p className="mt-2 max-w-3xl text-muted-foreground">
-        Review participant feedback for this event, sort responses by rating or
-        submission time, and export the full evaluation list to Excel.
+      <p className="max-w-5xl text-muted-foreground text-sm">
+        View, sort, and export event feedback.
       </p>
     </div>
   );
