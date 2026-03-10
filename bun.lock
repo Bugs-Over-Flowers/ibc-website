@@ -31,6 +31,7 @@
         "motion": "^12.35.0",
         "next": "^16.1.6",
         "next-themes": "^0.4.6",
+        "nodemailer": "^8.0.1",
         "playwright-webkit": "^1.58.2",
         "postcss": "^8.5.8",
         "qrcode": "^1.5.4",
@@ -64,6 +65,7 @@
         "@testing-library/user-event": "^14.6.1",
         "@types/dompurify": "^3.2.0",
         "@types/node": "^25.3.5",
+        "@types/nodemailer": "^7.0.11",
         "@types/react": "^19.2.14",
         "@types/react-dom": "^19.2.3",
         "@vitest/coverage-v8": "^4.0.18",
@@ -3392,6 +3394,13 @@
       "",
       { "dependencies": { "undici-types": "~7.18.0" } },
       "sha512-oX8xrhvpiyRCQkG1MFchB09f+cXftgIXb3a7UUa4Y3wpmZPw5tyZGTLWhlESOLq1Rq6oDlc8npVU2/9xiCuXMA=="
+    ],
+
+    "@types/nodemailer": [
+      "@types/nodemailer@7.0.11",
+      "",
+      { "dependencies": { "@types/node": "*" } },
+      "sha512-E+U4RzR2dKrx+u3N4DlsmLaDC6mMZOM/TPROxA0UAPiTgI0y4CEFBmZE+coGWTjakDriRsXG368lNk1u9Q0a2g=="
     ],
 
     "@types/phoenix": [
@@ -6822,6 +6831,13 @@
       "",
       {},
       "sha512-TdC8FSgHz8Mwtw9g5L4gR/Sh9XhSP/0DEkQxfEFXOpiul5IiHgHan2VhYYb6agDSfp4KuvltmGApc8HMgUrIkA=="
+    ],
+
+    "nodemailer": [
+      "nodemailer@8.0.1",
+      "",
+      {},
+      "sha512-5kcldIXmaEjZcHR6F28IKGSgpmZHaF1IXLWFTG+Xh3S+Cce4MiakLtWY+PlBU69fLbRa8HlaGIrC/QolUpHkhg=="
     ],
 
     "normalize-path": [
