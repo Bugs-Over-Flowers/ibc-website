@@ -232,7 +232,7 @@ export default function DeleteSectorDialog({
                   {alternativeSectors.map((sector) => (
                     <SelectItem
                       key={sector.sectorId}
-                      value={String(sector.sectorName)}
+                      value={String(sector.sectorId)}
                     >
                       {sector.sectorName}
                     </SelectItem>
@@ -364,7 +364,7 @@ export default function DeleteSectorDialog({
                 {alternativeSectors.map((sector) => (
                   <SelectItem
                     key={sector.sectorId}
-                    value={String(sector.sectorName)}
+                    value={String(sector.sectorId)}
                   >
                     {sector.sectorName}
                   </SelectItem>
