@@ -1,3 +1,5 @@
+import "server-only";
+
 export { sendViaNodemailer } from "./sendViaNodemailer";
 export { sendViaResend } from "./sendViaResend";
 export type { EmailAttachment, EmailOptions, EmailProvider } from "./types";

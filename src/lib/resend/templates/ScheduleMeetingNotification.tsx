@@ -11,6 +11,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import DOMPurify from "isomorphic-dompurify";
 
 interface MeetingNotificationEmailProps {
   companyName: string;
@@ -25,6 +26,25 @@ export default function MeetingNotificationEmail({
   interviewVenue,
   customMessage,
 }: MeetingNotificationEmailProps) {
+  const sanitizeEmailRichText = (html: string) =>
+    DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: [
+        "p",
+        "br",
+        "strong",
+        "b",
+        "em",
+        "i",
+        "ul",
+        "ol",
+        "li",
+        "h1",
+        "h2",
+        "h3",
+      ],
+      ALLOWED_ATTR: [],
+    });
+
   const hasDatePlaceholder = customMessage?.includes("{INTERVIEW_DATE}");
   const hasVenuePlaceholder = customMessage?.includes("{INTERVIEW_VENUE}");
 
@@ -39,7 +59,7 @@ export default function MeetingNotificationEmail({
       processed = `${processed}<p><strong>Interview Details:</strong></p><p>Date &amp; Time: ${interviewDate}</p><p>Venue: ${interviewVenue}</p>`;
     }
 
-    return processed;
+    return sanitizeEmailRichText(processed);
   };
 
   const processedMessage = processCustomMessage();
@@ -150,8 +170,8 @@ export default function MeetingNotificationEmail({
                 <Section style={styles.helpBox}>
                   <Text style={styles.helpText}>
                     <strong>Need to reschedule?</strong> If you need to
-                    reschedule or have any questions, please contact us
-                    immediately by replying to this email.
+                    reschedule or have any questions, please contact our Office
+                    directly. You can get our contact details on our website.
                   </Text>
                 </Section>
               </Section>

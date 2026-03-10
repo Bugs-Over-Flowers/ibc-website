@@ -12,6 +12,7 @@ import {
   List,
   ListOrdered,
 } from "lucide-react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ButtonGroup,
@@ -53,6 +54,18 @@ function StandaloneRichTextEditor({
       },
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const currentContent = editor.getHTML();
+
+    // Only sync when external state actually differs from the editor state.
+    if (value === currentContent) return;
+
+    // Avoid onUpdate feedback loops when syncing external state into TipTap.
+    editor.commands.setContent(value || "", { emitUpdate: false });
+  }, [editor, value]);
 
   if (!editor) {
     return null;
