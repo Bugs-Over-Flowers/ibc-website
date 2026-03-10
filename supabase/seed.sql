@@ -381,14 +381,13 @@ BEGIN
     "companyName",
     "companyAddress",
     "landline",
-    "faxNumber",
     "mobileNumber",
     "emailAddress",
     "paymentMethod",
     "websiteURL",
     "applicationMemberType",
     "applicationStatus",
-    "paymentStatus"
+    "paymentProofStatus"
   )
   SELECT
     gen_random_uuid(),
@@ -400,14 +399,13 @@ BEGIN
     bm."businessName",
     'Seed address for ' || bm."businessName",
     '02-0000-0000',
-    '02-0000-0001',
     '+639000000000',
     lower(replace(bm."businessName", ' ', '.')) || '.seed@example.com',
     'BPI',
     bm."websiteURL",
     'corporate',
     'approved',
-    'verified'
+    'accepted'
   FROM "BusinessMember" bm
   WHERE bm."primaryApplicationId" IS NULL;
 

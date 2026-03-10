@@ -1,8 +1,5 @@
-drop extension if exists "pg_net";
-drop policy "Enable insert for all users" on "public"."Participant";
-drop policy "Enable read access for all users" on "public"."Participant";
-drop type "public"."registration_list_item" cascade;
 set check_function_bodies = off;
+
 CREATE OR REPLACE FUNCTION public.check_application_status(p_application_identifier text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -44,7 +41,9 @@ EXCEPTION
   WHEN OTHERS THEN
     RAISE EXCEPTION 'Failed to check application status: %', SQLERRM;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.check_member_exists(p_identifier text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -81,7 +80,9 @@ EXCEPTION
   WHEN OTHERS THEN
     RETURN jsonb_build_object('exists', false, 'message', 'Unable to validate member ID at this time');
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.check_member_exists(p_identifier text, p_application_type text DEFAULT 'renewal'::text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -131,7 +132,9 @@ EXCEPTION
   WHEN OTHERS THEN
     RETURN jsonb_build_object('exists', false, 'message', 'Unable to validate member ID at this time');
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.check_membership_expiry()
  RETURNS void
  LANGUAGE plpgsql
@@ -160,7 +163,9 @@ BEGIN
     WHERE "membershipExpiryDate" < NOW()
     AND "membershipStatus" = 'paid';
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.compute_primary_application_id(p_member_id uuid)
  RETURNS uuid
  LANGUAGE sql
@@ -178,7 +183,9 @@ AS $function$
     END DESC,
     a."applicationDate" DESC
   LIMIT 1;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.create_sponsored_registration(p_event_id uuid, p_sponsored_by text, p_fee_deduction numeric, p_max_sponsored_guests bigint DEFAULT NULL::bigint)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -233,7 +240,9 @@ EXCEPTION
       'error', SQLERRM
     );
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.delete_evaluation(eval_id uuid)
  RETURNS TABLE(success boolean, message text)
  LANGUAGE plpgsql
@@ -252,7 +261,9 @@ begin
     return query select true, 'Evaluation deleted successfully'::text;
   end if;
 end;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.delete_sr(p_sponsored_registration_id uuid)
  RETURNS json
  LANGUAGE sql
@@ -264,7 +275,9 @@ AS $function$
       'success', true
     )
   );
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.generate_member_identifier()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -275,7 +288,9 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_all_evaluations()
  RETURNS TABLE(evaluation_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, venue text, name text, q1_rating public."ratingScale", q2_rating public."ratingScale", q3_rating public."ratingScale", q4_rating public."ratingScale", q5_rating public."ratingScale", q6_rating public."ratingScale", additional_comments text, feedback text, created_at timestamp with time zone)
  LANGUAGE sql
@@ -303,7 +318,9 @@ AS $function$
     left join "Event" e on ef."eventId" = e."eventId"
   order by
     ef."createdAt" desc;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_all_sponsored_registrations()
  RETURNS TABLE(sponsored_registration_id uuid, event_id uuid, event_name text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, sponsored_by text, uuid uuid, max_sponsored_guests integer, used_count integer, status text, created_at timestamp with time zone, updated_at timestamp with time zone)
  LANGUAGE plpgsql
@@ -327,7 +344,9 @@ BEGIN
   LEFT JOIN "Event" e ON sr.event_id = e.event_id
   ORDER BY sr.created_at DESC;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_all_sponsored_registrations_with_event()
  RETURNS TABLE(sponsored_registration_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, sponsored_by text, uuid uuid, max_sponsored_guests bigint, used_count bigint, status public."SponsoredRegistrationStatus", created_at timestamp with time zone, updated_at timestamp with time zone)
  LANGUAGE sql
@@ -349,7 +368,81 @@ SELECT
 FROM "SponsoredRegistration" sr
 LEFT JOIN "Event" e ON sr."eventId" = e."eventId"
 ORDER BY sr."createdAt" DESC;
-$function$;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.get_application_history(p_member_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+AS $function$
+DECLARE
+  v_result jsonb;
+  v_business_name text;
+  v_applications jsonb;
+BEGIN
+  -- Get business name
+  SELECT "businessName" INTO v_business_name
+  FROM "BusinessMember"
+  WHERE "businessMemberId" = p_member_id;
+
+  IF v_business_name IS NULL THEN
+    RAISE EXCEPTION 'Business member not found';
+  END IF;
+
+  -- Get all applications for this member with related data
+  SELECT COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'applicationId', a."applicationId",
+      'identifier', a."identifier",
+      'companyName', a."companyName",
+      'applicationDate', a."applicationDate",
+      'applicationType', a."applicationType",
+      'applicationStatus', a."applicationStatus",
+      'applicationMemberType', a."applicationMemberType",
+      'companyAddress', a."companyAddress",
+      'emailAddress', a."emailAddress",
+      'mobileNumber', a."mobileNumber",
+      'landline', a."landline",
+      'websiteURL', a."websiteURL",
+      'paymentMethod', a."paymentMethod",
+      'paymentProofStatus', a."paymentProofStatus",
+      'sectorName', COALESCE(s."sectorName", 'N/A'),
+      'members', (
+        SELECT COALESCE(jsonb_agg(
+          jsonb_build_object(
+            'applicationMemberId', am."applicationMemberId",
+            'firstName', am."firstName",
+            'lastName', am."lastName",
+            'companyDesignation', am."companyDesignation",
+            'companyMemberType', am."companyMemberType",
+            'emailAddress', am."emailAddress"
+          )
+        ), '[]'::jsonb)
+        FROM "ApplicationMember" am
+        WHERE am."applicationId" = a."applicationId"
+      )
+    ) ORDER BY a."applicationDate" DESC
+  ), '[]'::jsonb)
+  INTO v_applications
+  FROM "Application" a
+  LEFT JOIN "Sector" s ON a."sectorId" = s."sectorId"
+  WHERE a."businessMemberId" = p_member_id;
+
+  v_result := jsonb_build_object(
+    'businessName', v_business_name,
+    'applications', v_applications
+  );
+
+  RETURN v_result;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE EXCEPTION 'Failed to fetch application history: %', SQLERRM;
+END;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_evaluation_by_id(eval_id uuid)
  RETURNS TABLE(evaluation_id uuid, event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone, venue text, name text, q1_rating public."ratingScale", q2_rating public."ratingScale", q3_rating public."ratingScale", q4_rating public."ratingScale", q5_rating public."ratingScale", q6_rating public."ratingScale", additional_comments text, feedback text, created_at timestamp with time zone)
  LANGUAGE sql
@@ -377,7 +470,9 @@ AS $function$
     left join "Event" e on ef."eventId" = e."eventId"
   where
     ef."evaluationId" = eval_id;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_events_for_select()
  RETURNS TABLE(event_id uuid, event_title text, event_start_date timestamp with time zone, event_end_date timestamp with time zone)
  LANGUAGE sql
@@ -391,14 +486,18 @@ SELECT
 FROM "Event" e
 WHERE e."eventStartDate" > now()
 ORDER BY e."eventStartDate" ASC;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_member_primary_application(p_member_id uuid)
  RETURNS uuid
  LANGUAGE sql
  STABLE
 AS $function$
   SELECT public.compute_primary_application_id(p_member_id);
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_registration_list_checkin(p_identifier text, p_today date DEFAULT CURRENT_DATE)
  RETURNS public.registration_details_result
  LANGUAGE plpgsql
@@ -523,7 +622,9 @@ BEGIN
   RETURN v_result;
 
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_id(registration_id uuid)
  RETURNS SETOF public."SponsoredRegistration"
  LANGUAGE plpgsql
@@ -535,7 +636,9 @@ BEGIN
   FROM "SponsoredRegistration"
   WHERE "sponsoredRegistrationId" = registration_id;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_uuid(p_uuid text)
  RETURNS TABLE("sponsoredRegistrationId" uuid, uuid text, "eventId" uuid, "sponsoredBy" text, "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, status public."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
  LANGUAGE plpgsql
@@ -557,7 +660,9 @@ BEGIN
   FROM public."SponsoredRegistration" sr
   WHERE sr."uuid" = p_uuid;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_sponsored_registration_by_uuid(p_uuid uuid)
  RETURNS TABLE("sponsoredRegistrationId" uuid, uuid uuid, "eventId" uuid, "sponsoredBy" text, "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, status public."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
  LANGUAGE plpgsql
@@ -579,7 +684,9 @@ BEGIN
   FROM public."SponsoredRegistration" sr
   WHERE sr."uuid" = p_uuid;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_sponsored_registrations_with_details(p_event_id uuid)
  RETURNS TABLE(id uuid, event_id uuid, sponsor_id uuid, registration_id uuid, status text, created_at timestamp with time zone, updated_at timestamp with time zone, sponsor_name text, registration_email text)
  LANGUAGE plpgsql
@@ -604,7 +711,9 @@ BEGIN
   WHERE sr.event_id = p_event_id
   ORDER BY sr.created_at DESC;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_sr_by_event_id(p_event_id uuid)
  RETURNS SETOF public."SponsoredRegistration"
  LANGUAGE sql
@@ -614,7 +723,9 @@ AS $function$
   FROM "SponsoredRegistration"
   WHERE "eventId" = p_event_id
   ORDER BY "createdAt" DESC;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.handle_event_days()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -666,7 +777,9 @@ BEGIN
 
   RETURN NEW;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.january_first_reset()
  RETURNS void
  LANGUAGE plpgsql
@@ -687,7 +800,9 @@ BEGIN
         END
     WHERE "membershipStatus" IN ('active'::"MembershipStatus", 'unpaid'::"MembershipStatus");
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.publish_event(p_event_id uuid)
  RETURNS void
  LANGUAGE plpgsql
@@ -729,8 +844,9 @@ BEGIN
     v_day_number := v_day_number + 1;
   END LOOP;
 END;
-$function$;
-create type "public"."registration_list_item" as ("registration_id" uuid, "affiliation" text, "registration_date" timestamp with time zone, "payment_proof_status" public."PaymentStatus", "payment_method" public."PaymentMethod", "business_member_id" uuid, "business_name" text, "is_member" boolean, "registrant" jsonb, "people" integer, "registration_identifier" text);
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.schedule_interviews_batch(p_interview_data jsonb)
  RETURNS TABLE(success boolean, message text, interview_count integer)
  LANGUAGE plpgsql
@@ -786,7 +902,9 @@ BEGIN
     format('Scheduled %s interview(s) and linked to applications', v_interview_count),
     v_interview_count;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.set_membership_expiry()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -798,7 +916,9 @@ AS $function$BEGIN
         NEW."membershipStatus" = 'paid'::"MembershipStatus";
     END IF;
     RETURN NEW;
-END;$function$;
+END;$function$
+;
+
 CREATE OR REPLACE FUNCTION public.submit_evaluation_form(p_event_id uuid, p_name text, p_q1_rating public."ratingScale", p_q2_rating public."ratingScale", p_q3_rating public."ratingScale", p_q4_rating public."ratingScale", p_q5_rating public."ratingScale", p_q6_rating public."ratingScale", p_additional_comments text DEFAULT NULL::text, p_feedback text DEFAULT NULL::text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -854,7 +974,9 @@ EXCEPTION
   WHEN OTHERS THEN
     RAISE EXCEPTION 'Evaluation submission failed: %', SQLERRM;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.submit_membership_application(p_application_type text, p_company_details jsonb, p_representatives jsonb, p_payment_method text, p_application_member_type text, p_payment_proof_url text DEFAULT NULL::text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -864,7 +986,7 @@ DECLARE
   v_identifier text;
   v_app_type_enum "ApplicationType";
   v_pay_method_enum "PaymentMethod";
-  v_pay_status_enum "PaymentStatus";
+  v_pay_status_enum "PaymentProofStatus";
   v_sector_id int;
   v_business_member_id uuid;
   v_member_exists boolean;
@@ -881,7 +1003,7 @@ BEGIN
   -- 1. Validate Inputs & Enums
   v_app_type_enum := p_application_type::"ApplicationType";
   v_pay_method_enum := p_payment_method::"PaymentMethod";
-  v_pay_status_enum := 'pending'::"PaymentStatus";
+  v_pay_status_enum := 'pending'::"PaymentProofStatus";
 
   -- Validate: Online payment requires proof (Checking against 'BPI')
   IF v_pay_method_enum = 'BPI' AND (p_payment_proof_url IS NULL OR p_payment_proof_url = '') THEN
@@ -927,10 +1049,9 @@ BEGIN
     "companyName",
     "companyAddress",
     "landline",
-    "faxNumber",
     "mobileNumber",
     "emailAddress",
-    "paymentStatus",
+    "paymentProofStatus",
     "paymentMethod",
     "websiteURL",
     "applicationMemberType"
@@ -945,7 +1066,6 @@ BEGIN
     p_company_details->>'name',
     p_company_details->>'address',
     p_company_details->>'landline',
-    p_company_details->>'fax',
     p_company_details->>'mobile',
     p_company_details->>'email',
     v_pay_status_enum,
@@ -979,7 +1099,6 @@ BEGIN
         "birthdate",
         "companyDesignation",
         "landline",
-        "faxNumber",
         "mobileNumber",
         "emailAddress"
       ) VALUES (
@@ -993,7 +1112,6 @@ BEGIN
         (representative->>'birthdate')::timestamp,
         representative->>'position',
         representative->>'landline',
-        representative->>'fax',
         representative->>'mobileNumber',
         representative->>'email'
       );
@@ -1019,7 +1137,9 @@ EXCEPTION
   WHEN OTHERS THEN
     RAISE EXCEPTION 'Application submission failed: %', SQLERRM;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.toggle_sr_status(p_sponsored_registration_id uuid)
  RETURNS json
  LANGUAGE sql
@@ -1045,7 +1165,9 @@ AS $function$
       'updatedAt', "updatedAt"
     )
   );
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.update_event_available_slots_trigger()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1087,7 +1209,9 @@ BEGIN
         RETURN NEW;
     END IF;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.update_event_details(p_event_id uuid, p_title text DEFAULT NULL::text, p_description text DEFAULT NULL::text, p_event_header_url text DEFAULT NULL::text, p_start_date timestamp without time zone DEFAULT NULL::timestamp without time zone, p_end_date timestamp without time zone DEFAULT NULL::timestamp without time zone, p_venue text DEFAULT NULL::text, p_event_type text DEFAULT NULL::text, p_registration_fee real DEFAULT NULL::real)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -1208,7 +1332,9 @@ EXCEPTION
       'error', SQLERRM
     );
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.update_participant_count_trigger()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1232,7 +1358,9 @@ BEGIN
     END IF;
     RETURN NULL;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.update_primary_application_for_member()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1256,7 +1384,9 @@ BEGIN
 
   RETURN COALESCE(NEW, OLD);
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1319,7 +1449,9 @@ BEGIN
     RETURN NEW;
   END IF;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count_from_participant()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1360,7 +1492,9 @@ BEGIN
     RETURN NEW;
   END IF;
 END;
-$function$;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.update_sponsored_registration_used_count_from_registration()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1425,44 +1559,5 @@ BEGIN
     RETURN NEW;
   END IF;
 END;
-$function$;
-create policy "Enable insert for all users"
-  on "public"."Participant"
-  as permissive
-  for insert
-  to anon, authenticated
-with check (true);
-create policy "Enable read access for all users"
-  on "public"."Participant"
-  as permissive
-  for select
-  to anon, authenticated
-using (true);
-drop policy "Allow all operations for anyone 11d98ol_0" on "storage"."objects";
-drop policy "Allow all operations for anyone 11d98ol_1" on "storage"."objects";
-drop policy "Allow all operations for anyone 11d98ol_2" on "storage"."objects";
-drop policy "Allow all operations for anyone 11d98ol_3" on "storage"."objects";
-create policy "Allow all operations for anyone 11d98ol_0"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to anon, authenticated
-with check ((bucket_id = 'paymentproofs'::text));
-create policy "Allow all operations for anyone 11d98ol_1"
-  on "storage"."objects"
-  as permissive
-  for select
-  to anon, authenticated
-using ((bucket_id = 'paymentproofs'::text));
-create policy "Allow all operations for anyone 11d98ol_2"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to anon, authenticated
-using ((bucket_id = 'paymentproofs'::text));
-create policy "Allow all operations for anyone 11d98ol_3"
-  on "storage"."objects"
-  as permissive
-  for update
-  to anon, authenticated
-using ((bucket_id = 'paymentproofs'::text));
+$function$
+;
