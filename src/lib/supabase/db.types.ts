@@ -159,6 +159,7 @@ export type Database = {
         Row: {
           businessMemberId: string;
           businessName: string;
+          featuredExpirationDate: string | null;
           identifier: string;
           joinDate: string;
           lastPaymentDate: string | null;
@@ -174,6 +175,7 @@ export type Database = {
         Insert: {
           businessMemberId?: string;
           businessName: string;
+          featuredExpirationDate?: string | null;
           identifier: string;
           joinDate: string;
           lastPaymentDate?: string | null;
@@ -189,6 +191,7 @@ export type Database = {
         Update: {
           businessMemberId?: string;
           businessName?: string;
+          featuredExpirationDate?: string | null;
           identifier?: string;
           joinDate?: string;
           lastPaymentDate?: string | null;

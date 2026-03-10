@@ -1,16 +1,45 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { Loader2, ScanLine } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { RegistrationItem } from "@/lib/validation/registration-management";
-import CheckInRegistrationRowActions from "./CheckInRegistrationRowActions";
+import { useScanQR } from "../../_hooks/useScanQR";
 
 interface CheckInRegistrationTableProps {
   eventDayId: string;
   eventId: string;
   registrationList: RegistrationItem[];
+}
+
+function CheckInActionButton({
+  eventDayId,
+  eventId,
+  registrationIdentifier,
+}: {
+  eventDayId: string;
+  eventId: string;
+  registrationIdentifier: string;
+}) {
+  const { execute: scanQRData, isPending } = useScanQR({ eventId });
+
+  return (
+    <Button
+      disabled={isPending}
+      onClick={(event) => {
+        event.stopPropagation();
+        scanQRData(registrationIdentifier, eventDayId);
+      }}
+      size="sm"
+      variant="outline"
+    >
+      {isPending ? <Loader2 className="animate-spin" /> : <ScanLine />}
+      Check-In
+    </Button>
+  );
 }
 
 const getColumns = ({
@@ -63,11 +92,11 @@ const getColumns = ({
     cell: ({ row }) => <>{row.original.people}</>,
   },
   {
-    accessorKey: "actions",
-    header: "Actions",
+    accessorKey: "checkIn",
+    header: "Check In",
     enableHiding: false,
     cell: ({ row }) => (
-      <CheckInRegistrationRowActions
+      <CheckInActionButton
         eventDayId={eventDayId}
         eventId={eventId}
         registrationIdentifier={row.original.registrationIdentifier}
