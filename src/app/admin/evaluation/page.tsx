@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function EvaluationPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-2">
       <Suspense fallback={<EvaluationPageSkeleton />}>
         <div>
           <h1 className="font-bold text-3xl text-foreground">Evaluations</h1>
