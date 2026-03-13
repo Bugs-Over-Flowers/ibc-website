@@ -39,7 +39,12 @@ function SelectField({
         onValueChange={(value) => field.handleChange(value || "")}
         value={field.state.value ?? ""}
       >
-        <SelectTrigger id={field.name}>
+        <SelectTrigger
+          aria-invalid={isInvalid}
+          className="w-full"
+          data-invalid={isInvalid}
+          id={field.name}
+        >
           <SelectValue placeholder={placeholder}>
             {hasValue ? selectedOption.label : null}
           </SelectValue>
@@ -53,7 +58,7 @@ function SelectField({
         </SelectContent>
       </Select>
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={field.state.meta.errors} />
+      <FieldError errors={field.state.meta.errors} reserveSpace />
     </Field>
   );
 }

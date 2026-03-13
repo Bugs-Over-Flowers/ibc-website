@@ -183,7 +183,12 @@ export function Step2Company({ form, sectors }: StepProps) {
             {(logoImageURL) => (
               <form.AppField name="logoImage">
                 {(field) => (
-                  <Field className="space-y-2">
+                  <Field
+                    className="grid gap-2"
+                    data-invalid={
+                      field.state.meta.isTouched && !field.state.meta.isValid
+                    }
+                  >
                     {/** Keep existing logo URL preview support while using upload button UI for new files. */}
                     <Label className="font-semibold text-foreground text-sm">
                       Company Logo *
@@ -218,12 +223,16 @@ export function Step2Company({ form, sectors }: StepProps) {
                       ) : (
                         (() => {
                           const hasFile = field.state.value;
+                          const isInvalid =
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid;
 
                           return (
                             <div className="space-y-2">
                               <button
+                                aria-invalid={isInvalid}
                                 className={cn(
-                                  "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors",
+                                  "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all",
                                   hasFile &&
                                     "border-emerald-500 bg-emerald-50/60 dark:border-emerald-400/70 dark:bg-emerald-500/15",
                                   !hasFile &&
@@ -231,6 +240,8 @@ export function Step2Company({ form, sectors }: StepProps) {
                                   dragActive &&
                                     !hasFile &&
                                     "border-primary bg-primary/5",
+                                  isInvalid &&
+                                    "border-destructive bg-destructive/5 hover:border-destructive",
                                 )}
                                 onDragEnter={handleDrag}
                                 onDragLeave={handleDrag}
@@ -265,6 +276,7 @@ export function Step2Company({ form, sectors }: StepProps) {
                                 <input
                                   accept="image/png,image/jpeg,image/jpg"
                                   className="absolute inset-0 cursor-pointer opacity-0"
+                                  onBlur={field.handleBlur}
                                   onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (!file) {
@@ -347,7 +359,7 @@ export function Step2Company({ form, sectors }: StepProps) {
                         })()
                       )}
                     </div>
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError errors={field.state.meta.errors} reserveSpace />
                   </Field>
                 )}
               </form.AppField>

@@ -123,7 +123,10 @@ export type MembershipApplicationStep2Schema = z.infer<
 export const MembershipApplicationStep3Schema = z.object({
   representatives: z
     .array(ApplicationMemberSchema)
-    .min(1, "At least one representative is required"),
+    .length(
+      2,
+      "Exactly two representatives are required: one principal and one alternate",
+    ),
 });
 
 export type MembershipApplicationStep3Schema = z.infer<
@@ -179,7 +182,10 @@ export const MembershipApplicationSchema = z
       .min(1, "Company logo is required"),
     representatives: z
       .array(ApplicationMemberSchema)
-      .min(1, "At least one representative is required"),
+      .length(
+        2,
+        "Exactly two representatives are required: one principal and one alternate",
+      ),
     paymentMethod: MembershipPaymentMethodEnum,
     paymentProofUrl: z.string().optional(),
     paymentProof: z.any().optional(),

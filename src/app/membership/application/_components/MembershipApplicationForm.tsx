@@ -52,7 +52,7 @@ const steps = [
     id: 3,
     title: "Representatives",
     description:
-      "The first representative is the principal member. You may add alternate representatives as needed.",
+      "Provide one principal and one alternate representative for this application.",
     icon: Users,
   },
   {

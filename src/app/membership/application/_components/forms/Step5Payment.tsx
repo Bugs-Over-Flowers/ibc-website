@@ -106,6 +106,10 @@ export function Step5Payment({ form, applicationData }: StepProps) {
           </div>
           <form.AppField name="applicationMemberType">
             {(field) => {
+              const isInvalid =
+                field.state.meta.isTouched &&
+                field.state.meta.errors.length > 0;
+
               const options = [
                 {
                   value: "corporate" as const,
@@ -135,7 +139,10 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                             "flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
                             field.state.value === option.value &&
                               "border-primary bg-primary/5",
+                            isInvalid &&
+                              "border-destructive/70 bg-destructive/5",
                           )}
+                          data-invalid={isInvalid}
                           key={option.value}
                           onClick={() => field.handleChange(option.value)}
                           type="button"
@@ -162,7 +169,7 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                       );
                     })}
                   </div>
-                  <FieldError errors={field.state.meta.errors} />
+                  <FieldError errors={field.state.meta.errors} reserveSpace />
                 </div>
               );
             }}
@@ -187,6 +194,9 @@ export function Step5Payment({ form, applicationData }: StepProps) {
           name="paymentMethod"
         >
           {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && field.state.meta.errors.length > 0;
+
             const options = [
               {
                 value: "ONSITE" as const,
@@ -214,7 +224,9 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                           "flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
                           field.state.value === option.value &&
                             "border-primary bg-primary/5",
+                          isInvalid && "border-destructive/70 bg-destructive/5",
                         )}
+                        data-invalid={isInvalid}
                         key={option.value}
                         onClick={() => field.handleChange(option.value)}
                         type="button"
@@ -238,7 +250,7 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                     );
                   })}
                 </div>
-                <FieldError errors={field.state.meta.errors} />
+                <FieldError errors={field.state.meta.errors} reserveSpace />
               </div>
             );
           }}
@@ -329,6 +341,9 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                 <form.AppField name="paymentProof">
                   {(field) => {
                     const selectedFile = field.state.value as File | undefined;
+                    const isInvalid =
+                      field.state.meta.isTouched &&
+                      field.state.meta.errors.length > 0;
 
                     return (
                       <div className="space-y-2">
@@ -337,8 +352,9 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                         </Label>
                         <div className="space-y-2 rounded-xl bg-background p-0">
                           <button
+                            aria-invalid={isInvalid}
                             className={cn(
-                              "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors",
+                              "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all",
                               selectedFile &&
                                 "border-emerald-500 bg-emerald-50/60 dark:border-emerald-400/70 dark:bg-emerald-500/15",
                               !selectedFile &&
@@ -346,6 +362,8 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                               dragActive &&
                                 !selectedFile &&
                                 "border-primary bg-primary/5",
+                              isInvalid &&
+                                "border-destructive bg-destructive/5 hover:border-destructive",
                             )}
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}
@@ -366,6 +384,7 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                             <input
                               accept="image/png,image/jpeg,image/jpg"
                               className="absolute inset-0 cursor-pointer opacity-0"
+                              onBlur={field.handleBlur}
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (!file || !isValidPaymentProof(file)) {
@@ -424,7 +443,10 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                             </div>
                           ) : null}
                         </div>
-                        <FieldError errors={field.state.meta.errors} />
+                        <FieldError
+                          errors={field.state.meta.errors}
+                          reserveSpace
+                        />
                       </div>
                     );
                   }}

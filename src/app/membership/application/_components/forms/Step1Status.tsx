@@ -193,7 +193,7 @@ export function Step1Status({
                 field.state.meta.errors.length > 0;
 
               return (
-                <Field className="space-y-2">
+                <Field className="grid gap-2" data-invalid={isInvalid}>
                   <Label
                     className="font-bold text-base"
                     htmlFor="businessMemberId"
@@ -209,9 +209,11 @@ export function Step1Status({
                           "border-emerald-400 bg-emerald-50 dark:border-emerald-500/70 dark:bg-emerald-500/15",
                         memberValidation.validationStatus === "invalid" &&
                           "border-destructive/60 bg-destructive/5",
+                        isInvalid && "border-destructive",
                       )}
                       data-invalid={isInvalid}
                       id="businessMemberId"
+                      onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       placeholder="ibc-mem-xxxxxxxx"
                       type="text"
@@ -274,7 +276,7 @@ export function Step1Status({
                     Enter your existing IBC Member ID. Verification will happen
                     when you click Next.
                   </p>
-                  <FieldError errors={field.state.meta.errors} />
+                  <FieldError errors={field.state.meta.errors} reserveSpace />
                 </Field>
               );
             }}
