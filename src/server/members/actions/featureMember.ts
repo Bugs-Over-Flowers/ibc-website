@@ -1,12 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 
 const featureMemberSchema = z.object({
   memberId: z.string().uuid(),
-  featuredExpirationDate: z.coerce.date(),
+  featuredExpirationDate: z.string().date(), // Validates YYYY-MM-DD
 });
 
 export async function featureMember(
@@ -15,19 +16,26 @@ export async function featureMember(
   const parsed = featureMemberSchema.parse(input);
 
   const supabase = await createActionClient();
-  const formattedDate = parsed.featuredExpirationDate
-    .toISOString()
-    .slice(0, 10);
+  const formattedDate = parsed.featuredExpirationDate;
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("BusinessMember")
     .update({ featuredExpirationDate: formattedDate })
-    .eq("businessMemberId", parsed.memberId);
+    .eq("businessMemberId", parsed.memberId)
+    .select("businessMemberId")
+    .maybeSingle();
 
   if (error) {
-    throw new Error(`Failed to feature member: ${error.message}`);
+    throw new Error(error.message);
   }
 
+  if (!data) {
+    throw new Error("Member not found");
+  }
+
+  // Invalidate cache for featured members
+  updateTag(CACHE_TAGS.members.featured);
+  // Also invalidate admin list as it shows feature status
   revalidatePath("/admin/members");
 
   return {

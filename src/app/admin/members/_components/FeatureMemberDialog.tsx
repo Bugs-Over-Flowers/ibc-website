@@ -1,6 +1,5 @@
 "use client";
 
-import { Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,16 +18,19 @@ import tryCatch from "@/lib/server/tryCatch";
 import { featureMember } from "@/server/members/actions/featureMember";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
-type FeatureableMember = Awaited<ReturnType<typeof getMembers>>[number] & {
-  featuredExpirationDate?: string | null;
-};
+export type FeatureableMember = Awaited<ReturnType<typeof getMembers>>[number];
 
 interface FeatureMemberDialogProps {
   member: FeatureableMember;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function FeatureMemberDialog({ member }: FeatureMemberDialogProps) {
-  const [open, setOpen] = useState(false);
+export function FeatureMemberDialog({
+  member,
+  open,
+  onOpenChange,
+}: FeatureMemberDialogProps) {
   const [expirationDate, setExpirationDate] = useState(
     member.featuredExpirationDate ?? "",
   );
@@ -44,8 +46,9 @@ export function FeatureMemberDialog({ member }: FeatureMemberDialogProps) {
       return "Not currently featured";
     }
 
+    // Use "T00:00:00" suffix to ensure local timezone interpretation for date-only string
     const formatted = new Date(
-      member.featuredExpirationDate,
+      `${member.featuredExpirationDate}T00:00:00`,
     ).toLocaleDateString();
     return `Featured until ${formatted}`;
   }, [member.featuredExpirationDate]);
@@ -53,7 +56,7 @@ export function FeatureMemberDialog({ member }: FeatureMemberDialogProps) {
   const { execute, isPending } = useAction(tryCatch(featureMember), {
     onSuccess: () => {
       toast.success(`${member.businessName} is now marked as featured.`);
-      setOpen(false);
+      onOpenChange(false);
     },
     onError: (error) => {
       toast.error(error);
@@ -70,22 +73,12 @@ export function FeatureMemberDialog({ member }: FeatureMemberDialogProps) {
 
     await execute({
       memberId: member.businessMemberId,
-      featuredExpirationDate: new Date(expirationDate),
+      featuredExpirationDate: expirationDate, // Send YYYY-MM-DD string directly
     });
   };
 
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
-      <Button
-        className="w-full"
-        onClick={() => setOpen(true)}
-        size="sm"
-        type="button"
-        variant="secondary"
-      >
-        <Star className="mr-2 h-4 w-4" />
-        Feature Member
-      </Button>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Feature {member.businessName}</DialogTitle>
@@ -99,7 +92,8 @@ export function FeatureMemberDialog({ member }: FeatureMemberDialogProps) {
             </Label>
             <Input
               id="featuredExpirationDate"
-              min={new Date().toISOString().slice(0, 10)}
+              // Use local date string YYYY-MM-DD instead of UTC
+              min={new Date().toLocaleDateString("en-CA")}
               onChange={(event) => setExpirationDate(event.target.value)}
               type="date"
               value={expirationDate}
@@ -109,7 +103,7 @@ export function FeatureMemberDialog({ member }: FeatureMemberDialogProps) {
           <DialogFooter>
             <Button
               disabled={isPending}
-              onClick={() => setOpen(false)}
+              onClick={() => onOpenChange(false)}
               type="button"
               variant="outline"
             >

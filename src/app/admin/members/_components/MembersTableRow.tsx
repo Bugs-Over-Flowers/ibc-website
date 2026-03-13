@@ -1,26 +1,30 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { getMembers } from "@/server/members/queries/getMembers";
-import { FeatureMemberDialog } from "./FeatureMemberDialog";
 
 interface MembersTableRowProps {
   member: Awaited<ReturnType<typeof getMembers>>[number];
   isSelected: boolean;
   onSelectedChange: (selected: boolean) => void;
+  onFeatureClick: (
+    member: Awaited<ReturnType<typeof getMembers>>[number],
+  ) => void;
 }
 
 export function MembersTableRow({
   member,
   isSelected,
   onSelectedChange,
+  onFeatureClick,
 }: MembersTableRowProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = member.logoImageURL && !imageError;
@@ -144,7 +148,16 @@ export function MembersTableRow({
       </button>
 
       <div className="mt-3">
-        <FeatureMemberDialog member={member} />
+        <Button
+          className="w-full"
+          onClick={() => onFeatureClick(member)}
+          size="sm"
+          type="button"
+          variant="secondary"
+        >
+          <Star className="mr-2 h-4 w-4" />
+          Feature Member
+        </Button>
       </div>
     </div>
   );
