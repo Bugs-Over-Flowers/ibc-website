@@ -2,9 +2,6 @@ services:
   # Development service - for local development with hot reload
   ibc-dev:
     container_name: ibc-dev
-  # Development service - for local development with hot reload
-  ibc-dev:
-    container_name: ibc-dev
     build:
       context: .
       dockerfile: Dockerfile
@@ -29,7 +26,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-  
+
   # Production service - optimized production build
   ibc-prod:
     container_name: ibc-prod
