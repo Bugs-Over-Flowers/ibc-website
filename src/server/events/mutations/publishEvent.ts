@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { ServerFunction } from "@/lib/server/types";
 import type { Database } from "@/lib/supabase/db.types";
