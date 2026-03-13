@@ -9,18 +9,29 @@ import {
   updateSectorSchema,
 } from "@/lib/validation/sector/sectorSchema";
 
+function escapeLikeString(str: string) {
+  return str.replace(/[%_\\]/g, "\\$&");
+}
+
 export async function createSector(input: z.infer<typeof createSectorSchema>) {
   const parsed = createSectorSchema.parse(input);
 
   const supabase = await createActionClient();
 
-  const { data: existingSector } = await supabase
+  // Escape special characters to treat input as literal string, not pattern
+  const safeSectorName = escapeLikeString(parsed.sectorName);
+
+  const { data: existingSectors, error: checkError } = await supabase
     .from("Sector")
     .select("sectorId")
-    .ilike("sectorName", parsed.sectorName)
-    .maybeSingle();
+    .ilike("sectorName", safeSectorName)
+    .limit(1);
 
-  if (existingSector) {
+  if (checkError) {
+    throw new Error(checkError.message);
+  }
+
+  if (existingSectors && existingSectors.length > 0) {
     throw new Error("Sector with this name already exists");
   }
 
