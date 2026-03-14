@@ -16,21 +16,21 @@ export async function CreateSRPageContent() {
 
   return (
     <div className="pb-8">
-      <div className="bg-primary px-4 pt-8 pb-24 text-primary-foreground sm:px-6 lg:px-8">
+      <div className="px-4 pt-8 pb-24 text-primary-foreground sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-4 flex items-center justify-between gap-3">
             <Link href="/admin/sponsored-registration">
-              <Button className="text-primary-foreground" variant="ghost">
+              <Button className="text-primary-foreground" variant="default">
                 <ChevronLeft className="h-4 w-4" />
                 Back to Sponsored Registrations
               </Button>
             </Link>
           </div>
 
-          <h1 className="mb-4 font-extrabold text-4xl text-primary-foreground tracking-tight md:text-5xl">
+          <h1 className="mb-4 font-extrabold text-4xl text-foreground tracking-tight md:text-5xl">
             Create Sponsored Registration
           </h1>
-          <p className="max-w-2xl font-medium text-lg text-primary-foreground/90 leading-relaxed">
+          <p className="max-w-2xl font-medium text-foreground/90 text-lg leading-relaxed">
             Generate a unique sponsored registration link, assign fee deduction,
             and control guest limits for the selected event.
           </p>
