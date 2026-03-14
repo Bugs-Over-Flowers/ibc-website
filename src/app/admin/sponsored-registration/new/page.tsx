@@ -1,10 +1,16 @@
+import { Suspense } from "react";
 import { CreateSRPageContent } from "./_components/CreateSRPageContent";
+import NewSponsoredRegistrationLoading from "./loading";
 
 export const metadata = {
   title: "Create Sponsored Registration | Admin",
   description: "Create a new sponsored registration",
 };
 
-export default async function NewSponsoredRegistrationPage() {
-  return <CreateSRPageContent />;
+export default function NewSponsoredRegistrationPage() {
+  return (
+    <Suspense fallback={<NewSponsoredRegistrationLoading />}>
+      <CreateSRPageContent />
+    </Suspense>
+  );
 }

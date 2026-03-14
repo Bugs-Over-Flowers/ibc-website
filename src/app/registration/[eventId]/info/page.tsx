@@ -1,58 +1,20 @@
-import { cookies } from "next/headers";
-import { RegistrationInfoCta } from "@/app/registration/[eventId]/info/_components/RegistrationInfoCta";
-import { RegistrationInfoEventCard } from "@/app/registration/[eventId]/info/_components/RegistrationInfoEventCard";
-import { RegistrationInfoSteps } from "@/app/registration/[eventId]/info/_components/RegistrationInfoSteps";
-import { RegistrationInfoTopNav } from "@/app/registration/[eventId]/info/_components/RegistrationInfoTopNav";
-import tryCatch from "@/lib/server/tryCatch";
+import { Suspense } from "react";
 import type { RegistrationInformationPageProps } from "@/lib/types/route";
-import { getRegistrationEventDetails } from "@/server/registration/queries/getRegistrationEventDetails";
-import NotReadyEvent from "../_components/NotReadyEvent";
-import RegistrationErrorComponent from "../_components/RegistrationErrorComponent";
+import { RegistrationInfoPageContent } from "./_components/RegistrationInfoPageContent";
+import Loading from "./loading";
 
-export default async function InfoPageWrapper({
+export default function InfoPageWrapper({
   params,
+  searchParams,
 }: RegistrationInformationPageProps) {
-  const { eventId } = await params;
-  const requestCookies = (await cookies()).getAll();
-
-  const {
-    error: registrationEventDetailsMessage,
-    data,
-    success,
-  } = await tryCatch(getRegistrationEventDetails(requestCookies, { eventId }));
-
-  if (!success) {
-    return (
-      <RegistrationErrorComponent message={registrationEventDetailsMessage} />
-    );
-  }
-
-  if (data.eventType === null) {
-    return (
-      <NotReadyEvent title={data.eventTitle ?? "Registration unavailable"} />
-    );
-  }
-
-  if (!data.eventStartDate || !data.eventEndDate) {
-    return <div>Error loading event.</div>;
-  }
-
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <RegistrationInfoTopNav eventId={eventId} />
-
-      <div className="mx-auto max-w-5xl space-y-8 px-6 pt-8">
-        <RegistrationInfoEventCard
-          description={data.description}
-          eventEndDate={data.eventEndDate}
-          eventStartDate={data.eventStartDate}
-          fee={data.registrationFee}
-          headerUrl={data.eventHeaderUrl}
-          title={data.eventTitle ?? "Event Header"}
+    <main className="min-h-screen w-full bg-background pb-20">
+      <Suspense fallback={<Loading />}>
+        <RegistrationInfoPageContent
+          params={params}
+          searchParams={searchParams}
         />
-        <RegistrationInfoSteps />
-        <RegistrationInfoCta eventId={eventId} />
-      </div>
-    </div>
+      </Suspense>
+    </main>
   );
 }
