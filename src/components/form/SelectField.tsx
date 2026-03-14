@@ -15,6 +15,7 @@ interface SelectFieldProps {
   className?: string;
   options: { label: string; value: string }[];
   placeholder?: string;
+  reserveErrorSpace?: boolean;
 }
 
 function SelectField({
@@ -23,6 +24,7 @@ function SelectField({
   className,
   options,
   placeholder,
+  reserveErrorSpace = true,
 }: SelectFieldProps) {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -58,7 +60,10 @@ function SelectField({
         </SelectContent>
       </Select>
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={field.state.meta.errors} reserveSpace />
+      <FieldError
+        errors={field.state.meta.errors}
+        reserveSpace={reserveErrorSpace}
+      />
     </Field>
   );
 }

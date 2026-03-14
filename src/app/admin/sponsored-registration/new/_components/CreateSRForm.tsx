@@ -109,6 +109,7 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
                   label="Event"
                   options={eventOptions}
                   placeholder="Select an event"
+                  reserveErrorSpace={false}
                 />
               )}
             </form.AppField>
@@ -148,7 +149,6 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
                   <field.NumberField
                     description="Discount amount deducted per registration. Must not exceed the selected event registration fee"
                     label="Fee Deduction (PHP)"
-                    max={selectedEvent?.registrationFee ?? 1500}
                     min={0}
                     placeholder="0"
                     step={1}
