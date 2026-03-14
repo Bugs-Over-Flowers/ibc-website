@@ -2,12 +2,10 @@
 
 import { render } from "@react-email/render";
 import { revalidatePath, updateTag } from "next/cache";
-import { Resend } from "resend";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { sendEmail } from "@/lib/email";
 import PaymentRejectedTemplate from "@/lib/resend/templates/PaymentRejectedTemplate";
 import { createActionClient } from "@/lib/supabase/server";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const rejectPayment = async (registrationId: string) => {
   const supabase = await createActionClient();
@@ -67,17 +65,11 @@ export const rejectPayment = async (registrationId: string) => {
       }),
     );
 
-    const { error: emailError } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
+    await sendEmail({
       to: principal.email,
       subject: `Payment Rejected: ${eventTitle}`,
       html: emailHtml,
     });
-
-    if (emailError) {
-      console.error("Failed to send rejection email:", emailError);
-      throw new Error("Failed to send rejection email");
-    }
   } catch (error) {
     console.error("Error sending email:", error);
     throw new Error("Failed to process rejection email");
