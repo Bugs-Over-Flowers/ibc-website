@@ -39,6 +39,7 @@ export async function EventEvaluationsTableWrapper({
   return (
     <EventEvaluationsTable
       evaluations={evaluations}
+      eventId={eventId}
       eventTitle={event.eventTitle}
     />
   );

@@ -21,6 +21,7 @@ interface EvaluationCardProps {
   isSelected: boolean;
   onSelect: (evaluation: EvaluationWithEventRpc) => void;
   showCheckbox?: boolean;
+  backEventId?: string;
 }
 
 export function EvaluationCard({
@@ -28,6 +29,7 @@ export function EvaluationCard({
   isSelected,
   onSelect,
   showCheckbox,
+  backEventId,
 }: EvaluationCardProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -53,7 +55,10 @@ export function EvaluationCard({
   };
 
   const goToDetails = () => {
-    router.push(`/admin/evaluation/${evaluation.evaluation_id}` as Route);
+    const targetPath = backEventId
+      ? `/admin/evaluation/${evaluation.evaluation_id}?eventId=${backEventId}`
+      : `/admin/evaluation/${evaluation.evaluation_id}`;
+    router.push(targetPath as Route);
   };
 
   const handleViewDetails = (e: React.MouseEvent) => {

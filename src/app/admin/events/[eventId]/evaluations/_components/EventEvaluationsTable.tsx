@@ -14,6 +14,7 @@ import type { EvaluationWithEventRpc } from "@/server/evaluation/queries/getAllE
 interface EventEvaluationsTableProps {
   evaluations: EvaluationWithEventRpc[];
   eventTitle: string;
+  eventId: string;
 }
 
 type RatingScale = NonNullable<EvaluationWithEventRpc["q1_rating"]>;
@@ -54,6 +55,7 @@ const getExcelColumns = (): ColumnDef<EventEvaluationExportRow>[] => [
 export default function EventEvaluationsTable({
   evaluations,
   eventTitle,
+  eventId,
 }: EventEvaluationsTableProps) {
   const [filteredEvaluations, setFilteredEvaluations] = useState(evaluations);
 
@@ -106,7 +108,11 @@ export default function EventEvaluationsTable({
         </Button>
       </div>
 
-      <EvaluationList evaluations={filteredEvaluations} pageSize={10} />
+      <EvaluationList
+        backEventId={eventId}
+        evaluations={filteredEvaluations}
+        pageSize={10}
+      />
     </div>
   );
 }

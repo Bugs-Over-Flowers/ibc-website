@@ -15,11 +15,13 @@ import { EvaluationCard } from "./EvaluationRow";
 interface EvaluationListProps {
   evaluations: EvaluationWithEventRpc[];
   pageSize?: number;
+  backEventId?: string;
 }
 
 export function EvaluationList({
   evaluations,
   pageSize = 10,
+  backEventId,
 }: EvaluationListProps) {
   const router = useRouter();
   const [displayedCount, setDisplayedCount] = useState(pageSize);
@@ -193,6 +195,7 @@ export function EvaluationList({
       <div className="grid grid-cols-3 gap-4">
         {displayed.map((evaluation) => (
           <EvaluationCard
+            backEventId={backEventId}
             evaluation={evaluation}
             isSelected={selectedIds.has(evaluation.evaluation_id)}
             key={evaluation.evaluation_id}
