@@ -10,9 +10,6 @@ const MEMBERSHIP_STATUS_VALUES = [
   "cancelled",
 ] as const satisfies readonly MembershipStatusEnum[];
 
-const WEBSITE_URL_REGEX =
-  /^(https?:\/\/)?((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,}(\/[^\s]*)?$/;
-
 export const UpdateMemberSchema = z.object({
   // Identifiers
   memberId: z.string().uuid(),
