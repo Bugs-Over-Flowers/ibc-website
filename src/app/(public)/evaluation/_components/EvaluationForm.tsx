@@ -228,7 +228,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               className="py-3 first:pt-0 last:pb-0 sm:py-4 md:py-5 lg:py-6"
               key={q.field}
             >
-              {/* @ts-expect-error - Form infers type from defaultValues with null, but rating fields exist at runtime */}
+              {/* @ts-expect-error - Rating fields are present in runtime form state */}
               <form.AppField name={q.field}>
                 {(field) => <field.RatingScale label={q.question} />}
               </form.AppField>

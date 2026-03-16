@@ -1,5 +1,14 @@
 import { z } from "zod";
-import { phoneSchema } from "@/lib/validation/utils";
+import type { Database } from "@/lib/supabase/db.types";
+import { phoneSchema } from "../utils";
+
+type MembershipStatusEnum = Database["public"]["Enums"]["MembershipStatus"];
+
+const MEMBERSHIP_STATUS_VALUES = [
+  "paid",
+  "unpaid",
+  "cancelled",
+] as const satisfies readonly MembershipStatusEnum[];
 
 export const UpdateMemberSchema = z.object({
   // Identifiers
@@ -19,7 +28,7 @@ export const UpdateMemberSchema = z.object({
   mobileNumber: phoneSchema.optional(),
 
   // Membership Details
-  membershipStatus: z.enum(["paid", "unpaid", "cancelled"]).optional(),
+  membershipStatus: z.enum(MEMBERSHIP_STATUS_VALUES).optional(),
   joinDate: z.coerce.date().optional(),
   membershipExpiryDate: z.coerce.date().optional().nullable(),
 });

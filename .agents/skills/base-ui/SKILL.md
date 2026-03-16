@@ -1,8 +1,8 @@
 ---
 name: base-ui
 description: "Base UI unstyled React components. Covers forms, menus, overlays, composition. Keywords: @base-ui/react, render props."
-version: "1.1.0"
-release_date: "2026-01-15"
+version: "1.2.0"
+release_date: "2026-02-12"
 ---
 
 # Base UI (React)
@@ -63,6 +63,12 @@ Use this skill when the user wants to:
 
 - references/scroll-area.md
 - references/separator.md
+
+## v1.2.0 highlights
+
+- New Drawer/Sheet overlay component.
+- New `useFilteredItems` hook for filtered item lists (Autocomplete/Combobox).
+- `render` prop supports lazy elements.
 
 ## Core concepts to apply
 
@@ -125,3 +131,10 @@ When responding to the user, provide:
 - The specific Base UI components to use (and their key parts).
 - A brief assembly plan (Root + parts + portal/positioner where relevant).
 - A short checklist for accessibility and state-driven styling.
+
+## Links
+
+- [Documentation](https://base-ui.com/)
+- [Releases](https://github.com/mui/base-ui/releases)
+- [GitHub](https://github.com/mui/base-ui)
+- [npm](https://www.npmjs.com/package/@base-ui-components/react)

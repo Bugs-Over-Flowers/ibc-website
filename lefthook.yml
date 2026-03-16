@@ -6,13 +6,13 @@
 
 
 pre-commit:
-  parallel: true
+  parallel: false
   jobs:
-    - name: Biome Check on Staged Files
-      run: bun x biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
-      stage_fixed: true
     - name: packages audit
       tags:
         - frontend
         - security
       run: bun audit
+    - name: Biome Check on Staged Files
+      run: bun x biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true

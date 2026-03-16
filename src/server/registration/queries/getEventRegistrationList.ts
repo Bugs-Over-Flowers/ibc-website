@@ -32,6 +32,7 @@ export const getEventRegistrationList = async (
   cacheTag(CACHE_TAGS.registrations.all);
   cacheTag(CACHE_TAGS.registrations.list);
   cacheTag(CACHE_TAGS.registrations.event);
+
   const supabase = await createClient(requestCookies);
   const parsedPaymentProofStatus = paymentProofStatus
     ? PaymentProofStatusEnum.safeParse(paymentProofStatus)

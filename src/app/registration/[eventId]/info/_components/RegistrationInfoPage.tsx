@@ -159,7 +159,7 @@ export default async function RegistrationInfoPage({
 
           <TermsAndConditions
             triggerOverride={
-              <Button className="px-0 text-blue-600" variant={"link"}>
+              <Button className="px-0 text-primary" variant={"link"}>
                 See Terms and Conditions here
               </Button>
             }

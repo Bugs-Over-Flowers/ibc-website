@@ -24,23 +24,40 @@ export default function TermsAndConditions() {
       <Hr style={{ borderColor: "#e5e7eb", margin: "16px 0" }} />
 
       <Text style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.6" }}>
-        <strong>1. Registration & Payment</strong>
+        <strong>1. Registration Information</strong>
         <br />
-        All registrations are considered final upon receipt of payment. Payment
-        must be completed within 48 hours of registration to secure your slot.
-        Failure to pay within this period may result in automatic cancellation.
+        You confirm that all details you submitted are accurate and complete.
+        Incorrect or incomplete information may affect your registration status.
       </Text>
 
       <Text style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.6" }}>
-        <strong>2. Cancellation & Refunds</strong>
+        <strong>2. Data Privacy</strong>
         <br />
-        Cancellations made 7 days or more before the event are eligible for a
-        full refund. Cancellations made within 7 days of the event are
-        non-refundable. No-shows are not entitled to refunds.
+        Personal information collected during registration is used for event
+        processing, participant coordination, and official event records. Data
+        is handled by authorized personnel and protected using reasonable
+        safeguards.
       </Text>
 
       <Text style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.6" }}>
-        <strong>3. Event Changes</strong>
+        <strong>3. Communication Consent</strong>
+        <br />
+        By registering, you agree to receive event-related updates,
+        confirmations, reminders, and important announcements through your
+        provided contact channels.
+      </Text>
+
+      <Text style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.6" }}>
+        <strong>4. Photography &amp; Media Consent</strong>
+        <br />
+        Event activities may be photographed or recorded. By attending, you
+        consent to the use of your image, voice, or likeness in IBC
+        documentation, website content, social media, and promotional materials.
+        If you prefer not to be featured, please notify event staff.
+      </Text>
+
+      <Text style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.6" }}>
+        <strong>5. Event Changes</strong>
         <br />
         Iloilo Business Club reserves the right to modify event details,
         including date, time, venue, or speakers, due to unforeseen
@@ -49,19 +66,18 @@ export default function TermsAndConditions() {
       </Text>
 
       <Text style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.6" }}>
-        <strong>4. Code of Conduct</strong>
+        <strong>6. Code of Conduct</strong>
         <br />
         Attendees are expected to conduct themselves professionally and
         respectfully. IBC reserves the right to remove any participant who
-        engages in disruptive or inappropriate behavior without refund.
+        engages in disruptive or inappropriate behavior.
       </Text>
 
       <Text style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.6" }}>
-        <strong>5. Photography & Media</strong>
+        <strong>7. Acknowledgment</strong>
         <br />
-        By attending, you consent to being photographed or recorded for
-        promotional purposes. If you prefer not to be included, please notify
-        our staff at the event.
+        By completing your registration, you acknowledge that you have read and
+        agree to these terms and conditions.
       </Text>
 
       <Hr style={{ borderColor: "#e5e7eb", margin: "16px 0" }} />
