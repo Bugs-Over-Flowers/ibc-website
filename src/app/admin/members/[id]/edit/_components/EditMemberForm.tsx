@@ -49,28 +49,30 @@ export function EditMemberForm({ member, sectors }: EditMemberFormProps) {
       onSubmit: zodValidator(UpdateMemberSchema),
     },
     onSubmit: async ({ value }) => {
+      const parsedValues = UpdateMemberSchema.parse(value);
       const dataToSubmit = {
-        ...value,
+        ...parsedValues,
         // Ensure nulls are converted to undefined for the server action
-        websiteURL: value.websiteURL || undefined,
-        faxNumber: value.faxNumber || undefined,
-        mobileNumber: value.mobileNumber || undefined,
-        membershipStatus: (value.membershipStatus || undefined) as
+        websiteURL: parsedValues.websiteURL || undefined,
+        mobileNumber: parsedValues.mobileNumber || undefined,
+        membershipStatus: (parsedValues.membershipStatus || undefined) as
           | "paid"
           | "unpaid"
           | "cancelled"
           | undefined,
-        joinDate: value.joinDate ? new Date(value.joinDate) : undefined,
-        membershipExpiryDate: value.membershipExpiryDate
-          ? new Date(value.membershipExpiryDate)
+        joinDate: parsedValues.joinDate
+          ? new Date(parsedValues.joinDate)
           : undefined,
-        memberId: value.memberId,
-        applicationId: value.applicationId,
-        businessName: value.businessName,
-        companyAddress: value.companyAddress,
-        emailAddress: value.emailAddress,
-        landline: value.landline,
-        sectorId: Number(value.sectorId),
+        membershipExpiryDate: parsedValues.membershipExpiryDate
+          ? new Date(parsedValues.membershipExpiryDate)
+          : undefined,
+        memberId: parsedValues.memberId,
+        applicationId: parsedValues.applicationId,
+        businessName: parsedValues.businessName,
+        companyAddress: parsedValues.companyAddress,
+        emailAddress: parsedValues.emailAddress,
+        landline: parsedValues.landline,
+        sectorId: Number(parsedValues.sectorId),
       };
 
       const { error, success } = await tryCatch(updateMember(dataToSubmit));
@@ -146,10 +148,6 @@ export function EditMemberForm({ member, sectors }: EditMemberFormProps) {
 
           <form.AppField name="mobileNumber">
             {(field) => <field.TextField label="Mobile Number" />}
-          </form.AppField>
-
-          <form.AppField name="faxNumber">
-            {(field) => <field.TextField label="Fax Number" />}
           </form.AppField>
 
           <div className="mt-2 border-t pt-6 md:col-span-2">

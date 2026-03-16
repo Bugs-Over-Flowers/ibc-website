@@ -6,9 +6,7 @@ import { getAllSectors } from "@/server/members/queries/getAllSectors";
 import { getMemberById } from "@/server/members/queries/getMemberById";
 import { EditMemberForm } from "./_components/EditMemberForm";
 
-interface EditMemberPageProps {
-  params: Promise<{ id: string }>;
-}
+type EditMemberPageProps = PageProps<"/admin/members/[id]/edit">;
 
 export default async function EditMemberPage({ params }: EditMemberPageProps) {
   const { id } = await params;

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
-import type { ZodIssue, z } from "zod";
+import type { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import { UpdateMemberSchema } from "@/lib/validation/members/update";
@@ -9,19 +9,6 @@ import { UpdateMemberSchema } from "@/lib/validation/members/update";
 type UpdateMemberInput = z.infer<typeof UpdateMemberSchema>;
 
 export async function updateMember(input: UpdateMemberInput) {
-  const result = UpdateMemberSchema.safeParse(input);
-
-  if (!result.success) {
-    const message = result.error.issues
-      .map((issue: ZodIssue) => {
-        const path = issue.path.join(".") || "form";
-        return `${path}: ${issue.message}`;
-      })
-      .join(", ");
-
-    throw new Error(message);
-  }
-
   const {
     memberId,
     applicationId,
@@ -36,7 +23,7 @@ export async function updateMember(input: UpdateMemberInput) {
     membershipStatus,
     joinDate,
     membershipExpiryDate,
-  } = result.data;
+  } = UpdateMemberSchema.parse(input);
 
   const supabase = await createActionClient();
 
