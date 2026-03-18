@@ -69,7 +69,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       }
 
       toast.success("Thank you! Your feedback has been submitted.");
-      router.push("/events");
+      router.push(`/evaluation/success?eventId=${encodeURIComponent(eventId)}`);
       return undefined;
     },
   });

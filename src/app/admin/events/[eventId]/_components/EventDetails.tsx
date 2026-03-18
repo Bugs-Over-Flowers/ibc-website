@@ -8,6 +8,7 @@ import {
   Edit,
   Globe,
   MapPin,
+  Star,
   Users,
 } from "lucide-react";
 import type { Route } from "next";
@@ -292,7 +293,7 @@ export default async function EventDetails({
       </div>
 
       {/* Action Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className="flex flex-col">
           <CardContent className="flex flex-1 flex-col p-6">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
@@ -325,6 +326,24 @@ export default async function EventDetails({
               <Button className="w-full" variant="outline">
                 <CheckSquare className="mr-2 h-4 w-4" />
                 View Check-in List
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+        <Card className="flex flex-col">
+          <CardContent className="flex flex-1 flex-col p-6">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+              <Star className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 font-semibold text-lg">Evaluations</h3>
+            <p className="mb-6 flex-1 text-muted-foreground text-sm">
+              Review participant feedback, inspect ratings, and export event
+              evaluation responses
+            </p>
+            <Link href={`/admin/events/${eventId}/evaluations` as Route}>
+              <Button className="w-full" variant="outline">
+                <Star className="mr-2 h-4 w-4" />
+                View Evaluations
               </Button>
             </Link>
           </CardContent>
