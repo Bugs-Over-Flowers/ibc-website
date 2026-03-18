@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EvaluationTable } from "./_components/EvaluationTable";
 import EvaluationPageSkeleton from "./loading";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Evaluations | Admin",
   description: "View and manage event evaluations",
 };

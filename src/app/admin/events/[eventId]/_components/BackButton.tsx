@@ -8,7 +8,7 @@ interface BackButtonProps {
   eventId: string;
 }
 
-export function BackButton({ eventId }: BackButtonProps) {
+export default function BackButton({ eventId }: BackButtonProps) {
   const router = useRouter();
 
   const handleClick = () => {
