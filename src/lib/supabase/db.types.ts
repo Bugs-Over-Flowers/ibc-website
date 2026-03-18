@@ -312,6 +312,7 @@ export type Database = {
           description: string | null;
           eventEndDate: string | null;
           eventHeaderUrl: string | null;
+          eventPoster: string | null;
           eventId: string;
           eventStartDate: string | null;
           eventTitle: string;
@@ -327,6 +328,7 @@ export type Database = {
           description?: string | null;
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
+          eventPoster?: string | null;
           eventId?: string;
           eventStartDate?: string | null;
           eventTitle: string;
@@ -342,6 +344,7 @@ export type Database = {
           description?: string | null;
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
+          eventPoster?: string | null;
           eventId?: string;
           eventStartDate?: string | null;
           eventTitle?: string;

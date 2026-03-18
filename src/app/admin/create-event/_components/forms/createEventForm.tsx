@@ -87,6 +87,18 @@ export function CreateEventForm() {
                 <field.FileDropzoneField
                   description="Upload an image for the event banner"
                   label="Event Image *"
+                  layout="banner"
+                  maxFiles={1}
+                />
+              )}
+            </form.AppField>
+
+            <form.AppField name="eventPoster">
+              {(field) => (
+                <field.FileDropzoneField
+                  description="Optional supporting asset displayed as the event poster"
+                  label="Event Poster Image"
+                  layout="banner"
                   maxFiles={1}
                 />
               )}

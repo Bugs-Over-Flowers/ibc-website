@@ -28,6 +28,7 @@ const draftEventClientSchema = z.object({
   venue: z.string(),
   registrationFee: z.number().optional(),
   eventImage: z.array(z.instanceof(File)).optional(),
+  eventPoster: z.array(z.instanceof(File)).optional(),
   eventType: z.literal(null),
 });
 
@@ -56,6 +57,7 @@ const publishedEventClientSchema = z.object({
   eventImage: z
     .array(z.instanceof(File))
     .min(1, "At least 1 image is required"),
+  eventPoster: z.array(z.instanceof(File)).optional(),
 });
 
 // Public event client schema
@@ -96,6 +98,7 @@ export const draftEventServerSchema = z
     ),
     registrationFee: z.number().optional(),
     eventImage: z.string().url().optional().nullable(),
+    eventPoster: z.string().url().optional().nullable(),
     eventType: z.literal(null),
   })
   .refine(dateRefinement, dateRefinementOptions);
@@ -114,6 +117,7 @@ export const publishEventServerSchema = z
     venue: z.string().min(5, "Venue must be at least 5 characters"),
     registrationFee: z.number().min(0, "Registration fee must be at least 0"),
     eventImage: z.string().url(),
+    eventPoster: z.string().url().optional().nullable(),
     eventType: z.enum(["public", "private"]),
   })
   .refine(dateRefinement, dateRefinementOptions);

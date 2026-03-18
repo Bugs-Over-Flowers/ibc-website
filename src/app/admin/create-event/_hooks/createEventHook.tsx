@@ -26,6 +26,7 @@ export const useCreateEventForm = () => {
       registrationFee: 0,
       eventType: null as "public" | "private" | null,
       eventImage: [] as File[],
+      eventPoster: [] as File[],
     },
 
     validationLogic: revalidateLogic(),
@@ -44,12 +45,13 @@ export const useCreateEventForm = () => {
     onSubmit: async ({ value }) => {
       console.log("Submitting form to server...", value);
 
-      let publicUrl: string | null | undefined = null;
+      const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+      let headerUrl: string | null | undefined = null;
+      let posterUrl: string | null | undefined = null;
 
       if (value.eventImage && value.eventImage.length > 0) {
         const file = value.eventImage[0];
         const fileExt = file.name.split(".").pop()?.toLowerCase();
-        const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
 
         if (!fileExt || !allowedExtensions.includes(fileExt)) {
           toast.error(
@@ -76,12 +78,45 @@ export const useCreateEventForm = () => {
         const {
           data: { publicUrl: url },
         } = supabase.storage.from("headerimage").getPublicUrl(filePath);
-        publicUrl = url;
+        headerUrl = url;
+      }
+
+      if (value.eventPoster && value.eventPoster.length > 0) {
+        const posterFile = value.eventPoster[0];
+        const fileExt = posterFile.name.split(".").pop()?.toLowerCase();
+
+        if (!fileExt || !allowedExtensions.includes(fileExt)) {
+          toast.error(
+            "Invalid poster type. Only jpg, jpeg, png, gif, and webp are allowed.",
+          );
+          return;
+        }
+
+        const fileName = `${Math.random()
+          .toString(36)
+          .substring(2)}_${Date.now()}.${fileExt}`;
+        const filePath = `event-posters/${fileName}`;
+
+        const supabase = await createClient();
+        const { error: uploadError } = await supabase.storage
+          .from("headerimage")
+          .upload(filePath, posterFile);
+
+        if (uploadError) {
+          toast.error(`Poster upload failed: ${uploadError.message}`);
+          return;
+        }
+
+        const {
+          data: { publicUrl: url },
+        } = supabase.storage.from("headerimage").getPublicUrl(filePath);
+        posterUrl = url;
       }
 
       const payload = {
         ...value,
-        eventImage: publicUrl,
+        eventImage: headerUrl,
+        eventPoster: posterUrl,
       };
 
       const result =
