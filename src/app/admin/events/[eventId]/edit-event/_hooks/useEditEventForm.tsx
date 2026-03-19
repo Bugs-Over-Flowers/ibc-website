@@ -42,29 +42,64 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
       eventType: event.eventType as "public" | "private" | null,
       eventImage: [] as File[],
       eventHeaderUrl: event.eventHeaderUrl || "",
+      eventPoster: [] as File[],
+      eventPosterUrl: event.eventPoster || "",
     },
 
     onSubmit: async ({ value }) => {
       console.log("Submitting edit form...", value);
 
+      const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+      const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
       let headerUrl = value.eventHeaderUrl;
+      let posterUrl = value.eventPosterUrl;
+      let supabaseClient: Awaited<ReturnType<typeof createClient>> | null =
+        null;
 
-      // If a new image was uploaded, upload it first
-      if (value.eventImage && value.eventImage.length > 0) {
-        const file = value.eventImage[0];
+      const getSupabaseClient = async () => {
+        if (!supabaseClient) {
+          supabaseClient = await createClient();
+        }
+        return supabaseClient;
+      };
+
+      const validateFile = (file: File) => {
         const fileExt = file.name.split(".").pop()?.toLowerCase();
-        const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
         if (!fileExt || !allowedExtensions.includes(fileExt)) {
           toast.error(
             "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
           );
-          return;
+          return null;
         }
 
-        if (file.size > MAX_FILE_SIZE) {
+        if (file.size > MAX_FILE_SIZE_BYTES) {
           toast.error("File size exceeds 5MB limit.");
+          return null;
+        }
+
+        return fileExt;
+      };
+
+      const deleteOldFile = async (publicUrl?: string | null) => {
+        if (!publicUrl) return;
+        const [, path] = publicUrl.split("/headerimage/");
+        if (!path) return;
+        const supabase = await getSupabaseClient();
+        const { error } = await supabase.storage
+          .from("headerimage")
+          .remove([path]);
+        if (error) {
+          console.error("Failed to delete old image:", error);
+        }
+      };
+
+      // If a new image was uploaded, upload it first
+      if (value.eventImage && value.eventImage.length > 0) {
+        const file = value.eventImage[0];
+        const fileExt = validateFile(file);
+
+        if (!fileExt) {
           return;
         }
 
@@ -73,7 +108,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
           .substring(2)}_${Date.now()}.${fileExt}`;
         const filePath = `event-headers/${fileName}`;
 
-        const supabase = await createClient();
+        const supabase = await getSupabaseClient();
         const { error: uploadError } = await supabase.storage
           .from("headerimage")
           .upload(filePath, file);
@@ -88,24 +123,38 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
         } = supabase.storage.from("headerimage").getPublicUrl(filePath);
 
         headerUrl = publicUrl;
+        await deleteOldFile(event.eventHeaderUrl);
+      }
 
-        // Delete old image if it exists
-        if (event.eventHeaderUrl) {
-          const oldUrl = event.eventHeaderUrl;
-          // Extract the path from the public URL
-          // URL format: .../storage/v1/object/public/headerimage/event-headers/filename.ext
-          const pathParts = oldUrl.split("/headerimage/");
-          if (pathParts.length > 1) {
-            const oldPath = pathParts[1];
-            const { error: deleteError } = await supabase.storage
-              .from("headerimage")
-              .remove([oldPath]);
+      if (value.eventPoster && value.eventPoster.length > 0) {
+        const posterFile = value.eventPoster[0];
+        const fileExt = validateFile(posterFile);
 
-            if (deleteError) {
-              console.error("Failed to delete old image:", deleteError);
-            }
-          }
+        if (!fileExt) {
+          return;
         }
+
+        const fileName = `${Math.random()
+          .toString(36)
+          .substring(2)}_${Date.now()}.${fileExt}`;
+        const filePath = `event-posters/${fileName}`;
+
+        const supabase = await getSupabaseClient();
+        const { error: uploadError } = await supabase.storage
+          .from("headerimage")
+          .upload(filePath, posterFile);
+
+        if (uploadError) {
+          toast.error(`Poster upload failed: ${uploadError.message}`);
+          return;
+        }
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("headerimage").getPublicUrl(filePath);
+
+        posterUrl = publicUrl;
+        await deleteOldFile(event.eventPoster);
       }
 
       // Validate that dates are provided
@@ -125,6 +174,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
         eventEndDate: isoEndDate,
         venue: value.venue,
         eventHeaderUrl: headerUrl || undefined,
+        eventPoster: posterUrl || undefined,
         eventType: value.eventType,
         ...(isDraft && {
           registrationFee: value.registrationFee,

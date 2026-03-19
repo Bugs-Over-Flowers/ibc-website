@@ -23,6 +23,14 @@ interface EventCardProps {
 export function EventCard({ event, index }: EventCardProps) {
   const router = useRouter();
   const status = getEventStatus(event.eventStartDate, event.eventEndDate);
+  const normalizeUrl = (value?: string | null) => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  };
+  const posterUrl = normalizeUrl(event.eventPoster);
+  const headerUrl = normalizeUrl(event.eventHeaderUrl);
+  const displayImage = posterUrl ?? headerUrl ?? "/placeholder.svg";
 
   const handleCardClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const target = e.target as HTMLElement;
@@ -71,7 +79,7 @@ export function EventCard({ event, index }: EventCardProps) {
                 alt={event.eventTitle}
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 fill
-                src={event.eventHeaderUrl || "/placeholder.svg"}
+                src={displayImage}
               />
               <div className="absolute top-4 left-4 flex gap-2">
                 {getStatusBadge(status)}

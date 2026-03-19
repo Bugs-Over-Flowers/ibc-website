@@ -2113,7 +2113,7 @@ $$;
 ALTER FUNCTION "public"."update_event_available_slots_trigger"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."update_event_details"("p_event_id" "uuid", "p_title" "text" DEFAULT NULL::"text", "p_description" "text" DEFAULT NULL::"text", "p_event_header_url" "text" DEFAULT NULL::"text", "p_start_date" timestamp without time zone DEFAULT NULL::timestamp without time zone, "p_end_date" timestamp without time zone DEFAULT NULL::timestamp without time zone, "p_venue" "text" DEFAULT NULL::"text", "p_event_type" "text" DEFAULT NULL::"text", "p_registration_fee" real DEFAULT NULL::real) RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION "public"."update_event_details"("p_event_id" "uuid", "p_title" "text" DEFAULT NULL::"text", "p_description" "text" DEFAULT NULL::"text", "p_event_header_url" "text" DEFAULT NULL::"text", "p_event_poster" "text" DEFAULT NULL::"text", "p_start_date" timestamp without time zone DEFAULT NULL::timestamp without time zone, "p_end_date" timestamp without time zone DEFAULT NULL::timestamp without time zone, "p_venue" "text" DEFAULT NULL::"text", "p_event_type" "text" DEFAULT NULL::"text", "p_registration_fee" real DEFAULT NULL::real) RETURNS "jsonb"
     LANGUAGE "plpgsql"
     AS $$
 DECLARE
@@ -2121,6 +2121,7 @@ DECLARE
   v_final_title text;
   v_final_description text;
   v_final_header_url text;
+  v_final_poster_url text;
   v_final_start_date timestamp;
   v_final_end_date timestamp;
   v_final_venue text;
@@ -2149,6 +2150,7 @@ BEGIN
   v_final_title := COALESCE(p_title, v_existing_event."eventTitle");
   v_final_description := COALESCE(p_description, v_existing_event."description");
   v_final_header_url := COALESCE(p_event_header_url, v_existing_event."eventHeaderUrl");
+  v_final_poster_url := COALESCE(p_event_poster, v_existing_event."eventPoster");
   v_final_start_date := COALESCE(p_start_date, v_existing_event."eventStartDate");
   v_final_end_date := COALESCE(p_end_date, v_existing_event."eventEndDate");
   v_final_venue := COALESCE(p_venue, v_existing_event."venue");
@@ -2200,6 +2202,7 @@ BEGIN
     "eventTitle" = v_final_title,
     "description" = v_final_description,
     "eventHeaderUrl" = v_final_header_url,
+    "eventPoster" = v_final_poster_url,
     "eventStartDate" = v_final_start_date,
     "eventEndDate" = v_final_end_date,
     "venue" = v_final_venue,
@@ -2235,7 +2238,7 @@ END;
 $$;
 
 
-ALTER FUNCTION "public"."update_event_details"("p_event_id" "uuid", "p_title" "text", "p_description" "text", "p_event_header_url" "text", "p_start_date" timestamp without time zone, "p_end_date" timestamp without time zone, "p_venue" "text", "p_event_type" "text", "p_registration_fee" real) OWNER TO "postgres";
+ALTER FUNCTION "public"."update_event_details"("p_event_id" "uuid", "p_title" "text", "p_description" "text", "p_event_header_url" "text", "p_event_poster" "text", "p_start_date" timestamp without time zone, "p_end_date" timestamp without time zone, "p_venue" "text", "p_event_type" "text", "p_registration_fee" real) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."update_participant_count_trigger"() RETURNS "trigger"
@@ -2599,6 +2602,7 @@ CREATE TABLE IF NOT EXISTS "public"."Event" (
     "eventId" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "eventTitle" "text" NOT NULL,
     "eventHeaderUrl" "text",
+    "eventPoster" "text",
     "description" "text",
     "eventStartDate" timestamp with time zone,
     "eventEndDate" timestamp with time zone,

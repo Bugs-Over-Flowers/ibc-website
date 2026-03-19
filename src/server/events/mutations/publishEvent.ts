@@ -47,7 +47,7 @@ export const publishEvent: ServerFunction<
       registrationFee: data.registrationFee,
       eventType: data.eventType as Database["public"]["Enums"]["EventType"],
       eventHeaderUrl: data.eventImage,
-      eventPoster: data.eventPoster ?? null,
+      eventPoster: data.eventPoster,
       publishedAt: new Date().toISOString(),
     })
     .select("eventId")

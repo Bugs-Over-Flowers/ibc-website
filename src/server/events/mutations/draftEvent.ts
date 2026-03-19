@@ -37,7 +37,7 @@ export const draftEvent: ServerFunction<
       registrationFee: data.registrationFee ?? 0,
       eventType: null, // Force eventType to null for drafts
       eventHeaderUrl: data.eventImage,
-      eventPoster: data.eventPoster ?? null,
+      eventPoster: data.eventPoster,
     })
     .select("eventId")
     .single();
