@@ -8,13 +8,20 @@ export type EventForSelect = {
   eventTitle: string | null;
   eventStartDate: string | null;
   eventEndDate: string | null;
+  eventType: "public" | "private" | null;
+  registrationFee: number;
 };
 
 export async function getEventsForSelect(): Promise<EventForSelect[]> {
   const cookieStore = await cookies();
   const supabase = await createClient(cookieStore.getAll());
 
-  const { data, error } = await supabase.rpc("get_events_for_select");
+  const { data, error } = await supabase
+    .from("Event")
+    .select(
+      "eventId,eventTitle,eventStartDate,eventEndDate,eventType,registrationFee",
+    )
+    .order("eventStartDate", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch events for select: ${error.message}`);
@@ -25,9 +32,11 @@ export async function getEventsForSelect(): Promise<EventForSelect[]> {
   }
 
   return data.map((row) => ({
-    eventId: row.event_id,
-    eventTitle: row.event_title,
-    eventStartDate: row.event_start_date,
-    eventEndDate: row.event_end_date,
+    eventId: row.eventId,
+    eventTitle: row.eventTitle,
+    eventStartDate: row.eventStartDate,
+    eventEndDate: row.eventEndDate,
+    eventType: row.eventType,
+    registrationFee: row.registrationFee,
   }));
 }

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function SponsoredRegistrationPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-2">
       <Suspense fallback={<SponsoredRegistrationPageSkeleton />}>
         <div className="flex items-start justify-between gap-4">
           <div>

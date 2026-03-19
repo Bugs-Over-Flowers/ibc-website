@@ -1,65 +1,76 @@
 "use client";
-import { Progress } from "@/components/ui/progress";
+import { Check } from "lucide-react";
 import useRegistrationStore from "@/hooks/registration.store";
-import type Step from "@/lib/types/Step";
 import { cn } from "@/lib/utils";
 
-const STEPS: Step[] = [
+const STEPS = [
   {
-    title: "Affiliation",
-    description: "Member Status",
+    label: "Member Type",
   },
   {
-    title: "Participants",
-    description: "Registration Details",
+    label: "Participants",
   },
   {
-    title: "Payment",
-    description: "Payment Selection",
+    label: "Payment",
   },
   {
-    title: "Review and Confirm",
-    description: "Verify Information",
+    label: "Review",
   },
 ];
 
 export default function Stepper() {
-  const step = useRegistrationStore((state) => state.step);
+  const currentStep = useRegistrationStore((state) => state.step);
+
+  const progressWidth = ((currentStep - 1) / (STEPS.length - 1)) * 100;
 
   return (
-    <div className="flex flex-col">
-      <div className="hidden w-full md:block">
-        {STEPS.map((s, index) => (
-          <div
-            className={cn(
-              "mb-4 flex w-full items-center gap-3 px-2 py-1 text-xl last:mb-0",
-              step === index + 1 && "rounded-md border border-primary",
-            )}
-            key={s.title}
-          >
-            {/* Step Number */}
-            <div
-              className={cn(
-                "flex size-10 items-center justify-center rounded-full border-2 font-semibold text-primary-foreground",
-                step === index + 1
-                  ? "bg-primary"
-                  : "border-neutral-400 bg-white",
-              )}
-            >
-              {index + 1}
+    <div className="mb-6 w-full sm:mb-8">
+      <div className="relative flex items-center justify-between">
+        <div className="absolute top-1/2 left-0 -z-10 h-1 w-full -translate-y-1/2 rounded-full bg-secondary" />
+        <div
+          className="absolute top-1/2 left-0 -z-10 h-1 -translate-y-1/2 rounded-full bg-primary transition-all duration-500 ease-in-out"
+          style={{ width: `${progressWidth}%` }}
+        />
+
+        {STEPS.map((step, index) => {
+          const stepNumber = index + 1;
+          const isCompleted = currentStep > stepNumber;
+          const isActive = currentStep === stepNumber;
+
+          return (
+            <div className="flex flex-col items-center" key={step.label}>
+              <div
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full border-2 font-semibold text-xs transition-all duration-300 sm:h-10 sm:w-10 sm:text-sm",
+                  isCompleted &&
+                    "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/25",
+                  isActive &&
+                    "border-primary bg-background text-primary shadow-md",
+                  !isCompleted &&
+                    !isActive &&
+                    "border-muted bg-background text-muted-foreground",
+                )}
+              >
+                {isCompleted ? (
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5" />
+                ) : (
+                  stepNumber
+                )}
+              </div>
+
+              <span
+                className={cn(
+                  "mt-1 hidden text-center font-medium text-xs transition-colors sm:mt-2 sm:block sm:text-sm",
+                  isActive || isCompleted
+                    ? "text-foreground"
+                    : "text-muted-foreground",
+                )}
+              >
+                {step.label}
+              </span>
             </div>
-            {/* Step Details */}
-            <div>
-              <div className="font-semibold">{s.title}</div>
-              <div className="text-sm">{s.description}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="block space-y-2 md:hidden">
-        <div>Step {step} of 4</div>
-        <Progress value={(step / 4) * 100} />
-        <div>{STEPS[step - 1].title}</div>
+          );
+        })}
       </div>
     </div>
   );
