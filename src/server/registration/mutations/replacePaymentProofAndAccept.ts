@@ -1,6 +1,6 @@
 "use server";
 
-import { updateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
@@ -228,6 +228,27 @@ export async function replacePaymentProofAndAccept(input: {
   updateTag(CACHE_TAGS.registrations.stats);
   updateTag(CACHE_TAGS.registrations.event);
   updateTag(CACHE_TAGS.events.registrations);
+
+  if (registration?.eventId) {
+    updateTag(CACHE_TAGS.events.registrations);
+  }
+
+  if (registration?.eventId) {
+    const eventId = registration.eventId;
+    revalidatePath(`/admin/events/${eventId}/registration-list`, "page");
+
+    if (registration.sponsoredRegistrationId) {
+      revalidatePath(
+        `/admin/events/${eventId}/sponsored-registrations`,
+        "page",
+      );
+      revalidatePath(
+        `/admin/events/${eventId}/sponsored-registrations/${registration.sponsoredRegistrationId}`,
+        "page",
+      );
+      revalidatePath("/admin/sponsored-registration", "page");
+    }
+  }
 
   return {
     message: "Payment proof replaced and accepted",

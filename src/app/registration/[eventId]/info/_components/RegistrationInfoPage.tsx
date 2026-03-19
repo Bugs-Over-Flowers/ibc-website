@@ -107,23 +107,28 @@ export default async function RegistrationInfoPage({
   ];
 
   return (
-    <div className="p-10">
-      <Card>
-        <CardHeader>
+    <section className="bg-background px-4 py-6 sm:px-6 lg:px-8">
+      <Card className="mx-auto w-full max-w-7xl rounded-3xl">
+        <CardHeader className="space-y-6 p-6 sm:space-y-7 sm:p-8">
           <Link href={`/events/${eventId}`}>
             <Button>Back to Event</Button>
           </Link>
           {data.eventHeaderUrl && (
-            <div className="relative h-96 overflow-hidden rounded-md">
+            <div
+              className="relative w-full overflow-hidden rounded-xl"
+              style={{ aspectRatio: "4 / 1" }}
+            >
               <Image
                 alt={data.eventTitle}
-                className="object-cover"
+                className="object-contain"
                 fill
+                priority
+                sizes="(max-width: 1600px) 100vw, 1600px"
                 src={data.eventHeaderUrl}
               />
             </div>
           )}
-          <CardTitle className="pt-3 text-xl">{data.eventTitle}</CardTitle>
+          <CardTitle className="text-xl">{data.eventTitle}</CardTitle>
           <CardDescription className="flex items-center gap-2">
             <CalendarDays />
             {dateDisplay}
@@ -180,6 +185,6 @@ export default async function RegistrationInfoPage({
           </CardAction>
         </CardFooter>
       </Card>
-    </div>
+    </section>
   );
 }

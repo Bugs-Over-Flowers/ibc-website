@@ -28,7 +28,8 @@ interface SponsoredRegistrationCardProps {
   registration: SponsoredRegistration;
   onCopyLink: (uuid: string, eventId: string) => void;
   onToggleStatus: (id: string) => void;
-  onDeleteClick: (registration: SponsoredRegistration) => void;
+  onDeleteClick: (registration: SponsoredRegistration) => Promise<void>;
+  isDeleting: boolean;
 }
 
 export function SponsoredRegistrationCard({
@@ -37,10 +38,11 @@ export function SponsoredRegistrationCard({
   onCopyLink,
   onToggleStatus,
   onDeleteClick,
+  isDeleting,
 }: SponsoredRegistrationCardProps) {
   const router = useRouter();
-  const [isDeleting, setIsDeleting] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const isDeleteDisabled = registration.usedCount > 0;
 
   const remainingGuests =
     (registration.maxSponsoredGuests ?? 0) - registration.usedCount;
@@ -54,14 +56,16 @@ export function SponsoredRegistrationCard({
     : "Unspecified";
 
   const handleDelete = () => {
+    if (isDeleteDisabled) {
+      return;
+    }
+
     setOpenDeleteDialog(true);
   };
 
   const handleConfirmDelete = async () => {
-    setIsDeleting(true);
-    onDeleteClick(registration);
+    await onDeleteClick(registration);
     setOpenDeleteDialog(false);
-    setIsDeleting(false);
   };
 
   const handleToggleStatus = () => {
@@ -249,10 +253,14 @@ export function SponsoredRegistrationCard({
 
           <Button
             className="h-9 w-9 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-            disabled={isDeleting}
+            disabled={isDeleting || isDeleteDisabled}
             onClick={handleDelete}
             size="icon"
-            title="Delete sponsored registration"
+            title={
+              isDeleteDisabled
+                ? "Cannot delete: this sponsored registration has already been used"
+                : "Delete sponsored registration"
+            }
             variant="ghost"
           >
             <Trash2 className="h-4 w-4" />
@@ -285,7 +293,7 @@ export function SponsoredRegistrationCard({
 
           <Button
             className="h-8 gap-1.5 text-destructive text-xs hover:bg-destructive/10 hover:text-destructive"
-            disabled={isDeleting}
+            disabled={isDeleting || isDeleteDisabled}
             onClick={handleDelete}
             size="sm"
             variant="ghost"
