@@ -59,7 +59,9 @@ export async function replacePaymentProofAndAccept(input: {
 
   const { data: registration, error: registrationError } = await supabase
     .from("Registration")
-    .select("paymentMethod, paymentProofStatus, ProofImage(proofImageId, path)")
+    .select(
+      "eventId, paymentMethod, sponsoredRegistrationId, paymentProofStatus, ProofImage(proofImageId, path)",
+    )
     .eq("registrationId", registrationId)
     .single();
 

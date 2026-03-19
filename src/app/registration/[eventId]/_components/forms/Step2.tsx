@@ -244,10 +244,12 @@ function ParticipantFields({ form, index }: ParticipantFieldsProps) {
         <form.AppField name={`${prefix}.contactNumber` as Step2FieldName}>
           {(field) => (
             <div className="space-y-2">
-              <Label className="text-sm">Contact Number</Label>
+              <Label className="text-sm">
+                Contact Number / Telephone Number
+              </Label>
               <field.TextField
                 className="h-11 rounded-xl"
-                placeholder="09171234567"
+                placeholder="09XXXXXXXXX / 0XXXX-XXXX"
               />
             </div>
           )}
