@@ -116,7 +116,7 @@ export function SponsoredRegistrationsList({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-2 gap-4">
       {displayedRegistrations.map((registration, _index) => (
         <SponsoredRegistrationCard
           event={event}
@@ -130,7 +130,7 @@ export function SponsoredRegistrationsList({
       ))}
 
       {displayedCount < registrations.length && (
-        <div className="py-4 text-center" ref={loaderRef}>
+        <div className="col-span-2 py-4 text-center" ref={loaderRef}>
           {isLoadingMore ? (
             <span className="text-muted-foreground text-sm">
               Loading more...

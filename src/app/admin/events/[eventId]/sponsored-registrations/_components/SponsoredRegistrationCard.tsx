@@ -51,6 +51,9 @@ export function SponsoredRegistrationCard({
     totalGuests > 0 ? (registration.usedCount / totalGuests) * 100 : 0;
   const isStatusFull = registration.status === "full";
   const createdAt = new Date(registration.createdAt);
+  const eventTypeLabel = event.eventType
+    ? `${event.eventType.charAt(0).toUpperCase()}${event.eventType.slice(1)}`
+    : "Unspecified";
 
   const handleDelete = () => {
     if (isDeleteDisabled) {
@@ -100,14 +103,13 @@ export function SponsoredRegistrationCard({
           type="button"
         >
           <div className="flex flex-col gap-5 p-5">
-            {/* Header Row - Name and Badge */}
+            {/* Header */}
             <div className="flex items-start gap-4">
-              {/* Sponsor Info */}
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="font-semibold text-base text-foreground">
-                    {registration.sponsoredBy}
-                  </h3>
+                  <span className="inline-flex h-5 shrink-0 items-center rounded-full border border-primary/30 bg-primary/10 px-2 font-semibold text-primary text-xs uppercase tracking-wide">
+                    {eventTypeLabel} event
+                  </span>
                   <span
                     className={cn(
                       "inline-flex h-5 shrink-0 items-center rounded-full px-2 font-medium text-xs uppercase",
@@ -117,11 +119,17 @@ export function SponsoredRegistrationCard({
                     {registration.status}
                   </span>
                 </div>
-                <p className="text-muted-foreground text-xs">
-                  Created {format(createdAt, "MMM d, yyyy")} at{" "}
-                  {format(createdAt, "h:mm a")}
-                </p>
+                <h3 className="font-semibold text-base text-foreground">
+                  {registration.sponsoredBy}
+                </h3>
               </div>
+            </div>
+
+            <div className="rounded-lg bg-muted/30 px-3 py-2">
+              <p className="text-muted-foreground text-xs">
+                Created {format(createdAt, "MMM d, yyyy")} at{" "}
+                {format(createdAt, "h:mm a")}
+              </p>
             </div>
 
             {/* Divider */}

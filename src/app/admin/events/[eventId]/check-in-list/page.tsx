@@ -20,13 +20,22 @@ export default function CheckInPageWrapper({
   return (
     <main className="flex flex-col gap-4 p-5 md:p-10">
       <Suspense>
-        <BackButton params={params} />
+        <BackButtonWrapper params={params} />
       </Suspense>
       <Suspense fallback={<div>Loading check-in data...</div>}>
         <CheckInPage params={params} />
       </Suspense>
     </main>
   );
+}
+
+async function BackButtonWrapper({
+  params,
+}: {
+  params: CheckInPageWrapperProps["params"];
+}) {
+  const { eventId } = await params;
+  return <BackButton eventId={eventId} />;
 }
 
 async function CheckInPage({
