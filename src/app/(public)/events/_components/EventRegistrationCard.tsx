@@ -5,6 +5,7 @@ import {
   Banknote,
   Check,
   Copy,
+  ExternalLink,
   Facebook,
   Linkedin,
   Share2,
@@ -32,6 +33,22 @@ export default function EventRegistrationCard({
   const { eventId } = useParams<{ eventId: string }>();
 
   const [copied, setCopied] = useState(false);
+  const facebookLink = event.facebookLink?.trim() ?? "";
+  const displayFacebookLink = (() => {
+    if (!facebookLink) return null;
+    const truncate = (value: string) =>
+      value.length > 48 ? `${value.slice(0, 45)}...` : value;
+
+    try {
+      const url = new URL(facebookLink);
+      const path = url.pathname.replace(/\/$/, "");
+      const condensed = `${url.hostname}${path}` || url.hostname;
+      return truncate(condensed);
+    } catch {
+      const normalized = facebookLink.replace(/^https?:\/\//i, "");
+      return truncate(normalized);
+    }
+  })();
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
@@ -116,6 +133,26 @@ export default function EventRegistrationCard({
                 </Button>
               </div>
             </div>
+
+            {facebookLink && displayFacebookLink && (
+              <div className="mt-6 border-border border-t pt-6">
+                <p className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
+                  <Facebook className="h-4 w-4 text-[#1877F2]" />
+                  Event Facebook Link
+                </p>
+                <a
+                  aria-label="Open Facebook event link"
+                  className="inline-flex items-center gap-2 font-semibold text-primary transition-colors hover:text-primary/80"
+                  href={facebookLink}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  title={facebookLink}
+                >
+                  {displayFacebookLink}
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>

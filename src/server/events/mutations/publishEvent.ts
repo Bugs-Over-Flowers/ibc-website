@@ -48,6 +48,7 @@ export const publishEvent: ServerFunction<
       eventType: data.eventType as Database["public"]["Enums"]["EventType"],
       eventHeaderUrl: data.eventImage,
       publishedAt: new Date().toISOString(),
+      facebookLink: data.facebookLink ?? null,
     })
     .select("eventId")
     .single();

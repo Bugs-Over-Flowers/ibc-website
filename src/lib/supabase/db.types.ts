@@ -313,9 +313,11 @@ export type Database = {
           eventEndDate: string | null;
           eventHeaderUrl: string | null;
           eventId: string;
+          eventPoster: string | null;
           eventStartDate: string | null;
           eventTitle: string;
           eventType: Database["public"]["Enums"]["EventType"] | null;
+          facebookLink: string | null;
           maxGuest: number | null;
           publishedAt: string | null;
           registrationFee: number;
@@ -328,9 +330,11 @@ export type Database = {
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
           eventId?: string;
+          eventPoster?: string | null;
           eventStartDate?: string | null;
           eventTitle: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          facebookLink?: string | null;
           maxGuest?: number | null;
           publishedAt?: string | null;
           registrationFee?: number;
@@ -343,9 +347,11 @@ export type Database = {
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
           eventId?: string;
+          eventPoster?: string | null;
           eventStartDate?: string | null;
           eventTitle?: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
+          facebookLink?: string | null;
           maxGuest?: number | null;
           publishedAt?: string | null;
           registrationFee?: number;
