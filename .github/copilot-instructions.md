@@ -118,6 +118,15 @@ Do not default to `actions/` for new work. Older files may still exist, but new 
 - Feature server code belongs in `src/server/[feature]`
 - Shared cross-feature logic should stay in shared lib/server utilities, not random route files
 
+## Component Extraction
+
+- Keep route-local step files thin: orchestration plus step-specific layout only.
+- Extract a helper when a block is reused across 2+ places, or when a file mixes upload logic, preview logic, validation, summary math, and repeated card/row markup.
+- Allow tiny one-off helpers inline if they are short, local, and easy to scan.
+- Prefer `src/app/**/_components` for route-specific reusable UI and `src/components` for app-wide reusable UI.
+- Keep shadcn-generated primitives under `src/components/ui` untouched; wrap them instead of rewriting them.
+- If a route-local file becomes scroll-heavy or grows multiple named helper components, split it before adding more logic.
+
 ## Imports and Formatting
 
 - Always use the `@/` alias for project imports when possible
@@ -152,6 +161,7 @@ Do not default to `actions/` for new work. Older files may still exist, but new 
 - Register new custom fields in `@/hooks/_formHooks`
 - Preserve `data-invalid` and `aria-invalid` behavior on custom fields
 - Use Zod for both form validation and server-side validation
+- For repeated form patterns like upload validation, keyboard guards, payment summaries, and section headers, extract shared helpers instead of repeating the same logic in multiple step files
 
 ## Error Handling
 

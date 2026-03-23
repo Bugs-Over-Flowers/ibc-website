@@ -105,6 +105,16 @@ Expect staged files to be auto-formatted.
 - `src/lib`: utilities, validation, cache tags, Supabase clients, types
 - `src/server`: feature server logic using `queries/`, `mutations/`, and some older `actions/`
 
+## Component Extraction Guidelines
+
+- Keep route-local step files thin: orchestration, layout, and step-specific wiring only.
+- Extract helper components when logic is reused across steps or when a file mixes layout, validation, upload, preview, and repeated row/card markup.
+- Allow small, one-off helpers inline when they are short and tightly coupled to the parent file.
+- Prefer shared route-local components under `src/app/**/_components` for step-specific UI that is reused within the route.
+- Prefer `src/components` for app-wide reusable primitives and `src/components/form` for registered field components.
+- If a route-local file becomes scroll-heavy or reaches multiple named helper components, split it before adding more logic.
+- Preserve shadcn-generated primitives under `src/components/ui`; only wrap or compose them in feature components.
+
 ## Imports and Module Boundaries
 
 - Always use the `@/` alias for project imports when possible
@@ -151,6 +161,7 @@ Expect staged files to be auto-formatted.
 - New form fields must be added in `src/components/form` and registered in `@/hooks/_formHooks`
 - Use Zod for both form validation and server-side input validation
 - Preserve `data-invalid` and `aria-invalid` behavior on custom fields
+- For repeated route form logic (upload validation, keyboard guards, summary rows, section headers), extract shared helpers instead of duplicating the same block in multiple step files
 
 ## Error Handling and Actions
 
