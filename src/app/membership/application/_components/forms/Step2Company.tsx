@@ -8,6 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  isValidImageUploadFile,
+} from "@/lib/fileUpload";
+import { preventInvalidKeyDown } from "@/lib/keyboard";
 import { cn } from "@/lib/utils";
 import type { Sector } from "@/server/membership/queries/getSectors";
 
@@ -114,31 +119,7 @@ export function Step2Company({ form, sectors }: StepProps) {
               {(field) => (
                 <field.TextField
                   label="Landline"
-                  onKeyDown={(e) => {
-                    // Allow: backspace, delete, tab, escape, enter, home, end, arrows
-                    if (
-                      [
-                        "Backspace",
-                        "Delete",
-                        "Tab",
-                        "Escape",
-                        "Enter",
-                        "Home",
-                        "End",
-                        "ArrowLeft",
-                        "ArrowRight",
-                      ].includes(e.key) ||
-                      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                      ((e.ctrlKey || e.metaKey) &&
-                        ["a", "c", "v", "x"].includes(e.key))
-                    ) {
-                      return;
-                    }
-                    // Block if not a number or allowed special characters
-                    if (!/[0-9()\-\s]/.test(e.key)) {
-                      e.preventDefault();
-                    }
-                  }}
+                  onKeyDown={(e) => preventInvalidKeyDown(e, /[0-9()\-\s]/)}
                   placeholder="(033) XXX-XXXX"
                 />
               )}
@@ -148,31 +129,7 @@ export function Step2Company({ form, sectors }: StepProps) {
               {(field) => (
                 <field.TextField
                   label="Mobile Number"
-                  onKeyDown={(e) => {
-                    // Allow: backspace, delete, tab, escape, enter, home, end, arrows
-                    if (
-                      [
-                        "Backspace",
-                        "Delete",
-                        "Tab",
-                        "Escape",
-                        "Enter",
-                        "Home",
-                        "End",
-                        "ArrowLeft",
-                        "ArrowRight",
-                      ].includes(e.key) ||
-                      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                      ((e.ctrlKey || e.metaKey) &&
-                        ["a", "c", "v", "x"].includes(e.key))
-                    ) {
-                      return;
-                    }
-                    // Block if not a number or plus sign
-                    if (!/[0-9+]/.test(e.key)) {
-                      e.preventDefault();
-                    }
-                  }}
+                  onKeyDown={(e) => preventInvalidKeyDown(e, /[0-9+]/)}
                   placeholder="+63 9XX XXX XXXX"
                 />
               )}
@@ -250,21 +207,8 @@ export function Step2Company({ form, sectors }: StepProps) {
                                   handleDrop(e);
                                   if (e.dataTransfer.files?.[0]) {
                                     const droppedFile = e.dataTransfer.files[0];
-                                    const isValidType = [
-                                      "image/png",
-                                      "image/jpeg",
-                                      "image/jpg",
-                                    ].includes(droppedFile.type);
-
-                                    if (!isValidType) {
+                                    if (!isValidImageUploadFile(droppedFile)) {
                                       toast.error("Invalid file");
-                                      return;
-                                    }
-
-                                    if (droppedFile.size > 5 * 1024 * 1024) {
-                                      toast.error(
-                                        "File size must be less than 5MB",
-                                      );
                                       return;
                                     }
 
@@ -274,7 +218,7 @@ export function Step2Company({ form, sectors }: StepProps) {
                                 type="button"
                               >
                                 <input
-                                  accept="image/png,image/jpeg,image/jpg"
+                                  accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                                   className="absolute inset-0 cursor-pointer opacity-0"
                                   onBlur={field.handleBlur}
                                   onChange={(e) => {
@@ -283,21 +227,8 @@ export function Step2Company({ form, sectors }: StepProps) {
                                       return;
                                     }
 
-                                    const isValidType = [
-                                      "image/png",
-                                      "image/jpeg",
-                                      "image/jpg",
-                                    ].includes(file.type);
-
-                                    if (!isValidType) {
+                                    if (!isValidImageUploadFile(file)) {
                                       toast.error("Invalid file");
-                                      return;
-                                    }
-
-                                    if (file.size > 5 * 1024 * 1024) {
-                                      toast.error(
-                                        "File size must be less than 5MB",
-                                      );
                                       return;
                                     }
 

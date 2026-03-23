@@ -3,6 +3,7 @@ import { useRef } from "react";
 import type { useMembershipStep3 } from "@/app/membership/application/_hooks/useMembershipStep3";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
+import { preventInvalidKeyDown } from "@/lib/keyboard";
 
 interface StepProps {
   form: ReturnType<typeof useMembershipStep3>;
@@ -131,29 +132,9 @@ export function Step3Representatives({ form }: StepProps) {
                           {(subField) => (
                             <subField.TextField
                               label="Mobile Number"
-                              onKeyDown={(e) => {
-                                if (
-                                  [
-                                    "Backspace",
-                                    "Delete",
-                                    "Tab",
-                                    "Escape",
-                                    "Enter",
-                                    "Home",
-                                    "End",
-                                    "ArrowLeft",
-                                    "ArrowRight",
-                                  ].includes(e.key) ||
-                                  ((e.ctrlKey || e.metaKey) &&
-                                    ["a", "c", "v", "x"].includes(e.key))
-                                ) {
-                                  return;
-                                }
-
-                                if (!/[0-9+]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              }}
+                              onKeyDown={(e) =>
+                                preventInvalidKeyDown(e, /[0-9+]/)
+                              }
                               placeholder="+639XXXXXXXX or 09XXXXXXXXX"
                             />
                           )}
@@ -205,29 +186,9 @@ export function Step3Representatives({ form }: StepProps) {
                           {(subField) => (
                             <subField.TextField
                               label="Landline"
-                              onKeyDown={(e) => {
-                                if (
-                                  [
-                                    "Backspace",
-                                    "Delete",
-                                    "Tab",
-                                    "Escape",
-                                    "Enter",
-                                    "Home",
-                                    "End",
-                                    "ArrowLeft",
-                                    "ArrowRight",
-                                  ].includes(e.key) ||
-                                  ((e.ctrlKey || e.metaKey) &&
-                                    ["a", "c", "v", "x"].includes(e.key))
-                                ) {
-                                  return;
-                                }
-
-                                if (!/[0-9()\-\s]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              }}
+                              onKeyDown={(e) =>
+                                preventInvalidKeyDown(e, /[0-9()\-\s]/)
+                              }
                               placeholder="(033) XXX-XXXX"
                             />
                           )}
