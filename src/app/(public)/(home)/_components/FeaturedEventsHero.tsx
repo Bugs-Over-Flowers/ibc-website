@@ -1,17 +1,17 @@
 import { cookies } from "next/headers";
-import { getAllEvents } from "@/server/events/queries/getAllEvents";
+import { getPublicEvents } from "@/server/events/queries/getPublicEvents";
 import { HeroCarousel } from "./HeroCarousel";
 
 export async function FeaturedEventsHero() {
-  const events = await getAllEvents((await cookies()).getAll(), {});
+  const events = await getPublicEvents((await cookies()).getAll(), {});
   const now = new Date();
-  const oneWeekFromNow = new Date();
-  oneWeekFromNow.setDate(now.getDate() + 7);
+  const oneMonthFromNow = new Date();
+  oneMonthFromNow.setMonth(now.getMonth() + 1);
 
   const upcomingEvents = (events || []).filter((event) => {
     if (!event.eventStartDate) return false;
     const eventDate = new Date(event.eventStartDate);
-    return eventDate >= now && eventDate <= oneWeekFromNow;
+    return eventDate >= now && eventDate <= oneMonthFromNow;
   });
 
   return <HeroCarousel events={upcomingEvents} />;

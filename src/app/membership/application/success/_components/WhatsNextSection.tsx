@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock3, Mail } from "lucide-react";
+import { Clock3, Mail } from "lucide-react";
 
 export function WhatsNextSection() {
   const steps = [
