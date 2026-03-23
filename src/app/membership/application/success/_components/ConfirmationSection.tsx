@@ -1,4 +1,4 @@
-import { Inbox, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 
 export function ConfirmationSection() {
   return (
