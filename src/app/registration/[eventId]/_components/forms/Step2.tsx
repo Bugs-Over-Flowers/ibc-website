@@ -1,6 +1,7 @@
 "use client";
-import { Plus, Trash2, Users } from "lucide-react";
-import FormButtons from "@/components/FormButtons";
+
+import { ArrowLeft, ArrowRight, Plus, Trash2, Users } from "lucide-react";
+import type { FormEvent } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,27 +19,24 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FieldGroup, FieldTitle } from "@/components/ui/field";
-import { Item, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/item";
+import { Label } from "@/components/ui/label";
 import { useFieldContext } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
-import type {
-  RegistrantDetails,
-  StandardRegistrationStep2Schema,
-} from "@/lib/validation/registration/standard";
+import type { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
 import { useRegistrationStep2 } from "../../_hooks/useRegistrationStep2";
-import RegistrationStepHeader from "./RegistrationStepHeader";
 
 const MAX_OTHER_PARTICIPANTS = 9;
 
-const EMPTY_REGISTRANT: RegistrantDetails = {
+const EMPTY_REGISTRANT = {
+  id: crypto.randomUUID(),
   firstName: "",
   lastName: "",
   email: "",
   contactNumber: "",
-};
+} as const;
 
 export default function Step2() {
   const form = useRegistrationStep2();
@@ -54,7 +52,7 @@ export default function Step2() {
     });
   };
 
-  const onNext = async (e?: React.SubmitEvent) => {
+  const onNext = async (e?: FormEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -63,21 +61,25 @@ export default function Step2() {
   };
 
   return (
-    <form className="space-y-4" onSubmit={onNext}>
-      <ItemGroup>
-        <RegistrationStepHeader
-          description={`You may register up to a maximum of ${
-            MAX_OTHER_PARTICIPANTS + 1
-          } participants (including yourself).`}
-          Icon={Users}
-          title="Participants"
-        />
+    <form onSubmit={onNext}>
+      <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
+        <CardHeader className="border-border/30 border-b bg-card/5 pb-4 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
+            <Users className="h-6 w-6 text-primary" />
+            Participant Details
+          </CardTitle>
+          <CardDescription className="text-muted-foreground text-sm">
+            Enter the details of the primary registrant and any additional
+            attendees.
+          </CardDescription>
+        </CardHeader>
 
-        {/* Participant Counter */}
-        <Item variant={"outline"}>
-          <ItemContent>
-            <ItemTitle>Total Participants</ItemTitle>
-            <span className="font-medium">
+        <CardContent className="space-y-6 px-0 sm:px-6">
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:gap-3">
+            <h3 className="pb-2 font-semibold text-foreground text-lg">
+              Primary Registrant
+            </h3>
+            <Badge className="shrink-0" variant="secondary">
               <form.Subscribe
                 selector={(s) => s.values.otherParticipants?.length ?? 0}
               >
@@ -87,95 +89,99 @@ export default function Step2() {
                   </>
                 )}
               </form.Subscribe>
-            </span>
-          </ItemContent>
-        </Item>
-      </ItemGroup>
-      {/* Registrant */}
-      <Card>
-        <CardContent>
-          <div className="flex flex-col gap-2 pb-3 md:flex-row md:items-center md:justify-between">
-            <CardTitle>
-              <h3>Registrant</h3>
-            </CardTitle>
-            <Badge>You</Badge>
+            </Badge>
           </div>
-          <FieldGroup>
-            <CardDescription>
-              Please provide your information as the registrant.
-            </CardDescription>
-            <ParticipantFields form={form} />
-          </FieldGroup>
+
+          <ParticipantFields form={form} />
+
+          <form.AppField mode="array" name="otherParticipants">
+            {(field) => {
+              const otherParticipantsCount = field.state.value?.length ?? 0;
+              const canAddMore =
+                otherParticipantsCount < MAX_OTHER_PARTICIPANTS;
+
+              return (
+                <div className="space-y-6">
+                  {field.state.value?.map((registrant, idx) => {
+                    const hasData =
+                      registrant.firstName ||
+                      registrant.lastName ||
+                      registrant.email ||
+                      registrant.contactNumber;
+
+                    return (
+                      <div
+                        className="slide-in-from-top-2 fade-in relative animate-in space-y-4 rounded-xl border-0 border-border bg-background p-4 shadow-sm sm:p-6"
+                        key={registrant.id}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-foreground text-lg">
+                            Additional Participant #{idx + 1}
+                          </h4>
+                          {hasData ? (
+                            <RemoveParticipantDialog idx={idx} />
+                          ) : (
+                            <Button
+                              className="h-8 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => field.removeValue(idx)}
+                              size="sm"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Trash2 className="mr-1 h-4 w-4" />
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                        <ParticipantFields form={form} index={idx} />
+                      </div>
+                    );
+                  })}
+
+                  <Button
+                    className="h-12 w-full rounded-xl border-2 border-dashed transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+                    disabled={!canAddMore}
+                    onClick={() =>
+                      field.pushValue({
+                        ...EMPTY_REGISTRANT,
+                        id: crypto.randomUUID(),
+                      })
+                    }
+                    type="button"
+                    variant="outline"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    {canAddMore
+                      ? "Add Another Participant"
+                      : `Maximum ${MAX_OTHER_PARTICIPANTS + 1} participants reached`}
+                  </Button>
+                </div>
+              );
+            }}
+          </form.AppField>
+
+          <div className="flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <Button
+              className="w-full rounded-xl sm:w-auto"
+              onClick={onBack}
+              size="lg"
+              type="button"
+              variant="ghost"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <Button
+              className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
+              size="lg"
+              type="submit"
+            >
+              Continue to Payment
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </CardContent>
       </Card>
-
-      {/* Other Registrants */}
-      <form.AppField mode="array" name="otherParticipants">
-        {(field) => {
-          // Determine if we can add more participants
-          const otherParticipantsCount = field.state.value?.length ?? 0;
-          const canAddMore = otherParticipantsCount < MAX_OTHER_PARTICIPANTS;
-
-          return (
-            <div className="space-y-4">
-              {field.state.value?.map((registrant, idx) => {
-                const hasData =
-                  registrant.firstName ||
-                  registrant.lastName ||
-                  registrant.email ||
-                  registrant.contactNumber;
-
-                return (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: getting index is okay, handled by tanstack form
-                  <Card key={idx}>
-                    <CardContent>
-                      <div className="flex flex-col items-start gap-2 pb-3 md:flex-row md:items-center md:justify-between">
-                        <FieldTitle>
-                          <h3>Participant {idx + 2}</h3>
-                        </FieldTitle>
-                        {/* Remove Participant */}
-                        {hasData ? (
-                          <RemoveParticipantDialog idx={idx} />
-                        ) : (
-                          <Button
-                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => field.removeValue(idx)}
-                            size="sm"
-                            type="button"
-                            variant="ghost"
-                          >
-                            <Trash2 className="mr-1 h-4 w-4" />
-                            Remove
-                          </Button>
-                        )}
-                      </div>
-                      <FieldGroup>
-                        <ParticipantFields form={form} index={idx} />
-                      </FieldGroup>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-
-              {/* Button for adding another participant */}
-              <Button
-                className="w-full"
-                disabled={!canAddMore}
-                onClick={() => field.pushValue({ ...EMPTY_REGISTRANT })}
-                type="button"
-                variant="outline"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                {canAddMore
-                  ? "Add Another Participant"
-                  : `Maximum ${MAX_OTHER_PARTICIPANTS + 1} participants reached`}
-              </Button>
-            </div>
-          );
-        }}
-      </form.AppField>
-
-      <FormButtons onBack={onBack} onNext={onNext} />
     </form>
   );
 }
@@ -194,60 +200,80 @@ function ParticipantFields({ form, index }: ParticipantFieldsProps) {
     index === undefined ? "registrant" : `otherParticipants[${index}]`;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <form.AppField name={`${prefix}.firstName` as Step2FieldName}>
-        {(field) => <field.TextField label="First Name" placeholder="Juan" />}
-      </form.AppField>
-      <form.AppField name={`${prefix}.lastName` as Step2FieldName}>
-        {(field) => (
-          <field.TextField label="Last Name" placeholder="Dela Cruz" />
-        )}
-      </form.AppField>
-      <form.AppField name={`${prefix}.email` as Step2FieldName}>
-        {(field) => (
-          <field.TextField
-            label="Email"
-            placeholder="juan@example.com"
-            type="email"
-          />
-        )}
-      </form.AppField>
-      <form.AppField name={`${prefix}.contactNumber` as Step2FieldName}>
-        {(field) => (
-          <field.TextField
-            label="Contact Number / Landline"
-            placeholder="09######### / 0####-####"
-          />
-        )}
-      </form.AppField>
+    <div className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <form.AppField name={`${prefix}.firstName` as Step2FieldName}>
+          {(field) => (
+            <div className="space-y-2">
+              <Label className="text-sm">
+                First Name <span className="text-destructive">*</span>
+              </Label>
+              <field.TextField className="h-11 rounded-xl" placeholder="Juan" />
+            </div>
+          )}
+        </form.AppField>
+        <form.AppField name={`${prefix}.lastName` as Step2FieldName}>
+          {(field) => (
+            <div className="space-y-2">
+              <Label className="text-sm">
+                Last Name <span className="text-destructive">*</span>
+              </Label>
+              <field.TextField
+                className="h-11 rounded-xl"
+                placeholder="Dela Cruz"
+              />
+            </div>
+          )}
+        </form.AppField>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <form.AppField name={`${prefix}.email` as Step2FieldName}>
+          {(field) => (
+            <div className="space-y-2">
+              <Label className="text-sm">Email Address</Label>
+              <field.TextField
+                className="h-11 rounded-xl"
+                placeholder="juan.delacruz@example.com"
+                type="email"
+              />
+            </div>
+          )}
+        </form.AppField>
+
+        <form.AppField name={`${prefix}.contactNumber` as Step2FieldName}>
+          {(field) => (
+            <div className="space-y-2">
+              <Label className="text-sm">Contact Number</Label>
+              <field.TextField
+                className="h-11 rounded-xl"
+                placeholder="09171234567"
+              />
+            </div>
+          )}
+        </form.AppField>
+      </div>
     </div>
   );
 }
 
 function RemoveParticipantDialog({ idx }: { idx: number }) {
   const field = useFieldContext();
+
   return (
     <AlertDialog>
-      <AlertDialogTrigger
-        render={
-          <Button
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            size="sm"
-            type="button"
-            variant="ghost"
-          >
-            <Trash2 className="mr-1 h-4 w-4" />
-            Remove
-          </Button>
-        }
-      />
+      <AlertDialogTrigger className="h-8 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive">
+        <span className="flex items-center">
+          <Trash2 className="mr-1 h-4 w-4" />
+          Remove
+        </span>
+      </AlertDialogTrigger>
 
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Remove Participant?</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to remove this participant? Any information
-            entered will be lost.
+            Any information entered will be lost. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -1,6 +1,7 @@
 "use client";
 
-import { Edit, MoreVertical, Trash } from "lucide-react";
+import { Edit, Eye, MoreVertical, Trash } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -45,6 +46,15 @@ export default function SectorActionsDropdown({
           <span className="sr-only">Open menu</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem>
+            <Link
+              className="flex w-full cursor-pointer items-center"
+              href={`/admin/manage-sector/${sectorId}/members`}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              <span>View Members</span>
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={() => setIsEditOpen(true)}
