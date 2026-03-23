@@ -674,6 +674,30 @@ export type Database = {
         Args: { p_sponsored_registration_id: string };
         Returns: Json;
       };
+      get_evaluations_by_event: {
+        Args: {
+          event_id: string;
+          completed_only?: boolean;
+        };
+        Returns: {
+          additional_comments: string;
+          created_at: string;
+          evaluation_id: string;
+          event_end_date: string;
+          event_id: string;
+          event_start_date: string;
+          event_title: string;
+          feedback: string;
+          name: string;
+          q1_rating: Database["public"]["Enums"]["ratingScale"];
+          q2_rating: Database["public"]["Enums"]["ratingScale"];
+          q3_rating: Database["public"]["Enums"]["ratingScale"];
+          q4_rating: Database["public"]["Enums"]["ratingScale"];
+          q5_rating: Database["public"]["Enums"]["ratingScale"];
+          q6_rating: Database["public"]["Enums"]["ratingScale"];
+          venue: string;
+        }[];
+      };
       get_all_evaluations: {
         Args: never;
         Returns: {
