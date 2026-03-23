@@ -1,14 +1,7 @@
 import { ArrowRight, Building, CheckCircle2, UserCircle } from "lucide-react";
-import type { FormEvent } from "react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { FieldSet } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -16,21 +9,27 @@ import useRegistrationStore from "@/hooks/registration.store";
 import { cn } from "@/lib/utils";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep1 } from "../../_hooks/useRegistrationStep1";
+import RegistrationStepHeader from "./RegistrationStepHeader";
 
 interface Step1Props {
   members: Awaited<ReturnType<typeof getAllMembers>>;
 }
 
+type SubmitEventLike = {
+  preventDefault: () => void;
+  stopPropagation: () => void;
+};
+
 const Step1 = ({ members }: Step1Props) => {
   const form = useRegistrationStep1();
 
-  const onNext = async (e?: FormEvent) => {
+  function onNext(e?: SubmitEventLike) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     form.handleSubmit({ nextStep: true });
-  };
+  }
 
   const membersOptions = members.map((m) => ({
     label: m.businessName,
@@ -40,15 +39,11 @@ const Step1 = ({ members }: Step1Props) => {
   return (
     <form onSubmit={onNext}>
       <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
-        <CardHeader className="border-border/30 border-b pb-4 sm:pb-6">
-          <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
-            <CheckCircle2 className="h-6 w-6 text-primary" />
-            Member Verification
-          </CardTitle>
-          <CardDescription className="text-muted-foreground text-sm">
-            Please identify your affiliation with the organization.
-          </CardDescription>
-        </CardHeader>
+        <RegistrationStepHeader
+          description="Please identify your affiliation with the organization."
+          Icon={CheckCircle2}
+          title="Member Verification"
+        />
 
         <CardContent className="space-y-6 px-0 sm:px-6">
           <MemberTypeSelection form={form} membersOptions={membersOptions} />

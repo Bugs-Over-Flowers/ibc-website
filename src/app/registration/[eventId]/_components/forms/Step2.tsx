@@ -1,7 +1,6 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, Plus, Trash2, Users } from "lucide-react";
-import type { FormEvent } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,18 +14,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useFieldContext } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
 import type { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
 import { useRegistrationStep2 } from "../../_hooks/useRegistrationStep2";
+import RegistrationStepHeader from "./RegistrationStepHeader";
 
 const MAX_OTHER_PARTICIPANTS = 9;
 
@@ -37,6 +31,11 @@ const EMPTY_REGISTRANT = {
   email: "",
   contactNumber: "",
 } as const;
+
+type SubmitEventLike = {
+  preventDefault: () => void;
+  stopPropagation: () => void;
+};
 
 export default function Step2() {
   const form = useRegistrationStep2();
@@ -52,29 +51,25 @@ export default function Step2() {
     });
   };
 
-  const onNext = async (e?: FormEvent) => {
+  function onNext(e?: SubmitEventLike) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     form.handleSubmit({ nextStep: true });
-  };
+  }
 
   return (
     <form onSubmit={onNext}>
       <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
-        <CardHeader className="border-border/30 border-b bg-card/5 pb-4 sm:pb-6">
-          <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
-            <Users className="h-6 w-6 text-primary" />
-            Participant Details
-          </CardTitle>
-          <CardDescription className="text-muted-foreground text-sm">
-            Enter the details of the primary registrant and any additional
-            attendees.
-          </CardDescription>
-        </CardHeader>
+        <RegistrationStepHeader
+          className="bg-card/5"
+          description="Enter the details of the primary registrant and any additional attendees."
+          Icon={Users}
+          title="Participant Details"
+        />
 
-        <CardContent className="space-y-6 px-0 sm:px-6">
+        <CardContent className="space-y-12 px-0 sm:px-6">
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:gap-3">
             <h3 className="pb-2 font-semibold text-foreground text-lg">
               Primary Registrant
@@ -101,7 +96,7 @@ export default function Step2() {
                 otherParticipantsCount < MAX_OTHER_PARTICIPANTS;
 
               return (
-                <div className="space-y-6">
+                <div className="space-y-12">
                   {field.state.value?.map((registrant, idx) => {
                     const hasData =
                       registrant.firstName ||
@@ -111,7 +106,7 @@ export default function Step2() {
 
                     return (
                       <div
-                        className="slide-in-from-top-2 fade-in relative animate-in space-y-4 rounded-xl border-0 border-border bg-background p-4 shadow-sm sm:p-6"
+                        className="slide-in-from-top-2 fade-in relative animate-in space-y-4 rounded-xl border-0 pt-4 shadow-sm"
                         key={registrant.id}
                       >
                         <div className="flex items-center justify-between">
@@ -139,7 +134,7 @@ export default function Step2() {
                   })}
 
                   <Button
-                    className="h-12 w-full rounded-xl border-2 border-dashed transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+                    className="mt-12 h-12 w-full rounded-xl border-2 border-dashed transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
                     disabled={!canAddMore}
                     onClick={() =>
                       field.pushValue({
@@ -200,8 +195,8 @@ function ParticipantFields({ form, index }: ParticipantFieldsProps) {
     index === undefined ? "registrant" : `otherParticipants[${index}]`;
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <div className="space-y-6 sm:space-y-12">
+      <div className="grid gap-6 sm:grid-cols-2">
         <form.AppField name={`${prefix}.firstName` as Step2FieldName}>
           {(field) => (
             <div className="space-y-2">
@@ -227,7 +222,7 @@ function ParticipantFields({ form, index }: ParticipantFieldsProps) {
         </form.AppField>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2">
         <form.AppField name={`${prefix}.email` as Step2FieldName}>
           {(field) => (
             <div className="space-y-2">
