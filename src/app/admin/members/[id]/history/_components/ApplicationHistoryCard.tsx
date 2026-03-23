@@ -3,7 +3,7 @@
  * in the member's history timeline.
  *
  * Displays: status badge, application type/membership type, date, company info,
- * contact details, sector, principal member name, and representative count.
+ * contact details, sector, and representative names (principal + alternate).
  *
  * Clicking navigates to the full application detail page at:
  *   /admin/application/[applicationId]?source=history&memberId=[memberId]
@@ -63,6 +63,9 @@ export function ApplicationHistoryCard({
 
   const principalMember = application.members.find(
     (m) => m.companyMemberType === "principal",
+  );
+  const alternateMember = application.members.find(
+    (m) => m.companyMemberType === "alternate",
   );
 
   return (
@@ -126,7 +129,7 @@ export function ApplicationHistoryCard({
             </div>
           </div>
 
-          {/* Sector and principal member */}
+          {/* Sector and representative names */}
           <div className="mt-3 flex flex-wrap items-center gap-4 border-t pt-3 text-muted-foreground text-sm">
             <span>
               Sector:{" "}
@@ -140,12 +143,14 @@ export function ApplicationHistoryCard({
                 </span>
               </span>
             )}
-            <span>
-              Representatives:{" "}
-              <span className="text-foreground">
-                {application.members.length}
+            {alternateMember && (
+              <span>
+                Alternate:{" "}
+                <span className="text-foreground">
+                  {alternateMember.firstName} {alternateMember.lastName}
+                </span>
               </span>
-            </span>
+            )}
           </div>
         </div>
       </div>

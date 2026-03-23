@@ -4,7 +4,8 @@
  *
  * Provides three filtering mechanisms:
  * 1. **Text search** — matches against identifier, company address (location),
- *    email, phone number, application date, and principal member name.
+ *    email, phone number, application date, and representative names
+ *    (principal + alternate).
  * 2. **Application type filter** — dropdown to filter by newMember, renewal, or updating.
  * 3. **Date range picker** — Popover with dual calendars + quick-select presets to
  *    filter applications by applicationDate (inclusive on both ends).
@@ -112,8 +113,14 @@ export function ApplicationHistoryFilters({
         const principalMember = app.members.find(
           (m) => m.companyMemberType === "principal",
         );
+        const alternateMember = app.members.find(
+          (m) => m.companyMemberType === "alternate",
+        );
         const principalName = principalMember
           ? `${principalMember.firstName} ${principalMember.lastName}`.toLowerCase()
+          : "";
+        const alternateName = alternateMember
+          ? `${alternateMember.firstName} ${alternateMember.lastName}`.toLowerCase()
           : "";
 
         const formattedDate = new Date(app.applicationDate).toLocaleDateString(
@@ -127,7 +134,8 @@ export function ApplicationHistoryFilters({
           app.emailAddress.toLowerCase().includes(term) ||
           app.mobileNumber.toLowerCase().includes(term) ||
           formattedDate.toLowerCase().includes(term) ||
-          principalName.includes(term)
+          principalName.includes(term) ||
+          alternateName.includes(term)
         );
       });
     }
@@ -202,7 +210,7 @@ export function ApplicationHistoryFilters({
             data-lpignore="true"
             name="history-search"
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search by identifier, location, email, phone, date, or principal..."
+            placeholder="Search by identifier, location, email, phone, date, principal, or alternate..."
             value={searchTerm}
           />
           <AnimatePresence>
