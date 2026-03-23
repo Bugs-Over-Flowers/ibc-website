@@ -21,6 +21,7 @@ const FormDateRangePicker: React.FC<FormDateRangePickerProps> = ({
     <Field data-invalid={isInvalid}>
       {label && <FieldLabel>{label}</FieldLabel>}
       <Calendar
+        aria-invalid={isInvalid}
         className={className}
         data-invalid={isInvalid}
         defaultMonth={new Date(Date.now())}
@@ -30,7 +31,7 @@ const FormDateRangePicker: React.FC<FormDateRangePickerProps> = ({
         selected={field.state.value}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={field.state.meta.errors} />
+      <FieldError errors={field.state.meta.errors} reserveSpace />
     </Field>
   );
 };

@@ -1,49 +1,98 @@
 "use client";
 
 import type { Route } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect } from "react";
+import { useSearchInput } from "@/app/admin/events/_hooks/useSearchInput";
 
 export function useEventFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
+
+  const currentSort = searchParams.get("sort") || "";
+  const currentStatus = searchParams.get("status") || "";
+  const currentSearch = searchParams.get("search") || "";
 
   const updateFilter = useCallback(
     (key: string, value: string | null) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams);
 
-      if (value) {
-        params.set(key, value);
+      if (key === "sort") {
+        if (value && value !== "date-desc") {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      } else if (key === "status") {
+        if (value && value !== "all") {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      } else if (key === "search") {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
       } else {
-        params.delete(key);
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
       }
-      router.push(`${pathname}?${params.toString()}` as Route);
+
+      const qs = params.toString();
+      router.push(qs ? (`?${qs}` as Route) : ("/admin/events" as Route));
     },
-    [searchParams, pathname, router],
+    [searchParams, router],
   );
 
-  const updateSort = useCallback(
-    (value: string | null) => updateFilter("sort", value),
-    [updateFilter],
+  const { searchValue, setSearchValue, handleSearchChange } = useSearchInput({
+    initialValue: currentSearch,
+    onSearch: useCallback(
+      (value: string) => updateFilter("search", value || null),
+      [updateFilter],
+    ),
+    debounceMs: 400,
+  });
+
+  useEffect(() => {
+    setSearchValue(currentSearch);
+  }, [currentSearch, setSearchValue]);
+
+  const removeFilter = useCallback(
+    (key: string) => {
+      const params = new URLSearchParams(searchParams);
+      params.delete(key);
+
+      if (key === "search") {
+        setSearchValue("");
+      }
+
+      const qs = params.toString();
+      router.push(qs ? (`?${qs}` as Route) : ("/admin/events" as Route));
+    },
+    [searchParams, router, setSearchValue],
   );
 
-  const updateStatus = useCallback(
-    (value: string | null) =>
-      updateFilter("status", value === "all" ? null : value),
-    [updateFilter],
-  );
+  const clearFilters = useCallback(() => {
+    setSearchValue("");
+    router.push("/admin/events" as Route);
+  }, [router, setSearchValue]);
 
-  const updateSearch = useCallback(
-    (value: string) => updateFilter("search", value || null),
-    [updateFilter],
-  );
+  const hasActiveFilters = currentSort || currentStatus || currentSearch;
 
   return {
+    currentSort,
+    currentStatus,
+    currentSearch,
+    searchValue,
+    hasActiveFilters,
     updateFilter,
-    updateSort,
-    updateStatus,
-    updateSearch,
-    searchParams,
+    removeFilter,
+    clearFilters,
+    handleSearchChange,
   };
 }

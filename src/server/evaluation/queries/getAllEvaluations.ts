@@ -46,3 +46,21 @@ export async function getAllEvaluationsRpc(
 
   return (data as EvaluationWithEventRpc[]) || [];
 }
+
+export async function getEvaluationsByEventId(
+  requestCookies: RequestCookie[],
+  eventId: string,
+): Promise<EvaluationWithEventRpc[]> {
+  const evaluations = await getAllEvaluationsRpc(requestCookies);
+
+  return evaluations.filter(
+    (evaluation) =>
+      evaluation.event_id === eventId &&
+      evaluation.q1_rating &&
+      evaluation.q2_rating &&
+      evaluation.q3_rating &&
+      evaluation.q4_rating &&
+      evaluation.q5_rating &&
+      evaluation.q6_rating,
+  );
+}

@@ -30,6 +30,7 @@ function TextField({
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
+        aria-invalid={isInvalid}
         autoCapitalize="on"
         autoComplete="off"
         data-invalid={isInvalid}
@@ -44,7 +45,7 @@ function TextField({
         value={field.state.value ?? ""}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={field.state.meta.errors} />
+      <FieldError errors={field.state.meta.errors} reserveSpace />
     </Field>
   );
 }

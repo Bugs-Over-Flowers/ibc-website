@@ -34,6 +34,24 @@ export const useSubmitRegistration = () => {
     (state) => state.setCreatedRegistrationId,
   );
 
+  const getRegistrationErrorMessage = (error: string) => {
+    const normalizedError = error.toLowerCase();
+
+    const isSponsoredSlotExceeded =
+      normalizedError.includes("not enough sponsored registration slots") ||
+      normalizedError.includes("sponsoredregistration_used_check") ||
+      (normalizedError.includes("sponsored") &&
+        (normalizedError.includes("slot") ||
+          normalizedError.includes("maxsponsoredguests") ||
+          normalizedError.includes("usedcount")));
+
+    if (isSponsoredSlotExceeded) {
+      return "Not enough sponsored registration slots for this registrant. Please use another sponsor link or reduce participants.";
+    }
+
+    return `Registration failed: ${error}`;
+  };
+
   return useAction(
     tryCatch(async (registrationData: StandardRegistrationSchema) => {
       // Validate eventId exists
@@ -85,7 +103,7 @@ export const useSubmitRegistration = () => {
         toast.success("Registration successful!");
       },
       onError: (error) => {
-        toast.error(`Registration failed: ${error}`);
+        toast.error(getRegistrationErrorMessage(error));
       },
     },
   );

@@ -55,7 +55,7 @@ export default function EventRow({ event }: EventRowProps) {
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2">
             {event.eventType && (
-              <span className="whitespace-nowrap rounded-xl bg-muted px-2 py-1 font-semibold text-background text-xs capitalize">
+              <span className="whitespace-nowrap rounded-xl bg-muted px-2 py-1 font-semibold text-popup text-xs capitalize">
                 {event.eventType}
               </span>
             )}
@@ -96,7 +96,7 @@ export default function EventRow({ event }: EventRowProps) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 font-semibold text-muted text-muted text-xs">
+            <div className="flex items-center gap-2 font-semibold text-muted text-xs">
               <DollarSign size={12} />
               <span>Fee</span>
             </div>

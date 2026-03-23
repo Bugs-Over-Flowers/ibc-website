@@ -70,7 +70,7 @@ export function SponsoredRegistrationActions({
     {
       onSuccess: () => {
         toast.success("Sponsored registration deleted successfully");
-        router.push(`/admin/events/${eventId}/sponsored-registrations`);
+        router.push("/admin/sponsored-registration");
       },
       onError: (error: unknown) => {
         if (typeof error === "string") {
