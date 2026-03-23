@@ -21,6 +21,7 @@ export const useScanQR = ({ eventId }: { eventId: string }) => {
         setScannedData(checkInData);
       },
       onError: (message) => {
+        console.error(message);
         toast.error(message);
       },
       persist: true,
