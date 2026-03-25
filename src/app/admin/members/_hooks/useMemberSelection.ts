@@ -34,6 +34,10 @@ export function useMemberSelection() {
     setSelectedMembers(newSelection);
   };
 
+  const handleClearSelection = () => {
+    setSelectedMembers(new Set());
+  };
+
   const handleUpdateStatus = async () => {
     if (selectedMembers.size === 0) {
       toast.error("Please select at least one member");
@@ -59,6 +63,7 @@ export function useMemberSelection() {
     selectedStatus,
     setSelectedStatus,
     handleSelectMember,
+    handleClearSelection,
     handleUpdateStatus,
     isPending,
     isUpdateDisabled,

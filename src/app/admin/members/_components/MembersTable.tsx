@@ -23,6 +23,7 @@ export function MembersTable({ members }: MembersTableProps) {
     selectedStatus,
     setSelectedStatus,
     handleSelectMember,
+    handleClearSelection,
     handleUpdateStatus,
     isPending,
     isUpdateDisabled,
@@ -55,6 +56,16 @@ export function MembersTable({ members }: MembersTableProps) {
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
+
+            {selectedMembers.size > 0 && (
+              <Button
+                onClick={handleClearSelection}
+                size="sm"
+                variant="outline"
+              >
+                Clear Selection
+              </Button>
+            )}
 
             <Button
               disabled={isUpdateDisabled}
