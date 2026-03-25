@@ -45,17 +45,6 @@ export function MembersTableRow({
     router.push(`/admin/members/${member.businessMemberId}` as Route);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      if (showCheckbox) {
-        onSelectedChange(!isSelected);
-      } else {
-        router.push(`/admin/members/${member.businessMemberId}` as Route);
-      }
-    }
-  };
-
   return (
     <div
       className={cn(
@@ -66,18 +55,18 @@ export function MembersTableRow({
       )}
     >
       {/* Clickable area */}
-      <button
-        className="flex w-full flex-1 cursor-pointer flex-col gap-3 overflow-hidden text-left"
-        onClick={handleCardClick}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        type="button"
-      >
+      <div className="relative flex w-full flex-1 flex-col gap-3 overflow-hidden text-left">
+        <button
+          aria-label={`Open ${member.businessName} member details`}
+          className="absolute inset-0 z-0 rounded-xl"
+          onClick={handleCardClick}
+          type="button"
+        />
         {/* Image with status badge and checkbox */}
-        <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-900/60">
+        <div className="pointer-events-none relative z-10 aspect-square w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-900/60">
           {/* Checkbox - top left corner */}
           {showCheckbox ? (
-            <div className="absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10 dark:border-foreground/20 dark:ring-foreground/20">
+            <div className="pointer-events-auto absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10 dark:border-foreground/20 dark:ring-foreground/20">
               <Checkbox
                 checked={isSelected}
                 className="size-5"
@@ -121,13 +110,13 @@ export function MembersTableRow({
         </div>
 
         {/* Middle content */}
-        <div className="relative flex w-full flex-1 flex-col gap-3 px-2 pb-1">
+        <div className="pointer-events-none relative z-10 flex w-full flex-1 flex-col gap-3 px-2 pb-1">
           {/* Company name with website icon on right */}
           <div className="flex items-start justify-between gap-2">
             <h3 className="line-clamp-1 flex-1 font-bold text-base leading-snug">
               {member.businessName}
             </h3>
-            <div className="flex shrink-0 items-center gap-3">
+            <div className="pointer-events-auto flex shrink-0 items-center gap-3">
               <button
                 className="inline-flex rounded-md p-1 text-muted-foreground transition-colors hover:text-primary"
                 onClick={(e) => {
@@ -181,7 +170,7 @@ export function MembersTableRow({
             </div>
           </div>
         </div>
-      </button>
+      </div>
     </div>
   );
 }
