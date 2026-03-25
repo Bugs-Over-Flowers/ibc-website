@@ -9,3 +9,11 @@ export function DetailsSkeleton() {
     </div>
   );
 }
+
+export default function MemberDetailLoading() {
+  return (
+    <div className="space-y-6 px-2">
+      <DetailsSkeleton />
+    </div>
+  );
+}

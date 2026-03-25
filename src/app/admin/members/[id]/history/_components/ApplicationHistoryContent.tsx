@@ -1,17 +1,3 @@
-/**
- * ApplicationHistoryContent — Async Server Component that fetches and renders
- * the full application history for a business member.
- *
- * Flow:
- * 1. Reads cookies for the authenticated Supabase client
- * 2. Calls `getApplicationHistory` (cached RPC query) with the member ID
- * 3. On failure, triggers a 404 (member not found or RPC error)
- * 4. On success, displays the business name heading and delegates rendering
- *    to ApplicationHistoryList (client component) which handles search,
- *    filtering by application type, and date range filtering.
- *
- * Wrapped in <Suspense> by the parent page.tsx for streaming.
- */
 import { ChevronLeft } from "lucide-react";
 import type { Route } from "next";
 import { cookies } from "next/headers";
@@ -39,26 +25,28 @@ export async function ApplicationHistoryContent({
   }
 
   return (
-    <>
+    <div className="space-y-6 px-2">
       <Link
-        className="mb-2 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
+        className="inline-flex items-center gap-1.5 text-primary transition-colors hover:text-primary/80"
         href={`/admin/members/${memberId}` as Route}
       >
-        <ChevronLeft className="h-5 w-5" />
-        Back to Member
+        <ChevronLeft className="h-4 w-4" />
+        <span className="font-medium text-sm">Back to Member Details</span>
       </Link>
 
-      <div className="space-y-1">
+      <div>
         <h1 className="font-bold text-3xl text-foreground">
           {history.businessName}
         </h1>
-        <h2 className="text-base text-muted-foreground">Application History</h2>
+        <p className="mt-2 text-muted-foreground">
+          View and manage all applications for this member
+        </p>
       </div>
 
       <ApplicationHistoryList
         applications={history.applications}
         memberId={memberId}
       />
-    </>
+    </div>
   );
 }

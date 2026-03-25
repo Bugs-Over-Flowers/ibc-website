@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { DetailsSkeleton } from "./_components/DetailsSkeleton";
 import { MembersDetails } from "./_components/MembersDetails";
+import { DetailsSkeleton } from "./loading";
 
 interface PageProps {
   params: Promise<{ id: string }>;

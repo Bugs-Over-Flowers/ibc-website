@@ -1,8 +1,10 @@
 import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { Suspense } from "react";
 import { getAllSectors } from "@/server/members/queries/getAllSectors";
 import { CreateManualMemberFormWrapper } from "./_components/forms/CreateManualMemberFormWrapper";
+import CreateMemberLoading from "./loading";
 
 export default async function CreateMemberPage() {
   const cookieStore = await cookies();
@@ -33,7 +35,9 @@ export default async function CreateMemberPage() {
       </div>
 
       <div className="mx-auto -mt-16 max-w-4xl px-4 sm:px-6 lg:px-8">
-        <CreateManualMemberFormWrapper sectors={sectors} />
+        <Suspense fallback={<CreateMemberLoading />}>
+          <CreateManualMemberFormWrapper sectors={sectors} />
+        </Suspense>
       </div>
     </div>
   );
