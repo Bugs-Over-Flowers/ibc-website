@@ -9,24 +9,24 @@ export interface CreateManualMemberData {
     emailAddress: string;
     landline: string;
     mobileNumber: string;
-    faxNumber: string;
     logoImageURL: string | File;
     applicationMemberType: "corporate" | "personal";
     membershipStatus: "paid" | "unpaid" | "cancelled";
   };
   step2: {
-    firstName: string;
-    lastName: string;
-    representativeEmailAddress: string;
-    companyDesignation: string;
-    birthdate: Date;
-    sex: "male" | "female";
-    nationality: string;
-    mailingAddress: string;
-    representativeMobileNumber: string;
-    representativeLandline: string;
-    representativeFaxNumber: string;
-    companyMemberType: "principal" | "alternate";
+    representatives: Array<{
+      firstName: string;
+      lastName: string;
+      emailAddress: string;
+      companyDesignation: string;
+      birthdate: Date;
+      sex: "male" | "female";
+      nationality: string;
+      mailingAddress: string;
+      mobileNumber: string;
+      landline: string;
+      companyMemberType: "principal" | "alternate";
+    }>;
   };
 }
 
@@ -54,24 +54,39 @@ const initialData: CreateManualMemberData = {
     emailAddress: "",
     landline: "",
     mobileNumber: "",
-    faxNumber: "",
     logoImageURL: "",
     applicationMemberType: "corporate",
     membershipStatus: "paid",
   },
   step2: {
-    firstName: "",
-    lastName: "",
-    representativeEmailAddress: "",
-    companyDesignation: "",
-    birthdate: new Date(),
-    sex: "male",
-    nationality: "",
-    mailingAddress: "",
-    representativeMobileNumber: "",
-    representativeLandline: "",
-    representativeFaxNumber: "",
-    companyMemberType: "principal",
+    representatives: [
+      {
+        firstName: "",
+        lastName: "",
+        emailAddress: "",
+        companyDesignation: "",
+        birthdate: new Date(),
+        sex: "male",
+        nationality: "",
+        mailingAddress: "",
+        mobileNumber: "",
+        landline: "",
+        companyMemberType: "principal",
+      },
+      {
+        firstName: "",
+        lastName: "",
+        emailAddress: "",
+        companyDesignation: "",
+        birthdate: new Date(),
+        sex: "male",
+        nationality: "",
+        mailingAddress: "",
+        mobileNumber: "",
+        landline: "",
+        companyMemberType: "alternate",
+      },
+    ],
   },
 };
 

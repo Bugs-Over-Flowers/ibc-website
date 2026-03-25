@@ -48,19 +48,25 @@ export const useCreateManualMemberStep3 = () => {
       }
 
       // Combine step1 and step2 data and transform
+      const transformedRepresentatives = memberData.step2.representatives.map(
+        (representative) => ({
+          ...representative,
+          firstName: titleCase(representative.firstName).trim(),
+          lastName: titleCase(representative.lastName).trim(),
+          nationality: titleCase(representative.nationality).trim(),
+          companyDesignation:
+            representative.companyDesignation ===
+            representative.companyDesignation.toLowerCase()
+              ? titleCase(representative.companyDesignation).trim()
+              : representative.companyDesignation.trim(),
+        }),
+      );
+
       const combinedData: ManualMemberInput = {
         ...memberData.step1,
-        ...memberData.step2,
+        representatives: transformedRepresentatives,
         logoImageURL: typeof logoImageURL === "string" ? logoImageURL : "",
         companyName: titleCase(memberData.step1.companyName).trim(),
-        firstName: titleCase(memberData.step2.firstName).trim(),
-        lastName: titleCase(memberData.step2.lastName).trim(),
-        nationality: titleCase(memberData.step2.nationality).trim(),
-        companyDesignation:
-          memberData.step2.companyDesignation ===
-          memberData.step2.companyDesignation.toLowerCase()
-            ? titleCase(memberData.step2.companyDesignation).trim()
-            : memberData.step2.companyDesignation.trim(),
       };
 
       const { error, data } = await tryCatch(createManualMember(combinedData));

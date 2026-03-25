@@ -4,6 +4,10 @@ import useMembershipApplicationStore from "@/hooks/membershipApplication.store";
 import type { FormSubmitMeta } from "@/lib/types/FormSubmitMeta";
 import { zodErrorToFieldErrors } from "@/lib/utils";
 import { MembershipApplicationStep3Schema } from "@/lib/validation/membership/application";
+import {
+  enforceRepresentativeOrder,
+  getNormalizedRepresentatives,
+} from "./representativesForm.utils";
 
 const defaultMeta: FormSubmitMeta = {
   nextStep: false,
@@ -19,36 +23,9 @@ export const useMembershipStep3 = () => {
     (state) => state.applicationData?.step3,
   );
 
-  // Ensure we always have exactly 2 fixed representatives (Principal and Alternate)
-  const representatives = defaultApplicationDataStep3?.representatives || [];
-  const normalizedRepresentatives = [
-    representatives[0] || {
-      companyMemberType: "principal",
-      firstName: "",
-      lastName: "",
-      mailingAddress: "",
-      sex: "male",
-      nationality: "",
-      birthdate: undefined as unknown as Date,
-      companyDesignation: "",
-      landline: "",
-      mobileNumber: "",
-      emailAddress: "",
-    },
-    representatives[1] || {
-      companyMemberType: "alternate",
-      firstName: "",
-      lastName: "",
-      mailingAddress: "",
-      sex: "male",
-      nationality: "",
-      birthdate: undefined as unknown as Date,
-      companyDesignation: "",
-      landline: "",
-      mobileNumber: "",
-      emailAddress: "",
-    },
-  ];
+  const normalizedRepresentatives = getNormalizedRepresentatives(
+    defaultApplicationDataStep3?.representatives,
+  );
 
   const form = useAppForm({
     defaultValues: {
@@ -84,14 +61,9 @@ export const useMembershipStep3 = () => {
     onSubmit: async ({ value, meta }) => {
       const refinedValue = MembershipApplicationStep3Schema.parse(value);
 
-      const representatives = refinedValue.representatives
-        .slice(0, 2)
-        .map((rep, index) => ({
-          ...rep,
-          companyMemberType: (index === 0 ? "principal" : "alternate") as
-            | "principal"
-            | "alternate",
-        }));
+      const representatives = enforceRepresentativeOrder(
+        refinedValue.representatives,
+      );
 
       // Update form with transformed values
       representatives.forEach((rep, index) => {

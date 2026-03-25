@@ -1,16 +1,30 @@
 "use client";
 
 import { useStore } from "@tanstack/react-form";
-import { CheckCircle2, ChevronLeft } from "lucide-react";
-import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Users,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useCreateManualMemberStep1 } from "@/app/admin/members/create/_hooks/useCreateManualMemberStep1";
 import { useCreateManualMemberStep2 } from "@/app/admin/members/create/_hooks/useCreateManualMemberStep2";
 import { useCreateManualMemberStep3 } from "@/app/admin/members/create/_hooks/useCreateManualMemberStep3";
+import { MembershipStepper } from "@/app/membership/application/_components/MembershipStepper";
 import CenterSpinner from "@/components/CenterSpinner";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import useCreateManualMemberStore from "@/hooks/createManualMember.store";
-import { cn } from "@/lib/utils";
 import { Step1Company } from "./Step1Company";
 import { Step2Representative } from "./Step2Representative";
 import { Step3Review } from "./Step3Review";
@@ -18,19 +32,58 @@ import { Step3Review } from "./Step3Review";
 const steps = [
   {
     id: 1,
-    title: "Company Info",
-    description: "Provide company information",
+    title: "Company",
+    description:
+      "Provide company details, contact information, and initial membership settings.",
+    icon: Building2,
   },
   {
     id: 2,
     title: "Representative",
-    description: "Add primary representative",
+    description:
+      "Add the primary representative details for member records and communication.",
+    icon: Users,
   },
-  { id: 3, title: "Review & Confirm", description: "Confirm and create" },
+  {
+    id: 3,
+    title: "Review",
+    description: "Review all data before creating the member account.",
+    icon: CheckCircle2,
+  },
 ];
 
 interface CreateManualMemberFormProps {
   sectors: Array<{ sectorId: number; sectorName: string }>;
+}
+
+interface ManualMemberStepCardProps {
+  children: ReactNode;
+  description: string;
+  icon: LucideIcon;
+  title: string;
+}
+
+function ManualMemberStepCard({
+  children,
+  description,
+  icon: Icon,
+  title,
+}: ManualMemberStepCardProps) {
+  return (
+    <Card className="w-full overflow-hidden rounded-2xl bg-transparent shadow-none ring-0">
+      <CardHeader className="border-border/30 border-b bg-card/5 pb-4 sm:pb-6">
+        <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
+          <Icon className="h-6 w-6 text-primary" />
+          {title}
+        </CardTitle>
+        <CardDescription className="text-muted-foreground text-sm">
+          {description}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-6 px-0 sm:px-6">{children}</CardContent>
+    </Card>
+  );
 }
 
 export function CreateManualMemberForm({
@@ -45,7 +98,21 @@ export function CreateManualMemberForm({
   const { form: step3Form, memberData } = useCreateManualMemberStep3();
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  };
+
+  const handleNext = async (
+    form: typeof step1Form.form | typeof step2Form.form,
+  ) => {
+    const stepBefore = useCreateManualMemberStore.getState().step;
+    await form.handleSubmit();
+    const stepAfter = useCreateManualMemberStore.getState().step;
+
+    if (stepAfter !== stepBefore) {
+      scrollToTop();
+    }
   };
 
   const handleBack = (targetStep: number) => {
@@ -60,153 +127,146 @@ export function CreateManualMemberForm({
     return <CenterSpinner scale={10} />;
   }
 
-  return (
-    <div className="px-4 py-6 sm:px-0">
-      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-        {/* Sidebar / Stepper */}
-        <div className="w-full space-y-4 lg:w-1/4 lg:space-y-6">
-          <Link href="/admin/members">
-            <Button className="-ml-4" variant="ghost">
-              <ChevronLeft />
-              Back to Members
+  const currentStepMeta = steps[currentStep - 1];
+
+  const stepContent =
+    currentStep === 1 ? (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleNext(step1Form.form);
+        }}
+      >
+        <ManualMemberStepCard
+          description={currentStepMeta.description}
+          icon={currentStepMeta.icon}
+          title={currentStepMeta.title}
+        >
+          <Step1Company form={step1Form.form} sectors={sectors} />
+
+          <div className="mt-8 flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <Button
+              className="w-full rounded-xl sm:w-auto"
+              onClick={() => router.push("/admin/members")}
+              size="lg"
+              type="button"
+              variant="ghost"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Cancel
             </Button>
-          </Link>
-          <div className="space-y-2 lg:space-y-4">
-            <h2 className="font-bold text-lg text-primary lg:text-xl">
-              Create Member
-            </h2>
-            <p className="text-muted-foreground text-xs lg:text-sm">
-              Step {currentStep} of {steps.length}
-            </p>
+
+            <step1Form.form.Subscribe selector={(state) => state.isSubmitting}>
+              {(nextSubmitting) => (
+                <Button
+                  className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
+                  disabled={nextSubmitting}
+                  size="lg"
+                  type="submit"
+                >
+                  {nextSubmitting ? "Saving..." : "Continue to Representative"}
+                  {!nextSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+              )}
+            </step1Form.form.Subscribe>
           </div>
-          <div className="space-y-2 lg:space-y-3">
-            {steps.map((step) => (
-              <div
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 transition-colors",
-                  currentStep === step.id
-                    ? "bg-primary/10 text-primary"
-                    : currentStep > step.id
-                      ? "text-muted-foreground hover:bg-muted"
-                      : "text-muted-foreground",
-                )}
-                key={step.id}
-              >
-                {currentStep > step.id ? (
-                  <CheckCircle2 className="h-5 w-5" />
-                ) : (
-                  <div
-                    className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-full font-semibold text-xs",
-                      currentStep === step.id
-                        ? "bg-primary text-primary-foreground"
-                        : "border border-current",
-                    )}
-                  >
-                    {step.id}
-                  </div>
-                )}
-                <div>
-                  <p className="font-medium text-sm">{step.title}</p>
-                  <p className="text-xs opacity-75">{step.description}</p>
-                </div>
-              </div>
-            ))}
+        </ManualMemberStepCard>
+      </form>
+    ) : currentStep === 2 ? (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleNext(step2Form.form);
+        }}
+      >
+        <ManualMemberStepCard
+          description={currentStepMeta.description}
+          icon={currentStepMeta.icon}
+          title={currentStepMeta.title}
+        >
+          <Step2Representative form={step2Form.form} />
+
+          <div className="mt-8 flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <Button
+              className="w-full rounded-xl sm:w-auto"
+              onClick={() => handleBack(1)}
+              size="lg"
+              type="button"
+              variant="ghost"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+
+            <step2Form.form.Subscribe selector={(state) => state.isSubmitting}>
+              {(nextSubmitting) => (
+                <Button
+                  className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
+                  disabled={nextSubmitting}
+                  size="lg"
+                  type="submit"
+                >
+                  {nextSubmitting ? "Saving..." : "Continue to Review"}
+                  {!nextSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+              )}
+            </step2Form.form.Subscribe>
           </div>
-        </div>
+        </ManualMemberStepCard>
+      </form>
+    ) : (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          step3Form.handleSubmit();
+        }}
+      >
+        <ManualMemberStepCard
+          description={currentStepMeta.description}
+          icon={currentStepMeta.icon}
+          title={currentStepMeta.title}
+        >
+          <Step3Review form={step3Form} memberData={memberData} />
 
-        {/* Main Content */}
-        <div className="flex-1">
-          {/* Form content will be rendered here */}
-          {currentStep === 1 && (
-            <form
-              className="space-y-8"
-              onSubmit={(e) => {
-                e.preventDefault();
-                step1Form.form.handleSubmit();
-              }}
+          <div className="mt-8 flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <Button
+              className="w-full rounded-xl sm:w-auto"
+              onClick={() => handleBack(2)}
+              size="lg"
+              type="button"
+              variant="ghost"
             >
-              <Step1Company form={step1Form.form} sectors={sectors} />
-              <div className="flex justify-end gap-4">
-                <Button
-                  onClick={() => router.push("/admin/members")}
-                  type="button"
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-                <step1Form.form.Subscribe
-                  selector={(state) => [state.isSubmitting]}
-                >
-                  {([isSubmitting]) => (
-                    <Button disabled={isSubmitting} type="submit">
-                      {isSubmitting ? "Loading..." : "Next"}
-                    </Button>
-                  )}
-                </step1Form.form.Subscribe>
-              </div>
-            </form>
-          )}
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
 
-          {currentStep === 2 && (
-            <form
-              className="space-y-8"
-              onSubmit={(e) => {
-                e.preventDefault();
-                step2Form.form.handleSubmit();
-              }}
-            >
-              <Step2Representative form={step2Form.form} />
-              <div className="flex justify-between gap-4">
+            <step3Form.Subscribe selector={(state) => state.isSubmitting}>
+              {(submitPending) => (
                 <Button
-                  onClick={() => handleBack(1)}
-                  type="button"
-                  variant="outline"
+                  className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
+                  disabled={submitPending}
+                  size="lg"
+                  type="submit"
                 >
-                  Back
+                  {submitPending ? "Creating..." : "Create Member"}
+                  {!submitPending && <CheckCircle2 className="ml-2 h-4 w-4" />}
                 </Button>
-                <step2Form.form.Subscribe
-                  selector={(state) => [state.isSubmitting]}
-                >
-                  {([isSubmitting]) => (
-                    <Button disabled={isSubmitting} type="submit">
-                      {isSubmitting ? "Loading..." : "Next"}
-                    </Button>
-                  )}
-                </step2Form.form.Subscribe>
-              </div>
-            </form>
-          )}
+              )}
+            </step3Form.Subscribe>
+          </div>
+        </ManualMemberStepCard>
+      </form>
+    );
 
-          {currentStep === 3 && (
-            <form
-              className="space-y-8"
-              onSubmit={(e) => {
-                e.preventDefault();
-                step3Form.handleSubmit();
-              }}
-            >
-              <Step3Review form={step3Form} memberData={memberData} />
-              <div className="flex justify-between gap-4">
-                <Button
-                  onClick={() => handleBack(2)}
-                  type="button"
-                  variant="outline"
-                >
-                  Back
-                </Button>
-                <step3Form.Subscribe selector={(state) => [state.isSubmitting]}>
-                  {([isSubmitting]) => (
-                    <Button disabled={isSubmitting} type="submit">
-                      {isSubmitting ? "Creating..." : "Create Member"}
-                    </Button>
-                  )}
-                </step3Form.Subscribe>
-              </div>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
+  return (
+    <Card className="w-full overflow-hidden rounded-2xl border border-border/50 bg-background p-4 pb-2 shadow-xl sm:p-6 sm:pb-3 md:p-8 md:pb-4">
+      <CardContent className="px-0">
+        <MembershipStepper currentStep={currentStep} steps={steps} />
+        <div className="mt-6 sm:mt-8">{stepContent}</div>
+      </CardContent>
+    </Card>
   );
 }

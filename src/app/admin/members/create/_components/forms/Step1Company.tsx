@@ -1,5 +1,14 @@
+import { useStore } from "@tanstack/react-form";
+import { UploadCloud, X } from "lucide-react";
+import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import type { useCreateManualMemberStep1 } from "@/app/admin/members/create/_hooks/useCreateManualMemberStep1";
-import { FieldGroup } from "@/components/ui/field";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldGroup } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface Step1CompanyProps {
   form: ReturnType<typeof useCreateManualMemberStep1>["form"];
@@ -12,86 +21,329 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
     label: sector.sectorName,
   }));
 
+  const logoImage = useStore(form.store, (state) => state.values.logoImageURL);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+
+  const handleDrag = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  }, []);
+
+  useEffect(() => {
+    if (logoImage instanceof File) {
+      const url = URL.createObjectURL(logoImage);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setPreview(null);
+  }, [logoImage]);
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h3 className="font-medium text-lg">Company Information</h3>
-        <p className="text-muted-foreground text-sm">
-          Provide your company details below
-        </p>
-      </div>
-
+    <div className="space-y-8">
       <FieldGroup>
-        <form.AppField name="companyName">
-          {(field) => (
-            <field.TextField
-              label="Company Name"
-              placeholder="Enter your company name"
-            />
-          )}
-        </form.AppField>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <form.AppField name="companyName">
+            {(field) => (
+              <field.TextField
+                label="Company Name"
+                placeholder="Enter your company name"
+              />
+            )}
+          </form.AppField>
 
-        <form.AppField name="sectorId">
-          {(field) => (
-            <field.SelectField
-              label="Industry/Sector"
-              options={sectorOptions}
-              placeholder="Select industry"
-            />
-          )}
-        </form.AppField>
+          <form.AppField name="sectorId">
+            {(field) => (
+              <field.SelectField
+                label="Industry/Sector"
+                options={sectorOptions}
+                placeholder="Select industry"
+              />
+            )}
+          </form.AppField>
+        </div>
 
         <form.AppField name="companyAddress">
           {(field) => (
-            <field.TextareaField
+            <field.TextField
               label="Company Address"
               placeholder="Enter complete business address"
             />
           )}
         </form.AppField>
 
-        <form.AppField name="websiteURL">
-          {(field) => (
-            <field.TextField
-              description="Enter your company's website or profile URL"
-              label="Company Profile / Website"
-              placeholder="https://www.example.com"
-            />
-          )}
-        </form.AppField>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <form.AppField name="websiteURL">
+            {(field) => (
+              <field.TextField
+                description="Enter your company's website or profile URL"
+                label="Company Profile / Website"
+                placeholder="https://www.example.com"
+              />
+            )}
+          </form.AppField>
 
-        <form.AppField name="emailAddress">
-          {(field) => (
-            <field.TextField
-              description="We'll send confirmation to this email"
-              label="Email Address"
-              placeholder="company@example.com"
-              type="email"
-            />
-          )}
-        </form.AppField>
+          <form.AppField name="emailAddress">
+            {(field) => (
+              <field.TextField
+                description="We'll send confirmation to this email"
+                label="Email Address"
+                placeholder="company@example.com"
+                type="email"
+              />
+            )}
+          </form.AppField>
+        </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <form.AppField name="landline">
-            {(field) => <field.TextField label="Landline" />}
+            {(field) => (
+              <field.TextField
+                label="Landline"
+                onKeyDown={(e) => {
+                  if (
+                    [
+                      "Backspace",
+                      "Delete",
+                      "Tab",
+                      "Escape",
+                      "Enter",
+                      "Home",
+                      "End",
+                      "ArrowLeft",
+                      "ArrowRight",
+                    ].includes(e.key) ||
+                    ((e.ctrlKey || e.metaKey) &&
+                      ["a", "c", "v", "x"].includes(e.key))
+                  ) {
+                    return;
+                  }
+
+                  if (!/[0-9()\-\s]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="(033) XXX-XXXX"
+              />
+            )}
           </form.AppField>
 
           <form.AppField name="mobileNumber">
-            {(field) => <field.TextField label="Mobile Number" />}
-          </form.AppField>
+            {(field) => (
+              <field.TextField
+                label="Mobile Number"
+                onKeyDown={(e) => {
+                  if (
+                    [
+                      "Backspace",
+                      "Delete",
+                      "Tab",
+                      "Escape",
+                      "Enter",
+                      "Home",
+                      "End",
+                      "ArrowLeft",
+                      "ArrowRight",
+                    ].includes(e.key) ||
+                    ((e.ctrlKey || e.metaKey) &&
+                      ["a", "c", "v", "x"].includes(e.key))
+                  ) {
+                    return;
+                  }
 
-          <form.AppField name="faxNumber">
-            {(field) => <field.TextField label="Telefax" />}
+                  if (!/[0-9+]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="+63 9XX XXX XXXX"
+              />
+            )}
           </form.AppField>
         </div>
 
         <form.AppField name="logoImageURL">
-          {(field) => (
-            <field.ImageField
-              description="Upload your company logo image"
-              label="Company Logo"
-            />
-          )}
+          {(field) => {
+            const fieldValue = field.state.value;
+            const hasFile = fieldValue instanceof File;
+            const hasLogoUrl =
+              typeof fieldValue === "string" && fieldValue.length > 0;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+
+            return (
+              <Field className="grid gap-2" data-invalid={isInvalid}>
+                <Label className="font-semibold text-foreground text-sm">
+                  Company Logo *
+                </Label>
+
+                {hasLogoUrl && !hasFile ? (
+                  <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-2">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <Image
+                        alt="Logo"
+                        className="h-8 w-8 object-contain"
+                        height={32}
+                        src={fieldValue}
+                        width={32}
+                      />
+                      <span className="max-w-[200px] truncate text-sm">
+                        Current Logo
+                      </span>
+                    </div>
+                    <Button
+                      className="h-8 w-8"
+                      onClick={() => field.handleChange("")}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <button
+                      aria-invalid={isInvalid}
+                      className={cn(
+                        "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all",
+                        hasFile &&
+                          "border-emerald-500 bg-emerald-50/60 dark:border-emerald-400/70 dark:bg-emerald-500/15",
+                        !hasFile &&
+                          "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
+                        dragActive && !hasFile && "border-primary bg-primary/5",
+                        isInvalid &&
+                          "border-destructive bg-destructive/5 hover:border-destructive",
+                      )}
+                      onDragEnter={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDragOver={handleDrag}
+                      onDrop={(e) => {
+                        handleDrop(e);
+                        if (!e.dataTransfer.files?.[0]) {
+                          return;
+                        }
+
+                        const droppedFile = e.dataTransfer.files[0];
+                        const isValidType = [
+                          "image/png",
+                          "image/jpeg",
+                          "image/jpg",
+                        ].includes(droppedFile.type);
+
+                        if (!isValidType) {
+                          toast.error("Invalid file");
+                          return;
+                        }
+
+                        if (droppedFile.size > 5 * 1024 * 1024) {
+                          toast.error("File size must be less than 5MB");
+                          return;
+                        }
+
+                        field.handleChange(droppedFile);
+                      }}
+                      type="button"
+                    >
+                      <input
+                        accept="image/png,image/jpeg,image/jpg"
+                        className="absolute inset-0 cursor-pointer opacity-0"
+                        onBlur={field.handleBlur}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) {
+                            return;
+                          }
+
+                          const isValidType = [
+                            "image/png",
+                            "image/jpeg",
+                            "image/jpg",
+                          ].includes(file.type);
+
+                          if (!isValidType) {
+                            toast.error("Invalid file");
+                            return;
+                          }
+
+                          if (file.size > 5 * 1024 * 1024) {
+                            toast.error("File size must be less than 5MB");
+                            return;
+                          }
+
+                          field.handleChange(file);
+                        }}
+                        tabIndex={-1}
+                        type="file"
+                      />
+
+                      {hasFile ? (
+                        <>
+                          {preview ? (
+                            <Image
+                              alt="Logo preview"
+                              className="mt-3 h-12 w-12 rounded-md object-contain"
+                              height={48}
+                              src={preview}
+                              width={48}
+                            />
+                          ) : null}
+                          <span className="font-medium text-emerald-700 dark:text-emerald-300">
+                            Logo Uploaded Successfully
+                          </span>
+                          <Badge
+                            className="mt-2 max-w-full overflow-hidden"
+                            variant="outline"
+                          >
+                            <span className="block max-w-[260px] truncate sm:max-w-[360px]">
+                              {fieldValue.name}
+                            </span>
+                          </Badge>
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud className="mb-2 h-8 w-8 text-muted-foreground" />
+                          <span className="font-medium text-muted-foreground">
+                            Click to upload or drag and drop
+                          </span>
+                          <span className="mt-1 text-muted-foreground text-xs">
+                            PNG, JPG up to 5MB
+                          </span>
+                        </>
+                      )}
+                    </button>
+
+                    {hasFile ? (
+                      <div className="mt-3 flex justify-center">
+                        <Button
+                          className="h-9 rounded-lg border-destructive/30 px-4 font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => field.handleChange("")}
+                          size="sm"
+                          type="button"
+                          variant="outline"
+                        >
+                          <X className="mr-1 h-4 w-4" />
+                          Remove selected logo
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
+                <FieldError errors={field.state.meta.errors} reserveSpace />
+              </Field>
+            );
+          }}
         </form.AppField>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

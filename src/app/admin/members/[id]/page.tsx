@@ -10,7 +10,7 @@ export default async function MemberDetailPage({ params }: PageProps) {
   const { id } = await params;
 
   return (
-    <div className="container mx-auto space-y-6 py-8">
+    <div className="space-y-6 px-2">
       <Suspense fallback={<DetailsSkeleton />}>
         <MembersDetails memberId={id} />
       </Suspense>

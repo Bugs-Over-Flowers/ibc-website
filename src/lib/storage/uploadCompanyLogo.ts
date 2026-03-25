@@ -15,10 +15,10 @@ export async function uploadCompanyLogo(file: File): Promise<string> {
 
   // Extract file extension from MIME type
   const extension = getExtensionFromMimeType(file.type);
-  const filePath = `logo-${uuid}`;
+  const filePath = `logo-${uuid}.${extension}`;
 
   const { data, error } = await supabase.storage
-    .from("logos")
+    .from("logoimage")
     .upload(filePath, file, {
       contentType: file.type,
       upsert: true,
@@ -28,5 +28,5 @@ export async function uploadCompanyLogo(file: File): Promise<string> {
     throw new Error(`Failed to upload company logo: ${error.message}`);
   }
 
-  return `${data.path}.${extension}`;
+  return data.path;
 }

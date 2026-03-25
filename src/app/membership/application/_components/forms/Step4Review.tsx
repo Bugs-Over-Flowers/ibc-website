@@ -1,9 +1,10 @@
-import { useStore } from "@tanstack/react-form";
 import { Building2, MapPin, User } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type { MembershipApplicationData } from "@/hooks/membershipApplication.store";
 import { cn } from "@/lib/utils";
 import type { Sector } from "@/server/membership/queries/getSectors";
@@ -50,17 +51,142 @@ function formatEnumValue(value?: string): string {
     .join(" ");
 }
 
-export function Step4Review({ applicationData, sectors }: StepProps) {
-  const representativeKeysRef = useRef(new WeakMap<object, string>());
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+function formatBirthdate(value?: Date): string {
+  if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
+    return "N/A";
+  }
 
-  const getRepresentativeKey = (representative: object) => {
-    const existingKey = representativeKeysRef.current.get(representative);
-    if (existingKey) return existingKey;
-    const nextKey = crypto.randomUUID();
-    representativeKeysRef.current.set(representative, nextKey);
-    return nextKey;
-  };
+  return value.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function capitalize(value?: string): string {
+  if (!value) {
+    return "N/A";
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+}
+
+function RepresentativeField({
+  label,
+  value,
+  valueClassName,
+}: {
+  label: string;
+  value: React.ReactNode;
+  valueClassName?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+        {label}
+      </span>
+      <span
+        className={cn("font-semibold text-sm leading-tight", valueClassName)}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function RepresentativeDetailsCard({
+  representative,
+  memberRole,
+  badgeLabel,
+}: {
+  representative: MembershipApplicationData["step3"]["representatives"][number];
+  memberRole: string;
+  badgeLabel: string;
+}) {
+  const initials = `${representative.firstName?.[0] ?? ""}${representative.lastName?.[0] ?? ""}`;
+  const isPrincipal = representative.companyMemberType === "principal";
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border p-4 shadow-sm",
+        isPrincipal
+          ? "border-primary/60 bg-primary/5 shadow-primary/10"
+          : "border-border/50 bg-background",
+      )}
+    >
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 text-center font-bold text-primary text-sm leading-10">
+            {initials || "--"}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate font-bold text-sm leading-tight">
+              {representative.firstName || "N/A"}{" "}
+              {representative.lastName || ""}
+            </p>
+            <p className="mt-0.5 text-muted-foreground text-xs">{memberRole}</p>
+          </div>
+        </div>
+
+        <Badge
+          className={cn(
+            isPrincipal
+              ? "border-primary/50 bg-primary/10 font-semibold text-primary"
+              : "border-border text-muted-foreground",
+          )}
+          variant="outline"
+        >
+          {badgeLabel}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <RepresentativeField
+          label="Email Address"
+          value={representative.emailAddress || "N/A"}
+          valueClassName="break-all"
+        />
+        <RepresentativeField
+          label="Mobile Number"
+          value={representative.mobileNumber || "N/A"}
+        />
+        <RepresentativeField
+          label="Landline"
+          value={representative.landline || "N/A"}
+        />
+        <RepresentativeField
+          label="Birthdate"
+          value={formatBirthdate(representative.birthdate)}
+        />
+        <RepresentativeField
+          label="Sex"
+          value={capitalize(representative.sex)}
+        />
+        <RepresentativeField
+          label="Nationality"
+          value={representative.nationality || "N/A"}
+        />
+      </div>
+
+      <Separator className="my-4" />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <RepresentativeField
+          label="Position / Designation"
+          value={representative.companyDesignation || "N/A"}
+        />
+        <RepresentativeField
+          label="Mailing Address"
+          value={representative.mailingAddress || "N/A"}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function Step4Review({ applicationData, sectors }: StepProps) {
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const sectorName =
     sectors.find(
@@ -79,6 +205,12 @@ export function Step4Review({ applicationData, sectors }: StepProps) {
   }, [applicationData.step2.logoImage]);
 
   const logoSrc = logoPreview || applicationData.step2.logoImageURL || null;
+  const principalRepresentative = applicationData.step3.representatives.find(
+    (rep) => rep.companyMemberType === "principal",
+  );
+  const alternateRepresentatives = applicationData.step3.representatives.filter(
+    (rep) => rep.companyMemberType === "alternate",
+  );
 
   return (
     <div className="space-y-8">
@@ -177,48 +309,22 @@ export function Step4Review({ applicationData, sectors }: StepProps) {
             </div>
 
             <div className="grid gap-3">
-              {applicationData.step3.representatives.map((rep) => {
-                const isPrincipal = rep.companyMemberType === "principal";
-                return (
-                  <div
-                    className={cn(
-                      "grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-xl border p-4 shadow-sm transition-colors",
-                      isPrincipal
-                        ? "border-primary/60 bg-primary/5 shadow-primary/10"
-                        : "border-border/50 bg-background",
-                    )}
-                    key={getRepresentativeKey(rep)}
-                  >
-                    {/* Avatar */}
-                    <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 text-center font-bold text-primary text-sm leading-10">
-                      {rep.firstName?.[0] || ""}
-                      {rep.lastName?.[0] || ""}
-                    </div>
+              {principalRepresentative ? (
+                <RepresentativeDetailsCard
+                  badgeLabel="Principal"
+                  memberRole="Principal Member"
+                  representative={principalRepresentative}
+                />
+              ) : null}
 
-                    {/* Name + Designation */}
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm leading-tight">
-                        {rep.firstName} {rep.lastName}
-                      </p>
-                      <p className="mt-0.5 truncate text-muted-foreground text-xs">
-                        {rep.companyDesignation}
-                      </p>
-                    </div>
-
-                    {/* Badge */}
-                    <span
-                      className={cn(
-                        "shrink-0 rounded-md border px-2.5 py-1 font-medium text-xs",
-                        isPrincipal
-                          ? "border-primary/50 bg-primary/10 font-semibold text-primary"
-                          : "border-border text-muted-foreground",
-                      )}
-                    >
-                      {isPrincipal ? "Principal" : "Alternate"}
-                    </span>
-                  </div>
-                );
-              })}
+              {alternateRepresentatives.map((representative, index) => (
+                <RepresentativeDetailsCard
+                  badgeLabel="Alternate"
+                  key={`${representative.companyMemberType}-${representative.emailAddress}-${representative.mobileNumber}`}
+                  memberRole={`Alternate Member ${index + 1}`}
+                  representative={representative}
+                />
+              ))}
             </div>
           </CardContent>
         </Card>
