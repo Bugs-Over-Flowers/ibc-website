@@ -196,7 +196,7 @@ export function ApplicationHistoryFilters({
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-3">
+    <div className="rounded-xl p-0">
       <div className="flex flex-col gap-3">
         {/* Search bar */}
         <div className="relative flex-1">
@@ -205,7 +205,7 @@ export function ApplicationHistoryFilters({
           </div>
           <Input
             autoComplete="off"
-            className="h-10 rounded-xl border-border/40 bg-background/80 pr-12 pl-12 text-base transition-all placeholder:text-muted-foreground/50 focus:border-primary/40 focus:ring-primary/20"
+            className="h-12 rounded-xl border-border bg-card/80 pr-12 pl-12 text-base transition-all placeholder:text-muted-foreground/50 focus:border-primary/40 focus:ring-primary/20"
             data-form-type="other"
             data-lpignore="true"
             name="history-search"

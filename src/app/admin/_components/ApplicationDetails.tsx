@@ -486,16 +486,26 @@ export async function ApplicationDetails({
 
   return (
     <>
-      <Link href={backLink.href}>
-        <Button
-          className="mb-4 border border-border active:scale-95 active:opacity-80"
-          size="sm"
-          variant="ghost"
+      {source === "members" || source === "history" ? (
+        <Link
+          className="mb-2 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
+          href={backLink.href}
         >
-          <ChevronLeft className="mr-2 h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
           {backLink.label}
-        </Button>
-      </Link>
+        </Link>
+      ) : (
+        <Link href={backLink.href}>
+          <Button
+            className="mb-4 border border-border active:scale-95 active:opacity-80"
+            size="sm"
+            variant="ghost"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            {backLink.label}
+          </Button>
+        </Link>
+      )}
 
       <ApplicationHeader application={application} />
 

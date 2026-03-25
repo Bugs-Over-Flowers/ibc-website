@@ -1,7 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { getAllSectors } from "@/server/members/queries/getAllSectors";
 import { CreateManualMemberFormWrapper } from "./_components/forms/CreateManualMemberFormWrapper";
 
@@ -14,11 +13,12 @@ export default async function CreateMemberPage() {
       <div className="bg-primary px-4 pt-8 pb-24 text-primary-foreground sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <Link href="/admin/members">
-              <Button className="text-primary-foreground" variant="secondary">
-                <ChevronLeft className="h-4 w-4" />
-                Back to Members
-              </Button>
+            <Link
+              className="inline-flex items-center gap-1 text-primary-foreground transition-colors hover:text-primary-foreground/80"
+              href="/admin/members"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              Back to Members
             </Link>
           </div>
 

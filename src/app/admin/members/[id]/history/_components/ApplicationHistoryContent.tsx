@@ -17,7 +17,6 @@ import type { Route } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationHistory } from "@/server/applications/queries/getApplicationHistory";
 import { ApplicationHistoryList } from "./ApplicationHistoryList";
@@ -41,20 +40,19 @@ export async function ApplicationHistoryContent({
 
   return (
     <>
-      <Link href={`/admin/members/${memberId}` as Route}>
-        <Button
-          className="mb-4 border border-border active:scale-95 active:opacity-80"
-          size="sm"
-          variant="ghost"
-        >
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Back to Member
-        </Button>
+      <Link
+        className="mb-2 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
+        href={`/admin/members/${memberId}` as Route}
+      >
+        <ChevronLeft className="h-5 w-5" />
+        Back to Member
       </Link>
 
-      <div className="space-y-2">
-        <h1 className="font-bold text-3xl">{history.businessName}</h1>
-        <h2 className="text-lg text-muted-foreground">Application History</h2>
+      <div className="space-y-1">
+        <h1 className="font-bold text-3xl text-foreground">
+          {history.businessName}
+        </h1>
+        <h2 className="text-base text-muted-foreground">Application History</h2>
       </div>
 
       <ApplicationHistoryList

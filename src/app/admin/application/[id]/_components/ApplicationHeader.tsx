@@ -99,42 +99,47 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
       : PERSONAL_REGISTRATION_FEE;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Main Header Section */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:justify-between">
+      <div className="flex flex-col gap-6 rounded-xl border border-border bg-card/80 p-6 lg:flex-row lg:items-start lg:justify-between">
         {/* Company Info */}
-        <div className="flex flex-1 flex-row items-center gap-6">
+        <div className="flex flex-1 items-center gap-4 sm:gap-5">
           <div className="shrink-0">
             {showImage ? (
               <Image
                 alt={`${application.companyName} logo`}
-                className="rounded-lg object-cover shadow-sm"
-                height={100}
+                className="h-24 w-24 rounded-xl border border-border/60 bg-muted/20 object-cover p-1 shadow-sm"
+                height={96}
                 onError={() => setImageError(true)}
                 src={application.logoImageURL as string}
                 unoptimized
-                width={100}
+                width={96}
               />
             ) : (
-              <div className="flex h-[100px] w-[100px] shrink-0 items-center justify-center rounded-lg border-2 border-gray-300 bg-gray-100 font-semibold text-4xl text-gray-600 shadow-sm">
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/30 font-semibold text-4xl text-muted-foreground shadow-sm">
                 {application.companyName.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
-          <div className="flex flex-col justify-center gap-1">
+          <div className="min-w-0 space-y-1">
             <h1 className="font-bold text-3xl leading-tight">
               {application.companyName}
             </h1>
-            <p className="text-muted-foreground text-sm">
-              Application ID:{" "}
-              <span className="font-medium">{application.identifier}</span>
-            </p>
+            <div className="inline-flex w-fit items-center rounded-md border border-border/60 bg-background/70 px-2.5 py-1 text-muted-foreground text-xs">
+              Application ID:
+              <span className="ml-1 font-semibold text-foreground">
+                {application.identifier}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Payment Proof Section */}
         {hasProofImage && (
-          <div className="flex flex-col gap-2">
+          <div className="flex shrink-0 flex-col gap-2 lg:items-end">
+            <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Payment Proof
+            </span>
             <Dialog
               onOpenChange={setIsProofDialogOpen}
               open={isProofDialogOpen}
@@ -142,7 +147,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
               <DialogTrigger
                 render={
                   <button
-                    className="group relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-lg border-2 bg-muted/30 shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
+                    className="group relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-card/80 shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
                     type="button"
                   />
                 }
@@ -167,8 +172,8 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                     <StatusIcon className="h-10 w-10" />
                   </span>
                 </span>
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-1 text-foreground text-sm">
-                  Payment Proof
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-1 text-foreground text-xs">
+                  Proof
                 </span>
               </DialogTrigger>
               <DialogContent className="max-h-[calc(100vh-2rem)] w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] overflow-y-auto sm:w-[calc(100vw-3rem)] sm:max-w-[calc(100vw-3rem)] lg:max-w-3xl">
@@ -180,8 +185,8 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid items-stretch gap-4 md:grid-cols-2">
-                  <div className="flex h-full flex-col gap-4 rounded-lg border bg-muted/20 p-4">
-                    <div className="flex flex-col gap-2">
+                  <div className="flex h-full flex-col gap-4 rounded-xl border border-border/50 bg-muted/20 p-4">
+                    <div className="space-y-2">
                       <span className="font-semibold text-muted-foreground text-xs uppercase">
                         Member Type
                       </span>
@@ -196,7 +201,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                         category.
                       </p>
                     </div>
-                    <div className="flex flex-col gap-2 border-t pt-3">
+                    <div className="space-y-2 border-border/50 border-t pt-3">
                       <span className="font-semibold text-muted-foreground text-xs uppercase">
                         Registration Fee
                       </span>
@@ -208,7 +213,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                         {membershipTypeLabel.toLowerCase()}.
                       </p>
                     </div>
-                    <div className="grid gap-2 rounded-md border bg-background/60 p-3 text-xs">
+                    <div className="grid gap-2 rounded-lg border border-border/50 bg-background/60 p-3 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">
                           Personal fee
@@ -259,28 +264,28 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
 
       {/* Approval Status Section */}
       {application.businessMemberId && (
-        <div className="flex flex-col items-start justify-between gap-4 rounded-lg border bg-muted/20 p-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col items-start justify-between gap-4 rounded-xl border border-border bg-card/80 p-4 sm:flex-row sm:items-center sm:gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <Badge className="bg-status-green text-sm" variant="default">
               Approved
             </Badge>
             {application.BusinessMember?.identifier && (
               <span className="text-muted-foreground text-sm">
-                Member ID:
-                <span className="font-medium text-foreground">
+                Member ID:{" "}
+                <span className="font-semibold text-foreground">
                   {application.BusinessMember.identifier}
                 </span>
               </span>
             )}
           </div>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <Link
               href={
                 `/admin/members/${application.businessMemberId}/history` as Route
               }
             >
               <Button
-                className="border border-border active:scale-95 active:opacity-80"
+                className="h-10 w-full rounded-xl border border-border active:scale-95 active:opacity-80 sm:w-auto"
                 size="sm"
                 variant="outline"
               >

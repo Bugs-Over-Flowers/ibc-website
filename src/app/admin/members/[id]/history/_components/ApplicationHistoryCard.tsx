@@ -70,12 +70,12 @@ export function ApplicationHistoryCard({
 
   return (
     <Link
-      className="block transition-transform hover:scale-[1.005] active:scale-[0.995]"
+      className="block"
       href={
         `/admin/application/${application.applicationId}?source=history&memberId=${memberId}` as Route
       }
     >
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/30">
+      <div className="rounded-xl border border-border bg-card text-card-foreground transition-all duration-200 hover:border-primary/50 hover:bg-accent/5 hover:shadow-lg">
         <div className="p-6">
           {/* Top row: badges and date */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -130,7 +130,7 @@ export function ApplicationHistoryCard({
           </div>
 
           {/* Sector and representative names */}
-          <div className="mt-3 flex flex-wrap items-center gap-4 border-t pt-3 text-muted-foreground text-sm">
+          <div className="mt-3 flex flex-wrap items-center gap-4 border-border/50 border-t pt-3 text-muted-foreground text-sm">
             <span>
               Sector:{" "}
               <span className="text-foreground">{application.sectorName}</span>
