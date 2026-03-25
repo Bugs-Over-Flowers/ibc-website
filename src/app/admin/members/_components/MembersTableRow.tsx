@@ -21,12 +21,14 @@ interface MembersTableRowProps {
   member: Awaited<ReturnType<typeof getMembers>>[number];
   isSelected: boolean;
   onSelectedChange: (selected: boolean) => void;
+  showCheckbox?: boolean;
 }
 
 export function MembersTableRow({
   member,
   isSelected,
   onSelectedChange,
+  showCheckbox = false,
 }: MembersTableRowProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = member.logoImageURL && !imageError;
@@ -42,6 +44,11 @@ export function MembersTableRow({
       });
 
   const handleDoubleTap = () => {
+    if (showCheckbox) {
+      onSelectedChange(!isSelected);
+      return;
+    }
+
     const now = Date.now();
     const timeSinceLastTap = now - lastTapRef.current;
 
@@ -55,7 +62,11 @@ export function MembersTableRow({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      router.push(`/admin/members/${member.businessMemberId}` as Route);
+      if (showCheckbox) {
+        onSelectedChange(!isSelected);
+      } else {
+        router.push(`/admin/members/${member.businessMemberId}` as Route);
+      }
     }
   };
 
@@ -65,6 +76,7 @@ export function MembersTableRow({
         "group flex h-full w-full flex-col overflow-hidden rounded-xl border bg-card p-3",
         "transition-all duration-200",
         "hover:border-primary/50 hover:bg-accent/5 hover:shadow-lg",
+        showCheckbox && isSelected && "border-primary/60 bg-primary/5",
       )}
     >
       {/* Clickable area */}
@@ -78,14 +90,18 @@ export function MembersTableRow({
         {/* Image with status badge and checkbox */}
         <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-xl bg-slate-100">
           {/* Checkbox - top left corner */}
-          <div className="absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
-            <Checkbox
-              checked={isSelected}
-              className="size-5"
-              onCheckedChange={(checked) => onSelectedChange(checked === true)}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
+          {showCheckbox ? (
+            <div className="absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
+              <Checkbox
+                checked={isSelected}
+                className="size-5"
+                onCheckedChange={(checked) =>
+                  onSelectedChange(checked === true)
+                }
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          ) : null}
           {showImage ? (
             <Image
               alt={member.businessName}
