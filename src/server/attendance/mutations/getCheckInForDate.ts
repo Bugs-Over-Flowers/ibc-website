@@ -1,7 +1,10 @@
 "use server";
 
 import { createActionClient } from "@/lib/supabase/server";
-import { GetCheckInForDateSchema } from "@/lib/validation/qr/standard";
+import {
+  GetCheckInForDateSchema,
+  normalizeCheckInForEventDay,
+} from "@/lib/validation/qr/standard";
 
 export const getCheckInForDate = async (
   identifier: string,
@@ -20,9 +23,13 @@ export const getCheckInForDate = async (
         registrationDate,
         paymentMethod,
         identifier,
-        paymentStatus,
+        paymentProofStatus,
         businessMember:BusinessMember(
           businessName
+        ),
+        proofImage:ProofImage(
+          path,
+          proofImageId
         ),
         participants:Participant (
           email,
@@ -44,20 +51,20 @@ export const getCheckInForDate = async (
       `,
     )
     .eq("identifier", identifier)
-    .eq("participants.checkIn.eventDayId", eventDayId)
     .single();
-
-  if (!data) {
-    throw new Error("No check-in data found for the given identifier.");
-  }
 
   if (error) {
     throw new Error("An error has occured while fetching check-in data.");
   }
 
-  // transform the checkin data to get the first one
+  if (!data) {
+    throw new Error("No check-in data found for the given identifier.");
+  }
+
+  const normalizedData = normalizeCheckInForEventDay(data, eventDayId);
+
   const { data: parsedData, error: parseError } =
-    GetCheckInForDateSchema.safeParse(data);
+    GetCheckInForDateSchema.safeParse(normalizedData);
 
   if (parseError) {
     console.error("Check-in data parsing error:", parseError);
@@ -66,7 +73,7 @@ export const getCheckInForDate = async (
 
   let message: string | undefined;
 
-  if (parsedData.paymentStatus === "pending") {
+  if (parsedData.paymentProofStatus === "pending") {
     message = "The registration payment is still pending.";
   }
 

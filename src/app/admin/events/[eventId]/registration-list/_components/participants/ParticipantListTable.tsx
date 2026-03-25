@@ -16,6 +16,7 @@ import type { ParticipantListItem } from "@/lib/validation/registration-manageme
 import ParticipantRowActions from "./ParticipantRowActions";
 
 interface ParticipantListProps {
+  eventTitle: string;
   participantList: ParticipantListItem[];
 }
 
@@ -185,13 +186,14 @@ const getExcelColumns = (): ColumnDef<ParticipantListItem>[] => [
 ];
 
 export default function ParticipantListTable({
+  eventTitle,
   participantList,
 }: ParticipantListProps) {
   const handleExport = async (data: ParticipantListItem[]) => {
     await exportToExcel({
       data,
       columns: getExcelColumns(),
-      filename: "participants",
+      filename: `${eventTitle}-Participants-${new Date().toISOString().split("T")[0]}.xlsx`,
       sheetName: "Participants",
       excludeColumns: ["actions"],
     });
@@ -212,7 +214,11 @@ export default function ParticipantListTable({
           Export to Excel
         </Button>
       </div>
-      <DataTable columns={participantListColumns} data={participantList} />
+      <DataTable
+        columns={participantListColumns}
+        data={participantList}
+        enableClearSorting
+      />
     </div>
   );
 }

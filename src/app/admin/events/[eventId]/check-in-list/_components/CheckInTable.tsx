@@ -11,8 +11,10 @@ import CheckInRowActions from "./CheckInRowActions";
 import RemarksDialog from "./RemarksDialog";
 
 interface CheckInTableProps {
+  eventTitle: string;
   checkIns: CheckInListItem[];
   eventDayId: string;
+  eventDayLabel: string;
 }
 
 type CheckInListRow = CheckInListItem & { name: string };
@@ -26,13 +28,14 @@ const getCheckInListColumns = (
     header: ({ column }) => (
       <Button
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
+        variant={"ghost"}
       >
         Check-In Time
         {column.getIsSorted() === "asc" ? (
-          <Clock className="rotate-180" />
+          <Clock className="size-4 rotate-180" />
         ) : column.getIsSorted() === "desc" ? (
-          <Clock />
+          <Clock className="size-4" />
         ) : null}
       </Button>
     ),
@@ -46,56 +49,71 @@ const getCheckInListColumns = (
     },
   },
   {
+    accessorKey: "firstName",
+    header: ({ column }) => (
+      <Button
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        type="button"
+        variant={"ghost"}
+      >
+        First Name
+        {column.getIsSorted() === "asc" ? (
+          <ArrowDownAZ className="size-4" />
+        ) : column.getIsSorted() === "desc" ? (
+          <ArrowUpZA className="size-4" />
+        ) : null}
+      </Button>
+    ),
+  },
+  {
+    accessorKey: "lastName",
+    header: ({ column }) => (
+      <Button
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        type="button"
+        variant={"ghost"}
+      >
+        Last Name
+        {column.getIsSorted() === "asc" ? (
+          <ArrowDownAZ className="size-4" />
+        ) : column.getIsSorted() === "desc" ? (
+          <ArrowUpZA className="size-4" />
+        ) : null}
+      </Button>
+    ),
+  },
+  {
     accessorKey: "affiliation",
     header: ({ column }) => (
       <Button
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
+        variant={"ghost"}
       >
         Affiliation
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
       </Button>
     ),
     cell: ({ row }) => row.original.affiliation,
   },
-  {
-    accessorKey: "name",
-    sortingFn: (rowA, rowB) => {
-      const aName = `${rowA.original.firstName} ${rowA.original.lastName}`;
-      const bName = `${rowB.original.firstName} ${rowB.original.lastName}`;
-      return aName.localeCompare(bName);
-    },
-    header: ({ column }) => (
-      <Button
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
-      >
-        Name
-        {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
-        ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
-        ) : null}
-      </Button>
-    ),
-    cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
-  },
+
   {
     accessorKey: "email",
     header: ({ column }) => (
       <Button
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
+        variant={"ghost"}
       >
         Email
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
       </Button>
     ),
@@ -150,8 +168,12 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
     header: "Affiliation", // Custom Excel header
   },
   {
-    accessorKey: "name",
-    header: "Full Name", // Custom Excel header
+    accessorKey: "firstName",
+    header: "First Name", // Custom Excel header
+  },
+  {
+    accessorKey: "lastName",
+    header: "Last Name", // Custom Excel header
   },
   {
     accessorKey: "email",
@@ -168,8 +190,10 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
 ];
 
 export default function CheckInTable({
+  eventTitle,
   checkIns,
   eventDayId,
+  eventDayLabel,
 }: CheckInTableProps) {
   const tableData: CheckInListRow[] = checkIns.map((checkIn) => ({
     ...checkIn,
@@ -180,7 +204,7 @@ export default function CheckInTable({
     await exportToExcel({
       data: tableData,
       columns: getExcelColumns(),
-      filename: "check-in-list",
+      filename: `${eventTitle}-${eventDayLabel}-CheckIns-${new Date().toISOString().split("T")[0]}.xlsx`,
       sheetName: "Check-In List",
       excludeColumns: ["actions"],
       formatters: {
@@ -202,7 +226,11 @@ export default function CheckInTable({
           </Button>
         </div>
       </div>
-      <DataTable columns={getCheckInListColumns(eventDayId)} data={tableData} />
+      <DataTable
+        columns={getCheckInListColumns(eventDayId)}
+        data={tableData}
+        enableClearSorting
+      />
     </div>
   );
 }

@@ -24,6 +24,24 @@ export type EventStats = {
   event_days: EventDayStat[];
 };
 
+type EventStatsRpcResponse = Partial<EventStats> & {
+  total_participants?: number;
+  total_attended?: number;
+};
+
+const normalizeEventStats = (
+  eventId: string,
+  data: EventStatsRpcResponse,
+): EventStats => ({
+  event_id: data.event_id ?? eventId,
+  total_registrations: data.total_registrations ?? 0,
+  verified_registrations: data.verified_registrations ?? 0,
+  pending_registrations: data.pending_registrations ?? 0,
+  participants: data.participants ?? data.total_participants ?? 0,
+  attended: data.attended ?? data.total_attended ?? 0,
+  event_days: data.event_days ?? [],
+});
+
 export const getEventStats = async (
   requestCookies: RequestCookie[],
   { eventId }: { eventId: string },
@@ -42,31 +60,29 @@ export const getEventStats = async (
     p_event_id: eventId,
   });
 
-  console.log("RPC get_event_status result:", data);
-  console.log("RPC get_event_status error:", error);
-
   if (!error && data) {
-    return data as EventStats;
+    return normalizeEventStats(eventId, data as EventStatsRpcResponse);
   }
 
   // Fallback to direct queries if RPC fails
-  console.log("Falling back to direct queries for event stats");
 
   // Get registrations counts
   const { data: registrations, error: regError } = await supabase
     .from("Registration")
-    .select("paymentStatus")
+    .select("paymentProofStatus")
     .eq("eventId", eventId);
 
   if (regError) throw new Error(regError.message);
 
   const totalRegistrations = registrations?.length || 0;
   const verified =
-    registrations?.filter((r) => r.paymentStatus?.toLowerCase() === "verified")
-      .length || 0;
+    registrations?.filter(
+      (r) => r.paymentProofStatus?.toLowerCase() === "approved",
+    ).length || 0;
   const pending =
-    registrations?.filter((r) => r.paymentStatus?.toLowerCase() === "pending")
-      .length || 0;
+    registrations?.filter(
+      (r) => r.paymentProofStatus?.toLowerCase() === "pending",
+    ).length || 0;
 
   // Get participants count
   const { data: participants, error: partError } = await supabase

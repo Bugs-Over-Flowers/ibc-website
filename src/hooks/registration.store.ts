@@ -13,6 +13,10 @@ interface RegistrationStore {
   eventDetails: RegistrationStoreEventDetails | null;
   registrationData: StandardRegistrationSchema;
   createdRegistrationId?: string;
+  sponsorUuid?: string;
+  sponsoredBy?: string;
+  sponsoredRegistrationId?: string;
+  sponsorFeeDeduction?: number;
 }
 
 interface RegistrationStoreActions {
@@ -22,6 +26,13 @@ interface RegistrationStoreActions {
     registrationData: Partial<StandardRegistrationSchema> | null,
   ) => void;
   setCreatedRegistrationId: (id: string) => void;
+  setSponsorInfo: (info: {
+    sponsorUuid: string;
+    sponsoredRegistrationId: string;
+    sponsoredBy: string;
+    feeDeduction: number;
+  }) => void;
+  clearSponsorInfo: () => void;
   resetStore: () => void;
 }
 const initialState: RegistrationStore = {
@@ -34,6 +45,7 @@ const initialState: RegistrationStore = {
     },
     step2: {
       registrant: {
+        id: crypto.randomUUID(),
         email: "",
         contactNumber: "",
         firstName: "",
@@ -48,6 +60,10 @@ const initialState: RegistrationStore = {
       termsAndConditions: false,
     },
   },
+  sponsorUuid: undefined,
+  sponsoredBy: undefined,
+  sponsoredRegistrationId: undefined,
+  sponsorFeeDeduction: undefined,
 };
 
 const useRegistrationStore = create<
@@ -73,6 +89,25 @@ const useRegistrationStore = create<
         })),
       setCreatedRegistrationId: (id: string) =>
         set({ createdRegistrationId: id }),
+      setSponsorInfo: (info: {
+        sponsorUuid: string;
+        sponsoredRegistrationId: string;
+        sponsoredBy: string;
+        feeDeduction: number;
+      }) =>
+        set({
+          sponsorUuid: info.sponsorUuid,
+          sponsoredRegistrationId: info.sponsoredRegistrationId,
+          sponsoredBy: info.sponsoredBy,
+          sponsorFeeDeduction: info.feeDeduction,
+        }),
+      clearSponsorInfo: () =>
+        set({
+          sponsorUuid: undefined,
+          sponsoredBy: undefined,
+          sponsoredRegistrationId: undefined,
+          sponsorFeeDeduction: undefined,
+        }),
       resetStore: () =>
         set((state) => ({ ...initialState, eventDetails: state.eventDetails })),
     }),

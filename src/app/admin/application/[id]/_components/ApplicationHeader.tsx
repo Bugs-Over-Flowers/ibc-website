@@ -1,7 +1,9 @@
 "use client";
 
-import { AlertTriangle, CircleCheckBig, XCircle } from "lucide-react";
+import { AlertTriangle, CircleCheckBig, History, XCircle } from "lucide-react";
+import type { Route } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -80,11 +82,21 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
       case "rejected":
         return "text-status-red";
       default:
-        return "text-status-red";
+        return "text-status-orange";
     }
   };
 
   const StatusIcon = getStatusIcon(paymentProofStatus);
+  const PERSONAL_REGISTRATION_FEE = 5000;
+  const CORPORATE_REGISTRATION_FEE = 10000;
+  const membershipTypeLabel =
+    application.applicationMemberType === "personal"
+      ? "Personal Membership"
+      : "Corporate Membership";
+  const expectedRegistrationFee =
+    application.applicationMemberType === "corporate"
+      ? CORPORATE_REGISTRATION_FEE
+      : PERSONAL_REGISTRATION_FEE;
 
   return (
     <div className="space-y-6">
@@ -143,7 +155,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                 />
                 <span
                   aria-hidden="true"
-                  className="absolute inset-0 bg-background/50"
+                  className="absolute inset-0 bg-background/85"
                 />
                 <span
                   className={cn(
@@ -155,11 +167,11 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                     <StatusIcon className="h-10 w-10" />
                   </span>
                 </span>
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-1 font-medium text-foreground/80 text-sm">
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-1 text-foreground text-sm">
                   Payment Proof
                 </span>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl">
+              <DialogContent className="max-h-[calc(100vh-2rem)] w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] overflow-y-auto sm:w-[calc(100vw-3rem)] sm:max-w-[calc(100vw-3rem)] lg:max-w-3xl">
                 <DialogHeader>
                   <DialogTitle>Verify Payment Proof</DialogTitle>
                   <DialogDescription>
@@ -167,14 +179,63 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                     rejected.
                   </DialogDescription>
                 </DialogHeader>
-                <ImageZoom className="h-[420px] w-full">
-                  <Image
-                    alt="Payment proof"
-                    className="h-full w-full object-contain"
-                    fill
-                    src={proofImage.path}
-                  />
-                </ImageZoom>
+                <div className="grid items-stretch gap-4 md:grid-cols-2">
+                  <div className="flex h-full flex-col gap-4 rounded-lg border bg-muted/20 p-4">
+                    <div className="flex flex-col gap-2">
+                      <span className="font-semibold text-muted-foreground text-xs uppercase">
+                        Member Type
+                      </span>
+                      <Badge
+                        className="w-fit bg-primary text-sm"
+                        variant="default"
+                      >
+                        {membershipTypeLabel}
+                      </Badge>
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        Applicant is being evaluated under this membership
+                        category.
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2 border-t pt-3">
+                      <span className="font-semibold text-muted-foreground text-xs uppercase">
+                        Registration Fee
+                      </span>
+                      <p className="font-bold text-2xl text-primary">
+                        ₱{expectedRegistrationFee.toLocaleString()}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        Expected payment amount for{" "}
+                        {membershipTypeLabel.toLowerCase()}.
+                      </p>
+                    </div>
+                    <div className="grid gap-2 rounded-md border bg-background/60 p-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">
+                          Personal fee
+                        </span>
+                        <span className="font-semibold text-foreground">
+                          ₱{PERSONAL_REGISTRATION_FEE.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">
+                          Corporate fee
+                        </span>
+                        <span className="font-semibold text-foreground">
+                          ₱{CORPORATE_REGISTRATION_FEE.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <ImageZoom className="h-[280px] w-full sm:h-[340px] md:h-full md:min-h-[380px]">
+                    <Image
+                      alt="Payment proof"
+                      className="h-full w-full object-contain"
+                      fill
+                      src={proofImage.path}
+                    />
+                  </ImageZoom>
+                </div>
                 <DialogFooter>
                   <Button
                     disabled={isUpdatingStatus || isDecisionLocked}
@@ -212,7 +273,21 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
               </span>
             )}
           </div>
-          <div className="w-full sm:w-auto">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <Link
+              href={
+                `/admin/members/${application.businessMemberId}/history` as Route
+              }
+            >
+              <Button
+                className="border border-border active:scale-95 active:opacity-80"
+                size="sm"
+                variant="outline"
+              >
+                <History className="mr-2 h-4 w-4" />
+                Application History
+              </Button>
+            </Link>
             <ExportPDFButton application={application} />
           </div>
         </div>

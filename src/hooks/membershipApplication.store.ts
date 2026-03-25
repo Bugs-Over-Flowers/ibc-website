@@ -7,7 +7,7 @@ import type {
   MembershipApplicationStep4Schema,
 } from "@/lib/validation/membership/application";
 
-export const MAX_STEPS = 4;
+export const MAX_STEPS = 5;
 
 export interface MembershipApplicationData {
   step1: MembershipApplicationStep1Schema;
@@ -43,7 +43,6 @@ interface MembershipApplicationStoreActions {
   ) => void;
   setIsSubmitted: (isSubmitted: boolean) => void;
   resetStore: () => void;
-  // Member validation actions
   setMemberValidationAttempt: (count: number) => void;
   setMemberValidationCooldown: (endTime: number | null) => void;
   setMemberValidationStatus: (
@@ -83,7 +82,6 @@ const initialState: MembershipApplicationStore = {
       companyAddress: "",
       sectorId: "",
       landline: "",
-      faxNumber: "",
       mobileNumber: "",
       emailAddress: "",
       websiteURL: "",
@@ -102,7 +100,6 @@ const initialState: MembershipApplicationStore = {
           birthdate: undefined as unknown as Date,
           companyDesignation: "",
           landline: "",
-          faxNumber: "",
           mobileNumber: "",
           emailAddress: "",
         },
@@ -116,7 +113,6 @@ const initialState: MembershipApplicationStore = {
           birthdate: undefined as unknown as Date,
           companyDesignation: "",
           landline: "",
-          faxNumber: "",
           mobileNumber: "",
           emailAddress: "",
         },
@@ -152,12 +148,10 @@ const useMembershipApplicationStore = create<
 
       resetStore: () =>
         set((state) => {
-          // Clear the persisted storage to ensure no stale data
           localStorage.removeItem("membership-application-storage");
 
           return {
             ...initialState,
-            // Increment resetKey to force React remount of form components
             resetKey: state.resetKey + 1,
             memberValidation: {
               ...initialState.memberValidation,
@@ -218,11 +212,9 @@ const useMembershipApplicationStore = create<
     }),
     {
       name: "membership-application-storage",
-      version: 3,
-
-      // 1. Migrate logic
+      version: 6,
       migrate: (persistedState, version) => {
-        if (version < 3) {
+        if (version < 4) {
           const oldState =
             persistedState as Partial<MembershipApplicationStore>;
           return {
@@ -235,91 +227,128 @@ const useMembershipApplicationStore = create<
             },
           };
         }
+
+        if (version < 6) {
+          const oldState =
+            persistedState as Partial<MembershipApplicationStore>;
+
+          const firstRepresentative =
+            oldState?.applicationData?.step3?.representatives?.[0];
+          const secondRepresentative =
+            oldState?.applicationData?.step3?.representatives?.[1];
+
+          return {
+            ...initialState,
+            ...oldState,
+            applicationData: {
+              ...initialState.applicationData,
+              ...oldState?.applicationData,
+              step3: {
+                representatives: [
+                  {
+                    ...initialState.applicationData.step3.representatives[0],
+                    ...firstRepresentative,
+                    companyMemberType: "principal",
+                  },
+                  {
+                    ...initialState.applicationData.step3.representatives[1],
+                    ...secondRepresentative,
+                    companyMemberType: "alternate",
+                  },
+                ],
+              },
+            },
+          };
+        }
+
         return persistedState as MembershipApplicationStore;
       },
-
-      // 2. Partialize logic - Excludes non-serializable fields (File objects)
       partialize: (state) =>
         ({
           step: state.step,
           isSubmitted: state.isSubmitted,
-          // resetKey is intentionally excluded from persistence
-          // It should always start at 0 on page load
           memberValidation: state.memberValidation,
           applicationData: {
             step1: state.applicationData.step1,
-            // Step2: Explicitly exclude logoImage (File object) - cannot be serialized to localStorage
             step2: {
               companyName: state.applicationData.step2.companyName,
               companyAddress: state.applicationData.step2.companyAddress,
               sectorId: state.applicationData.step2.sectorId,
               landline: state.applicationData.step2.landline,
-              faxNumber: state.applicationData.step2.faxNumber,
               mobileNumber: state.applicationData.step2.mobileNumber,
               emailAddress: state.applicationData.step2.emailAddress,
               websiteURL: state.applicationData.step2.websiteURL,
               logoImageURL: state.applicationData.step2.logoImageURL,
-              // logoImage: undefined - File object excluded from persistence
               logoImage: undefined,
             },
             step3: {
               representatives: state.applicationData.step3.representatives.map(
                 (rep) => ({
                   ...rep,
-                  // Serialize Date to string
                   birthdate: rep.birthdate
                     ? new Date(rep.birthdate).toISOString()
                     : undefined,
                 }),
               ),
             },
-            // Step4: Explicitly exclude paymentProof (File object) - cannot be serialized to localStorage
             step4: {
               applicationMemberType:
                 state.applicationData.step4.applicationMemberType,
               paymentMethod: state.applicationData.step4.paymentMethod,
               paymentProofUrl: state.applicationData.step4.paymentProofUrl,
-              // paymentProof: undefined - File object excluded from persistence
               paymentProof: undefined,
             },
           },
         }) as unknown as MembershipApplicationStore,
-
-      // 3. Rehydrate logic - Handles the string-to-Date conversion
       onRehydrateStorage: () => (state) => {
         if (!state) return;
 
         if (state.applicationData?.step3?.representatives) {
           state.applicationData.step3.representatives =
-            state.applicationData.step3.representatives.map((rep) => {
-              // At runtime, 'rep.birthdate' might be a string string despite the type definition
-              const serialized = rep as unknown as {
-                birthdate?: string | Date;
-              };
+            state.applicationData.step3.representatives
+              .slice(0, 2)
+              .map((rep, index) => {
+                const serialized = rep as unknown as {
+                  birthdate?: string | Date;
+                };
 
-              let birthdateVal: Date | undefined;
+                let birthdateValue: Date | undefined;
 
-              if (serialized.birthdate) {
-                if (serialized.birthdate instanceof Date) {
-                  birthdateVal = serialized.birthdate;
-                } else {
-                  birthdateVal = new Date(serialized.birthdate);
+                if (serialized.birthdate) {
+                  birthdateValue =
+                    serialized.birthdate instanceof Date
+                      ? serialized.birthdate
+                      : new Date(serialized.birthdate);
                 }
-              }
 
-              return {
-                ...rep,
-                birthdate: birthdateVal as Date,
-              };
-            });
+                return {
+                  ...rep,
+                  companyMemberType: (index === 0
+                    ? "principal"
+                    : "alternate") as "principal" | "alternate",
+                  birthdate: birthdateValue as Date,
+                };
+              });
+
+          if (state.applicationData.step3.representatives.length < 2) {
+            state.applicationData.step3.representatives = [
+              {
+                ...initialState.applicationData.step3.representatives[0],
+                ...state.applicationData.step3.representatives[0],
+                companyMemberType: "principal",
+              },
+              {
+                ...initialState.applicationData.step3.representatives[1],
+                companyMemberType: "alternate",
+              },
+            ];
+          }
         }
 
-        // Ensure File objects are explicitly undefined after rehydration
-        // This is defensive programming - partialize already excludes them,
-        // but this ensures type safety and prevents any confusion
         if (state.applicationData?.step2) {
           state.applicationData.step2.logoImage = undefined;
         }
+
         if (state.applicationData?.step4) {
           state.applicationData.step4.paymentProof = undefined;
         }

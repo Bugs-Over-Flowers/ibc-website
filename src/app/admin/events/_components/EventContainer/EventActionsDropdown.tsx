@@ -43,11 +43,13 @@ export default function EventActionsDropdown({
           sideOffset={10}
         >
           <ViewDetailsButton eventId={eventId} />
-          <AttendanceButton
-            handleClick={() => {
-              setIsAttendanceModalOpen(true);
-            }}
-          />
+          {status !== "draft" && (
+            <AttendanceButton
+              handleClick={() => {
+                setIsAttendanceModalOpen(true);
+              }}
+            />
+          )}
           <DropdownMenuSeparator />
           <RegistrationsButton eventId={eventId} />
           <ParticipantsButton eventId={eventId} />

@@ -5,13 +5,15 @@ import { getAllSectors } from "@/server/members/queries/getAllSectors";
 import MembersList from "./MembersList";
 
 export default async function MembersListSection() {
+  const cookieStore = (await cookies()).getAll();
+
   console.log("[MembersListSection] Fetching members and sectors...");
   const { error: membersError, data: members } = await tryCatch(
-    getAllMembers((await cookies()).getAll()),
+    getAllMembers(cookieStore),
   );
   console.log("[MembersListSection] Members fetched:", members);
   const { error: sectorsError, data: sectors } = await tryCatch(
-    getAllSectors((await cookies()).getAll()),
+    getAllSectors(cookieStore),
   );
   console.log("[MembersListSection] Sectors fetched:", sectors);
 

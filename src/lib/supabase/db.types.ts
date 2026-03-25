@@ -25,7 +25,6 @@ export type Database = {
           companyAddress: string;
           companyName: string;
           emailAddress: string;
-          faxNumber: string;
           identifier: string;
           interviewId: string | null;
           landline: string;
@@ -33,7 +32,6 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
-          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           sectorId: number | null;
           websiteURL: string;
         };
@@ -47,7 +45,6 @@ export type Database = {
           companyAddress: string;
           companyName: string;
           emailAddress: string;
-          faxNumber: string;
           identifier: string;
           interviewId?: string | null;
           landline: string;
@@ -55,7 +52,6 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           sectorId?: number | null;
           websiteURL: string;
         };
@@ -69,7 +65,6 @@ export type Database = {
           companyAddress?: string;
           companyName?: string;
           emailAddress?: string;
-          faxNumber?: string;
           identifier?: string;
           interviewId?: string | null;
           landline?: string;
@@ -77,7 +72,6 @@ export type Database = {
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           sectorId?: number | null;
           websiteURL?: string;
         };
@@ -113,7 +107,6 @@ export type Database = {
           companyDesignation: string;
           companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
-          faxNumber: string;
           firstName: string;
           landline: string;
           lastName: string;
@@ -129,7 +122,6 @@ export type Database = {
           companyDesignation: string;
           companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
-          faxNumber: string;
           firstName: string;
           landline: string;
           lastName: string;
@@ -145,7 +137,6 @@ export type Database = {
           companyDesignation?: string;
           companyMemberType?: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress?: string;
-          faxNumber?: string;
           firstName?: string;
           landline?: string;
           lastName?: string;
@@ -168,6 +159,7 @@ export type Database = {
         Row: {
           businessMemberId: string;
           businessName: string;
+          featuredExpirationDate: string | null;
           identifier: string;
           joinDate: string;
           lastPaymentDate: string | null;
@@ -183,6 +175,7 @@ export type Database = {
         Insert: {
           businessMemberId?: string;
           businessName: string;
+          featuredExpirationDate?: string | null;
           identifier: string;
           joinDate: string;
           lastPaymentDate?: string | null;
@@ -198,6 +191,7 @@ export type Database = {
         Update: {
           businessMemberId?: string;
           businessName?: string;
+          featuredExpirationDate?: string | null;
           identifier?: string;
           joinDate?: string;
           lastPaymentDate?: string | null;
@@ -512,7 +506,7 @@ export type Database = {
           nonMemberName: string | null;
           numberOfParticipants: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
-          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
+          paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate: string;
           registrationId: string;
           sponsoredRegistrationId: string | null;
@@ -524,7 +518,7 @@ export type Database = {
           nonMemberName?: string | null;
           numberOfParticipants?: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
-          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
+          paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate?: string;
           registrationId?: string;
           sponsoredRegistrationId?: string | null;
@@ -536,7 +530,7 @@ export type Database = {
           nonMemberName?: string | null;
           numberOfParticipants?: number | null;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
-          paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
+          paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate?: string;
           registrationId?: string;
           sponsoredRegistrationId?: string | null;
@@ -729,6 +723,7 @@ export type Database = {
           uuid: string;
         }[];
       };
+      get_application_history: { Args: { p_member_id: string }; Returns: Json };
       get_evaluation_by_id: {
         Args: { eval_id: string };
         Returns: {
@@ -777,7 +772,7 @@ export type Database = {
       get_registration_list: {
         Args: {
           p_event_id: string;
-          p_payment_status?: Database["public"]["Enums"]["PaymentStatus"];
+          p_payment_proof_status?: Database["public"]["Enums"]["PaymentProofStatus"];
           p_search_text?: string;
         };
         Returns: Database["public"]["CompositeTypes"]["registration_list_item"][];
@@ -818,7 +813,7 @@ export type Database = {
           numberOfParticipants: number;
           participants: Json;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
-          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
+          paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate: string;
           registrationId: string;
           sponsoredRegistrationId: string;
@@ -845,10 +840,19 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_sponsored_registration_by_uuid: {
-        Args: { p_uuid: string };
-        Returns: Json;
-      };
+      get_sponsored_registration_by_uuid:
+        | {
+            Args: { p_uuid: string };
+            Returns: {
+              error: true;
+            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
+          }
+        | {
+            Args: { p_uuid: string };
+            Returns: {
+              error: true;
+            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
+          };
       get_sponsored_registrations_with_details: {
         Args: { p_event_id: string };
         Returns: {
@@ -909,36 +913,35 @@ export type Database = {
         };
         Returns: Json;
       };
-      submit_event_registration:
-        | {
-            Args: {
-              p_business_member_id?: string;
-              p_event_id: string;
-              p_identifier: string;
-              p_member_type: string;
-              p_non_member_name?: string;
-              p_other_participants?: Json;
-              p_payment_method?: string;
-              p_payment_path?: string;
-              p_registrant?: Json;
-            };
-            Returns: Json;
-          }
-        | {
-            Args: {
-              p_business_member_id?: string;
-              p_event_id: string;
-              p_identifier: string;
-              p_member_type: string;
-              p_non_member_name?: string;
-              p_other_participants?: Json;
-              p_payment_method?: string;
-              p_payment_path?: string;
-              p_registrant?: Json;
-              p_sponsored_registration_id?: string;
-            };
-            Returns: Json;
-          };
+      submit_event_registration: {
+        Args: {
+          p_business_member_id?: string;
+          p_event_id: string;
+          p_identifier: string;
+          p_member_type: string;
+          p_non_member_name?: string;
+          p_other_participants?: Json;
+          p_payment_method?: string;
+          p_payment_path?: string;
+          p_registrant?: Json;
+          p_sponsored_registration_id?: string;
+        };
+        Returns: Json;
+      };
+      submit_event_registration_standard: {
+        Args: {
+          p_business_member_id?: string;
+          p_event_id: string;
+          p_identifier: string;
+          p_member_type: string;
+          p_non_member_name?: string;
+          p_other_participants?: Json;
+          p_payment_method?: string;
+          p_payment_path?: string;
+          p_registrant?: Json;
+        };
+        Returns: Json;
+      };
       submit_membership_application: {
         Args: {
           p_application_member_type: string;
@@ -979,7 +982,6 @@ export type Database = {
       MembershipStatus: "paid" | "unpaid" | "cancelled";
       PaymentMethod: "BPI" | "ONSITE";
       PaymentProofStatus: "pending" | "accepted" | "rejected";
-      PaymentStatus: "pending" | "verified";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
       SponsoredRegistrationStatus: "active" | "full" | "disabled";
     };
@@ -1006,7 +1008,9 @@ export type Database = {
         registration_id: string | null;
         affiliation: string | null;
         registration_date: string | null;
-        payment_status: Database["public"]["Enums"]["PaymentStatus"] | null;
+        payment_proof_status:
+          | Database["public"]["Enums"]["PaymentProofStatus"]
+          | null;
         payment_method: Database["public"]["Enums"]["PaymentMethod"] | null;
         business_member_id: string | null;
         business_name: string | null;
@@ -1157,7 +1161,6 @@ export const Constants = {
       MembershipStatus: ["paid", "unpaid", "cancelled"],
       PaymentMethod: ["BPI", "ONSITE"],
       PaymentProofStatus: ["pending", "accepted", "rejected"],
-      PaymentStatus: ["pending", "verified"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
       SponsoredRegistrationStatus: ["active", "full", "disabled"],
     },

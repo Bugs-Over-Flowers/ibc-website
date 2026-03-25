@@ -1,6 +1,11 @@
 import z from "zod";
 import { titleCase } from "@/lib/utils";
-import { MemberTypeEnum, PaymentMethodEnum, phoneSchema } from "../utils";
+import {
+  landlineSchema,
+  MemberTypeEnum,
+  PaymentMethodEnum,
+  phoneSchema,
+} from "../utils";
 
 export const StandardRegistrationStep1Schema = z.discriminatedUnion("member", [
   z.object({
@@ -24,6 +29,7 @@ export type StandardRegistrationStep1Schema = z.infer<
 
 export const RegistrantDetailsSchema = z
   .object({
+    id: z.string().default(() => crypto.randomUUID()),
     firstName: z
       .string()
       .min(2, "First name must be at least 2 characters")
@@ -32,7 +38,16 @@ export const RegistrantDetailsSchema = z
       .string()
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    contactNumber: phoneSchema,
+    contactNumber: z
+      .string()
+      .refine(
+        (data) =>
+          z.union([phoneSchema, landlineSchema]).safeParse(data).success,
+        {
+          error:
+            "Contact number must be a valid Philippine phone or landline number",
+        },
+      ),
     email: z.email().trim(),
   })
   .transform((data) => ({
@@ -168,6 +183,7 @@ export const ServerRegistrationSchema = z.object({
   step1: StandardRegistrationStep1Schema,
   step2: StandardRegistrationStep2Schema,
   step4: StandardRegistrationStep4Schema,
+  sponsoredRegistrationId: z.string().uuid().optional().nullable(),
   step3: z.discriminatedUnion("paymentMethod", [
     z.object({
       paymentMethod: z.literal("online"),

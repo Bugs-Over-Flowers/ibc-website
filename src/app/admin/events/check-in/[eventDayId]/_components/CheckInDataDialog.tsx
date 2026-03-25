@@ -1,6 +1,8 @@
 "use client";
 
+import { CircleAlert } from "lucide-react";
 import { useParams } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,10 +10,14 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Item, ItemMedia } from "@/components/ui/item";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
+import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
 import { useCheckIn } from "../_hooks/useCheckIn";
 import CheckInTable from "./CheckInTable";
+import ProofDialog from "./proofResubmit/ProofDialog";
 
 interface CheckInDataDialogProps {
   eventId: string;
@@ -76,12 +82,6 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
 
     if (participantsToProcess.size === 0) return;
 
-    console.log("🚀 Check-in/Update started:", {
-      participantIds: Array.from(participantsToProcess),
-      eventDayId,
-      remarks: editedRemarks,
-    });
-
     // Execute optimistic action
     await execute({
       eventDayId,
@@ -99,29 +99,50 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
       open={!!scannedData}
     >
       <DialogContent
-        className={"w-full md:min-w-2xl md:max-w-2xl"}
+        className="flex max-h-[90vh] w-[95vw] flex-col sm:max-w-3xl"
         showCloseButton={false}
       >
-        <DialogTitle>
-          <pre>{scannedData.identifier}</pre>
-        </DialogTitle>
-        <h4>{scannedData.affiliation}</h4>
-
-        <div className="w-full overflow-auto">
+        <div className="flex w-full flex-col justify-between gap-10 border-b pb-3 sm:flex-row">
+          <div className="flex flex-col gap-1">
+            <DialogTitle className="flex flex-col gap-2 font-bold text-xl tracking-tight">
+              Check-in Confirmation
+            </DialogTitle>
+            <div className="font-medium text-muted-foreground text-sm">
+              {scannedData.affiliation}
+            </div>
+            <Badge className="mt-2 font-mono text-xs" variant="outline">
+              {scannedData.identifier}
+            </Badge>
+          </div>
+          {scannedData.paymentProofStatus !== "accepted" && (
+            <DataDialogProofStatusMessage
+              paymentProofStatus={scannedData.paymentProofStatus}
+            />
+          )}
+        </div>
+        <div className="flex-1 overflow-y-auto px-1 py-2">
           {/* Pass optimistic data to table, but prioritize fetched Data */}
           <CheckInTable data={scannedData || optimistic} />
         </div>
 
-        <DialogFooter className="flex justify-between sm:justify-between">
+        <DialogFooter className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-between">
           <Button
+            className="w-full sm:w-auto"
             disabled={isPending}
             onClick={() => setCheckInDialogOpen(false)}
             variant="outline"
           >
             Close
           </Button>
-          <div>
+          <div className="w-full space-x-2 sm:w-auto">
+            {scannedData.paymentMethod === "BPI" && scannedData.proofImage && (
+              <ProofDialog
+                paymentProofStatus={scannedData.paymentProofStatus}
+                registrationId={scannedData.registrationId}
+              />
+            )}
             <Button
+              className="w-full sm:w-auto"
               disabled={
                 (selectedCount === 0 && !hasCheckedInRemarkEdits()) || isPending
               }
@@ -144,5 +165,31 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+interface DataDialogProofStatusMessageProps {
+  paymentProofStatus: (typeof PaymentProofStatusEnum.options)[number];
+}
+
+function DataDialogProofStatusMessage({
+  paymentProofStatus,
+}: DataDialogProofStatusMessageProps) {
+  const colorClass =
+    paymentProofStatus === "pending"
+      ? "text-yellow-600 border-yellow-300"
+      : paymentProofStatus === "rejected" && "text-red-500 border-red-300";
+  return (
+    <Item className={cn("sm:w-max", colorClass)} variant={"outline"}>
+      <ItemMedia>
+        <CircleAlert />
+      </ItemMedia>
+      <div>
+        {paymentProofStatus === "pending"
+          ? "This payment is still pending review."
+          : paymentProofStatus === "rejected" &&
+            "This payment has been rejected."}
+      </div>
+    </Item>
   );
 }

@@ -26,10 +26,31 @@ import { submitRegistrationRPC } from "@/server/registration/mutations/submitReg
  */
 export const useSubmitRegistration = () => {
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const sponsoredRegistrationId = useRegistrationStore(
+    (state) => state.sponsoredRegistrationId,
+  );
 
   const setCreatedRegistrationId = useRegistrationStore(
     (state) => state.setCreatedRegistrationId,
   );
+
+  const getRegistrationErrorMessage = (error: string) => {
+    const normalizedError = error.toLowerCase();
+
+    const isSponsoredSlotExceeded =
+      normalizedError.includes("not enough sponsored registration slots") ||
+      normalizedError.includes("sponsoredregistration_used_check") ||
+      (normalizedError.includes("sponsored") &&
+        (normalizedError.includes("slot") ||
+          normalizedError.includes("maxsponsoredguests") ||
+          normalizedError.includes("usedcount")));
+
+    if (isSponsoredSlotExceeded) {
+      return "Not enough sponsored registration slots for this registrant. Please use another sponsor link or reduce participants.";
+    }
+
+    return `Registration failed: ${error}`;
+  };
 
   return useAction(
     tryCatch(async (registrationData: StandardRegistrationSchema) => {
@@ -67,6 +88,7 @@ export const useSubmitRegistration = () => {
           ? { paymentMethod: "online", path: paymentProofPath }
           : { paymentMethod: "onsite" },
         step4: registrationData.step4,
+        sponsoredRegistrationId: sponsoredRegistrationId || null,
       });
 
       setCreatedRegistrationId(registrationId);
@@ -81,7 +103,7 @@ export const useSubmitRegistration = () => {
         toast.success("Registration successful!");
       },
       onError: (error) => {
-        toast.error(`Registration failed: ${error}`);
+        toast.error(getRegistrationErrorMessage(error));
       },
     },
   );

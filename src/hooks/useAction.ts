@@ -181,15 +181,22 @@ export function useOptimisticAction<
       setOptimistic(options.optimisticUpdate(prevSnapshot, ...args));
     });
 
-    const res = await action(...args);
+    let res!: Awaited<ReturnType<typeof action>>;
+    await new Promise<void>((resolve) => {
+      startTransition(async () => {
+        res = await action(...args);
+        resolve();
+      });
+    });
 
     if (!res.success) {
-      setError(res.error);
-      options.onError?.(res.error);
+      const { error } = res;
+      setError(error);
+      options.onError?.(error);
 
       startTransition(() => {
         const rolledBack = options.rollback
-          ? options.rollback(prevSnapshot, optimistic, res.error, ...args)
+          ? options.rollback(prevSnapshot, optimistic, error, ...args)
           : prevSnapshot;
 
         setOptimistic(rolledBack);
@@ -198,14 +205,15 @@ export function useOptimisticAction<
       return res;
     }
 
-    setData(res.data);
-    options.onSuccess?.(res.data);
+    const { data } = res;
+    setData(data);
+    options.onSuccess?.(data);
 
     const commit = options.commit;
 
     if (typeof commit === "function") {
       startTransition(() => {
-        setOptimistic(commit(optimistic, res.data, ...args));
+        setOptimistic(commit(optimistic, data, ...args));
       });
     }
 

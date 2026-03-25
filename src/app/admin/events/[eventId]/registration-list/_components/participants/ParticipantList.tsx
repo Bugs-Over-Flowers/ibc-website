@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationListPageProps } from "@/lib/types/route";
 import { parseStringParam } from "@/lib/utils";
+import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventParticipantList } from "@/server/registration/queries/getEventParticipantList";
 import ParticipantListTable from "./ParticipantListTable";
 
@@ -13,14 +14,26 @@ export default async function ParticipantList({
   const { part_q } = await searchParams;
   const cookieStore = await cookies();
 
-  const participantList = await tryCatch(
-    getEventParticipantList(cookieStore.getAll(), {
-      eventId,
-      searchString: parseStringParam(part_q),
-    }),
-  );
-  if (!participantList.success) {
-    return <div>Error: {participantList.error}</div>;
+  const [participantList, eventDetails] = await Promise.all([
+    tryCatch(
+      getEventParticipantList(cookieStore.getAll(), {
+        eventId,
+        searchString: parseStringParam(part_q),
+      }),
+    ),
+    tryCatch(
+      getEventById(cookieStore.getAll(), {
+        id: eventId,
+      }),
+    ),
+  ]);
+  if (!participantList.success || !eventDetails.success) {
+    return <div>Error: {participantList.error || eventDetails.error}</div>;
   }
-  return <ParticipantListTable participantList={participantList.data} />;
+  return (
+    <ParticipantListTable
+      eventTitle={eventDetails.data?.eventTitle}
+      participantList={participantList.data}
+    />
+  );
 }

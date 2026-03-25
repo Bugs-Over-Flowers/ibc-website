@@ -47,7 +47,7 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
 
   const registrationIdentifier = createRegistrationIdentifier();
 
-  const { step1, step3, eventId, step2 } = parsedData;
+  const { step1, step3, eventId, step2, sponsoredRegistrationId } = parsedData;
 
   // Call database RPC function with transformed data
   const { data: rpcResults, error } = await supabase.rpc(
@@ -67,18 +67,39 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
         step1.member === "nonmember" ? step1.nonMemberName : undefined,
       p_member_type: step1.member,
       p_identifier: registrationIdentifier,
+      // Sponsored registration: send ID if exists, otherwise undefined
+      p_sponsored_registration_id: sponsoredRegistrationId || undefined,
     },
   );
 
   if (error) {
-    throw new Error("Failed to submit event registration");
+    console.error(error);
+
+    const combinedErrorText = [error.message, error.details, error.hint]
+      .filter(Boolean)
+      .join(" ");
+
+    const isSponsoredSlotExceeded =
+      error.code === "23514" &&
+      /SponsoredRegistration_used_check|maxSponsoredGuests|usedCount|sponsored\s+slot/i.test(
+        combinedErrorText,
+      );
+
+    if (isSponsoredSlotExceeded) {
+      throw new Error(
+        "Not enough sponsored registration slots. This registration would exceed the maximum sponsored slots.",
+      );
+    }
+
+    throw new Error(
+      "Failed to submit event registration. Please try again or contact support if the problem persists.",
+    );
   }
 
   if (!rpcResults) {
     throw new Error("No data returned from registration");
   }
 
-  // Validate RPC response with Zod for type safety
   const validatedResponse = SubmitRegistrationResponseSchema.parse(rpcResults);
 
   return {

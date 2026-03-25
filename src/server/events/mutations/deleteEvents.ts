@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import { getEventStatus } from "./helpers";
 
@@ -29,17 +30,17 @@ export async function deleteEvents(eventId: string) {
     // Delete associated header image from Supabase Storage
     if (
       event.eventHeaderUrl?.includes(
-        "/storage/v1/object/public/headerImage/event-headers/",
+        "/storage/v1/object/public/headerimage/event-headers/",
       )
     ) {
       // Extract the file path from the URL
       const match = event.eventHeaderUrl.match(
-        /headerImage\/event-headers\/(.+)$/,
+        /headerimage\/event-headers\/(.+)$/,
       );
       if (match?.[1]) {
         const filePath = `event-headers/${match[1]}`;
         const { error: storageError } = await supabase.storage
-          .from("headerImage")
+          .from("headerimage")
           .remove([filePath]);
         if (storageError) {
           // Log but do not block event deletion
@@ -57,11 +58,10 @@ export async function deleteEvents(eventId: string) {
       throw new Error(deleteError.message || "Failed to delete event");
     }
 
-    // updateTag(CACHE_TAGS.events.all);
-    // updateTag(CACHE_TAGS.events.admin);
-    // updateTag(CACHE_TAGS.events.public);
+    updateTag(CACHE_TAGS.events.all);
+    updateTag(CACHE_TAGS.events.admin);
+    updateTag(CACHE_TAGS.events.public);
 
-    revalidatePath("/admin/events");
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

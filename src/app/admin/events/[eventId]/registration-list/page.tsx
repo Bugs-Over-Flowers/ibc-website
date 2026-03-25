@@ -27,7 +27,7 @@ export default function RegistrationPageWrapper({
           </Link>
         }
       >
-        <BackButton params={params} />
+        <BackButtonWrapper params={params} />
       </Suspense>
       <RegistrationTabs>
         {/*Registration and Participant Stats*/}
@@ -71,4 +71,13 @@ export default function RegistrationPageWrapper({
       </RegistrationTabs>
     </main>
   );
+}
+
+async function BackButtonWrapper({
+  params,
+}: {
+  params: RegistrationListPageProps["params"];
+}) {
+  const { eventId } = await params;
+  return <BackButton eventId={eventId} />;
 }

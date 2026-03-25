@@ -55,7 +55,6 @@ export const ApplicationMemberSchema = z
       .min(1, "Mailing address is required"),
     mobileNumber: phoneSchema,
     landline: z.string().min(1, "Landline is required"),
-    faxNumber: z.string().min(1, "Telefax is required"),
   })
   .transform((data) => {
     // Only apply titleCase to companyDesignation if all letters are lowercase
@@ -93,7 +92,6 @@ export const MembershipApplicationStep2Schema = z
     emailAddress: z.email("Email address is required"),
     landline: z.string().min(1, "Landline is required"),
     mobileNumber: phoneSchema,
-    faxNumber: z.string().min(1, "Telefax is required"),
     logoImageURL: z.string().optional(),
     logoImage: z
       .file("Company logo is required")
@@ -125,7 +123,10 @@ export type MembershipApplicationStep2Schema = z.infer<
 export const MembershipApplicationStep3Schema = z.object({
   representatives: z
     .array(ApplicationMemberSchema)
-    .min(1, "At least one representative is required"),
+    .length(
+      2,
+      "Exactly two representatives are required: one principal and one alternate",
+    ),
 });
 
 export type MembershipApplicationStep3Schema = z.infer<
@@ -176,13 +177,15 @@ export const MembershipApplicationSchema = z
     emailAddress: z.email("Email address is required"),
     landline: z.string("Landline is required").min(1, "Landline is required"),
     mobileNumber: phoneSchema,
-    faxNumber: z.string("Telefax is required").min(1, "Telefax is required"),
     logoImageURL: z
       .string({ message: "Company logo is required" })
       .min(1, "Company logo is required"),
     representatives: z
       .array(ApplicationMemberSchema)
-      .min(1, "At least one representative is required"),
+      .length(
+        2,
+        "Exactly two representatives are required: one principal and one alternate",
+      ),
     paymentMethod: MembershipPaymentMethodEnum,
     paymentProofUrl: z.string().optional(),
     paymentProof: z.any().optional(),

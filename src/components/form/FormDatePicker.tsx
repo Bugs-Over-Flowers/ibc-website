@@ -5,8 +5,7 @@ import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
-import { Field, FieldDescription, FieldError } from "../ui/field";
-import { Label } from "../ui/label";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 interface FormDatePickerProps {
@@ -38,15 +37,18 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
   const computedEndMonth = endMonth ?? maxDate ?? new Date(2100, 11);
 
   return (
-    <Field className={className} data-invalid={isInvalid}>
-      {label && <Label>{label}</Label>}
+    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
+      {label && <FieldLabel>{label}</FieldLabel>}
       <Popover onOpenChange={setOpen} open={open}>
         <PopoverTrigger
           render={
             <Button
+              aria-invalid={isInvalid}
               className={cn(
-                "w-full justify-between text-left font-normal",
+                "w-full justify-between text-left font-normal transition-colors",
                 !field.state.value && "text-muted-foreground",
+                isInvalid &&
+                  "border-destructive text-destructive focus-visible:border-destructive",
               )}
               variant={"outline"}
             >
@@ -91,7 +93,7 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
         </PopoverContent>
       </Popover>
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={field.state.meta.errors} />
+      <FieldError errors={field.state.meta.errors} reserveSpace />
     </Field>
   );
 };

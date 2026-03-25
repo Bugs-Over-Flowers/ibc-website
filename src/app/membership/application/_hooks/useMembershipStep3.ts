@@ -19,9 +19,9 @@ export const useMembershipStep3 = () => {
     (state) => state.applicationData?.step3,
   );
 
-  // Ensure we always have 2 representatives (Principal and Alternate)
+  // Ensure we always have exactly 2 fixed representatives (Principal and Alternate)
   const representatives = defaultApplicationDataStep3?.representatives || [];
-  const paddedRepresentatives = [
+  const normalizedRepresentatives = [
     representatives[0] || {
       companyMemberType: "principal",
       firstName: "",
@@ -32,7 +32,6 @@ export const useMembershipStep3 = () => {
       birthdate: undefined as unknown as Date,
       companyDesignation: "",
       landline: "",
-      faxNumber: "",
       mobileNumber: "",
       emailAddress: "",
     },
@@ -46,7 +45,6 @@ export const useMembershipStep3 = () => {
       birthdate: undefined as unknown as Date,
       companyDesignation: "",
       landline: "",
-      faxNumber: "",
       mobileNumber: "",
       emailAddress: "",
     },
@@ -55,7 +53,7 @@ export const useMembershipStep3 = () => {
   const form = useAppForm({
     defaultValues: {
       ...defaultApplicationDataStep3,
-      representatives: paddedRepresentatives,
+      representatives: normalizedRepresentatives,
     },
     validators: {
       onSubmit: ({ value }) => {
@@ -86,15 +84,14 @@ export const useMembershipStep3 = () => {
     onSubmit: async ({ value, meta }) => {
       const refinedValue = MembershipApplicationStep3Schema.parse(value);
 
-      // Ensure companyMemberType is correct based on index
-      const representatives = refinedValue.representatives.map(
-        (rep, index) => ({
+      const representatives = refinedValue.representatives
+        .slice(0, 2)
+        .map((rep, index) => ({
           ...rep,
           companyMemberType: (index === 0 ? "principal" : "alternate") as
             | "principal"
             | "alternate",
-        }),
-      );
+        }));
 
       // Update form with transformed values
       representatives.forEach((rep, index) => {

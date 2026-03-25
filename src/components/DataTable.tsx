@@ -11,6 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -27,6 +28,8 @@ interface DataTableProps<TData, TValue> {
     position: "top" | "bottom";
     render: React.ReactNode;
   };
+  enableClearSorting?: boolean;
+  clearSortingLabel?: string;
   children?: (table: TableType<TData>) => React.ReactNode;
 }
 
@@ -34,6 +37,8 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   paginationControls,
+  enableClearSorting = false,
+  clearSortingLabel = "Clear sorting",
   children,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -52,11 +57,29 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      {paginationControls?.position === "top" && paginationControls.render}
+      {(paginationControls?.position === "top" || enableClearSorting) && (
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div>
+            {paginationControls?.position === "top" &&
+              paginationControls.render}
+          </div>
+          {enableClearSorting && (
+            <Button
+              disabled={sorting.length === 0}
+              onClick={() => table.resetSorting()}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              {clearSortingLabel}
+            </Button>
+          )}
+        </div>
+      )}
 
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-x-auto rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-secondary/10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {

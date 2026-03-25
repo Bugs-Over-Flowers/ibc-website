@@ -1,11 +1,10 @@
 "use server";
+import { render } from "@react-email/render";
 import { revalidatePath } from "next/cache";
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/email";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import ResendQRCodeTemplate from "@/lib/resend/templates/ResendQRCodeTemplate";
 import { createActionClient } from "@/lib/supabase/server";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface SendRegistrationConfirmationEmailProps {
   toEmail: string;
@@ -43,12 +42,20 @@ export const resendQRCode = async ({
     .single()
     .throwOnError();
 
+  if (!eventDetails) {
+    throw new Error("Event not found");
+  }
+
   // get registration details
   const { data: participants } = await supabase
     .from("Participant")
     .select("firstName, lastName, email, isPrincipal, participantId")
     .eq("registrationId", registrationId)
     .throwOnError();
+
+  if (!participants || participants.length === 0) {
+    throw new Error("Participants not found");
+  }
 
   // get the registrant details
   const registrantDetails = participants.find(
@@ -59,11 +66,8 @@ export const resendQRCode = async ({
     throw new Error("Registrant details not found");
   }
 
-  const { error: sendEmailError } = await resend.emails.send({
-    to: toEmail,
-    from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
-    subject: `Resend QR Code for ${eventDetails.eventTitle}`,
-    react: ResendQRCodeTemplate({
+  const html = await render(
+    ResendQRCodeTemplate({
       email: toEmail,
       eventDetails,
       self: {
@@ -77,19 +81,20 @@ export const resendQRCode = async ({
           fullName: `${participant.firstName} ${participant.lastName}`,
         })),
     }),
+  );
+
+  await sendEmail({
+    to: toEmail,
+    subject: `Resend QR Code for ${eventDetails.eventTitle}`,
+    html,
     attachments: [
       {
         filename: `${qrData}.png`,
         content: qrBuffer,
-        contentId: "qrCodeCID",
+        cid: "qrCodeCID",
       },
     ],
   });
-
-  if (sendEmailError) {
-    console.error("Failed to send email:", sendEmailError);
-    throw new Error("Failed to send email");
-  }
 
   // change the email if does not match participant email
   if (toEmail !== registrantDetails.email) {

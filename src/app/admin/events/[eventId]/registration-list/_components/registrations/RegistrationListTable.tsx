@@ -23,7 +23,6 @@ import RegistrationRowActions from "./RegistrationRowActions";
 interface RegistrationListProps {
   registrationList: RegistrationItem[];
 }
-
 export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
   {
     accessorKey: "registrationIdentifer",
@@ -36,13 +35,14 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
       return (
         <Button
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          type="button"
           variant={"ghost"}
         >
           Affiliation
           {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
+            <ArrowDownAZ className="size-4" />
           ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
+            <ArrowUpZA className="size-4" />
           ) : null}
         </Button>
       );
@@ -75,13 +75,14 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
       return (
         <Button
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          type="button"
           variant={"ghost"}
         >
           Registrant
           {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
+            <ArrowDownAZ className="size-4" />
           ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
+            <ArrowUpZA className="size-4" />
           ) : null}
         </Button>
       );
@@ -102,13 +103,14 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
       return (
         <Button
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          type="button"
           variant={"ghost"}
         >
           Registration Date
           {column.getIsSorted() === "asc" ? (
-            <CalendarArrowDown />
+            <CalendarArrowDown className="size-4" />
           ) : column.getIsSorted() === "desc" ? (
-            <CalendarArrowUp />
+            <CalendarArrowUp className="size-4" />
           ) : null}
         </Button>
       );
@@ -119,18 +121,20 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
     },
   },
   {
-    accessorKey: "paymentStatus",
+    accessorKey: "paymentProofStatus",
     header: "Payment Status",
     cell: ({ row }) => (
       <Badge
         className={cn(
           "rounded-full",
-          row.original.paymentStatus === "verified"
+          row.original.paymentProofStatus === "accepted"
             ? "bg-green-600"
-            : "bg-yellow-600",
+            : row.original.paymentProofStatus === "rejected"
+              ? "bg-red-600"
+              : "bg-yellow-600",
         )}
       >
-        {row.getValue("paymentStatus")}
+        {row.original.paymentProofStatus}
       </Badge>
     ),
   },
@@ -152,7 +156,8 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
         data={{
           affiliation: row.original.affiliation,
           registrationIdentifier: row.original.registrationIdentifier,
-          paymentStatus: row.original.paymentStatus,
+          paymentProofStatus: row.original.paymentProofStatus,
+          paymentMethod: row.original.paymentMethod,
           email: row.original.registrant.email,
           registrationId: row.original.registrationId,
         }}
@@ -166,6 +171,10 @@ export default function RegistrationListTable({
   registrationList,
 }: RegistrationListProps) {
   return (
-    <DataTable columns={registrationListColumns} data={registrationList} />
+    <DataTable
+      columns={registrationListColumns}
+      data={registrationList}
+      enableClearSorting
+    />
   );
 }

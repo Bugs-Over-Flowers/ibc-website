@@ -42,7 +42,7 @@ const RegistrationPage = async ({
             Back to Event
           </Button>
         </Link>
-        <RegistrationForm members={members} />
+        <RegistrationForm initialEventDetails={eventData} members={members} />
       </div>
     </div>
   );
