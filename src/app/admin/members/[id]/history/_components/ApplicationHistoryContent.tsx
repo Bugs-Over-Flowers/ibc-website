@@ -25,13 +25,13 @@ export async function ApplicationHistoryContent({
   }
 
   return (
-    <div className="space-y-6 px-2">
+    <div className="space-y-6">
       <Link
-        className="inline-flex items-center gap-1.5 text-primary transition-colors hover:text-primary/80"
+        className="flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
         href={`/admin/members/${memberId}` as Route}
       >
-        <ChevronLeft className="h-4 w-4" />
-        <span className="font-medium text-sm">Back to Member Details</span>
+        <ChevronLeft className="h-5 w-5" />
+        Back to Member Details
       </Link>
 
       <div>

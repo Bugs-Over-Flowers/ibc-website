@@ -101,7 +101,7 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
   return (
     <div className="space-y-5">
       {/* Main Header Section */}
-      <div className="flex flex-col gap-6 rounded-xl border border-border bg-card/80 p-6 lg:flex-row lg:items-start lg:justify-between">
+      <div className="mt-3 flex flex-col gap-6 rounded-xl border border-border bg-card/80 p-6 lg:flex-row lg:items-start lg:justify-between">
         {/* Company Info */}
         <div className="flex flex-1 items-center gap-4 sm:gap-5">
           <div className="shrink-0">

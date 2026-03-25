@@ -4,13 +4,16 @@ const memberCardSkeletons = Array.from({ length: 8 }, (_, i) => `member-${i}`);
 
 export default function MembersLoading() {
   return (
-    <div className="space-y-6 px-2">
+    <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
-          <Skeleton className="h-9 w-56" />
-          <Skeleton className="h-5 w-full max-w-sm" />
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-5 w-full max-w-xs" />
         </div>
-        <Skeleton className="h-12 w-32 rounded-xl" />
+        <div className="inline-flex h-12 w-32 items-center justify-center gap-2 rounded-xl border border-border bg-primary/90 px-4">
+          <Skeleton className="h-4 w-4 rounded-full bg-primary-foreground/40" />
+          <Skeleton className="h-4 w-16 bg-primary-foreground/40" />
+        </div>
       </div>
 
       <div className="rounded-xl p-0">
@@ -33,15 +36,18 @@ export default function MembersLoading() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {memberCardSkeletons.map((key) => (
             <div
-              className="rounded-xl border border-border bg-card p-3"
+              className="group flex h-full w-full flex-col overflow-hidden rounded-xl border bg-card p-3"
               key={key}
             >
               <div className="space-y-3">
-                <Skeleton className="aspect-square w-full rounded-xl" />
+                <div className="relative aspect-square w-full overflow-hidden rounded-xl">
+                  <Skeleton className="h-full w-full" />
+                  <Skeleton className="absolute top-2 right-2 h-6 w-20 rounded-full" />
+                </div>
 
                 <div className="space-y-3 px-2 pb-1">
                   <div className="flex items-start justify-between gap-2">
-                    <Skeleton className="h-5 w-2/3" />
+                    <Skeleton className="h-6 w-2/3" />
                     <div className="flex items-center gap-3">
                       <Skeleton className="h-5 w-5 rounded" />
                       <Skeleton className="h-5 w-5 rounded" />
@@ -49,13 +55,19 @@ export default function MembersLoading() {
                   </div>
 
                   <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-4 w-1/2" />
 
                   <Skeleton className="h-px w-full" />
 
                   <div className="space-y-2">
-                    <Skeleton className="h-3 w-1/2" />
-                    <Skeleton className="h-3 w-2/3" />
+                    <div className="flex items-center gap-1.5">
+                      <Skeleton className="h-3.5 w-3.5 rounded" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Skeleton className="h-3.5 w-3.5 rounded" />
+                      <Skeleton className="h-3 w-2/3" />
+                    </div>
                   </div>
                 </div>
               </div>
