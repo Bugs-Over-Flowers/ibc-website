@@ -221,11 +221,12 @@ export default function DeleteSectorDialog({
                 }
                 value={memberValue ?? ""}
               >
-                <SelectTrigger
-                  aria-label="Choose sector"
-                  className="w-full sm:w-[200px]"
-                >
-                  <SelectValue placeholder="Choose a sector" />
+                <SelectTrigger aria-label="Choose sector" className="w-full">
+                  {alternativeSectors.find(
+                    (sector) => sector.sectorId === Number(memberValue),
+                  )?.sectorName ?? (
+                    <SelectValue placeholder="Choose a sector" />
+                  )}
                 </SelectTrigger>
 
                 <SelectContent>
@@ -358,7 +359,11 @@ export default function DeleteSectorDialog({
               value={selectedSectorId ?? ""}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choose the new sector" />
+                {alternativeSectors.find(
+                  (sector) => sector.sectorId === Number(selectedSectorId),
+                )?.sectorName ?? (
+                  <SelectValue placeholder="Choose the new sector" />
+                )}
               </SelectTrigger>
               <SelectContent>
                 {alternativeSectors.map((sector) => (
