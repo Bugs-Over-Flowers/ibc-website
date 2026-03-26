@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { Step1Status } from "@/app/membership/application/_components/forms/Step1Status";
 import { Step2Company } from "@/app/membership/application/_components/forms/Step2Company";
 import { Step3Representatives } from "@/app/membership/application/_components/forms/Step3Representatives";
@@ -367,11 +367,13 @@ export function MembershipApplicationForm({
     );
 
   return (
-    <Card className="w-full overflow-hidden rounded-2xl border border-border/50 bg-background p-4 pb-2 shadow-xl sm:p-6 sm:pb-3 md:p-8 md:pb-4">
-      <CardContent className="px-0">
-        <MembershipStepper currentStep={currentStep} steps={steps} />
-        <div className="mt-6 sm:mt-8">{stepContent}</div>
-      </CardContent>
-    </Card>
+    <Suspense>
+      <Card className="w-full overflow-hidden rounded-2xl border border-border/50 bg-background p-4 pb-2 shadow-xl sm:p-6 sm:pb-3 md:p-8 md:pb-4">
+        <CardContent className="px-0">
+          <MembershipStepper currentStep={currentStep} steps={steps} />
+          <div className="mt-6 sm:mt-8">{stepContent}</div>
+        </CardContent>
+      </Card>
+    </Suspense>
   );
 }

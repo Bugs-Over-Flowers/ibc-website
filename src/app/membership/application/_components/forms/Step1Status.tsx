@@ -35,40 +35,41 @@ export function Step1Status({
     form.store,
     (state) => state.values.applicationType,
   );
-  const businessMemberId = useStore(
+  const businessMemberIdentifier = useStore(
     form.store,
-    (state) => state.values.businessMemberId,
+    (state) => state.values.businessMemberIdentifier,
   );
 
   const { remainingTime, isInCooldown: hookIsInCooldown } =
     useMemberValidationTimer();
 
-  const showMemberIdInput =
+  const showMemberIdentifierInput =
     applicationType === "renewal" || applicationType === "updating";
 
   useEffect(() => {
-    const currentMemberId = businessMemberId?.trim() || null;
-    const lastValidatedId = memberValidation.lastValidatedMemberId;
+    const currentMemberIdentifier = businessMemberIdentifier?.trim() || null;
+    const lastValidatedMemberIdentifier =
+      memberValidation.lastValidatedMemberIdentifier;
 
     if (
-      lastValidatedId &&
-      currentMemberId !== lastValidatedId &&
+      lastValidatedMemberIdentifier &&
+      currentMemberIdentifier !== lastValidatedMemberIdentifier &&
       memberValidation.validationStatus !== "idle"
     ) {
       resetMemberValidation();
     }
   }, [
-    businessMemberId,
+    businessMemberIdentifier,
     resetMemberValidation,
-    memberValidation.lastValidatedMemberId,
+    memberValidation.lastValidatedMemberIdentifier,
     memberValidation.validationStatus,
   ]);
 
   useEffect(() => {
     if (applicationType === "newMember") {
       resetMemberValidation();
-      form.setFieldValue("businessMemberId", "");
-      form.resetField("businessMemberId");
+      form.setFieldValue("businessMemberIdentifier", "");
+      form.resetField("businessMemberIdentifier");
     }
   }, [applicationType, resetMemberValidation, form]);
 
@@ -184,9 +185,9 @@ export function Step1Status({
         </form.AppField>
       </div>
 
-      {showMemberIdInput && (
+      {showMemberIdentifierInput && (
         <div className="fade-in slide-in-from-top-2 animate-in space-y-4 pt-2 duration-300">
-          <form.AppField name="businessMemberId">
+          <form.AppField name="businessMemberIdentifier">
             {(field) => {
               const isInvalid =
                 field.state.meta.isTouched &&
@@ -196,9 +197,9 @@ export function Step1Status({
                 <Field className="grid gap-2" data-invalid={isInvalid}>
                   <Label
                     className="font-bold text-base"
-                    htmlFor="businessMemberId"
+                    htmlFor="businessMemberIdentifier"
                   >
-                    Business Member ID
+                    Business Member Identifier
                   </Label>
                   <div className="relative">
                     <Input
@@ -212,7 +213,7 @@ export function Step1Status({
                         isInvalid && "border-destructive",
                       )}
                       data-invalid={isInvalid}
-                      id="businessMemberId"
+                      id="businessMemberIdentifier"
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       placeholder="ibc-mem-xxxxxxxx"
@@ -243,9 +244,9 @@ export function Step1Status({
                         {memberValidation.memberInfo.companyName &&
                         memberValidation.memberInfo.membershipStatus
                           ? applicationType === "renewal"
-                            ? `${memberValidation.memberInfo.companyName} is currently "${memberValidation.memberInfo.membershipStatus}" and does not need renewal.`
-                            : `${memberValidation.memberInfo.companyName} membership is cancelled. Please renew first.`
-                          : "Member ID not found or invalid for this application type."}
+                            ? `${memberValidation.memberInfo.companyName} is currently "${memberValidation.memberInfo.membershipStatus}". Only cancelled memberships can renew.`
+                            : `${memberValidation.memberInfo.companyName} is currently cancelled. Please choose renewal first.`
+                          : "Business Member Identifier not found or invalid for this application type."}
                       </span>
                     </div>
                   )}
@@ -273,8 +274,8 @@ export function Step1Status({
                     )}
 
                   <p className="text-muted-foreground text-xs">
-                    Enter your existing IBC Member ID. Verification will happen
-                    when you click Next.
+                    Enter your existing IBC Business Member Identifier.
+                    Verification will happen when you click Next.
                   </p>
                   <FieldError errors={field.state.meta.errors} reserveSpace />
                 </Field>

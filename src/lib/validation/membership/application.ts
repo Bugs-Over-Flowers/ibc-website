@@ -12,18 +12,20 @@ export const SexEnum = z.enum(["male", "female"]);
 export const MembershipApplicationStep1Schema = z
   .object({
     applicationType: ApplicationTypeEnum,
-    businessMemberId: z.string().optional(),
+    businessMemberIdentifier: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (
       (data.applicationType === "renewal" ||
         data.applicationType === "updating") &&
-      (!data.businessMemberId || data.businessMemberId.trim().length === 0)
+      (!data.businessMemberIdentifier ||
+        data.businessMemberIdentifier.trim().length === 0)
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Member ID is required for renewal and update applications",
-        path: ["businessMemberId"],
+        message:
+          "Business Member Identifier is required for renewal and update applications",
+        path: ["businessMemberIdentifier"],
       });
     }
   });
