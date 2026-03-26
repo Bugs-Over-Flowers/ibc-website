@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import CenterSpinner from "@/components/CenterSpinner";
+// import CenterSpinner from "@/components/CenterSpinner";
 import type { RegistrationRouteProps } from "@/lib/types/route";
 import { RegistrationPageContent } from "./_components/RegistrationPageContent";
 import Loading from "./loading";
