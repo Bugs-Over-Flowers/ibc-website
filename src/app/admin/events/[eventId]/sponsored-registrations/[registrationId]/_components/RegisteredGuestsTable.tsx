@@ -136,8 +136,7 @@ export function RegisteredGuestsTable({
                         return (
                           <span
                             className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-medium text-xs ${
-                              displayStatus === "accepted" ||
-                              displayStatus === "verified"
+                              displayStatus === "accepted"
                                 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                                 : displayStatus === "pending"
                                   ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"

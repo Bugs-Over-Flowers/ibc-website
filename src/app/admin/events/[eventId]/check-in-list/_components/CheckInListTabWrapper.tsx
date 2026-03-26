@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { getEventDays } from "@/server/events/mutations/getEventDays";
 import CheckInListStats from "./CheckInListStats";
+import DraftEventEmptyComponent from "./DraftEventEmptyComponent";
 
 interface CheckInListTabWrapperProps {
   tabs: Awaited<ReturnType<typeof getEventDays>>;
@@ -20,7 +21,11 @@ export default function CheckInListTabWrapper({
   eventTitle,
   totalExpected,
 }: CheckInListTabWrapperProps) {
-  const [activeTab, setActiveTab] = useState(tabs[0].eventDayId);
+  const [activeTab, setActiveTab] = useState(tabs[0]?.eventDayId ?? "");
+
+  if (tabs.length === 0) {
+    return <DraftEventEmptyComponent />;
+  }
 
   // Find the current event day label
   const currentEventDay = tabs.find((day) => day.eventDayId === activeTab);

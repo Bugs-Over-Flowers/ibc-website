@@ -44,6 +44,10 @@ function normalizeLegacyPaymentProofPath(path: string): string {
   return path.replace(/\.[A-Za-z0-9]+$/, "");
 }
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export async function replacePaymentProofAndAccept(input: {
   registrationId: string;
   uploadedPath: string;
@@ -56,7 +60,7 @@ export async function replacePaymentProofAndAccept(input: {
   const { data: registration, error: registrationError } = await supabase
     .from("Registration")
     .select(
-      "eventId, sponsoredRegistrationId, paymentMethod, ProofImage(proofImageId, path)",
+      "eventId, paymentMethod, sponsoredRegistrationId, paymentProofStatus, ProofImage(proofImageId, path)",
     )
     .eq("registrationId", registrationId)
     .single();
@@ -73,30 +77,58 @@ export async function replacePaymentProofAndAccept(input: {
 
   const existingProof = registration.ProofImage?.[0];
   const oldPath = existingProof?.path;
+  const previousPaymentProofStatus = registration.paymentProofStatus;
 
   const normalizedUploadedPath = extractPaymentProofPath(uploadedPath);
+  const normalizedNewPath = normalizeLegacyPaymentProofPath(
+    normalizedUploadedPath,
+  );
+  let proofMutation: "updated" | "inserted" | null = null;
+  let insertedProofImageId: string | null = null;
 
   try {
     if (existingProof?.proofImageId) {
-      const { error: updateProofError } = await supabase
+      let updateProofQuery = supabase
         .from("ProofImage")
         .update({ path: normalizedUploadedPath })
         .eq("proofImageId", existingProof.proofImageId);
 
+      if (oldPath) {
+        updateProofQuery = updateProofQuery.eq("path", oldPath);
+      }
+
+      const { data: updatedProof, error: updateProofError } =
+        await updateProofQuery.select("proofImageId").single();
+
       if (updateProofError) {
         throw new Error(updateProofError.message);
       }
+
+      if (!updatedProof) {
+        throw new Error("Failed to update payment proof");
+      }
+
+      proofMutation = "updated";
     } else {
-      const { error: insertProofError } = await supabase
+      const { data: insertedProof, error: insertProofError } = await supabase
         .from("ProofImage")
         .insert({
           path: normalizedUploadedPath,
           registrationId,
-        });
+        })
+        .select("proofImageId")
+        .single();
 
       if (insertProofError) {
         throw new Error(insertProofError.message);
       }
+
+      if (!insertedProof) {
+        throw new Error("Failed to create payment proof");
+      }
+
+      insertedProofImageId = insertedProof.proofImageId;
+      proofMutation = "inserted";
     }
 
     const { error: statusUpdateError } = await supabase
@@ -107,23 +139,67 @@ export async function replacePaymentProofAndAccept(input: {
     if (statusUpdateError) {
       throw new Error(statusUpdateError.message);
     }
-  } catch (error) {
-    const normalizedNewPath = normalizeLegacyPaymentProofPath(
-      normalizedUploadedPath,
-    );
+  } catch (originalError) {
+    const compensationErrors: string[] = [];
+
+    if (proofMutation === "updated" && existingProof?.proofImageId && oldPath) {
+      const { error: revertProofError } = await supabase
+        .from("ProofImage")
+        .update({ path: oldPath })
+        .eq("proofImageId", existingProof.proofImageId)
+        .eq("path", normalizedUploadedPath);
+
+      if (revertProofError) {
+        compensationErrors.push(
+          `Failed to revert payment proof row: ${revertProofError.message}`,
+        );
+      }
+    }
+
+    if (proofMutation === "inserted" && insertedProofImageId) {
+      const { error: deleteProofRowError } = await supabase
+        .from("ProofImage")
+        .delete()
+        .eq("proofImageId", insertedProofImageId);
+
+      if (deleteProofRowError) {
+        compensationErrors.push(
+          `Failed to delete inserted payment proof row: ${deleteProofRowError.message}`,
+        );
+      }
+    }
 
     const { error: removeNewImageError } = await supabase.storage
       .from(PAYMENT_PROOFS_BUCKET)
       .remove([normalizedNewPath]);
 
     if (removeNewImageError) {
-      console.error(
-        "Failed to remove newly uploaded payment proof:",
-        removeNewImageError.message,
+      compensationErrors.push(
+        `Failed to remove newly uploaded payment proof: ${removeNewImageError.message}`,
       );
     }
 
-    throw error;
+    if (previousPaymentProofStatus !== "accepted") {
+      const { error: revertRegistrationStatusError } = await supabase
+        .from("Registration")
+        .update({ paymentProofStatus: previousPaymentProofStatus })
+        .eq("registrationId", registrationId)
+        .eq("paymentProofStatus", "accepted");
+
+      if (revertRegistrationStatusError) {
+        compensationErrors.push(
+          `Failed to revert registration status: ${revertRegistrationStatusError.message}`,
+        );
+      }
+    }
+
+    if (compensationErrors.length > 0) {
+      throw new Error(
+        `replacePaymentProofAndAccept failed: ${getErrorMessage(originalError)} | Compensation failed: ${compensationErrors.join(" | ")}`,
+      );
+    }
+
+    throw originalError;
   }
 
   if (oldPath) {

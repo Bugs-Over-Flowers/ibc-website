@@ -11,7 +11,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeEmailHtml } from "@/lib/resend/utils/sanitizeEmailHtml";
 
 interface MeetingNotificationEmailProps {
   companyName: string;
@@ -27,8 +27,8 @@ export default function MeetingNotificationEmail({
   customMessage,
 }: MeetingNotificationEmailProps) {
   const sanitizeEmailRichText = (html: string) =>
-    DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: [
+    sanitizeEmailHtml(html, {
+      allowedTags: [
         "p",
         "br",
         "strong",
@@ -42,7 +42,7 @@ export default function MeetingNotificationEmail({
         "h2",
         "h3",
       ],
-      ALLOWED_ATTR: [],
+      allowedAttributes: {},
     });
 
   const hasDatePlaceholder = customMessage?.includes("{INTERVIEW_DATE}");
