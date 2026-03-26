@@ -104,12 +104,12 @@ export function CreateEventForm() {
                           "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp"],
                         }}
                         className="h-full"
-                        description="Upload an image for the event banner"
+                        description="Upload an image for the event header"
                         dropzoneClassName="sm:min-h-[280px]"
                         fullHeight
                         label={
                           <span>
-                            Event Image{" "}
+                            Event Header{" "}
                             <span className="text-destructive">*</span>
                           </span>
                         }
@@ -171,7 +171,7 @@ export function CreateEventForm() {
                             aspectClass="aspect-[16/9]"
                             className="flex-1"
                             file={selectedImage}
-                            label="Event Image Preview"
+                            label="Event Header Preview"
                           />
                         </div>
                       )}
