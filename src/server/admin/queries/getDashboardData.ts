@@ -36,8 +36,8 @@ export type DashboardData = {
     totalActiveMembers: number;
     totalInactiveOrExpiredMembers: number;
     membersBySector: Array<{ sectorName: string; count: number }>;
-    renewalsDueThisMonth: number;
-    renewalsDueNext30Days: number;
+    memberGrowthLast30Days: number;
+    growthVsPrevious30Days: number;
   };
   events: {
     upcomingEventsNext7Days: number;
@@ -111,12 +111,11 @@ export async function getDashboardData(
   const now = new Date();
   const nowIso = now.toISOString();
 
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  endOfMonth.setHours(23, 59, 59, 999);
+  const last30Days = new Date(now);
+  last30Days.setDate(last30Days.getDate() - 30);
 
-  const next30Days = new Date(now);
-  next30Days.setDate(next30Days.getDate() + 30);
+  const previous30DaysStart = new Date(now);
+  previous30DaysStart.setDate(previous30DaysStart.getDate() - 60);
 
   const next7Days = new Date(now);
   next7Days.setDate(next7Days.getDate() + 7);
@@ -297,17 +296,36 @@ export async function getDashboardData(
     return isStatusInactive || isExpired;
   }).length;
 
-  const renewalsDueThisMonth = members.filter((member) => {
-    if (!member.membershipExpiryDate) return false;
-    const expiryDate = new Date(member.membershipExpiryDate);
-    return expiryDate >= startOfMonth && expiryDate <= endOfMonth;
+  const memberGrowthLast30Days = members.filter((member) => {
+    const joinedAt = new Date(member.joinDate);
+    return (
+      member.membershipStatus === "paid" &&
+      joinedAt >= last30Days &&
+      joinedAt <= now
+    );
   }).length;
 
-  const renewalsDueNext30Days = members.filter((member) => {
-    if (!member.membershipExpiryDate) return false;
-    const expiryDate = new Date(member.membershipExpiryDate);
-    return expiryDate >= now && expiryDate <= next30Days;
+  const previous30DayGrowth = members.filter((member) => {
+    const joinedAt = new Date(member.joinDate);
+    return (
+      member.membershipStatus === "paid" &&
+      joinedAt >= previous30DaysStart &&
+      joinedAt < last30Days
+    );
   }).length;
+
+  const growthVsPrevious30Days =
+    previous30DayGrowth > 0
+      ? Number(
+          (
+            ((memberGrowthLast30Days - previous30DayGrowth) /
+              previous30DayGrowth) *
+            100
+          ).toFixed(1),
+        )
+      : memberGrowthLast30Days > 0
+        ? 100
+        : 0;
 
   const totalParticipants = participants.length;
   const attendedParticipants = new Set(
@@ -482,8 +500,8 @@ export async function getDashboardData(
       totalActiveMembers,
       totalInactiveOrExpiredMembers,
       membersBySector: getTopSectorCounts(members),
-      renewalsDueThisMonth,
-      renewalsDueNext30Days,
+      memberGrowthLast30Days,
+      growthVsPrevious30Days,
     },
     events: {
       upcomingEventsNext7Days: upcomingEventsRes.data?.length ?? 0,

@@ -3,6 +3,7 @@ import {
   ClipboardList,
   FileWarning,
   Handshake,
+  TrendingUp,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -18,6 +19,14 @@ type DashboardClientProps = {
 };
 
 export function DashboardClient({ data }: DashboardClientProps) {
+  const memberGrowthValue =
+    data.members.memberGrowthLast30Days > 0
+      ? `+${data.members.memberGrowthLast30Days}`
+      : String(data.members.memberGrowthLast30Days);
+
+  const growthDelta = data.members.growthVsPrevious30Days;
+  const growthDeltaText = `${growthDelta > 0 ? "+" : ""}${growthDelta}%`;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card/70 p-4 text-xs sm:flex-row sm:items-center sm:justify-between">
@@ -68,12 +77,12 @@ export function DashboardClient({ data }: DashboardClientProps) {
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <StatCard
-          badge={`+30d: ${data.members.renewalsDueNext30Days}`}
-          description="Renewals due this month"
-          icon={<FileWarning className="h-4 w-4" />}
-          title="Membership Renewals Due"
+          badge={`vs previous 30d: ${growthDeltaText}`}
+          description="Newly activated members in the last 30 days"
+          icon={<TrendingUp className="h-4 w-4" />}
+          title="Member Growth (30d)"
           tone="amber"
-          value={String(data.members.renewalsDueThisMonth)}
+          value={memberGrowthValue}
         />
         <StatCard
           badge={`${data.events.attendedParticipants}/${data.events.totalParticipants} attended`}
