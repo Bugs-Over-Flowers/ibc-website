@@ -8,6 +8,13 @@ const baseEditEventSchema = z.object({
   eventStartDate: z.iso.datetime({ local: true }),
   eventEndDate: z.iso.datetime({ local: true }),
   venue: z.string().min(1, "Venue is required"),
+  facebookLink: z.preprocess((val) => {
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      return trimmed === "" ? null : trimmed;
+    }
+    return val;
+  }, z.string().url().nullable().optional()),
 });
 
 // Draft events can edit everything

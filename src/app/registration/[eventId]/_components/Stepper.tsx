@@ -40,6 +40,8 @@ export default function Stepper() {
           return (
             <div className="flex flex-col items-center" key={step.label}>
               <div
+                aria-current={isActive ? "step" : undefined}
+                aria-label={`Step ${stepNumber}: ${step.label}${isCompleted ? " (Completed)" : ""}`}
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full border-2 font-semibold text-xs transition-all duration-300 sm:h-10 sm:w-10 sm:text-sm",
                   isCompleted &&
@@ -50,6 +52,7 @@ export default function Stepper() {
                     !isActive &&
                     "border-muted bg-background text-muted-foreground",
                 )}
+                role="img"
               >
                 {isCompleted ? (
                   <Check className="h-4 w-4 sm:h-5 sm:w-5" />

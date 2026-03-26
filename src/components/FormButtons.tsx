@@ -4,7 +4,6 @@ import useRegistrationStore, { MAX_STEPS } from "@/hooks/registration.store";
 
 interface FormButtonsProps {
   onBack: () => void;
-  onNext: () => void;
   submitting?: boolean;
 }
 
