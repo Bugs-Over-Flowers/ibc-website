@@ -49,11 +49,11 @@ export const useCreateEventForm = () => {
       if (value.eventImage && value.eventImage.length > 0) {
         const file = value.eventImage[0];
         const fileExt = file.name.split(".").pop()?.toLowerCase();
-        const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+        const allowedExtensions = ["jpg", "jpeg", "png"];
 
         if (!fileExt || !allowedExtensions.includes(fileExt)) {
           toast.error(
-            "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
+            "Invalid file type. Only jpg, jpeg, and png are allowed.",
           );
           return;
         }
