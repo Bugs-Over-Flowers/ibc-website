@@ -23,6 +23,7 @@ export const useCreateEventForm = () => {
       eventStartDate: undefined as Date | undefined,
       eventEndDate: undefined as Date | undefined,
       venue: "",
+      facebookLink: "",
       registrationFee: 0,
       eventType: null as "public" | "private" | null,
       eventImage: [] as File[],
@@ -79,9 +80,16 @@ export const useCreateEventForm = () => {
         publicUrl = url;
       }
 
+      const trimmedFacebookLink = value.facebookLink?.trim();
+      const normalizedFacebookLink =
+        trimmedFacebookLink && trimmedFacebookLink.length > 0
+          ? trimmedFacebookLink
+          : undefined;
+
       const payload = {
         ...value,
         eventImage: publicUrl,
+        facebookLink: normalizedFacebookLink,
       };
 
       const result =
