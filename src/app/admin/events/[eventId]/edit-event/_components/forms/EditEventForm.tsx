@@ -197,48 +197,6 @@ export function EditEventForm({ event }: EditEventFormProps) {
 
             <div className="space-y-8">
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-5 sm:items-stretch">
-                <div className="col-span-1 flex h-full flex-col gap-2 sm:col-span-3">
-                  <p className="font-medium text-sm">Current Event Image</p>
-                  <div className="relative aspect-video w-full flex-1 overflow-hidden rounded-lg border bg-muted/20 sm:aspect-auto sm:h-full sm:min-h-[280px]">
-                    {event.eventHeaderUrl ? (
-                      <Image
-                        alt="Current event image"
-                        className="object-cover"
-                        fill
-                        sizes="(min-width: 640px) 75vw, 100vw"
-                        src={event.eventHeaderUrl}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-muted-foreground text-sm">
-                        No image uploaded yet
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="col-span-1 flex h-full flex-col gap-2 sm:col-span-2">
-                  <p className="font-medium text-sm">Current Event Poster</p>
-                  <div className="flex flex-1 items-center justify-center">
-                    <div className="relative aspect-square w-full max-w-[220px] overflow-hidden rounded-lg border bg-muted/20 sm:aspect-auto sm:h-full sm:min-h-[280px] sm:max-w-full">
-                      {event.eventPoster ? (
-                        <Image
-                          alt="Current event poster"
-                          className="object-cover"
-                          fill
-                          sizes="(min-width: 640px) 25vw, 50vw"
-                          src={event.eventPoster}
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-muted-foreground text-sm">
-                          No poster uploaded yet
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-5 sm:items-stretch">
                 <div className="col-span-1 flex h-full flex-col sm:col-span-3">
                   <form.AppField name="eventImage">
                     {(field) => (
@@ -263,6 +221,23 @@ export function EditEventForm({ event }: EditEventFormProps) {
                       />
                     )}
                   </form.AppField>
+                </div>
+                <div className="col-span-1 flex h-full flex-col gap-2 sm:col-span-3">
+                  <p className="font-medium text-sm">Current Event Image</p>
+                  <div className="relative aspect-video w-full flex-1 overflow-hidden rounded-lg border bg-muted/20 sm:aspect-auto sm:h-full sm:min-h-[280px]">
+                    {event.eventHeaderUrl ? (
+                      <Image
+                        alt="Current event image"
+                        className="object-cover"
+                        fill
+                        src={event.eventHeaderUrl}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-muted-foreground text-sm">
+                        No image uploaded yet
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="col-span-1 flex h-full flex-col sm:col-span-2">
@@ -291,6 +266,28 @@ export function EditEventForm({ event }: EditEventFormProps) {
                       />
                     )}
                   </form.AppField>
+                </div>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-5 sm:items-stretch">
+                  <div className="col-span-1 flex h-full flex-col gap-2 sm:col-span-2">
+                    <p className="font-medium text-sm">Current Event Poster</p>
+                    <div className="flex flex-1 items-center justify-center">
+                      <div className="relative aspect-square w-full max-w-[220px] overflow-hidden rounded-lg border bg-muted/20 sm:aspect-auto sm:h-full sm:min-h-[280px] sm:max-w-full">
+                        {event.eventPoster ? (
+                          <Image
+                            alt="Current event poster"
+                            className="object-cover"
+                            fill
+                            sizes="(min-width: 640px) 25vw, 50vw"
+                            src={event.eventPoster}
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-muted-foreground text-sm">
+                            No poster uploaded yet
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

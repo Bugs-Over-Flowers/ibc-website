@@ -85,6 +85,15 @@ export function CreateEventForm() {
               {(field) => <field.NumberField label="Registration Fee * " />}
             </form.AppField>
 
+            <form.AppField name="facebookLink">
+              {(field) => (
+                <field.TextField
+                  label="Facebook Event Link"
+                  placeholder="https://www.facebook.com/events/..."
+                />
+              )}
+            </form.AppField>
+
             <div className="space-y-8">
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-5 sm:items-stretch">
                 <div className="col-span-1 flex h-full flex-col sm:col-span-3">
@@ -181,24 +190,6 @@ export function CreateEventForm() {
                 }}
               </form.Subscribe>
             </div>
-            <form.AppField name="facebookLink">
-              {(field) => (
-                <field.TextField
-                  label="Facebook Event Link"
-                  placeholder="https://www.facebook.com/events/..."
-                />
-              )}
-            </form.AppField>
-
-            <form.AppField name="eventImage">
-              {(field) => (
-                <field.FileDropzoneField
-                  description="Upload an image for the event banner"
-                  label="Event Image *"
-                  maxFiles={1}
-                />
-              )}
-            </form.AppField>
 
             <div className="flex justify-end gap-4">
               <form.Subscribe selector={(state) => state.isSubmitting}>
