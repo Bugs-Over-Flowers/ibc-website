@@ -17,7 +17,14 @@ interface EventRowProps {
 }
 
 export default function EventRow({ event }: EventRowProps) {
-  const imageUrl = event.eventHeaderUrl?.trim();
+  const normalizeUrl = (value?: string | null) => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  };
+  const posterUrl = normalizeUrl(event.eventPoster);
+  const headerUrl = normalizeUrl(event.eventHeaderUrl);
+  const imageUrl = posterUrl ?? headerUrl;
 
   return (
     <article className="flex flex-col items-start gap-3 overflow-hidden rounded-lg border bg-background p-3 shadow-sm md:flex-row md:items-start">

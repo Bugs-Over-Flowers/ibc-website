@@ -12,21 +12,27 @@ interface FileDropzoneFieldProps {
   label?: React.ReactNode;
   description?: string;
   className?: string;
+  dropzoneClassName?: string;
   multiple?: boolean;
   accept?: Record<string, string[]>;
   maxFiles?: number;
   maxSize?: number;
   layout?: "grid" | "banner";
+  previewGridClassName?: string;
+  previewItemClassName?: string;
+  fullHeight?: boolean;
 }
 
 const FilePreview = ({
   file,
   onRemove,
   layout = "grid",
+  className,
 }: {
   file: File;
   onRemove: () => void;
   layout?: "grid" | "banner";
+  className?: string;
 }) => {
   const [preview, setPreview] = React.useState<string | null>(null);
 
@@ -40,7 +46,13 @@ const FilePreview = ({
   }, [file]);
 
   return (
-    <div className={cn("group relative", layout === "banner" ? "w-full" : "")}>
+    <div
+      className={cn(
+        "group relative",
+        layout === "banner" ? "w-full" : "",
+        className,
+      )}
+    >
       <div
         className={cn(
           "relative w-full overflow-hidden rounded-lg border bg-background",
@@ -83,11 +95,15 @@ function FileDropzoneField({
   label,
   description,
   className,
+  dropzoneClassName,
   multiple = false,
   accept = { "image/*": [] },
   maxFiles,
   maxSize,
   layout = "grid",
+  previewGridClassName,
+  previewItemClassName,
+  fullHeight = false,
 }: FileDropzoneFieldProps) {
   const field = useFieldContext<File[]>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -108,26 +124,41 @@ function FileDropzoneField({
   };
 
   return (
-    <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
+    <Field
+      className={cn(
+        fullHeight ? "flex h-full flex-col gap-2" : "grid gap-2",
+        className,
+      )}
+      data-invalid={isInvalid}
+    >
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
 
       <Dropzone
         accept={accept}
-        className="w-full border-dashed bg-background transition-colors hover:bg-muted/50"
+        className={cn(
+          "w-full border-dashed bg-background transition-colors hover:bg-muted/50",
+          fullHeight && "flex-1",
+          dropzoneClassName,
+        )}
         maxFiles={maxFiles}
         maxSize={maxSize}
         onDrop={handleDrop}
         src={files}
       >
-        <div className="flex flex-col items-center justify-center gap-4 py-4">
+        <div
+          className={cn(
+            "flex flex-col items-center justify-center gap-4 px-4 py-6 text-center",
+            fullHeight && "h-full",
+          )}
+        >
           <div className="rounded-full bg-muted p-4">
             <UploadCloud className="h-8 w-8 text-muted-foreground" />
           </div>
-          <div className="flex flex-col items-center gap-1 text-center">
-            <span className="font-medium text-sm">
+          <div className="flex flex-col items-center gap-1 text-center leading-snug">
+            <span className="text-pretty font-medium text-foreground text-sm">
               Drag & drop files here or click to upload
             </span>
-            <span className="text-muted-foreground text-xs">
+            <span className="text-pretty text-muted-foreground text-xs">
               {multiple
                 ? "You can upload multiple files"
                 : "Single file upload"}
@@ -143,10 +174,12 @@ function FileDropzoneField({
             layout === "banner"
               ? "grid-cols-1"
               : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+            previewGridClassName,
           )}
         >
           {files.map((file, index) => (
             <FilePreview
+              className={previewItemClassName}
               file={file}
               key={`${file.name}-${
                 // biome-ignore lint/suspicious/noArrayIndexKey: Generated key based on file name and index
