@@ -10,10 +10,13 @@ const MEMBERSHIP_STATUS_VALUES = [
   "cancelled",
 ] as const satisfies readonly MembershipStatusEnum[];
 
+const WEBSITE_URL_REGEX =
+  /^(https?:\/\/)?((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,}(\/[^\s]*)?$/;
+
 export const UpdateMemberSchema = z.object({
   // Identifiers
-  memberId: z.string().uuid(),
-  applicationId: z.string().uuid(),
+  memberId: z.uuid(),
+  applicationId: z.uuid(),
 
   // Company Information
   businessName: z.string().min(1, "Company name is required"),
@@ -32,7 +35,7 @@ export const UpdateMemberSchema = z.object({
     }, "Invalid URL"),
 
   // Contact Information
-  emailAddress: z.string().email("Invalid email address"),
+  emailAddress: z.email("Invalid email address"),
   landline: z.string().min(1, "Landline is required"),
   faxNumber: z.string().optional(),
   mobileNumber: phoneSchema.optional(),
