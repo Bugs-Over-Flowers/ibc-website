@@ -72,9 +72,5 @@ export async function updateMember(input: UpdateMemberInput) {
   updateTag(CACHE_TAGS.members.admin);
   updateTag(CACHE_TAGS.members.public);
 
-  revalidatePath("/admin/members");
-  revalidatePath(`/admin/members/${memberId}`);
-  revalidatePath(`/admin/application/${applicationId}`);
-
   return { success: true };
 }
