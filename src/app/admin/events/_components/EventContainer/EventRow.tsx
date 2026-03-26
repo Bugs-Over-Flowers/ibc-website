@@ -12,7 +12,15 @@ interface EventRowProps {
 }
 
 export default function EventRow({ event }: EventRowProps) {
-  const imageUrl = event.eventHeaderUrl?.trim();
+  const normalizeUrl = (value?: string | null) => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  };
+  const posterUrl = normalizeUrl(event.eventPoster);
+  const headerUrl = normalizeUrl(event.eventHeaderUrl);
+  const imageUrl = posterUrl ?? headerUrl;
+
   const typeLabel = event.eventType
     ? event.eventType.charAt(0).toUpperCase() + event.eventType.slice(1)
     : null;
