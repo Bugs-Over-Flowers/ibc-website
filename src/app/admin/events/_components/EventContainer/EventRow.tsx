@@ -21,14 +21,14 @@ export default function EventRow({ event }: EventRowProps) {
 
   return (
     <article className="flex flex-col items-start gap-3 overflow-hidden rounded-lg border bg-background p-3 shadow-sm md:flex-row md:items-start">
-      <div className="relative h-32 w-32 shrink-0 md:h-40 md:w-40">
+      <div className="relative aspect-square w-full shrink-0 md:h-40 md:w-40">
         {imageUrl ? (
           <Image
             alt={event.eventTitle || "Event image"}
             className="h-full w-full rounded object-cover"
             height={192}
             priority={false}
-            sizes="(max-width: 768px) 100vw, 128px"
+            sizes="(max-width: 768px) 100vw, 160px"
             src={imageUrl}
             width={192}
           />

@@ -1,70 +1,134 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
-import { ChevronRight, Filter, SortAsc, X } from "lucide-react";
+import { Check, ChevronRight, Filter, SortAsc, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import ActiveFilterBadges from "@/app/admin/events/_components/event-filters/ActiveFilterBadges";
 import { STATUS_LABELS } from "@/app/admin/events/_components/event-filters/constants";
 import EventSearchBar from "@/app/admin/events/_components/event-filters/EventSearchBar";
 import { useEventFilters } from "@/app/admin/events/_hooks/useEventFilters";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export default function EventFilters() {
   const {
-    currentSort,
+    currentDateSort,
+    currentTitleSort,
     currentStatus,
     currentSearch,
     searchValue,
     hasActiveFilters,
     updateFilter,
+    updateSortFilters,
     removeFilter,
     clearFilters,
     handleSearchChange,
   } = useEventFilters();
+
+  const normalizedDateSort =
+    currentDateSort === "date-asc" || currentDateSort === "date-desc"
+      ? currentDateSort
+      : null;
+  const normalizedTitleSort =
+    currentTitleSort === "title-desc" || currentTitleSort === "title-asc"
+      ? currentTitleSort
+      : null;
+  const hasExplicitSort = Boolean(normalizedDateSort || normalizedTitleSort);
+
+  const selectedDateSort = hasExplicitSort ? normalizedDateSort : "date-desc";
+  const selectedTitleSort = hasExplicitSort ? normalizedTitleSort : null;
+
+  const toggleDateSort = (next: "date-asc" | "date-desc") => {
+    if (selectedDateSort === next) {
+      if (selectedTitleSort) {
+        updateSortFilters({ dateSort: null, titleSort: selectedTitleSort });
+      }
+      return;
+    }
+
+    updateSortFilters({ dateSort: next, titleSort: selectedTitleSort });
+  };
+
+  const toggleTitleSort = (next: "title-asc" | "title-desc") => {
+    if (selectedTitleSort === next) {
+      if (selectedDateSort) {
+        updateSortFilters({ dateSort: selectedDateSort, titleSort: null });
+      }
+      return;
+    }
+
+    updateSortFilters({ dateSort: selectedDateSort, titleSort: next });
+  };
 
   return (
     <div className="rounded-xl border border-border bg-card p-3">
       {/* Search + Filters Row */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         {/* Search Bar */}
-        <EventSearchBar
-          onSearchChange={handleSearchChange}
-          searchValue={searchValue}
-        />
+        <div className="w-full">
+          <EventSearchBar
+            onSearchChange={handleSearchChange}
+            searchValue={searchValue}
+          />
+        </div>
 
         {/* Filters - right side */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          {/* Sort Select */}
-          <Select
-            onValueChange={(value) => updateFilter("sort", value)}
-            value={currentSort || "date-desc"}
-          >
-            <SelectTrigger className="w-full sm:w-48">
-              <div className="flex items-center gap-1.5">
-                <SortAsc className="h-4 w-4 text-muted-foreground" />
-                <SelectValue aria-label="Sort events" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Sort Order</SelectLabel>
-                <SelectItem value="date-desc">Date Descending</SelectItem>
-                <SelectItem value="date-asc">Date Ascending</SelectItem>
-                <SelectItem value="title-asc">Title Ascending</SelectItem>
-                <SelectItem value="title-desc">Title Descending</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          {/* Combined Sort Menu */}
+          <Menu.Root>
+            <Menu.Trigger
+              className={cn(
+                "flex h-9 w-full items-center gap-2 rounded-md border border-border bg-transparent px-3 py-2 text-sm shadow-xs sm:w-52",
+                "hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-1",
+              )}
+            >
+              <SortAsc className="h-4 w-4 text-muted-foreground" />
+              <span>Sort</span>
+            </Menu.Trigger>
+            <Menu.Portal>
+              <Menu.Positioner className="z-50 outline-none" sideOffset={8}>
+                <Menu.Popup className="menu-popup w-56">
+                  <div className="px-3 py-1.5 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                    Date Sort
+                  </div>
+                  <Menu.Item
+                    className="menu-item"
+                    onClick={() => toggleDateSort("date-desc")}
+                  >
+                    <span>Date Descending</span>
+                    {selectedDateSort === "date-desc" && <Check size={14} />}
+                  </Menu.Item>
+                  <Menu.Item
+                    className="menu-item"
+                    onClick={() => toggleDateSort("date-asc")}
+                  >
+                    <span>Date Ascending</span>
+                    {selectedDateSort === "date-asc" && <Check size={14} />}
+                  </Menu.Item>
+
+                  <div className="my-1 h-px bg-border" />
+
+                  <div className="px-3 py-1.5 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                    Name Sort
+                  </div>
+                  <Menu.Item
+                    className="menu-item"
+                    onClick={() => toggleTitleSort("title-asc")}
+                  >
+                    <span>Title A-Z</span>
+                    {selectedTitleSort === "title-asc" && <Check size={14} />}
+                  </Menu.Item>
+                  <Menu.Item
+                    className="menu-item"
+                    onClick={() => toggleTitleSort("title-desc")}
+                  >
+                    <span>Title Z-A</span>
+                    {selectedTitleSort === "title-desc" && <Check size={14} />}
+                  </Menu.Item>
+                </Menu.Popup>
+              </Menu.Positioner>
+            </Menu.Portal>
+          </Menu.Root>
 
           {/* Status Filter Menu */}
           <Menu.Root>
@@ -207,9 +271,10 @@ export default function EventFilters() {
 
       {/* Active Filters Summary - Badge pills */}
       <ActiveFilterBadges
+        currentDateSort={selectedDateSort ?? ""}
         currentSearch={currentSearch}
-        currentSort={currentSort}
         currentStatus={currentStatus}
+        currentTitleSort={selectedTitleSort ?? ""}
         removeFilter={removeFilter}
         updateFilter={updateFilter}
       />
