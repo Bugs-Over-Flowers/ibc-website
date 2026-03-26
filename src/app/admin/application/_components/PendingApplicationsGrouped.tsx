@@ -147,42 +147,46 @@ export function PendingApplicationsGrouped({
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        aria-label="Select all in group"
-                        checked={allInGroupSelected}
-                        data-indeterminate={someInGroupSelected}
-                        onCheckedChange={() => {
-                          if (allInGroupSelected) {
-                            // Deselect only this group's apps
-                            groupAppIds.forEach((id) => {
-                              toggleSelection(id);
-                            });
-                          } else {
-                            selectAll(groupAppIds);
-                          }
-                        }}
+              <div className="w-full overflow-x-auto">
+                <Table className="min-w-[760px] table-fixed">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          aria-label="Select all in group"
+                          checked={allInGroupSelected}
+                          data-indeterminate={someInGroupSelected}
+                          onCheckedChange={() => {
+                            if (allInGroupSelected) {
+                              // Deselect only this group's apps
+                              groupAppIds.forEach((id) => {
+                                toggleSelection(id);
+                              });
+                            } else {
+                              selectAll(groupAppIds);
+                            }
+                          }}
+                        />
+                      </TableHead>
+                      <TableHead className="w-[24%]">Company Name</TableHead>
+                      <TableHead className="w-[34%]">Sector</TableHead>
+                      <TableHead className="w-[16%]">
+                        Application Type
+                      </TableHead>
+                      <TableHead className="w-[14%]">Date Applied</TableHead>
+                      <TableHead className="w-[12%]">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {group.applications.map((app) => (
+                      <ApplicationsTableRow
+                        application={app}
+                        key={app.applicationId}
                       />
-                    </TableHead>
-                    <TableHead>Company Name</TableHead>
-                    <TableHead>Sector</TableHead>
-                    <TableHead>Application Type</TableHead>
-                    <TableHead>Date Applied</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {group.applications.map((app) => (
-                    <ApplicationsTableRow
-                      application={app}
-                      key={app.applicationId}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         );
@@ -199,28 +203,30 @@ export function PendingApplicationsGrouped({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <Checkbox disabled />
-                  </TableHead>
-                  <TableHead>Company Name</TableHead>
-                  <TableHead>Sector</TableHead>
-                  <TableHead>Application Type</TableHead>
-                  <TableHead>Date Applied</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {unscheduled.map((app) => (
-                  <ApplicationsTableRow
-                    application={app}
-                    key={app.applicationId}
-                  />
-                ))}
-              </TableBody>
-            </Table>
+            <div className="w-full overflow-x-auto">
+              <Table className="min-w-[760px] table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox disabled />
+                    </TableHead>
+                    <TableHead className="w-[24%]">Company Name</TableHead>
+                    <TableHead className="w-[34%]">Sector</TableHead>
+                    <TableHead className="w-[16%]">Application Type</TableHead>
+                    <TableHead className="w-[14%]">Date Applied</TableHead>
+                    <TableHead className="w-[12%]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {unscheduled.map((app) => (
+                    <ApplicationsTableRow
+                      application={app}
+                      key={app.applicationId}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       )}

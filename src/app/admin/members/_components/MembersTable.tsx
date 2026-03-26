@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -23,6 +24,7 @@ export function MembersTable({ members }: MembersTableProps) {
     selectedStatus,
     setSelectedStatus,
     handleSelectMember,
+    handleClearSelection,
     handleUpdateStatus,
     isPending,
     isUpdateDisabled,
@@ -32,37 +34,54 @@ export function MembersTable({ members }: MembersTableProps) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
-          <CardTitle>
-            Members List
-            <span className="ml-2 font-normal text-muted-foreground text-sm">
-              ({members.length} members
-              {selectedMembers.size > 0 && `, ${selectedMembers.size} selected`}
-              )
+          <CardTitle className="flex flex-wrap items-center gap-2">
+            <span>
+              Members List
+              <span className="ml-2 font-normal text-muted-foreground text-sm">
+                ({members.length} members
+                {selectedMembers.size > 0 &&
+                  `, ${selectedMembers.size} selected`}
+                )
+              </span>
             </span>
+
+            {selectedMembers.size > 0 && (
+              <Button
+                className="h-8 whitespace-nowrap rounded-xl border border-foreground px-3 text-muted-foreground transition-colors hover:border-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={handleClearSelection}
+                size="sm"
+                variant="ghost"
+              >
+                <X className="mr-1.5 h-4 w-4" />
+                Clear selection
+              </Button>
+            )}
           </CardTitle>
 
-          <div className="flex items-center gap-2">
-            <Select
-              onValueChange={(value) => setSelectedStatus(value)}
-              value={selectedStatus}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="unpaid">Unpaid</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 rounded-md border border-border p-2">
+              <Select
+                onValueChange={(value) => setSelectedStatus(value)}
+                value={selectedStatus}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="unpaid">Unpaid</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Button
-              disabled={isUpdateDisabled}
-              onClick={handleUpdateStatus}
-              size="sm"
-            >
-              {isPending ? "Updating..." : "Update Status"}
-            </Button>
+              <Button
+                disabled={isUpdateDisabled}
+                onClick={handleUpdateStatus}
+                size="sm"
+              >
+                {isPending ? "Updating..." : "Update Status"}
+              </Button>
+            </div>
           </div>
         </div>
       </CardHeader>

@@ -22,7 +22,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "cmdk": "^1.1.1",
-        "date-fns": "^4.1.0",
+        "date-fns": "4.1.0",
         "embla-carousel-react": "^8.6.0",
         "file-type": "^21.3.4",
         "html-to-image": "^1.11.13",
@@ -92,6 +92,7 @@
   },
   "overrides": {
     "flatted": "^3.4.1",
+    "picomatch": "^2.3.2",
   },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.4.4", "", {}, "sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg=="],

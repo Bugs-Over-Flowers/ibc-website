@@ -4,8 +4,9 @@ import { ExternalLink } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { getMembers } from "@/server/members/queries/getMembers";
@@ -24,40 +25,38 @@ export function MembersTableRow({
   const [imageError, setImageError] = useState(false);
   const showImage = member.logoImageURL && !imageError;
   const router = useRouter();
-  const lastTapRef = useRef<number>(0);
+  const joinedDate = new Date(member.joinDate);
+  const joinedDateLabel = joinedDate.toLocaleDateString();
+  const joinedDateTooltip = joinedDate.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const memberIdLabel = member.identifier || "-";
 
-  const handleDoubleTap = () => {
-    const now = Date.now();
-    const timeSinceLastTap = now - lastTapRef.current;
-
-    if (timeSinceLastTap < 300) {
-      router.push(`/admin/members/${member.businessMemberId}` as Route);
-    }
-
-    lastTapRef.current = now;
+  const navigateToDetails = () => {
+    router.push(`/admin/members/${member.businessMemberId}` as Route);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      router.push(`/admin/members/${member.businessMemberId}` as Route);
-    }
+  const toggleSelection = () => {
+    onSelectedChange(!isSelected);
   };
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border bg-background p-3 shadow-sm">
-      {/* Clickable area */}
+    <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-lg">
       <button
-        className="flex w-full flex-1 cursor-pointer flex-col gap-3 overflow-hidden text-left"
-        onClick={handleDoubleTap}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
+        aria-label={`Select ${member.businessName}`}
+        aria-pressed={isSelected}
+        className="absolute inset-0 z-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        onClick={toggleSelection}
         type="button"
-      >
+      />
+      <div className="pointer-events-none relative z-10 flex w-full flex-1 flex-col gap-3 overflow-hidden text-left">
         {/* Image with status badge and checkbox */}
         <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded">
           {/* Checkbox - top left corner */}
-          <div className="absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
+          <div className="pointer-events-auto absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
             <Checkbox
               checked={isSelected}
               className="size-5"
@@ -68,7 +67,7 @@ export function MembersTableRow({
           {showImage ? (
             <Image
               alt={member.businessName}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               fill
               onError={() => setImageError(true)}
               priority={false}
@@ -106,7 +105,7 @@ export function MembersTableRow({
             </h3>
             {member.websiteURL && (
               <a
-                className="inline-flex shrink-0 text-blue-600 transition-colors hover:text-blue-700"
+                className="pointer-events-auto inline-flex shrink-0 text-blue-600 transition-colors hover:text-blue-700"
                 href={member.websiteURL}
                 onClick={(e) => e.stopPropagation()}
                 rel="noopener noreferrer"
@@ -125,22 +124,38 @@ export function MembersTableRow({
           <div className="h-px w-full bg-border" />
 
           {/* Identifier and date at bottom */}
-          <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-            <p className="text-muted-foreground text-xs opacity-60">
-              {member.identifier}
+          <div className="pointer-events-auto mt-auto flex items-center justify-between gap-2 pt-2">
+            <p
+              className="cursor-help text-muted-foreground text-xs opacity-60"
+              title={`Member ID: ${memberIdLabel}`}
+            >
+              {memberIdLabel}
             </p>
-            <p className="text-muted-foreground text-xs opacity-60">
-              {new Date(member.joinDate).toLocaleDateString()}
+
+            <p
+              className="cursor-help text-muted-foreground text-xs opacity-60"
+              title={`Joined Date: ${joinedDateTooltip}`}
+            >
+              {joinedDateLabel}
             </p>
           </div>
 
           <div className="flex justify-center pt-2">
-            <p className="text-muted-foreground text-xs italic opacity-50">
-              -- Double click to view details --
-            </p>
+            <Button
+              className="pointer-events-auto w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigateToDetails();
+              }}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              View Details
+            </Button>
           </div>
         </div>
-      </button>
+      </div>
     </div>
   );
 }
