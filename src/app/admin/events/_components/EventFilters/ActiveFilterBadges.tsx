@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   DATE_SORT_LABELS,
   TITLE_SORT_LABELS,
-} from "@/app/admin/events/_components/event-filters/constants";
+} from "@/app/admin/events/_components/EventFilters/constants";
 
 interface ActiveFilterBadgesProps {
   currentDateSort: string;

@@ -3,9 +3,9 @@
 import { Menu } from "@base-ui/react/menu";
 import { Check, ChevronRight, Filter, SortAsc, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import ActiveFilterBadges from "@/app/admin/events/_components/event-filters/ActiveFilterBadges";
-import { STATUS_LABELS } from "@/app/admin/events/_components/event-filters/constants";
-import EventSearchBar from "@/app/admin/events/_components/event-filters/EventSearchBar";
+import ActiveFilterBadges from "@/app/admin/events/_components/EventFilters/ActiveFilterBadges";
+import { STATUS_LABELS } from "@/app/admin/events/_components/EventFilters/constants";
+import EventSearchBar from "@/app/admin/events/_components/EventFilters/EventSearchBar";
 import { useEventFilters } from "@/app/admin/events/_hooks/useEventFilters";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
