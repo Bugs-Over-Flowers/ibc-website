@@ -62,10 +62,11 @@ export const useCreateEventForm = () => {
 
       const validateFile = (file: File) => {
         const fileExt = file.name.split(".").pop()?.toLowerCase();
+        const allowedExtensions = ["jpg", "jpeg", "png"];
 
         if (!fileExt || !allowedExtensions.includes(fileExt)) {
           toast.error(
-            "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
+            "Invalid file type. Only jpg, jpeg, and png are allowed.",
           );
           return null;
         }
