@@ -18,13 +18,11 @@ const SectorContent = ({ search }: { search?: string }) => {
         <CreateSectorButton />
       </div>
 
-      <div className="rounded-lg border bg-background p-4 md:p-6">
-        <Suspense
-          fallback={<div className="h-12 animate-pulse rounded bg-muted" />}
-        >
-          <SectorFilters />
-        </Suspense>
-      </div>
+      <Suspense
+        fallback={<div className="h-12 animate-pulse rounded bg-muted" />}
+      >
+        <SectorFilters />
+      </Suspense>
 
       <SectorRow search={search} />
     </div>
