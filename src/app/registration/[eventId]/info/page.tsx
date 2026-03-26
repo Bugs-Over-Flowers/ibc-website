@@ -1,13 +1,20 @@
 import { Suspense } from "react";
 import type { RegistrationInformationPageProps } from "@/lib/types/route";
-import RegistrationInfoPage from "./_components/RegistrationInfoPage";
+import { RegistrationInfoPageContent } from "./_components/RegistrationInfoPageContent";
+import Loading from "./loading";
 
 export default function InfoPageWrapper({
   params,
+  searchParams,
 }: RegistrationInformationPageProps) {
   return (
-    <Suspense>
-      <RegistrationInfoPage params={params} />
-    </Suspense>
+    <main className="min-h-screen w-full bg-background pb-20">
+      <Suspense fallback={<Loading />}>
+        <RegistrationInfoPageContent
+          params={params}
+          searchParams={searchParams}
+        />
+      </Suspense>
+    </main>
   );
 }

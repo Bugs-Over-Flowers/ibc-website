@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import { getEventStatus } from "@/lib/events/eventUtils";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getRegistrationsBySponsoredId } from "@/server/sponsored-registrations/queries/getRegistrationsBySponsoredId";
@@ -117,6 +118,17 @@ async function DetailContent({
     console.error("Error loading registrations:", registrationsResult.error);
   }
 
+  const maxSponsoredGuests = sponsoredRegistration.maxSponsoredGuests ?? 0;
+  const isSlotsFull =
+    sponsoredRegistration.status === "full" ||
+    (maxSponsoredGuests > 0 &&
+      sponsoredRegistration.usedCount >= maxSponsoredGuests);
+  const isPastEvent =
+    getEventStatus(event.eventStartDate, event.eventEndDate) === "past";
+
+  const sponsoredLinkDisabledReason: "past-event" | "maxed-slots" | null =
+    isPastEvent ? "past-event" : isSlotsFull ? "maxed-slots" : null;
+
   return (
     <>
       <DetailBackButton />
@@ -127,7 +139,11 @@ async function DetailContent({
         sponsoredRegistration={sponsoredRegistration}
       />
 
-      <SponsoredLinkCard eventId={eventId} uuid={sponsoredRegistration.uuid} />
+      <SponsoredLinkCard
+        disabledReason={sponsoredLinkDisabledReason}
+        eventId={eventId}
+        uuid={sponsoredRegistration.uuid}
+      />
 
       <SlotUtilizationCard
         registrationCount={registrations.length}

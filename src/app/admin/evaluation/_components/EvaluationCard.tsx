@@ -10,7 +10,7 @@ import {
   User,
 } from "lucide-react";
 import type { Route } from "next";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getEvaluationRatingQuestions } from "@/lib/evaluation/evaluationQuestions";
 import { renderStars } from "@/lib/evaluation/ratingStarsClient";
 import {
@@ -26,6 +26,7 @@ interface EvaluationCardProps {
 
 export function EvaluationCard({ evaluation }: EvaluationCardProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const eventTitle = evaluation.event_title || "Unknown Event";
   const createdAt = new Date(evaluation.created_at);
   const ratings = getEvaluationRatingQuestions(evaluation);
@@ -33,8 +34,17 @@ export function EvaluationCard({ evaluation }: EvaluationCardProps) {
   const overallRating = calculateOverallRating(ratingValues);
 
   const handleClick = () => {
-    router.push("/admin/evaluation" as Route);
+    const eventId = searchParams.get("eventId");
+    const targetPath = eventId
+      ? `/admin/events/${eventId}/evaluations`
+      : "/admin/evaluation";
+    router.push(targetPath as Route);
   };
+
+  const eventId = searchParams.get("eventId");
+  const backButtonLabel = eventId
+    ? "Back to Event Evaluations"
+    : "Back to Evaluations";
 
   return (
     <form className="mx-auto max-w-full space-y-6">
@@ -44,7 +54,7 @@ export function EvaluationCard({ evaluation }: EvaluationCardProps) {
         type="button"
       >
         <ChevronLeft className="h-5 w-5" />
-        Back to Evaluations
+        {backButtonLabel}
       </button>
 
       {/* Event Details Card */}

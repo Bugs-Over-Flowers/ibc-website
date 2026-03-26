@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { ServerFunction } from "@/lib/server/types";
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
@@ -48,6 +49,7 @@ export const publishEvent: ServerFunction<
       eventType: data.eventType as Database["public"]["Enums"]["EventType"],
       eventHeaderUrl: data.eventImage,
       publishedAt: new Date().toISOString(),
+      facebookLink: data.facebookLink ?? null,
     })
     .select("eventId")
     .single();
@@ -60,10 +62,9 @@ export const publishEvent: ServerFunction<
     };
   }
 
-  // updateTag(CACHE_TAGS.events.all);
-  // updateTag(CACHE_TAGS.events.admin);
-  // updateTag(CACHE_TAGS.events.public);
+  updateTag(CACHE_TAGS.events.all);
+  updateTag(CACHE_TAGS.events.admin);
+  updateTag(CACHE_TAGS.events.public);
 
-  revalidatePath("/admin/events");
   return { success: true, data: { eventId: eventData.eventId }, error: null };
 };

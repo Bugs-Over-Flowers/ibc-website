@@ -27,6 +27,7 @@ export function SponsoredRegistrationsList({
   const router = useRouter();
   const [displayedCount, setDisplayedCount] = useState(pageSize);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for infinite scroll
@@ -86,7 +87,14 @@ export function SponsoredRegistrationsList({
   };
 
   const handleDeleteClick = async (registration: SponsoredRegistration) => {
-    setIsDeleting(true);
+    if (registration.usedCount > 0) {
+      toast.error(
+        "Cannot delete this sponsored registration because it has already been used.",
+      );
+      return;
+    }
+
+    setIsDeletingId(registration.sponsoredRegistrationId);
     const toastId = toast.loading("Deleting...");
 
     const { error } = await tryCatch(
@@ -96,7 +104,7 @@ export function SponsoredRegistrationsList({
       }),
     );
 
-    setIsDeleting(false);
+    setIsDeletingId(null);
 
     if (error) {
       toast.error(`Failed to delete: ${error}`, { id: toastId });
@@ -104,14 +112,15 @@ export function SponsoredRegistrationsList({
     }
 
     toast.success("Deleted successfully!", { id: toastId });
-    router.refresh();
+    router.push("/admin/sponsored-registration");
   };
 
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-2 gap-4">
       {displayedRegistrations.map((registration, _index) => (
         <SponsoredRegistrationCard
           event={event}
+          isDeleting={isDeletingId === registration.sponsoredRegistrationId}
           key={registration.sponsoredRegistrationId}
           onCopyLink={handleCopyLink}
           onDeleteClick={handleDeleteClick}
@@ -121,7 +130,7 @@ export function SponsoredRegistrationsList({
       ))}
 
       {displayedCount < registrations.length && (
-        <div className="py-4 text-center" ref={loaderRef}>
+        <div className="col-span-2 py-4 text-center" ref={loaderRef}>
           {isLoadingMore ? (
             <span className="text-muted-foreground text-sm">
               Loading more...
@@ -135,7 +144,4 @@ export function SponsoredRegistrationsList({
       )}
     </div>
   );
-}
-function setIsDeleting(_arg0: boolean) {
-  throw new Error("Function not implemented.");
 }

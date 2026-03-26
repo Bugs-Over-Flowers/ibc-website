@@ -25,6 +25,7 @@ function TextareaField({
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Textarea
+        aria-invalid={isInvalid}
         data-invalid={isInvalid}
         id={field.name}
         name={field.name}
@@ -35,7 +36,7 @@ function TextareaField({
         {...textareaProps}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={field.state.meta.errors} />
+      <FieldError errors={field.state.meta.errors} reserveSpace />
     </Field>
   );
 }
