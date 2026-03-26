@@ -47,6 +47,7 @@ export function MembersTableRow({
     <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-lg">
       <button
         aria-label={`Select ${member.businessName}`}
+        aria-pressed={isSelected}
         className="absolute inset-0 z-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         onClick={toggleSelection}
         type="button"

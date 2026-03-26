@@ -23,6 +23,44 @@ interface CursorPayload {
   id: string;
 }
 
+function isStringOrNull(value: unknown): value is string | null {
+  return typeof value === "string" || value === null;
+}
+
+function normalizeCursorPayload(value: unknown): CursorPayload | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+
+  // Support current payload shape and legacy key aliases.
+  const idValue =
+    typeof record.id === "string"
+      ? record.id
+      : typeof record.eventId === "string"
+        ? record.eventId
+        : null;
+
+  if (!idValue) {
+    return null;
+  }
+
+  const dvValue =
+    record.dv ?? record.dateValue ?? record.eventStartDate ?? null;
+  const tvValue = record.tv ?? record.titleValue ?? record.eventTitle ?? null;
+
+  if (!isStringOrNull(dvValue) || !isStringOrNull(tvValue)) {
+    return null;
+  }
+
+  return {
+    dv: dvValue,
+    tv: tvValue,
+    id: idValue,
+  };
+}
+
 interface GetAdminEventsArgs {
   search?: string;
   sort?: SortOption;
@@ -63,13 +101,19 @@ function encodeCursor(
 function decodeCursor(cursor?: string | null): CursorPayload | null {
   if (!cursor) return null;
   try {
-    return JSON.parse(
-      Buffer.from(cursor, "base64url").toString(),
-    ) as CursorPayload;
+    const decoded = JSON.parse(Buffer.from(cursor, "base64url").toString());
+    return normalizeCursorPayload(decoded);
   } catch (error) {
     console.error("Invalid cursor", error);
     return null;
   }
+}
+
+function toPostgrestLiteral(value: string): string {
+  // Quote/escape values so PostgREST filter grammar is preserved even when
+  // the value contains commas, parentheses, periods, or quotes.
+  const escaped = value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return `"${escaped}"`;
 }
 
 export async function getAdminEventsPage(
@@ -181,22 +225,35 @@ export async function getAdminEventsPage(
       if (includeDateSort && includeTitleSort && dv !== null && tv !== null) {
         const dateCmp = ascendingDate ? "gt" : "lt";
         const titleCmp = ascendingTitle ? "gt" : "lt";
+        const safeDv = toPostgrestLiteral(dv);
+        const safeTv = toPostgrestLiteral(tv);
+        const safeId = toPostgrestLiteral(id);
 
         query = query.or(
-          `eventStartDate.${dateCmp}.${dv},and(eventStartDate.eq.${dv},eventTitle.${titleCmp}.${tv}),and(eventStartDate.eq.${dv},eventTitle.eq.${tv},eventId.gt.${id})`,
+          `eventStartDate.${dateCmp}.${safeDv},and(eventStartDate.eq.${safeDv},eventTitle.${titleCmp}.${safeTv}),and(eventStartDate.eq.${safeDv},eventTitle.eq.${safeTv},eventId.gt.${safeId})`,
         );
       } else if (includeDateSort && dv !== null) {
         const dateCmp = ascendingDate ? "gt" : "lt";
+        const safeDv = toPostgrestLiteral(dv);
+        const safeId = toPostgrestLiteral(id);
         query = query.or(
-          `eventStartDate.${dateCmp}.${dv},and(eventStartDate.eq.${dv},eventId.gt.${id})`,
+          `eventStartDate.${dateCmp}.${safeDv},and(eventStartDate.eq.${safeDv},eventId.gt.${safeId})`,
         );
       } else if (includeTitleSort && tv !== null) {
         const titleCmp = ascendingTitle ? "gt" : "lt";
+        const safeTv = toPostgrestLiteral(tv);
+        const safeId = toPostgrestLiteral(id);
         query = query.or(
-          `eventTitle.${titleCmp}.${tv},and(eventTitle.eq.${tv},eventId.gt.${id})`,
+          `eventTitle.${titleCmp}.${safeTv},and(eventTitle.eq.${safeTv},eventId.gt.${safeId})`,
         );
       } else {
-        query = query.gt("eventId", id);
+        if (includeDateSort) {
+          // Keep keyset pagination aligned with primary date ordering when
+          // the cursor date is null by advancing only through non-null dates.
+          query = query.not("eventStartDate", "is", null).gt("eventId", id);
+        } else {
+          query = query.gt("eventId", id);
+        }
       }
     }
   }

@@ -126,7 +126,7 @@ export function PaymentProofModal({
                   Registration Fee
                 </span>
                 <p className="font-bold text-2xl text-primary">
-                  P{expectedRegistrationFee.toLocaleString()}
+                  ₱{expectedRegistrationFee.toLocaleString()}
                 </p>
                 <p className="text-muted-foreground text-xs">
                   Expected payment amount for{" "}
@@ -137,13 +137,13 @@ export function PaymentProofModal({
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Personal fee</span>
                   <span className="font-semibold text-foreground">
-                    P{PERSONAL_REGISTRATION_FEE.toLocaleString()}
+                    ₱{PERSONAL_REGISTRATION_FEE.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Corporate fee</span>
                   <span className="font-semibold text-foreground">
-                    P{CORPORATE_REGISTRATION_FEE.toLocaleString()}
+                    ₱{CORPORATE_REGISTRATION_FEE.toLocaleString()}
                   </span>
                 </div>
               </div>
