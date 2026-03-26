@@ -14,7 +14,7 @@ Modern membership, events, and registration platform for the Iloilo Business Clu
 
 - **Framework**: Next.js 16 (App Router) + React 19 (Server Components-first)
 - **Runtime**: Bun with Turbopack for dev builds
-- **Language**: TypeScript 
+- **Language**: TypeScript
 - **Styling**: Tailwind CSS and shadcn/ui
 - **Forms**: TanStack Form and Zod validation helpers
 - **Backend**: Supabase (PostgreSQL, Auth, Storage) + Server Actions
@@ -23,20 +23,21 @@ Modern membership, events, and registration platform for the Iloilo Business Clu
 
 1. **Clone & install**
    ```bash
-   git clone <https://github.com/Bugs-Over-Flowers/ibc-website.git>
+   git clone https://github.com/Bugs-Over-Flowers/ibc-website.git
    cd ibc-website
    bun install
    ```
 2. **Environment variables** (`.env.local`)
-   ```bash
+   ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=optional_if_needed
+   RESEND_API_KEY=your_resend_api_key
+   EMAIL_FROM=notifications@example.com
+   # Optional: required for admin tooling / E2E seeding, not for basic local browsing
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
    ```
 3. **Local development**
    ```bash
    bun run dev
    ```
    Visit http://localhost:3000 and sign in via the configured Supabase auth provider(s).
-
-
