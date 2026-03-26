@@ -14,7 +14,7 @@ export async function resetMemberStatuses() {
   const { data, error } = await supabase
     .from("BusinessMember")
     .update({ membershipStatus: "unpaid" })
-    .eq("membershipStatus", "unpaid")
+    .eq("membershipStatus", "paid")
     .select("businessMemberId");
 
   if (error) {

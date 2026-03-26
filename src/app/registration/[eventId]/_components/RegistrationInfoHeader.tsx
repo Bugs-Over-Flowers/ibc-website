@@ -1,7 +1,10 @@
 "use client";
 
 import { format } from "date-fns";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useEffectEvent } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import useRegistrationStore from "@/hooks/registration.store";
@@ -41,6 +44,19 @@ const RegistrationInfoHeader = (
   }, [initialEventDetails, eventDetails?.eventId, resetStore]);
   return (
     <div className="space-y-5 p-3 md:w-96">
+      {eventDetails?.eventId && (
+        <div className="mb-2">
+          <Link href={`/events/${eventDetails.eventId}`}>
+            <Button
+              className="h-8 px-2 no-underline hover:text-primary/60 hover:no-underline active:no-underline"
+              variant={"link"}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back to Event
+            </Button>
+          </Link>
+        </div>
+      )}
       <Card>
         <CardContent className="flex-col items-start">
           <CardTitle>{eventTitle}</CardTitle>

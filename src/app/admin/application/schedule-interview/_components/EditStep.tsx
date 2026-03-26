@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react";
+import StandaloneRichTextEditor from "@/components/StandaloneRichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { ApplicationBadgeList } from "./ApplicationBadgeList";
 import { InterviewDetailsCard } from "./InterviewDetailsCard";
 
@@ -55,14 +55,14 @@ export function EditStep({
           <Label className="font-medium" htmlFor="customMessage">
             Email Message
           </Label>
-          <Textarea
-            className="flex-1 resize-none text-sm"
-            id="customMessage"
-            onChange={(e) => onCustomMessageChange(e.target.value)}
+          <StandaloneRichTextEditor
+            onChange={onCustomMessageChange}
+            placeholder="Write your email message..."
             value={customMessage}
           />
           <p className="text-muted-foreground text-xs">
-            Edit the message as needed or use the default template.
+            Use the toolbar to format text with bold, italic, headings, and
+            lists.
           </p>
         </div>
       </div>

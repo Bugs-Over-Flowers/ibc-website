@@ -1,12 +1,11 @@
 import { ChevronLeft, Send } from "lucide-react";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ApplicationBadgeList } from "./ApplicationBadgeList";
 
-const INTERVIEW_DETAILS_TEMPLATE = `Interview Details:
-Date & Time: {INTERVIEW_DATE}
-Venue: {INTERVIEW_VENUE}`;
+const INTERVIEW_DETAILS_TEMPLATE = `<p><strong>Interview Details:</strong></p><p>Date &amp; Time: {INTERVIEW_DATE}</p><p>Venue: {INTERVIEW_VENUE}</p>`;
 
 interface Application {
   applicationId: string;
@@ -66,8 +65,8 @@ export function PreviewStep({
         .replace(/\{INTERVIEW_VENUE\}/g, interviewVenue || "Not set");
     }
 
-    // Otherwise, append details to ensure they're always shown
-    return `${message}\n\n${details}`;
+    // Otherwise, append details to ensure they're always shown (both are HTML)
+    return `${message}${details}`;
   };
 
   return (
@@ -82,9 +81,7 @@ export function PreviewStep({
         <div className="flex flex-col gap-3">
           <Label className="font-medium">Email Message</Label>
           <Card className="flex-1 overflow-y-auto p-4">
-            <pre className="whitespace-pre-wrap font-sans text-sm">
-              {getPreviewMessage()}
-            </pre>
+            <RichTextDisplay content={getPreviewMessage()} />
           </Card>
         </div>
       </div>

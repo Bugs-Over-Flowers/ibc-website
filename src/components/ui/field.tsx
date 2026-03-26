@@ -166,9 +166,11 @@ function FieldError({
   className,
   children,
   errors,
+  reserveSpace = false,
   ...props
 }: React.ComponentProps<"div"> & {
   errors?: Array<{ message?: string } | undefined>
+  reserveSpace?: boolean
 }) {
   const content = useMemo(() => {
     if (children) {
@@ -197,7 +199,7 @@ function FieldError({
     )
   }, [children, errors])
 
-  if (!content) {
+  if (!content && !reserveSpace) {
     return null
   }
 
@@ -205,7 +207,11 @@ function FieldError({
     <div
       role="alert"
       data-slot="field-error"
-      className={cn("text-destructive text-sm font-normal", className)}
+      className={cn(
+        "text-destructive min-h-5 text-sm font-normal",
+        !content && "invisible",
+        className
+      )}
       {...props}
     >
       {content}

@@ -24,6 +24,7 @@ function RadioGroupField({
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel>{label}</FieldLabel>}
       <RadioGroup
+        aria-invalid={isInvalid}
         className="flex gap-4"
         defaultValue={options[0]?.value}
         onValueChange={(value) => field.handleChange(value as string)}
@@ -46,7 +47,7 @@ function RadioGroupField({
         ))}
       </RadioGroup>
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={field.state.meta.errors} />
+      <FieldError errors={field.state.meta.errors} reserveSpace />
     </Field>
   );
 }

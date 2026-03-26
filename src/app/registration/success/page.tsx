@@ -9,7 +9,7 @@ import ResetRegistrationWrapper from "./_components/ResetRegistrationWrapper";
 
 export default function SuccessPageWrapper() {
   return (
-    <main className="h-screen">
+    <main className="min-h-screen bg-background px-4 py-8 sm:px-6 lg:px-8">
       <Suspense fallback={<CenterSpinner className="size-10" />}>
         <SuccessPage />
       </Suspense>
@@ -23,36 +23,32 @@ async function SuccessPage() {
 
   if (!recentQRData) {
     return (
-      <main className="flex h-screen flex-col items-center justify-center space-y-5 bg-gray-100 p-5">
-        <h1>No registration yet</h1>
-        <div>
+      <section className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center space-y-5 text-center">
+        <h1 className="font-semibold text-foreground text-xl">
+          No registration yet
+        </h1>
+        <p className="max-w-xl text-muted-foreground">
           You have not registered recently (for the past 14 days). Please
           register first.
-        </div>
+        </p>
         <Link href={"/events"}>
           <Button>Go to Events</Button>
         </Link>
-      </main>
+      </section>
     );
   }
   return (
     <ResetRegistrationWrapper>
-      <main className="h-full p-5 md:p-10">
-        <h1>Registration Successful!</h1>
-
-        <Suspense
-          fallback={
-            <div className="h-full pt-5 pb-5 md:pb-10">
-              <Skeleton className="min-h-full rounded-xl bg-neutral-300" />
-            </div>
-          }
-        >
-          <EventDetails
-            cookieStore={cookieStore.getAll()}
-            registrationIdentifier={recentQRData}
-          />
-        </Suspense>
-      </main>
+      <Suspense
+        fallback={
+          <Skeleton className="mx-auto h-[720px] w-full max-w-4xl rounded-2xl bg-muted" />
+        }
+      >
+        <EventDetails
+          cookieStore={cookieStore.getAll()}
+          registrationIdentifier={recentQRData}
+        />
+      </Suspense>
     </ResetRegistrationWrapper>
   );
 }
