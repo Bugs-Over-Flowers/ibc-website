@@ -89,7 +89,7 @@ export function ApplicationsTableRow({
           }}
         />
       </TableCell>
-      <TableCell className="font-medium">
+      <TableCell className="w-[24%] font-medium">
         <div className="flex items-center gap-2">
           {isPaymentProofPending && (
             <Tooltip>
@@ -105,12 +105,12 @@ export function ApplicationsTableRow({
           <span>{application.companyName}</span>
         </div>
       </TableCell>
-      <TableCell className="max-w-64">
+      <TableCell className="w-[34%] max-w-64">
         <div className="line-clamp-2 truncate text-sm">
           {application.Sector?.sectorName}
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-[16%]">
         <Badge className={`${borderColor} ${textColor}`} variant="outline">
           {toPascalCaseWithSpaces(application.applicationType)}
         </Badge>
@@ -123,14 +123,14 @@ export function ApplicationsTableRow({
           </div>
         </div>
       </TableCell> */}
-      <TableCell>
+      <TableCell className="w-[14%]">
         <div className="space-y-1">
           <div>
             {new Date(application.applicationDate).toLocaleDateString()}
           </div>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-[12%]">
         <Button
           className="active:scale-95 active:opacity-80 dark:hover:bg-muted"
           size="sm"
