@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import ApplicationsList from "./_components/ApplicationsList";
 import { ApplicationsListSkeleton } from "./_components/ApplicationsListSkeleton";
 import ApplicationsStats from "./_components/ApplicationsStats";
 import ApplicationsTabs from "./_components/ApplicationsTabs";
+
+export const metadata: Metadata = {
+  title: "Membership Applications | Admin",
+  description: "Manage membership applications and schedule interviews",
+};
 
 export default async function ApplicationsPage() {
   return (

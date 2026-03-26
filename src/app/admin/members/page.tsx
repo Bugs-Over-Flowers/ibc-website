@@ -1,9 +1,15 @@
 import { Plus } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import FiltersWrapper from "./_components/FiltersWrapper";
 import MembersList from "./_components/MembersList";
 import MembersLoading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Members Directory | Admin",
+  description: "View and manage active members",
+};
 
 interface PageProps {
   searchParams: Promise<{

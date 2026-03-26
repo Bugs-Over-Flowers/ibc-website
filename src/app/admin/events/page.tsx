@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import {
@@ -8,6 +9,11 @@ import CreateEventButton from "./_components/CreateEventButton";
 import EventFilters from "./_components/EventFilters";
 import EventTable from "./_components/EventTable";
 import EventsPageSkeleton from "./loading";
+
+export const metadata: Metadata = {
+  title: "Events | Admin",
+  description: "View and manage your events",
+};
 
 interface SearchParams {
   search?: string;
