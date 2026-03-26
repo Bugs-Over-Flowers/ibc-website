@@ -85,16 +85,15 @@ export async function createManualMember(
     throw new Error("Failed to parse membership application response");
   }
 
-  const { error: paymentProofStatusError } = await supabase
+  const manualPaymentProofStatus: PaymentProofStatus = "accepted";
+  const { error: paymentProofUpdateError } = await supabase
     .from("Application")
-    .update({
-      paymentProofStatus: "accepted" as PaymentProofStatus,
-    })
+    .update({ paymentProofStatus: manualPaymentProofStatus })
     .eq("applicationId", submitResult.data.applicationId);
 
-  if (paymentProofStatusError) {
+  if (paymentProofUpdateError) {
     throw new Error(
-      `Failed to set payment proof status: ${paymentProofStatusError.message}`,
+      `Failed to set payment proof status: ${paymentProofUpdateError.message}`,
     );
   }
 
