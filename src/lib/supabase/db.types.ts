@@ -308,7 +308,6 @@ export type Database = {
       };
       Event: {
         Row: {
-          availableSlots: number | null;
           description: string | null;
           eventEndDate: string | null;
           eventHeaderUrl: string | null;
@@ -318,14 +317,12 @@ export type Database = {
           eventTitle: string;
           eventType: Database["public"]["Enums"]["EventType"] | null;
           facebookLink: string | null;
-          maxGuest: number | null;
           publishedAt: string | null;
           registrationFee: number;
           updatedAt: string | null;
           venue: string | null;
         };
         Insert: {
-          availableSlots?: number | null;
           description?: string | null;
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
@@ -335,14 +332,12 @@ export type Database = {
           eventTitle: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
           facebookLink?: string | null;
-          maxGuest?: number | null;
           publishedAt?: string | null;
           registrationFee?: number;
           updatedAt?: string | null;
           venue?: string | null;
         };
         Update: {
-          availableSlots?: number | null;
           description?: string | null;
           eventEndDate?: string | null;
           eventHeaderUrl?: string | null;
@@ -352,7 +347,6 @@ export type Database = {
           eventTitle?: string;
           eventType?: Database["public"]["Enums"]["EventType"] | null;
           facebookLink?: string | null;
-          maxGuest?: number | null;
           publishedAt?: string | null;
           registrationFee?: number;
           updatedAt?: string | null;
@@ -643,12 +637,10 @@ export type Database = {
         Args: { p_application_identifier: string };
         Returns: Json;
       };
-      check_member_exists:
-        | { Args: { p_identifier: string }; Returns: Json }
-        | {
-            Args: { p_application_type?: string; p_identifier: string };
-            Returns: Json;
-          };
+      check_member_exists: {
+        Args: { p_application_type?: string; p_identifier: string };
+        Returns: Json;
+      };
       check_membership_expiry: { Args: never; Returns: undefined };
       compute_primary_application_id: {
         Args: { p_member_id: string };
@@ -673,30 +665,6 @@ export type Database = {
       delete_sr: {
         Args: { p_sponsored_registration_id: string };
         Returns: Json;
-      };
-      get_evaluations_by_event: {
-        Args: {
-          event_id: string;
-          completed_only?: boolean;
-        };
-        Returns: {
-          additional_comments: string;
-          created_at: string;
-          evaluation_id: string;
-          event_end_date: string;
-          event_id: string;
-          event_start_date: string;
-          event_title: string;
-          feedback: string;
-          name: string;
-          q1_rating: Database["public"]["Enums"]["ratingScale"];
-          q2_rating: Database["public"]["Enums"]["ratingScale"];
-          q3_rating: Database["public"]["Enums"]["ratingScale"];
-          q4_rating: Database["public"]["Enums"]["ratingScale"];
-          q5_rating: Database["public"]["Enums"]["ratingScale"];
-          q6_rating: Database["public"]["Enums"]["ratingScale"];
-          venue: string;
-        }[];
       };
       get_all_evaluations: {
         Args: never;
@@ -756,6 +724,27 @@ export type Database = {
       get_application_history: { Args: { p_member_id: string }; Returns: Json };
       get_evaluation_by_id: {
         Args: { eval_id: string };
+        Returns: {
+          additional_comments: string;
+          created_at: string;
+          evaluation_id: string;
+          event_end_date: string;
+          event_id: string;
+          event_start_date: string;
+          event_title: string;
+          feedback: string;
+          name: string;
+          q1_rating: Database["public"]["Enums"]["ratingScale"];
+          q2_rating: Database["public"]["Enums"]["ratingScale"];
+          q3_rating: Database["public"]["Enums"]["ratingScale"];
+          q4_rating: Database["public"]["Enums"]["ratingScale"];
+          q5_rating: Database["public"]["Enums"]["ratingScale"];
+          q6_rating: Database["public"]["Enums"]["ratingScale"];
+          venue: string;
+        }[];
+      };
+      get_evaluations_by_event: {
+        Args: { completed_only?: boolean; event_id: string };
         Returns: {
           additional_comments: string;
           created_at: string;
@@ -993,7 +982,9 @@ export type Database = {
           p_end_date?: string;
           p_event_header_url?: string;
           p_event_id: string;
+          p_event_poster?: string;
           p_event_type?: string;
+          p_facebook_link?: string;
           p_registration_fee?: number;
           p_start_date?: string;
           p_title?: string;
