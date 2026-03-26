@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import { Button } from "@/components/ui/button";
 import type { Tables } from "@/lib/supabase/db.types";
 
@@ -163,6 +164,18 @@ export function EventSlide({
             {event.eventTitle}
           </motion.h2>
 
+          {/* Event Description */}
+          <motion.div
+            className="mb-6 line-clamp-2 max-w-2xl text-pretty text-base text-hero-text leading-relaxed drop-shadow-[0_1px_4px_rgba(255,255,255,0.2)] sm:text-lg dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+            variants={itemVariants}
+          >
+            <RichTextDisplay
+              content={
+                event.description ??
+                "<p>Join us for this exciting business networking event!</p>"
+              }
+            />
+          </motion.div>
           {/* Event Details Pills */}
           <motion.div
             className="mb-8 flex flex-wrap gap-3"

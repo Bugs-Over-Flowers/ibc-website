@@ -36,7 +36,11 @@ function DetailRow({
   );
 }
 
-function formatEnumValue(value: string): string {
+function formatEnumValue(value?: string): string {
+  if (!value) {
+    return "N/A";
+  }
+
   return value
     .replace(/([A-Z])/g, " $1")
     .trim()
@@ -45,7 +49,7 @@ function formatEnumValue(value: string): string {
     .join(" ");
 }
 
-export function Step4Review({ form, applicationData, sectors }: StepProps) {
+export function Step4Review({ applicationData, sectors }: StepProps) {
   const representativeKeysRef = useRef(new WeakMap<object, string>());
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 

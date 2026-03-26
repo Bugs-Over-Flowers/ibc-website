@@ -82,6 +82,15 @@ export function CreateEventForm() {
               {(field) => <field.NumberField label="Registration Fee * " />}
             </form.AppField>
 
+            <form.AppField name="facebookLink">
+              {(field) => (
+                <field.TextField
+                  label="Facebook Event Link"
+                  placeholder="https://www.facebook.com/events/..."
+                />
+              )}
+            </form.AppField>
+
             <form.AppField name="eventImage">
               {(field) => (
                 <field.FileDropzoneField
