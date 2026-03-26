@@ -18,6 +18,7 @@ const ApproveMembershipResponseSchema = z.object({
 });
 
 type MembershipStatus = Database["public"]["Enums"]["MembershipStatus"];
+type PaymentProofStatus = Database["public"]["Enums"]["PaymentProofStatus"];
 
 type CreateManualMemberResponse = {
   success: boolean;
@@ -82,6 +83,19 @@ export async function createManualMember(
 
   if (!submitResult.success) {
     throw new Error("Failed to parse membership application response");
+  }
+
+  const { error: paymentProofStatusError } = await supabase
+    .from("Application")
+    .update({
+      paymentProofStatus: "accepted" as PaymentProofStatus,
+    })
+    .eq("applicationId", submitResult.data.applicationId);
+
+  if (paymentProofStatusError) {
+    throw new Error(
+      `Failed to set payment proof status: ${paymentProofStatusError.message}`,
+    );
   }
 
   const { data: approveData, error: approveError } = await supabase.rpc(
