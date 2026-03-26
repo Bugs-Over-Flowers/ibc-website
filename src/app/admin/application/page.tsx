@@ -6,36 +6,24 @@ import ApplicationsTabs from "./_components/ApplicationsTabs";
 
 export default async function ApplicationsPage() {
   return (
-    <div className="container mx-auto space-y-8 py-8">
-      <div>
-        <h1 className="font-bold text-3xl">Membership Applications</h1>
-        <p className="mt-2 text-muted-foreground">
-          Manage membership applications and schedule interviews
-        </p>
-      </div>
+    <div className="space-y-6 px-2">
+      <Suspense fallback={<ApplicationsListSkeleton />}>
+        <div>
+          <h1 className="font-bold text-3xl text-foreground">
+            Membership Applications
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Manage membership applications and schedule interviews
+          </p>
+        </div>
 
-      <ApplicationsTabs
-        finishedApplications={
-          <Suspense fallback={<ApplicationsListSkeleton />}>
-            <ApplicationsList status="finished" />
-          </Suspense>
-        }
-        newApplications={
-          <Suspense fallback={<ApplicationsListSkeleton />}>
-            <ApplicationsList status="new" />
-          </Suspense>
-        }
-        pendingApplications={
-          <Suspense fallback={<ApplicationsListSkeleton />}>
-            <ApplicationsList status="pending" />
-          </Suspense>
-        }
-        stats={
-          <Suspense fallback={<div className="h-full" />}>
-            <ApplicationsStats />
-          </Suspense>
-        }
-      />
+        <ApplicationsTabs
+          finishedApplications={<ApplicationsList status="finished" />}
+          newApplications={<ApplicationsList status="new" />}
+          pendingApplications={<ApplicationsList status="pending" />}
+          stats={<ApplicationsStats />}
+        />
+      </Suspense>
     </div>
   );
 }

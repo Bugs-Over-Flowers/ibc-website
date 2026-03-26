@@ -6,8 +6,8 @@ import {
 } from "@/server/events/queries/getAdminEventsPage";
 import CreateEventButton from "./_components/CreateEventButton";
 import EventFilters from "./_components/EventFilters";
-import EventsSkeleton from "./_components/EventSkeleton/EventsSkeleton";
 import EventTable from "./_components/EventTable";
+import EventsPageSkeleton from "./loading";
 
 interface SearchParams {
   search?: string;
@@ -57,7 +57,7 @@ async function EventsPageContent({
 export default function Page(props: { searchParams: Promise<SearchParams> }) {
   return (
     <div className="space-y-6 px-2">
-      <Suspense fallback={<EventsSkeleton />}>
+      <Suspense fallback={<EventsPageSkeleton />}>
         <EventsPageContent {...props} />
       </Suspense>
     </div>

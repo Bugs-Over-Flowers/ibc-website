@@ -58,7 +58,7 @@ export default function EventTable({
 
   return (
     <div className="w-full space-y-4 md:space-y-6">
-      <div className="font-medium text-muted-foreground text-sm md:text-base">
+      <div className="font-medium text-muted-foreground text-sm">
         {events.length} event{events.length !== 1 ? "s" : ""} loaded
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
