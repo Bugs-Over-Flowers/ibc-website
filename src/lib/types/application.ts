@@ -16,6 +16,13 @@ export interface ApplicationWithMembers
   ApplicationMember: ApplicationMember[];
   BusinessMember: {
     identifier: string;
+    businessMemberId: string;
+    businessName: string;
+    websiteURL: string;
+    joinDate: string;
+    membershipStatus: MembershipStatus;
+    membershipExpiryDate: string | null;
+    sectorId: number;
   } | null;
   Sector: {
     sectorId: number;
