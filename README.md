@@ -27,15 +27,28 @@ Modern membership, events, and registration platform for the Iloilo Business Clu
    cd ibc-website
    bun install
    ```
-2. **Environment variables** (`.env.local`)
+2. **Environment variables** (`.env.local` or `.env`)
+
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-   RESEND_API_KEY=your_resend_api_key
+   SUPABASE_SECRET_KEY=your_service_role_key
+
    EMAIL_FROM=notifications@example.com
-   # Optional: required for admin tooling / E2E seeding, not for basic local browsing
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+   EMAIL_PROVIDER=nodemailer / resend
+
+   # Required if REMAIL_PROVIDER=resend
+   RESEND_API_KEY=your_resend_api_key
+
+   # Required if EMAIL_PROVIDER=nodemailer
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=email@gmail.com
+   SMTP_PASS=samplePassword
+   SMTP_SECURE=false
    ```
+
 3. **Local development**
    ```bash
    bun run dev
