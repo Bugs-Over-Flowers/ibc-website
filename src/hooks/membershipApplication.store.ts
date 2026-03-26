@@ -7,7 +7,7 @@ import type {
   MembershipApplicationStep4Schema,
 } from "@/lib/validation/membership/application";
 
-export const MAX_STEPS = 4;
+export const MAX_STEPS = 5;
 
 export interface MembershipApplicationData {
   step1: MembershipApplicationStep1Schema;
@@ -212,7 +212,7 @@ const useMembershipApplicationStore = create<
     }),
     {
       name: "membership-application-storage",
-      version: 4,
+      version: 6,
       migrate: (persistedState, version) => {
         if (version < 4) {
           const oldState =
@@ -227,6 +227,40 @@ const useMembershipApplicationStore = create<
             },
           };
         }
+
+        if (version < 6) {
+          const oldState =
+            persistedState as Partial<MembershipApplicationStore>;
+
+          const firstRepresentative =
+            oldState?.applicationData?.step3?.representatives?.[0];
+          const secondRepresentative =
+            oldState?.applicationData?.step3?.representatives?.[1];
+
+          return {
+            ...initialState,
+            ...oldState,
+            applicationData: {
+              ...initialState.applicationData,
+              ...oldState?.applicationData,
+              step3: {
+                representatives: [
+                  {
+                    ...initialState.applicationData.step3.representatives[0],
+                    ...firstRepresentative,
+                    companyMemberType: "principal",
+                  },
+                  {
+                    ...initialState.applicationData.step3.representatives[1],
+                    ...secondRepresentative,
+                    companyMemberType: "alternate",
+                  },
+                ],
+              },
+            },
+          };
+        }
+
         return persistedState as MembershipApplicationStore;
       },
       partialize: (state) =>
@@ -271,25 +305,44 @@ const useMembershipApplicationStore = create<
 
         if (state.applicationData?.step3?.representatives) {
           state.applicationData.step3.representatives =
-            state.applicationData.step3.representatives.map((rep) => {
-              const serialized = rep as unknown as {
-                birthdate?: string | Date;
-              };
+            state.applicationData.step3.representatives
+              .slice(0, 2)
+              .map((rep, index) => {
+                const serialized = rep as unknown as {
+                  birthdate?: string | Date;
+                };
 
-              let birthdateValue: Date | undefined;
+                let birthdateValue: Date | undefined;
 
-              if (serialized.birthdate) {
-                birthdateValue =
-                  serialized.birthdate instanceof Date
-                    ? serialized.birthdate
-                    : new Date(serialized.birthdate);
-              }
+                if (serialized.birthdate) {
+                  birthdateValue =
+                    serialized.birthdate instanceof Date
+                      ? serialized.birthdate
+                      : new Date(serialized.birthdate);
+                }
 
-              return {
-                ...rep,
-                birthdate: birthdateValue as Date,
-              };
-            });
+                return {
+                  ...rep,
+                  companyMemberType: (index === 0
+                    ? "principal"
+                    : "alternate") as "principal" | "alternate",
+                  birthdate: birthdateValue as Date,
+                };
+              });
+
+          if (state.applicationData.step3.representatives.length < 2) {
+            state.applicationData.step3.representatives = [
+              {
+                ...initialState.applicationData.step3.representatives[0],
+                ...state.applicationData.step3.representatives[0],
+                companyMemberType: "principal",
+              },
+              {
+                ...initialState.applicationData.step3.representatives[1],
+                companyMemberType: "alternate",
+              },
+            ];
+          }
         }
 
         if (state.applicationData?.step2) {

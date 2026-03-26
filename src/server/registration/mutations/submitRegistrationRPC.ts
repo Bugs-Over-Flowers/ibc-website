@@ -74,14 +74,32 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
 
   if (error) {
     console.error(error);
-    throw new Error("Failed to submit event registration");
+
+    const combinedErrorText = [error.message, error.details, error.hint]
+      .filter(Boolean)
+      .join(" ");
+
+    const isSponsoredSlotExceeded =
+      error.code === "23514" &&
+      /SponsoredRegistration_used_check|maxSponsoredGuests|usedCount|sponsored\s+slot/i.test(
+        combinedErrorText,
+      );
+
+    if (isSponsoredSlotExceeded) {
+      throw new Error(
+        "Not enough sponsored registration slots. This registration would exceed the maximum sponsored slots.",
+      );
+    }
+
+    throw new Error(
+      "Failed to submit event registration. Please try again or contact support if the problem persists.",
+    );
   }
 
   if (!rpcResults) {
     throw new Error("No data returned from registration");
   }
 
-  // Validate RPC response with Zod for type safety
   const validatedResponse = SubmitRegistrationResponseSchema.parse(rpcResults);
 
   return {

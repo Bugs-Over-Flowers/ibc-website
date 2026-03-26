@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { ServerFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
@@ -38,6 +39,7 @@ export const draftEvent: ServerFunction<
       eventType: null, // Force eventType to null for drafts
       eventHeaderUrl: data.eventImage,
       eventPoster: data.eventPoster,
+      facebookLink: data.facebookLink ?? null,
     })
     .select("eventId")
     .single();
@@ -50,9 +52,7 @@ export const draftEvent: ServerFunction<
     };
   }
 
-  // updateTag(CACHE_TAGS.events.all);
-  // updateTag(CACHE_TAGS.events.admin);
-
-  revalidatePath("/admin");
+  updateTag(CACHE_TAGS.events.all);
+  updateTag(CACHE_TAGS.events.admin);
   return { success: true, data: { eventId: eventData.eventId }, error: null };
 };

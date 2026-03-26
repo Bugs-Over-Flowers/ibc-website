@@ -27,9 +27,9 @@ export function EventDetailsContent({ event }: EventDetailsContentProps) {
   };
 
   return (
-    <section className="relative overflow-hidden bg-background py-8 md:py-12">
+    <section className="relative overflow-hidden bg-background py-6 sm:py-8 md:py-12">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5 lg:gap-12">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-5 lg:gap-12">
           <motion.div
             animate="visible"
             className="flex flex-col lg:col-span-3"

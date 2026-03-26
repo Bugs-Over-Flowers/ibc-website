@@ -29,6 +29,7 @@ function NumberField({
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
+        aria-invalid={isInvalid}
         data-invalid={isInvalid}
         id={field.name}
         max={max}
@@ -43,7 +44,7 @@ function NumberField({
         value={Number.isNaN(field.state.value) ? "" : (field.state.value ?? "")}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={field.state.meta.errors} />
+      <FieldError errors={field.state.meta.errors} reserveSpace />
     </Field>
   );
 }

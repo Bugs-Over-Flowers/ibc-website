@@ -39,6 +39,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
 
       venue: event.venue || "",
       registrationFee: event.registrationFee,
+      facebookLink: event.facebookLink || "",
       eventType: event.eventType as "public" | "private" | null,
       eventImage: [] as File[],
       eventHeaderUrl: event.eventHeaderUrl || "",
@@ -166,6 +167,12 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
       const isoStartDate = new Date(value.eventStartDate).toISOString();
       const isoEndDate = new Date(value.eventEndDate).toISOString();
 
+      const trimmedFacebookLink = value.facebookLink?.trim();
+      const normalizedFacebookLink =
+        trimmedFacebookLink && trimmedFacebookLink.length > 0
+          ? trimmedFacebookLink
+          : null;
+
       const payload = {
         eventId: value.eventId,
         eventTitle: value.eventTitle,
@@ -176,6 +183,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
         eventHeaderUrl: headerUrl || undefined,
         eventPoster: posterUrl || undefined,
         eventType: value.eventType,
+        facebookLink: normalizedFacebookLink,
         ...(isDraft && {
           registrationFee: value.registrationFee,
         }),

@@ -36,6 +36,7 @@ export function SponsoredRegistrationCard({
 }: SponsoredRegistrationCardProps) {
   const maxGuests = Number(registration.maxSponsoredGuests ?? 0);
   const usedCount = Number(registration.usedCount);
+  const isDeleteDisabled = usedCount > 0;
 
   const remainingGuests = maxGuests - usedCount;
   const totalGuests = maxGuests;
@@ -141,10 +142,14 @@ export function SponsoredRegistrationCard({
 
         <Button
           className="h-9 w-9 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-          disabled={isDeleting}
+          disabled={isDeleting || isDeleteDisabled}
           onClick={handleDelete}
           size="icon"
-          title="Delete sponsored registration"
+          title={
+            isDeleteDisabled
+              ? "Cannot delete: this sponsored registration has already been used"
+              : "Delete sponsored registration"
+          }
           type="button"
           variant="ghost"
         >
@@ -298,7 +303,7 @@ export function SponsoredRegistrationCard({
 
         <Button
           className="h-8 gap-1.5 text-destructive text-xs hover:bg-destructive/10 hover:text-destructive"
-          disabled={isDeleting}
+          disabled={isDeleting || isDeleteDisabled}
           onClick={handleDelete}
           size="sm"
           type="button"

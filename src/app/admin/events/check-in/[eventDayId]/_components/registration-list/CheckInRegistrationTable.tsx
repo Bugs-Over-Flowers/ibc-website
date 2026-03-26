@@ -17,15 +17,15 @@ interface CheckInRegistrationTableProps {
 
 function CheckInActionButton({
   eventDayId,
-  eventId,
   registrationIdentifier,
+  scanQRData,
+  isPending,
 }: {
   eventDayId: string;
-  eventId: string;
   registrationIdentifier: string;
+  scanQRData: (registrationIdentifier: string, eventDayId: string) => void;
+  isPending: boolean;
 }) {
-  const { execute: scanQRData, isPending } = useScanQR({ eventId });
-
   return (
     <Button
       disabled={isPending}
@@ -44,10 +44,12 @@ function CheckInActionButton({
 
 const getColumns = ({
   eventDayId,
-  eventId,
+  scanQRData,
+  isPending,
 }: {
   eventDayId: string;
-  eventId: string;
+  scanQRData: (registrationIdentifier: string, eventDayId: string) => void;
+  isPending: boolean;
 }): ColumnDef<RegistrationItem>[] => [
   {
     accessorKey: "registrationIdentifier",
@@ -98,8 +100,9 @@ const getColumns = ({
     cell: ({ row }) => (
       <CheckInActionButton
         eventDayId={eventDayId}
-        eventId={eventId}
+        isPending={isPending}
         registrationIdentifier={row.original.registrationIdentifier}
+        scanQRData={scanQRData}
       />
     ),
   },
@@ -110,9 +113,11 @@ export default function CheckInRegistrationTable({
   eventId,
   registrationList,
 }: CheckInRegistrationTableProps) {
+  const { execute: scanQRData, isPending } = useScanQR({ eventId });
+
   return (
     <DataTable
-      columns={getColumns({ eventDayId, eventId })}
+      columns={getColumns({ eventDayId, isPending, scanQRData })}
       data={registrationList}
     />
   );

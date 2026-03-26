@@ -14,6 +14,22 @@ const dateRefinementOptions = {
   path: ["eventEndDate"],
 };
 
+const facebookLinkClientSchema = z.preprocess((val) => {
+  if (typeof val === "string") {
+    const trimmed = val.trim();
+    return trimmed === "" ? undefined : trimmed;
+  }
+  return val;
+}, z.string().url("Please enter a valid URL").optional());
+
+const facebookLinkServerSchema = z.preprocess((val) => {
+  if (typeof val === "string") {
+    const trimmed = val.trim();
+    return trimmed === "" ? null : trimmed;
+  }
+  return val;
+}, z.string().url("Please enter a valid URL").nullable().optional());
+
 // Draft Event Schema (client-side form)
 // Only eventTitle and eventStartDate are required
 const draftEventClientSchema = z.object({
@@ -30,6 +46,7 @@ const draftEventClientSchema = z.object({
   eventImage: z.array(z.instanceof(File)).optional(),
   eventPoster: z.array(z.instanceof(File)).min(1, "Poster image is required"),
   eventType: z.literal(null),
+  facebookLink: facebookLinkClientSchema,
 });
 
 // Published Event Schema (client-side form)
@@ -58,6 +75,7 @@ const publishedEventClientSchema = z.object({
     .array(z.instanceof(File))
     .min(1, "At least 1 image is required"),
   eventPoster: z.array(z.instanceof(File)).min(1, "Poster image is required"),
+  facebookLink: facebookLinkClientSchema,
 });
 
 // Public event client schema
@@ -100,6 +118,7 @@ export const draftEventServerSchema = z
     eventImage: z.string().url().optional().nullable(),
     eventPoster: z.string().url({ message: "Poster image is required" }),
     eventType: z.literal(null),
+    facebookLink: facebookLinkServerSchema,
   })
   .refine(dateRefinement, dateRefinementOptions);
 
@@ -119,6 +138,7 @@ export const publishEventServerSchema = z
     eventImage: z.string().url(),
     eventPoster: z.string().url({ message: "Poster image is required" }),
     eventType: z.enum(["public", "private"]),
+    facebookLink: facebookLinkServerSchema,
   })
   .refine(dateRefinement, dateRefinementOptions);
 

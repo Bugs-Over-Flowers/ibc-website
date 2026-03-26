@@ -181,6 +181,24 @@ export function CreateEventForm() {
                 }}
               </form.Subscribe>
             </div>
+            <form.AppField name="facebookLink">
+              {(field) => (
+                <field.TextField
+                  label="Facebook Event Link"
+                  placeholder="https://www.facebook.com/events/..."
+                />
+              )}
+            </form.AppField>
+
+            <form.AppField name="eventImage">
+              {(field) => (
+                <field.FileDropzoneField
+                  description="Upload an image for the event banner"
+                  label="Event Image *"
+                  maxFiles={1}
+                />
+              )}
+            </form.AppField>
 
             <div className="flex justify-end gap-4">
               <form.Subscribe selector={(state) => state.isSubmitting}>

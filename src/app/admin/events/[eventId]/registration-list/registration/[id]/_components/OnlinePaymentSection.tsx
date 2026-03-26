@@ -25,7 +25,7 @@ import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 type OnlinePaymentSectionProps = {
   paymentProofStatus: Enums<"PaymentProofStatus">;
   getStatusColor: (status: string) => string;
-  proofImageURL: string;
+  proofImageURL?: string;
   registrationId: string;
 };
 
@@ -99,7 +99,10 @@ export default function OnlinePaymentSection({
       )}
       <div>
         <Badge
-          className={cn("capitalize", getStatusColor(paymentProofStatus))}
+          className={cn(
+            "capitalize",
+            getStatusColor(optimisticPaymentProofStatus),
+          )}
           variant="outline"
         >
           {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
@@ -111,11 +114,7 @@ export default function OnlinePaymentSection({
           disabled={isPending || optimisticPaymentProofStatus === "accepted"}
           onClick={() => handleStatusChange("accepted")}
         >
-          {isVerifyPending
-            ? "Verifying..."
-            : optimisticPaymentProofStatus === "accepted"
-              ? "Verified"
-              : "Verify Payment"}
+          {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
         </Button>
         <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
           {/* Reject Button */}
