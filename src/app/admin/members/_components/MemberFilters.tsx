@@ -142,7 +142,7 @@ export default function MemberFilters({ sectors }: MemberFiltersProps) {
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                "inline-flex h-12 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
                 currentStatus !== "all" && "border-primary/40 bg-primary/5",
               )}
             >
@@ -199,7 +199,7 @@ export default function MemberFilters({ sectors }: MemberFiltersProps) {
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                "inline-flex h-12 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
                 currentSector !== "all" && "border-primary/40 bg-primary/5",
               )}
             >
@@ -264,7 +264,7 @@ export default function MemberFilters({ sectors }: MemberFiltersProps) {
           {/* Clear Filters */}
           {hasActiveFilters && (
             <Button
-              className="h-10 gap-2 rounded-xl text-xs sm:w-auto"
+              className="h-12 gap-2 rounded-xl text-xs sm:w-auto"
               onClick={clearFilters}
               variant="destructive"
             >
