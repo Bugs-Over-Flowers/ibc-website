@@ -1,10 +1,8 @@
 import {
-  Activity,
   CalendarClock,
   ClipboardList,
   FileWarning,
   Handshake,
-  RefreshCcw,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -15,16 +13,6 @@ import { RecentActivityPanel } from "./RecentActivityPanel";
 import { StatCard } from "./StatCard";
 import { TopSectorsPanel } from "./TopSectorsPanel";
 
-function formatSyncTime(value: string): string {
-  return new Intl.DateTimeFormat("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
-
 type DashboardClientProps = {
   data: DashboardData;
 };
@@ -32,21 +20,17 @@ type DashboardClientProps = {
 export function DashboardClient({ data }: DashboardClientProps) {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-3 rounded-xl border border-border/60 bg-card/60 p-4 md:flex-row md:items-center">
-        <div>
-          <h1 className="font-bold text-3xl text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground text-sm">
-            Core metrics for applications, members, events, sponsored links, and
-            evaluations.
-          </p>
+      <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card/70 p-4 text-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="inline-flex items-center gap-2 text-muted-foreground">
+          <span className="h-2 w-2 rounded-full bg-status-green" />
+          <span className="font-medium">System status:</span>
+          <span className="text-foreground capitalize">
+            {data.health.status}
+          </span>
         </div>
-
-        <div className="flex items-center gap-2 text-muted-foreground text-xs">
-          <Activity className="h-4 w-4 text-status-green" />
-          <span>System: {data.health.status}</span>
-          <span className="opacity-60">|</span>
-          <RefreshCcw className="h-3.5 w-3.5" />
-          <span>Synced {formatSyncTime(data.health.lastSyncTime)}</span>
+        <div className="text-muted-foreground">
+          <span className="font-medium">Last sync:</span>{" "}
+          {new Date(data.health.lastSyncTime).toLocaleString("en-PH")}
         </div>
       </div>
 
@@ -56,24 +40,28 @@ export function DashboardClient({ data }: DashboardClientProps) {
           description={`${data.applications.pendingRejections} pending rejection reviews`}
           icon={<ClipboardList className="h-4 w-4" />}
           title="New Applications"
+          tone="blue"
           value={String(data.applications.totalNewApplications)}
         />
         <StatCard
           description="Applications awaiting interview schedule"
           icon={<CalendarClock className="h-4 w-4" />}
           title="Pending Interviews"
+          tone="amber"
           value={String(data.applications.pendingInterviews)}
         />
         <StatCard
           description="Paid and active member records"
           icon={<UserCheck className="h-4 w-4" />}
           title="Active Members"
+          tone="green"
           value={String(data.members.totalActiveMembers)}
         />
         <StatCard
           description="Events happening in the next 7 days"
           icon={<Handshake className="h-4 w-4" />}
           title="Upcoming Events"
+          tone="violet"
           value={String(data.events.upcomingEventsNext7Days)}
         />
       </section>
@@ -84,6 +72,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
           description="Renewals due this month"
           icon={<FileWarning className="h-4 w-4" />}
           title="Membership Renewals Due"
+          tone="amber"
           value={String(data.members.renewalsDueThisMonth)}
         />
         <StatCard
@@ -91,13 +80,15 @@ export function DashboardClient({ data }: DashboardClientProps) {
           description={`${data.events.eventsWithLowRegistration} events with low registration`}
           icon={<Users className="h-4 w-4" />}
           title="Event Registrations"
+          tone="cyan"
           value={String(data.events.totalRegistrationsAcrossActiveEvents)}
         />
         <StatCard
           badge={`Recent: ${data.evaluations.recentEvaluationCount}`}
           description={`Avg satisfaction: ${data.evaluations.averageSatisfactionScore}/5`}
-          icon={<Activity className="h-4 w-4" />}
+          icon={<ClipboardList className="h-4 w-4" />}
           title="Evaluations Pending"
+          tone="blue"
           value={String(data.evaluations.pendingEvaluations)}
         />
       </section>
@@ -109,17 +100,24 @@ export function DashboardClient({ data }: DashboardClientProps) {
         </div>
         <div className="space-y-4">
           <TopSectorsPanel sectors={data.members.membersBySector} />
-          <StatCard
-            badge={`${data.sponsoredRegistrations.activeSponsoredLinks} active`}
-            description={
-              data.sponsoredRegistrations.topPerformingLinks.length > 0
-                ? `Top link: ${data.sponsoredRegistrations.topPerformingLinks[0].label}`
-                : "No sponsored links available"
-            }
-            icon={<Handshake className="h-4 w-4" />}
-            title="Sponsored Link Conversions"
-            value={`${data.sponsoredRegistrations.usageRate}%`}
-          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1">
+            <StatCard
+              badge={`${data.sponsoredRegistrations.activeSponsoredLinks} active`}
+              description="Overall conversion rate across sponsored links"
+              icon={<Handshake className="h-4 w-4" />}
+              title="Sponsored Link Conversions"
+              tone="violet"
+              value={`${data.sponsoredRegistrations.usageRate}%`}
+            />
+            <StatCard
+              badge={`${data.members.totalActiveMembers} active`}
+              description="Members currently marked inactive or expired"
+              icon={<FileWarning className="h-4 w-4" />}
+              title="Inactive / Expired Members"
+              tone="rose"
+              value={String(data.members.totalInactiveOrExpiredMembers)}
+            />
+          </div>
           <Card className="border-border/60 bg-card/80 shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg">Top Performing Links</CardTitle>
@@ -133,13 +131,13 @@ export function DashboardClient({ data }: DashboardClientProps) {
 
               {data.sponsoredRegistrations.topPerformingLinks.map((link) => (
                 <div
-                  className="flex items-center justify-between rounded-lg border border-border/50 bg-background/80 px-3 py-2"
+                  className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-lg border border-border/50 bg-background/80 px-3 py-2"
                   key={link.sponsoredRegistrationId}
                 >
                   <span className="line-clamp-1 font-medium text-sm">
                     {link.label}
                   </span>
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-right text-muted-foreground text-xs tabular-nums">
                     {link.usedCount}
                     {link.maxSponsoredGuests
                       ? `/${link.maxSponsoredGuests}`
@@ -150,12 +148,6 @@ export function DashboardClient({ data }: DashboardClientProps) {
               ))}
             </CardContent>
           </Card>
-          <StatCard
-            description="Members marked inactive or expired"
-            icon={<FileWarning className="h-4 w-4" />}
-            title="Inactive / Expired Members"
-            value={String(data.members.totalInactiveOrExpiredMembers)}
-          />
         </div>
       </section>
     </div>

@@ -67,14 +67,16 @@ export function RecentActivityPanel({
                 className="block rounded-lg border border-border/50 bg-background/80 p-3 transition-colors hover:bg-muted/40"
                 href={activity.href as Route}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-sm">{activity.title}</p>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="line-clamp-1 font-medium text-sm">
+                      {activity.title}
+                    </p>
                     <p className="text-muted-foreground text-xs">
                       {activity.subtitle}
                     </p>
                   </div>
-                  <span className="inline-flex items-center gap-1 text-muted-foreground text-xs">
+                  <span className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs tabular-nums">
                     <Clock3 className="h-3.5 w-3.5" />
                     {formatActivityDate(activity.date)}
                   </span>

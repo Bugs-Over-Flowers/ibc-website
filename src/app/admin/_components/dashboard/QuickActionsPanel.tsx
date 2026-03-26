@@ -6,25 +6,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const QUICK_ACTIONS: Array<{
   label: string;
-  description: string;
   href: Route;
   icon: typeof FileCheck2;
 }> = [
   {
     label: "Review Applications",
-    description: "Approve or reject pending membership requests.",
     href: "/admin/application",
     icon: FileCheck2,
   },
   {
     label: "Create Event",
-    description: "Set up a new event and publish registration details.",
     href: "/admin/create-event",
     icon: PlusCircle,
   },
   {
     label: "Add Member",
-    description: "Create manual member records and keep directories current.",
     href: "/admin/members/create",
     icon: UserPlus,
   },
@@ -42,19 +38,16 @@ export function QuickActionsPanel() {
           const Icon = action.icon;
 
           return (
-            <Link href={action.href} key={action.label}>
+            <Link className="block" href={action.href} key={action.label}>
               <Button
-                className="h-auto w-full items-start justify-start gap-3 rounded-lg px-3 py-3 text-left"
+                className="flex h-auto min-h-16 w-full items-center justify-start gap-3 rounded-lg px-3 py-3 text-left"
                 variant="outline"
               >
-                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span className="space-y-1">
-                  <span className="block font-medium text-sm">
-                    {action.label}
-                  </span>
-                  <span className="block text-muted-foreground text-xs">
-                    {action.description}
-                  </span>
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="block flex-1 text-left font-medium text-sm leading-tight">
+                  {action.label}
                 </span>
               </Button>
             </Link>
