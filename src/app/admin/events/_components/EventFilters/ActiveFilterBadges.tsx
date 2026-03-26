@@ -2,10 +2,14 @@
 
 import { Filter, Search, SortAsc, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { SORT_LABELS } from "@/app/admin/events/_components/event-filters/constants";
+import {
+  DATE_SORT_LABELS,
+  TITLE_SORT_LABELS,
+} from "@/app/admin/events/_components/EventFilters/constants";
 
 interface ActiveFilterBadgesProps {
-  currentSort: string;
+  currentDateSort: string;
+  currentTitleSort: string;
   currentStatus: string;
   currentSearch: string;
   removeFilter: (key: string) => void;
@@ -13,13 +17,23 @@ interface ActiveFilterBadgesProps {
 }
 
 export default function ActiveFilterBadges({
-  currentSort,
+  currentDateSort,
+  currentTitleSort,
   currentStatus,
   currentSearch,
   removeFilter,
   updateFilter,
 }: ActiveFilterBadgesProps) {
-  const hasActiveFilters = currentSort || currentStatus || currentSearch;
+  const hasDateSortFilter =
+    currentDateSort === "date-asc" || currentDateSort === "date-desc";
+  const hasTitleSortFilter =
+    currentTitleSort === "title-asc" || currentTitleSort === "title-desc";
+  const activeSortCount =
+    (hasDateSortFilter ? 1 : 0) + (hasTitleSortFilter ? 1 : 0);
+  const canRemoveSort = activeSortCount > 1;
+
+  const hasActiveFilters =
+    hasDateSortFilter || hasTitleSortFilter || currentStatus || currentSearch;
 
   return (
     <AnimatePresence mode="wait">
@@ -37,24 +51,49 @@ export default function ActiveFilterBadges({
               Active filters:
             </span>
 
-            {currentSort && (
+            {hasDateSortFilter && (
               <motion.span
                 animate={{ opacity: 1, scale: 1 }}
                 className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-sm"
                 initial={{ opacity: 0, scale: 0.8 }}
-                key="sort-filter"
+                key="date-sort-filter"
                 transition={{ duration: 0.2 }}
               >
                 <SortAsc className="h-3 w-3" />
-                Sort: {SORT_LABELS[currentSort] || currentSort}
-                <button
-                  aria-label="Remove sort filter"
-                  className="ml-1 rounded-full p-0.5 transition-colors hover:bg-primary/20"
-                  onClick={() => removeFilter("sort")}
-                  type="button"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                Date: {DATE_SORT_LABELS[currentDateSort] || currentDateSort}
+                {canRemoveSort && (
+                  <button
+                    aria-label="Remove date sort filter"
+                    className="ml-1 rounded-full p-0.5 transition-colors hover:bg-primary/20"
+                    onClick={() => removeFilter("dateSort")}
+                    type="button"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </motion.span>
+            )}
+
+            {hasTitleSortFilter && (
+              <motion.span
+                animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-sm"
+                initial={{ opacity: 0, scale: 0.8 }}
+                key="title-sort-filter"
+                transition={{ duration: 0.2 }}
+              >
+                <SortAsc className="h-3 w-3" />
+                Name: {TITLE_SORT_LABELS[currentTitleSort] || currentTitleSort}
+                {canRemoveSort && (
+                  <button
+                    aria-label="Remove title sort filter"
+                    className="ml-1 rounded-full p-0.5 transition-colors hover:bg-primary/20"
+                    onClick={() => removeFilter("titleSort")}
+                    type="button"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </motion.span>
             )}
 

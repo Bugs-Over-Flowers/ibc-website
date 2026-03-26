@@ -1,17 +1,25 @@
 "use server";
 
 import { cookies } from "next/headers";
-import type { SortOption } from "./getAdminEventsPage";
+import type {
+  DateSortOption,
+  SortOption,
+  TitleSortOption,
+} from "./getAdminEventsPage";
 import { getAdminEventsPage } from "./getAdminEventsPage";
 
 export async function fetchMoreEvents({
   search,
   sort,
+  dateSort,
+  titleSort,
   status,
   cursor,
 }: {
   search?: string;
   sort?: SortOption;
+  dateSort?: DateSortOption;
+  titleSort?: TitleSortOption;
   status?: string;
   cursor: string;
 }) {
@@ -20,6 +28,8 @@ export async function fetchMoreEvents({
   return getAdminEventsPage(cookieStore.getAll(), {
     search,
     sort,
+    dateSort,
+    titleSort,
     status,
     cursor,
   });

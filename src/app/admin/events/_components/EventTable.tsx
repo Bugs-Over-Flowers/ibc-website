@@ -9,7 +9,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import type { SortOption } from "@/server/events/queries/getAdminEventsPage";
+import type {
+  DateSortOption,
+  SortOption,
+  TitleSortOption,
+} from "@/server/events/queries/getAdminEventsPage";
 import { useInfiniteEvents } from "../_hooks/useInfiniteEvents";
 import type { EventWithStatus } from "../types/event";
 import CreateEventButton from "./CreateEventButton";
@@ -20,6 +24,8 @@ interface EventTableProps {
   initialNextCursor: string | null;
   search?: string;
   sort?: SortOption;
+  dateSort?: DateSortOption;
+  titleSort?: TitleSortOption;
   status?: string;
 }
 
@@ -28,6 +34,8 @@ export default function EventTable({
   initialNextCursor,
   search,
   sort,
+  dateSort,
+  titleSort,
   status,
 }: EventTableProps) {
   const { events, isLoading, observerTarget } = useInfiniteEvents({
@@ -35,6 +43,8 @@ export default function EventTable({
     initialNextCursor,
     search,
     sort,
+    dateSort,
+    titleSort,
     status,
   });
 

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   SORT_LABELS,
   STATUS_LABELS,
-} from "@/app/admin/events/_components/event-filters/constants";
+} from "@/app/admin/events/_components/EventFilters/constants";
 import { useEventFilters } from "@/app/admin/events/_hooks/useEventFilters";
 import { Button } from "@/components/ui/button";
 import {
@@ -68,16 +68,53 @@ function buildStatusValue(
 
 export default function EventFilters() {
   const {
-    currentSort,
+    currentDateSort,
+    currentTitleSort,
     currentStatus,
     searchValue,
     hasActiveFilters,
     updateFilter,
+    updateSortFilters,
     clearFilters,
     handleSearchChange,
   } = useEventFilters();
 
-  const selectedSort = currentSort || "date-desc";
+  const normalizedDateSort =
+    currentDateSort === "date-asc" || currentDateSort === "date-desc"
+      ? currentDateSort
+      : null;
+  const normalizedTitleSort =
+    currentTitleSort === "title-desc" || currentTitleSort === "title-asc"
+      ? currentTitleSort
+      : null;
+  const hasExplicitSort = Boolean(normalizedDateSort || normalizedTitleSort);
+
+  const selectedDateSort = hasExplicitSort ? normalizedDateSort : "date-desc";
+  const selectedTitleSort = hasExplicitSort ? normalizedTitleSort : null;
+  const selectedSort = selectedTitleSort ?? selectedDateSort ?? "date-desc";
+
+  const toggleDateSort = (next: "date-asc" | "date-desc") => {
+    if (selectedDateSort === next) {
+      if (selectedTitleSort) {
+        updateSortFilters({ dateSort: null, titleSort: selectedTitleSort });
+      }
+      return;
+    }
+
+    updateSortFilters({ dateSort: next, titleSort: selectedTitleSort });
+  };
+
+  const toggleTitleSort = (next: "title-asc" | "title-desc") => {
+    if (selectedTitleSort === next) {
+      if (selectedDateSort) {
+        updateSortFilters({ dateSort: selectedDateSort, titleSort: null });
+      }
+      return;
+    }
+
+    updateSortFilters({ dateSort: selectedDateSort, titleSort: next });
+  };
+
   const selectedStatus = currentStatus || "all";
   const { lifecycle, audience } = parseStatus(selectedStatus);
 
@@ -302,7 +339,9 @@ export default function EventFilters() {
                     ? "bg-primary/10 font-medium text-primary"
                     : "hover:bg-muted/50",
                 )}
-                onClick={() => updateFilter("sort", null)}
+                onClick={() =>
+                  updateSortFilters({ dateSort: null, titleSort: null })
+                }
               >
                 Latest First
               </DropdownMenuItem>
@@ -317,7 +356,16 @@ export default function EventFilters() {
                         : "hover:bg-muted/50",
                     )}
                     key={value}
-                    onClick={() => updateFilter("sort", value)}
+                    onClick={() => {
+                      if (value === "date-asc" || value === "date-desc") {
+                        toggleDateSort(value);
+                        return;
+                      }
+
+                      if (value === "title-asc" || value === "title-desc") {
+                        toggleTitleSort(value);
+                      }
+                    }}
                   >
                     {label}
                   </DropdownMenuItem>

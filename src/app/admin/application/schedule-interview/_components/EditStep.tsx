@@ -31,6 +31,13 @@ export function EditStep({
   onCancel,
   onNext,
 }: EditStepProps) {
+  const plainMessage = customMessage
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;|&#160;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const isMessageEmpty = plainMessage.length === 0;
+
   return (
     <>
       <div className="space-y-6">
@@ -78,7 +85,7 @@ export function EditStep({
         </Button>
         <Button
           className="active:scale-95 active:opacity-80"
-          disabled={applications.length === 0}
+          disabled={applications.length === 0 || isMessageEmpty}
           onClick={onNext}
           type="button"
         >

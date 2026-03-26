@@ -9,6 +9,7 @@
   },
   "js/ts.experimental.useTsgo": true,
   "chat.tools.terminal.autoApprove": {
-    "bun": true
+    "bun": true,
+    "ForEach-Object": true
   }
 }
