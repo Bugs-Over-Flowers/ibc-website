@@ -326,7 +326,8 @@ export default function DeleteSectorDialog({
                 <p className="font-medium text-sm">
                   {members.length} {members.length === 1 ? "member" : "members"}{" "}
                   will be affected. Select a new sector per member here or use
-                  the dropdown below to move everyone at once.
+                  the dropdown below to move everyone at once. Individual
+                  choices will override the bulk selection.
                 </p>
                 <div className="max-h-[calc(3*6.5rem+2rem)] overflow-y-auto pr-1">
                   <DataTable columns={memberColumns} data={members} />
@@ -383,15 +384,6 @@ export default function DeleteSectorDialog({
                 before deleting this one.
               </p>
             )}
-
-            {hasIncompleteAssignments &&
-            requiresReassignment &&
-            !noAlternativeSectors ? (
-              <p className="text-destructive text-xs">
-                Select a sector for every member in the list above or choose one
-                from this dropdown.
-              </p>
-            ) : null}
           </section>
         </div>
 
