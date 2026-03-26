@@ -25,6 +25,15 @@ export function MembersTableRow({
   const [imageError, setImageError] = useState(false);
   const showImage = member.logoImageURL && !imageError;
   const router = useRouter();
+  const joinedDate = new Date(member.joinDate);
+  const joinedDateLabel = joinedDate.toLocaleDateString();
+  const joinedDateTooltip = joinedDate.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const memberIdLabel = member.identifier || "-";
 
   const navigateToDetails = () => {
     router.push(`/admin/members/${member.businessMemberId}` as Route);
@@ -114,12 +123,19 @@ export function MembersTableRow({
           <div className="h-px w-full bg-border" />
 
           {/* Identifier and date at bottom */}
-          <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-            <p className="text-muted-foreground text-xs opacity-60">
-              {member.identifier}
+          <div className="pointer-events-auto mt-auto flex items-center justify-between gap-2 pt-2">
+            <p
+              className="cursor-help text-muted-foreground text-xs opacity-60"
+              title={`Member ID: ${memberIdLabel}`}
+            >
+              {memberIdLabel}
             </p>
-            <p className="text-muted-foreground text-xs opacity-60">
-              {new Date(member.joinDate).toLocaleDateString()}
+
+            <p
+              className="cursor-help text-muted-foreground text-xs opacity-60"
+              title={`Joined Date: ${joinedDateTooltip}`}
+            >
+              {joinedDateLabel}
             </p>
           </div>
 
