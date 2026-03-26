@@ -2,30 +2,21 @@ import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { DataTable } from "@/components/DataTable";
 import { getMembersBySector } from "@/server/members/queries/getMembersBySector";
 import { columns } from "./_components/columns";
+import Loading from "./loading";
 
-export default async function SectorMembersPage({
-  params,
-}: {
-  params: Promise<{ sectorId: string }>;
-}) {
-  const { sectorId } = await params;
-  const id = Number.parseInt(sectorId, 10);
-
-  if (Number.isNaN(id)) {
-    notFound();
-  }
-
+async function SectorMembersContent({ sectorId }: { sectorId: number }) {
   const cookieStore = await cookies();
   const { sectorName, members } = await getMembersBySector(
     cookieStore.getAll(),
-    id,
+    sectorId,
   );
 
   return (
-    <div className="space-y-6 px-2">
+    <>
       <div>
         <Link
           className="flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
@@ -49,6 +40,27 @@ export default async function SectorMembersPage({
       ) : (
         <DataTable columns={columns} data={members} />
       )}
+    </>
+  );
+}
+
+export default async function SectorMembersPage({
+  params,
+}: {
+  params: Promise<{ sectorId: string }>;
+}) {
+  const { sectorId } = await params;
+  const id = Number.parseInt(sectorId, 10);
+
+  if (Number.isNaN(id)) {
+    notFound();
+  }
+
+  return (
+    <div className="space-y-6 px-2">
+      <Suspense fallback={<Loading />}>
+        <SectorMembersContent sectorId={id} />
+      </Suspense>
     </div>
   );
 }
