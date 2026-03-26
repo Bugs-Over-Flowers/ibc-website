@@ -1,21 +1,3 @@
-/**
- * ApplicationDetails — Shared Server Component for the full application detail view.
- *
- * Used by the `/admin/application/[id]` route which can be reached from three sources:
- * - "applications" — the main applications dashboard (default)
- * - "members" — the members list page
- * - "history" — the member's application history timeline
- *
- * The `source` prop controls the back-navigation link text and destination.
- * When `source === "history"`, the back link points to `/admin/members/[memberId]/history`.
- *
- * Fetches full application data via `getApplicationDetailsById`, then renders:
- * - ApplicationHeader (status, title, logo)
- * - CompanyInfoCard (name, address, sector, type)
- * - ContactInfoCard (email, phone, landline)
- * - RepresentativesCard (list of ApplicationMembers)
- * - PaymentInfoCard (method, proof status, proof images)
- */
 import { Building2, ChevronLeft, CreditCard, MapPin, User } from "lucide-react";
 import type { Route } from "next";
 import { cookies } from "next/headers";
@@ -123,10 +105,14 @@ function MemberReviewDetails({
 }: {
   application: Awaited<ReturnType<typeof getApplicationDetailsById>>;
 }) {
-  const principalRepresentative = application.ApplicationMember.find(
+  const applicationMembers = Array.isArray(application.ApplicationMember)
+    ? application.ApplicationMember
+    : [];
+
+  const principalRepresentative = applicationMembers.find(
     (member) => member.companyMemberType === "principal",
   );
-  const alternateRepresentatives = application.ApplicationMember.filter(
+  const alternateRepresentatives = applicationMembers.filter(
     (member) => member.companyMemberType === "alternate",
   );
 
@@ -294,13 +280,21 @@ function MemberReviewDetails({
                   />
                   <RepresentativeField
                     label="Sex"
-                    value={toPascalCaseWithSpaces(principalRepresentative.sex)}
+                    value={
+                      principalRepresentative.sex
+                        ? toPascalCaseWithSpaces(principalRepresentative.sex)
+                        : "N/A"
+                    }
                   />
                   <RepresentativeField
                     label="Nationality"
-                    value={toPascalCaseWithSpaces(
-                      principalRepresentative.nationality,
-                    )}
+                    value={
+                      principalRepresentative.nationality
+                        ? toPascalCaseWithSpaces(
+                            principalRepresentative.nationality,
+                          )
+                        : "N/A"
+                    }
                   />
                 </div>
 
@@ -372,11 +366,19 @@ function MemberReviewDetails({
                   />
                   <RepresentativeField
                     label="Sex"
-                    value={toPascalCaseWithSpaces(representative.sex)}
+                    value={
+                      representative.sex
+                        ? toPascalCaseWithSpaces(representative.sex)
+                        : "N/A"
+                    }
                   />
                   <RepresentativeField
                     label="Nationality"
-                    value={toPascalCaseWithSpaces(representative.nationality)}
+                    value={
+                      representative.nationality
+                        ? toPascalCaseWithSpaces(representative.nationality)
+                        : "N/A"
+                    }
                   />
                 </div>
 
@@ -440,13 +442,6 @@ function MemberReviewDetails({
   );
 }
 
-/**
- * Resolves the back-navigation link based on where the user came from.
- * The `source` query param is set when navigating into the detail view:
- * - "history"      → back to the member's application history timeline
- * - "members"      → back to the admin members list
- * - "applications" → back to the main applications dashboard (default)
- */
 function getBackLink(
   source: ApplicationDetailsProps["source"],
   memberId?: string,

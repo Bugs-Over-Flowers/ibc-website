@@ -2,27 +2,27 @@
 
 import { ChevronLeft } from "lucide-react";
 import type { Route } from "next";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface BackButtonProps {
   eventId: string;
 }
 
 export default function BackButton({ eventId }: BackButtonProps) {
-  const router = useRouter();
-
-  const handleClick = () => {
-    router.push(`/admin/events/${eventId}` as Route);
-  };
-
   return (
-    <button
-      className="flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
-      onClick={() => handleClick()}
-      type="button"
-    >
-      <ChevronLeft className="h-5 w-5" />
-      Back to Event
-    </button>
+    <div className="flex w-full justify-start">
+      <Button
+        className="justify-start gap-1 px-0 text-primary transition-colors hover:bg-transparent hover:text-primary/80 focus:bg-transparent active:bg-transparent"
+        nativeButton={false}
+        render={
+          <Link href={`/admin/events/${eventId}` as Route}>
+            <ChevronLeft className="h-5 w-5" />
+            Back to Event
+          </Link>
+        }
+        variant="default"
+      />
+    </div>
   );
 }
