@@ -6,5 +6,6 @@
   },
   "files.watcherExclude": {
     "**/target": true
-  }
+  },
+  "js/ts.experimental.useTsgo": true
 }

@@ -42,12 +42,20 @@ export const resendQRCode = async ({
     .single()
     .throwOnError();
 
+  if (!eventDetails) {
+    throw new Error("Event not found");
+  }
+
   // get registration details
   const { data: participants } = await supabase
     .from("Participant")
     .select("firstName, lastName, email, isPrincipal, participantId")
     .eq("registrationId", registrationId)
     .throwOnError();
+
+  if (!participants || participants.length === 0) {
+    throw new Error("Participants not found");
+  }
 
   // get the registrant details
   const registrantDetails = participants.find(

@@ -95,6 +95,13 @@ export function SponsoredRegistrationList({
   };
 
   const handleDeleteClick = (registration: SponsoredRegistrationWithEvent) => {
+    if (Number(registration.usedCount) > 0) {
+      toast.error(
+        "Cannot delete this sponsored registration because it has already been used.",
+      );
+      return;
+    }
+
     setDeletingRegistration(registration);
     setOpenDeleteDialog(true);
   };
@@ -142,7 +149,7 @@ export function SponsoredRegistrationList({
 
   return (
     <>
-      <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-4">
         {displayed.map((registration) => (
           <SponsoredRegistrationCard
             isDeleting={isDeletingId === registration.sponsoredRegistrationId}
@@ -174,7 +181,7 @@ export function SponsoredRegistrationList({
         {/* Loader for infinite scroll */}
         {displayedCount < registrations.length && (
           <div
-            className="flex items-center justify-center py-8"
+            className="col-span-2 flex items-center justify-center py-8"
             ref={loaderRef}
           >
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary" />

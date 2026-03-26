@@ -18,6 +18,32 @@ export async function deleteSR(
 
   const supabase = await createActionClient();
 
+  const { data: sponsoredRegistration, error: sponsoredRegistrationError } =
+    await supabase
+      .from("SponsoredRegistration")
+      .select("usedCount, eventId")
+      .eq("sponsoredRegistrationId", parsed.sponsoredRegistrationId)
+      .maybeSingle();
+
+  if (sponsoredRegistrationError) {
+    throw new Error(
+      `Failed to validate sponsored registration usage: ${sponsoredRegistrationError.message}`,
+    );
+  }
+
+  if (
+    !sponsoredRegistration ||
+    sponsoredRegistration.eventId !== parsed.eventId
+  ) {
+    throw new Error("Sponsored registration not found for this event.");
+  }
+
+  if (sponsoredRegistration.usedCount > 0) {
+    throw new Error(
+      "Cannot delete this sponsored registration because it has already been used.",
+    );
+  }
+
   const { data, error } = await supabase.rpc("delete_sr", {
     p_sponsored_registration_id: parsed.sponsoredRegistrationId,
   });

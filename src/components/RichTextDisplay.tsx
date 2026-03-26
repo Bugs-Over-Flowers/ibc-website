@@ -4,31 +4,33 @@ import DOMPurify from "isomorphic-dompurify";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
-interface RichTextDisplayProps {
+type RichTextDisplayProps = {
   content: string | null;
   className?: string;
-}
+};
+
+const SANITIZE_CONFIG = {
+  ALLOWED_TAGS: [
+    "p",
+    "br",
+    "strong",
+    "b",
+    "em",
+    "i",
+    "ul",
+    "ol",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+  ],
+  ALLOWED_ATTR: [],
+};
 
 function RichTextDisplay({ content, className }: RichTextDisplayProps) {
   const sanitizedContent = useMemo(() => {
     if (!content) return null;
-    return DOMPurify.sanitize(content, {
-      ALLOWED_TAGS: [
-        "p",
-        "br",
-        "strong",
-        "b",
-        "em",
-        "i",
-        "ul",
-        "ol",
-        "li",
-        "h1",
-        "h2",
-        "h3",
-      ],
-      ALLOWED_ATTR: [],
-    });
+    return DOMPurify.sanitize(content, SANITIZE_CONFIG);
   }, [content]);
 
   if (!sanitizedContent) {

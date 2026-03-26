@@ -21,7 +21,7 @@ interface EditEventFormProps {
 export function EditEventForm({ event }: EditEventFormProps) {
   const { form, router, isDraft, isFinished } = useEditEventForm({ event });
 
-  // Only block editing if it's finished AND NOT a draft
+  // Finished events can only edit the Facebook link
   if (isFinished && !isDraft) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-0">
@@ -33,13 +33,63 @@ export function EditEventForm({ event }: EditEventFormProps) {
           ← Back to event
         </button>
         <div className="mt-12 text-center">
-          <h2 className="font-bold text-2xl text-destructive">
-            Cannot Edit Finished Event
-          </h2>
+          <h2 className="font-bold text-2xl">Update Facebook Link</h2>
           <p className="mt-2 text-muted-foreground">
-            This event has already ended and cannot be modified.
+            This event has finished. Only the Facebook recap link can be
+            updated.
           </p>
         </div>
+
+        <formContext.Provider value={form}>
+          <form
+            className="mt-10 space-y-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit();
+            }}
+          >
+            <form.AppField name="facebookLink">
+              {(field) => (
+                <field.TextField
+                  label="Facebook Link"
+                  placeholder="https://www.facebook.com/your-event"
+                  type="url"
+                />
+              )}
+            </form.AppField>
+
+            <form.Subscribe
+              selector={(state) => ({
+                isDirty: state.isDirty,
+                isSubmitting: state.isSubmitting,
+              })}
+            >
+              {({ isDirty, isSubmitting }) => (
+                <div className="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
+                  <Button
+                    className="w-full sm:w-auto"
+                    disabled={isSubmitting}
+                    onClick={() =>
+                      router.push(`/admin/events/${event.eventId}`)
+                    }
+                    type="button"
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="w-full sm:w-auto"
+                    disabled={isSubmitting || !isDirty}
+                    type="submit"
+                  >
+                    {isSubmitting ? "Saving..." : "Save Facebook Link"}
+                  </Button>
+                </div>
+              )}
+            </form.Subscribe>
+          </form>
+        </formContext.Provider>
       </div>
     );
   }
@@ -132,6 +182,16 @@ export function EditEventForm({ event }: EditEventFormProps) {
                 </p>
               </div>
             )}
+
+            <form.AppField name="facebookLink">
+              {(field) => (
+                <field.TextField
+                  label="Facebook Link"
+                  placeholder="https://www.facebook.com/your-event"
+                  type="url"
+                />
+              )}
+            </form.AppField>
 
             {/* Current Image Preview */}
             {event.eventHeaderUrl && (

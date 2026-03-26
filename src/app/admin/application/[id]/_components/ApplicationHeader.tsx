@@ -1,7 +1,9 @@
 "use client";
 
-import { AlertTriangle, CircleCheckBig, XCircle } from "lucide-react";
+import { AlertTriangle, CircleCheckBig, History, XCircle } from "lucide-react";
+import type { Route } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -278,7 +280,23 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                 memberId={application.BusinessMember.businessMemberId}
               />
             )}
-            <ExportPDFButton application={application} />
+            <div className="flex w-full items-center gap-2 sm:w-auto">
+              <Link
+                href={
+                  `/admin/members/${application.businessMemberId}/history` as Route
+                }
+              >
+                <Button
+                  className="border border-border active:scale-95 active:opacity-80"
+                  size="sm"
+                  variant="outline"
+                >
+                  <History className="mr-2 h-4 w-4" />
+                  Application History
+                </Button>
+              </Link>
+              <ExportPDFButton application={application} />
+            </div>
           </div>
         </div>
       )}
