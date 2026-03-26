@@ -9,10 +9,13 @@ export default function SponsoredRegistrationPageSkeleton() {
       {/* Header Skeleton */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
-          <Skeleton className="h-9 w-64 md:h-10" />
-          <Skeleton className="h-4 w-96" />
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-5 w-full max-w-xs" />
         </div>
-        <Skeleton className="h-12 w-56 rounded-xl" />
+        <div className="inline-flex h-12 w-56 items-center justify-center gap-2 rounded-xl border border-border bg-primary/90 px-4">
+          <Skeleton className="h-4 w-4 rounded-full bg-primary-foreground/40" />
+          <Skeleton className="h-4 w-24 bg-primary-foreground/40" />
+        </div>
       </div>
 
       {/* Filter Bar Skeleton */}
