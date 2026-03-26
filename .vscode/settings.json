@@ -3,5 +3,9 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports.biome": "explicit",
     "source.fixAll.biome": "explicit"
-  }
+  },
+  "files.watcherExclude": {
+    "**/target": true
+  },
+  "js/ts.experimental.useTsgo": true
 }

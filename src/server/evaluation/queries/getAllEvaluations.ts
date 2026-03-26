@@ -46,3 +46,26 @@ export async function getAllEvaluationsRpc(
 
   return (data as EvaluationWithEventRpc[]) || [];
 }
+
+export async function getEvaluationsByEventId(
+  requestCookies: RequestCookie[],
+  eventId: string,
+): Promise<EvaluationWithEventRpc[]> {
+  "use cache";
+  applyAdmin5mCache();
+  cacheTag(CACHE_TAGS.evaluations.all);
+  cacheTag(CACHE_TAGS.evaluations.admin);
+
+  const supabase = await createClient(requestCookies);
+
+  const { data, error } = await supabase.rpc("get_evaluations_by_event", {
+    event_id: eventId,
+    completed_only: true,
+  });
+
+  if (error) {
+    throw new Error(`Failed to fetch evaluations by event: ${error.message}`);
+  }
+
+  return (data as EvaluationWithEventRpc[]) || [];
+}

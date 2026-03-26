@@ -1,731 +1,201 @@
 # Copilot Instructions for IBC Website
 
-Next.js 15 + React 19 website for the Iloilo Business Club. Uses Turbopack, Tailwind CSS v4, shadcn/ui, Supabase backend, and bun.
+Use repository patterns over generic framework advice.
 
-## Commit Message Convention
+## Repository Snapshot
 
-All commit messages must follow this format: `<type>: <description>`
+- Next.js 16 App Router with `typedRoutes` and `reactCompiler`
+- Bun + React 19 + TypeScript with `strict: true`
+- Tailwind CSS v4 + shadcn/ui + Base UI
+- Supabase backend
+- Biome for linting and formatting
+- Vitest for unit, integration, and component tests
+- Playwright for E2E tests
+- Next cache components enabled in `next.config.ts`
 
-**Commit Types:**
-
-- `feat:` new feature
-- `fix:` bug fix
-- `docs:` documentation updates
-- `style:` formatting (no code change)
-- `refactor:` code restructure (no feature/bug fix)
-- `test:` add/modify tests
-- `chore:` maintenance tasks
-- `build:` build system changes
-- `perf:` performance improvement
-
-**Examples:**
-
-- `feat: add user authentication`
-- `fix: resolve infinite loop in data fetching`
-- `docs: update API documentation`
-- `refactor: extract validation logic to utility`
-
-## Quick Reference
+## Core Commands
 
 ```bash
-bun run dev          # Dev server (Turbopack)
-bun run build        # Production build
-bun run check-code   # Biome lint + format
-supabase start       # Start local Supabase
-supabase db reset    # Reset local DB & run migrations
-bun run test:local   # Run tests with local Supabase
-bun run test:all     # Run all tests
-bun run db:gen:types # Generate local types
-bun run gen:types    # Generate production types
-
-# Docker
-bun run docker:dev   # Start development container
-bun run docker:devb  # Build & start development container
-bun run docker:prod  # Start production container
-bun run docker:prodb # Build & start production container
+bun run dev
+bun run build
+bun run start
+bun run biome:check
+bun run biome:write
 ```
 
-## Architecture Overview
+## Test Commands
 
-```
-src/
-├── app/
-│   ├── (public)/       # Public routes (home, about, events, members, network, contact)
-│   ├── admin/          # Admin dashboard routes
-│   ├── layout.tsx      # Root layout with Toaster
-│   └── globals.css     # Tailwind v4 + oklch design tokens
-├── components/
-│   ├── ui/             # shadcn/ui primitives (Base-ui-based)
-│   └── form/           # TanStack Form field wrappers
-├── hooks/
-│   ├── _formHooks.ts   # TanStack Form context setup
-│   └── useAction.ts    # Server action hook for buttons
-├─── lib/
-│   ├── qr              # QR code generation functions
-│   ├── resend          # Email resend library
-│   ├── server/         # Server Function types, tryCatch utility
-│   ├── supabase/       # Supabase library
-│   ├── types/          # Type definitions for shared data
-│   ├── validation/     # Zod schemas for forms and general validation of data types
-│   ├── constants.ts    # Constants for shared data
-│   ├── utils.ts        # Utility functions for queries and actions
-└── server/
-    ├── members/        # Member feature related business logic
-    │   ├── queries/
-    │   └── actions/
-    ├── events/         # Event feature related business logic
-    │   ├── queries/
-    │   └── actions/
-    ├── registration/   # Registration feature related business logic
-    │   ├── queries/
-    │   ├── actions/
-    │   ├── utils.ts
-    └── [other features / business logic]
-```
-
-Component placement:
-
-- Route-specific components → `app/[route]/_components/`
-- Include forms under `app/[route]/_components/forms/`
-- Route-specific hooks under `app/[route]/_hooks/`
-- Keep global / reusable components → `src/components/`
-
-Server logic placement:
-
-- Feature-specific server logic → `src/server/[feature]/`
-- mutations (POST, PUT, DELETE) → `src/server/[feature]/mutations/<filename>.ts`
-- queries (GET) → `src/server/[feature]/queries/<filename>.ts`
-- Shared server logic → `src/server/utils.ts`
-- Add utils under feature-specific if needed.
-
----
-
-## Code Conventions
-
-### Imports & Styling
-
-- Always use `@/` path alias (maps to `./src/`)
-- Use `cn()` from `@/lib/utils` for conditional Tailwind classes
-- Use `cva()` from `class-variance-authority` for component variants
-- Design tokens in `globals.css` use oklch colors as CSS variables
-
-### Components
-
-- Server Components by default; add `"use client"` only when needed
-- shadcn/ui components use `data-slot` attributes and Base-ui primitives
-- Add UI components: `bunx --bun shadcn@latest add <component>`
-
----
-
-## Form System (TanStack Form)
-
-Use `useAppForm` from `@/hooks/_formHooks` with registered field components.
-
-### Available Field Components
-
-| Component             | Import from         | Use case              |
-| --------------------- | ------------------- | --------------------- |
-| `TextField`           | `@/components/form` | Text inputs           |
-| `NumberField`         | `@/components/form` | Numeric inputs        |
-| `SelectField`         | `@/components/form` | Dropdowns             |
-| `TextareaField`       | `@/components/form` | Multi-line text       |
-| `FormDatePicker`      | `@/components/form` | Single date selection |
-| `FormDateRangePicker` | `@/components/form` | Date range selection  |
-
-### Basic Form Example
-
-```tsx
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useAppForm } from "@/hooks/_formHooks";
-import tryCatch from "@/lib/server/tryCatch";
-import { createItem } from "@/server/items/mutations";
-import { z } from "zod";
-
-const CreateItemFormSchema = z.object({
-  name: z.string().min(2).max(100),
-  email: z.string().email().min(5).max(100),
-});
-
-export function CreateItemForm() {
-  const router = useRouter();
-
-  const form = useAppForm({
-    defaultValues: { name: "", email: "" },
-    validation: {
-      onSubmit: CreateItemFormSchema, // or use zodValidator(CreateItemFormSchema)
-    },
-    onSubmit: async ({ value }) => {
-      const { error, data } = await tryCatch(createItem(value));
-
-      if (error) {
-        form.setErrorMap({ onSubmit: error });
-        return;
-      }
-
-      router.push(`/items/${data.id}`);
-    },
-  });
-
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        form.handleSubmit();
-      }}
-    >
-      <form.AppField name="name">
-        {(field) => <field.TextField label="Name" placeholder="Enter name" />}
-      </form.AppField>
-
-      <form.AppField name="email">
-        {(field) => <field.TextField label="Email" type="email" />}
-      </form.AppField>
-
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(isSubmitting) => (
-          <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create"}
-          </button>
-        )}
-      </form.Subscribe>
-      <form.AppForm>
-        <form.SubmitButton
-          label={"Submit"}
-          isSubmittingLabel={"Submitting..."}
-        />
-      </form.AppForm>
-    </form>
-  );
-}
-```
-
-### Adding New Field Types
-
-1. Create component in `src/components/form/` using `useFieldContext<T>()`
-2. Include `<FieldErrors />` for validation display
-3. Export from `src/components/form/index.ts`
-4. Include `data-invalid` and `aria-invalid` attributes on necessary elements (see shadcn documentation) [documentation](https://ui.shadcn.com/docs/components)
-5. Register in `src/hooks/_formHooks.ts` under `fieldComponents`
-
-**Field component template:**
-
-```tsx
-import { useFieldContext } from "@/hooks/_formHooks";
-import { cn } from "@/lib/utils";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
-import { FieldErrors } from "./FieldErrors";
-
-interface MyFieldProps {
-  label?: string;
-  description?: string;
-  className?: string;
-}
-
-function MyField({ label, description, className }: MyFieldProps) {
-  const field = useFieldContext<string>();
-
-  const isInvalid = field.state.meta.touched && !field.state.meta.isValid;
-
-  return (
-    <Field
-      className={cn("grid gap-2", className)}
-      data-invalid={isInvalid}
-      aria-invalid={isInvalid}
-    >
-      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
-      {/* Your input component here */}
-      {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldErrors errors={field.state.meta.errors} />
-    </Field>
-  );
-}
-
-export default MyField;
-```
-
----
-
-## Server Functions
-
-### Types
-
-`@/lib/server/types`:
-
-```ts
-type ServerFunctionSuccess<T> = { success: true; data: T };
-type ServerFunctionError<E> = { success: false; error: E };
-
-type ServerFunctionResult<T, E = Error | string> =
-  | ServerFunctionError<E>
-  | ServerFunctionSuccess<T>;
-
-type ServerFunction<
-  TInput extends unknown[],
-  TOutput,
-  TError = Error | string,
-> = (...args: TInput) => Promise<ServerFunctionResult<TOutput, TError>>;
-```
-
-These are used for the return type of the `tryCatch` utility function. The result is a discriminated union based on the `success` property:
-
-- `{ success: true, data: T }` - Success case with typed data
-- `{ success: false, error: E }` - Error case with error object
-
-### Writing Server Functions
-
-Server actions can **throw errors freely**, or utilize the `ServerFunction` type. Use `tryCatch` on the client to handle server actions that throw errors. Or simply, create a tryCatch boundary where it is called.
-
-**Use `"use server"` for server actions under the `/actions` folders:**
-
-```ts
-"use server";
-
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
-
-const createItemSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
-});
-
-type CreateItemInput = z.infer<typeof createItemSchema>;
-
-export async function createItem(input: CreateItemInput) {
-  // 1. Validate input (throws on failure)
-  const parsed = createItemSchema.parse(input);
-
-  // 2. Perform mutation
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("items")
-    .insert(parsed)
-    .select("id")
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  // 3. Revalidate and return if needed
-  revalidatePath("/items");
-  return { id: data.id };
-}
-```
-
-**Use `import "server-only"` for data fetching under the `/queries` folder:**
-
-```ts
-import "server-only";
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-
-type Item = { id: string; name: string };
-
-export async function getItems(): Promise<Item[]> {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
-  const { data, error } = await supabase.from("items").select("*");
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data;
-}
-```
-
----
-
-## Client-Side Action Handling
-
-### `tryCatch` Utility
-
-The `tryCatch` utility from `@/lib/server/tryCatch` converts throwing functions/promises into `[error, data]` tuples. It supports two usage patterns:
-
-**1. Wrap a function** (for use with `useAction`):
-
-```ts
-import tryCatch from "@/lib/server/tryCatch";
-import { useAction } from "@/hooks/useAction";
-import { createItem } from "@/server/items/mutations";
-
-// tryCatch wraps the function, converting thrown errors to tuples
-const { execute } = useAction(tryCatch(createItem), {
-  onSuccess: (data) => console.log(data),
-  onError: (error) => console.error(error),
-});
-
-execute({ name: "New Item" });
-```
-
-**2. Wrap a promise** (for inline use):
-
-```ts
-import tryCatch from "@/lib/server/tryCatch";
-import { createItem } from "@/server/items/mutations";
-
-// tryCatch wraps the promise directly
-const { error, data, success } = await tryCatch(createItem(input));
-
-if (!success) {
-  toast.error(error);
-  return;
-}
-
-console.log(data);
-```
-
-### `useAction` Hook
-
-For button-triggered mutations (not form submissions). Use with `tryCatch` to wrap server actions that throw:
-
-```tsx
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useAction } from "@/hooks/useAction";
-import tryCatch from "@/lib/server/tryCatch";
-import { deleteItem } from "@/server/items/mutations";
-
-export function DeleteButton({ id }: { id: string }) {
-  const router = useRouter();
-
-  const { execute, isPending, error } = useAction(tryCatch(deleteItem), {
-    onSuccess: () => router.push("/items"),
-    onError: (err) => toast.error(err.message),
-  });
-
-  return (
-    <button onClick={() => execute(id)} disabled={isPending}>
-      {isPending ? "Deleting..." : "Delete"}
-    </button>
-  );
-}
-```
-
-**`useAction` returns:**
-
-| Property    | Type                                                                 | Description           |
-| ----------- | -------------------------------------------------------------------- | --------------------- |
-| `execute`   | `(...args: TInput) => Promise<ServerFunctionResult<TOutput, Error>>` | Triggers the action   |
-| `isPending` | `boolean`                                                            | Loading state         |
-| `data`      | `TOutput \| null`                                                    | Success result        |
-| `error`     | `Error \| null`                                                      | Error object          |
-| `reset`     | `() => void`                                                         | Clears data and error |
-
----
-
-## Supabase
-
-### Server-side Supabase Clients
-
-There are **two** server-side clients in `@/lib/supabase/server`:
-
-#### `createClient(requestCookies)` - For Cached Queries
-
-Use this in `"use cache"` functions or cached Server Components. Requires passing cookies from the page level:
-
-```ts
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-
-// In page.tsx
-const cookieStore = await cookies();
-const data = await getCachedData(cookieStore.getAll());
-
-// In query file with "use cache"
-export async function getCachedData(requestCookies: RequestCookie[]) {
-  "use cache";
-  const supabase = await createClient(requestCookies);
-  const { data, error } = await supabase.from("table").select("*");
-  // ...
-}
-```
-
-If the query requires dynamic fetching, you may opt to get the cookies on the query itself:
-
-```ts
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-
-export async function getDynamicData() {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
-  const { data, error } = await supabase.from("table").select("*");
-  // ...
-}
-```
-
-**Rules:**
-
-- ✅ Use in cached queries (`"use cache"`)
-- ❌ Cannot set cookies (read-only)
-- ❌ Never use for mutations
-
-#### `createActionClient()` - For Server Actions & Mutations
-
-Use this in Server Actions where cookie mutation is needed (e.g., auth token refresh):
-
-```ts
-import { createActionClient } from "@/lib/supabase/server";
-
-export async function updateItem(data: FormData) {
-  "use server";
-  const supabase = await createActionClient();
-  const { data, error } = await supabase
-    .from("table")
-    .update(data)
-    .eq("id", id);
-  // ...
-}
-```
-
-**Rules:**
-
-- ✅ Use in Server Actions (`"use server"`)
-- ✅ Can set cookies (auth token refresh)
-- ❌ Do NOT use inside `"use cache"` functions
-- ❌ Never import in `"use client"` components
-
-Both clients are typed with your `Database` types from `db.types.ts`.
-
-### Client-side Supabase Client
-
-Always use the client client from `@/lib/supabase/client`:
-
-```ts
-import { createClient } from "@/lib/supabase/client";
-
-const supabase = await createClient();
-const { data, error } = await supabase.from("table").select("*");
-```
-
-**Rules:**
-
-- ✅ Use in Client Components, React Hooks, and other client-side files
-- ❌ Never import in `"use server"` components
-- The client is already typed with your `Database` types from `db.types.ts`
-
-### Generated Types
-
-Database types are in `@/lib/supabase/db.types.ts`.
-
-**For Local Development (after migrations):**
 ```bash
+bun run test
+bun run test:watch
+bun run test:coverage
+bun run test:ui
+bun run test:unit
+bun run test:integration
+bun run test:component
+bun run test:local
+bun run test:local:ui
+```
+
+### Running a Single Test
+
+```bash
+bun run test -- __tests__/unit/path/to/file.test.ts
+vitest run __tests__/integration/path/to/file.test.ts
+vitest run __tests__/component/vitest/path/to/file.test.tsx
+vitest run -t "specific test name"
+```
+
+Notes:
+
+- `bun run test -- <file>` forwards the file path to Vitest
+- Vitest loads `.env.testing`
+- Test environment is `happy-dom`
+- Vitest includes only `__tests__/unit`, `__tests__/integration`, and `__tests__/component/vitest`
+- `__tests__/e2e` is excluded from Vitest
+
+## Playwright Commands
+
+```bash
+bun run test:e2e
+bun run test:e2e:ui
+bun run test:e2e:headed
+bun run test:e2e:debug
+bun run test:e2e:report
+bun run test:e2e:local
+playwright test __tests__/e2e/path/to/spec.ts
+```
+
+## Other Useful Commands
+
+```bash
+bun run email:dev
 bun run db:gen:types
-```
-
-**For Production (before deployment):**
-```bash
 bun run gen:types
+bun run docker:dev
+bun run docker:devb
+bun run docker:prod
+bun run docker:prodb
 ```
 
----
+## Commit Convention
 
-## Validation
+Commit messages must follow `<type>: <description>`.
 
-### Zod Schemas
+Allowed types:
 
-Always use zod schemas for forms integrated with Tanstack Forms.
+- `feat`
+- `fix`
+- `docs`
+- `style`
+- `refactor`
+- `test`
+- `chore`
+- `build`
+- `perf`
 
-Import from `@/lib/validation/utils`:
+## Project Structure
 
-```ts
-import {
-  phoneSchema, // Philippine phone: +639XXXXXXXXX or 09XXXXXXXXX
-  emailSchema, // Standard email validation
-} from "@/lib/validation/utils";
+- `src/app`: routes, route-local UI, route-local hooks
+- `src/components`: reusable UI
+- `src/components/form`: registered TanStack Form field components
+- `src/hooks`: shared hooks like `useAction` and `useAppForm`
+- `src/lib`: utilities, validation, cache tags, Supabase clients, shared types
+- `src/server`: feature server logic
 
-const contactSchema = z.object({
-  email: emailSchema,
-  phone: phoneSchema.optional(),
-});
-```
+Inside `src/server`, prefer:
 
----
+- `queries/` for reads
+- `mutations/` for writes
 
-## Environment Variables
+Do not default to `actions/` for new work. Older files may still exist, but new write operations should go in `mutations/`.
 
-**Required:**
+## Placement Rules
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=eyJ...
-```
+- Route-specific components belong in `src/app/**/_components`
+- Route-specific hooks belong in `src/app/**/_hooks`
+- Reusable components belong in `src/components`
+- Feature server code belongs in `src/server/[feature]`
+- Shared cross-feature logic should stay in shared lib/server utilities, not random route files
 
-## Common Patterns
+## Imports and Formatting
 
-### Loading States in Server Components
+- Always use the `@/` alias for project imports when possible
+- Prefer `import type` for type-only imports
+- Let Biome organize imports automatically
+- Indentation: 2 spaces
+- Strings: double quotes
+- Semicolons: required
+- Tailwind classes are auto-sorted by Biome's `useSortedClasses` rule
+- Use `cn()` from `@/lib/utils` for conditional classes
+- Preserve generated component patterns in `src/components/ui`
 
-```tsx
-import { Suspense } from "react";
+## TypeScript and Naming
 
-export default function Page() {
-  return (
-    <Suspense fallback={<ItemsSkeleton />}>
-      <ItemsList />
-    </Suspense>
-  );
-}
+- Keep types strict; avoid `any` unless there is no practical alternative
+- Prefer `type` for object shapes and unions; use `interface` when extension is intended
+- Prefer explicit return types on exported functions
+- Infer validated input types from Zod with `z.infer<typeof Schema>`
+- Reuse generated DB types from `@/lib/supabase/db.types.ts`
+- Components use PascalCase
+- Hooks use camelCase with `use` prefix
+- Utility files use camelCase
+- Constants use UPPER_SNAKE_CASE
+- Server functions use verb-led camelCase like `getMembers`, `createEvent`, `verifyPayment`
 
-async function ItemsList() {
-  const [error, items] = await getItems();
+## React and Forms
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+- Prefer Server Components first
+- Add `"use client"` only when hooks, browser APIs, handlers, or client context are required
+- Use `useAppForm` from `@/hooks/_formHooks`
+- Use registered components from `src/components/form`
+- Register new custom fields in `@/hooks/_formHooks`
+- Preserve `data-invalid` and `aria-invalid` behavior on custom fields
+- Use Zod for both form validation and server-side validation
 
-  return items.map((item) => <ItemCard key={item.id} item={item} />);
-}
-```
+## Error Handling
 
-### Loading States in Client Components
+- Client code should usually wrap async server calls with `tryCatch` from `@/lib/server/tryCatch`
+- `tryCatch(promise)` returns `{ success, data, error }`
+- `tryCatch(fn)` adapts throwing async functions for `useAction` and `useOptimisticAction`
+- Use `useAction` for button-triggered mutations
+- Form submission errors should flow through TanStack Form error handling
+- Server mutations may throw; callers are expected to handle failures through `tryCatch`
 
-```tsx
-// page.tsx
-import { Suspense } from "react";
+## Supabase Usage
 
-export default function Page() {
-  return (
-    <Suspense fallback={<ItemsSkeleton />}>
-      <ItemsList />
-    </Suspense>
-  );
-}
+Use the correct client for the correct layer:
 
-// Items.tsx
-("use client");
-import { getItems } from "@/lib/data";
-import { use } from "react";
+- `createClient(requestCookies)` from `@/lib/supabase/server` for server reads and cached queries
+- `createActionClient()` from `@/lib/supabase/server` for server mutations that may mutate cookies
+- `createClient()` from `@/lib/supabase/client` for client-side usage
 
-function ItemsList() {
-  const [error, items] = use(getItems);
+Rules:
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+- Never use `createActionClient()` inside cached queries
+- Never use the read-only server client for mutations
+- Never import server Supabase clients into client components
+- Query modules should use `import "server-only"` when appropriate
 
-  return items.map((item) => <ItemCard key={item.id} item={item} />);
-}
-```
+## Caching Rules
 
-- You may also opt to use `loading.tsx`
-- For a page with multiple queries, you may use `await Promise.all([query1(), query2()])`
-- Revalidate and return if needed
-- In cases where client side reactivity is needed, use `use` hook from `react` library. It allows you to await promises in the client. see [https://react.dev/reference/react/use](https://react.dev/reference/react/use) for more information.
+- Cached queries should use `"use cache"` only when reuse is likely
+- Use cache profiles from `next.config.ts`: `publicHours`, `admin5m`, `realtime60s`
+- Use centralized tags from `@/lib/cache/tags`; do not hardcode tag strings
+- Cached queries should declare both `cacheLife()` and `cacheTag()`
+- Prefer `updateTag(...)` for shared data invalidation
+- Use `revalidatePath(...)` only when route refresh is intentionally the primary strategy
+- Avoid dynamic tag strings like `members:${id}`
 
-### Caching Components / Data
+## Testing Expectations
 
-Use the `"use cache"` directive only for queries with good cache reuse. Prefer explicit cache profiles and centralized tags.
+- For targeted changes, run the smallest relevant check first
+- For style-only changes, `bun run biome:check` is usually enough
+- For UI or routing changes, consider `bun run build`
+- For broader data-flow changes, run the nearest unit or integration tests plus lint
 
-#### Cache Profiles
+## Guardrails
 
-Profiles defined in `next.config.ts`:
-- `publicHours` - Public-facing data (1 hour revalidation)
-- `admin5m` - Admin dashboard data (5 minute revalidation)
-- `realtime60s` - Near real-time data (60 second revalidation)
-
-#### Cached Query Pattern
-
-Every cached query MUST declare both `cacheLife()` and `cacheTag()`:
-
-```typescript
-import "server-only";
-import { cacheLife, cacheTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
-
-export async function getItems(requestCookies: RequestCookie[]) {
-  "use cache";
-  cacheLife("admin5m");
-  cacheTag(CACHE_TAGS.items.all);
-  cacheTag(CACHE_TAGS.items.admin);
-
-  const supabase = await createClient(requestCookies);
-  const { data } = await supabase.from("items").select("*");
-  return data;
-}
-```
-
-Pass cookies from the page level:
-
-```tsx
-import { cookies } from "next/headers";
-
-export default async function Page() {
-  const cookieStore = await cookies();
-  const items = await getItems(cookieStore.getAll());
-  return <ItemList items={items} />;
-}
-```
-
-#### Invalidation Strategy - Choose ONE Primary
-
-**1. Tag-Level Invalidation** (preferred for shared data)
-- Use when: Data is reused across multiple routes/components
-- Use when: You have tagged cached queries
-- Implementation: Call `updateTag(CACHE_TAGS.*)` after mutation
-- Allows partial invalidation of only affected tags
-
-```typescript
-"use server";
-import { updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
-
-export async function updateItem(id: string, data: ItemUpdate) {
-  const supabase = await createActionClient();
-  await supabase.from("items").update(data).eq("id", id);
-
-  // Invalidate only affected tags
-  updateTag(CACHE_TAGS.items.all);
-  updateTag(CACHE_TAGS.items.admin);
-}
-```
-
-**2. Path-Level Invalidation** (use sparingly)
-- Use when: Freshness is strictly route/segment-driven
-- Use when: The affected view is not backed by tagged caches
-- Implementation: Call `revalidatePath("/path")` after mutation
-
-```typescript
-"use server";
-import { revalidatePath } from "next/cache";
-
-export async function updateItem(id: string, data: ItemUpdate) {
-  const supabase = await createActionClient();
-  await supabase.from("items").update(data).eq("id", id);
-
-  revalidatePath("/admin/items");
-  revalidatePath(`/admin/items/${id}`);
-}
-```
-
-**Rules:**
-- Choose one primary strategy per mutation (tag-level OR path-level)
-- Only combine both when intentionally needed
-- NO param tags: Don't create `items:${id}`; function args are auto-serialized into cache keys
-- Use `revalidateTag(tag, "max")` only for public flows with eventual consistency
-
-#### What to Cache
-
-- ✅ Cache low-cardinality, shared, repeat-read queries (public lists, admin stats, registration/check-in lists)
-- ❌ Avoid caching high-cardinality search/filter/cursor queries unless proven reusable
-- ❌ Avoid caching time-dependent queries (`new Date()`, `Date.now()`) unless intentional staleness is acceptable
-
-For more details, see [Next.js caching](https://nextjs.org/docs/app/building-your-application/caching),
-[CacheComponents](https://nextjs.org/docs/app/getting-started/cache-components)
-
-### Toast Notifications
-
-Toasts use `sonner`. The `<Toaster />` is in the root layout.
-
-```tsx
-import { toast } from "sonner";
-
-// Manual usage (usually prefer useAction's toast options)
-toast.success("Saved!");
-toast.error("Something went wrong");
-toast.loading("Saving...");
-```
+- Do not modify `AGENTS.md` or `.github/DOD.md` unless explicitly asked
+- When docs and code disagree, trust the actual codebase and config first
+- Prefer extending existing feature patterns instead of introducing a new architecture style

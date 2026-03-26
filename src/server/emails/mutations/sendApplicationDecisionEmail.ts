@@ -1,10 +1,8 @@
 "use server";
 
 import { render } from "@react-email/render";
-import { Resend } from "resend";
-import ApplicationDecisionEmail from "@/lib/resend/templates/application-decision";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmail } from "@/lib/email";
+import ApplicationDecisionEmail from "@/lib/resend/templates/ApplicationDecision";
 
 interface SendApplicationDecisionEmailProps {
   to: string;
@@ -45,17 +43,12 @@ export async function sendApplicationDecisionEmail({
       { plainText: true, pretty: false },
     );
 
-    const { error } = await resend.emails.send({
+    await sendEmail({
       to,
-      from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
       subject,
       html: String(html),
       text: String(text),
     });
-
-    if (error) {
-      return [`Failed to send decision email: ${error.message}`, null];
-    }
 
     return [null, { success: true }];
   } catch (e) {

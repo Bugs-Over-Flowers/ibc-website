@@ -1,11 +1,13 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { Loader2, ScanLine } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { RegistrationItem } from "@/lib/validation/registration-management";
-import CheckInRegistrationRowActions from "./CheckInRegistrationRowActions";
+import { useScanQR } from "../../_hooks/useScanQR";
 
 interface CheckInRegistrationTableProps {
   eventDayId: string;
@@ -13,12 +15,41 @@ interface CheckInRegistrationTableProps {
   registrationList: RegistrationItem[];
 }
 
-const getColumns = ({
+function CheckInActionButton({
   eventDayId,
-  eventId,
+  registrationIdentifier,
+  scanQRData,
+  isPending,
 }: {
   eventDayId: string;
-  eventId: string;
+  registrationIdentifier: string;
+  scanQRData: (registrationIdentifier: string, eventDayId: string) => void;
+  isPending: boolean;
+}) {
+  return (
+    <Button
+      disabled={isPending}
+      onClick={(event) => {
+        event.stopPropagation();
+        scanQRData(registrationIdentifier, eventDayId);
+      }}
+      size="sm"
+      variant="outline"
+    >
+      {isPending ? <Loader2 className="animate-spin" /> : <ScanLine />}
+      Check-In
+    </Button>
+  );
+}
+
+const getColumns = ({
+  eventDayId,
+  scanQRData,
+  isPending,
+}: {
+  eventDayId: string;
+  scanQRData: (registrationIdentifier: string, eventDayId: string) => void;
+  isPending: boolean;
 }): ColumnDef<RegistrationItem>[] => [
   {
     accessorKey: "registrationIdentifier",
@@ -63,14 +94,15 @@ const getColumns = ({
     cell: ({ row }) => <>{row.original.people}</>,
   },
   {
-    accessorKey: "actions",
-    header: "Actions",
+    accessorKey: "checkIn",
+    header: "Check In",
     enableHiding: false,
     cell: ({ row }) => (
-      <CheckInRegistrationRowActions
+      <CheckInActionButton
         eventDayId={eventDayId}
-        eventId={eventId}
+        isPending={isPending}
         registrationIdentifier={row.original.registrationIdentifier}
+        scanQRData={scanQRData}
       />
     ),
   },
@@ -81,9 +113,11 @@ export default function CheckInRegistrationTable({
   eventId,
   registrationList,
 }: CheckInRegistrationTableProps) {
+  const { execute: scanQRData, isPending } = useScanQR({ eventId });
+
   return (
     <DataTable
-      columns={getColumns({ eventDayId, eventId })}
+      columns={getColumns({ eventDayId, isPending, scanQRData })}
       data={registrationList}
     />
   );

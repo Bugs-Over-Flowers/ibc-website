@@ -29,6 +29,7 @@ export type StandardRegistrationStep1Schema = z.infer<
 
 export const RegistrantDetailsSchema = z
   .object({
+    id: z.string().default(() => crypto.randomUUID()),
     firstName: z
       .string()
       .min(2, "First name must be at least 2 characters")
