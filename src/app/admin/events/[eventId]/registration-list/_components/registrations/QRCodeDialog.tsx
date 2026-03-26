@@ -84,7 +84,12 @@ export default function QRCodeDialog({
                     registrationIdentifier={registrationIdentifier}
                   >
                     <div className="relative size-50">
-                      <Image alt="QR Code" fill src={qrURL} />
+                      <Image
+                        alt="QR Code"
+                        fill
+                        sizes="(min-width: 640px) 512px, 100vw"
+                        src={qrURL}
+                      />
                     </div>
                   </QRDownloader>
                   <Field>

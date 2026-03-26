@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventStats } from "@/server/events/queries/getEventStats";
+import AddFacebookLinkButton from "./AddFacebookLinkButton";
 
 export default async function EventDetails({
   params,
@@ -128,6 +129,10 @@ export default async function EventDetails({
               )}
             </div>
             <div className="flex items-center gap-2">
+              <AddFacebookLinkButton
+                eventId={eventId}
+                facebookLink={event.facebookLink}
+              />
               <EvaluationQRDownloader
                 eventId={eventId}
                 eventTitle={event.eventTitle}

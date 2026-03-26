@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { EditMemberButton } from "@/app/admin/_components/EditMemberButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAction } from "@/hooks/useAction";
@@ -149,22 +150,29 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
               </span>
             )}
           </div>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Link
-              href={
-                `/admin/members/${application.businessMemberId}/history` as Route
-              }
-            >
-              <Button
-                className="border border-border active:scale-95 active:opacity-80"
-                size="sm"
-                variant="outline"
+          <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
+            {application.BusinessMember && (
+              <EditMemberButton
+                memberId={application.BusinessMember.businessMemberId}
+              />
+            )}
+            <div className="flex w-full items-center gap-2 sm:w-auto">
+              <Link
+                href={
+                  `/admin/members/${application.businessMemberId}/history` as Route
+                }
               >
-                <History className="mr-2 h-4 w-4" />
-                Application History
-              </Button>
-            </Link>
-            <ExportPDFButton application={application} />
+                <Button
+                  className="border border-border active:scale-95 active:opacity-80"
+                  size="sm"
+                  variant="outline"
+                >
+                  <History className="mr-2 h-4 w-4" />
+                  Application History
+                </Button>
+              </Link>
+              <ExportPDFButton application={application} />
+            </div>
           </div>
         </div>
       )}

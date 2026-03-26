@@ -23,6 +23,7 @@ export const useCreateEventForm = () => {
       eventStartDate: undefined as Date | undefined,
       eventEndDate: undefined as Date | undefined,
       venue: "",
+      facebookLink: "",
       registrationFee: 0,
       eventType: null as "public" | "private" | null,
       eventImage: [] as File[],
@@ -49,11 +50,11 @@ export const useCreateEventForm = () => {
       if (value.eventImage && value.eventImage.length > 0) {
         const file = value.eventImage[0];
         const fileExt = file.name.split(".").pop()?.toLowerCase();
-        const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+        const allowedExtensions = ["jpg", "jpeg", "png"];
 
         if (!fileExt || !allowedExtensions.includes(fileExt)) {
           toast.error(
-            "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
+            "Invalid file type. Only jpg, jpeg, and png are allowed.",
           );
           return;
         }
@@ -79,9 +80,16 @@ export const useCreateEventForm = () => {
         publicUrl = url;
       }
 
+      const trimmedFacebookLink = value.facebookLink?.trim();
+      const normalizedFacebookLink =
+        trimmedFacebookLink && trimmedFacebookLink.length > 0
+          ? trimmedFacebookLink
+          : undefined;
+
       const payload = {
         ...value,
         eventImage: publicUrl,
+        facebookLink: normalizedFacebookLink,
       };
 
       const result =

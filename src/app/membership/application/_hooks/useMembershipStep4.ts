@@ -198,7 +198,7 @@ export const useMembershipStep4 = ({
   });
 
   const goBack = () => {
-    setStep(4);
+    setStep(3);
   };
 
   return { form, goBack, applicationData };

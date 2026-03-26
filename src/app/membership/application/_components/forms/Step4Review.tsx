@@ -1,4 +1,3 @@
-import { useStore } from "@tanstack/react-form";
 import { Building2, MapPin, User } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
