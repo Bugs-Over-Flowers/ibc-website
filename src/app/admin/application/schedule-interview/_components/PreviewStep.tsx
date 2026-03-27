@@ -111,7 +111,7 @@ export function PreviewStep({
             "Sending..."
           ) : (
             <>
-              <Send className="mr-2 h-4 w-4" /> Send Invitations
+              <Send className="mr-2 h-4 w-4" /> Schedule Interview
             </>
           )}
         </Button>

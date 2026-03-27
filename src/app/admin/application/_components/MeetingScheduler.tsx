@@ -1,5 +1,6 @@
 "use client";
 
+import { addDays, isSameDay, parseISO, startOfDay } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsS
 export default function MeetingScheduler() {
   const { selectedApplicationIds, clearSelection } =
     useSelectedApplicationsStore();
+  const minInterviewDate = addDays(startOfDay(new Date()), 1);
 
   const form = useMeetingScheduler(() => {
     clearSelection();
@@ -50,7 +52,7 @@ export default function MeetingScheduler() {
                   <div suppressHydrationWarning>
                     <field.FormDateTimePicker
                       className="w-full"
-                      minDate={new Date()}
+                      minDate={minInterviewDate}
                     />
                   </div>
                 )}
@@ -85,6 +87,9 @@ export default function MeetingScheduler() {
                 isVenueTooShort:
                   !state.values.interviewVenue ||
                   state.values.interviewVenue.trim().length < 3,
+                isCurrentDateSelected:
+                  !!state.values.interviewDate &&
+                  isSameDay(parseISO(state.values.interviewDate), new Date()),
               })}
             >
               {(state) => (
@@ -95,7 +100,8 @@ export default function MeetingScheduler() {
                     !state.interviewDate ||
                     !state.interviewVenue ||
                     state.isFieldInvalid ||
-                    state.isVenueTooShort
+                    state.isVenueTooShort ||
+                    state.isCurrentDateSelected
                   }
                   onClick={handleNavigateToSchedule}
                   type="button"

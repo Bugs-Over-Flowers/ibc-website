@@ -1,6 +1,7 @@
 "use client";
 
 import { Edit, Eye, MoreVertical, Trash } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -49,7 +50,7 @@ export default function SectorActionsDropdown({
           <DropdownMenuItem>
             <Link
               className="flex w-full cursor-pointer items-center"
-              href={`/admin/manage-sector/${sectorId}/members`}
+              href={`/admin/manage-sector/${sectorId}/members` as Route}
             >
               <Eye className="mr-2 h-4 w-4" />
               <span>View Members</span>

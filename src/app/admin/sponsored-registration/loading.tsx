@@ -5,14 +5,17 @@ const buttonSkeletons = Array.from({ length: 5 }, (_, i) => `button-${i}`);
 
 export default function SponsoredRegistrationPageSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-2">
       {/* Header Skeleton */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <Skeleton className="h-9 w-64" />
-          <Skeleton className="h-5 w-full max-w-md" />
+          <Skeleton className="h-5 w-full max-w-xs" />
         </div>
-        <Skeleton className="h-12 w-60 rounded-xl" />
+        <div className="inline-flex h-12 w-56 items-center justify-center gap-2 rounded-xl border border-border bg-primary/90 px-4">
+          <Skeleton className="h-4 w-4 rounded-full bg-primary-foreground/40" />
+          <Skeleton className="h-4 w-24 bg-primary-foreground/40" />
+        </div>
       </div>
 
       {/* Filter Bar Skeleton */}
@@ -31,7 +34,7 @@ export default function SponsoredRegistrationPageSkeleton() {
       </div>
 
       {/* Cards Skeleton */}
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {skeletonCards.map((cardKey) => (
           <div
             className="rounded-xl border border-border bg-card p-5"

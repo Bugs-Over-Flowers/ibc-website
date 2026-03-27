@@ -1,16 +1,13 @@
-import { Calendar, DollarSign, MapPin } from "lucide-react";
+import { Calendar, MapPin, Ticket } from "lucide-react";
+import type { Route } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { Suspense } from "react";
+import { getStatusBadge } from "@/components/BadgeEvents";
 import { formatFullDateTime } from "@/lib/events/eventUtils";
 import { cn } from "@/lib/utils";
 import type { EventWithStatus } from "../../types/event";
 import EventActionsDropdown from "./EventActionsDropdown";
-
-const statusColors: Record<string, string> = {
-  draft: "bg-muted text-foreground",
-  published: "bg-status-blue text-background",
-  finished: "bg-status-green text-background",
-};
 
 interface EventRowProps {
   event: EventWithStatus;
@@ -26,93 +23,109 @@ export default function EventRow({ event }: EventRowProps) {
   const headerUrl = normalizeUrl(event.eventHeaderUrl);
   const imageUrl = posterUrl ?? headerUrl;
 
-  return (
-    <article className="flex flex-col items-start gap-3 overflow-hidden rounded-lg border bg-background p-3 shadow-sm md:flex-row md:items-start">
-      <div className="relative h-32 w-32 shrink-0 md:h-40 md:w-40">
-        {imageUrl ? (
-          <Image
-            alt={event.eventTitle || "Event image"}
-            className="h-full w-full rounded object-cover"
-            height={192}
-            priority={false}
-            sizes="(max-width: 768px) 100vw, 128px"
-            src={imageUrl}
-            width={192}
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center rounded bg-background text-muted-foreground text-xs">
-            No image
-          </div>
-        )}
-        <div className="absolute top-2 left-2">
-          <span
-            className={cn(
-              "rounded-full border border-popover px-2 py-1 font-medium text-xs",
-              statusColors[event.computedStatus] ??
-                "bg-foreground text-background",
-            )}
-          >
-            {event.computedStatus.charAt(0).toUpperCase() +
-              event.computedStatus.slice(1)}
-          </span>
-        </div>
-      </div>
+  const typeLabel = event.eventType
+    ? event.eventType.charAt(0).toUpperCase() + event.eventType.slice(1)
+    : null;
 
-      <div className="flex w-full flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between gap-2">
-            {event.eventType && (
-              <span className="whitespace-nowrap rounded-xl bg-muted px-2 py-1 font-semibold text-popup text-xs capitalize">
-                {event.eventType}
+  const fee = Number(event.registrationFee);
+
+  return (
+    <Link
+      className="group block transition-colors"
+      href={`/admin/events/${event.eventId}` as Route}
+    >
+      <article
+        className={cn(
+          "flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground",
+          "transition-all duration-300 ease-out",
+          "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-xl",
+        )}
+      >
+        {/* Image — strictly 1:1 */}
+        <div
+          className="relative w-full overflow-hidden bg-muted/20"
+          style={{ aspectRatio: "1 / 1" }}
+        >
+          {imageUrl ? (
+            <Image
+              alt={event.eventTitle || "Event image"}
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              fill
+              priority={false}
+              sizes="(max-width: 768px) 100vw, (max-width: 1536px) 50vw, 33vw"
+              src={imageUrl}
+            />
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground/40">
+              <Calendar className="h-8 w-8" />
+              <span className="text-xs tracking-wide">No image</span>
+            </div>
+          )}
+
+          {/* Gradient scrim for badge readability */}
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-transparent" />
+
+          {/* Overlaid badges */}
+          <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
+            {getStatusBadge(event.computedStatus)}
+            {typeLabel && (
+              <span className="inline-flex items-center rounded-full border border-white/15 bg-black/55 px-2.5 py-0.5 font-medium text-[10px] text-white uppercase tracking-widest backdrop-blur-md">
+                {typeLabel}
               </span>
             )}
-            <div className="ml-auto flex items-center">
-              <Suspense>
-                <EventActionsDropdown
-                  eventId={event.eventId}
-                  status={event.computedStatus}
-                />
-              </Suspense>
-            </div>
           </div>
-          <h3 className="line-clamp-2 font-semibold text-base md:text-lg">
+        </div>
+
+        {/* Body */}
+        <div className="flex flex-1 flex-col gap-3 p-4">
+          <h3 className="line-clamp-2 font-semibold text-[14.5px] text-foreground leading-snug tracking-tight">
             {event.eventTitle}
           </h3>
-        </div>
 
-        <div className="grid grid-cols-1 gap-3 border-t pt-2 sm:grid-cols-2 xl:grid-cols-3">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 font-semibold text-muted text-xs">
-              <MapPin size={12} />
-              <span>Venue</span>
+          <div className="space-y-2 text-[12.5px] text-muted-foreground">
+            {/* Venue */}
+            <div className="flex items-start gap-2">
+              <MapPin className="mt-px h-3.5 w-3.5 shrink-0 text-primary/60" />
+              <p className="line-clamp-1 leading-snug">{event.venue}</p>
             </div>
-            <span className="line-clamp-2 text-sm">{event.venue}</span>
-          </div>
 
-          <div className="flex min-w-0 flex-col gap-1">
-            <div className="flex items-center gap-2 font-semibold text-muted text-xs">
-              <Calendar size={12} />
-              <span>Dates</span>
-            </div>
-            <div className="flex flex-col gap-1 text-sm">
-              <div className="border-border border-b py-1">
-                {formatFullDateTime(event.eventStartDate)}
+            {/* Schedule */}
+            <div className="flex items-start gap-2">
+              <Calendar className="mt-px h-3.5 w-3.5 shrink-0 text-primary/60" />
+              <div className="space-y-0.5 leading-snug">
+                <p>{formatFullDateTime(event.eventStartDate)}</p>
+                <p className="text-muted-foreground/60">
+                  {formatFullDateTime(event.eventEndDate)}
+                </p>
               </div>
-              <div>{formatFullDateTime(event.eventEndDate)}</div>
             </div>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 font-semibold text-muted text-xs">
-              <DollarSign size={12} />
-              <span>Fee</span>
-            </div>
-            <p className="font-semibold text-lg text-primary">
-              ₱{Number(event.registrationFee).toLocaleString()}
-            </p>
           </div>
         </div>
-      </div>
-    </article>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between border-border/60 border-t bg-muted/5 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Ticket className="h-3.5 w-3.5 text-primary/50" />
+            <span
+              className={cn(
+                "font-semibold tabular-nums",
+                fee === 0
+                  ? "text-[13px] text-status-green"
+                  : "text-[15px] text-foreground",
+              )}
+            >
+              {fee === 0 ? "Free" : `₱${fee.toLocaleString()}`}
+            </span>
+          </div>
+
+          <Suspense>
+            <EventActionsDropdown
+              eventId={event.eventId}
+              status={event.computedStatus}
+            />
+          </Suspense>
+        </div>
+      </article>
+    </Link>
   );
 }

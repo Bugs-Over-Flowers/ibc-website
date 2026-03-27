@@ -39,7 +39,7 @@ export function ApplicationHistoryList({
   // No applications at all — show empty state without filters
   if (applications.length === 0) {
     return (
-      <div className="rounded-lg border bg-muted/20 p-8 text-center">
+      <div className="mx-auto max-w-md rounded-2xl p-12 text-center backdrop-blur-xl">
         <p className="text-muted-foreground">
           No applications found for this member.
         </p>
@@ -55,21 +55,15 @@ export function ApplicationHistoryList({
       />
 
       {/* Results count */}
-      <p className="text-muted-foreground text-sm">
-        Showing{" "}
-        <span className="font-medium text-foreground">
-          {filteredApplications.length}
-        </span>{" "}
-        of{" "}
-        <span className="font-medium text-foreground">
-          {applications.length}
-        </span>{" "}
-        application{applications.length !== 1 ? "s" : ""}
+      <p className="font-medium text-muted-foreground text-sm">
+        Showing {filteredApplications.length} of {applications.length}{" "}
+        application
+        {applications.length !== 1 ? "s" : ""}
       </p>
 
       {/* Filtered results or "no matches" empty state */}
       {filteredApplications.length === 0 ? (
-        <div className="rounded-lg border bg-muted/20 p-8 text-center">
+        <div className="mx-auto max-w-md rounded-2xl p-12 text-center backdrop-blur-xl">
           <p className="text-muted-foreground">
             No applications match the current filters.
           </p>

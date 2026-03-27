@@ -46,7 +46,6 @@ export const useCreateEventForm = () => {
     onSubmit: async ({ value }) => {
       console.log("Submitting form to server...", value);
 
-      const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
       const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
       let headerUrl: string | null | undefined = null;
       let posterUrl: string | null | undefined = null;

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { DetailsSkeleton } from "./_components/DetailsSkeleton";
 import { MembersDetails } from "./_components/MembersDetails";
+import { DetailsSkeleton } from "./loading";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -10,7 +10,7 @@ export default async function MemberDetailPage({ params }: PageProps) {
   const { id } = await params;
 
   return (
-    <div className="container mx-auto space-y-6 py-8">
+    <div className="space-y-6">
       <Suspense fallback={<DetailsSkeleton />}>
         <MembersDetails memberId={id} />
       </Suspense>

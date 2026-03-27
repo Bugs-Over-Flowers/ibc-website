@@ -45,7 +45,7 @@ const menuItems = [
     href: "/admin/sponsored-registration",
   },
   {
-    title: "Manage Sectors",
+    title: "Sectors",
     icon: Building2,
     href: "/admin/manage-sector",
   },

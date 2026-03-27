@@ -9,7 +9,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import type { SortOption } from "@/server/events/queries/getAdminEventsPage";
+import type {
+  DateSortOption,
+  SortOption,
+  TitleSortOption,
+} from "@/server/events/queries/getAdminEventsPage";
 import { useInfiniteEvents } from "../_hooks/useInfiniteEvents";
 import type { EventWithStatus } from "../types/event";
 import CreateEventButton from "./CreateEventButton";
@@ -20,6 +24,8 @@ interface EventTableProps {
   initialNextCursor: string | null;
   search?: string;
   sort?: SortOption;
+  dateSort?: DateSortOption;
+  titleSort?: TitleSortOption;
   status?: string;
 }
 
@@ -28,6 +34,8 @@ export default function EventTable({
   initialNextCursor,
   search,
   sort,
+  dateSort,
+  titleSort,
   status,
 }: EventTableProps) {
   const { events, isLoading, observerTarget } = useInfiniteEvents({
@@ -35,6 +43,8 @@ export default function EventTable({
     initialNextCursor,
     search,
     sort,
+    dateSort,
+    titleSort,
     status,
   });
 
@@ -58,12 +68,10 @@ export default function EventTable({
 
   return (
     <div className="w-full space-y-4 md:space-y-6">
-      <div className="rounded-lg bg-background px-4 md:px-5">
-        <div className="font-medium text-muted-foreground text-sm md:text-base">
-          {events.length} event{events.length !== 1 ? "s" : ""} loaded
-        </div>
+      <div className="font-medium text-muted-foreground text-sm">
+        {events.length} event{events.length !== 1 ? "s" : ""} loaded
       </div>
-      <div className="space-y-4 md:space-y-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
         {events.map((ev) => (
           <EventRow event={ev} key={ev.eventId} />
         ))}

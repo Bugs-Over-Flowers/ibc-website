@@ -1,6 +1,19 @@
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
-import EventsSkeleton from "./_components/EventSkeleton/EventsSkeleton";
-import EventsContents from "./_components/EventsContents";
+import {
+  getAdminEventsPage,
+  type SortOption,
+} from "@/server/events/queries/getAdminEventsPage";
+import CreateEventButton from "./_components/CreateEventButton";
+import EventFilters from "./_components/EventFilters";
+import EventTable from "./_components/EventTable";
+import EventsPageSkeleton from "./loading";
+
+export const metadata: Metadata = {
+  title: "Events | Admin",
+  description: "View and manage your events",
+};
 
 interface SearchParams {
   search?: string;
@@ -8,10 +21,51 @@ interface SearchParams {
   status?: string;
 }
 
+async function EventsPageContent({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+  const cookieStore = await cookies();
+
+  const { items, nextCursor } = await getAdminEventsPage(cookieStore.getAll(), {
+    search: sp.search,
+    sort: sp.sort as SortOption,
+    status: sp.status,
+  });
+
+  return (
+    <>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-bold text-3xl text-foreground">Events</h1>
+          <p className="mt-2 text-muted-foreground">
+            View and manage your events
+          </p>
+        </div>
+        <CreateEventButton />
+      </div>
+
+      <EventFilters />
+
+      <EventTable
+        initialEvents={items}
+        initialNextCursor={nextCursor}
+        search={sp.search}
+        sort={sp.sort as SortOption}
+        status={sp.status}
+      />
+    </>
+  );
+}
+
 export default function Page(props: { searchParams: Promise<SearchParams> }) {
   return (
-    <Suspense fallback={<EventsSkeleton />}>
-      <EventsContents {...props} />
-    </Suspense>
+    <div className="space-y-6 px-2">
+      <Suspense fallback={<EventsPageSkeleton />}>
+        <EventsPageContent {...props} />
+      </Suspense>
+    </div>
   );
 }

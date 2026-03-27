@@ -1,32 +1,44 @@
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
+  const columns = ["Company", "Representative", "Role", "Email", "Phone"];
+  const rows = Array.from({ length: 8 }, (_, i) => `row-${i}`);
+
   return (
     <div className="space-y-6 px-2">
-      <div className="flex items-center gap-4">
-        <Button disabled size="icon" variant="outline">
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="mt-1 h-4 w-64" />
+      {/* Header with Back Link */}
+      <div>
+        <div className="flex items-center gap-1">
+          <ChevronLeft className="h-5 w-5 text-primary" />
+          <Skeleton className="h-5 w-32" />
+        </div>
+        <div className="mt-4">
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="mt-2 h-5 w-full max-w-sm" />
         </div>
       </div>
 
-      <div className="rounded-lg border bg-background p-4 md:p-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-10 w-[200px]" />
-            <Skeleton className="h-10 w-[100px]" />
-          </div>
-          <div className="space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton list
-              <Skeleton className="h-16 w-full" key={i} />
+      {/* Data Table Skeleton */}
+      <div className="overflow-hidden rounded-lg border bg-background">
+        {/* Table Header */}
+        <div className="border-b bg-background">
+          <div className="flex gap-4 px-6 py-3">
+            {columns.map((column) => (
+              <Skeleton className="h-4 w-24" key={column} />
             ))}
           </div>
+        </div>
+
+        {/* Table Rows */}
+        <div className="divide-y">
+          {rows.map((rowKey) => (
+            <div className="flex gap-4 px-6 py-4" key={rowKey}>
+              {columns.map((column) => (
+                <Skeleton className="h-4 flex-1" key={`${rowKey}-${column}`} />
+              ))}
+            </div>
+          ))}
         </div>
       </div>
     </div>
