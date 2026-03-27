@@ -15,11 +15,13 @@ import { EvaluationCard } from "./EvaluationRow";
 interface EvaluationListProps {
   evaluations: EvaluationWithEventRpc[];
   pageSize?: number;
+  backEventId?: string;
 }
 
 export function EvaluationList({
   evaluations,
   pageSize = 10,
+  backEventId,
 }: EvaluationListProps) {
   const router = useRouter();
   const [displayedCount, setDisplayedCount] = useState(pageSize);
@@ -190,9 +192,10 @@ export function EvaluationList({
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-3 gap-4">
         {displayed.map((evaluation) => (
           <EvaluationCard
+            backEventId={backEventId}
             evaluation={evaluation}
             isSelected={selectedIds.has(evaluation.evaluation_id)}
             key={evaluation.evaluation_id}
@@ -201,22 +204,6 @@ export function EvaluationList({
           />
         ))}
       </div>
-
-      {displayedCount < evaluations.length && (
-        <div className="flex justify-center py-8" ref={loaderRef}>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 animate-bounce rounded-full bg-primary/50" />
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-primary/50"
-              style={{ animationDelay: "0.1s" }}
-            />
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-primary/50"
-              style={{ animationDelay: "0.2s" }}
-            />
-          </div>
-        </div>
-      )}
 
       <ConfirmDeleteDialog
         count={selectedIds.size}

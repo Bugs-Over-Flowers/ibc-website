@@ -1,17 +1,28 @@
+"use client";
+
+import { ChevronLeft } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import type { RegistrationListPageProps } from "@/lib/types/route";
 
-export default async function BackButton({
-  params,
-}: {
-  params: RegistrationListPageProps["params"];
-}) {
-  const { eventId } = await params;
+interface BackButtonProps {
+  eventId: string;
+}
+
+export default function BackButton({ eventId }: BackButtonProps) {
   return (
-    <Link className="w-max" href={`/admin/events/${eventId}` as Route}>
-      <Button>Back to Event Page</Button>
-    </Link>
+    <div className="flex w-full justify-start">
+      <Button
+        className="justify-start gap-1 px-0 text-primary transition-colors hover:bg-transparent hover:text-primary/80 focus:bg-transparent active:bg-transparent"
+        nativeButton={false}
+        render={
+          <Link href={`/admin/events/${eventId}` as Route}>
+            <ChevronLeft className="h-5 w-5" />
+            Back to Event
+          </Link>
+        }
+        variant="default"
+      />
+    </div>
   );
 }

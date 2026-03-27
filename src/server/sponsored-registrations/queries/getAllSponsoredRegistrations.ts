@@ -8,6 +8,7 @@ export type SponsoredRegistrationWithEvent = {
   eventName: string;
   sponsoredRegistrationId: string;
   eventId: string;
+  eventType: Database["public"]["Enums"]["EventType"] | null;
   eventTitle: string | null;
   eventStartDate: string | null;
   eventEndDate: string | null;
@@ -39,10 +40,21 @@ export async function getAllSponsoredRegistrationsWithEvent(
     return [];
   }
 
+  const eventIds = [...new Set(data.map((row) => row.event_id))];
+  const { data: eventTypesData } = await supabase
+    .from("Event")
+    .select("eventId, eventType")
+    .in("eventId", eventIds);
+
+  const eventTypesById = new Map(
+    (eventTypesData ?? []).map((event) => [event.eventId, event.eventType]),
+  );
+
   return data.map((row) => ({
     eventName: row.event_title ?? "",
     sponsoredRegistrationId: row.sponsored_registration_id,
     eventId: row.event_id,
+    eventType: eventTypesById.get(row.event_id) ?? null,
     eventTitle: row.event_title,
     eventStartDate: row.event_start_date,
     eventEndDate: row.event_end_date,

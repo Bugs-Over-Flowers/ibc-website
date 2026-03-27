@@ -1,9 +1,11 @@
 "use client";
-import { ChevronRight, MoreHorizontal, QrCodeIcon } from "lucide-react";
+
+import { ChevronRight, Images, MoreHorizontal, QrCodeIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import PaymentProofReviewDialog from "@/app/admin/events/_components/PaymentProof/PaymentProofReviewDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Enums } from "@/lib/supabase/db.types";
+import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 import QRCodeDialog from "./QRCodeDialog";
 
 interface RegistrationRowActionsProps {
@@ -20,8 +23,8 @@ interface RegistrationRowActionsProps {
     registrationIdentifier: string;
     registrationId: string;
     email: string;
+    paymentMethod: Enums<"PaymentMethod">;
     paymentProofStatus: Enums<"PaymentProofStatus">;
-    proofOfPaymentImageURL?: string;
     affiliation: string;
   };
   isDetailsPage: boolean;
@@ -34,6 +37,8 @@ export default function RegistrationRowActions({
   const { eventId } = useParams<{ eventId: string }>();
 
   const [qrcodeDialog, setQrcodeDialog] = useState(false);
+  const [paymentProofDialog, setPaymentProofDialog] = useState(false);
+  const shouldShowPaymentProofAction = data.paymentMethod === "BPI";
 
   return (
     <>
@@ -65,9 +70,17 @@ export default function RegistrationRowActions({
               <QrCodeIcon />
               QR Code
             </DropdownMenuItem>
+
+            {shouldShowPaymentProofAction && (
+              <DropdownMenuItem onClick={() => setPaymentProofDialog(true)}>
+                <Images />
+                Review Payment Proof
+              </DropdownMenuItem>
+            )}
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <QRCodeDialog
         affiliation={data.affiliation}
         email={data.email}
@@ -77,6 +90,26 @@ export default function RegistrationRowActions({
         registrationIdentifier={data.registrationIdentifier}
         setOpen={setQrcodeDialog}
       />
+
+      {shouldShowPaymentProofAction && (
+        <PaymentProofReviewDialog
+          enforcePendingDecision={false}
+          initialPaymentProofStatus={data.paymentProofStatus}
+          onAcceptAction={async (id) => {
+            const result = await verifyPayment(id);
+            return {
+              message: result,
+              status: "accepted" as const,
+            };
+          }}
+          onOpenChange={setPaymentProofDialog}
+          onStatusChange={() => {
+            setPaymentProofDialog(false);
+          }}
+          open={paymentProofDialog}
+          registrationId={data.registrationId}
+        />
+      )}
     </>
   );
 }

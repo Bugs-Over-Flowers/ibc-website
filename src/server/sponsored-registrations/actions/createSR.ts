@@ -34,6 +34,26 @@ export async function createSR(
 
   const supabase = await createActionClient();
 
+  const { data: eventData, error: eventError } = await supabase
+    .from("Event")
+    .select("registrationFee")
+    .eq("eventId", parsed.eventId)
+    .maybeSingle();
+
+  if (eventError) {
+    throw new Error(`Failed to fetch event fee: ${eventError.message}`);
+  }
+
+  if (!eventData) {
+    throw new Error("Selected event was not found.");
+  }
+
+  if (parsed.feeDeduction > eventData.registrationFee) {
+    throw new Error(
+      `Fee deduction cannot exceed the event registration fee (₱${eventData.registrationFee.toLocaleString()}).`,
+    );
+  }
+
   const { data, error } = await supabase.rpc("create_sponsored_registration", {
     p_event_id: parsed.eventId,
     p_sponsored_by: parsed.sponsoredBy,

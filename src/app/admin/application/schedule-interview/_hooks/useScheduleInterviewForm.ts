@@ -3,15 +3,7 @@ import { useEffect, useState } from "react";
 import { useMeetingSchedulerStore } from "../../_store/useMeetingSchedulerStore";
 import { useSelectedApplicationsStore } from "../../_store/useSelectedApplicationsStore";
 
-const DEFAULT_MESSAGE = `Dear Applicant,
-We are pleased to inform you that your application has been reviewed. We would like to invite you to an interview to discuss your membership with the Iloilo Business Club.
-
-Please confirm your attendance by replying to this email.
-
-We look forward to meeting you.
-
-Best regards,
-Iloilo Business Club`;
+const DEFAULT_MESSAGE = `<p>Dear Applicant,</p><p>We are pleased to inform you that your application has been reviewed. We would like to invite you to an interview to discuss your membership with the Iloilo Business Club.</p><p>Please confirm your attendance by replying to this email.</p><p>We look forward to meeting you.</p><p>Best regards,<br>Iloilo Business Club</p>`;
 
 interface Application {
   applicationId: string;

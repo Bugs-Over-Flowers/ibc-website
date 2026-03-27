@@ -38,6 +38,9 @@ export const useCreateSectorForm = () => {
       }
 
       toast.success("Sector created successfully!");
+      form.reset({
+        sectorName: "",
+      });
       router.push("/admin/manage-sector" as Route);
     },
   });

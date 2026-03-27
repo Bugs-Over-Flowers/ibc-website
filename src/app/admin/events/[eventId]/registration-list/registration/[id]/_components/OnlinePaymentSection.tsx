@@ -18,33 +18,27 @@ import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
-import { cn } from "@/lib/utils";
+import { cn, titleCase } from "@/lib/utils";
 import { rejectPayment } from "@/server/registration/mutations/rejectPayment";
 import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 
 type OnlinePaymentSectionProps = {
   paymentProofStatus: Enums<"PaymentProofStatus">;
   getStatusColor: (status: string) => string;
-  proofImageURL?: string | null;
+  proofImageURL?: string;
   registrationId: string;
 };
 
 export default function OnlinePaymentSection({
+  registrationId,
   paymentProofStatus,
   getStatusColor,
   proofImageURL,
-  registrationId,
 }: OnlinePaymentSectionProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<
     "accepted" | "rejected" | null
   >(null);
-
-  // Early validation - ensure URL is valid before any rendering
-  const validProofImageURL =
-    proofImageURL && typeof proofImageURL === "string"
-      ? proofImageURL.trim()
-      : null;
 
   const paymentAction = async (
     registration: string,
@@ -66,20 +60,6 @@ export default function OnlinePaymentSection({
   });
 
   const handleStatusChange = async (nextStatus: "accepted" | "rejected") => {
-    if (
-      isPending ||
-      optimisticPaymentProofStatus === nextStatus ||
-      (nextStatus === "accepted" &&
-        optimisticPaymentProofStatus === "rejected") ||
-      (nextStatus === "rejected" && optimisticPaymentProofStatus === "accepted")
-    ) {
-      // prevent duplicate submissions or conflicting transitions
-      if (nextStatus === "rejected") {
-        setIsAlertOpen(false);
-      }
-      return;
-    }
-
     setPendingAction(nextStatus);
 
     const result = await updatePaymentStatus(registrationId, nextStatus);
@@ -99,28 +79,24 @@ export default function OnlinePaymentSection({
     setPendingAction(null);
   };
 
-  const hasProofImage = Boolean(
-    validProofImageURL && validProofImageURL.length > 0,
-  );
-
   const isVerifyPending = isPending && pendingAction === "accepted";
   const isRejectPending = isPending && pendingAction === "rejected";
 
   return (
     <>
-      {hasProofImage && validProofImageURL ? (
+      {proofImageURL && (
         <>
           <ImageZoom className="relative h-96 w-full touch-none select-none">
             <Image
               alt="Proof of Payment Image"
               className="object-contain"
               fill
-              src={validProofImageURL}
+              src={proofImageURL}
             />
           </ImageZoom>
           <div className="text-neutral-600">click on the image to zoom in</div>
         </>
-      ) : null}
+      )}
       <div>
         <Badge
           className={cn(
@@ -129,29 +105,21 @@ export default function OnlinePaymentSection({
           )}
           variant="outline"
         >
-          {isVerifyPending
-            ? "Verifying..."
-            : isRejectPending
-              ? "Rejecting..."
-              : optimisticPaymentProofStatus}
+          {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
         </Badge>
       </div>
       <div className="flex gap-2">
+        {/* Accepted */}
         <Button
-          disabled={
-            isPending ||
-            optimisticPaymentProofStatus === "accepted" ||
-            optimisticPaymentProofStatus === "rejected"
-          }
+          disabled={isPending || optimisticPaymentProofStatus === "accepted"}
           onClick={() => handleStatusChange("accepted")}
         >
           {isVerifyPending
             ? "Verifying..."
-            : optimisticPaymentProofStatus === "accepted"
-              ? "Verified"
-              : "Verify Payment"}
+            : titleCase(optimisticPaymentProofStatus)}
         </Button>
         <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
+          {/* Reject Button */}
           <AlertDialogTrigger
             className={buttonVariants({ variant: "destructive" })}
             disabled={
@@ -177,7 +145,7 @@ export default function OnlinePaymentSection({
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className="bg-red-600 hover:bg-red-700 data-[disabled]:opacity-50"
+                className="bg-red-600 hover:bg-red-700 data-disabled:opacity-50"
                 disabled={isRejectPending}
                 onClick={(e) => {
                   e.preventDefault();

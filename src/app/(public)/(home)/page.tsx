@@ -17,7 +17,7 @@ export default function Page() {
         <FeaturedEventsHero />
       </Suspense>
       <FeaturesSection />
-      <Suspense fallback={null}>
+      <Suspense>
         <FeaturedEventsSection />
       </Suspense>
       <FacebookCTASection />

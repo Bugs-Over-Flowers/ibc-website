@@ -1,6 +1,7 @@
 "use client";
 import { type IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { RegistrationIdentifier } from "@/lib/validation/utils";
 import useAttendanceStore from "../../_hooks/useAttendanceStore";
@@ -31,13 +32,11 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
     const parsedIdentifier = RegistrationIdentifier.safeParse(code);
     if (!parsedIdentifier.success) {
       console.error("Invalid QR code scanned. Not an identifier.");
+      toast.error("Invalid QR code scanned. Not an identifier.");
       return;
     }
 
-    const { error } = await scanQRData(code, eventDayId);
-    if (error) {
-      return;
-    }
+    await scanQRData(code, eventDayId);
   };
   return (
     <Card className="h-fit w-full overflow-hidden border-2 border-primary/20 shadow-lg">

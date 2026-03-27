@@ -36,6 +36,7 @@ export function SponsoredRegistrationCard({
 }: SponsoredRegistrationCardProps) {
   const maxGuests = Number(registration.maxSponsoredGuests ?? 0);
   const usedCount = Number(registration.usedCount);
+  const isDeleteDisabled = usedCount > 0;
 
   const remainingGuests = maxGuests - usedCount;
   const totalGuests = maxGuests;
@@ -44,6 +45,9 @@ export function SponsoredRegistrationCard({
     totalGuests > 0 ? (usedCount / totalGuests) * 100 : 0;
   const isStatusFull = registration.status === "full";
   const createdAt = registration.createdAt;
+  const eventTypeLabel = registration.eventType
+    ? `${registration.eventType.charAt(0).toUpperCase()}${registration.eventType.slice(1)}`
+    : "Unspecified";
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -138,10 +142,14 @@ export function SponsoredRegistrationCard({
 
         <Button
           className="h-9 w-9 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-          disabled={isDeleting}
+          disabled={isDeleting || isDeleteDisabled}
           onClick={handleDelete}
           size="icon"
-          title="Delete sponsored registration"
+          title={
+            isDeleteDisabled
+              ? "Cannot delete: this sponsored registration has already been used"
+              : "Delete sponsored registration"
+          }
           type="button"
           variant="ghost"
         >
@@ -155,14 +163,13 @@ export function SponsoredRegistrationCard({
         type="button"
       >
         <div className="flex flex-col gap-5 p-5">
-          {/* Header Row - Name and Event Badge */}
+          {/* Header */}
           <div className="flex items-start gap-4">
-            {/* Sponsor Info */}
             <div className="min-w-0 flex-1 space-y-1 sm:pr-56">
               <div className="flex flex-wrap items-center gap-3">
-                <h3 className="font-semibold text-base text-foreground">
-                  {registration.sponsoredBy}
-                </h3>
+                <span className="inline-flex h-5 shrink-0 items-center rounded-full border border-primary/30 bg-primary/10 px-2 font-semibold text-primary text-xs uppercase tracking-wide">
+                  {eventTypeLabel} event
+                </span>
                 <span
                   className={cn(
                     "inline-flex h-5 shrink-0 items-center rounded-full px-2 font-medium text-xs uppercase",
@@ -172,29 +179,35 @@ export function SponsoredRegistrationCard({
                   {registration.status}
                 </span>
               </div>
+              <h3 className="font-semibold text-base text-foreground">
+                {registration.sponsoredBy}
+              </h3>
               <p className="text-muted-foreground text-xs">
                 Event:{" "}
                 {registration.eventTitle || registration.eventName || "N/A"}
               </p>
-              {registration.eventStartDate && (
-                <p className="text-muted-foreground text-xs">
-                  {format(new Date(registration.eventStartDate), "MMM d, yyyy")}
-                  {registration.eventEndDate &&
-                    registration.eventStartDate !== registration.eventEndDate &&
-                    ` - ${format(new Date(registration.eventEndDate), "MMM d, yyyy")}`}
-                  {" • "}
-                  Created: {format(createdAt, "MMM d, yyyy")} at{" "}
-                  {format(createdAt, "h:mm a")}
-                </p>
-              )}
-              {!registration.eventStartDate && (
-                <p className="text-muted-foreground text-xs">
-                  Created: {format(createdAt, "MMM d, yyyy")} at{" "}
-                  {format(createdAt, "h:mm a")}
-                </p>
-              )}
             </div>
           </div>
+
+          {registration.eventStartDate && (
+            <p className="text-muted-foreground text-xs">
+              Date:{" "}
+              {format(new Date(registration.eventStartDate), "MMM d, yyyy")}
+              {registration.eventEndDate &&
+                registration.eventStartDate !== registration.eventEndDate &&
+                ` - ${format(new Date(registration.eventEndDate), "MMM d, yyyy")}`}
+              <br />
+              Created: {format(createdAt, "MMM d, yyyy")} at{" "}
+              {format(createdAt, "h:mm a")}
+            </p>
+          )}
+          {!registration.eventStartDate && (
+            <p className="text-muted-foreground text-xs">
+              Created: {format(createdAt, "MMM d, yyyy")}
+              <br />
+              {format(createdAt, "h:mm a")}
+            </p>
+          )}
 
           {/* Divider */}
           <div className="-mx-5 border-t" />
@@ -290,7 +303,7 @@ export function SponsoredRegistrationCard({
 
         <Button
           className="h-8 gap-1.5 text-destructive text-xs hover:bg-destructive/10 hover:text-destructive"
-          disabled={isDeleting}
+          disabled={isDeleting || isDeleteDisabled}
           onClick={handleDelete}
           size="sm"
           type="button"

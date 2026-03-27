@@ -1,144 +1,391 @@
 "use client";
 
-import { Filter, Search, SortAsc } from "lucide-react";
+import { ChevronDown, Filter, Search, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+  SORT_LABELS,
+  STATUS_LABELS,
+} from "@/app/admin/events/_components/EventFilters/constants";
+import { useEventFilters } from "@/app/admin/events/_hooks/useEventFilters";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useEventFilters } from "../_hooks/useEventFilters";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
+type LifecycleStatus = "all" | "draft" | "published" | "finished";
+type AudienceStatus = "all" | "public" | "private";
+
+function parseStatus(value: string): {
+  lifecycle: LifecycleStatus;
+  audience: AudienceStatus;
+} {
+  switch (value) {
+    case "draft":
+      return { lifecycle: "draft", audience: "all" };
+    case "published":
+      return { lifecycle: "published", audience: "all" };
+    case "published-public":
+      return { lifecycle: "published", audience: "public" };
+    case "published-private":
+      return { lifecycle: "published", audience: "private" };
+    case "finished":
+      return { lifecycle: "finished", audience: "all" };
+    case "finished-public":
+      return { lifecycle: "finished", audience: "public" };
+    case "finished-private":
+      return { lifecycle: "finished", audience: "private" };
+    default:
+      return { lifecycle: "all", audience: "all" };
+  }
+}
+
+function buildStatusValue(
+  lifecycle: LifecycleStatus,
+  audience: AudienceStatus,
+): string | null {
+  if (lifecycle === "all") {
+    return null;
+  }
+
+  if (lifecycle === "draft") {
+    return "draft";
+  }
+
+  if (audience === "all") {
+    return lifecycle;
+  }
+
+  return `${lifecycle}-${audience}`;
+}
 
 export default function EventFilters() {
-  const { updateSort, updateStatus, updateSearch, searchParams } =
-    useEventFilters();
-  const [searchValue, setSearchValue] = useState("");
-  const deferredSearch = useDeferredValue(searchValue);
-  const lastSearchRef = useRef<string | null>(null);
+  const {
+    currentDateSort,
+    currentTitleSort,
+    currentStatus,
+    searchValue,
+    hasActiveFilters,
+    updateFilter,
+    updateSortFilters,
+    clearFilters,
+    handleSearchChange,
+  } = useEventFilters();
 
-  const submitSearch = useCallback(() => {
-    updateSearch(searchValue.trim());
-  }, [searchValue, updateSearch]);
+  const normalizedDateSort =
+    currentDateSort === "date-asc" || currentDateSort === "date-desc"
+      ? currentDateSort
+      : null;
+  const normalizedTitleSort =
+    currentTitleSort === "title-desc" || currentTitleSort === "title-asc"
+      ? currentTitleSort
+      : null;
+  const hasExplicitSort = Boolean(normalizedDateSort || normalizedTitleSort);
 
-  // Auto-search using React's deferred value (avoids setTimeout)
-  // Only trigger when the deferred value actually changes from last search
-  useEffect(() => {
-    const trimmed = deferredSearch.trim();
-    const currentUrlSearch = searchParams.get("search") || "";
+  const selectedDateSort = hasExplicitSort ? normalizedDateSort : "date-desc";
+  const selectedTitleSort = hasExplicitSort ? normalizedTitleSort : null;
+  const selectedSort = selectedTitleSort ?? selectedDateSort ?? "date-desc";
 
-    // Skip if search hasn't changed from URL or last submitted value
-    if (trimmed === currentUrlSearch || trimmed === lastSearchRef.current) {
+  const toggleDateSort = (next: "date-asc" | "date-desc") => {
+    if (selectedDateSort === next) {
+      if (selectedTitleSort) {
+        updateSortFilters({ dateSort: null, titleSort: selectedTitleSort });
+      }
       return;
     }
 
-    lastSearchRef.current = trimmed;
-    updateSearch(trimmed);
-  }, [deferredSearch, searchParams, updateSearch]);
+    updateSortFilters({ dateSort: next, titleSort: selectedTitleSort });
+  };
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      submitSearch();
-    },
-    [submitSearch],
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        submitSearch();
+  const toggleTitleSort = (next: "title-asc" | "title-desc") => {
+    if (selectedTitleSort === next) {
+      if (selectedDateSort) {
+        updateSortFilters({ dateSort: selectedDateSort, titleSort: null });
       }
-    },
-    [submitSearch],
-  );
+      return;
+    }
+
+    updateSortFilters({ dateSort: selectedDateSort, titleSort: next });
+  };
+
+  const selectedStatus = currentStatus || "all";
+  const { lifecycle, audience } = parseStatus(selectedStatus);
+
+  const sortOptions = Object.entries(SORT_LABELS);
+  const lifecycleOptions: Array<{ value: LifecycleStatus; label: string }> = [
+    { value: "all", label: "All Status" },
+    { value: "draft", label: STATUS_LABELS.draft ?? "Draft" },
+    { value: "published", label: STATUS_LABELS.published ?? "Published" },
+    { value: "finished", label: STATUS_LABELS.finished ?? "Finished" },
+  ];
+  const audienceOptions: Array<{ value: AudienceStatus; label: string }> = [
+    { value: "all", label: "All Audience" },
+    { value: "public", label: "Public" },
+    { value: "private", label: "Private" },
+  ];
+
+  const isAudienceEnabled =
+    lifecycle === "published" || lifecycle === "finished";
 
   return (
-    <form
-      className="grid grid-cols-2 gap-3 xl:grid-cols-12 xl:gap-4"
-      onSubmit={handleSubmit}
-    >
-      <div className="relative col-span-1 xl:col-span-7">
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-foreground" />
-        <Input
-          autoComplete="off"
-          className="w-full border-border pl-10"
-          data-form-type="other"
-          data-lpignore="true"
-          name="event-search"
-          onChange={(e) => setSearchValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Search title or venue..."
-          value={searchValue}
-        />
-      </div>
-
-      <div className="col-span-1 flex items-stretch">
-        <Button
-          aria-label="Search"
-          className="w-full"
-          type="submit"
-          variant="default"
-        >
-          <Search className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <div className="col-span-2">
-        <Select
-          onValueChange={updateSort}
-          value={searchParams.get("sort") || "date-asc"}
-        >
-          <SelectTrigger className="w-full border-border">
-            <div className="flex items-center gap-2">
-              <SortAsc size={16} />
-              <span className="hidden xl:inline">
-                <SelectValue aria-label="Sort By Date" />
-              </span>
-              <span className="xl:hidden">Sort</span>
+    <div className="rounded-xl p-0">
+      <div className="flex flex-col gap-3">
+        {/* Search Bar */}
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+              <Search className="h-5 w-5 text-muted-foreground/70" />
             </div>
-          </SelectTrigger>
-          <SelectContent className="w-auto">
-            <SelectItem value="date-asc">Date (Ascending)</SelectItem>
-            <SelectItem value="date-desc">Date (Descending)</SelectItem>
-            <SelectItem value="title-asc">Title (A → Z)</SelectItem>
-            <SelectItem value="title-desc">Title (Z → A)</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+            <Input
+              className="h-12 rounded-xl border-border bg-card/80 pr-12 pl-12 text-base transition-all placeholder:text-muted-foreground/50 focus:border-primary/40 focus:ring-primary/20"
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search events by title..."
+              type="text"
+              value={searchValue}
+            />
+            <AnimatePresence>
+              {searchValue && (
+                <motion.div
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="absolute inset-y-0 right-2 flex items-center"
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                >
+                  <Button
+                    className="h-8 w-8 rounded-full hover:bg-muted/60"
+                    onClick={() => handleSearchChange("")}
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
 
-      <div className="col-span-2">
-        <Select
-          onValueChange={updateStatus}
-          value={searchParams.get("status") || "all"}
-        >
-          <SelectTrigger className="w-full border-border">
-            <div className="flex items-center gap-2">
-              <Filter size={16} />
-              <span className="hidden xl:inline">
-                <SelectValue aria-label="Filter By Status" />
+        {/* Filters Row */}
+        <div className="flex flex-col gap-3 sm:flex-row">
+          {/* Status Filter Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "inline-flex h-12 min-w-[180px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                lifecycle !== "all" && "border-primary/40 bg-primary/5",
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Filter
+                  className={cn(
+                    "h-4 w-4",
+                    lifecycle !== "all"
+                      ? "text-primary"
+                      : "text-muted-foreground/70",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-sm",
+                    lifecycle !== "all"
+                      ? "text-foreground"
+                      : "text-muted-foreground/70",
+                  )}
+                >
+                  {lifecycle === "all"
+                    ? "All Status"
+                    : lifecycleOptions.find(
+                        (option) => option.value === lifecycle,
+                      )?.label}
+                </span>
+              </div>
+              <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-[220px] rounded-xl border-border/50 bg-card p-1 shadow-2xl"
+            >
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Lifecycle</DropdownMenuLabel>
+                {lifecycleOptions.map((option) => (
+                  <DropdownMenuItem
+                    className={cn(
+                      "cursor-pointer rounded-lg text-sm transition-colors",
+                      lifecycle === option.value
+                        ? "bg-primary/10 font-medium text-primary"
+                        : "hover:bg-muted/50",
+                    )}
+                    key={option.value}
+                    onClick={() => {
+                      const nextStatus = buildStatusValue(option.value, "all");
+                      updateFilter("status", nextStatus);
+                    }}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "inline-flex h-12 min-w-[180px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                isAudienceEnabled &&
+                  audience !== "all" &&
+                  "border-primary/40 bg-primary/5",
+                !isAudienceEnabled && "opacity-60",
+              )}
+              disabled={!isAudienceEnabled}
+            >
+              <div className="flex items-center gap-2">
+                <Filter
+                  className={cn(
+                    "h-4 w-4",
+                    isAudienceEnabled && audience !== "all"
+                      ? "text-primary"
+                      : "text-muted-foreground/70",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-sm",
+                    isAudienceEnabled && audience !== "all"
+                      ? "text-foreground"
+                      : "text-muted-foreground/70",
+                  )}
+                >
+                  {!isAudienceEnabled
+                    ? "Audience (N/A)"
+                    : audienceOptions.find(
+                        (option) => option.value === audience,
+                      )?.label}
+                </span>
+              </div>
+              <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-[220px] rounded-xl border-border/50 bg-card p-1 shadow-2xl"
+            >
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Audience</DropdownMenuLabel>
+                {audienceOptions.map((option, index) => (
+                  <div key={option.value}>
+                    <DropdownMenuItem
+                      className={cn(
+                        "cursor-pointer rounded-lg text-sm transition-colors",
+                        audience === option.value
+                          ? "bg-primary/10 font-medium text-primary"
+                          : "hover:bg-muted/50",
+                      )}
+                      onClick={() => {
+                        const nextStatus = buildStatusValue(
+                          lifecycle,
+                          option.value,
+                        );
+                        updateFilter("status", nextStatus);
+                      }}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                    {index === 0 ? <DropdownMenuSeparator /> : null}
+                  </div>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Sort Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "inline-flex h-12 min-w-[180px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                selectedSort !== "date-desc" &&
+                  "border-primary/40 bg-primary/5",
+              )}
+            >
+              <span
+                className={cn(
+                  "text-sm",
+                  selectedSort !== "date-desc"
+                    ? "text-foreground"
+                    : "text-muted-foreground/70",
+                )}
+              >
+                {selectedSort === "date-desc"
+                  ? "Latest First"
+                  : (SORT_LABELS[selectedSort] ?? "Latest First")}
               </span>
-              <span className="xl:hidden">Filter</span>
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="published">Published</SelectItem>
-            <SelectItem value="finished">Finished</SelectItem>
-          </SelectContent>
-        </Select>
+              <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-[220px] rounded-xl border-border/50 bg-card p-1 shadow-2xl"
+            >
+              <DropdownMenuItem
+                className={cn(
+                  "cursor-pointer rounded-lg text-sm transition-colors",
+                  selectedSort === "date-desc"
+                    ? "bg-primary/10 font-medium text-primary"
+                    : "hover:bg-muted/50",
+                )}
+                onClick={() =>
+                  updateSortFilters({ dateSort: null, titleSort: null })
+                }
+              >
+                Latest First
+              </DropdownMenuItem>
+              {sortOptions
+                .filter(([value]) => value !== "date-desc")
+                .map(([value, label]) => (
+                  <DropdownMenuItem
+                    className={cn(
+                      "cursor-pointer rounded-lg text-sm transition-colors",
+                      selectedSort === value
+                        ? "bg-primary/10 font-medium text-primary"
+                        : "hover:bg-muted/50",
+                    )}
+                    key={value}
+                    onClick={() => {
+                      if (value === "date-asc" || value === "date-desc") {
+                        toggleDateSort(value);
+                        return;
+                      }
+
+                      if (value === "title-asc" || value === "title-desc") {
+                        toggleTitleSort(value);
+                      }
+                    }}
+                  >
+                    {label}
+                  </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Clear All Filters Button */}
+          {hasActiveFilters && (
+            <Button
+              className="h-12 gap-2 rounded-xl text-xs sm:w-auto"
+              onClick={clearFilters}
+              variant="destructive"
+            >
+              <X className="h-4 w-4" />
+              Clear Filters
+            </Button>
+          )}
+        </div>
       </div>
-    </form>
+    </div>
   );
 }

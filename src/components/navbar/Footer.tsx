@@ -1,8 +1,9 @@
 "use client";
 
-import { Facebook, Linkedin, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import { FacebookIcon, LinkedInIcon } from "@/components/icons/SocialIcons";
 import { Separator } from "@/components/ui/separator";
 
 export function Footer() {
@@ -15,12 +16,12 @@ export function Footer() {
 
   const socialLinks = [
     {
-      icon: Facebook,
+      icon: FacebookIcon,
       href: "https://www.facebook.com/iloilobusinessclub",
       label: "Facebook",
     },
     {
-      icon: Linkedin,
+      icon: LinkedInIcon,
       href: "https://www.linkedin.com/company/iloilo-business-club-inc",
       label: "LinkedIn",
     },
