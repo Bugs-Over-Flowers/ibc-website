@@ -53,28 +53,6 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
     });
   };
 
-  const getStatusIcon = (status: Enums<"PaymentProofStatus">) => {
-    switch (status) {
-      case "accepted":
-        return CircleCheckBig;
-      case "rejected":
-        return XCircle;
-      default:
-        return AlertTriangle;
-    }
-  };
-
-  const getStatusClasses = (status: Enums<"PaymentProofStatus">) => {
-    switch (status) {
-      case "accepted":
-        return "text-status-green";
-      case "rejected":
-        return "text-status-red";
-      default:
-        return "text-status-orange";
-    }
-  };
-
   const PERSONAL_REGISTRATION_FEE = 5000;
   const CORPORATE_REGISTRATION_FEE = 10000;
   const membershipTypeLabel =
