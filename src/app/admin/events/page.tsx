@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import {
+  type DateSortOption,
   getAdminEventsPage,
   type SortOption,
+  type TitleSortOption,
 } from "@/server/events/queries/getAdminEventsPage";
 import CreateEventButton from "./_components/CreateEventButton";
 import EventFilters from "./_components/EventFilters";
@@ -18,6 +20,8 @@ export const metadata: Metadata = {
 interface SearchParams {
   search?: string;
   sort?: string;
+  dateSort?: string;
+  titleSort?: string;
   status?: string;
 }
 
@@ -32,8 +36,18 @@ async function EventsPageContent({
   const { items, nextCursor } = await getAdminEventsPage(cookieStore.getAll(), {
     search: sp.search,
     sort: sp.sort as SortOption,
+    dateSort: sp.dateSort as DateSortOption,
+    titleSort: sp.titleSort as TitleSortOption,
     status: sp.status,
   });
+
+  const tableKey = JSON.stringify([
+    sp.search ?? "",
+    sp.status ?? "",
+    sp.sort ?? "",
+    sp.dateSort ?? "",
+    sp.titleSort ?? "",
+  ]);
 
   return (
     <>
@@ -50,11 +64,14 @@ async function EventsPageContent({
       <EventFilters />
 
       <EventTable
+        dateSort={sp.dateSort as DateSortOption}
         initialEvents={items}
         initialNextCursor={nextCursor}
+        key={tableKey}
         search={sp.search}
         sort={sp.sort as SortOption}
         status={sp.status}
+        titleSort={sp.titleSort as TitleSortOption}
       />
     </>
   );
