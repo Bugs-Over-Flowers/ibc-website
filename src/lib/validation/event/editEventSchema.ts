@@ -14,7 +14,7 @@ const baseEditEventSchema = z.object({
       return trimmed === "" ? null : trimmed;
     }
     return val;
-  }, z.string().url().nullable().optional()),
+  }, z.url().nullable().optional()),
 });
 
 // Draft events can edit everything
