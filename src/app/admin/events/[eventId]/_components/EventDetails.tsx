@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   Calendar,
   CheckSquare,
+  ChevronLeft,
   ClipboardList,
   Clock,
   Edit,
@@ -204,25 +205,32 @@ export default async function EventDetails({
   return (
     <div className="space-y-6 pb-8">
       {/* Back Navigation */}
-      <div>
-        <Link
-          className="inline-flex items-center gap-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground"
-          href={"/admin/events" as Route}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Events
-        </Link>
+      <div className="flex w-full justify-start">
+        <Button
+          className="justify-start gap-1 bg-transparent px-0 text-primary transition-colors hover:bg-transparent hover:text-primary/80 focus:bg-transparent active:bg-transparent"
+          nativeButton={false}
+          render={
+            <Link href={"/admin/events" as Route}>
+              <ChevronLeft className="h-5 w-5" />
+              Back to Events
+            </Link>
+          }
+        />
       </div>
 
       {/* Hero Card */}
-      <Card className="overflow-hidden border-border/60 shadow-md">
+      <Card className="overflow-hidden border-border/60 pt-0 shadow-md">
         {/* Cover Image */}
-        <div className="relative h-56 w-full bg-muted sm:h-72 lg:h-80">
+        <div
+          className="relative w-full overflow-hidden rounded-xl"
+          style={{ aspectRatio: "4 / 1" }}
+        >
           <Image
             alt={event.eventTitle}
-            className="object-cover"
+            className="object-contain"
             fill
             priority
+            sizes="(max-width: 1600px) 100vw, 1600px"
             src={event.eventHeaderUrl || "/images/backgrounds/placeholder.jpg"}
           />
           {/* Gradient overlay */}

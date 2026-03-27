@@ -32,14 +32,14 @@ export default function EventRow({ event }: EventRowProps) {
   return (
     <article
       className={cn(
-        "flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground",
+        "group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground",
         "transition-all duration-300 ease-out",
         "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-xl",
       )}
     >
       {/* Image — strictly 1:1 */}
       <Link
-        className="group block transition-colors"
+        className="block transition-colors"
         href={`/admin/events/${event.eventId}` as Route}
       >
         <div
@@ -75,13 +75,15 @@ export default function EventRow({ event }: EventRowProps) {
             )}
           </div>
         </div>
+
         {/* Body */}
+
         <div className="flex flex-1 flex-col gap-3 p-4">
-          <h3 className="line-clamp-2 font-semibold text-[14.5px] text-foreground leading-snug tracking-tight">
+          <h3 className="line-clamp-2 font-semibold text-[17px] text-foreground leading-snug tracking-tight">
             {event.eventTitle}
           </h3>
 
-          <div className="space-y-2 text-[12.5px] text-muted-foreground">
+          <div className="space-y-2 text-[8px] text-muted-foreground">
             {/* Venue */}
             <div className="flex items-start gap-2">
               <MapPin className="mt-px h-3.5 w-3.5 shrink-0 text-primary/60" />

@@ -16,7 +16,7 @@ export function EventDetailsHero({ event }: EventDetailsHeroProps) {
   return (
     <section className="relative pt-14 sm:pt-0">
       <div
-        className="relative w-full overflow-hidden"
+        className="relative w-full overflow-hidden rounded-xl"
         style={{ aspectRatio: "4 / 1" }}
       >
         <motion.div
@@ -30,7 +30,7 @@ export function EventDetailsHero({ event }: EventDetailsHeroProps) {
             className="object-contain"
             fill
             priority
-            sizes="100vw"
+            sizes="(max-width: 1600px) 100vw, 1600px"
             src={
               event.eventHeaderUrl ||
               "/placeholder.svg?height=600&width=1200&query=business+conference+event"
