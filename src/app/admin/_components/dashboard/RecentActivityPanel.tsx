@@ -76,7 +76,10 @@ export function RecentActivityPanel({
                       {activity.subtitle}
                     </p>
                   </div>
-                  <span className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs tabular-nums">
+                  <span
+                    className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs tabular-nums"
+                    suppressHydrationWarning
+                  >
                     <Clock3 className="h-3.5 w-3.5" />
                     {formatActivityDate(activity.date)}
                   </span>

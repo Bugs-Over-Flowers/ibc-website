@@ -32,6 +32,13 @@ export function CreateSRFeePreview({
     );
   }
 
+  const sponsorDiscount = Number.isNaN(feeDeduction)
+    ? 0
+    : feeDeduction.toLocaleString();
+  const displayPrice = Number.isNaN(event.registrationFee - feeDeduction)
+    ? 0
+    : Math.max(0, event.registrationFee - feeDeduction).toLocaleString();
+
   return (
     <div className="fade-in slide-in-from-top-2 animate-in rounded-xl border border-border/50 bg-muted/20 p-4 duration-200">
       <h3 className="mb-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
@@ -44,11 +51,11 @@ export function CreateSRFeePreview({
         </div>
         <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300">
           <span>Sponsor Discount</span>
-          <span>{`- PHP ${feeDeduction.toLocaleString()}`}</span>
+          <span>{`- PHP ${sponsorDiscount}`}</span>
         </div>
         <div className="flex items-center justify-between border-border/50 border-t pt-2 font-semibold">
           <span>Final Price for Guest</span>
-          <span>{`PHP ${Math.max(0, event.registrationFee - feeDeduction).toLocaleString()}`}</span>
+          <span>{`PHP ${displayPrice}`}</span>
         </div>
       </div>
     </div>

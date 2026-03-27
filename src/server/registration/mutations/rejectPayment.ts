@@ -37,7 +37,7 @@ export const rejectPayment = async (registrationId: string) => {
 
   const principal = participants.find((p) => p.isPrincipal);
 
-  if (!principal || !principal.email) {
+  if (!principal?.email) {
     throw new Error("Principal registrant email not found");
   }
 

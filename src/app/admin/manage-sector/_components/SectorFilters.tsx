@@ -21,7 +21,7 @@ export default function SectorFilters() {
   const deferredSearch = useDeferredValue(searchValue);
   const lastSearchRef = useRef<string | null>(null);
 
-  const submitSearch = useCallback(() => {
+  const _submitSearch = useCallback(() => {
     updateSearch(searchValue.trim());
   }, [searchValue, updateSearch]);
 

@@ -135,7 +135,7 @@ export function PaymentProofDropzone({
   const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!value || !value.type.startsWith("image/")) {
+    if (!value?.type.startsWith("image/")) {
       setPreview(null);
       return;
     }
