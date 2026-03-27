@@ -1,18 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Banknote, Check, Copy, ExternalLink } from "lucide-react";
+import { Banknote } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import {
-  FacebookIcon,
-  LinkedInIcon,
-  Share2Icon,
-  TwitterIcon,
-} from "@/components/icons/SocialIcons";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
@@ -29,9 +22,9 @@ export default function EventRegistrationCard({
 }: EventRegistrationCardProps) {
   const { eventId } = useParams<{ eventId: string }>();
 
-  const [copied, setCopied] = useState(false);
+  const [_copied, setCopied] = useState(false);
   const facebookLink = event.facebookLink?.trim() ?? "";
-  const displayFacebookLink = (() => {
+  const _displayFacebookLink = (() => {
     if (!facebookLink) return null;
     const truncate = (value: string) =>
       value.length > 48 ? `${value.slice(0, 45)}...` : value;
@@ -46,7 +39,7 @@ export default function EventRegistrationCard({
       return truncate(normalized);
     }
   })();
-  const handleCopyLink = () => {
+  const _handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

@@ -30,12 +30,7 @@ export default async function EventDetails({
     registrationIdentifier,
   });
 
-  if (
-    !data ||
-    !data.registeredEvent ||
-    !data.registeredEvent.eventStartDate ||
-    !data.registrationDetails
-  ) {
+  if (!data?.registeredEvent?.eventStartDate || !data.registrationDetails) {
     return null;
   }
 
