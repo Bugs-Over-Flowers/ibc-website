@@ -79,11 +79,11 @@ export default function EventRow({ event }: EventRowProps) {
 
       {/* Body */}
       <div className="flex flex-1 flex-col gap-3 p-4">
-        <h3 className="line-clamp-2 font-semibold text-[14.5px] text-foreground leading-snug tracking-tight">
+        <h3 className="line-clamp-2 font-semibold text-[17px] text-foreground leading-snug tracking-tight">
           {event.eventTitle}
         </h3>
 
-        <div className="space-y-2 text-[12.5px] text-muted-foreground">
+        <div className="space-y-2 text-[8px] text-muted-foreground">
           {/* Venue */}
           <div className="flex items-start gap-2">
             <MapPin className="mt-px h-3.5 w-3.5 shrink-0 text-primary/60" />
