@@ -87,6 +87,7 @@ export default function RegistrationForm({
       </div>
     );
   }
+
   return (
     <main>
       {step === 1 ? (

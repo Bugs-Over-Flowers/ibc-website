@@ -12,20 +12,16 @@ import { useEffect, useMemo, useState } from "react";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError } from "@/components/ui/field";
+import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import useRegistrationStore from "@/hooks/registration.store";
 import { cn } from "@/lib/utils";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep4 } from "../../_hooks/useRegistrationStep4";
+import RegistrationStepHeader from "./RegistrationStepHeader";
+import { RegistrationPaymentSummary } from "./registration-payment";
 
 interface Step4Props {
   members: Awaited<ReturnType<typeof getAllMembers>>;
@@ -59,11 +55,6 @@ export default function Step4({ members }: Step4Props) {
 
   const participantCount = 1 + (step2Data.otherParticipants?.length ?? 0);
   const baseFee = eventDetails?.registrationFee ?? 0;
-  const subtotal = baseFee * participantCount;
-  const totalSponsorDiscount = sponsorFeeDeduction
-    ? sponsorFeeDeduction * participantCount
-    : 0;
-  const finalTotal = subtotal - totalSponsorDiscount;
   const selectedPaymentProof =
     step3Data.paymentMethod === "online" ? step3Data.paymentProof : undefined;
 
@@ -79,7 +70,7 @@ export default function Step4({ members }: Step4Props) {
     return () => URL.revokeObjectURL(previewUrl);
   }, [selectedPaymentProof]);
 
-  const onSubmit = (e?: React.SubmitEvent) => {
+  const onSubmit = (e?: React.SubmitEvent<HTMLFormElement>) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -90,16 +81,12 @@ export default function Step4({ members }: Step4Props) {
   return (
     <form onSubmit={onSubmit}>
       <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent pb-0 shadow-none ring-0">
-        <CardHeader className="border-border/30 border-b bg-card/5">
-          <CardTitle className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
-            <CheckCircle2 className="h-6 w-6 text-primary" />
-            Review & Confirm
-          </CardTitle>
-          <CardDescription className="text-muted-foreground text-sm">
-            Please review your details before submitting your final
-            registration.
-          </CardDescription>
-        </CardHeader>
+        <RegistrationStepHeader
+          className="bg-card/5"
+          description="Please review your details before submitting your final registration."
+          Icon={CheckCircle2}
+          title="Review & Confirm"
+        />
 
         <CardContent className="space-y-6 px-0 sm:px-6">
           <Card className="rounded-2xl border border-border/50 bg-background">
@@ -218,30 +205,14 @@ export default function Step4({ members }: Step4Props) {
                 </span>
               </div>
 
-              <div className="space-y-2 text-base">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Base Fee x {participantCount}
-                  </span>
-                  <span className="font-semibold text-base leading-tight">
-                    Php {subtotal.toLocaleString()}
-                  </span>
-                </div>
-
-                {totalSponsorDiscount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Sponsor Discount ({sponsoredBy})</span>
-                    <span className="font-semibold text-base leading-tight">
-                      -Php {totalSponsorDiscount.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex justify-between border-border/50 border-t pt-3 font-bold text-foreground text-lg">
-                  <span>Total Amount</span>
-                  <span>Php {finalTotal.toLocaleString()}</span>
-                </div>
-              </div>
+              <RegistrationPaymentSummary
+                baseFee={baseFee}
+                className="border-border/50 bg-background"
+                participantCount={participantCount}
+                sponsorDiscountPerParticipant={sponsorFeeDeduction}
+                sponsoredBy={sponsoredBy}
+                title={null}
+              />
 
               <div className="mt-4 flex flex-col items-start gap-2 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
@@ -255,6 +226,12 @@ export default function Step4({ members }: Step4Props) {
                 </Badge>
               </div>
 
+              {step3Data.paymentMethod === "onsite" ? (
+                <p className="text-muted-foreground text-sm">
+                  Onsite payments do not require a proof of payment upload.
+                </p>
+              ) : null}
+
               {step3Data.paymentMethod === "online" && selectedPaymentProof ? (
                 <div className="mt-4 rounded-xl border border-border/50 bg-background p-4">
                   <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">
@@ -262,14 +239,17 @@ export default function Step4({ members }: Step4Props) {
                   </p>
                   <div className="flex flex-col items-start gap-2">
                     {proofPreview ? (
-                      <Image
-                        alt="Payment proof preview"
-                        className="h-12 w-12 rounded-md border border-border/60 bg-muted/20 object-contain p-0.5"
-                        height={48}
-                        src={proofPreview}
-                        unoptimized
-                        width={48}
-                      />
+                      <ImageZoom className="block">
+                        <div className="relative h-24 w-24 overflow-hidden rounded-md border border-border/60 bg-muted/20">
+                          <Image
+                            alt="Payment proof preview"
+                            className="object-contain p-0.5"
+                            fill
+                            src={proofPreview}
+                            unoptimized
+                          />
+                        </div>
+                      </ImageZoom>
                     ) : null}
                     <span className="font-medium text-green-600">
                       Proof Uploaded Successfully

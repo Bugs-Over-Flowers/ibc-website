@@ -11,15 +11,18 @@ export const StandardRegistrationStep1Schema = z.discriminatedUnion("member", [
   z.object({
     member: z.literal(MemberTypeEnum.enum.member),
     businessMemberId: z
-      .string()
+      .string("Please select your company / organization / affiliation")
       .min(1, "Please select your company / organization / affiliation"),
   }),
   z.object({
     member: z.literal(MemberTypeEnum.enum.nonmember),
     nonMemberName: z
-      .string()
+      .string("Please input your company / organization / affiliation")
       .min(1, "Please input your company / organization / affiliation")
-      .max(100),
+      .max(
+        100,
+        "Please input a company / organization / affiliation less than 100 characters",
+      ),
   }),
 ]);
 
@@ -31,15 +34,15 @@ export const RegistrantDetailsSchema = z
   .object({
     id: z.string().default(() => crypto.randomUUID()),
     firstName: z
-      .string()
+      .string("Please input your first name")
       .min(2, "First name must be at least 2 characters")
       .max(100),
     lastName: z
-      .string()
+      .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
     contactNumber: z
-      .string()
+      .string("Please input your contact number")
       .refine(
         (data) =>
           z.union([phoneSchema, landlineSchema]).safeParse(data).success,
@@ -159,7 +162,7 @@ export type StandardRegistrationStep3Schema = z.infer<
 
 export const StandardRegistrationStep4Schema = z.object({
   termsAndConditions: z.boolean().refine((val) => val, {
-    error: "You must agree to the terms and conditions.",
+    error: "You must agree to the Terms and Conditions.",
   }),
 });
 

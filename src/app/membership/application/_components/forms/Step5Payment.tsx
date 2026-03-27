@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import type { MembershipApplicationData } from "@/hooks/membershipApplication.store";
+import { isValidImageUploadFile } from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 
 interface StepProps {
@@ -27,17 +28,8 @@ interface StepProps {
 }
 
 function isValidPaymentProof(file: File): boolean {
-  const isValidType = ["image/png", "image/jpeg", "image/jpg"].includes(
-    file.type,
-  );
-
-  if (!isValidType) {
-    toast.error("Invalid file type");
-    return false;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    toast.error("File size must be less than 5MB");
+  if (!isValidImageUploadFile(file)) {
+    toast.error("Invalid file type or size");
     return false;
   }
 

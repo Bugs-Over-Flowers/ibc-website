@@ -25,12 +25,13 @@ interface MembershipApplicationStore {
     attemptCount: number;
     cooldownEndTime: number | null;
     validationStatus: "idle" | "valid" | "invalid";
-    lastValidatedMemberId: string | null;
+    lastValidatedMemberIdentifier: string | null;
     lastValidatedApplicationType: "renewal" | "updating" | null;
     remainingTime: number;
     memberInfo: {
       companyName?: string;
       membershipStatus?: string;
+      businessMemberIdentifier?: string;
       businessMemberId?: string;
     };
   };
@@ -50,9 +51,10 @@ interface MembershipApplicationStoreActions {
     memberInfo?: {
       companyName?: string;
       membershipStatus?: string;
+      businessMemberIdentifier?: string;
       businessMemberId?: string;
     },
-    memberId?: string | null,
+    memberIdentifier?: string | null,
     applicationType?: "renewal" | "updating" | null,
   ) => void;
   setMemberValidationRemainingTime: (time: number) => void;
@@ -67,7 +69,7 @@ const initialState: MembershipApplicationStore = {
     attemptCount: 0,
     cooldownEndTime: null,
     validationStatus: "idle",
-    lastValidatedMemberId: null,
+    lastValidatedMemberIdentifier: null,
     lastValidatedApplicationType: null,
     remainingTime: 0,
     memberInfo: {},
@@ -75,7 +77,7 @@ const initialState: MembershipApplicationStore = {
   applicationData: {
     step1: {
       applicationType: "newMember",
-      businessMemberId: "",
+      businessMemberIdentifier: "",
     },
     step2: {
       companyName: "",
@@ -178,7 +180,7 @@ const useMembershipApplicationStore = create<
       setMemberValidationStatus: (
         status,
         memberInfo = {},
-        memberId = null,
+        memberIdentifier = null,
         applicationType = null,
       ) =>
         set((state) => ({
@@ -186,8 +188,9 @@ const useMembershipApplicationStore = create<
             ...state.memberValidation,
             validationStatus: status,
             memberInfo,
-            lastValidatedMemberId:
-              memberId || state.memberValidation.lastValidatedMemberId,
+            lastValidatedMemberIdentifier:
+              memberIdentifier ||
+              state.memberValidation.lastValidatedMemberIdentifier,
             lastValidatedApplicationType:
               applicationType ||
               state.memberValidation.lastValidatedApplicationType,
@@ -204,7 +207,7 @@ const useMembershipApplicationStore = create<
           memberValidation: {
             ...state.memberValidation,
             validationStatus: "idle",
-            lastValidatedMemberId: null,
+            lastValidatedMemberIdentifier: null,
             lastValidatedApplicationType: null,
             memberInfo: {},
           },
@@ -212,7 +215,7 @@ const useMembershipApplicationStore = create<
     }),
     {
       name: "membership-application-storage",
-      version: 6,
+      version: 7,
       migrate: (persistedState, version) => {
         if (version < 4) {
           const oldState =
@@ -259,6 +262,26 @@ const useMembershipApplicationStore = create<
               },
             },
           };
+        }
+
+        if (version < 7) {
+          const oldState =
+            persistedState as Partial<MembershipApplicationStore> & {
+              memberValidation?: {
+                lastValidatedMemberId?: string | null;
+              };
+            };
+
+          return {
+            ...oldState,
+            memberValidation: {
+              ...oldState?.memberValidation,
+              lastValidatedMemberIdentifier:
+                oldState?.memberValidation?.lastValidatedMemberIdentifier ??
+                oldState?.memberValidation?.lastValidatedMemberId ??
+                null,
+            },
+          } as MembershipApplicationStore;
         }
 
         return persistedState as MembershipApplicationStore;

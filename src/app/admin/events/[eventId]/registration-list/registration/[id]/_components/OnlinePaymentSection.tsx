@@ -18,7 +18,7 @@ import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
-import { cn } from "@/lib/utils";
+import { cn, titleCase } from "@/lib/utils";
 import { rejectPayment } from "@/server/registration/mutations/rejectPayment";
 import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 
@@ -114,7 +114,9 @@ export default function OnlinePaymentSection({
           disabled={isPending || optimisticPaymentProofStatus === "accepted"}
           onClick={() => handleStatusChange("accepted")}
         >
-          {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
+          {isVerifyPending
+            ? "Verifying..."
+            : titleCase(optimisticPaymentProofStatus)}
         </Button>
         <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
           {/* Reject Button */}
