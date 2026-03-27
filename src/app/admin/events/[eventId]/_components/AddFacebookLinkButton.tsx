@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,7 +46,7 @@ export default function AddFacebookLinkButton({
     }
   }, [isOpen, facebookLink]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const normalizedValue = linkValue.trim();
 
@@ -67,6 +67,7 @@ export default function AddFacebookLinkButton({
             <DialogTitle>Add Facebook Link</DialogTitle>
             <DialogDescription>
               Paste the full Facebook event URL. Leave blank to remove the link.
+              ensure to include an http:// or https:// in the link
             </DialogDescription>
           </DialogHeader>
 
@@ -79,7 +80,7 @@ export default function AddFacebookLinkButton({
                 id="facebook-link"
                 onChange={(event) => setLinkValue(event.target.value)}
                 placeholder="https://www.facebook.com/events/..."
-                type="url"
+                type="string"
                 value={linkValue}
               />
             </div>

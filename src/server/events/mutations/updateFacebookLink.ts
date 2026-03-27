@@ -5,19 +5,26 @@ import { z } from "zod";
 import type { ServerFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 
-const facebookLinkSchema = z.preprocess((val) => {
-  if (typeof val === "string") {
-    const trimmed = val.trim();
-    return trimmed.length === 0 ? null : trimmed;
-  }
-  if (val === undefined) {
-    return null;
-  }
-  return val;
-}, z.string().url("Please provide a valid Facebook link").nullable());
+const facebookLinkSchema = z.preprocess(
+  (val) => {
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      return trimmed.length === 0 ? null : trimmed;
+    }
+    if (val === undefined) {
+      return null;
+    }
+    return val;
+  },
+  z
+    .url({
+      error: "Please provide a valid Facebook link",
+    })
+    .nullable(),
+);
 
 const updateFacebookLinkSchema = z.object({
-  eventId: z.string().uuid("Invalid event ID"),
+  eventId: z.uuid("Invalid event ID"),
   facebookLink: facebookLinkSchema,
 });
 
