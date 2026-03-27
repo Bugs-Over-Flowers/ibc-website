@@ -10,10 +10,10 @@
  * - `memberId` — required when `source=history` so the back link can point to
  *   `/admin/members/[memberId]/history`.
  *
- * Re-exports the shared ApplicationDetails component from `@/app/admin/_components/`.
+ * Uses the shared ApplicationDetails component from `@/app/admin/_components/`.
  */
 import { Suspense } from "react";
-import { ApplicationDetails } from "./_components/ApplicationDetails";
+import { ApplicationDetails } from "@/app/admin/_components/ApplicationDetails";
 import { DetailsSkeleton } from "./_components/DetailsSkeleton";
 
 /** Valid values for the `source` search param. */

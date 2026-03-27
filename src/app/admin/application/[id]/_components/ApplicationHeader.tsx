@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CircleCheckBig, History, XCircle } from "lucide-react";
+import { History } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,28 +50,6 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
       applicationId: application.applicationId,
       status,
     });
-  };
-
-  const getStatusIcon = (status: Enums<"PaymentProofStatus">) => {
-    switch (status) {
-      case "accepted":
-        return CircleCheckBig;
-      case "rejected":
-        return XCircle;
-      default:
-        return AlertTriangle;
-    }
-  };
-
-  const getStatusClasses = (status: Enums<"PaymentProofStatus">) => {
-    switch (status) {
-      case "accepted":
-        return "text-status-green";
-      case "rejected":
-        return "text-status-red";
-      default:
-        return "text-status-orange";
-    }
   };
 
   const PERSONAL_REGISTRATION_FEE = 5000;

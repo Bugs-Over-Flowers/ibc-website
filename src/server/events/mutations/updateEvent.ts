@@ -75,7 +75,7 @@ export const updateEvent: ServerFunction<
       p_registration_fee: isDraft
         ? (data as EditDraftEventInput).registrationFee
         : undefined,
-      p_facebook_link: data.facebookLink ?? null,
+      p_facebook_link: data.facebookLink ?? undefined,
     },
   );
 
