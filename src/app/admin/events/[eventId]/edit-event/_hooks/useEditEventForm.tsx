@@ -32,11 +32,10 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
   const form = useAppForm({
     defaultValues: {
       eventId: event.eventId,
-      eventTitle: event.eventTitle,
+      eventTitle: event.eventTitle, // this is a required field for draft
       description: event.description || "",
       eventStartDate: formatForDateTimeLocal(event.eventStartDate),
       eventEndDate: formatForDateTimeLocal(event.eventEndDate),
-
       venue: event.venue || "",
       registrationFee: event.registrationFee,
       facebookLink: event.facebookLink || "",

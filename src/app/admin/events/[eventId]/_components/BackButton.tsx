@@ -13,7 +13,6 @@ export default function BackButton({ eventId }: BackButtonProps) {
   return (
     <div className="flex w-full justify-start">
       <Button
-        className="justify-start gap-1 px-0 text-primary transition-colors hover:bg-transparent hover:text-primary/80 focus:bg-transparent active:bg-transparent"
         nativeButton={false}
         render={
           <Link href={`/admin/events/${eventId}` as Route}>
