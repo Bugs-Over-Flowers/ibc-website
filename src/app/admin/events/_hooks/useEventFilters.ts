@@ -8,13 +8,63 @@ import { useSearchInput } from "@/app/admin/events/_hooks/useSearchInput";
 type DateSortValue = "date-asc" | "date-desc" | null;
 type TitleSortValue = "title-asc" | "title-desc" | null;
 
+const DATE_SORT_VALUES = ["date-asc", "date-desc"] as const;
+const TITLE_SORT_VALUES = ["title-asc", "title-desc"] as const;
+
+function normalizeDateSort(value: string | null): DateSortValue {
+  return DATE_SORT_VALUES.includes(value as (typeof DATE_SORT_VALUES)[number])
+    ? (value as DateSortValue)
+    : null;
+}
+
+function normalizeTitleSort(value: string | null): TitleSortValue {
+  return TITLE_SORT_VALUES.includes(value as (typeof TITLE_SORT_VALUES)[number])
+    ? (value as TitleSortValue)
+    : null;
+}
+
+function resolveSortState(
+  dateSort: string | null,
+  titleSort: string | null,
+): {
+  explicitDateSort: DateSortValue;
+  explicitTitleSort: TitleSortValue;
+  effectiveDateSort: "date-asc" | "date-desc";
+  effectiveTitleSort: TitleSortValue;
+  hasExplicitSort: boolean;
+} {
+  const explicitDateSort = normalizeDateSort(dateSort);
+  const explicitTitleSort = normalizeTitleSort(titleSort);
+  const hasExplicitSort = Boolean(explicitDateSort || explicitTitleSort);
+
+  return {
+    explicitDateSort,
+    explicitTitleSort,
+    // Baseline default: Latest First when no explicit sorts are set.
+    effectiveDateSort: hasExplicitSort
+      ? (explicitDateSort ?? "date-desc")
+      : "date-desc",
+    effectiveTitleSort: hasExplicitSort ? explicitTitleSort : null,
+    hasExplicitSort,
+  };
+}
+
 export function useEventFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const currentSort = searchParams.get("sort") || "";
-  const currentDateSort = searchParams.get("dateSort") || "";
-  const currentTitleSort = searchParams.get("titleSort") || "";
+  const rawDateSort = searchParams.get("dateSort");
+  const rawTitleSort = searchParams.get("titleSort");
+  const {
+    explicitDateSort,
+    explicitTitleSort,
+    effectiveDateSort,
+    effectiveTitleSort,
+    hasExplicitSort,
+  } = resolveSortState(rawDateSort, rawTitleSort);
+  const currentDateSort = explicitDateSort ?? "";
+  const currentTitleSort = explicitTitleSort ?? "";
   const currentStatus = searchParams.get("status") || "";
   const currentSearch = searchParams.get("search") || "";
 
@@ -77,17 +127,20 @@ export function useEventFilters() {
     }) => {
       const params = new URLSearchParams(searchParams);
 
+      const normalizedDateSort = normalizeDateSort(dateSort);
+      const normalizedTitleSort = normalizeTitleSort(titleSort);
+
       // Drop legacy combined sort once explicit sort filters are used.
       params.delete("sort");
 
-      if (dateSort) {
-        params.set("dateSort", dateSort);
+      if (normalizedDateSort) {
+        params.set("dateSort", normalizedDateSort);
       } else {
         params.delete("dateSort");
       }
 
-      if (titleSort) {
-        params.set("titleSort", titleSort);
+      if (normalizedTitleSort) {
+        params.set("titleSort", normalizedTitleSort);
       } else {
         params.delete("titleSort");
       }
@@ -116,7 +169,7 @@ export function useEventFilters() {
       const params = new URLSearchParams(searchParams);
       const rawDateSort = searchParams.get("dateSort");
       const rawTitleSort = searchParams.get("titleSort");
-      const hasExplicitSort = Boolean(rawDateSort || rawTitleSort);
+      const { hasExplicitSort } = resolveSortState(rawDateSort, rawTitleSort);
 
       if (key === "dateSort") {
         // Date-desc is the only implicit default sort. Keep at least one sort active.
@@ -151,12 +204,9 @@ export function useEventFilters() {
     router.push("/admin/events" as Route);
   }, [router, setSearchValue]);
 
-  const hasExplicitSort = Boolean(currentDateSort || currentTitleSort);
-  const effectiveDateSort = hasExplicitSort ? currentDateSort : "date-desc";
-  const effectiveTitleSort = hasExplicitSort ? currentTitleSort : "";
   const hasNonDefaultDateSort = effectiveDateSort !== "date-desc";
-  const hasNonDefaultTitleSort = effectiveTitleSort !== "";
-  const hasDisabledDefaultSort = hasExplicitSort && !currentDateSort;
+  const hasNonDefaultTitleSort = effectiveTitleSort !== null;
+  const hasDisabledDefaultSort = hasExplicitSort && !explicitDateSort;
   const hasActiveFilters =
     hasNonDefaultDateSort ||
     hasNonDefaultTitleSort ||
@@ -169,6 +219,8 @@ export function useEventFilters() {
     currentSort,
     currentDateSort,
     currentTitleSort,
+    effectiveDateSort,
+    effectiveTitleSort,
     currentStatus,
     currentSearch,
     searchValue,
