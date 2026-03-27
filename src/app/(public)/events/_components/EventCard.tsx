@@ -26,7 +26,8 @@ export function EventCard({ event, index }: EventCardProps) {
   };
   const posterUrl = normalizeUrl(event.eventPoster);
   const headerUrl = normalizeUrl(event.eventHeaderUrl);
-  const displayImage = posterUrl ?? headerUrl ?? "/placeholder.svg";
+  const displayImage =
+    posterUrl ?? headerUrl ?? "/images/backgrounds/placeholder.jpg";
 
   return (
     <motion.div
@@ -37,11 +38,16 @@ export function EventCard({ event, index }: EventCardProps) {
       <div className="group flex h-full w-full cursor-not-allowed flex-col overflow-hidden rounded-xl border border-border bg-background text-left transition-shadow hover:shadow-lg hover:shadow-primary/10">
         <Link className="block" href={`/events/${event.eventId}`}>
           <div className="flex-1">
-            <div className="relative aspect-16/10 overflow-hidden">
+            <div
+              className="relative w-full overflow-hidden rounded-xl rounded-b-none"
+              style={{ aspectRatio: "1 / 1" }}
+            >
               <Image
                 alt={event.eventTitle}
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                className="object-contain"
                 fill
+                priority
+                sizes="(max-width: 1600px) 100vw, 1600px"
                 src={displayImage}
               />
               <div className="absolute top-4 left-4 flex gap-2">

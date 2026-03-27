@@ -11,11 +11,6 @@ import {
 import { DataTable } from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { RegistrationItem } from "@/lib/validation/registration-management";
 import RegistrationRowActions from "./RegistrationRowActions";
@@ -47,22 +42,7 @@ export const registrationListColumns: ColumnDef<RegistrationItem>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => {
-      const data = row.original;
-
-      if (data.isMember) {
-        return (
-          <Tooltip>
-            <TooltipTrigger>{data.businessName}</TooltipTrigger>
-            <TooltipContent>
-              {data.businessName} (id: {data.businessMemberId})
-            </TooltipContent>
-          </Tooltip>
-        );
-      }
-
-      return <>{data.affiliation}</>;
-    },
+    cell: ({ row }) => row.original.affiliation,
   },
   {
     accessorKey: "registrant",
