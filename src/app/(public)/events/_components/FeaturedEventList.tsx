@@ -84,15 +84,19 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
             variants={slideVariants}
           >
             {/* Image */}
-            <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl shadow-xl lg:w-1/2">
+            <div
+              className="relative w-full overflow-hidden rounded-2xl shadow-xl lg:w-1/2"
+              style={{ aspectRatio: "1 / 1" }}
+            >
               <Image
                 alt={currentEvent.eventTitle}
-                className="object-cover"
+                className="object-contain"
                 fill
+                priority
                 sizes="(min-width: 1024px) 50vw, 100vw"
                 src={
                   currentEvent.eventHeaderUrl ||
-                  "/placeholder.svg?height=400&width=600"
+                  "/images/backgrounds/placeholder.jpg"
                 }
               />
             </div>
