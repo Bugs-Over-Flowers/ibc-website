@@ -4,6 +4,7 @@ import { Building2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
+import { resolveMemberLogoUrl } from "@/lib/storage/memberLogo";
 import type { Member } from "./MembersList";
 
 interface MembersGridProps {
@@ -32,11 +33,11 @@ export function MembersGrid({ members }: MembersGridProps) {
               <CardContent className="flex h-full flex-col p-0" key={safeKey}>
                 <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-linear-to-br from-secondary to-accent">
                   <div className="absolute inset-0"></div>
-                  {member.logoImageURL ? (
+                  {resolveMemberLogoUrl(member.logoImageURL) ? (
                     <Img
                       alt={member.businessName}
                       className="aspect-square h-full w-full bg-white object-cover p-4 transition-transform duration-500 group-hover:scale-105"
-                      src={member.logoImageURL}
+                      src={resolveMemberLogoUrl(member.logoImageURL) ?? ""}
                       style={{ aspectRatio: "1 / 1", objectPosition: "center" }}
                     />
                   ) : (
