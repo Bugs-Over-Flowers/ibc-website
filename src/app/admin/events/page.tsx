@@ -41,13 +41,13 @@ async function EventsPageContent({
     status: sp.status,
   });
 
-  const tableKey = [
+  const tableKey = JSON.stringify([
     sp.search ?? "",
     sp.status ?? "",
     sp.sort ?? "",
     sp.dateSort ?? "",
     sp.titleSort ?? "",
-  ].join("|");
+  ]);
 
   return (
     <>

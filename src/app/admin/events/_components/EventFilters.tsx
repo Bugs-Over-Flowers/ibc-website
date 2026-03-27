@@ -93,7 +93,9 @@ export default function EventFilters() {
   const selectedTitleSort = effectiveTitleSort;
   const selectedSort = selectedTitleSort ?? effectiveDateSort ?? "date-desc";
   const sortSummary = selectedTitleSort
-    ? `${DATE_SORT_LABELS[effectiveDateSort]} + ${TITLE_SORT_LABELS[selectedTitleSort]}`
+    ? selectedDateSort
+      ? `${DATE_SORT_LABELS[selectedDateSort]} + ${TITLE_SORT_LABELS[selectedTitleSort]}`
+      : TITLE_SORT_LABELS[selectedTitleSort]
     : selectedSort === "date-desc"
       ? "Latest First"
       : (SORT_LABELS[selectedSort] ?? "Latest First");

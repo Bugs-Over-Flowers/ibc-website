@@ -29,7 +29,7 @@ function resolveSortState(
 ): {
   explicitDateSort: DateSortValue;
   explicitTitleSort: TitleSortValue;
-  effectiveDateSort: "date-asc" | "date-desc";
+  effectiveDateSort: DateSortValue;
   effectiveTitleSort: TitleSortValue;
   hasExplicitSort: boolean;
 } {
@@ -40,10 +40,10 @@ function resolveSortState(
   return {
     explicitDateSort,
     explicitTitleSort,
-    // Baseline default: Latest First when no explicit sorts are set.
-    effectiveDateSort: hasExplicitSort
-      ? (explicitDateSort ?? "date-desc")
-      : "date-desc",
+    // Applied date sort should mirror server behavior:
+    // - default to date-desc only when no explicit sort exists
+    // - remain null when title sort is explicit and date sort is intentionally disabled
+    effectiveDateSort: hasExplicitSort ? explicitDateSort : "date-desc",
     effectiveTitleSort: hasExplicitSort ? explicitTitleSort : null,
     hasExplicitSort,
   };
@@ -204,7 +204,7 @@ export function useEventFilters() {
     router.push("/admin/events" as Route);
   }, [router, setSearchValue]);
 
-  const hasNonDefaultDateSort = effectiveDateSort !== "date-desc";
+  const hasNonDefaultDateSort = explicitDateSort === "date-asc";
   const hasNonDefaultTitleSort = effectiveTitleSort !== null;
   const hasDisabledDefaultSort = hasExplicitSort && !explicitDateSort;
   const hasActiveFilters =
