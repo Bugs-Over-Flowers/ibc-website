@@ -1,18 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Banknote, Check, Copy, ExternalLink } from "lucide-react";
+import { Banknote } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import {
-  FacebookIcon,
-  LinkedInIcon,
-  Share2Icon,
-  TwitterIcon,
-} from "@/components/icons/SocialIcons";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
@@ -29,9 +22,9 @@ export default function EventRegistrationCard({
 }: EventRegistrationCardProps) {
   const { eventId } = useParams<{ eventId: string }>();
 
-  const [copied, setCopied] = useState(false);
+  const [_copied, setCopied] = useState(false);
   const facebookLink = event.facebookLink?.trim() ?? "";
-  const displayFacebookLink = (() => {
+  const _displayFacebookLink = (() => {
     if (!facebookLink) return null;
     const truncate = (value: string) =>
       value.length > 48 ? `${value.slice(0, 45)}...` : value;
@@ -46,7 +39,7 @@ export default function EventRegistrationCard({
       return truncate(normalized);
     }
   })();
-  const handleCopyLink = () => {
+  const _handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -90,66 +83,6 @@ export default function EventRegistrationCard({
                 Register for This Event
               </Link>
             </div>
-
-            {/* Share Section */}
-            <div className="mt-6 border-border border-t pt-6">
-              <p className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                <Share2Icon className="h-4 w-4" />
-                Share this event
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { icon: FacebookIcon, label: "Facebook" },
-                  { icon: TwitterIcon, label: "Twitter" },
-                  { icon: LinkedInIcon, label: "LinkedIn" },
-                ].map(({ icon: Icon, label }) => (
-                  <Button
-                    aria-label={`Share on ${label}`}
-                    className="flex-1 rounded-lg bg-primary/10 p-2.5 text-primary transition-colors hover:bg-primary/20 hover:text-primary"
-                    key={label}
-                    size="icon"
-                    type="button"
-                    variant="default"
-                  >
-                    <Icon className="mx-auto h-4 w-4" />
-                  </Button>
-                ))}
-                <Button
-                  aria-label="Copy link"
-                  className="flex-1 rounded-lg bg-primary/10 p-2.5 text-primary transition-colors hover:bg-primary/20 hover:text-primary"
-                  onClick={handleCopyLink}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  {copied ? (
-                    <Check className="mx-auto h-4 w-4" />
-                  ) : (
-                    <Copy className="mx-auto h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {facebookLink && displayFacebookLink && (
-              <div className="mt-6 border-border border-t pt-6">
-                <p className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                  <FacebookIcon className="h-4 w-4 text-[#1877F2]" />
-                  Event Facebook Link
-                </p>
-                <a
-                  aria-label="Open Facebook event link"
-                  className="inline-flex items-center gap-2 font-semibold text-primary transition-colors hover:text-primary/80"
-                  href={facebookLink}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  title={facebookLink}
-                >
-                  {displayFacebookLink}
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </div>
-            )}
           </CardContent>
         </Card>
       </motion.div>

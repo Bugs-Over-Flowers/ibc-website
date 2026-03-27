@@ -20,13 +20,16 @@ const sponsoredRegistrationBase = {
 export const createSRFormSchema = z.object({
   eventId: z.string().min(1, "Please select an event"),
   ...sponsoredRegistrationBase,
-  feeDeduction: z.coerce.number().min(0).max(1500),
-  maxSponsoredGuests: z.coerce.number().int().positive(),
+  feeDeduction: z.coerce.number("Please input a valid number").min(0).max(1500),
+  maxSponsoredGuests: z.coerce
+    .number("Please input a valid number")
+    .int()
+    .positive(),
 });
 
 // Server-side schema (stricter validation)
 export const createSRSchema = z.object({
-  eventId: z.string().uuid("Invalid Event ID format"),
+  eventId: z.uuid("Invalid Event ID format"),
   ...sponsoredRegistrationBase,
 });
 

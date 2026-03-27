@@ -50,7 +50,7 @@ async function CheckInPage({
     }),
   );
 
-  if (!eventDayData || !eventDayData.event) {
+  if (!eventDayData?.event) {
     return <div>Event Day not found</div>;
   }
 
