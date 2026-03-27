@@ -29,15 +29,19 @@ export function MembersGrid({ members }: MembersGridProps) {
               (typeof member.id !== "number" || !Number.isNaN(member.id))
                 ? member.id
                 : `member-${idx}`;
+
+            const resolvedMemberLogoURL = resolveMemberLogoUrl(
+              member.logoImageURL,
+            );
             const cardContent = (
               <CardContent className="flex h-full flex-col p-0" key={safeKey}>
                 <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-linear-to-br from-secondary to-accent">
                   <div className="absolute inset-0"></div>
-                  {resolveMemberLogoUrl(member.logoImageURL) ? (
+                  {resolvedMemberLogoURL ? (
                     <Img
                       alt={member.businessName}
                       className="aspect-square h-full w-full bg-white object-cover p-4 transition-transform duration-500 group-hover:scale-105"
-                      src={resolveMemberLogoUrl(member.logoImageURL) ?? ""}
+                      src={resolvedMemberLogoURL ?? ""}
                       style={{ aspectRatio: "1 / 1", objectPosition: "center" }}
                     />
                   ) : (

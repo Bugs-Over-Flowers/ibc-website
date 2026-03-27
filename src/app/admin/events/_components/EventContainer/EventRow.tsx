@@ -75,32 +75,32 @@ export default function EventRow({ event }: EventRowProps) {
             )}
           </div>
         </div>
-      </Link>
-      {/* Body */}
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <h3 className="line-clamp-2 font-semibold text-[14.5px] text-foreground leading-snug tracking-tight">
-          {event.eventTitle}
-        </h3>
+        {/* Body */}
+        <div className="flex flex-1 flex-col gap-3 p-4">
+          <h3 className="line-clamp-2 font-semibold text-[14.5px] text-foreground leading-snug tracking-tight">
+            {event.eventTitle}
+          </h3>
 
-        <div className="space-y-2 text-[12.5px] text-muted-foreground">
-          {/* Venue */}
-          <div className="flex items-start gap-2">
-            <MapPin className="mt-px h-3.5 w-3.5 shrink-0 text-primary/60" />
-            <p className="line-clamp-1 leading-snug">{event.venue}</p>
-          </div>
+          <div className="space-y-2 text-[12.5px] text-muted-foreground">
+            {/* Venue */}
+            <div className="flex items-start gap-2">
+              <MapPin className="mt-px h-3.5 w-3.5 shrink-0 text-primary/60" />
+              <p className="line-clamp-1 leading-snug">{event.venue}</p>
+            </div>
 
-          {/* Schedule */}
-          <div className="flex items-start gap-2">
-            <Calendar className="mt-px h-3.5 w-3.5 shrink-0 text-primary/60" />
-            <div className="space-y-0.5 leading-snug">
-              <p>{formatFullDateTime(event.eventStartDate)}</p>
-              <p className="text-muted-foreground/60">
-                {formatFullDateTime(event.eventEndDate)}
-              </p>
+            {/* Schedule */}
+            <div className="flex items-start gap-2">
+              <Calendar className="mt-px h-3.5 w-3.5 shrink-0 text-primary/60" />
+              <div className="space-y-0.5 leading-snug">
+                <p>{formatFullDateTime(event.eventStartDate)}</p>
+                <p className="text-muted-foreground/60">
+                  {formatFullDateTime(event.eventEndDate)}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* Footer */}
       <div className="flex items-center justify-between border-border/60 border-t bg-muted/5 px-4 py-3">

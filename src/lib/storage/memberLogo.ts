@@ -22,8 +22,10 @@ export function resolveMemberLogoUrl(
     return null;
   }
 
-  const fullURL = `${supabaseUrl}storage/v1/object/public/logoimage/${logoImageURL}`;
-  console.log(fullURL);
+  const fullURL = new URL(
+    `storage/v1/object/public/logoimage/${logoImageURL}`,
+    supabaseUrl,
+  ).toString();
 
   return fullURL;
 }
