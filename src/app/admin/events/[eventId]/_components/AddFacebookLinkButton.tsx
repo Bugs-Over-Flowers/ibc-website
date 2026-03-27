@@ -67,7 +67,7 @@ export default function AddFacebookLinkButton({
             <DialogTitle>Add Facebook Link</DialogTitle>
             <DialogDescription>
               Paste the full Facebook event URL. Leave blank to remove the link.
-              ensure to include an http:// or https:// in the link
+              ensure to include an https:// in the link
             </DialogDescription>
           </DialogHeader>
 
@@ -84,7 +84,7 @@ export default function AddFacebookLinkButton({
                 value={linkValue}
               />
             </div>
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter className="gap-2">
               <Button
                 disabled={isPending}
                 onClick={() => setIsOpen(false)}
