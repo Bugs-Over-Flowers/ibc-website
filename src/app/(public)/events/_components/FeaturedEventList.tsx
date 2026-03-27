@@ -127,22 +127,43 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
                 <span>{currentEvent.venue || "Venue TBA"}</span>
               </div>
 
-              <div className="flex gap-4">
-                <Link
-                  className="inline-flex h-12 items-center rounded-lg bg-primary px-8 text-primary-foreground transition hover:bg-primary/90"
-                  href={{
-                    pathname: `/events/${currentEvent.eventId}`,
-                  }}
-                >
-                  View Event
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+              {/* Registration Fee */}
+              <div className="mb-6 flex items-center gap-2 text-muted-foreground">
+                Registration Fee:
+                <span className="inline-flex items-center rounded-full border-primary/20 font-bold text-lg text-primary">
+                  {currentEvent.registrationFee === 0
+                    ? "Free"
+                    : `₱${currentEvent.registrationFee?.toLocaleString?.() ?? "-"}`}
+                </span>
+              </div>
 
+              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
                 <Link
-                  className="inline-flex h-12 items-center justify-center rounded-lg border border-primary px-8 text-primary transition hover:bg-primary/5"
-                  href={`/registration/${currentEvent.eventId}/info`}
+                  className="w-full sm:w-auto"
+                  href={{ pathname: `/events/${currentEvent.eventId}` }}
+                  tabIndex={-1}
                 >
-                  Register Now
+                  <Button
+                    className="flex w-full items-center justify-center rounded-xl border-primary bg-background px-8 py-4 font-semibold text-lg text-primary transition-all duration-200 hover:bg-primary/10 hover:text-primary focus-visible:bg-primary/10 focus-visible:text-primary sm:w-auto"
+                    size="lg"
+                    variant="outline"
+                  >
+                    View Event
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link
+                  className="w-full sm:w-auto"
+                  href={`/registration/${currentEvent.eventId}/info`}
+                  tabIndex={-1}
+                >
+                  <Button
+                    className="flex w-full items-center justify-center rounded-xl bg-primary px-8 py-4 font-semibold text-lg text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus-visible:bg-primary/90 sm:w-auto"
+                    size="lg"
+                    variant="default"
+                  >
+                    Register Now
+                  </Button>
                 </Link>
               </div>
             </div>

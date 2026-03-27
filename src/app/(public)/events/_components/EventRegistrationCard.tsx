@@ -90,66 +90,6 @@ export default function EventRegistrationCard({
                 Register for This Event
               </Link>
             </div>
-
-            {/* Share Section */}
-            <div className="mt-6 border-border border-t pt-6">
-              <p className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                <Share2Icon className="h-4 w-4" />
-                Share this event
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { icon: FacebookIcon, label: "Facebook" },
-                  { icon: TwitterIcon, label: "Twitter" },
-                  { icon: LinkedInIcon, label: "LinkedIn" },
-                ].map(({ icon: Icon, label }) => (
-                  <Button
-                    aria-label={`Share on ${label}`}
-                    className="flex-1 rounded-lg bg-primary/10 p-2.5 text-primary transition-colors hover:bg-primary/20 hover:text-primary"
-                    key={label}
-                    size="icon"
-                    type="button"
-                    variant="default"
-                  >
-                    <Icon className="mx-auto h-4 w-4" />
-                  </Button>
-                ))}
-                <Button
-                  aria-label="Copy link"
-                  className="flex-1 rounded-lg bg-primary/10 p-2.5 text-primary transition-colors hover:bg-primary/20 hover:text-primary"
-                  onClick={handleCopyLink}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  {copied ? (
-                    <Check className="mx-auto h-4 w-4" />
-                  ) : (
-                    <Copy className="mx-auto h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {facebookLink && displayFacebookLink && (
-              <div className="mt-6 border-border border-t pt-6">
-                <p className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                  <FacebookIcon className="h-4 w-4 text-[#1877F2]" />
-                  Event Facebook Link
-                </p>
-                <a
-                  aria-label="Open Facebook event link"
-                  className="inline-flex items-center gap-2 font-semibold text-primary transition-colors hover:text-primary/80"
-                  href={facebookLink}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  title={facebookLink}
-                >
-                  {displayFacebookLink}
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </div>
-            )}
           </CardContent>
         </Card>
       </motion.div>

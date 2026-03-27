@@ -39,7 +39,7 @@ export function EventCard({ event, index }: EventCardProps) {
         <Link className="block" href={`/events/${event.eventId}`}>
           <div className="flex-1">
             <div
-              className="relative w-full overflow-hidden rounded-xl"
+              className="relative w-full overflow-hidden rounded-xl rounded-b-none"
               style={{ aspectRatio: "1 / 1" }}
             >
               <Image
