@@ -1,20 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  Banknote,
-  Check,
-  Copy,
-  ExternalLink,
-  Facebook,
-  Linkedin,
-  Share2,
-  Twitter,
-} from "lucide-react";
+import { Banknote, Check, Copy, ExternalLink } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import {
+  FacebookIcon,
+  LinkedInIcon,
+  Share2Icon,
+  TwitterIcon,
+} from "@/components/icons/SocialIcons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
@@ -97,14 +94,14 @@ export default function EventRegistrationCard({
             {/* Share Section */}
             <div className="mt-6 border-border border-t pt-6">
               <p className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                <Share2 className="h-4 w-4" />
+                <Share2Icon className="h-4 w-4" />
                 Share this event
               </p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { icon: Facebook, label: "Facebook" },
-                  { icon: Twitter, label: "Twitter" },
-                  { icon: Linkedin, label: "LinkedIn" },
+                  { icon: FacebookIcon, label: "Facebook" },
+                  { icon: TwitterIcon, label: "Twitter" },
+                  { icon: LinkedInIcon, label: "LinkedIn" },
                 ].map(({ icon: Icon, label }) => (
                   <Button
                     aria-label={`Share on ${label}`}
@@ -137,7 +134,7 @@ export default function EventRegistrationCard({
             {facebookLink && displayFacebookLink && (
               <div className="mt-6 border-border border-t pt-6">
                 <p className="mb-3 flex items-center gap-2 text-muted-foreground text-sm">
-                  <Facebook className="h-4 w-4 text-[#1877F2]" />
+                  <FacebookIcon className="h-4 w-4 text-[#1877F2]" />
                   Event Facebook Link
                 </p>
                 <a

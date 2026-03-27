@@ -12,12 +12,14 @@ export function useMemberSelection() {
     new Set(),
   );
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   const { execute, isPending } = useAction(tryCatch(updateMembershipStatus), {
     onSuccess: (data) => {
       toast.success(data.message);
       setSelectedMembers(new Set());
       setSelectedStatus(null);
+      setIsSelectionMode(false);
     },
     onError: (error) => {
       toast.error(String(error));
@@ -34,8 +36,19 @@ export function useMemberSelection() {
     setSelectedMembers(newSelection);
   };
 
-  const handleClearSelection = () => {
+  const handleSelectAll = (memberIds: string[]) => {
+    setSelectedMembers(new Set(memberIds));
+    setIsSelectionMode(true);
+  };
+
+  const clearSelection = () => {
     setSelectedMembers(new Set());
+    setSelectedStatus(null);
+    setIsSelectionMode(false);
+  };
+
+  const enableSelectionMode = () => {
+    setIsSelectionMode(true);
   };
 
   const handleUpdateStatus = async () => {
@@ -61,9 +74,13 @@ export function useMemberSelection() {
   return {
     selectedMembers,
     selectedStatus,
+    isSelectionMode,
     setSelectedStatus,
     handleSelectMember,
-    handleClearSelection,
+    handleSelectAll,
+    clearSelection,
+    enableSelectionMode,
+    setIsSelectionMode,
     handleUpdateStatus,
     isPending,
     isUpdateDisabled,

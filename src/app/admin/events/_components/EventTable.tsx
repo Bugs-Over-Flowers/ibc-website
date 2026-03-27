@@ -68,12 +68,10 @@ export default function EventTable({
 
   return (
     <div className="w-full space-y-4 md:space-y-6">
-      <div className="rounded-lg bg-background px-4 md:px-5">
-        <div className="font-medium text-muted-foreground text-sm md:text-base">
-          {events.length} event{events.length !== 1 ? "s" : ""} loaded
-        </div>
+      <div className="font-medium text-muted-foreground text-sm">
+        {events.length} event{events.length !== 1 ? "s" : ""} loaded
       </div>
-      <div className="space-y-4 md:space-y-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
         {events.map((ev) => (
           <EventRow event={ev} key={ev.eventId} />
         ))}

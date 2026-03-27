@@ -215,7 +215,7 @@ export function SponsoredRegistrationFilter({
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                "inline-flex h-12 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
                 selectedDatePreset !== "all" &&
                   "border-primary/40 bg-primary/5",
               )}
@@ -267,7 +267,7 @@ export function SponsoredRegistrationFilter({
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                "inline-flex h-12 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
                 selectedEvent && "border-primary/40 bg-primary/5",
               )}
             >
@@ -327,7 +327,7 @@ export function SponsoredRegistrationFilter({
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                "inline-flex h-12 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
                 selectedStatus !== "all" && "border-primary/40 bg-primary/5",
               )}
             >

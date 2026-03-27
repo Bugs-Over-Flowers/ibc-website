@@ -1,13 +1,13 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
-import type { Route } from "next";
+import { Building2, CalendarDays, ExternalLink, Eye } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
@@ -15,147 +15,164 @@ interface MembersTableRowProps {
   member: Awaited<ReturnType<typeof getMembers>>[number];
   isSelected: boolean;
   onSelectedChange: (selected: boolean) => void;
+  showCheckbox?: boolean;
 }
 
 export function MembersTableRow({
   member,
   isSelected,
   onSelectedChange,
+  showCheckbox = false,
 }: MembersTableRowProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = member.logoImageURL && !imageError;
   const router = useRouter();
+
   const joinedDate = new Date(member.joinDate);
-  const joinedDateLabel = joinedDate.toLocaleDateString();
-  const joinedDateTooltip = joinedDate.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const memberIdLabel = member.identifier || "-";
+  const formattedJoinDate = Number.isNaN(joinedDate.getTime())
+    ? "N/A"
+    : joinedDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
 
-  const navigateToDetails = () => {
-    router.push(`/admin/members/${member.businessMemberId}` as Route);
-  };
-
-  const toggleSelection = () => {
-    onSelectedChange(!isSelected);
+  const handleCardClick = () => {
+    if (showCheckbox) {
+      onSelectedChange(!isSelected);
+      return;
+    }
+    router.push(`/admin/members/${member.businessMemberId}`);
   };
 
   return (
-    <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-lg">
-      <button
-        aria-label={`Select ${member.businessName}`}
-        aria-pressed={isSelected}
-        className="absolute inset-0 z-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        onClick={toggleSelection}
-        type="button"
-      />
-      <div className="pointer-events-none relative z-10 flex w-full flex-1 flex-col gap-3 overflow-hidden text-left">
-        {/* Image with status badge and checkbox */}
-        <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded">
-          {/* Checkbox - top left corner */}
-          <div className="pointer-events-auto absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
+    <article
+      className={cn(
+        "group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground",
+        "transition-all duration-300 ease-out",
+        "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-xl",
+        showCheckbox && isSelected && "border-primary/50 bg-primary/5",
+      )}
+    >
+      {/* Image — strictly 1:1 */}
+      <div
+        className="relative w-full overflow-hidden bg-muted/20"
+        style={{ aspectRatio: "1 / 1" }}
+      >
+        {/* Gradient scrim */}
+        <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-b from-black/35 via-transparent to-transparent" />
+
+        {showImage ? (
+          <Image
+            alt={member.businessName}
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            fill
+            onError={() => setImageError(true)}
+            priority={false}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            src={member.logoImageURL as string}
+            unoptimized
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-blue-500 to-indigo-700 font-extrabold text-5xl text-white/90 dark:from-blue-600 dark:to-indigo-900">
+            {member.businessName.charAt(0).toUpperCase() || "?"}
+          </div>
+        )}
+
+        {/* Checkbox — top left */}
+        {showCheckbox && (
+          <div className="absolute top-3 left-3 z-20 rounded-md border border-foreground/20 bg-card/90 p-1 shadow-md backdrop-blur-sm">
             <Checkbox
               checked={isSelected}
-              className="size-5"
+              className="size-4"
               onCheckedChange={(checked) => onSelectedChange(checked === true)}
               onClick={(e) => e.stopPropagation()}
             />
           </div>
-          {showImage ? (
-            <Image
-              alt={member.businessName}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              fill
-              onError={() => setImageError(true)}
-              priority={false}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-              src={member.logoImageURL as string}
-              unoptimized
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center rounded bg-muted font-semibold text-3xl text-muted-foreground">
-              {member.businessName.charAt(0).toUpperCase()}
-            </div>
-          )}
-          {/* Status badge - top right corner */}
-          <div className="absolute top-2 right-2">
-            <Badge
-              className={cn(
-                "border border-popover font-semibold text-card capitalize",
-                member.membershipStatus === "cancelled" && "bg-status-red",
-                member.membershipStatus === "paid" && "bg-status-green",
-                member.membershipStatus === "unpaid" && "bg-status-orange",
-              )}
-              variant="default"
-            >
-              {member.membershipStatus}
-            </Badge>
-          </div>
+        )}
+
+        {/* Status badge — top right */}
+        <div className="absolute top-3 right-3 z-20">
+          <Badge
+            className={cn(
+              "border border-white/20 font-semibold text-[10px] text-white capitalize tracking-widest shadow-sm backdrop-blur-md",
+              member.membershipStatus === "cancelled" && "bg-status-red/90",
+              member.membershipStatus === "paid" && "bg-status-green/90",
+              member.membershipStatus === "unpaid" && "bg-status-orange/90",
+            )}
+            variant="default"
+          >
+            {member.membershipStatus}
+          </Badge>
         </div>
 
-        {/* Middle content */}
-        <div className="relative flex w-full flex-1 flex-col gap-2">
-          {/* Company name with website icon on right */}
-          <div className="flex h-7 items-start justify-between gap-2">
-            <h3 className="line-clamp-1 flex-1 font-semibold text-base">
-              {member.businessName}
-            </h3>
+        {/* Invisible click overlay */}
+        <button
+          aria-label={`Open ${member.businessName} member details`}
+          className="absolute inset-0 z-10"
+          onClick={handleCardClick}
+          type="button"
+        />
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        {/* Name row */}
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-1 flex-1 font-semibold text-[14.5px] text-foreground leading-snug tracking-tight">
+            {member.businessName}
+          </h3>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              className="rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-muted/40 hover:text-primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/admin/members/${member.businessMemberId}`);
+              }}
+              title="View member details"
+              type="button"
+            >
+              <Eye className="size-4" />
+            </button>
+
             {member.websiteURL && (
               <a
-                className="pointer-events-auto inline-flex shrink-0 text-blue-600 transition-colors hover:text-blue-700"
+                className="rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-muted/40 hover:text-primary"
                 href={member.websiteURL}
                 onClick={(e) => e.stopPropagation()}
                 rel="noopener noreferrer"
                 target="_blank"
                 title={member.websiteURL}
               >
-                <ExternalLink className="mt-1 size-4" />
+                <ExternalLink className="size-4" />
               </a>
             )}
           </div>
+        </div>
 
-          {/* Sector with fixed 2 line height */}
-          <p className="line-clamp-2 h-[2.8em] text-muted-foreground text-sm opacity-60">
-            {member.Sector?.sectorName || "—"}
-          </p>
-          <div className="h-px w-full bg-border" />
+        {/* Sector */}
+        <p className="line-clamp-2 min-h-[2.5em] text-[12.5px] text-muted-foreground/70 leading-snug">
+          {member.Sector?.sectorName || "—"}
+        </p>
 
-          {/* Identifier and date at bottom */}
-          <div className="pointer-events-auto mt-auto flex items-center justify-between gap-2 pt-2">
-            <p
-              className="cursor-help text-muted-foreground text-xs opacity-60"
-              title={`Member ID: ${memberIdLabel}`}
-            >
-              {memberIdLabel}
-            </p>
+        <Separator className="opacity-50" />
 
-            <p
-              className="cursor-help text-muted-foreground text-xs opacity-60"
-              title={`Joined Date: ${joinedDateTooltip}`}
-            >
-              {joinedDateLabel}
-            </p>
+        {/* Meta */}
+        <div className="grid gap-1.5 text-[12px] text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-3.5 w-3.5 shrink-0 text-primary/50" />
+            <span className="truncate font-mono">
+              {member.identifier || member.businessMemberId}
+            </span>
           </div>
 
-          <div className="flex justify-center pt-2">
-            <Button
-              className="pointer-events-auto w-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigateToDetails();
-              }}
-              size="sm"
-              type="button"
-              variant="outline"
-            >
-              View Details
-            </Button>
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary/50" />
+            <span>Joined {formattedJoinDate}</span>
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

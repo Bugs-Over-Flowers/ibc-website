@@ -1,24 +1,36 @@
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { Suspense } from "react";
+import AdminDashboardPageSkeleton from "@/app/admin/_components/dashboard/AdminDashboardPageSkeleton";
+import { DashboardClient } from "@/app/admin/_components/dashboard/DashboardClient";
+import { getDashboardData } from "@/server/admin/queries/getDashboardData";
+
+export const metadata: Metadata = {
+  title: "Dashboard | Admin",
+  description: "View core admin statistics and quick actions",
+};
+
+async function DashboardContent() {
+  const cookieStore = await cookies();
+  const data = await getDashboardData(cookieStore.getAll());
+
+  return <DashboardClient data={data} />;
+}
+
 export default function AdminPage() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-bold text-3xl text-foreground">Dashboard</h1>
-        <div className="text-muted-foreground text-sm">
-          Welcome to the admin dashboard
-        </div>
-      </div>
-
-      <div className="rounded-lg border border-border border-dashed p-12 text-center">
-        <div className="mx-auto max-w-md">
-          <h3 className="font-semibold text-foreground text-lg">
-            Dashboard Content
-          </h3>
-          <p className="mt-2 text-muted-foreground text-sm">
-            Your dashboard content will appear here. Add charts, statistics, or
-            quick actions to get started.
+    <div className="space-y-6 px-2">
+      <Suspense fallback={<AdminDashboardPageSkeleton />}>
+        <div>
+          <h1 className="font-bold text-3xl text-foreground">Dashboard</h1>
+          <p className="mt-2 text-muted-foreground">
+            Core metrics for applications, members, events, sponsored links, and
+            evaluations.
           </p>
         </div>
-      </div>
+
+        <DashboardContent />
+      </Suspense>
     </div>
   );
 }
