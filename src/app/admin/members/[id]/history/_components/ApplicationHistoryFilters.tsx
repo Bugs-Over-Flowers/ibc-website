@@ -46,6 +46,7 @@ import type { ApplicationHistoryItem } from "@/server/applications/queries/getAp
 
 /** Available application type filter options. "all" shows everything. */
 type ApplicationTypeFilter = "all" | Enums<"ApplicationType">;
+type DateSortValue = "date-desc" | "date-asc";
 
 /** Date range for filtering — both bounds are optional. */
 interface DateRange {
@@ -61,6 +62,11 @@ const APPLICATION_TYPE_LABELS: Record<ApplicationTypeFilter, string> = {
   updating: "Update Info",
 };
 
+const SORT_LABELS: Record<DateSortValue, string> = {
+  "date-desc": "Latest First",
+  "date-asc": "Date Ascending",
+};
+
 interface ApplicationHistoryFiltersProps {
   applications: ApplicationHistoryItem[];
   onFiltersChange: (filtered: ApplicationHistoryItem[]) => void;
@@ -73,6 +79,7 @@ export function ApplicationHistoryFilters({
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<ApplicationTypeFilter>("all");
+  const [sortBy, setSortBy] = useState<DateSortValue>("date-desc");
   const [dateRange, setDateRange] = useState<DateRange>({});
   const [isDateRangeOpen, setIsDateRangeOpen] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -159,8 +166,19 @@ export function ApplicationHistoryFilters({
       result = result.filter((app) => new Date(app.applicationDate) <= toDate);
     }
 
-    return result;
-  }, [applications, debouncedSearch, typeFilter, dateRange]);
+    const sortedResult = [...result].sort((a, b) => {
+      const aDate = new Date(a.applicationDate).getTime();
+      const bDate = new Date(b.applicationDate).getTime();
+
+      if (sortBy === "date-asc") {
+        return aDate - bDate;
+      }
+
+      return bDate - aDate;
+    });
+
+    return sortedResult;
+  }, [applications, debouncedSearch, typeFilter, dateRange, sortBy]);
 
   // Notify parent whenever filtered results change
   useEffect(() => {
@@ -175,11 +193,16 @@ export function ApplicationHistoryFilters({
     setSearchTerm("");
     setDebouncedSearch("");
     setTypeFilter("all");
+    setSortBy("date-desc");
     setDateRange({});
   };
 
   const hasActiveFilters =
-    searchTerm || typeFilter !== "all" || dateRange.from || dateRange.to;
+    searchTerm ||
+    typeFilter !== "all" ||
+    sortBy !== "date-desc" ||
+    dateRange.from ||
+    dateRange.to;
 
   /** Format the date range trigger label for display. */
   const getDateRangeLabel = () => {
@@ -381,6 +404,46 @@ export function ApplicationHistoryFilters({
               </div>
             </PopoverContent>
           </Popover>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "inline-flex h-10 min-w-[170px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                sortBy !== "date-desc" && "border-primary/40 bg-primary/5",
+              )}
+            >
+              <span
+                className={cn(
+                  "text-sm",
+                  sortBy !== "date-desc"
+                    ? "text-foreground"
+                    : "text-muted-foreground/70",
+                )}
+              >
+                {SORT_LABELS[sortBy]}
+              </span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-[180px] rounded-xl border-border/50 bg-card p-1 shadow-2xl"
+            >
+              {Object.entries(SORT_LABELS).map(([value, label]) => (
+                <DropdownMenuItem
+                  className={cn(
+                    "cursor-pointer rounded-lg text-sm transition-colors",
+                    sortBy === value
+                      ? "bg-primary/10 font-medium text-primary"
+                      : "hover:bg-muted/50",
+                  )}
+                  key={value}
+                  onClick={() => setSortBy(value as DateSortValue)}
+                >
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Clear all filters button */}
           <AnimatePresence>

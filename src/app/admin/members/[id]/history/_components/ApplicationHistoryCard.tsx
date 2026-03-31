@@ -128,7 +128,7 @@ export function ApplicationHistoryCard({
             {/* ── Meta: Date + Sector as labeled columns ── */}
             <div className="grid grid-cols-2 gap-x-4 text-xs">
               <div>
-                <p className="text-muted-foreground">Date</p>
+                <p className="text-muted-foreground">Date Applied</p>
                 <p className="font-medium text-foreground">{formattedDate}</p>
               </div>
               <div>
