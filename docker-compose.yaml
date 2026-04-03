@@ -16,7 +16,6 @@ services:
       - ./:/app
       - /app/node_modules
       - /app/.next
-      - /app/.next
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
