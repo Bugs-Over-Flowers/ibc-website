@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { cleanupExpiredFeaturedMembers } from "@/server/members/mutations/cleanupExpiredFeaturedMembers";
 import { getMembers } from "@/server/members/queries/getMembers";
 import { EmptyMembersState } from "./EmptyMembersState";
 import { MembersTable } from "./MembersTable";
@@ -27,6 +28,8 @@ export default async function MembersList({ searchParams }: PageProps) {
     sectorName: params.sectorName,
     search: params.search,
   };
+
+  await cleanupExpiredFeaturedMembers();
 
   const members = await getMembers(cookieStore.getAll(), filters);
 

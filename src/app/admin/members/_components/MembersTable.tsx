@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckSquare2, Square, Users, X } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -11,6 +12,10 @@ import {
 } from "@/components/ui/select";
 import type { getMembers } from "@/server/members/queries/getMembers";
 import { useMemberSelection } from "../_hooks/useMemberSelection";
+import {
+  type FeatureableMember,
+  FeatureMemberDialog,
+} from "./FeatureMemberDialog";
 import { MembersTableRow } from "./MembersTableRow";
 
 interface MembersTableProps {
@@ -18,6 +23,18 @@ interface MembersTableProps {
 }
 
 export function MembersTable({ members }: MembersTableProps) {
+  const [featureMember, setFeatureMember] = useState<FeatureableMember | null>(
+    null,
+  );
+  const [isFeatureDialogOpen, setIsFeatureDialogOpen] = useState(false);
+
+  const handleFeatureClick = (
+    member: Awaited<ReturnType<typeof getMembers>>[number],
+  ) => {
+    setFeatureMember(member);
+    setIsFeatureDialogOpen(true);
+  };
+
   const {
     selectedMembers,
     selectedStatus,
@@ -128,6 +145,7 @@ export function MembersTable({ members }: MembersTableProps) {
             isSelected={selectedMembers.has(member.businessMemberId)}
             key={member.businessMemberId}
             member={member}
+            onFeatureClick={handleFeatureClick}
             onSelectedChange={(selected) =>
               handleSelectMember(member.businessMemberId, selected)
             }
@@ -135,6 +153,14 @@ export function MembersTable({ members }: MembersTableProps) {
           />
         ))}
       </div>
+
+      {featureMember ? (
+        <FeatureMemberDialog
+          member={featureMember}
+          onOpenChange={setIsFeatureDialogOpen}
+          open={isFeatureDialogOpen}
+        />
+      ) : null}
     </div>
   );
 }

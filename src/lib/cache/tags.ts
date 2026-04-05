@@ -10,6 +10,7 @@ export const CACHE_TAGS = {
     all: "members:all",
     admin: "members:admin",
     public: "members:public",
+    featured: "members:featured",
   },
   applications: {
     all: "applications:all",
