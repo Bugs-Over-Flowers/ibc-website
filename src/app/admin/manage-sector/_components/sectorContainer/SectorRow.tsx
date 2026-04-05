@@ -7,46 +7,61 @@ export default async function SectorRow({ search }: { search?: string }) {
 
   if (sectors.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border bg-background py-16 text-center shadow-sm">
-        <Building2 className="h-10 w-10 text-muted-foreground" />
-        <h3 className="font-semibold text-lg">No sectors found</h3>
-        <p className="text-muted-foreground text-sm">
-          {search
-            ? `No sectors matching "${search}"`
-            : "Get started by creating a new sector."}
-        </p>
+      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-muted/30 py-20 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <Building2 className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="font-semibold text-base text-foreground">
+            No sectors found
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            {search
+              ? `No results for "${search}"`
+              : "Get started by creating a new sector."}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {sectors.map((sector) => (
-        <article
-          className="flex flex-col items-start gap-4 overflow-hidden rounded-lg border bg-background p-4 shadow-sm md:flex-row md:items-center"
-          key={sector.sectorId}
-        >
-          <div className="flex w-full flex-1 flex-col gap-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Building2 className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg md:text-xl">
-                    {sector.sectorName}
-                  </h3>
-                </div>
-              </div>
+    <div className="overflow-hidden rounded-xl border bg-background shadow-sm">
+      <div className="flex items-center justify-between border-b px-4 py-3">
+        <p className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+          Sectors
+        </p>
+        <span className="rounded-full bg-muted px-2.5 py-0.5 font-medium text-muted-foreground text-xs">
+          {sectors.length}
+        </span>
+      </div>
 
-              <SectorActionsDropdown
-                sectorId={sector.sectorId}
-                sectorName={sector.sectorName}
-              />
+      <ul className="divide-y">
+        {sectors.map((sector) => (
+          <li
+            className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-muted/40"
+            key={sector.sectorId}
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Building2 className="h-4 w-4" />
             </div>
-          </div>
-        </article>
-      ))}
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium text-foreground text-sm">
+                {sector.sectorName}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                ID: {sector.sectorId}
+              </p>
+            </div>
+
+            <SectorActionsDropdown
+              sectorId={sector.sectorId}
+              sectorName={sector.sectorName}
+            />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   useCallback,
   useDeferredValue,
@@ -20,7 +21,7 @@ export default function SectorFilters() {
   const deferredSearch = useDeferredValue(searchValue);
   const lastSearchRef = useRef<string | null>(null);
 
-  const submitSearch = useCallback(() => {
+  const _submitSearch = useCallback(() => {
     updateSearch(searchValue.trim());
   }, [searchValue, updateSearch]);
 
@@ -39,54 +40,52 @@ export default function SectorFilters() {
     updateSearch(trimmed);
   }, [deferredSearch, searchParams, updateSearch]);
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      submitSearch();
-    },
-    [submitSearch],
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        submitSearch();
-      }
-    },
-    [submitSearch],
-  );
+  const handleClearSearch = useCallback(() => {
+    setSearchValue("");
+    updateSearch("");
+  }, [updateSearch]);
 
   return (
-    <form
-      className="grid grid-cols-2 gap-3 md:grid-cols-12 md:gap-4"
-      onSubmit={handleSubmit}
-    >
-      <div className="relative col-span-2 md:col-span-11">
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-foreground" />
-        <Input
-          autoComplete="off"
-          className="w-full border-border pl-10"
-          data-form-type="other"
-          data-lpignore="true"
-          name="sector-search"
-          onChange={(e) => setSearchValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Search sector name..."
-          value={searchValue}
-        />
+    <div className="rounded-xl p-0">
+      {/* Search Bar */}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <Search className="h-5 w-5 text-muted-foreground/70" />
+          </div>
+          <Input
+            autoComplete="off"
+            className="h-12 rounded-xl border-border bg-card/80 pr-12 pl-12 text-base transition-all placeholder:text-muted-foreground/50 focus:border-primary/40 focus:ring-primary/20"
+            data-form-type="other"
+            data-lpignore="true"
+            name="sector-search"
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Search sector name..."
+            type="text"
+            value={searchValue}
+          />
+          <AnimatePresence>
+            {searchValue && (
+              <motion.div
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute inset-y-0 right-2 flex items-center"
+                exit={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+              >
+                <Button
+                  className="h-8 w-8 rounded-full hover:bg-muted/60"
+                  onClick={handleClearSearch}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <X className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-
-      <div className="col-span-2 flex items-stretch md:col-span-1">
-        <Button
-          aria-label="Search"
-          className="w-full"
-          type="submit"
-          variant="default"
-        >
-          <Search className="h-4 w-4" />
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 }

@@ -62,7 +62,7 @@ export default function RegistrationDetails({
           </Button>
           <div>
             <h1 className="font-bold text-2xl tracking-tight">
-              Registration data
+              Registration Data
             </h1>
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <Calendar className="h-3.5 w-3.5" />

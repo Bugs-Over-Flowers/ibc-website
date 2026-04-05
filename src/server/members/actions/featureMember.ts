@@ -7,7 +7,13 @@ import { createActionClient } from "@/lib/supabase/server";
 
 const featureMemberSchema = z.object({
   memberId: z.string().uuid(),
-  featuredExpirationDate: z.string().date(), // Validates YYYY-MM-DD
+  featuredExpirationDate: z
+    .string()
+    .date()
+    .refine(
+      (date) => date >= new Date().toISOString().slice(0, 10),
+      "Feature expiration date cannot be earlier than today.",
+    ),
 });
 
 export async function featureMember(

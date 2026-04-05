@@ -1,34 +1,36 @@
 "use client";
 
-import DOMPurify from "isomorphic-dompurify";
 import { useMemo } from "react";
+import sanitizeHtml from "sanitize-html";
 import { cn } from "@/lib/utils";
 
-interface RichTextDisplayProps {
+type RichTextDisplayProps = {
   content: string | null;
   className?: string;
-}
+};
+
+const SANITIZE_CONFIG: sanitizeHtml.IOptions = {
+  allowedTags: [
+    "p",
+    "br",
+    "strong",
+    "b",
+    "em",
+    "i",
+    "ul",
+    "ol",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+  ],
+  allowedAttributes: {},
+};
 
 function RichTextDisplay({ content, className }: RichTextDisplayProps) {
   const sanitizedContent = useMemo(() => {
     if (!content) return null;
-    return DOMPurify.sanitize(content, {
-      ALLOWED_TAGS: [
-        "p",
-        "br",
-        "strong",
-        "b",
-        "em",
-        "i",
-        "ul",
-        "ol",
-        "li",
-        "h1",
-        "h2",
-        "h3",
-      ],
-      ALLOWED_ATTR: [],
-    });
+    return sanitizeHtml(content, SANITIZE_CONFIG);
   }, [content]);
 
   if (!sanitizedContent) {

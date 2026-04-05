@@ -7,7 +7,7 @@ import type {
   MembershipApplicationStep4Schema,
 } from "@/lib/validation/membership/application";
 
-export const MAX_STEPS = 4;
+export const MAX_STEPS = 5;
 
 export interface MembershipApplicationData {
   step1: MembershipApplicationStep1Schema;
@@ -25,12 +25,13 @@ interface MembershipApplicationStore {
     attemptCount: number;
     cooldownEndTime: number | null;
     validationStatus: "idle" | "valid" | "invalid";
-    lastValidatedMemberId: string | null;
+    lastValidatedMemberIdentifier: string | null;
     lastValidatedApplicationType: "renewal" | "updating" | null;
     remainingTime: number;
     memberInfo: {
       companyName?: string;
       membershipStatus?: string;
+      businessMemberIdentifier?: string;
       businessMemberId?: string;
     };
   };
@@ -50,9 +51,10 @@ interface MembershipApplicationStoreActions {
     memberInfo?: {
       companyName?: string;
       membershipStatus?: string;
+      businessMemberIdentifier?: string;
       businessMemberId?: string;
     },
-    memberId?: string | null,
+    memberIdentifier?: string | null,
     applicationType?: "renewal" | "updating" | null,
   ) => void;
   setMemberValidationRemainingTime: (time: number) => void;
@@ -67,7 +69,7 @@ const initialState: MembershipApplicationStore = {
     attemptCount: 0,
     cooldownEndTime: null,
     validationStatus: "idle",
-    lastValidatedMemberId: null,
+    lastValidatedMemberIdentifier: null,
     lastValidatedApplicationType: null,
     remainingTime: 0,
     memberInfo: {},
@@ -75,7 +77,7 @@ const initialState: MembershipApplicationStore = {
   applicationData: {
     step1: {
       applicationType: "newMember",
-      businessMemberId: "",
+      businessMemberIdentifier: "",
     },
     step2: {
       companyName: "",
@@ -178,7 +180,7 @@ const useMembershipApplicationStore = create<
       setMemberValidationStatus: (
         status,
         memberInfo = {},
-        memberId = null,
+        memberIdentifier = null,
         applicationType = null,
       ) =>
         set((state) => ({
@@ -186,8 +188,9 @@ const useMembershipApplicationStore = create<
             ...state.memberValidation,
             validationStatus: status,
             memberInfo,
-            lastValidatedMemberId:
-              memberId || state.memberValidation.lastValidatedMemberId,
+            lastValidatedMemberIdentifier:
+              memberIdentifier ||
+              state.memberValidation.lastValidatedMemberIdentifier,
             lastValidatedApplicationType:
               applicationType ||
               state.memberValidation.lastValidatedApplicationType,
@@ -204,7 +207,7 @@ const useMembershipApplicationStore = create<
           memberValidation: {
             ...state.memberValidation,
             validationStatus: "idle",
-            lastValidatedMemberId: null,
+            lastValidatedMemberIdentifier: null,
             lastValidatedApplicationType: null,
             memberInfo: {},
           },
@@ -212,7 +215,7 @@ const useMembershipApplicationStore = create<
     }),
     {
       name: "membership-application-storage",
-      version: 4,
+      version: 7,
       migrate: (persistedState, version) => {
         if (version < 4) {
           const oldState =
@@ -227,6 +230,60 @@ const useMembershipApplicationStore = create<
             },
           };
         }
+
+        if (version < 6) {
+          const oldState =
+            persistedState as Partial<MembershipApplicationStore>;
+
+          const firstRepresentative =
+            oldState?.applicationData?.step3?.representatives?.[0];
+          const secondRepresentative =
+            oldState?.applicationData?.step3?.representatives?.[1];
+
+          return {
+            ...initialState,
+            ...oldState,
+            applicationData: {
+              ...initialState.applicationData,
+              ...oldState?.applicationData,
+              step3: {
+                representatives: [
+                  {
+                    ...initialState.applicationData.step3.representatives[0],
+                    ...firstRepresentative,
+                    companyMemberType: "principal",
+                  },
+                  {
+                    ...initialState.applicationData.step3.representatives[1],
+                    ...secondRepresentative,
+                    companyMemberType: "alternate",
+                  },
+                ],
+              },
+            },
+          };
+        }
+
+        if (version < 7) {
+          const oldState =
+            persistedState as Partial<MembershipApplicationStore> & {
+              memberValidation?: {
+                lastValidatedMemberId?: string | null;
+              };
+            };
+
+          return {
+            ...oldState,
+            memberValidation: {
+              ...oldState?.memberValidation,
+              lastValidatedMemberIdentifier:
+                oldState?.memberValidation?.lastValidatedMemberIdentifier ??
+                oldState?.memberValidation?.lastValidatedMemberId ??
+                null,
+            },
+          } as MembershipApplicationStore;
+        }
+
         return persistedState as MembershipApplicationStore;
       },
       partialize: (state) =>
@@ -271,25 +328,44 @@ const useMembershipApplicationStore = create<
 
         if (state.applicationData?.step3?.representatives) {
           state.applicationData.step3.representatives =
-            state.applicationData.step3.representatives.map((rep) => {
-              const serialized = rep as unknown as {
-                birthdate?: string | Date;
-              };
+            state.applicationData.step3.representatives
+              .slice(0, 2)
+              .map((rep, index) => {
+                const serialized = rep as unknown as {
+                  birthdate?: string | Date;
+                };
 
-              let birthdateValue: Date | undefined;
+                let birthdateValue: Date | undefined;
 
-              if (serialized.birthdate) {
-                birthdateValue =
-                  serialized.birthdate instanceof Date
-                    ? serialized.birthdate
-                    : new Date(serialized.birthdate);
-              }
+                if (serialized.birthdate) {
+                  birthdateValue =
+                    serialized.birthdate instanceof Date
+                      ? serialized.birthdate
+                      : new Date(serialized.birthdate);
+                }
 
-              return {
-                ...rep,
-                birthdate: birthdateValue as Date,
-              };
-            });
+                return {
+                  ...rep,
+                  companyMemberType: (index === 0
+                    ? "principal"
+                    : "alternate") as "principal" | "alternate",
+                  birthdate: birthdateValue as Date,
+                };
+              });
+
+          if (state.applicationData.step3.representatives.length < 2) {
+            state.applicationData.step3.representatives = [
+              {
+                ...initialState.applicationData.step3.representatives[0],
+                ...state.applicationData.step3.representatives[0],
+                companyMemberType: "principal",
+              },
+              {
+                ...initialState.applicationData.step3.representatives[1],
+                companyMemberType: "alternate",
+              },
+            ];
+          }
         }
 
         if (state.applicationData?.step2) {

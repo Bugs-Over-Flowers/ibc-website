@@ -3,11 +3,13 @@ import {
   ArrowLeft,
   Calendar,
   CheckSquare,
+  ChevronLeft,
   ClipboardList,
   Clock,
   Edit,
   Globe,
   MapPin,
+  Star,
   Users,
 } from "lucide-react";
 import type { Route } from "next";
@@ -18,10 +20,11 @@ import { EvaluationQRDownloader } from "@/components/qr/EvaluationQRDownloader";
 import RichTextDisplay from "@/components/RichTextDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventStats } from "@/server/events/queries/getEventStats";
+import AddFacebookLinkButton from "./AddFacebookLinkButton";
 
 export default async function EventDetails({
   params,
@@ -35,7 +38,6 @@ export default async function EventDetails({
   const { data: event, error: eventError } = await tryCatch(
     getEventById(requestCookies, { id: eventId }),
   );
-
   const { data: stats } = await tryCatch(
     getEventStats(requestCookies, { eventId }),
   );
@@ -43,16 +45,22 @@ export default async function EventDetails({
   if (eventError || !event) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="font-bold text-2xl">Error loading event</h1>
-          <p className="text-muted-foreground">
-            {typeof eventError === "string" ? eventError : "Event not found"}
+        <div className="space-y-4 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+            <Calendar className="h-8 w-8 text-destructive" />
+          </div>
+          <h1 className="font-bold text-2xl">Event not found</h1>
+          <p className="max-w-sm text-muted-foreground">
+            {typeof eventError === "string"
+              ? eventError
+              : "This event could not be loaded. It may have been removed or you may not have access."}
           </p>
-          <Link href="/admin/events">
-            <Button className="mt-4" variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Events
-            </Button>
+          <Link
+            className="mt-4 flex items-center justify-center gap-1 text-primary transition-colors hover:text-primary/80"
+            href={"/admin/events" as Route}
+          >
+            <ArrowLeft className="h-5 w-5" />
+            Back to Events
           </Link>
         </div>
       </div>
@@ -74,283 +82,334 @@ export default async function EventDetails({
   const isDraft = !event.eventType;
   const showEditButton = isDraft || !isFinished;
 
+  const statItems = [
+    {
+      label: "Total Registrations",
+      value: eventStats.total_registrations,
+      colorClass: "text-status-blue",
+      bgClass: "bg-status-blue/10",
+    },
+    {
+      label: "Verified",
+      value: eventStats.verified_registrations,
+      colorClass: "text-status-green",
+      bgClass: "bg-status-green/10",
+    },
+    {
+      label: "Pending",
+      value: eventStats.pending_registrations,
+      colorClass: "text-status-orange",
+      bgClass: "bg-status-orange/10",
+    },
+    {
+      label: "Participants",
+      value: eventStats.participants,
+      colorClass: "text-status-purple",
+      bgClass: "bg-status-purple/10",
+    },
+    {
+      label: "Attended",
+      value: eventStats.attended,
+      colorClass: "text-status-teal",
+      bgClass: "bg-status-teal/10",
+    },
+  ];
+
+  const actionCards = [
+    {
+      icon: ClipboardList,
+      label: "Registration List",
+      description:
+        "View and manage all registrations, payment verification, and participant details",
+      href: `/admin/events/${eventId}/registration-list`,
+      iconBg: "bg-status-blue/10",
+      iconColor: "text-status-blue",
+      variant: "default" as const,
+    },
+    {
+      icon: CheckSquare,
+      label: "Check-in List",
+      description:
+        "View daily attendance records and export check-in data by event day",
+      href: `/admin/events/${eventId}/check-in-list`,
+      iconBg: "bg-status-green/10",
+      iconColor: "text-status-green",
+      variant: "outline" as const,
+    },
+    {
+      icon: Star,
+      label: "Evaluations",
+      description:
+        "Review participant feedback, inspect ratings, and export event evaluation responses",
+      href: `/admin/events/${eventId}/evaluations`,
+      iconBg: "bg-status-yellow/10",
+      iconColor: "text-status-yellow",
+      variant: "outline" as const,
+    },
+    {
+      icon: Users,
+      label: "Sponsored Registrations",
+      description:
+        "Manage sponsored registration links and track sponsored guest usage",
+      href: `/admin/events/${eventId}/sponsored-registrations`,
+      iconBg: "bg-status-purple/10",
+      iconColor: "text-status-purple",
+      variant: "outline" as const,
+    },
+  ];
+
+  const metaItems = [
+    {
+      icon: Calendar,
+      label: "Date & Time",
+      primary: event.eventStartDate
+        ? format(new Date(event.eventStartDate), "MMM d, yyyy · hh:mm a")
+        : "TBA",
+      secondary: event.eventEndDate
+        ? `Until ${format(new Date(event.eventEndDate), "MMM d, yyyy · hh:mm a")}`
+        : null,
+    },
+    {
+      icon: MapPin,
+      label: "Venue",
+      primary: event.venue || "TBA",
+      secondary: null,
+    },
+    {
+      icon: Users,
+      label: "Registration Fee",
+      primary: event.registrationFee
+        ? `₱${event.registrationFee.toLocaleString()}`
+        : "Free",
+      secondary: null,
+      primaryClass: "text-primary font-semibold",
+    },
+    {
+      icon: Globe,
+      label: "Published",
+      primary: event.publishedAt
+        ? format(new Date(event.publishedAt), "MMM d, yyyy · hh:mm a")
+        : "Not published",
+      secondary: null,
+    },
+    {
+      icon: Clock,
+      label: "Last Updated",
+      primary: event.updatedAt
+        ? format(new Date(event.updatedAt), "MMM d, yyyy · hh:mm a")
+        : "N/A",
+      secondary: null,
+    },
+  ];
+
   return (
-    <div className="space-y-6 p-6">
-      {/* Back Button */}
-      <div>
-        <Link href="/admin/events">
-          <Button size="sm" variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Events
-          </Button>
-        </Link>
+    <div className="space-y-6 pb-8">
+      {/* Back Navigation */}
+      <div className="flex w-full justify-start">
+        <Button
+          className="justify-start gap-1 bg-transparent px-0 text-primary transition-colors hover:bg-transparent hover:text-primary/80 focus:bg-transparent active:bg-transparent"
+          nativeButton={false}
+          render={
+            <Link href={"/admin/events" as Route}>
+              <ChevronLeft className="h-5 w-5" />
+              Back to Events
+            </Link>
+          }
+        />
       </div>
 
-      {/* Event Header Card */}
-      <Card className="overflow-hidden">
-        <div className="relative h-[300px] w-full">
+      {/* Hero Card */}
+      <Card className="overflow-hidden border-border/60 pt-0 shadow-md">
+        {/* Cover Image */}
+        <div
+          className="relative w-full overflow-hidden rounded-xl"
+          style={{ aspectRatio: "4 / 1" }}
+        >
           <Image
             alt={event.eventTitle}
-            className="object-cover"
+            className="object-contain"
             fill
             priority
+            sizes="(max-width: 1600px) 100vw, 1600px"
             src={event.eventHeaderUrl || "/images/backgrounds/placeholder.jpg"}
           />
-        </div>
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <h1 className="font-bold text-2xl">{event.eventTitle}</h1>
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
+
+          {/* Overlaid title + badge for visual polish */}
+          <div className="absolute right-0 bottom-0 left-0 p-5 sm:p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div className="space-y-1.5">
                 <Badge
+                  className="font-medium text-xs uppercase tracking-wide"
                   variant={
                     event.eventType === "public" ? "default" : "secondary"
                   }
                 >
                   {event.eventType || "Draft"}
                 </Badge>
+                <h1 className="max-w-2xl font-bold text-white text-xl leading-tight drop-shadow-sm sm:text-2xl lg:text-3xl">
+                  {event.eventTitle}
+                </h1>
               </div>
-              <p className="font-mono text-muted-foreground text-xs">
-                ID: {event.eventId}
-              </p>
-              {event.description ? (
-                <div className="max-w-3xl">
-                  <RichTextDisplay
-                    className="text-muted-foreground"
-                    content={event.description}
-                  />
-                </div>
-              ) : (
-                <p className="max-w-3xl text-muted-foreground italic">
-                  No description available.
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <EvaluationQRDownloader
-                eventId={eventId}
-                eventTitle={event.eventTitle}
-              />
-              {showEditButton && (
-                <Link href={`/admin/events/${eventId}/edit-event` as Route}>
-                  <Button variant="outline">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Event
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <div className="flex items-start gap-3">
-              <Calendar className="mt-1 h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-muted-foreground text-sm">
-                  Date & Time
-                </p>
-                <p className="font-medium">
-                  {event.eventStartDate
-                    ? format(
-                        new Date(event.eventStartDate),
-                        "MMM d, yyyy, hh:mm a",
-                      )
-                    : "TBA"}
-                </p>
-                {event.eventEndDate && (
-                  <p className="text-muted-foreground text-sm">
-                    to{" "}
-                    {format(
-                      new Date(event.eventEndDate),
-                      "MMM d, yyyy, hh:mm a",
-                    )}
-                  </p>
+              {/* Action buttons on the image */}
+              <div className="flex shrink-0 items-center gap-2">
+                <AddFacebookLinkButton
+                  eventId={eventId}
+                  facebookLink={event.facebookLink}
+                />
+                <EvaluationQRDownloader
+                  eventId={eventId}
+                  eventTitle={event.eventTitle}
+                />
+                {showEditButton && (
+                  <Link href={`/admin/events/${eventId}/edit-event` as Route}>
+                    <Button
+                      className="border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+                      size="sm"
+                      variant="outline"
+                    >
+                      <Edit className="mr-1.5 h-3.5 w-3.5" />
+                      Edit
+                    </Button>
+                  </Link>
                 )}
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="flex items-start gap-3">
-              <MapPin className="mt-1 h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-muted-foreground text-sm">
-                  Venue
-                </p>
-                <p className="font-medium">{event.venue || "TBA"}</p>
-              </div>
-            </div>
+        <CardContent className="space-y-6 p-5 sm:p-6">
+          {/* Event ID + Description */}
+          <div className="space-y-3">
+            <p className="font-mono text-muted-foreground/70 text-xs tracking-wide">
+              ID: {event.eventId}
+            </p>
+            {event.description ? (
+              <RichTextDisplay
+                className="max-w-3xl text-muted-foreground text-sm leading-relaxed"
+                content={event.description}
+              />
+            ) : (
+              <p className="text-muted-foreground text-sm italic">
+                No description available.
+              </p>
+            )}
+          </div>
 
-            <div className="flex items-start gap-3">
-              <Users className="mt-1 h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-muted-foreground text-sm">
-                  Registration Fee
-                </p>
-                <p className="font-medium text-primary">
-                  {event.registrationFee
-                    ? `₱${event.registrationFee.toLocaleString()}`
-                    : "Free"}
-                </p>
-              </div>
-            </div>
+          {/* Divider */}
+          <div className="border-border/60 border-t" />
 
-            <div className="flex items-start gap-3">
-              <Globe className="mt-1 h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-muted-foreground text-sm">
-                  Published
-                </p>
-                <p className="font-medium">
-                  {event.publishedAt
-                    ? format(
-                        new Date(event.publishedAt),
-                        "MMM d, yyyy, hh:mm a",
-                      )
-                    : "Not published"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Clock className="mt-1 h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-muted-foreground text-sm">
-                  Last Updated
-                </p>
-                <p className="font-medium">
-                  {event.updatedAt
-                    ? format(new Date(event.updatedAt), "MMM d, yyyy, hh:mm a")
-                    : "N/A"}
-                </p>
-              </div>
-            </div>
+          {/* Meta grid */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {metaItems.map(
+              ({ icon: Icon, label, primary, secondary, primaryClass }) => (
+                <div className="flex min-w-0 items-start gap-3" key={label}>
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="mb-0.5 font-medium text-muted-foreground text-xs">
+                      {label}
+                    </p>
+                    <p
+                      className={`truncate font-medium text-sm ${primaryClass ?? ""}`}
+                    >
+                      {primary}
+                    </p>
+                    {secondary && (
+                      <p className="truncate text-muted-foreground text-xs">
+                        {secondary}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ),
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Total Registrations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl text-blue-600">
-              {eventStats.total_registrations}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Verified
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl text-green-600">
-              {eventStats.verified_registrations}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Pending
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl text-orange-600">
-              {eventStats.pending_registrations}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Participants
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl text-purple-600">
-              {eventStats.participants}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Attended
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl text-teal-600">
-              {eventStats.attended}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {statItems.map(({ label, value, colorClass, bgClass }) => (
+          <Card
+            className="border-border/60 shadow-sm transition-shadow hover:shadow-md"
+            key={label}
+          >
+            <CardContent className="space-y-2 p-4">
+              <p className="font-medium text-muted-foreground text-xs leading-tight">
+                {label}
+              </p>
+              <div className={`flex items-center gap-2`}>
+                <div
+                  className={`h-2 w-2 rounded-full ${bgClass} ${colorClass} ring-2 ring-current ring-opacity-30`}
+                />
+                <span
+                  className={`font-bold text-2xl tabular-nums ${colorClass}`}
+                >
+                  {value}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Section heading */}
+      <div className="flex items-center gap-3">
+        <h2 className="font-semibold text-muted-foreground text-sm uppercase tracking-widest">
+          Management
+        </h2>
+        <div className="h-px flex-1 bg-border/60" />
       </div>
 
       {/* Action Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <Card className="flex flex-col">
-          <CardContent className="flex flex-1 flex-col p-6">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-              <ClipboardList className="h-6 w-6" />
-            </div>
-            <h3 className="mb-2 font-semibold text-lg">Registration List</h3>
-            <p className="mb-6 flex-1 text-muted-foreground text-sm">
-              View and manage all registrations, payment verification, and
-              participant details
-            </p>
-            <Link href={`/admin/events/${eventId}/registration-list` as Route}>
-              <Button className="w-full" variant="default">
-                <ClipboardList className="mr-2 h-4 w-4" />
-                View Registration List
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-        <Card className="flex flex-col">
-          <CardContent className="flex flex-1 flex-col p-6">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600">
-              <CheckSquare className="h-6 w-6" />
-            </div>
-            <h3 className="mb-2 font-semibold text-lg">Check-in List</h3>
-            <p className="mb-6 flex-1 text-muted-foreground text-sm">
-              View daily attendance records and export check-in data by event
-              day
-            </p>
-            <Link href={`/admin/events/${eventId}/check-in-list` as Route}>
-              <Button className="w-full" variant="outline">
-                <CheckSquare className="mr-2 h-4 w-4" />
-                View Check-in List
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-        <Card className="flex flex-col">
-          <CardContent className="flex flex-1 flex-col p-6">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
-              <Users className="h-6 w-6" />
-            </div>
-            <h3 className="mb-2 font-semibold text-lg">
-              Sponsored Registrations
-            </h3>
-            <p className="mb-6 flex-1 text-muted-foreground text-sm">
-              Manage sponsored registration links and track sponsored guest
-              usage
-            </p>
-            <Link
-              href={`/admin/events/${eventId}/sponsored-registrations` as Route}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {actionCards.map(
+          ({
+            icon: Icon,
+            label,
+            description,
+            href,
+            iconBg,
+            iconColor,
+            variant,
+          }) => (
+            <Card
+              className="group border-border/60 shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md"
+              key={label}
             >
-              <Button className="w-full" variant="outline">
-                <Users className="mr-2 h-4 w-4" />
-                View Sponsored Registrations
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+              <CardContent className="flex h-full flex-col gap-4 p-5">
+                <div className="flex items-start gap-4">
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconBg}`}
+                  >
+                    <Icon className={`h-5 w-5 ${iconColor}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="mb-1 font-semibold text-sm leading-tight transition-colors group-hover:text-primary">
+                      {label}
+                    </h3>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      {description}
+                    </p>
+                  </div>
+                </div>
+                <Link className="mt-auto" href={href as Route}>
+                  <Button
+                    className="h-9 w-full text-sm"
+                    size="sm"
+                    variant={variant}
+                  >
+                    <Icon className="mr-2 h-3.5 w-3.5" />
+                    {label}
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ),
+        )}
       </div>
     </div>
   );

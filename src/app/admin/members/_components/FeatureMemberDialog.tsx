@@ -31,27 +31,32 @@ export function FeatureMemberDialog({
   open,
   onOpenChange,
 }: FeatureMemberDialogProps) {
+  const todayDate = new Date().toISOString().slice(0, 10);
+  const normalizedFeaturedExpirationDate =
+    member.featuredExpirationDate && member.featuredExpirationDate >= todayDate
+      ? member.featuredExpirationDate
+      : null;
   const [expirationDate, setExpirationDate] = useState(
-    member.featuredExpirationDate ?? "",
+    normalizedFeaturedExpirationDate ?? "",
   );
 
   useEffect(() => {
     if (open) {
-      setExpirationDate(member.featuredExpirationDate ?? "");
+      setExpirationDate(normalizedFeaturedExpirationDate ?? "");
     }
-  }, [member.featuredExpirationDate, open]);
+  }, [normalizedFeaturedExpirationDate, open]);
 
   const currentStatus = useMemo(() => {
-    if (!member.featuredExpirationDate) {
+    if (!normalizedFeaturedExpirationDate) {
       return "Not currently featured";
     }
 
     // Use "T00:00:00" suffix to ensure local timezone interpretation for date-only string
     const formatted = new Date(
-      `${member.featuredExpirationDate}T00:00:00`,
+      `${normalizedFeaturedExpirationDate}T00:00:00`,
     ).toLocaleDateString();
     return `Featured until ${formatted}`;
-  }, [member.featuredExpirationDate]);
+  }, [normalizedFeaturedExpirationDate]);
 
   const { execute, isPending } = useAction(tryCatch(featureMember), {
     onSuccess: () => {
@@ -68,6 +73,11 @@ export function FeatureMemberDialog({
 
     if (!expirationDate) {
       toast.error("Please select an expiration date.");
+      return;
+    }
+
+    if (expirationDate < todayDate) {
+      toast.error("Feature expiration date cannot be earlier than today.");
       return;
     }
 
@@ -92,8 +102,7 @@ export function FeatureMemberDialog({
             </Label>
             <Input
               id="featuredExpirationDate"
-              // Use local date string YYYY-MM-DD instead of UTC
-              min={new Date().toLocaleDateString("en-CA")}
+              min={todayDate}
               onChange={(event) => setExpirationDate(event.target.value)}
               type="date"
               value={expirationDate}

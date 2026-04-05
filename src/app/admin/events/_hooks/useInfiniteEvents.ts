@@ -4,7 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Tables } from "@/lib/supabase/db.types";
 import { fetchMoreEvents } from "@/server/events/queries/fetchMoreEvents";
-import type { SortOption } from "@/server/events/queries/getAdminEventsPage";
+import type {
+  DateSortOption,
+  SortOption,
+  TitleSortOption,
+} from "@/server/events/queries/getAdminEventsPage";
 
 interface UseInfiniteEventsProps {
   initialEvents: (Tables<"Event"> & {
@@ -13,6 +17,8 @@ interface UseInfiniteEventsProps {
   initialNextCursor: string | null;
   search?: string;
   sort?: SortOption;
+  dateSort?: DateSortOption;
+  titleSort?: TitleSortOption;
   status?: string;
 }
 
@@ -21,6 +27,8 @@ export function useInfiniteEvents({
   initialNextCursor,
   search,
   sort,
+  dateSort,
+  titleSort,
   status,
 }: UseInfiniteEventsProps) {
   const [events, setEvents] = useState(initialEvents);
@@ -49,6 +57,8 @@ export function useInfiniteEvents({
       fetchMoreEvents({
         search,
         sort,
+        dateSort,
+        titleSort,
         status,
         cursor: nextCursor,
       }),
@@ -64,7 +74,7 @@ export function useInfiniteEvents({
 
     setEvents((prev) => [...prev, ...data.items]);
     setNextCursor(data.nextCursor);
-  }, [nextCursor, isLoading, search, sort, status]);
+  }, [nextCursor, isLoading, search, sort, dateSort, titleSort, status]);
 
   // Set up intersection observer for infinite scroll
   useEffect(() => {

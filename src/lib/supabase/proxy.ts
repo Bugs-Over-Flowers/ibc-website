@@ -44,6 +44,8 @@ export async function updateSession(request: NextRequest) {
     error,
   } = await supabase.auth.getUser();
 
+  const pathname = request.nextUrl.pathname;
+
   if (error?.message === "User from sub claim in JWT does not exist") {
     // Clear the invalid session
     await supabase.auth.signOut();
@@ -67,16 +69,32 @@ export async function updateSession(request: NextRequest) {
     return redirectResponse;
   }
 
+  if (user) {
+    const isAuthRoute =
+      pathname === "/auth" || pathname.startsWith("/auth/mfa");
+
+    if (isAuthRoute) {
+      const { data: assuranceData, error: assuranceError } =
+        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+      if (!assuranceError && assuranceData.currentLevel === "aal2") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin";
+        return NextResponse.redirect(url);
+      }
+    }
+  }
+
   if (!user) {
     // Protect admin routes
-    if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (pathname.startsWith("/admin")) {
       const url = request.nextUrl.clone();
       url.pathname = "/auth";
       return NextResponse.redirect(url);
     }
 
     // Protect MFA routes (require session)
-    if (request.nextUrl.pathname.startsWith("/auth/mfa")) {
+    if (pathname.startsWith("/auth/mfa")) {
       const url = request.nextUrl.clone();
       url.pathname = "/auth";
       return NextResponse.redirect(url);

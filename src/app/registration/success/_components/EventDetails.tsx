@@ -1,22 +1,21 @@
 import { formatDate } from "date-fns";
-import { CircleAlert } from "lucide-react";
-import type { Route } from "next";
-import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import Link from "next/link";
-import QRDownloader from "@/components/qr/QRDownloader";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+  CreditCard,
+  Download,
+  Info,
+  Mail,
+  QrCode,
+  ScanLine,
+  Smartphone,
+} from "lucide-react";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import Image from "next/image";
 import { getSuccessPageData } from "@/server/registration/queries/getSuccessPageData";
-import QRCodeItem from "./QRCodeItem";
+import { EventActions } from "./EventActions";
+import { EventHeader } from "./EventHeader";
+import { EventTitleBlock } from "./EventTitleBlock";
+import { QRCodeSection } from "./QRCodeSection";
+import { RegistrationDetails } from "./RegistrationDetails";
 
 interface EventDetailsProps {
   cookieStore: RequestCookie[];
@@ -31,86 +30,104 @@ export default async function EventDetails({
     registrationIdentifier,
   });
 
-  if (
-    !data ||
-    !data.registeredEvent ||
-    !data.registeredEvent.eventStartDate ||
-    !data.registrationDetails
-  ) {
+  if (!data?.registeredEvent?.eventStartDate || !data.registrationDetails) {
     return null;
   }
 
-  const renderPaymentMethodText =
-    data.registrationDetails?.paymentMethod === "ONSITE"
-      ? `Please ensure to be able to pay on the event proper at ${formatDate(data.registeredEvent?.eventStartDate, "MMMM d, yyyy")}`
-      : `Please be in touch with IBC to verify your payment status.`;
+  const isOnsite = data.registrationDetails?.paymentMethod === "ONSITE";
+  const paymentNote = isOnsite
+    ? `Pay on-site · ${formatDate(data.registeredEvent.eventStartDate, "MMM d, yyyy")}`
+    : "Contact IBC to verify payment";
+
+  const infoRows = [
+    {
+      icon: Mail,
+      label: "Confirmation sent to",
+      value: data.email,
+      bold: true,
+    },
+    {
+      icon: CreditCard,
+      label: data.registrationDetails.paymentMethod,
+      value: paymentNote,
+      bold: false,
+    },
+    {
+      icon: ScanLine,
+      label: "Check-in",
+      value: "Present your QR code at the event entrance",
+      bold: false,
+    },
+    {
+      icon: Info,
+      label: "Note",
+      value: "Event dates may change — watch for announcements",
+      bold: false,
+    },
+  ];
+
+  const qrSteps = [
+    {
+      icon: QrCode,
+      text: "Your QR code is unique to your registration.",
+    },
+    {
+      icon: Download,
+      text: "Download the QR code and save it to your device.",
+    },
+    {
+      icon: Smartphone,
+      text: "Present it at the entrance. Covers all attendees you registered.",
+    },
+  ];
 
   return (
-    <div className="pt-5 pb-5 md:pb-10">
-      <Card className="flex flex-col">
-        <CardContent>
-          <h4>
-            You have successfully registered for{" "}
-            {data.registeredEvent?.eventTitle}!
-          </h4>
-        </CardContent>
-        <Separator />
-        <CardContent>
-          <Alert>
-            <CircleAlert />
-            <AlertTitle>Important Notice:</AlertTitle>
-            <AlertDescription>
-              <li>
-                You will receive a confirmation email with your registration
-                details. Please check your email at{" "}
-                <strong>{data.email}</strong>
-              </li>
-              <li>
-                You have paid{" "}
-                <strong>{data.registrationDetails?.paymentMethod}</strong>.{" "}
-                {renderPaymentMethodText}
-              </li>
-              <li>
-                The dates of the event are subject for changes. Please stay
-                tuned for any announcements.
-              </li>
-              <li>Please present your QR code during the event.</li>
-              <li>If you have any questions, please contact us.</li>
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-        <Separator />
-        <CardHeader>
-          <CardTitle>Please download your QR code.</CardTitle>
-          <CardDescription>
-            This will be used during the event for you and the people you
-            registered.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <QRDownloader
-              affiliation={data.affiliation}
-              email={data.email}
-              registrationIdentifier={registrationIdentifier}
-            >
-              <div className="relative size-30 md:size-50">
-                <QRCodeItem encodedRegistrationData={registrationIdentifier} />
-              </div>
-            </QRDownloader>
-          </div>
-        </CardContent>
-        <Separator />
+    <section className="mx-auto w-full max-w-4xl space-y-6 sm:space-y-7">
+      {/* ── Event Header Image ── */}
+      {data.registeredEvent.eventHeaderUrl && (
+        <div
+          className="relative w-full overflow-hidden rounded-xl"
+          style={{ aspectRatio: "4 / 1" }}
+        >
+          <Image
+            alt={data.registeredEvent.eventTitle}
+            className="object-contain"
+            fill
+            priority
+            sizes="(max-width: 1600px) 100vw, 1600px"
+            src={data.registeredEvent.eventHeaderUrl}
+          />
+        </div>
+      )}
 
-        <CardFooter className="flex flex-col gap-4 md:flex-row">
-          <Link href="/events">
-            <Button>Return To Events Page</Button>
-          </Link>
-          <Link href={`/events/${data.registeredEvent.eventId}` as Route}>
-            <Button>Return To Event</Button>
-          </Link>
-        </CardFooter>
-      </Card>
-    </div>
+      {/* ── Header ── */}
+      <EventHeader
+        subtitle="You're all set. See the details below and keep your QR code ready."
+        title="Registration Confirmed"
+      />
+
+      {/* ── Divider ── */}
+      <div className="h-px bg-linear-to-r from-transparent via-primary/30 to-transparent" />
+
+      {/* ── Event title block ── */}
+      <EventTitleBlock
+        eventStartDate={new Date(data.registeredEvent.eventStartDate)}
+        eventTitle={data.registeredEvent.eventTitle}
+      />
+
+      {/* ── Info rows ── */}
+      <RegistrationDetails infoRows={infoRows} />
+
+      {/* ── QR Code Section ── */}
+      <QRCodeSection
+        affiliation={data.affiliation}
+        email={data.email}
+        qrSteps={qrSteps}
+        registrationIdentifier={registrationIdentifier}
+      />
+
+      {/* ── Actions ── */}
+      <EventActions eventId={data.registeredEvent.eventId} />
+    </section>
   );
 }

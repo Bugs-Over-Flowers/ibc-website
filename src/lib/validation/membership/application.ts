@@ -12,18 +12,20 @@ export const SexEnum = z.enum(["male", "female"]);
 export const MembershipApplicationStep1Schema = z
   .object({
     applicationType: ApplicationTypeEnum,
-    businessMemberId: z.string().optional(),
+    businessMemberIdentifier: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (
       (data.applicationType === "renewal" ||
         data.applicationType === "updating") &&
-      (!data.businessMemberId || data.businessMemberId.trim().length === 0)
+      (!data.businessMemberIdentifier ||
+        data.businessMemberIdentifier.trim().length === 0)
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Member ID is required for renewal and update applications",
-        path: ["businessMemberId"],
+        message:
+          "Business Member Identifier is required for renewal and update applications",
+        path: ["businessMemberIdentifier"],
       });
     }
   });
@@ -123,7 +125,10 @@ export type MembershipApplicationStep2Schema = z.infer<
 export const MembershipApplicationStep3Schema = z.object({
   representatives: z
     .array(ApplicationMemberSchema)
-    .min(1, "At least one representative is required"),
+    .length(
+      2,
+      "Exactly two representatives are required: one principal and one alternate",
+    ),
 });
 
 export type MembershipApplicationStep3Schema = z.infer<
@@ -179,7 +184,10 @@ export const MembershipApplicationSchema = z
       .min(1, "Company logo is required"),
     representatives: z
       .array(ApplicationMemberSchema)
-      .min(1, "At least one representative is required"),
+      .length(
+        2,
+        "Exactly two representatives are required: one principal and one alternate",
+      ),
     paymentMethod: MembershipPaymentMethodEnum,
     paymentProofUrl: z.string().optional(),
     paymentProof: z.any().optional(),

@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react";
+import StandaloneRichTextEditor from "@/components/StandaloneRichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { ApplicationBadgeList } from "./ApplicationBadgeList";
 import { InterviewDetailsCard } from "./InterviewDetailsCard";
 
@@ -31,6 +31,13 @@ export function EditStep({
   onCancel,
   onNext,
 }: EditStepProps) {
+  const plainMessage = customMessage
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;|&#160;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const isMessageEmpty = plainMessage.length === 0;
+
   return (
     <>
       <div className="space-y-6">
@@ -55,14 +62,14 @@ export function EditStep({
           <Label className="font-medium" htmlFor="customMessage">
             Email Message
           </Label>
-          <Textarea
-            className="flex-1 resize-none text-sm"
-            id="customMessage"
-            onChange={(e) => onCustomMessageChange(e.target.value)}
+          <StandaloneRichTextEditor
+            onChange={onCustomMessageChange}
+            placeholder="Write your email message..."
             value={customMessage}
           />
           <p className="text-muted-foreground text-xs">
-            Edit the message as needed or use the default template.
+            Use the toolbar to format text with bold, italic, headings, and
+            lists.
           </p>
         </div>
       </div>
@@ -78,7 +85,7 @@ export function EditStep({
         </Button>
         <Button
           className="active:scale-95 active:opacity-80"
-          disabled={applications.length === 0}
+          disabled={applications.length === 0 || isMessageEmpty}
           onClick={onNext}
           type="button"
         >

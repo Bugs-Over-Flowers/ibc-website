@@ -34,6 +34,7 @@ export const getSuccessPageData = async (
       registeredEvent:Event(
       	eventId,
        	eventTitle,
+        eventHeaderUrl,
         eventStartDate
       )
       `)

@@ -8,6 +8,13 @@ const baseEditEventSchema = z.object({
   eventStartDate: z.iso.datetime({ local: true }),
   eventEndDate: z.iso.datetime({ local: true }),
   venue: z.string().min(1, "Venue is required"),
+  facebookLink: z.preprocess((val) => {
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      return trimmed === "" ? null : trimmed;
+    }
+    return val;
+  }, z.url().nullable().optional()),
 });
 
 // Draft events can edit everything
@@ -16,12 +23,16 @@ export const editDraftEventSchema = baseEditEventSchema.extend({
   eventType: z.enum(["public", "private"]).nullable(),
   eventImage: z.array(z.instanceof(File)).optional(),
   eventHeaderUrl: z.url().optional(),
+  eventPoster: z.array(z.instanceof(File)).optional(),
+  eventPosterUrl: z.string().optional(),
 });
 
 // Published events can only edit limited fields
 export const editPublishedEventSchema = baseEditEventSchema.extend({
   eventImage: z.array(z.instanceof(File)).optional(),
   eventHeaderUrl: z.url().optional(),
+  eventPoster: z.array(z.instanceof(File)).optional(),
+  eventPosterUrl: z.string().optional(),
 });
 
 // Server schemas (after image upload, eventImage becomes URL string)
@@ -30,6 +41,7 @@ export const editDraftEventServerSchema = baseEditEventSchema
     registrationFee: z.number().min(0),
     eventType: z.enum(["public", "private"]).nullable(),
     eventHeaderUrl: z.url().optional(),
+    eventPoster: z.url().optional(),
   })
   .refine((data) => data.eventEndDate >= data.eventStartDate, {
     message: "Event end date must be after start date",
@@ -39,6 +51,7 @@ export const editDraftEventServerSchema = baseEditEventSchema
 export const editPublishedEventServerSchema = baseEditEventSchema
   .extend({
     eventHeaderUrl: z.url().optional(),
+    eventPoster: z.url().optional(),
   })
   .refine((data) => data.eventEndDate >= data.eventStartDate, {
     message: "Event end date must be after start date",

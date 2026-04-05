@@ -1,3 +1,5 @@
+import "server-only";
+
 import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { applyRealtime60sCache } from "@/lib/cache/profiles";
@@ -139,6 +141,10 @@ export const getRegistrationData = async (
     `)
     .eq("registrationId", registrationId)
     .throwOnError();
+
+  if (!participants || participants.length === 0) {
+    throw new Error("Participants not found");
+  }
 
   return {
     ...mappedData,

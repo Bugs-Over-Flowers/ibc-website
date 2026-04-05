@@ -18,14 +18,14 @@ import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
-import { cn } from "@/lib/utils";
+import { cn, titleCase } from "@/lib/utils";
 import { rejectPayment } from "@/server/registration/mutations/rejectPayment";
 import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 
 type OnlinePaymentSectionProps = {
   paymentProofStatus: Enums<"PaymentProofStatus">;
   getStatusColor: (status: string) => string;
-  proofImageURL: string;
+  proofImageURL?: string;
   registrationId: string;
 };
 
@@ -99,7 +99,10 @@ export default function OnlinePaymentSection({
       )}
       <div>
         <Badge
-          className={cn("capitalize", getStatusColor(paymentProofStatus))}
+          className={cn(
+            "capitalize",
+            getStatusColor(optimisticPaymentProofStatus),
+          )}
           variant="outline"
         >
           {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
@@ -113,9 +116,7 @@ export default function OnlinePaymentSection({
         >
           {isVerifyPending
             ? "Verifying..."
-            : optimisticPaymentProofStatus === "accepted"
-              ? "Verified"
-              : "Verify Payment"}
+            : titleCase(optimisticPaymentProofStatus)}
         </Button>
         <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
           {/* Reject Button */}

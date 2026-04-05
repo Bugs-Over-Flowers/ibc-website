@@ -47,13 +47,13 @@ export const useMembershipStep1 = () => {
     onSubmit: async ({ value, meta }) => {
       const refinedValue = MembershipApplicationStep1Schema.parse(value);
 
-      // If proceeding to next step and member ID is required, validate it first
+      // If proceeding to next step and member identifier is required, validate it first
       if (
         meta.nextStep &&
         (refinedValue.applicationType === "renewal" ||
           refinedValue.applicationType === "updating")
       ) {
-        // Check cooldown first - this applies regardless of member ID input
+        // Check cooldown first - this applies regardless of identifier input
         const now = Date.now();
         if (
           memberValidation.cooldownEndTime &&
@@ -77,29 +77,31 @@ export const useMembershipStep1 = () => {
           setMemberValidationCooldown(null);
         }
 
-        // Member ID is required for renewal/updating
-        if (!refinedValue.businessMemberId?.trim()) {
+        // Business Member Identifier is required for renewal/updating
+        if (!refinedValue.businessMemberIdentifier?.trim()) {
           toast.error(
-            "Member ID is required for renewal and update applications",
+            "Business Member Identifier is required for renewal and update applications",
           );
           return;
         }
 
-        // Check if already validated with the current member ID AND same application type
-        const currentMemberId = refinedValue.businessMemberId.trim();
+        // Check if already validated with the current member identifier and same application type
+        const currentMemberIdentifier =
+          refinedValue.businessMemberIdentifier.trim();
         const currentAppType = refinedValue.applicationType as
           | "renewal"
           | "updating";
         const alreadyValidated =
           memberValidation.validationStatus === "valid" &&
-          memberValidation.lastValidatedMemberId === currentMemberId &&
+          memberValidation.lastValidatedMemberIdentifier ===
+            currentMemberIdentifier &&
           memberValidation.lastValidatedApplicationType === currentAppType;
 
         if (!alreadyValidated) {
           try {
             const result = await tryCatch(
               checkMemberExists({
-                identifier: currentMemberId,
+                identifier: currentMemberIdentifier,
                 applicationType: currentAppType,
               }),
             );
@@ -108,10 +110,12 @@ export const useMembershipStep1 = () => {
               setMemberValidationStatus(
                 "invalid",
                 {},
-                currentMemberId,
+                currentMemberIdentifier,
                 currentAppType,
               );
-              toast.error(result.error || "Unable to verify member ID");
+              toast.error(
+                result.error || "Unable to verify Business Member Identifier",
+              );
 
               const newAttemptCount = memberValidation.attemptCount + 1;
               setMemberValidationAttempt(newAttemptCount);
@@ -131,10 +135,12 @@ export const useMembershipStep1 = () => {
               setMemberValidationStatus(
                 "invalid",
                 {},
-                currentMemberId,
+                currentMemberIdentifier,
                 currentAppType,
               );
-              toast.error(data?.message || "Member ID not found");
+              toast.error(
+                data?.message || "Business Member Identifier not found",
+              );
 
               const newAttemptCount = memberValidation.attemptCount + 1;
               setMemberValidationAttempt(newAttemptCount);
@@ -149,36 +155,17 @@ export const useMembershipStep1 = () => {
               return;
             }
 
-            // For renewal: check if member actually needs renewal (must be cancelled)
-            if (
-              refinedValue.applicationType === "renewal" &&
-              data.membershipStatus !== "cancelled"
-            ) {
-              setMemberValidationStatus(
-                "invalid",
-                {
-                  companyName: data.companyName,
-                  membershipStatus: data.membershipStatus,
-                  businessMemberId: data.businessMemberId,
-                },
-                currentMemberId,
-                currentAppType,
-              );
-              toast.error(
-                `This member is currently "${data.membershipStatus}" and does not need renewal. Use "Update Info" instead if you need to update your information.`,
-              );
-              return;
-            }
-
-            // Member validated successfully - store the actual UUID businessMemberId
+            // Member validated successfully - keep identifier for checks and UUID for submission
             setMemberValidationStatus(
               "valid",
               {
                 companyName: data.companyName,
                 membershipStatus: data.membershipStatus,
+                businessMemberIdentifier:
+                  data.businessMemberIdentifier ?? currentMemberIdentifier,
                 businessMemberId: data.businessMemberId,
               },
-              currentMemberId,
+              currentMemberIdentifier,
               currentAppType,
             );
             toast.success(`Member verified: ${data.companyName}`);
@@ -186,10 +173,12 @@ export const useMembershipStep1 = () => {
             setMemberValidationStatus(
               "invalid",
               {},
-              currentMemberId,
+              currentMemberIdentifier,
               currentAppType,
             );
-            toast.error("Unable to validate member ID at this time");
+            toast.error(
+              "Unable to validate Business Member Identifier at this time",
+            );
 
             const newAttemptCount = memberValidation.attemptCount + 1;
             setMemberValidationAttempt(newAttemptCount);

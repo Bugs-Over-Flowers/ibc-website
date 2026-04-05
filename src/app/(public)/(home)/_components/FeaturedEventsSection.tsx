@@ -9,18 +9,18 @@ import {
   formatTime,
   getEventCategory,
 } from "@/lib/events/eventUtils";
-import { getAllEvents } from "@/server/events/queries/getAllEvents";
+import { getPublicEvents } from "@/server/events/queries/getPublicEvents";
 export default async function FeaturedEventsSection() {
-  const events = await getAllEvents((await cookies()).getAll(), {});
+  const events = await getPublicEvents((await cookies()).getAll(), {});
   const now = new Date();
-  const oneWeekFromNow = new Date();
-  oneWeekFromNow.setDate(now.getDate() + 7);
+  const sixMonthsFromNow = new Date();
+  sixMonthsFromNow.setMonth(now.getMonth() + 6);
 
   const upcomingEvents = (events || [])
     .filter((event) => {
       if (!event.eventStartDate) return false;
       const eventDate = new Date(event.eventStartDate);
-      return eventDate >= now && eventDate <= oneWeekFromNow;
+      return eventDate >= now && eventDate <= sixMonthsFromNow;
     })
     .slice(0, 3);
 
@@ -81,12 +81,19 @@ export default async function FeaturedEventsSection() {
               key={event.eventId}
             >
               <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-shadow hover:shadow-lg">
-                <div className="relative aspect-16/10 overflow-hidden">
+                <div
+                  className="relative w-full overflow-hidden rounded-xl"
+                  style={{ aspectRatio: "1 / 1" }}
+                >
                   <Image
                     alt={event.eventTitle || "Event"}
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="object-contain"
                     fill
-                    src={event.eventHeaderUrl || "/placeholder.svg"}
+                    priority
+                    sizes="(max-width: 1600px) 100vw, 1600px"
+                    src={
+                      event.eventPoster || "/images/backgrounds/placeholder.jpg"
+                    }
                   />
                   {getEventCategory(event) === "ongoing" && (
                     <Badge className="absolute top-4 left-4 bg-green-500 text-white hover:bg-green-600">
