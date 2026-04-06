@@ -107,6 +107,16 @@ describe("updateMembershipStatus", () => {
     ).rejects.toThrow("No members selected");
   });
 
+  // ❌ ERROR FLOW: Missing status
+  it("should throw error when status is missing", async () => {
+    await expect(
+      updateMembershipStatus({
+        memberIds: ["bm-001"],
+        status: undefined as never,
+      }),
+    ).rejects.toThrow("Status is required");
+  });
+
   // ❌ ERROR FLOW: Supabase returns error
   it("should throw error when Supabase update fails", async () => {
     mockSelect.mockResolvedValueOnce({
