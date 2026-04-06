@@ -6,17 +6,22 @@ type MembershipStatus = "paid" | "unpaid" | "cancelled";
 
 type RpcErrorLike = { message: string } | null;
 type JanuaryResetRpcResponse = { error: RpcErrorLike };
+type RpcOptions = {
+  head?: boolean;
+  get?: boolean;
+  count?: "exact" | "planned" | "estimated";
+};
 type JanuaryResetRpcClient = {
   rpc: {
     (
       fn: "january_first_reset",
       args?: never,
-      options?: unknown,
+      options?: RpcOptions,
     ): PromiseLike<JanuaryResetRpcResponse>;
     (
       fn: "process_membership_statuses",
       args: { p_reference_time: string },
-      options?: unknown,
+      options?: RpcOptions,
     ): PromiseLike<JanuaryResetRpcResponse>;
   };
 };
