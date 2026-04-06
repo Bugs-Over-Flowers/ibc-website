@@ -219,14 +219,18 @@ export default async function EventDetails({
       </div>
 
       {/* Hero Card */}
-      <Card className="overflow-hidden border-border/60 shadow-md">
+      <Card className="overflow-hidden border-border/60 pt-0 shadow-md">
         {/* Cover Image */}
-        <div className="relative h-56 w-full bg-muted sm:h-72 lg:h-80">
+        <div
+          className="relative w-full overflow-hidden rounded-xl"
+          style={{ aspectRatio: "4 / 1" }}
+        >
           <Image
             alt={event.eventTitle}
-            className="object-cover"
+            className="object-contain"
             fill
             priority
+            sizes="(max-width: 1600px) 100vw, 1600px"
             src={event.eventHeaderUrl || "/images/backgrounds/placeholder.jpg"}
           />
           {/* Gradient overlay */}

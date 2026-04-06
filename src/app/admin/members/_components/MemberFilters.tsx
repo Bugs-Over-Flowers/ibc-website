@@ -68,7 +68,7 @@ export default function MemberFilters({ sectors }: MemberFiltersProps) {
     debounceMs: 400,
   });
 
-  const removeFilter = (key: string) => {
+  const _removeFilter = (key: string) => {
     const params = new URLSearchParams(searchParams);
     params.delete(key);
 

@@ -134,7 +134,7 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     throw new Error(`Failed to link interviews: ${rpcError.message}`);
   }
 
-  if (!rpcResult || !rpcResult[0]?.success) {
+  if (!rpcResult?.[0]?.success) {
     throw new Error(
       `Interview linking failed: ${rpcResult?.[0]?.message || "Unknown error"}`,
     );
