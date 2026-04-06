@@ -45,6 +45,7 @@ BEGIN
 END;
 $function$;
 
+REVOKE ALL ON FUNCTION public.process_membership_statuses(timestamp with time zone) FROM PUBLIC;
 GRANT ALL ON FUNCTION public.process_membership_statuses(timestamp with time zone) TO anon;
 GRANT ALL ON FUNCTION public.process_membership_statuses(timestamp with time zone) TO authenticated;
 GRANT ALL ON FUNCTION public.process_membership_statuses(timestamp with time zone) TO service_role;

@@ -33,7 +33,7 @@ vi.mock("next/cache", () => ({
 
 // Must use dynamic import so mocks are resolved first
 const { updateMembershipStatus } = await import(
-  "@/server/members/actions/updateMembershipStatus"
+  "@/server/members/mutations/manualUpdateMembershipStatus"
 );
 
 describe("updateMembershipStatus", () => {

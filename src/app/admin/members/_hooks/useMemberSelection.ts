@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
-import { updateMembershipStatus } from "@/server/members/actions/updateMembershipStatus";
+import { updateMembershipStatus } from "@/server/members/mutations/manualUpdateMembershipStatus";
 
 type MembershipStatus = Database["public"]["Enums"]["MembershipStatus"];
 
