@@ -5,12 +5,12 @@ import { createActionClient } from "@/lib/supabase/server";
 /**
  * Reset member statuses on January 1st
  * This function should be called by a cron job or scheduled task
- * Resets all active members to unpaid status at the start of the year
+ * Resets all paid members to unpaid status at the start of the year
  */
 export async function resetMemberStatuses() {
   const supabase = await createActionClient();
 
-  // Reset all active members to unpaid status for new year
+  // Reset all paid members to unpaid status for new year
   const { data, error } = await supabase
     .from("BusinessMember")
     .update({ membershipStatus: "unpaid" })
@@ -28,13 +28,13 @@ export async function resetMemberStatuses() {
     success: true,
     message: `Member statuses reset for ${currentYear}`,
     updatedCount,
-    details: `Reset ${updatedCount} members from active to unpaid status`,
+    details: `Reset ${updatedCount} members from paid to unpaid status`,
   };
 }
 
 /**
  * Check and update overdue members
- * Members who haven't paid by a certain deadline should be marked as overdue
+ * Members who haven't paid by a certain deadline should be marked as cancelled
  * Typically called quarterly or monthly to check membership expiry dates
  */
 export async function updateOverdueMembers(deadlineDate: Date) {
@@ -62,6 +62,6 @@ export async function updateOverdueMembers(deadlineDate: Date) {
     message: "Overdue members updated successfully",
     deadline: deadlineDateString,
     updatedCount,
-    details: `Marked ${updatedCount} unpaid members as overdue (expiry date before ${deadlineDateString})`,
+    details: `Marked ${updatedCount} unpaid members as cancelled (expiry date before ${deadlineDateString})`,
   };
 }

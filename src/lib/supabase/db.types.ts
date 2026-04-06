@@ -908,6 +908,10 @@ export type Database = {
         };
       };
       january_first_reset: { Args: never; Returns: undefined };
+      process_membership_statuses: {
+        Args: { p_reference_time?: string };
+        Returns: undefined;
+      };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
       schedule_interviews_batch: {
         Args: { p_interview_data: Json };
