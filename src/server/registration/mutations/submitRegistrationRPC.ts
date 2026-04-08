@@ -1,18 +1,11 @@
 "use server";
 
-import { z } from "zod";
 import { createActionClient } from "@/lib/supabase/server";
-import { ServerRegistrationSchema } from "@/lib/validation/registration/standard";
+import {
+  ServerRegistrationSchema,
+  SubmitRegistrationResponseSchema,
+} from "@/lib/validation/registration/standard";
 import { createRegistrationIdentifier } from "@/lib/validation/utils";
-
-/**
- * Zod schema for validating RPC response at runtime.
- * Ensures type safety for data returned from database.
- */
-const SubmitRegistrationResponseSchema = z.object({
-  registrationId: z.string().uuid(),
-  message: z.string(),
-});
 
 /**
  * Server action to submit event registration to database via RPC call.
