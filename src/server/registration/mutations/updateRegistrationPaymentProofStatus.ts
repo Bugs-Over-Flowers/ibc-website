@@ -5,21 +5,29 @@ import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Enums } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
+import { sendRejectProofOfPayment } from "@/server/emails/mutations/sendRejectProofOfPayment";
 
 const updateRegistrationPaymentProofStatusSchema = z.object({
+  page: z.enum(["check-in", "registration-details"]),
   registrationId: z.string().min(1),
   status: z.enum(["accepted", "rejected"]),
+  toEmail: z.email().trim(),
+  registrantName: z.string().min(1),
+  eventTitle: z.string().min(1),
 });
+
+type UpdateRegistrationPaymentProofStatusInput = z.infer<
+  typeof updateRegistrationPaymentProofStatusSchema
+>;
 
 export type PaymentProofDecision = z.infer<
   typeof updateRegistrationPaymentProofStatusSchema
 >["status"];
 
-export async function updateRegistrationPaymentProofStatus(input: {
-  registrationId: string;
-  status: PaymentProofDecision;
-}) {
-  const { registrationId, status } =
+export async function updateRegistrationPaymentProofStatus(
+  input: UpdateRegistrationPaymentProofStatusInput,
+) {
+  const { page, registrationId, status, toEmail, registrantName, eventTitle } =
     updateRegistrationPaymentProofStatusSchema.parse(input);
 
   const supabase = await createActionClient();
@@ -55,6 +63,15 @@ export async function updateRegistrationPaymentProofStatus(input: {
 
   if (updateError) {
     throw new Error(updateError.message);
+  }
+
+  // send a rejection email if the status is rejected and is not on the check in page
+  if (status === "rejected" && page !== "check-in") {
+    await sendRejectProofOfPayment({
+      toEmail,
+      eventTitle,
+      registrantName,
+    });
   }
 
   updateTag(CACHE_TAGS.registrations.all);

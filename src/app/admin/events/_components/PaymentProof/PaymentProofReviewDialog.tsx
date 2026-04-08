@@ -23,9 +23,15 @@ import PaymentProofViewPanel from "./PaymentProofViewPanel";
 type PaymentProofStatus = Enums<"PaymentProofStatus">;
 
 interface PaymentProofReviewDialogProps {
+  page: "check-in" | "registration-details";
   open: boolean;
   onOpenChange?: (open: boolean) => void;
-  registrationId: string;
+  registrationData: {
+    registrationId: string;
+    eventTitle: string;
+    registrantName: string;
+    registrantEmail: string;
+  };
   initialPaymentProofStatus: PaymentProofStatus;
   trigger?: React.ReactElement;
   onAcceptAction?: (registrationId: string) => Promise<unknown>;
@@ -61,9 +67,10 @@ function getStatusClassName(status: PaymentProofStatus): string {
 }
 
 export default function PaymentProofReviewDialog({
+  page,
   open,
   onOpenChange,
-  registrationId,
+  registrationData,
   initialPaymentProofStatus,
   trigger,
   onAcceptAction,
@@ -96,12 +103,16 @@ export default function PaymentProofReviewDialog({
     isSignedUrlImageError,
     setIsSignedUrlImageError,
     isFetchingSignedUrl,
-  } = usePaymentProofSignedUrlAction({ open, registrationId });
+  } = usePaymentProofSignedUrlAction({
+    open,
+    registrationId: registrationData.registrationId,
+  });
 
   // Accept / Reject actions
   const { acceptProof, rejectProof, isAccepting, isRejecting } =
     usePaymentProofDecisionActions({
-      registrationId,
+      page,
+      registrationData,
       onAcceptAction,
       onRejectAction,
       onStatusChange,
@@ -110,7 +121,7 @@ export default function PaymentProofReviewDialog({
 
   // Replace proof + accept action
   const { isReplacing, handleReplaceAndAccept } = useReplacePaymentProofAction({
-    registrationId,
+    registrationId: registrationData.registrationId,
     onReplaceAction,
     onStatusChange,
     onProofPathChange,

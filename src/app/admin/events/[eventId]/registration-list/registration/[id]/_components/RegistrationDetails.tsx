@@ -26,11 +26,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import type { getRegistrationData } from "@/server/registration/queries/getRegistrationData";
 
+interface RegistrationDetailsProps {
+  data: Awaited<ReturnType<typeof getRegistrationData>>;
+}
+
 export default function RegistrationDetails({
   data,
-}: {
-  data: Awaited<ReturnType<typeof getRegistrationData>>;
-}) {
+}: RegistrationDetailsProps) {
   const router = useRouter();
 
   const getStatusColor = (status: string) => {
@@ -82,7 +84,9 @@ export default function RegistrationDetails({
               registrationId: data.registrationId,
               paymentMethod: data.paymentMethod,
               paymentProofStatus: data.paymentProofStatus,
+              registrantName: `${data.registrant.firstName} ${data.registrant.lastName}`,
             }}
+            eventTitle={data.event.eventTitle}
             isDetailsPage
           />
         </div>

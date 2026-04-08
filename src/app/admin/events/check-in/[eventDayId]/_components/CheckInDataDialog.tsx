@@ -21,9 +21,13 @@ import ProofDialog from "./proofResubmit/ProofDialog";
 
 interface CheckInDataDialogProps {
   eventId: string;
+  eventTitle: string;
 }
 
-export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
+export default function CheckInDataDialog({
+  eventId,
+  eventTitle,
+}: CheckInDataDialogProps) {
   const { eventDayId } = useParams<{ eventDayId: string }>();
 
   // Store selectors
@@ -92,6 +96,9 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
     });
   };
 
+  // get registrant
+  const registrant = scannedData?.participants.find((part) => part.isPrincipal);
+
   return (
     <Dialog
       disablePointerDismissal
@@ -135,12 +142,17 @@ export default function CheckInDataDialog({ eventId }: CheckInDataDialogProps) {
             Close
           </Button>
           <div className="w-full space-x-2 sm:w-auto">
-            {scannedData.paymentMethod === "BPI" && scannedData.proofImage && (
-              <ProofDialog
-                paymentProofStatus={scannedData.paymentProofStatus}
-                registrationId={scannedData.registrationId}
-              />
-            )}
+            {scannedData.paymentMethod === "BPI" &&
+              scannedData.proofImage &&
+              registrant && (
+                <ProofDialog
+                  eventTitle={eventTitle}
+                  paymentProofStatus={scannedData.paymentProofStatus}
+                  registrantEmail={registrant.email}
+                  registrantName={`${registrant.firstName} ${registrant.lastName}`}
+                  registrationId={scannedData.registrationId}
+                />
+              )}
             <Button
               className="w-full sm:w-auto"
               disabled={

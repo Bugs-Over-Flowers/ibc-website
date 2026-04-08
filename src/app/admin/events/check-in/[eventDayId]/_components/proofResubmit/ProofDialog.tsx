@@ -10,11 +10,17 @@ import useAttendanceStore from "../../_hooks/useAttendanceStore";
 interface ProofDialogProps {
   paymentProofStatus: GetCheckInForDateSchema["paymentProofStatus"];
   registrationId: string;
+  eventTitle: string;
+  registrantEmail: string;
+  registrantName: string;
 }
 
 export default function ProofDialog({
   paymentProofStatus,
   registrationId,
+  eventTitle,
+  registrantEmail,
+  registrantName,
 }: ProofDialogProps) {
   const [open, setOpen] = useState(false);
   const scannedData = useAttendanceStore((state) => state.scannedData);
@@ -37,7 +43,13 @@ export default function ProofDialog({
         }
       }}
       open={open}
-      registrationId={registrationId}
+      page="check-in"
+      registrationData={{
+        registrationId,
+        eventTitle,
+        registrantEmail,
+        registrantName,
+      }}
       trigger={<Button>View Payment</Button>}
     />
   );
