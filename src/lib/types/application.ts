@@ -16,6 +16,13 @@ export interface ApplicationWithMembers
   ApplicationMember: ApplicationMember[];
   BusinessMember: {
     identifier: string;
+    businessMemberId: string;
+    businessName: string;
+    websiteURL: string;
+    joinDate: string;
+    membershipStatus: MembershipStatus;
+    membershipExpiryDate: string | null;
+    sectorId: number;
   } | null;
   Sector: {
     sectorId: number;
@@ -25,6 +32,12 @@ export interface ApplicationWithMembers
     proofImageId: string;
     path: string;
   }[];
+  Interview: {
+    interviewId: string;
+    interviewDate: string;
+    interviewVenue: string;
+    status: "scheduled" | "completed" | "cancelled" | "rescheduled" | null;
+  } | null;
   logoImageURL: string | null;
 }
 

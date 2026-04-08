@@ -11,6 +11,7 @@ type CheckMemberOutput = {
   exists: boolean;
   companyName?: string;
   membershipStatus?: string;
+  businessMemberIdentifier?: string;
   businessMemberId?: string;
   message?: string;
 };
@@ -24,7 +25,7 @@ export async function checkMemberExists(
 
   if (!trimmedIdentifier || !identifierRegex.test(trimmedIdentifier)) {
     throw new Error(
-      "Invalid member ID format. Expected format: ibc-mem-xxxxxxxx",
+      "Invalid Business Member Identifier format. Expected format: ibc-mem-xxxxxxxx",
     );
   }
 
@@ -37,7 +38,9 @@ export async function checkMemberExists(
 
   if (error) {
     console.error("[checkMemberExists] Error:", error);
-    throw new Error(`Unable to verify member ID: ${error.message}`);
+    throw new Error(
+      `Unable to verify Business Member Identifier: ${error.message}`,
+    );
   }
 
   return data as CheckMemberOutput;

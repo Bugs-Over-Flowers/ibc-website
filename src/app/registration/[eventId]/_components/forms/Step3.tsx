@@ -1,43 +1,41 @@
-import { Banknote, CreditCard, Users } from "lucide-react";
-import Image from "next/image";
-import { Activity } from "react";
-import IBCBPIQRCode from "@/../public/info/sampleqr.jpeg";
-import FormButtons from "@/components/FormButtons";
+"use client";
+
+import { ArrowLeft, ArrowRight, CreditCard, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-  FieldSet,
-  FieldTitle,
-} from "@/components/ui/field";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Separator } from "@/components/ui/separator";
-import {
-  Dropzone,
-  DropzoneContent,
-  DropzoneEmptyState,
-} from "@/components/ui/shadcn-io/dropzone";
-import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import useRegistrationStore from "@/hooks/registration.store";
+import { cn } from "@/lib/utils";
 import { PaymentMethodEnum } from "@/lib/validation/utils";
 import { useRegistrationStep3 } from "../../_hooks/useRegistrationStep3";
 import RegistrationStepHeader from "./RegistrationStepHeader";
+import {
+  PaymentProofDropzone,
+  RegistrationPaymentSummary,
+} from "./registration-payment";
 
-const BANK_DETAILS = {
-  bankName: "BPI",
-  accountName: "Iloilo Business Club",
-  accountNumber: "000XXXXXXXX",
-} as const;
+const PAYMENT_OPTIONS = [
+  {
+    id: "onsite",
+    value: PaymentMethodEnum.enum.onsite,
+    icon: Wallet,
+    title: "Pay Onsite",
+    description: "Pay via cash or card at the event",
+  },
+  {
+    id: "online",
+    value: PaymentMethodEnum.enum.online,
+    icon: CreditCard,
+    title: "Bank Transfer / Online",
+    description: "Pay now and upload receipt",
+  },
+] as const;
+
+type SubmitEventLike = {
+  preventDefault: () => void;
+  stopPropagation: () => void;
+};
 
 export default function Step3() {
   const form = useRegistrationStep3();
@@ -45,6 +43,14 @@ export default function Step3() {
     (state) => state.setRegistrationData,
   );
   const setStep = useRegistrationStore((state) => state.setStep);
+  const registrationData = useRegistrationStore(
+    (state) => state.registrationData,
+  );
+  const eventDetails = useRegistrationStore((state) => state.eventDetails);
+  const sponsorFeeDeduction = useRegistrationStore(
+    (state) => state.sponsorFeeDeduction,
+  );
+  const sponsoredBy = useRegistrationStore((state) => state.sponsoredBy);
 
   const onBack = async () => {
     setStep(2);
@@ -53,97 +59,68 @@ export default function Step3() {
     });
   };
 
-  const onNext = async (e?: React.SubmitEvent) => {
+  function onNext(e?: SubmitEventLike) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     form.handleSubmit({ nextStep: true });
-  };
+  }
+
+  const participantCount =
+    (registrationData?.step2?.otherParticipants?.length ?? 0) + 1;
 
   return (
-    <form className="space-y-4" onSubmit={onNext}>
-      <RegistrationStepHeader
-        description="Select your preferred payment method."
-        Icon={Banknote}
-        title="Payment Method"
-      />
+    <form onSubmit={onNext}>
+      <Card className="w-full overflow-hidden rounded-2xl border-none bg-transparent shadow-none ring-0">
+        <RegistrationStepHeader
+          className="bg-card/5"
+          description="Select your preferred payment method and upload proof if paying online."
+          Icon={CreditCard}
+          title="Payment Information"
+        />
 
-      <PaymentDetails />
+        <CardContent className="space-y-6 px-0 sm:px-6">
+          <RegistrationPaymentSummary
+            baseFee={eventDetails?.registrationFee || 0}
+            participantCount={participantCount}
+            sponsorDiscountPerParticipant={sponsorFeeDeduction}
+            sponsoredBy={sponsoredBy}
+          />
 
-      <PaymentMethodSelection form={form} />
+          <PaymentMethodSelection form={form} />
 
-      <PaymentProofUpload form={form} />
+          <form.Subscribe selector={(state) => state.values.paymentMethod}>
+            {(paymentMethod) =>
+              paymentMethod === PaymentMethodEnum.enum.online && (
+                <PaymentProofUpload form={form} />
+              )
+            }
+          </form.Subscribe>
 
-      <FormButtons onBack={onBack} onNext={onNext} />
+          <div className="flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <Button
+              className="w-full rounded-xl sm:w-auto"
+              onClick={onBack}
+              size="lg"
+              type="button"
+              variant="ghost"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <Button
+              className="w-full rounded-xl shadow-md sm:w-auto sm:px-8"
+              size="lg"
+              type="submit"
+            >
+              Review Registration
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </form>
-  );
-}
-
-function PaymentDetails() {
-  const registrationData = useRegistrationStore((s) => s.registrationData);
-  const eventDetails = useRegistrationStore((s) => s.eventDetails);
-
-  const baseFee = eventDetails?.registrationFee || 0;
-  const otherParticipantsCount =
-    registrationData?.step2?.otherParticipants?.length || 0;
-  const participantCount = otherParticipantsCount + 1;
-
-  const total = baseFee * participantCount;
-
-  return (
-    <Card className="border-dashed bg-muted/30">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 font-medium text-base">
-          <Banknote className="size-4 text-muted-foreground" />
-          Payment Summary
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-4 text-sm">
-        <div className="grid gap-2">
-          <div className="flex w-full items-center justify-between">
-            <span className="text-muted-foreground">Registration Fee</span>
-            <span>
-              {Intl.NumberFormat("en-US", {
-                currency: "PHP",
-                style: "currency",
-              }).format(baseFee)}
-              <span className="ml-1 text-muted-foreground text-xs">/ head</span>
-            </span>
-          </div>
-          <div className="flex w-full items-center justify-between">
-            <span className="text-muted-foreground">Total Participants</span>
-            <span>{participantCount}</span>
-          </div>
-        </div>
-
-        <Separator className="bg-border/50" />
-
-        <div className="flex w-full items-center justify-between font-semibold text-lg">
-          <span>Total Amount</span>
-          <span className="text-primary">
-            {Intl.NumberFormat("en-US", {
-              currency: "PHP",
-              style: "currency",
-            }).format(total)}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function BankTransferDetails() {
-  return (
-    <>
-      <h4>Bank Transfer Details</h4>
-      <div className="relative h-40 w-40">
-        <Image alt="qr code" className="object-fill" fill src={IBCBPIQRCode} />
-      </div>
-      <div>
-        {BANK_DETAILS.bankName} - {BANK_DETAILS.accountNumber}
-      </div>
-    </>
   );
 }
 
@@ -153,79 +130,73 @@ interface PaymentMethodSelectionProps {
 
 function PaymentMethodSelection({ form }: PaymentMethodSelectionProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <h4>Select a Payment Method</h4>
-        </CardTitle>
-        <CardDescription>
-          Choose a payment method that you prefer. Currently, we only support
-          BPI payments and onsite payments.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form.AppField
-          listeners={{
-            onChange: () => {
-              if (!form.getFieldValue("paymentProof")) {
-                form.resetField("paymentProof");
+    <form.AppField
+      listeners={{
+        onChange: () => {
+          if (form.getFieldValue("paymentProof")) {
+            form.resetField("paymentProof");
+          }
+        },
+      }}
+      name="paymentMethod"
+    >
+      {(field) => (
+        <div className="space-y-4">
+          <Label className="text-base">Payment Method</Label>
+          <RadioGroup
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+            onValueChange={(value) => {
+              const parsedPaymentMethodValue =
+                PaymentMethodEnum.safeParse(value);
+              if (!parsedPaymentMethodValue.success) {
+                return;
               }
-            },
-          }}
-          name="paymentMethod"
-        >
-          {(field) => {
-            return (
-              <FieldSet>
-                <FieldLabel>Payment Method</FieldLabel>
-                <RadioGroup
-                  defaultValue="online"
-                  onValueChange={(value) => {
-                    const parsedPaymentMethodValue =
-                      PaymentMethodEnum.safeParse(value);
-                    if (!parsedPaymentMethodValue.success) {
-                      return;
-                    }
-                    field.handleChange(parsedPaymentMethodValue.data);
-                  }}
-                  value={field.state.value}
-                >
-                  {/* Online Payment */}
-                  <FieldLabel htmlFor="online">
-                    <Field orientation={"horizontal"}>
-                      <FieldContent>
-                        <FieldTitle className="font-semibold">
-                          <CreditCard /> Pay Online (BPI only)
-                        </FieldTitle>
-                        <FieldDescription>
-                          Pay online through BPI and submit a proof of payment
-                        </FieldDescription>
-                        <RadioGroupItem id="online" value={"online"} />
-                      </FieldContent>
-                    </Field>
-                  </FieldLabel>
 
-                  {/* Onsite Payment */}
-                  <FieldLabel htmlFor="onsite">
-                    <Field orientation={"horizontal"}>
-                      <FieldContent>
-                        <FieldTitle className="font-semibold">
-                          <Users /> Pay Onsite (On Event)
-                        </FieldTitle>
-                        <FieldDescription>
-                          Pay in person at the event
-                        </FieldDescription>
-                        <RadioGroupItem id="onsite" value={"onsite"} />
-                      </FieldContent>
-                    </Field>
-                  </FieldLabel>
-                </RadioGroup>
-              </FieldSet>
-            );
-          }}
-        </form.AppField>
-      </CardContent>
-    </Card>
+              field.handleChange(parsedPaymentMethodValue.data);
+            }}
+            value={field.state.value}
+          >
+            {PAYMENT_OPTIONS.map((option) => {
+              const Icon = option.icon;
+
+              return (
+                <div className="flex-1" key={option.id}>
+                  <Label
+                    className={cn(
+                      "flex min-h-30 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
+                      field.state.value === option.value &&
+                        "border-primary bg-primary/5",
+                    )}
+                    htmlFor={option.id}
+                  >
+                    <RadioGroupItem
+                      className="peer sr-only"
+                      id={option.id}
+                      value={option.value}
+                    />
+                    <span
+                      className={cn(
+                        "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/40 text-muted-foreground",
+                        field.state.value === option.value &&
+                          "border-primary/30 bg-primary/10 text-primary",
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span className="font-semibold text-lg">
+                      {option.title}
+                    </span>
+                    <span className="mt-1 text-muted-foreground text-sm">
+                      {option.description}
+                    </span>
+                  </Label>
+                </div>
+              );
+            })}
+          </RadioGroup>
+        </div>
+      )}
+    </form.AppField>
   );
 }
 
@@ -235,80 +206,18 @@ interface PaymentProofUploadProps {
 
 function PaymentProofUpload({ form }: PaymentProofUploadProps) {
   return (
-    <form.Subscribe selector={(state) => state.values.paymentMethod}>
-      {(paymentMethod) => (
-        <Activity mode={paymentMethod === "online" ? "visible" : "hidden"}>
-          <form.AppField name="paymentProof">
-            {(field) => {
-              const localImageUrl =
-                field.state.value && URL.createObjectURL(field.state.value);
+    <form.AppField name="paymentProof">
+      {(field) => {
+        const selectedFile = field.state.value as File | undefined;
 
-              return (
-                <Card>
-                  <CardContent className="flex flex-col items-center space-y-3">
-                    <BankTransferDetails />
-                    <Field data-invalid={!field.state.meta.isValid}>
-                      <FieldLabel htmlFor="upload-proof">
-                        Upload Proof of Payment
-                      </FieldLabel>
-                      <FieldContent className="space-y-3">
-                        <Dropzone
-                          accept={{
-                            "image/png": [".png"],
-                            "image/jpeg": [".jpeg"],
-                            "image/jpg": [".jpg"],
-                          }}
-                          maxFiles={1}
-                          maxSize={1024 * 1024 * 10}
-                          onDrop={(files) => {
-                            if (files[0]) {
-                              field.handleChange(files[0]);
-                            }
-                          }}
-                          src={
-                            field.state.value ? [field.state.value] : undefined
-                          }
-                        >
-                          <DropzoneEmptyState />
-
-                          <DropzoneContent />
-                        </Dropzone>
-
-                        {field.state.value && (
-                          <Button
-                            onClick={() => {
-                              field.handleChange(undefined);
-                            }}
-                            type="button"
-                          >
-                            Remove File
-                          </Button>
-                        )}
-                      </FieldContent>
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
-
-                    {localImageUrl && (
-                      <ImageZoom>
-                        <Image
-                          alt="Image Preview"
-                          className="object-contain"
-                          height={200}
-                          src={localImageUrl}
-                          width={400}
-                        />
-                        <div className="text-center text-neutral-400 text-sm">
-                          click image to zoom
-                        </div>
-                      </ImageZoom>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            }}
-          </form.AppField>
-        </Activity>
-      )}
-    </form.Subscribe>
+        return (
+          <PaymentProofDropzone
+            errorMessages={field.state.meta.errors}
+            onChange={(file) => field.handleChange(file)}
+            value={selectedFile}
+          />
+        );
+      }}
+    </form.AppField>
   );
 }

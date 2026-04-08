@@ -1,10 +1,7 @@
-"use client";
-
 import { motion } from "framer-motion";
 import { ArrowRight, Calendar, ClipboardList, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { getStatusBadge } from "@/components/BadgeEvents";
 import {
   formatDate,
@@ -21,35 +18,16 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, index }: EventCardProps) {
-  const router = useRouter();
   const status = getEventStatus(event.eventStartDate, event.eventEndDate);
-
-  const handleCardClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const target = e.target as HTMLElement;
-    const isInteractiveElement =
-      target.closest("a") ||
-      target.closest("button") ||
-      target.tagName === "A" ||
-      target.tagName === "BUTTON";
-
-    if (!isInteractiveElement) {
-      router.push(`/events/${event.eventId}`);
-    }
+  const normalizeUrl = (value?: string | null) => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-    const target = e.target as HTMLElement;
-    const isInteractiveElement =
-      target.closest("a") ||
-      target.closest("button") ||
-      target.tagName === "A" ||
-      target.tagName === "BUTTON";
-
-    if (!isInteractiveElement && (e.key === "Enter" || e.key === " ")) {
-      e.preventDefault();
-      router.push(`/events/${event.eventId}`);
-    }
-  };
+  const posterUrl = normalizeUrl(event.eventPoster);
+  const headerUrl = normalizeUrl(event.eventHeaderUrl);
+  const displayImage =
+    posterUrl ?? headerUrl ?? "/images/backgrounds/placeholder.jpg";
 
   return (
     <motion.div
@@ -57,21 +35,20 @@ export function EventCard({ event, index }: EventCardProps) {
       initial={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.5, delay: 0.1 * index }}
     >
-      <div className="h-full">
-        <button
-          className="group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-background text-left transition-shadow hover:shadow-lg hover:shadow-primary/10"
-          onClick={handleCardClick}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-          type="button"
-        >
+      <div className="group flex h-full w-full cursor-not-allowed flex-col overflow-hidden rounded-xl border border-border bg-background text-left transition-shadow hover:shadow-lg hover:shadow-primary/10">
+        <Link className="block" href={`/events/${event.eventId}`}>
           <div className="flex-1">
-            <div className="relative aspect-16/10 overflow-hidden">
+            <div
+              className="relative w-full overflow-hidden rounded-xl rounded-b-none"
+              style={{ aspectRatio: "1 / 1" }}
+            >
               <Image
                 alt={event.eventTitle}
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                className="object-contain"
                 fill
-                src={event.eventHeaderUrl || "/placeholder.svg"}
+                priority
+                sizes="(max-width: 1600px) 100vw, 1600px"
+                src={displayImage}
               />
               <div className="absolute top-4 left-4 flex gap-2">
                 {getStatusBadge(status)}
@@ -120,35 +97,33 @@ export function EventCard({ event, index }: EventCardProps) {
               </div>
             </div>
           </div>
+        </Link>
 
-          <div className="flex flex-col gap-3 px-6 pb-6">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-lg text-primary">
-                {event.registrationFee === 0
-                  ? "Free"
-                  : `₱${event.registrationFee.toLocaleString()}`}
-              </span>
-              {status !== "past" && (
-                <Link
-                  className="ml-auto flex w-auto items-center gap-2 rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90 hover:text-white"
-                  href={`/registration/${event.eventId}/info`}
-                  tabIndex={0}
-                >
-                  <ClipboardList className="h-4 w-4" />
-                  Register Now
-                </Link>
-              )}
-            </div>
-            <Link
-              className="group/readmore flex w-full items-center justify-center gap-2 rounded-xl border border-primary/50 bg-card px-4 py-2.5 font-medium text-primary text-sm transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:shadow-md hover:shadow-primary/20"
-              href={`/events/${event.eventId}`}
-              tabIndex={0}
-            >
-              Read More
-              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/readmore:translate-x-1" />
-            </Link>
+        <div className="flex flex-col gap-3 px-6 pb-6">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-lg text-primary">
+              {event.registrationFee === 0
+                ? "Free"
+                : `₱${event.registrationFee.toLocaleString()}`}
+            </span>
+            {status !== "past" && (
+              <Link
+                className="ml-auto flex w-auto items-center gap-2 rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90 hover:text-white"
+                href={`/registration/${event.eventId}/info`}
+              >
+                <ClipboardList className="h-4 w-4" />
+                Register Now
+              </Link>
+            )}
           </div>
-        </button>
+          <Link
+            className="group/readmore flex w-full items-center justify-center gap-2 rounded-xl border border-primary/50 bg-card px-4 py-2.5 font-medium text-primary text-sm transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:shadow-md hover:shadow-primary/20"
+            href={`/events/${event.eventId}`}
+          >
+            Read More
+            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/readmore:translate-x-1" />
+          </Link>
+        </div>
       </div>
     </motion.div>
   );

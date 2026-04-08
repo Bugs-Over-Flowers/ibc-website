@@ -1,11 +1,10 @@
 "use server";
 
-import { Resend } from "resend";
+import { render } from "@react-email/render";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
+import { sendEmail } from "@/lib/email";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import StandardRegistrationConfirmationTemplate from "@/lib/resend/templates/StandardRegistrationConfirmationTemplate";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface SendRegistrationConfirmationEmailProps {
   toEmail: string;
@@ -30,11 +29,8 @@ export const sendRegistrationConfirmationEmail = async ({
 }: SendRegistrationConfirmationEmailProps) => {
   const qrBuffer = await generateQRBuffer(identifier);
 
-  const { error } = await resend.emails.send({
-    to: toEmail,
-    from: process.env.EMAIL_FROM || "IBC <onboarding@resend.dev>",
-    subject: `Registration Confirmation for ${eventDetails.eventTitle}`,
-    react: StandardRegistrationConfirmationTemplate({
+  const html = await render(
+    StandardRegistrationConfirmationTemplate({
       email: toEmail,
       eventDetails,
       self: {
@@ -43,18 +39,20 @@ export const sendRegistrationConfirmationEmail = async ({
       },
       otherParticipants,
     }),
+  );
+
+  await sendEmail({
+    to: toEmail,
+    subject: `Registration Confirmation for ${eventDetails.eventTitle}`,
+    html,
     attachments: [
       {
         filename: `${identifier}.png`,
         content: qrBuffer,
-        contentId: "qrCodeCID",
+        cid: "qrCodeCID",
       },
     ],
   });
-
-  if (error) {
-    throw new Error(`Failed to send email:${error.message}`);
-  }
 
   return "success";
 };

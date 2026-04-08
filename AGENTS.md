@@ -1,408 +1,202 @@
-# Agent Development Guide - IBC Website
+# AGENTS.md - IBC Website Repository Guide
 
-This guide provides essential information for AI coding agents working in this repository.
+This guide is for coding agents working in this repository.
+Prefer repository patterns over generic framework advice.
 
-## Commit Message Convention
+## Repo Snapshot
 
-All commit messages **MUST** follow this format: `<type>: <description>`
+- Next.js 16 App Router with `typedRoutes` and `reactCompiler`
+- Bun + React 19 + TypeScript `strict`
+- Tailwind CSS v4 + shadcn/ui + Base UI
+- Supabase backend
+- Biome, Vitest, Playwright
+- Next cache components enabled in `next.config.ts`
 
-**Commit Types:**
+## Instruction Sources
 
-- `feat:` new feature
-- `fix:` bug fix
-- `docs:` documentation updates
-- `style:` formatting (no code change)
-- `refactor:` code restructure (no feature/bug fix)
-- `test:` add/modify tests
-- `chore:` maintenance tasks
-- `build:` build system changes
-- `perf:` performance improvement
+- Included: `.github/copilot-instructions.md`
+- Checked: `package.json`, `biome.json`, `tsconfig.json`, `vitest.config.ts`, `lefthook.yml`, `next.config.ts`
+- Cursor rules: no `.cursor/rules/` directory and no `.cursorrules` file exist in this worktree
 
-**Examples:**
+## Build, Lint, and Test Commands
 
-- `feat: add user authentication`
-- `fix: resolve infinite loop in data fetching`
-- `docs: update API documentation`
-- `refactor: extract validation logic to utility`
-
-## Tech Stack
-
-- **Framework:** Next.js 15 (App Router) + React 19 + Turbopack
-- **Runtime:** Bun
-- **Language:** TypeScript (strict mode)
-- **Styling:** Tailwind CSS v4 with oklch design tokens
-- **UI:** shadcn/ui (Base-ui primitives)
-- **Forms:** TanStack Form with Zod validation
-- **Backend:** Supabase (PostgreSQL)
-- **Testing:** Vitest (unit, integration, component)
-- **Linting:** Biome (replaces ESLint + Prettier)
-- **Git Hooks:** Lefthook
-
-## Build/Test Commands
+### Core Commands
 
 ```bash
-# Development
-bun run dev                  # Start dev server with Turbopack
-bun run build                # Production build
-bun run start                # Start production server
-
-# Code Quality
-bun run biome:check          # Lint and format check
-bun run biome:write          # Lint and format with auto-fix
-
-# Testing
-bun run test                 # Run all tests
-bun run test:local           # Start Supabase & run tests
-bun run test:local:ui        # Start Supabase & run tests with UI
-bun run test:all             # Run all tests
-bun run test:watch           # Run tests in watch mode
-bun run test:coverage        # Run tests with coverage report
-bun run test -- <file>       # Run single test file
-vitest tests/example.test.ts # Run specific test file directly
-
-# Email Development
-bun run email:dev            # Email template preview server (port 3050)
-
-# Docker
-bun run docker:dev           # Start development container
-bun run docker:devb          # Build & start development container
-bun run docker:prod          # Start production container
-bun run docker:prodb         # Build & start production container
+bun run dev
+bun run build
+bun run start
+bun run biome:check
+bun run biome:write
 ```
 
-## Project Structure
+### Vitest Commands
 
-```
-src/
-├── app/                          # Next.js App Router
-│   ├── (public)/                 # Public routes
-│   ├── admin/                    # Admin dashboard
-│   ├── layout.tsx                # Root layout
-│   └── globals.css               # Tailwind + design tokens
-├── components/
-│   ├── ui/                       # shadcn/ui components
-│   └── form/                     # TanStack Form fields
-├── hooks/                        # Global React hooks
-├── lib/                          # Utilities and configs
-│   ├── supabase/                 # Supabase clients
-│   ├── validation/               # Zod schemas
-│   └── server/                   # Server utilities (tryCatch, types)
-└── server/                       # Business logic
-    └── [feature]/
-        ├── mutations/            # POST/PUT/DELETE actions
-        └── queries/              # GET queries
+```bash
+bun run test
+bun run test:watch
+bun run test:coverage
+bun run test:ui
+bun run test:unit
+bun run test:integration
+bun run test:component
+bun run test:local
+bun run test:local:ui
 ```
 
-### Component Placement Rules
+### Running a Single Test
 
-- **Route-specific components:** `app/[route]/_components/`
-- **Route-specific forms:** `app/[route]/_components/forms/`
-- **Route-specific hooks:** `app/[route]/_hooks/`
-- **Global/reusable components:** `src/components/`
+Preferred patterns:
 
-### Server Logic Placement Rules
-
-- **Feature business logic:** `src/server/[feature]/`
-- **Mutations (POST/PUT/DELETE):** `src/server/[feature]/mutations/<filename>.ts`
-- **Queries (GET):** `src/server/[feature]/queries/<filename>.ts`
-- **Shared server utils:** `src/server/utils.ts`
-
-## Code Style Guidelines
-
-### Imports
-
-- **ALWAYS** use `@/` path alias (maps to `./src/`) - never use relative paths
-- Organize imports: external packages → internal modules → components → types
-- Biome auto-sorts imports on save
-
-```typescript
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAppForm } from "@/hooks/_formHooks";
-import { Button } from "@/components/ui/button";
-import type { User } from "@/lib/types";
+```bash
+bun run test -- __tests__/unit/path/to/file.test.ts
+vitest run __tests__/integration/path/to/file.test.ts
+vitest run __tests__/component/vitest/path/to/file.test.tsx
+vitest run -t "specific test name"
 ```
 
-### Formatting
+Important notes:
 
-- **Indentation:** 2 spaces (enforced by Biome)
-- **Quotes:** Double quotes for strings
-- **Semicolons:** Required
-- **Line length:** No strict limit (Biome handles wrapping)
-- **Tailwind classes:** Auto-sorted by Biome's `useSortedClasses` rule
-- Use `cn()` from `@/lib/utils` for conditional classes
-- Use `cva()` from `class-variance-authority` for component variants
+- `bun run test -- <file>` forwards the file path to Vitest
+- Vitest loads `.env.testing`
+- Test environment is `happy-dom`
+- Vitest only includes `__tests__/unit`, `__tests__/integration`, and `__tests__/component/vitest`
+- `__tests__/e2e` is excluded from Vitest
 
-### TypeScript
+### Playwright
 
-- **Strict mode enabled** - all type errors must be resolved
-- Use `type` for object shapes, `interface` for extensible contracts
-- Prefer explicit return types on exported functions
-- Use generated types from `@/lib/supabase/db.types.ts` for database tables
-- Server functions use `ServerFunctionResult<T, E>` from `@/lib/server/types`
-
-```typescript
-// Good
-export async function getUser(id: string): Promise<User> {
-  // ...
-}
-
-// For server actions
-type CreateUserInput = z.infer<typeof createUserSchema>;
-export async function createUser(input: CreateUserInput): Promise<{ id: string }> {
-  // ...
-}
+```bash
+bun run test:e2e
+bun run test:e2e:ui
+bun run test:e2e:headed
+bun run test:e2e:debug
+bun run test:e2e:report
+bun run test:e2e:local
+playwright test __tests__/e2e/path/to/spec.ts
 ```
 
-### Naming Conventions
+### Other Commands
 
-- **Files:** camelCase for utilities, PascalCase for components
-- **Components:** PascalCase (e.g., `UserProfile.tsx`)
-- **Hooks:** camelCase with `use` prefix (e.g., `useUserData.ts`)
-- **Server actions:** camelCase verbs (e.g., `createUser`, `updateProfile`)
-- **Types/Interfaces:** PascalCase (e.g., `User`, `CreateUserInput`)
-- **Constants:** UPPER_SNAKE_CASE (e.g., `MAX_FILE_SIZE`)
-
-### Components
-
-- **Server Components by default** - only add `"use client"` when needed
-- Client-side requirements: hooks, event handlers, browser APIs, context
-- Use React 19 patterns: `use` hook for promises in client components
-- shadcn/ui components use `data-slot` attributes
-
-```tsx
-// Server Component (default)
-export default async function UsersPage() {
-  const users = await getUsers();
-  return <UserList users={users} />;
-}
-
-// Client Component
-"use client";
-export function UserForm() {
-  const [name, setName] = useState("");
-  // ...
-}
+```bash
+bun run email:dev
+bun run db:gen:types
+bun run gen:types
+bun run docker:dev
+bun run docker:devb
+bun run docker:prod
+bun run docker:prodb
 ```
-
-## Server Functions & Error Handling
-
-### Server Actions (Mutations)
-
-```typescript
-"use server";
-
-import { revalidatePath } from "next/cache";
-import { createActionClient } from "@/lib/supabase/server";
-import { z } from "zod";
-
-const schema = z.object({
-  name: z.string().min(1),
-  email: z.string().email(),
-});
-
-export async function createUser(input: z.infer<typeof schema>) {
-  const parsed = schema.parse(input); // Throws on validation failure
-  
-  const supabase = await createActionClient(); // Can set cookies
-  const { data, error } = await supabase
-    .from("users")
-    .insert(parsed)
-    .select("id")
-    .single();
-  
-  if (error) throw new Error(error.message);
-  
-  revalidatePath("/users");
-  return data;
-}
-```
-
-### Server Queries
-
-```typescript
-import "server-only";
-
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-
-export async function getUsers() {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll()); // Read-only
-  
-  const { data, error } = await supabase.from("users").select("*");
-  if (error) throw new Error(error.message);
-  
-  return data;
-}
-```
-
-### Client-Side Error Handling
-
-**Use `tryCatch` utility** to convert throwing functions/promises into safe results:
-
-```typescript
-import tryCatch from "@/lib/server/tryCatch";
-import { createUser } from "@/server/users/mutations";
-
-// In forms
-const { error, data, success } = await tryCatch(createUser(input));
-if (!success) {
-  form.setErrorMap({ onSubmit: error });
-  return;
-}
-
-// With useAction hook (for buttons, not forms)
-const { execute, isPending } = useAction(tryCatch(deleteUser), {
-  onSuccess: () => router.push("/users"),
-  onError: (err) => toast.error(err),
-});
-```
-
-## Forms (TanStack Form)
-
-**MUST use `useAppForm` from `@/hooks/_formHooks`** with registered field components.
-
-```tsx
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useAppForm } from "@/hooks/_formHooks";
-import tryCatch from "@/lib/server/tryCatch";
-import { createUser } from "@/server/users/mutations";
-import { z } from "zod";
-
-const schema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-});
-
-export function UserForm() {
-  const router = useRouter();
-  
-  const form = useAppForm({
-    defaultValues: { name: "", email: "" },
-    validation: { onSubmit: schema },
-    onSubmit: async ({ value }) => {
-      const { error, data } = await tryCatch(createUser(value));
-      if (error) {
-        form.setErrorMap({ onSubmit: error });
-        return;
-      }
-      router.push(`/users/${data.id}`);
-    },
-  });
-  
-  return (
-    <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}>
-      <form.AppField name="name">
-        {(field) => <field.TextField label="Name" />}
-      </form.AppField>
-      
-      <form.AppField name="email">
-        {(field) => <field.TextField label="Email" type="email" />}
-      </form.AppField>
-      
-      <form.AppForm>
-        <form.SubmitButton label="Create" isSubmittingLabel="Creating..." />
-      </form.AppForm>
-    </form>
-  );
-}
-```
-
-## Supabase Client Usage
-
-### Three Client Types
-
-1. **`createClient(requestCookies)`** - For cached queries/Server Components (read-only)
-2. **`createActionClient()`** - For Server Actions (can set cookies)
-3. **`createClient()`** (from `client.ts`) - For Client Components
-
-**Never mix client types incorrectly** - see `.cursor/rules/supabase-rules.mdc` for details.
-
-### Caching Strategy (Next.js Cache Components)
-
-**Cache Profiles (in `next.config.ts`):**
-- `publicHours` - Public-facing data (1 hour revalidation)
-- `admin5m` - Admin dashboard data (5 minute revalidation)
-- `realtime60s` - Near real-time data (60 second revalidation)
-
-**Centralized Tags:**
-All cache tags are defined in `src/lib/cache/tags.ts`. Use these constants; never hardcode tag strings.
-
-**Cached Queries (`"use cache"`):**
-- Use `createClient(requestCookies)` with cookies passed from caller
-- Must specify both: `cacheLife("profileName")` and `cacheTag(CACHE_TAGS.*)`
-- Example:
-  ```typescript
-  "use cache";
-  cacheLife("admin5m");
-  cacheTag(CACHE_TAGS.members.all);
-  cacheTag(CACHE_TAGS.members.admin);
-  ```
-
-**Invalidation Strategy - Choose ONE Primary Approach:**
-
-1. **Tag-Level Invalidation** (preferred for shared data)
-   - Use when: Data is reused across multiple routes/components
-   - Use when: You have tagged cached queries that need updating
-   - Implementation: Call `updateTag(CACHE_TAGS.*)` after mutation
-   - Allows partial invalidation - only invalidate affected tags
-
-2. **Path-Level Invalidation** (use sparingly)
-   - Use when: Freshness is strictly route/segment-driven
-   - Use when: The affected view is not backed by tagged caches
-   - Implementation: Call `revalidatePath("/path")` after mutation
-   - Use only when route-level refresh is explicitly required
-
-**Rules:**
-- Choose one primary strategy per mutation (tag-level OR path-level)
-- Only combine both when intentionally needed for different purposes
-- NO param tags: Don't create dynamic tags like `members:${id}`; function arguments are automatically serialized into cache keys
-- Use `revalidateTag(tag, "max")` only for public flows with eventual consistency
-
-**What to Cache:**
-- ✅ Low-cardinality, shared, repeatedly-read queries (lists, stats, public sections)
-- ❌ High-cardinality filter/cursor/search queries (unless proven reusable)
-- ❌ Time-dependent queries using `new Date()`, `Date.now()` (unless intentional staleness)
-
-## Validation
-
-**MUST use Zod schemas** for all forms. Import reusable schemas from `@/lib/validation/utils`:
-
-- `phoneSchema` - Philippine phone format
-- `emailSchema` - Standard email validation
 
 ## Pre-commit Hooks
 
-Lefthook runs automatically on commit:
-- Biome check with auto-fix on staged files
-- Package audit for security vulnerabilities
+Lefthook runs:
 
-To bypass (not recommended): `git commit --no-verify`
+- `bun x biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}`
+- `bun audit`
 
-## Common Pitfalls
+Expect staged files to be auto-formatted.
 
-1. **Don't use relative imports** when `@/` alias is available
-2. **Don't add `"use client"`** unless component needs client-side features
-3. **Don't use `createActionClient()`** in cached queries
-4. **Don't use `createClient(requestCookies)`** for mutations
-5. **Always wrap server actions with `tryCatch`** on the client side
-6. **Always validate with Zod** before processing user input
-7. **Don't forget cache invalidation after mutations** (`updateTag(...)` first, `revalidatePath(...)` only when needed)
-8. **Don't create param tags** like `members:${id}` - function arguments are automatically serialized into cache keys
-9. **Don't mix invalidation strategies** without intent - choose tag-level OR path-level as primary, combine only when needed
+## Project Layout
 
-## Additional Resources
+- `src/app`: routes, route-local UI, route-local hooks
+- `src/components`: reusable UI
+- `src/components/form`: registered form fields
+- `src/hooks`: shared hooks like `useAction` and `useAppForm`
+- `src/lib`: utilities, validation, cache tags, Supabase clients, types
+- `src/server`: feature server logic using `queries/`, `mutations/`, and some older `actions/`
 
-- Cursor Rules: `.cursor/rules/` (standard, form, server, supabase)
-- Copilot Instructions: `.github/copilot-instructions.md`
-- shadcn/ui docs: https://ui.shadcn.com/docs/components
-- TanStack Form docs: https://tanstack.com/form/latest
-- Supabase docs: https://supabase.com/docs
+## Component Extraction Guidelines
 
-## Editing Rules
+- Keep route-local step files thin: orchestration, layout, and step-specific wiring only.
+- Extract helper components when logic is reused across steps or when a file mixes layout, validation, upload, preview, and repeated row/card markup.
+- Allow small, one-off helpers inline when they are short and tightly coupled to the parent file.
+- Prefer shared route-local components under `src/app/**/_components` for step-specific UI that is reused within the route.
+- Prefer `src/components` for app-wide reusable primitives and `src/components/form` for registered field components.
+- If a route-local file becomes scroll-heavy or reaches multiple named helper components, split it before adding more logic.
+- Preserve shadcn-generated primitives under `src/components/ui`; only wrap or compose them in feature components.
 
--  Do not modify `AGENTS.md` without explicit instructions.
--  Do not modify `./github/DOD.md` without explicit instructions.
+## Imports and Module Boundaries
+
+- Always use the `@/` alias for project imports when possible
+- Prefer `import type` for type-only imports
+- Let Biome organize imports automatically
+- Query modules should use `import "server-only"` when they are server-only
+- Do not import server code into client components
+- Server Components are the default; add `"use client"` only when hooks, browser APIs, handlers, or client context are required
+
+## Formatting and Styling
+
+- Indentation: 2 spaces
+- Strings: double quotes
+- Semicolons: required
+- Biome is the source of truth for formatting and linting
+- Tailwind classes are auto-sorted by Biome's `useSortedClasses` rule
+- Use `cn()` from `@/lib/utils` for conditional classes
+- Biome ignores generated UI under `src/components/ui`; preserve existing generated patterns there
+
+## TypeScript Guidelines
+
+- Keep types strict; avoid `any` unless there is no practical alternative
+- Prefer `type` for object shapes and unions; use `interface` when extension or merging is intended
+- Prefer explicit return types on exported functions
+- Infer input types from Zod schemas with `z.infer<typeof Schema>`
+- Reuse generated DB types from `@/lib/supabase/db.types.ts`
+
+## Naming Conventions
+
+- Components: PascalCase
+- Hooks: camelCase with `use` prefix
+- Utility files: camelCase
+- Shared constants: UPPER_SNAKE_CASE
+- Zod schemas: descriptive PascalCase or camelCase names
+- Server functions: verb-led camelCase like `getMembers`, `createEvent`, `verifyPayment`
+
+## React, Forms, and Validation
+
+- Prefer Server Components first
+- Keep route-specific UI in `src/app/**/_components`
+- Keep route-specific hooks in `src/app/**/_hooks`
+- Use `useAppForm` from `@/hooks/_formHooks`; do not hand-roll inconsistent TanStack Form setups
+- Use registered field components from `src/components/form`
+- New form fields must be added in `src/components/form` and registered in `@/hooks/_formHooks`
+- Use Zod for both form validation and server-side input validation
+- Preserve `data-invalid` and `aria-invalid` behavior on custom fields
+- For repeated route form logic (upload validation, keyboard guards, summary rows, section headers), extract shared helpers instead of duplicating the same block in multiple step files
+
+## Error Handling and Actions
+
+- Client code should usually wrap async server calls with `tryCatch` from `@/lib/server/tryCatch`
+- `tryCatch(promise)` returns `{ success, data, error }`
+- `tryCatch(fn)` adapts throwing async functions for `useAction` and `useOptimisticAction`
+- Use `useAction` for button-triggered mutations
+- Form submission errors should flow through TanStack Form error handling, not ad-hoc alerts
+- Server mutations may throw; callers are expected to handle failures through `tryCatch`
+
+## Supabase and Caching Rules
+
+- Use `createClient(requestCookies)` from `@/lib/supabase/server` for server reads and cached queries
+- Use `createActionClient()` from `@/lib/supabase/server` for server mutations that may mutate cookies
+- Use `createClient()` from `@/lib/supabase/client` for client-side usage
+- Never use `createActionClient()` inside cached queries
+- Never use the read-only server client for mutations
+- Never import server Supabase clients into client components
+- Cached queries should use `"use cache"` only when reuse is likely
+- Use cache profiles from `next.config.ts`: `publicHours`, `admin5m`, `realtime60s`
+- Use centralized tags from `@/lib/cache/tags`; do not hardcode tag strings
+- Cached queries should declare both `cacheLife()` and `cacheTag()`
+- Prefer `updateTag(...)` for shared-data invalidation; use `revalidatePath(...)` only when route refresh is intentionally the primary strategy
+
+## Testing Expectations for Agents
+
+- For targeted changes, run the smallest relevant check first, usually a single Vitest file
+- For style-only changes, `bun run biome:check` is usually enough
+- For UI or routing changes, consider `bun run build`
+- For broader data-flow changes, run the nearest unit or integration tests plus lint
+
+## Commit Guidance and Guardrails
+
+- Commit messages must follow `<type>: <description>`
+- Allowed prefixes: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `build`, `perf`
+- Do not modify this `AGENTS.md` or `.github/DOD.md` unless explicitly asked
+- When docs and code disagree, trust the actual codebase and configs first
+- Prefer extending existing feature patterns instead of introducing a new architecture style

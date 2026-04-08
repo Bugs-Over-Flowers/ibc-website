@@ -1,12 +1,12 @@
 import { Calendar } from "lucide-react";
 import { cookies } from "next/headers";
 import tryCatch from "@/lib/server/tryCatch";
-import { getAllEvents } from "@/server/events/queries/getAllEvents";
+import { getPublicEvents } from "@/server/events/queries/getPublicEvents";
 import { EventsList } from "./EventsList";
 
 export default async function EventsListSection() {
   const { error, data: events } = await tryCatch(
-    getAllEvents((await cookies()).getAll(), {}),
+    getPublicEvents((await cookies()).getAll(), {}),
   );
 
   if (error || !events || events.length === 0) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useState, useTransition } from "react";
+import { useCallback, useOptimistic, useState, useTransition } from "react";
 import type { ServerFunction } from "@/lib/server/types";
 
 interface UseActionOptions<TOutput, TError = Error | string> {
@@ -87,34 +87,39 @@ export function useAction<
   const [data, setData] = useState<TOutput | null>(null);
   const [isPending, setIsPending] = useState(false);
 
-  async function execute(...args: TInput) {
-    setError(null);
+  const { persist = false, onSuccess, onError } = options;
 
-    if (!options.persist) {
-      setData(null);
-    }
+  const execute = useCallback(
+    async (...args: TInput) => {
+      setError(null);
 
-    setIsPending(true);
+      if (!persist) {
+        setData(null);
+      }
 
-    const res = await action(...args);
+      setIsPending(true);
 
-    if (!res.success) {
-      setError(res.error);
-      options.onError?.(res.error);
+      const res = await action(...args);
+
+      if (!res.success) {
+        setError(res.error);
+        onError?.(res.error);
+        setIsPending(false);
+        return res;
+      }
+
+      setData(res.data);
+      onSuccess?.(res.data);
       setIsPending(false);
       return res;
-    }
+    },
+    [action, onError, onSuccess, persist],
+  );
 
-    setData(res.data);
-    options.onSuccess?.(res.data);
-    setIsPending(false);
-    return res;
-  }
-
-  function reset() {
+  const reset = useCallback(() => {
     setError(null);
     setData(null);
-  }
+  }, []);
 
   return {
     execute,
@@ -181,15 +186,22 @@ export function useOptimisticAction<
       setOptimistic(options.optimisticUpdate(prevSnapshot, ...args));
     });
 
-    const res = await action(...args);
+    let res!: Awaited<ReturnType<typeof action>>;
+    await new Promise<void>((resolve) => {
+      startTransition(async () => {
+        res = await action(...args);
+        resolve();
+      });
+    });
 
     if (!res.success) {
-      setError(res.error);
-      options.onError?.(res.error);
+      const { error } = res;
+      setError(error);
+      options.onError?.(error);
 
       startTransition(() => {
         const rolledBack = options.rollback
-          ? options.rollback(prevSnapshot, optimistic, res.error, ...args)
+          ? options.rollback(prevSnapshot, optimistic, error, ...args)
           : prevSnapshot;
 
         setOptimistic(rolledBack);
@@ -198,14 +210,15 @@ export function useOptimisticAction<
       return res;
     }
 
-    setData(res.data);
-    options.onSuccess?.(res.data);
+    const { data } = res;
+    setData(data);
+    options.onSuccess?.(data);
 
     const commit = options.commit;
 
     if (typeof commit === "function") {
       startTransition(() => {
-        setOptimistic(commit(optimistic, res.data, ...args));
+        setOptimistic(commit(optimistic, data, ...args));
       });
     }
 

@@ -1,12 +1,12 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
-import type { Route } from "next";
+import { Building2, CalendarDays, ExternalLink, Eye } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
@@ -14,134 +14,164 @@ interface MembersTableRowProps {
   member: Awaited<ReturnType<typeof getMembers>>[number];
   isSelected: boolean;
   onSelectedChange: (selected: boolean) => void;
+  showCheckbox?: boolean;
 }
 
 export function MembersTableRow({
   member,
   isSelected,
   onSelectedChange,
+  showCheckbox = false,
 }: MembersTableRowProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = member.logoImageURL && !imageError;
   const router = useRouter();
-  const lastTapRef = useRef<number>(0);
 
-  const handleDoubleTap = () => {
-    const now = Date.now();
-    const timeSinceLastTap = now - lastTapRef.current;
+  const joinedDate = new Date(member.joinDate);
+  const formattedJoinDate = Number.isNaN(joinedDate.getTime())
+    ? "N/A"
+    : joinedDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
 
-    if (timeSinceLastTap < 300) {
-      router.push(`/admin/members/${member.businessMemberId}` as Route);
+  const handleCardClick = () => {
+    if (showCheckbox) {
+      onSelectedChange(!isSelected);
+      return;
     }
-
-    lastTapRef.current = now;
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      router.push(`/admin/members/${member.businessMemberId}` as Route);
-    }
+    router.push(`/admin/members/${member.businessMemberId}`);
   };
 
   return (
-    <div className="flex w-full flex-col gap-3 overflow-hidden rounded-lg border bg-background p-3 shadow-sm md:flex-row md:items-stretch">
-      {/* Clickable area */}
-      <button
-        className="flex w-full cursor-pointer flex-col gap-3 overflow-hidden text-left md:w-72 md:shrink-0"
-        onClick={handleDoubleTap}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        type="button"
+    <article
+      className={cn(
+        "group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground",
+        "transition-all duration-300 ease-out",
+        "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-xl",
+        showCheckbox && isSelected && "border-primary/50 bg-primary/5",
+      )}
+    >
+      {/* Image — strictly 1:1 */}
+      <div
+        className="relative w-full overflow-hidden bg-muted/20"
+        style={{ aspectRatio: "1 / 1" }}
       >
-        {/* Image with status badge and checkbox */}
-        <div className="relative aspect-square h-72 w-full shrink-0">
-          {/* Checkbox - top left corner */}
-          <div className="absolute top-2 left-2 z-10 rounded-sm border border-foreground/30 bg-card p-1 shadow-foreground shadow-lg ring-2 ring-foreground/10">
+        {/* Gradient scrim */}
+        <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-b from-black/35 via-transparent to-transparent" />
+
+        {showImage ? (
+          <Image
+            alt={member.businessName}
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            fill
+            onError={() => setImageError(true)}
+            priority={false}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            src={member.logoImageURL as string}
+            unoptimized
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-blue-500 to-indigo-700 font-extrabold text-5xl text-white/90 dark:from-blue-600 dark:to-indigo-900">
+            {member.businessName.charAt(0).toUpperCase() || "?"}
+          </div>
+        )}
+
+        {/* Checkbox — top left */}
+        {showCheckbox && (
+          <div className="absolute top-3 left-3 z-20 rounded-md border border-foreground/20 bg-card/90 p-1 shadow-md backdrop-blur-sm">
             <Checkbox
               checked={isSelected}
-              className="size-5"
+              className="size-4"
               onCheckedChange={(checked) => onSelectedChange(checked === true)}
               onClick={(e) => e.stopPropagation()}
             />
           </div>
-          {showImage ? (
-            <Image
-              alt={member.businessName}
-              className="h-full w-full rounded object-cover"
-              height={160}
-              onError={() => setImageError(true)}
-              priority={false}
-              sizes="(max-width: 768px) 100vw, 160px"
-              src={member.logoImageURL as string}
-              unoptimized
-              width={160}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center rounded bg-muted font-semibold text-3xl text-muted-foreground">
-              {member.businessName.charAt(0).toUpperCase()}
-            </div>
-          )}
-          {/* Status badge - top right corner */}
-          <div className="absolute top-2 right-2">
-            <Badge
-              className={cn(
-                "border border-background text-white capitalize",
-                member.membershipStatus === "cancelled" && "bg-status-red",
-                member.membershipStatus === "paid" && "bg-status-green",
-                member.membershipStatus === "unpaid" && "bg-status-orange",
-              )}
-              variant="default"
-            >
-              {member.membershipStatus}
-            </Badge>
-          </div>
+        )}
+
+        {/* Status badge — top right */}
+        <div className="absolute top-3 right-3 z-20">
+          <Badge
+            className={cn(
+              "border border-white/20 font-semibold text-[10px] text-white capitalize tracking-widest shadow-sm backdrop-blur-md",
+              member.membershipStatus === "cancelled" && "bg-status-red/90",
+              member.membershipStatus === "paid" && "bg-status-green/90",
+              member.membershipStatus === "unpaid" && "bg-status-orange/90",
+            )}
+            variant="default"
+          >
+            {member.membershipStatus}
+          </Badge>
         </div>
 
-        {/* Middle content */}
-        <div className="relative flex w-full flex-1 flex-col gap-2 md:py-4">
-          {/* Company name with website icon on right */}
-          <div className="flex items-start justify-between gap-2 pt-4 md:pt-0">
-            <h3 className="line-clamp-1 flex-1 font-semibold text-lg md:text-2xl">
-              {member.businessName}
-            </h3>
+        {/* Invisible click overlay */}
+        <button
+          aria-label={`Open ${member.businessName} member details`}
+          className="absolute inset-0 z-10"
+          onClick={handleCardClick}
+          type="button"
+        />
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        {/* Name row */}
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-1 flex-1 font-semibold text-[14.5px] text-foreground leading-snug tracking-tight">
+            {member.businessName}
+          </h3>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              className="rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-muted/40 hover:text-primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/admin/members/${member.businessMemberId}`);
+              }}
+              title="View member details"
+              type="button"
+            >
+              <Eye className="size-4" />
+            </button>
+
             {member.websiteURL && (
               <a
-                className="inline-flex shrink-0 text-blue-600 transition-colors hover:text-blue-700"
+                className="rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-muted/40 hover:text-primary"
                 href={member.websiteURL}
                 onClick={(e) => e.stopPropagation()}
                 rel="noopener noreferrer"
                 target="_blank"
                 title={member.websiteURL}
               >
-                <ExternalLink className="mt-1 size-4" />
+                <ExternalLink className="size-4" />
               </a>
             )}
           </div>
+        </div>
 
-          {/* Sector with fixed 2 line height */}
-          <p className="line-clamp-2 h-[2.8em] text-muted-foreground text-sm opacity-60">
-            {member.Sector?.sectorName || "—"}
-          </p>
-          <div className="h-px w-full bg-border" />
+        {/* Sector */}
+        <p className="line-clamp-2 min-h-[2.5em] text-[12.5px] text-muted-foreground/70 leading-snug">
+          {member.Sector?.sectorName || "—"}
+        </p>
 
-          {/* Identifier and date at bottom */}
-          <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-            <p className="text-muted-foreground text-xs opacity-60">
-              {member.identifier}
-            </p>
-            <p className="text-muted-foreground text-xs opacity-60">
-              {new Date(member.joinDate).toLocaleDateString()}
-            </p>
+        <Separator className="opacity-50" />
+
+        {/* Meta */}
+        <div className="grid gap-1.5 text-[12px] text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-3.5 w-3.5 shrink-0 text-primary/50" />
+            <span className="truncate font-mono">
+              {member.identifier || member.businessMemberId}
+            </span>
           </div>
 
-          <div className="flex justify-center pt-2">
-            <p className="text-muted-foreground text-xs italic opacity-50">
-              -- Double click to view details --
-            </p>
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary/50" />
+            <span>Joined {formattedJoinDate}</span>
           </div>
         </div>
-      </button>
-    </div>
+      </div>
+    </article>
   );
 }

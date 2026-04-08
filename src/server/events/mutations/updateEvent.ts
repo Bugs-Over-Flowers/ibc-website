@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { ServerFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
@@ -49,6 +50,7 @@ export const updateEvent: ServerFunction<
     title: data.eventTitle,
     description: data.description,
     headerUrl: data.eventHeaderUrl,
+    posterUrl: data.eventPoster,
     startDate: data.eventStartDate,
     endDate: data.eventEndDate,
     venue: data.venue,
@@ -63,6 +65,7 @@ export const updateEvent: ServerFunction<
       p_title: data.eventTitle,
       p_description: data.description,
       p_event_header_url: data.eventHeaderUrl,
+      p_event_poster: data.eventPoster,
       p_start_date: data.eventStartDate,
       p_end_date: data.eventEndDate,
       p_venue: data.venue,
@@ -72,6 +75,7 @@ export const updateEvent: ServerFunction<
       p_registration_fee: isDraft
         ? (data as EditDraftEventInput).registrationFee
         : undefined,
+      p_facebook_link: data.facebookLink ?? undefined,
     },
   );
 
@@ -103,12 +107,9 @@ export const updateEvent: ServerFunction<
     };
   }
 
-  // updateTag(CACHE_TAGS.events.all);
-  // updateTag(CACHE_TAGS.events.admin);
-  // updateTag(CACHE_TAGS.events.public);
-
-  revalidatePath("/admin/events");
-  revalidatePath(`/admin/events/${data.eventId}`);
+  updateTag(CACHE_TAGS.events.all);
+  updateTag(CACHE_TAGS.events.admin);
+  updateTag(CACHE_TAGS.events.public);
 
   return {
     success: true,

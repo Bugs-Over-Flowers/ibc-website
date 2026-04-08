@@ -41,7 +41,7 @@ export function SidebarItem({
           "h-12 w-full justify-start transition-colors transition-padding",
           isDestructive
             ? "text-red-600 hover:bg-red-50 hover:text-red-700"
-            : "hover:bg-gray-100",
+            : "text-muted-foreground hover:bg-primary/10 hover:text-primary",
           isActive &&
             !isDestructive &&
             "bg-primary/10 text-primary hover:bg-primary/20",

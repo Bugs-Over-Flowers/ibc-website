@@ -1,7 +1,8 @@
 import { type ClassValue, clsx } from "clsx";
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import { twMerge } from "tailwind-merge";
-import { treeifyError, type ZodError, type ZodType } from "zod";
+import type { ZodError, ZodTypeAny } from "zod";
+import { treeifyError } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -91,8 +92,8 @@ export function zodErrorToFieldErrors(error: ZodError) {
  * });
  * ```
  */
-export function zodValidator<T>(schema: ZodType<T>) {
-  return ({ value }: { value: T }) => {
+export function zodValidator<TSchema extends ZodTypeAny>(schema: TSchema) {
+  return ({ value }: { value: TSchema["_input"] }) => {
     const result = schema.safeParse(value);
     if (!result.success) {
       console.error("Validation failed", result.error);

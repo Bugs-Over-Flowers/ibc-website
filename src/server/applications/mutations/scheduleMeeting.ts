@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ScheduleMeetingInput } from "@/lib/validation/application/application";
 import { scheduleMeetingSchema } from "@/lib/validation/application/application";
-import { sendMeetingEmail } from "@/server/emails/mutations/sendMeetingEmail";
+import {
+  preRenderMeetingEmail,
+  sendPreRenderedMeetingEmail,
+} from "@/server/emails/mutations/sendMeetingEmail";
 
 export async function scheduleMeeting(input: ScheduleMeetingInput) {
   const parsed = scheduleMeetingSchema.parse(input);
@@ -56,15 +59,19 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     throw new Error("No applications found");
   }
 
-  // Send emails to all applicants first; only update DB when notifications succeed
+  // Pre-render the email template once (instead of 2N renders for N recipients)
+  const template = await preRenderMeetingEmail({
+    interviewDate: formattedInterviewDateLocal,
+    interviewVenue: parsed.interviewVenue,
+    customMessage: parsed.customMessage,
+  });
+
+  // Send emails to all applicants concurrently using the pre-rendered template
   const emailPromises = applications.map(async (app) => {
-    const [emailError] = await sendMeetingEmail({
+    const [emailError] = await sendPreRenderedMeetingEmail({
       to: app.emailAddress,
       companyName: app.companyName,
-      // Send a timezone-aware, human-readable datetime to applicants
-      interviewDate: formattedInterviewDateLocal,
-      interviewVenue: parsed.interviewVenue,
-      customMessage: parsed.customMessage,
+      template,
     });
 
     if (emailError) {
@@ -127,7 +134,7 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     throw new Error(`Failed to link interviews: ${rpcError.message}`);
   }
 
-  if (!rpcResult || !rpcResult[0]?.success) {
+  if (!rpcResult?.[0]?.success) {
     throw new Error(
       `Interview linking failed: ${rpcResult?.[0]?.message || "Unknown error"}`,
     );

@@ -33,14 +33,13 @@ export default function RegistrationDetails({
 }) {
   const router = useRouter();
 
-  // Helper to determine badge color for payment status
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "paid":
+      case "accepted":
         return "bg-green-500/15 text-green-700 hover:bg-green-500/25 border-green-200";
       case "pending":
         return "bg-yellow-500/15 text-yellow-700 hover:bg-yellow-500/25 border-yellow-200";
-      case "cancelled":
+      case "rejected":
         return "bg-red-500/15 text-red-700 hover:bg-red-500/25 border-red-200";
       default:
         return "bg-slate-100 text-slate-700 border-slate-200";
@@ -63,7 +62,7 @@ export default function RegistrationDetails({
           </Button>
           <div>
             <h1 className="font-bold text-2xl tracking-tight">
-              Registration data
+              Registration Data
             </h1>
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <Calendar className="h-3.5 w-3.5" />
@@ -81,8 +80,8 @@ export default function RegistrationDetails({
               registrationIdentifier: data.registrationIdentifier,
               email: data.registrant.email,
               registrationId: data.registrationId,
+              paymentMethod: data.paymentMethod,
               paymentProofStatus: data.paymentProofStatus,
-              proofOfPaymentImageURL: data.signedUrl,
             }}
             isDetailsPage
           />
@@ -208,7 +207,7 @@ export default function RegistrationDetails({
             </CardContent>
           </Card>
 
-          {/* Payment Details Section*/}
+          {/* Payment Details Section */}
           <Card>
             <CardHeader>
               <CardTitle>Payment Details</CardTitle>

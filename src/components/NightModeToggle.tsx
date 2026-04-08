@@ -24,12 +24,12 @@ export function ModeToggle() {
   return (
     <Button
       aria-label="Toggle theme"
-      className="relative rounded-xl bg-transparent backdrop-blur transition-colors hover:bg-transparent"
+      className="relative rounded-lg border border-border bg-transparent backdrop-blur transition-colors hover:bg-muted"
       onClick={toggleTheme}
       size="icon"
     >
       <Sun className="h-[1.5rem] w-[1.5rem] text-status-yellow transition-all duration-300 dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-[1.5rem] w-[1.5rem] rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100 dark:text-accent-foreground" />
+      <Moon className="absolute h-[1.5rem] w-[1.5rem] rotate-90 scale-0 text-status-blue transition-all duration-300 dark:rotate-0 dark:scale-100 dark:text-status-blue" />
     </Button>
   );
 }

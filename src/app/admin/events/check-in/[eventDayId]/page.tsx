@@ -37,18 +37,20 @@ async function CheckInPage({
 }) {
   const cookieStore = await cookies();
   const { eventDayId } = await params;
+
   const parsedSearchParams = await searchParams;
   const searchQuery = parseStringParam(parsedSearchParams.check_q);
   const paymentProofStatus = parseStringParam(
     parsedSearchParams.check_paymentStatus,
   );
+
   const { data: eventDayData } = await tryCatch(
     getEventDayDetails(cookieStore.getAll(), {
       eventDayId: eventDayId,
     }),
   );
 
-  if (!eventDayData || !eventDayData.event) {
+  if (!eventDayData?.event) {
     return <div>Event Day not found</div>;
   }
 

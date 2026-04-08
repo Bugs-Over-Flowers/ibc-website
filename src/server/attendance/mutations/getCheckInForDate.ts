@@ -54,11 +54,11 @@ export const getCheckInForDate = async (
     .single();
 
   if (error) {
-    throw new Error("An error has occured while fetching check-in data.");
+    throw new Error("An error has occurred. Registration not found.");
   }
 
   if (!data) {
-    throw new Error("No check-in data found for the given identifier.");
+    throw new Error("No registration data found for the given identifier.");
   }
 
   const normalizedData = normalizeCheckInForEventDay(data, eventDayId);

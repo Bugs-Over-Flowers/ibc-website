@@ -30,7 +30,7 @@ export const useMembershipStep4 = ({
   const setStep = useMembershipApplicationStore((state) => state.setStep);
   const resetStore = useMembershipApplicationStore((state) => state.resetStore);
 
-  // Get the verified businessMemberId (UUID) from member validation
+  // Get the verified businessMemberId (UUID) returned from identifier validation
   const verifiedBusinessMemberId = useMembershipApplicationStore(
     (state) => state.memberValidation.memberInfo.businessMemberId,
   );
@@ -131,8 +131,8 @@ export const useMembershipStep4 = ({
             throw new Error("Company logo is required");
           }
 
-          // Use the verified businessMemberId (UUID) for renewal/updating applications
-          // This is the actual UUID returned from member verification, not the identifier
+          // Use the verified businessMemberId (UUID) for renewal/updating applications.
+          // This is a returned FK value, while checks are based on Business Member Identifier.
           const businessMemberId =
             applicationData.step1.applicationType === "newMember"
               ? undefined

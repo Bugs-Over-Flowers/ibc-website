@@ -28,13 +28,14 @@ const getCheckInListColumns = (
     header: ({ column }) => (
       <Button
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
+        variant={"ghost"}
       >
         Check-In Time
         {column.getIsSorted() === "asc" ? (
-          <Clock className="rotate-180" />
+          <Clock className="size-4 rotate-180" />
         ) : column.getIsSorted() === "desc" ? (
-          <Clock />
+          <Clock className="size-4" />
         ) : null}
       </Button>
     ),
@@ -52,13 +53,14 @@ const getCheckInListColumns = (
     header: ({ column }) => (
       <Button
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
+        variant={"ghost"}
       >
         First Name
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
       </Button>
     ),
@@ -68,13 +70,14 @@ const getCheckInListColumns = (
     header: ({ column }) => (
       <Button
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
+        variant={"ghost"}
       >
         Last Name
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
       </Button>
     ),
@@ -84,13 +87,14 @@ const getCheckInListColumns = (
     header: ({ column }) => (
       <Button
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
+        variant={"ghost"}
       >
         Affiliation
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
       </Button>
     ),
@@ -102,13 +106,14 @@ const getCheckInListColumns = (
     header: ({ column }) => (
       <Button
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
+        type="button"
+        variant={"ghost"}
       >
         Email
         {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ />
+          <ArrowDownAZ className="size-4" />
         ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA />
+          <ArrowUpZA className="size-4" />
         ) : null}
       </Button>
     ),
@@ -221,7 +226,11 @@ export default function CheckInTable({
           </Button>
         </div>
       </div>
-      <DataTable columns={getCheckInListColumns(eventDayId)} data={tableData} />
+      <DataTable
+        columns={getCheckInListColumns(eventDayId)}
+        data={tableData}
+        enableClearSorting
+      />
     </div>
   );
 }

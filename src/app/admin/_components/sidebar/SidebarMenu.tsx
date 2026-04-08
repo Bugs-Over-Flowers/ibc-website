@@ -4,6 +4,7 @@ import {
   Building2,
   Calendar,
   FileText,
+  HandCoins,
   LayoutDashboard,
   MessageSquareDiff,
   Users,
@@ -39,7 +40,12 @@ const menuItems = [
     href: "/admin/evaluation",
   },
   {
-    title: "Manage Sectors",
+    title: "Sponsored Registrations",
+    icon: HandCoins,
+    href: "/admin/sponsored-registration",
+  },
+  {
+    title: "Sectors",
     icon: Building2,
     href: "/admin/manage-sector",
   },

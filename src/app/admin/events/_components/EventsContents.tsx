@@ -1,8 +1,10 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import {
+  type DateSortOption,
   getAdminEventsPage,
   type SortOption,
+  type TitleSortOption,
 } from "@/server/events/queries/getAdminEventsPage";
 import CreateEventButton from "./CreateEventButton";
 import EventFilters from "./EventFilters";
@@ -11,6 +13,8 @@ import EventTable from "./EventTable";
 interface SearchParams {
   search?: string;
   sort?: string;
+  dateSort?: string;
+  titleSort?: string;
   status?: string;
 }
 
@@ -25,6 +29,8 @@ export default async function EventsContents({
   const { items, nextCursor } = await getAdminEventsPage(cookieStore.getAll(), {
     search: sp.search,
     sort: sp.sort as SortOption,
+    dateSort: sp.dateSort as DateSortOption,
+    titleSort: sp.titleSort as TitleSortOption,
     status: sp.status,
   });
 
@@ -52,11 +58,13 @@ export default async function EventsContents({
 
       <div className="rounded-lg border bg-background p-4 md:border-0 md:p-0">
         <EventTable
+          dateSort={sp.dateSort as DateSortOption}
           initialEvents={items}
           initialNextCursor={nextCursor}
           search={sp.search}
           sort={sp.sort as SortOption}
           status={sp.status}
+          titleSort={sp.titleSort as TitleSortOption}
         />
       </div>
     </div>
