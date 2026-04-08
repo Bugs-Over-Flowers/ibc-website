@@ -1,10 +1,7 @@
 "use server";
 
-import { render } from "@react-email/render";
 import { revalidatePath, updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import { sendEmail } from "@/lib/email";
-import PaymentRejectedTemplate from "@/lib/resend/templates/PaymentRejectedTemplate";
 import { createActionClient } from "@/lib/supabase/server";
 import { sendRejectProofOfPayment } from "@/server/emails/mutations/sendRejectProofOfPayment";
 

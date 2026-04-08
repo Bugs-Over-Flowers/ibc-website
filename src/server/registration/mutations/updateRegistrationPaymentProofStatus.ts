@@ -3,6 +3,7 @@
 import { updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 import { sendRejectProofOfPayment } from "@/server/emails/mutations/sendRejectProofOfPayment";
@@ -65,13 +66,18 @@ export async function updateRegistrationPaymentProofStatus(
     throw new Error(updateError.message);
   }
 
+  let emailSent = false;
   // send a rejection email if the status is rejected and is not on the check in page
   if (status === "rejected" && page !== "check-in") {
-    await sendRejectProofOfPayment({
-      toEmail,
-      eventTitle,
-      registrantName,
-    });
+    const { success } = await tryCatch(
+      sendRejectProofOfPayment({
+        toEmail,
+        eventTitle,
+        registrantName,
+      }),
+    );
+
+    emailSent = success;
   }
 
   updateTag(CACHE_TAGS.registrations.all);
@@ -86,6 +92,6 @@ export async function updateRegistrationPaymentProofStatus(
     message:
       nextStatus === "accepted"
         ? "Payment proof accepted"
-        : "Payment proof rejected",
+        : `Payment proof rejected with rejection email${emailSent ? "sent" : "not sent. "}`,
   };
 }

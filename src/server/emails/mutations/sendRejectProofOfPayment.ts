@@ -3,7 +3,6 @@
 import { render } from "@react-email/render";
 import { sendEmail } from "@/lib/email";
 import PaymentRejectedTemplate from "@/lib/resend/templates/PaymentRejectedTemplate";
-import tryCatch from "@/lib/server/tryCatch";
 
 interface SendRejectProofOfPaymentProps {
   toEmail: string;

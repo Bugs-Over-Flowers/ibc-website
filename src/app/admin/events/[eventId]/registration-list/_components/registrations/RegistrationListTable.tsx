@@ -27,7 +27,7 @@ export default function RegistrationListTable({
     eventTitle: string,
   ): ColumnDef<RegistrationItem>[] => [
     {
-      accessorKey: "registrationIdentifer",
+      accessorKey: "registrationIdentifier",
       header: "Identifier",
       cell: ({ row }) => <pre>{row.original.registrationIdentifier}</pre>,
     },
@@ -147,7 +147,7 @@ export default function RegistrationListTable({
             paymentMethod: row.original.paymentMethod,
             email: row.original.registrant.email,
             registrationId: row.original.registrationId,
-            registrantName: row.original.registrant.lastName,
+            registrantName: `${row.original.registrant.firstName} ${row.original.registrant.lastName}`,
           }}
           eventTitle={eventTitle}
           isDetailsPage={false}
