@@ -5,8 +5,6 @@ CREATE OR REPLACE FUNCTION "public"."quick_onsite_registration"(
   "p_identifier" "text",
   "p_business_member_id" "uuid" DEFAULT NULL::"uuid",
   "p_non_member_name" "text" DEFAULT NULL::"text",
-  "p_payment_method" "text" DEFAULT 'onsite'::"text",
-  "p_payment_path" "text" DEFAULT NULL::"text",
   "p_registrant" "jsonb" DEFAULT '{}'::"jsonb",
   "p_remark" "text" DEFAULT NULL::"text"
 ) RETURNS "jsonb"
@@ -15,22 +13,27 @@ CREATE OR REPLACE FUNCTION "public"."quick_onsite_registration"(
 DECLARE
   v_registration_id UUID;
   v_participant_id UUID;
-  v_payment_proof_status "PaymentProofStatus";
-  v_payment_method_enum "PaymentMethod";
+  v_event_day_belongs_to_event BOOLEAN;
 BEGIN
-  v_payment_method_enum := (
-    CASE
-      WHEN p_payment_method = 'online' THEN 'BPI'
-      ELSE 'ONSITE'
-    END
-  )::"PaymentMethod";
+  -- Ensure the event day exists and belongs to the provided event.
+  SELECT EXISTS (
+    SELECT 1
+    FROM "EventDay" ed
+    WHERE ed."eventDayId" = p_event_day_id
+      AND ed."eventId" = p_event_id
+  )
+  INTO v_event_day_belongs_to_event;
 
-  v_payment_proof_status := (
-    CASE
-      WHEN p_payment_method = 'online' THEN 'pending'
-      ELSE 'accepted'
-    END
-  )::"PaymentProofStatus";
+  IF NOT v_event_day_belongs_to_event THEN
+    RAISE EXCEPTION USING
+      ERRCODE = '23514',
+      MESSAGE = 'Invalid event day for event',
+      DETAIL = format(
+        'event_day_id %s is not associated with event_id %s',
+        p_event_day_id,
+        p_event_id
+      );
+  END IF;
 
   INSERT INTO "Registration" (
     "eventId",
@@ -42,19 +45,14 @@ BEGIN
     "registrationDate"
   ) VALUES (
     p_event_id,
-    v_payment_method_enum,
-    v_payment_proof_status,
+    'ONSITE',
+    'accepted',
     CASE WHEN p_member_type = 'member' THEN p_business_member_id ELSE NULL END,
     CASE WHEN p_member_type = 'nonmember' THEN p_non_member_name ELSE NULL END,
     p_identifier,
     NOW()
   )
   RETURNING "registrationId" INTO v_registration_id;
-
-  IF p_payment_method = 'online' THEN
-    INSERT INTO "ProofImage" (path, "registrationId")
-    VALUES (p_payment_path, v_registration_id);
-  END IF;
 
   INSERT INTO "Participant" (
     "registrationId",
@@ -92,9 +90,35 @@ BEGIN
 END;
 $$;
 
+ALTER FUNCTION "public"."quick_onsite_registration"(
+  "p_event_day_id" "uuid",
+  "p_event_id" "uuid",
+  "p_member_type" "text",
+  "p_identifier" "text",
+  "p_business_member_id" "uuid",
+  "p_non_member_name" "text",
+  "p_registrant" "jsonb",
+  "p_remark" "text"
+) OWNER TO "postgres";
 
-ALTER FUNCTION "public"."quick_onsite_registration"("p_event_day_id" "uuid", "p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_remark" "text") OWNER TO "postgres";
+GRANT ALL ON FUNCTION "public"."quick_onsite_registration"(
+  "p_event_day_id" "uuid",
+  "p_event_id" "uuid",
+  "p_member_type" "text",
+  "p_identifier" "text",
+  "p_business_member_id" "uuid",
+  "p_non_member_name" "text",
+  "p_registrant" "jsonb",
+  "p_remark" "text"
+) TO "authenticated";
 
-
-GRANT ALL ON FUNCTION "public"."quick_onsite_registration"("p_event_day_id" "uuid", "p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_remark" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."quick_onsite_registration"("p_event_day_id" "uuid", "p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_remark" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."quick_onsite_registration"(
+  "p_event_day_id" "uuid",
+  "p_event_id" "uuid",
+  "p_member_type" "text",
+  "p_identifier" "text",
+  "p_business_member_id" "uuid",
+  "p_non_member_name" "text",
+  "p_registrant" "jsonb",
+  "p_remark" "text"
+) TO "service_role";

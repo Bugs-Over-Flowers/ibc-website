@@ -925,8 +925,6 @@ export type Database = {
           p_identifier: string;
           p_member_type: string;
           p_non_member_name?: string;
-          p_payment_method?: string;
-          p_payment_path?: string;
           p_registrant?: Json;
           p_remark?: string;
         };

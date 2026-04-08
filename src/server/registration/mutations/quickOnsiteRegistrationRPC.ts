@@ -17,21 +17,12 @@ export async function quickOnsiteRegistrationRPC(
   const parsedData = QuickOnsiteRegistrationInputSchema.parse(data);
 
   const supabase = await createActionClient();
-  const quickOnsiteSupabase = supabase as typeof supabase & {
-    rpc: (
-      name: string,
-      args: Record<string, unknown>,
-    ) => Promise<{
-      data: unknown;
-      error: { message?: string } | null;
-    }>;
-  };
 
   const registrationIdentifier = createRegistrationIdentifier();
 
   const { memberDetails, registrant, eventId, eventDayId, remark } = parsedData;
 
-  const { data: rpcResults, error } = await quickOnsiteSupabase.rpc(
+  const { data: rpcResults, error } = await supabase.rpc(
     "quick_onsite_registration",
     {
       p_event_day_id: eventDayId,
@@ -41,8 +32,6 @@ export async function quickOnsiteRegistrationRPC(
           ? memberDetails.businessMemberId
           : undefined,
       p_registrant: registrant,
-      p_payment_path: undefined,
-      p_payment_method: "onsite",
       p_non_member_name:
         memberDetails.member === "nonmember"
           ? memberDetails.nonMemberName
