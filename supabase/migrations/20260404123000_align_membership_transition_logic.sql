@@ -39,13 +39,58 @@ CREATE OR REPLACE FUNCTION public.january_first_reset()
  RETURNS void
  LANGUAGE plpgsql
 AS $function$
+DECLARE
+    ph_now timestamp;
+    ph_year_start timestamptz;
 BEGIN
-    -- Use Jan 1 of the current year to support deterministic annual reset logic.
-    PERFORM public.process_membership_statuses(DATE_TRUNC('year', NOW()));
+    -- Compute Jan 1 using PH local time to avoid UTC boundary issues.
+    ph_now := timezone('Asia/Manila', NOW());
+    ph_year_start := (DATE_TRUNC('year', ph_now) AT TIME ZONE 'Asia/Manila');
+
+    PERFORM public.process_membership_statuses(ph_year_start);
 END;
 $function$;
+
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+DO $cron$
+BEGIN
+    -- Recreate jobs safely so this migration remains idempotent.
+    PERFORM cron.unschedule(jobid)
+    FROM cron.job
+    WHERE jobname IN (
+        'membership-daily-ph',
+        'membership-january-first-ph',
+        'january-first-reset-ph'
+    );
+
+    -- Daily at 00:05 PH time (16:05 UTC previous day).
+    PERFORM cron.schedule(
+        'membership-daily-ph',
+        '5 16 * * *',
+        $$SELECT public.check_membership_expiry();$$
+    );
+
+    -- Jan 1 00:00 PH time (Dec 31 16:00 UTC).
+    PERFORM cron.schedule(
+        'membership-january-first-ph',
+        '0 16 31 12 *',
+        $$SELECT public.january_first_reset();$$
+    );
+END
+$cron$;
 
 REVOKE ALL ON FUNCTION public.process_membership_statuses(timestamp with time zone) FROM PUBLIC;
 GRANT ALL ON FUNCTION public.process_membership_statuses(timestamp with time zone) TO anon;
 GRANT ALL ON FUNCTION public.process_membership_statuses(timestamp with time zone) TO authenticated;
 GRANT ALL ON FUNCTION public.process_membership_statuses(timestamp with time zone) TO service_role;
+
+REVOKE ALL ON FUNCTION public.check_membership_expiry() FROM PUBLIC;
+GRANT ALL ON FUNCTION public.check_membership_expiry() TO anon;
+GRANT ALL ON FUNCTION public.check_membership_expiry() TO authenticated;
+GRANT ALL ON FUNCTION public.check_membership_expiry() TO service_role;
+
+REVOKE ALL ON FUNCTION public.january_first_reset() FROM PUBLIC;
+GRANT ALL ON FUNCTION public.january_first_reset() TO anon;
+GRANT ALL ON FUNCTION public.january_first_reset() TO authenticated;
+GRANT ALL ON FUNCTION public.january_first_reset() TO service_role;

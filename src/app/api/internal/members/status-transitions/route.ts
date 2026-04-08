@@ -1,3 +1,18 @@
+// POST /api/internal/members/status-transitions
+// Manual/fallback trigger for membership status transitions.
+//
+// PRIMARY EXECUTION: pg_cron jobs run automatically:
+//   - Daily at 12:05 AM PH (membership-daily-ph)
+//   - Yearly at Jan 1 12:00 AM PH (membership-january-first-ph)
+//
+// SECONDARY USE (this endpoint):
+//   - Manual on-demand triggers (bypass schedule, run immediately)
+//   - Fallback if cron fails or is delayed
+//   - External systems / monitoring hooks
+//   - Testing and debugging
+//
+// See: supabase/migrations/20260404123000_align_membership_transition_logic.sql
+
 import { NextResponse } from "next/server";
 import {
   resetMemberStatuses,
