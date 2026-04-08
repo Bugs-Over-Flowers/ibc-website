@@ -1,6 +1,7 @@
 import { Calendar, CheckCircle, Users } from "lucide-react";
 import { cookies } from "next/headers";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { getApplications } from "@/server/applications/queries/getApplications";
 
 export default async function ApplicationsStats() {
@@ -29,39 +30,67 @@ export default async function ApplicationsStats() {
       label: "New Applications",
       value: counts.new,
       icon: Users,
-      colorClass: "text-status-green",
+      iconClass: "text-status-green",
+      valueClass: "text-status-green",
+      iconWrapperClass: "bg-status-green/15",
     },
     {
       label: "Pending Interviews",
       value: counts.pending,
       icon: Calendar,
-      colorClass: "text-status-blue",
+      iconClass: "text-status-blue",
+      valueClass: "text-status-blue",
+      iconWrapperClass: "bg-status-blue/15",
     },
     {
       label: "Finished Meetings",
       value: counts.finished,
       icon: CheckCircle,
-      colorClass: "text-status-orange",
+      iconClass: "text-status-orange",
+      valueClass: "text-status-orange",
+      iconWrapperClass: "bg-status-orange/15",
     },
   ];
 
   return (
-    <Card className="flex h-full min-h-64 flex-col">
-      <CardContent className="flex flex-1 flex-col justify-center gap-4">
-        {items.map(({ label, value, icon: Icon, colorClass }) => (
-          <div className="flex items-center gap-4" key={label}>
-            <div className="rounded-md border border-foreground/10 bg-primary-foreground p-2">
-              <Icon className={`h-6 w-6 ${colorClass}`} />
-            </div>
-            <div>
-              <div className="text-muted-foreground text-sm">{label}</div>
-              <div className={`font-semibold text-2xl ${colorClass}`}>
-                {value}
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {items.map(
+        ({
+          label,
+          value,
+          icon: Icon,
+          iconClass,
+          valueClass,
+          iconWrapperClass,
+        }) => (
+          <Card className="rounded-2xl" key={label}>
+            <CardContent className="flex items-center gap-4 px-6">
+              <div
+                className={cn(
+                  "flex size-12 items-center justify-center rounded-2xl border border-border/70",
+                  iconWrapperClass,
+                )}
+              >
+                <Icon className={cn("size-5", iconClass)} />
               </div>
-            </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+
+              <div className="min-w-0">
+                <div className="truncate text-muted-foreground text-sm">
+                  {label}
+                </div>
+                <div
+                  className={cn(
+                    "font-semibold text-3xl leading-none",
+                    valueClass,
+                  )}
+                >
+                  {value}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ),
+      )}
+    </div>
   );
 }

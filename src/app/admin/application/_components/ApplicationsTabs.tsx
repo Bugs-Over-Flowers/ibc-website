@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import {
   type ReactNode,
   useEffect,
@@ -29,10 +28,8 @@ export default function ApplicationsTabs({
   const [activeTab, setActiveTab] = useState<"new" | "pending" | "finished">(
     "new",
   );
-  const [isMobile, setIsMobile] = useState(false);
   const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const containerRef = useRef<HTMLDivElement>(null);
   const { selectedApplicationIds, clearSelection, selectAll } =
     useSelectedApplicationsStore();
 
@@ -59,15 +56,9 @@ export default function ApplicationsTabs({
       }
     };
 
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-      // Recalculate indicator after resize
-      updateIndicator();
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    updateIndicator();
+    window.addEventListener("resize", updateIndicator);
+    return () => window.removeEventListener("resize", updateIndicator);
   }, [activeTab]);
 
   const { handleTabChange: handleTabSelectionChange } = useTabSelections({
@@ -90,111 +81,38 @@ export default function ApplicationsTabs({
 
   return (
     <>
-      <AnimatePresence mode={isMobile ? "wait" : "popLayout"}>
-        {activeTab === "new" ? (
-          <motion.div
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-stretch gap-6 lg:flex-row"
-            exit={{ opacity: isMobile ? 0 : 1 }}
-            initial={{ opacity: isMobile ? 0 : 1 }}
-            key="new"
-            transition={{ duration: isMobile ? 0.2 : 0.5 }}
-          >
-            <motion.div
-              animate={{ x: 0, opacity: 1 }}
-              className="flex flex-2 flex-col"
-              exit={{ x: isMobile ? 0 : -800, opacity: 1 }}
-              initial={{ x: isMobile ? 0 : -800, opacity: 1 }}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              <MeetingScheduler />
-            </motion.div>
+      {activeTab === "new" ? (
+        <div className="flex flex-col items-stretch" key="new">
+          <div className="flex w-full flex-col">{stats}</div>
+        </div>
+      ) : activeTab === "pending" ? (
+        <div
+          className="flex flex-col items-stretch gap-6 lg:flex-row"
+          key="pending"
+        >
+          <div className="flex flex-1 flex-col">
+            <BulkActions />
+          </div>
 
-            <motion.div
-              animate={{ opacity: 1 }}
-              className="flex flex-1 flex-col"
-              exit={{ opacity: 1 }}
-              initial={{ opacity: 1 }}
-              layoutId={isMobile ? undefined : "stats-container"}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              {stats}
-            </motion.div>
-          </motion.div>
-        ) : activeTab === "pending" ? (
-          <motion.div
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-stretch gap-6 lg:flex-row"
-            exit={{ opacity: isMobile ? 0 : 1 }}
-            initial={{ opacity: isMobile ? 0 : 1 }}
-            key="pending"
-            transition={{ duration: isMobile ? 0.2 : 0.5 }}
-          >
-            <motion.div
-              animate={{ x: 0, opacity: 1 }}
-              className="flex flex-1 flex-col"
-              exit={{ x: isMobile ? 0 : -500, opacity: 1 }}
-              initial={{ x: isMobile ? 0 : -500, opacity: 1 }}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              <BulkActions />
-            </motion.div>
-
-            <motion.div
-              animate={{ opacity: 1 }}
-              className="flex flex-2 flex-col"
-              exit={{ opacity: 1 }}
-              initial={{ opacity: 1 }}
-              layoutId={isMobile ? undefined : "stats-container"}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              {stats}
-            </motion.div>
-          </motion.div>
-        ) : (
-          <motion.div
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-stretch"
-            exit={{ opacity: isMobile ? 0 : 1 }}
-            initial={{ opacity: isMobile ? 0 : 1 }}
-            key="finished"
-            transition={{ duration: isMobile ? 0.2 : 0.3 }}
-          >
-            <motion.div
-              animate={{ opacity: 1 }}
-              className="flex w-full flex-col"
-              exit={{ opacity: 1 }}
-              initial={{ opacity: 1 }}
-              layoutId={isMobile ? undefined : "stats-container"}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              {stats}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div className="flex flex-2 flex-col">{stats}</div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-stretch" key="finished">
+          <div className="flex w-full flex-col">{stats}</div>
+        </div>
+      )}
 
       <div className="w-full">
         <div className="relative">
-          <div
-            className="relative grid grid-cols-3 gap-0.5 overflow-hidden rounded-md border border-border bg-background p-1 sm:gap-0"
-            ref={containerRef}
-          >
+          <div className="relative grid grid-cols-3 gap-0.5 overflow-hidden rounded-md border border-border bg-background p-1 sm:gap-0">
             {indicatorStyle.width > 0 && (
-              <motion.div
-                animate={{
-                  x: indicatorStyle.x,
-                  width: indicatorStyle.width,
-                }}
-                className="absolute rounded-md bg-primary/20"
+              <div
+                className="absolute rounded-md bg-primary/20 transition-all duration-200"
                 style={{
                   top: "4px",
+                  left: `${indicatorStyle.x}px`,
+                  width: `${indicatorStyle.width}px`,
                   height: "calc(100% - 8px)",
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 380,
-                  damping: 30,
                 }}
               />
             )}
@@ -237,7 +155,12 @@ export default function ApplicationsTabs({
 
         <div className="mt-4">
           {activeTab === "new" && (
-            <div className="space-y-4">{newApplications}</div>
+            <div className="flex flex-col gap-6 lg:flex-row">
+              <div className="flex flex-1 flex-col">
+                <MeetingScheduler />
+              </div>
+              <div className="flex flex-2 flex-col">{newApplications}</div>
+            </div>
           )}
           {activeTab === "pending" && (
             <div className="space-y-4">{pendingApplications}</div>
