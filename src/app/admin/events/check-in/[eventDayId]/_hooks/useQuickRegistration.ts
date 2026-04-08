@@ -8,8 +8,8 @@ import {
   type QuickOnsiteRegistrationForm,
   QuickOnsiteRegistrationFormSchema,
   type QuickOnsiteRegistrationInput,
-} from "@/lib/validation/registration/quickOnsite";
-import { createQuickOnsiteRegistration } from "@/server/registration/mutations/createQuickOnsiteRegistration";
+} from "@/lib/validation/registration/quickRegistration";
+import { quickOnsiteRegistrationRPC } from "@/server/registration/mutations/quickOnsiteRegistrationRPC";
 
 type QuickOnsiteSubmitMeta = {
   keepOpen: boolean;
@@ -34,15 +34,15 @@ const useQuickRegistration = ({
 }: QuickRegistrationProps) => {
   const { execute: quickRegistration } = useAction(
     tryCatch((payload: QuickOnsiteRegistrationInput) =>
-      createQuickOnsiteRegistration(payload),
+      quickOnsiteRegistrationRPC(payload),
     ),
     {
       onError: (error) => {
         toast.error(error);
       },
-      onSuccess: ({ checkedInCount, identifier }) => {
-        toast.success("Registration and Check in complete", {
-          description: `${checkedInCount} participant(s) checked in. ${identifier}`,
+      onSuccess: ({ rpcResults, identifier }) => {
+        toast.success("Registration and check-in complete", {
+          description: `${rpcResults.message} ${identifier}`,
         });
       },
     },
@@ -56,10 +56,10 @@ const useQuickRegistration = ({
     onSubmitMeta: DEFAULT_SUBMIT_META,
     onSubmit: async ({ value, meta, formApi }) => {
       const parsedValue = QuickOnsiteRegistrationFormSchema.parse(value);
-      const payload = {
+      const payload: QuickOnsiteRegistrationInput = {
         eventDayId,
         eventId,
-        step1:
+        memberDetails:
           parsedValue.member === "member"
             ? {
                 member: "member" as const,
@@ -69,22 +69,26 @@ const useQuickRegistration = ({
                 member: "nonmember" as const,
                 nonMemberName: parsedValue.nonMemberName ?? "",
               },
-        step2: {
-          registrant: {
-            id: crypto.randomUUID(),
-            firstName: parsedValue.firstName,
-            lastName: parsedValue.lastName,
-            email: parsedValue.email,
-            contactNumber: parsedValue.contactNumber,
-          },
-          otherParticipants: [],
+        registrant: {
+          id: crypto.randomUUID(),
+          firstName: parsedValue.firstName,
+          lastName: parsedValue.lastName,
+          email: parsedValue.email,
+          contactNumber: parsedValue.contactNumber,
         },
+
         remark: parsedValue.remark?.trim() || undefined,
       };
 
       const result = await quickRegistration(payload);
 
       if (!result.success) {
+        formApi.setErrorMap({
+          onSubmit: {
+            form: String(result.error),
+            fields: {},
+          },
+        });
         return;
       }
 

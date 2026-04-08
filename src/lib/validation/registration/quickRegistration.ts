@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { titleCase } from "@/lib/utils";
-import { StandardRegistrationStep1Schema } from "@/lib/validation/registration/standard";
+import {
+  StandardRegistrationStep1Schema,
+  SubmitRegistrationResponseSchema,
+} from "@/lib/validation/registration/standard";
 import { landlineSchema, phoneSchema } from "@/lib/validation/utils";
 
 export const QuickOnsiteRegistrantSchema = z
@@ -24,8 +27,7 @@ export const QuickOnsiteRegistrantSchema = z
             "Contact number must be a valid Philippine phone or landline number",
         },
       ),
-    // TODO: Restore stricter email validation if onsite walk-ins require it later.
-    email: z.string().trim(),
+    email: z.email().trim(),
   })
   .transform((data) => ({
     ...data,
@@ -33,9 +35,8 @@ export const QuickOnsiteRegistrantSchema = z
     lastName: titleCase(data.lastName).trim(),
   }));
 
-export const QuickOnsiteStep2Schema = z.object({
+export const QuickOnsiteRegistrationSchema = z.object({
   registrant: QuickOnsiteRegistrantSchema,
-  otherParticipants: z.array(QuickOnsiteRegistrantSchema).default([]),
 });
 
 export const QuickOnsiteRegistrationFormSchema = z
@@ -51,7 +52,6 @@ export const QuickOnsiteRegistrationFormSchema = z
       .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    // TODO: Restore stricter email validation if onsite walk-ins require it later.
     email: z.email(),
     contactNumber: z
       .string("Please input your contact number")
@@ -93,8 +93,8 @@ export type QuickOnsiteRegistrationForm = z.infer<
 export const QuickOnsiteRegistrationInputSchema = z.object({
   eventDayId: z.uuid("Invalid event day ID"),
   eventId: z.uuid("Invalid event ID"),
-  step1: StandardRegistrationStep1Schema,
-  step2: QuickOnsiteStep2Schema,
+  memberDetails: StandardRegistrationStep1Schema,
+  registrant: QuickOnsiteRegistrantSchema,
   remark: z.string().max(500, "Remark cannot exceed 500 characters").optional(),
 });
 
@@ -103,9 +103,8 @@ export type QuickOnsiteRegistrationInput = z.infer<
 >;
 
 export const QuickOnsiteRegistrationResultSchema = z.object({
-  registrationId: z.uuid(),
+  rpcResults: SubmitRegistrationResponseSchema,
   identifier: z.string(),
-  checkedInCount: z.number().int().nonnegative(),
 });
 
 export type QuickOnsiteRegistrationResult = z.infer<

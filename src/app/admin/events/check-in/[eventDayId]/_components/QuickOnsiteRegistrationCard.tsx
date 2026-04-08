@@ -23,7 +23,7 @@ import { FieldError, FieldGroup, FieldSet } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import type { QuickOnsiteRegistrationForm } from "@/lib/validation/registration/quickOnsite";
+import type { QuickOnsiteRegistrationForm } from "@/lib/validation/registration/quickRegistration";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import useQuickRegistration from "../_hooks/useQuickRegistration";
 
