@@ -93,7 +93,6 @@ export default function RegistrationRowActions({
 
       {shouldShowPaymentProofAction && (
         <PaymentProofReviewDialog
-          enforcePendingDecision={false}
           initialPaymentProofStatus={data.paymentProofStatus}
           onAcceptAction={async (id) => {
             const result = await verifyPayment(id);

@@ -114,10 +114,10 @@ export default function RegistrationDetails({
               </div>
               <div className="space-y-1">
                 <p className="font-medium text-muted-foreground text-sm">
-                  Registration ID
+                  Identifier
                 </p>
                 <p className="break-all font-mono text-muted-foreground text-xs">
-                  {data.registrationId}
+                  {data.identifier}
                 </p>
               </div>
             </CardContent>

@@ -22,7 +22,6 @@ export default function ProofDialog({
 
   return (
     <PaymentProofReviewDialog
-      enforcePendingDecision={false}
       initialPaymentProofStatus={paymentProofStatus}
       onAcceptAction={async (id) => {
         const result = await verifyPayment(id);
