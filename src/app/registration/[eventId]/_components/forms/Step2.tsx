@@ -106,7 +106,7 @@ export default function Step2() {
 
                     return (
                       <div
-                        className="slide-in-from-top-2 fade-in relative animate-in space-y-4 rounded-xl border-0 pt-4 shadow-sm"
+                        className="slide-in-from-top-2 fade-in relative animate-in space-y-4 rounded-xl pt-4"
                         key={registrant.id}
                       >
                         <div className="flex items-center justify-between">
