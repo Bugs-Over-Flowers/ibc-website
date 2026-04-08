@@ -3,8 +3,10 @@
 import { ChevronDown, Filter, Search, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import {
+  DATE_SORT_LABELS,
   SORT_LABELS,
   STATUS_LABELS,
+  TITLE_SORT_LABELS,
 } from "@/app/admin/events/_components/EventFilters/constants";
 import { useEventFilters } from "@/app/admin/events/_hooks/useEventFilters";
 import { Button } from "@/components/ui/button";
@@ -69,7 +71,8 @@ function buildStatusValue(
 export default function EventFilters() {
   const {
     currentDateSort,
-    currentTitleSort,
+    effectiveDateSort,
+    effectiveTitleSort,
     currentStatus,
     searchValue,
     hasActiveFilters,
@@ -79,19 +82,23 @@ export default function EventFilters() {
     handleSearchChange,
   } = useEventFilters();
 
-  const normalizedDateSort =
+  const explicitDateSort =
     currentDateSort === "date-asc" || currentDateSort === "date-desc"
       ? currentDateSort
       : null;
-  const normalizedTitleSort =
-    currentTitleSort === "title-desc" || currentTitleSort === "title-asc"
-      ? currentTitleSort
-      : null;
-  const hasExplicitSort = Boolean(normalizedDateSort || normalizedTitleSort);
 
-  const selectedDateSort = hasExplicitSort ? normalizedDateSort : "date-desc";
-  const selectedTitleSort = hasExplicitSort ? normalizedTitleSort : null;
-  const selectedSort = selectedTitleSort ?? selectedDateSort ?? "date-desc";
+  // Only show implicit date-desc as selected when no title sort is active.
+  const selectedDateSort =
+    explicitDateSort ?? (effectiveTitleSort ? null : "date-desc");
+  const selectedTitleSort = effectiveTitleSort;
+  const selectedSort = selectedTitleSort ?? effectiveDateSort ?? "date-desc";
+  const sortSummary = selectedTitleSort
+    ? selectedDateSort
+      ? `${DATE_SORT_LABELS[selectedDateSort]} + ${TITLE_SORT_LABELS[selectedTitleSort]}`
+      : TITLE_SORT_LABELS[selectedTitleSort]
+    : selectedSort === "date-desc"
+      ? "Latest First"
+      : (SORT_LABELS[selectedSort] ?? "Latest First");
 
   const toggleDateSort = (next: "date-asc" | "date-desc") => {
     if (selectedDateSort === next) {
@@ -118,7 +125,12 @@ export default function EventFilters() {
   const selectedStatus = currentStatus || "all";
   const { lifecycle, audience } = parseStatus(selectedStatus);
 
-  const sortOptions = Object.entries(SORT_LABELS);
+  const dateSortOptions = Object.entries(DATE_SORT_LABELS) as Array<
+    ["date-asc" | "date-desc", string]
+  >;
+  const titleSortOptions = Object.entries(TITLE_SORT_LABELS) as Array<
+    ["title-asc" | "title-desc", string]
+  >;
   const lifecycleOptions: Array<{ value: LifecycleStatus; label: string }> = [
     { value: "all", label: "All Status" },
     { value: "draft", label: STATUS_LABELS.draft ?? "Draft" },
@@ -322,9 +334,7 @@ export default function EventFilters() {
                     : "text-muted-foreground/70",
                 )}
               >
-                {selectedSort === "date-desc"
-                  ? "Latest First"
-                  : (SORT_LABELS[selectedSort] ?? "Latest First")}
+                {sortSummary}
               </span>
               <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
             </DropdownMenuTrigger>
@@ -332,44 +342,73 @@ export default function EventFilters() {
               align="end"
               className="w-[220px] rounded-xl border-border/50 bg-card p-1 shadow-2xl"
             >
-              <DropdownMenuItem
-                className={cn(
-                  "cursor-pointer rounded-lg text-sm transition-colors",
-                  selectedSort === "date-desc"
-                    ? "bg-primary/10 font-medium text-primary"
-                    : "hover:bg-muted/50",
-                )}
-                onClick={() =>
-                  updateSortFilters({ dateSort: null, titleSort: null })
-                }
-              >
-                Latest First
-              </DropdownMenuItem>
-              {sortOptions
-                .filter(([value]) => value !== "date-desc")
-                .map(([value, label]) => (
-                  <DropdownMenuItem
-                    className={cn(
-                      "cursor-pointer rounded-lg text-sm transition-colors",
-                      selectedSort === value
-                        ? "bg-primary/10 font-medium text-primary"
-                        : "hover:bg-muted/50",
-                    )}
-                    key={value}
-                    onClick={() => {
-                      if (value === "date-asc" || value === "date-desc") {
-                        toggleDateSort(value);
-                        return;
-                      }
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-xs uppercase tracking-wide">
+                  Date Sort
+                </DropdownMenuLabel>
+                {dateSortOptions.map(([value, label]) => {
+                  const isActive = selectedDateSort === value;
+                  return (
+                    <DropdownMenuItem
+                      className={cn(
+                        "cursor-pointer rounded-lg text-sm transition-colors",
+                        isActive
+                          ? "bg-primary/10 font-medium text-primary"
+                          : "hover:bg-muted/50",
+                      )}
+                      key={value}
+                      onClick={() => toggleDateSort(value)}
+                    >
+                      <span className="flex w-full items-center justify-between">
+                        <span>{label}</span>
+                        <span
+                          className={cn(
+                            "text-sm",
+                            isActive ? "opacity-100" : "opacity-0",
+                          )}
+                        >
+                          ✓
+                        </span>
+                      </span>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuGroup>
 
-                      if (value === "title-asc" || value === "title-desc") {
-                        toggleTitleSort(value);
-                      }
-                    }}
-                  >
-                    {label}
-                  </DropdownMenuItem>
-                ))}
+              <DropdownMenuSeparator />
+
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-xs uppercase tracking-wide">
+                  Name Sort
+                </DropdownMenuLabel>
+                {titleSortOptions.map(([value, label]) => {
+                  const isActive = selectedTitleSort === value;
+                  return (
+                    <DropdownMenuItem
+                      className={cn(
+                        "cursor-pointer rounded-lg text-sm transition-colors",
+                        isActive
+                          ? "bg-primary/10 font-medium text-primary"
+                          : "hover:bg-muted/50",
+                      )}
+                      key={value}
+                      onClick={() => toggleTitleSort(value)}
+                    >
+                      <span className="flex w-full items-center justify-between">
+                        <span>{label}</span>
+                        <span
+                          className={cn(
+                            "text-sm",
+                            isActive ? "opacity-100" : "opacity-0",
+                          )}
+                        >
+                          ✓
+                        </span>
+                      </span>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
 

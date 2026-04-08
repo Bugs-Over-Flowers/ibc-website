@@ -7,8 +7,16 @@ import type { CreateSREventOption } from "./types";
 
 export async function CreateSRPageContent() {
   const allEvents = await getEventsForSelect();
+  const now = new Date();
   const events: CreateSREventOption[] = allEvents
-    .filter((event) => event.eventTitle !== null)
+    .filter((event) => {
+      if (!event.eventTitle) return false;
+      if (event.eventEndDate) {
+        const end = new Date(event.eventEndDate);
+        if (end < now) return false;
+      }
+      return true;
+    })
     .map((event) => ({
       ...event,
       eventTitle: event.eventTitle as string,
