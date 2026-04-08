@@ -30,7 +30,7 @@ export default function MeetingScheduler() {
   const selectedCount = selectedApplicationIds.size;
 
   return (
-    <Card className="h-fit flex-col gap-0 rounded-2xl">
+    <Card className="flex h-full flex-col gap-0 rounded-2xl">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2 text-base">
           <CalendarIcon className="size-4" />

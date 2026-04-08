@@ -107,7 +107,7 @@ export function ApplicationsTable({
               <TableHead>Company Name</TableHead>
               <TableHead>Sector</TableHead>
               <TableHead>Application Type</TableHead>
-              {/* <TableHead>Contact</TableHead> */}
+              <TableHead>Contact</TableHead>
               <TableHead>Date Applied</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>

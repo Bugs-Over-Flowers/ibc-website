@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
+import { getApplications } from "@/server/applications/queries/getApplications";
 import ApplicationsList from "./_components/ApplicationsList";
 import { ApplicationsListSkeleton } from "./_components/ApplicationsListSkeleton";
-import ApplicationsStats from "./_components/ApplicationsStats";
 import ApplicationsTabs from "./_components/ApplicationsTabs";
 
 export const metadata: Metadata = {
@@ -11,6 +12,31 @@ export const metadata: Metadata = {
 };
 
 export default async function ApplicationsPage() {
+  const cookieStore = await cookies();
+  const applications = await getApplications(cookieStore.getAll());
+
+  const counts = applications.reduce(
+    (acc, app) => {
+      const status = app.applicationStatus as
+        | "new"
+        | "pending"
+        | "approved"
+        | "rejected"
+        | undefined;
+
+      if (status === "new") {
+        acc.new += 1;
+      } else if (status === "pending") {
+        acc.pending += 1;
+      } else if (status === "approved" || status === "rejected") {
+        acc.finished += 1;
+      }
+
+      return acc;
+    },
+    { new: 0, pending: 0, finished: 0 },
+  );
+
   return (
     <div className="space-y-6 px-2">
       <Suspense fallback={<ApplicationsListSkeleton />}>
@@ -24,10 +50,10 @@ export default async function ApplicationsPage() {
         </div>
 
         <ApplicationsTabs
+          counts={counts}
           finishedApplications={<ApplicationsList status="finished" />}
           newApplications={<ApplicationsList status="new" />}
           pendingApplications={<ApplicationsList status="pending" />}
-          stats={<ApplicationsStats />}
         />
       </Suspense>
     </div>
