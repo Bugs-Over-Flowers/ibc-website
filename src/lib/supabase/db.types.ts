@@ -641,6 +641,10 @@ export type Database = {
         Args: { p_application_type?: string; p_identifier: string };
         Returns: Json;
       };
+      check_member_exists_and_get: {
+        Args: { p_application_type?: string; p_identifier: string };
+        Returns: Json;
+      };
       check_membership_expiry: { Args: never; Returns: undefined };
       compute_primary_application_id: {
         Args: { p_member_id: string };
@@ -908,7 +912,24 @@ export type Database = {
         };
       };
       january_first_reset: { Args: never; Returns: undefined };
+      process_membership_statuses: {
+        Args: { p_reference_time?: string };
+        Returns: undefined;
+      };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
+      quick_onsite_registration: {
+        Args: {
+          p_business_member_id?: string;
+          p_event_day_id: string;
+          p_event_id: string;
+          p_identifier: string;
+          p_member_type: string;
+          p_non_member_name?: string;
+          p_registrant?: Json;
+          p_remark?: string;
+        };
+        Returns: Json;
+      };
       schedule_interviews_batch: {
         Args: { p_interview_data: Json };
         Returns: {

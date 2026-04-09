@@ -4,9 +4,11 @@ import CenterSpinner from "@/components/CenterSpinner";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
 import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
+import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import CheckInDataDialog from "./_components/CheckInDataDialog";
 import EventDayDetails from "./_components/EventDayDetails";
+import QuickOnsiteRegistrationCard from "./_components/QuickOnsiteRegistrationCard";
 import QRCodeScanner from "./_components/qr-scanning/QRCodeScanner";
 import CheckInRegistrationPanel from "./_components/registration-list/CheckInRegistrationPanel";
 
@@ -54,6 +56,10 @@ async function CheckInPage({
     return <div>Event Day not found</div>;
   }
 
+  const { data: membersData, error: membersError } = await tryCatch(
+    getAllMembers(cookieStore.getAll()),
+  );
+
   const { data: registrationListData, error: registrationListError } =
     await tryCatch(
       getEventRegistrationList(cookieStore.getAll(), {
@@ -63,7 +69,7 @@ async function CheckInPage({
       }),
     );
 
-  if (!registrationListData || !registrationListData) {
+  if (!registrationListData || membersError || !membersData) {
     return <div>Failed to load registration list.</div>;
   }
 
@@ -82,6 +88,13 @@ async function CheckInPage({
                   venue: eventDayData.event.venue,
                 }}
               />
+              <div className="mt-6">
+                <QuickOnsiteRegistrationCard
+                  eventDayId={eventDayId}
+                  eventId={eventDayData.event.eventId}
+                  members={membersData}
+                />
+              </div>
             </div>
           </div>
 

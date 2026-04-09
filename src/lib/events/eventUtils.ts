@@ -1,17 +1,24 @@
+import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import type { Tables } from "@/lib/supabase/db.types";
 
 type Event = Tables<"Event">;
 
 export type EventStatus = "upcoming" | "ongoing" | "past";
 
-export const formatDate = (dateString: string | null) => {
+export const formatDate = (
+  dateString: string | null,
+  formatString = "MMM d, yyyy",
+  timeZone?: string,
+) => {
   if (!dateString) return "TBA";
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+
+  if (timeZone) {
+    return formatInTimeZone(date, timeZone, formatString);
+  }
+
+  return format(date, formatString);
 };
 
 /**
