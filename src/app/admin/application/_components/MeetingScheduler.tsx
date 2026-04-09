@@ -1,7 +1,6 @@
 "use client";
-
 import { addDays, isSameDay, parseISO, startOfDay } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { CalendarIcon, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,72 +19,80 @@ export default function MeetingScheduler() {
   const { selectedApplicationIds, clearSelection } =
     useSelectedApplicationsStore();
   const minInterviewDate = addDays(startOfDay(new Date()), 1);
-
   const form = useMeetingScheduler(() => {
     clearSelection();
   });
-
   const { handleNavigateToSchedule } = useMeetingSchedulerSync(form);
-
   const selectedCount = selectedApplicationIds.size;
 
   return (
-    <Card className="flex h-full flex-col gap-0 rounded-2xl">
-      <CardHeader className="border-b">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <CalendarIcon className="size-4" />
-          <span>Schedule Interview</span>
-          <Badge className="ml-auto" variant="secondary">
+    <Card className="h-auto overflow-hidden rounded-2xl py-2">
+      {/* Header */}
+      <CardHeader className="space-y-1.5 border-b px-5 py-4">
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="size-4 shrink-0 text-foreground" />
+          <CardTitle className="flex-1 font-medium text-sm">
+            Schedule interview
+          </CardTitle>
+          <Badge
+            className={
+              selectedCount > 0
+                ? "border border-[#85B7EB] bg-[#E6F1FB] text-[#0C447C] dark:border-[#185FA5] dark:bg-[#0C447C] dark:text-[#B5D4F4]"
+                : ""
+            }
+            variant={selectedCount > 0 ? "default" : "secondary"}
+          >
             {selectedCount} selected
           </Badge>
-        </CardTitle>
+        </div>
         <p className="text-muted-foreground text-xs">
           Set a date and venue for all selected applications.
         </p>
       </CardHeader>
-      <CardContent className="pt-4">
+
+      {/* Body */}
+      <CardContent className="px-5 py-5 pt-0">
         <form
           className="flex flex-col gap-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
+          onSubmit={(e) => e.preventDefault()}
         >
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <form.AppField name="interviewDate">
-                {(field) => (
-                  <div suppressHydrationWarning>
-                    <field.FormDateTimePicker
-                      className="w-full"
-                      minDate={minInterviewDate}
-                    />
-                  </div>
-                )}
-              </form.AppField>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label className="px-1 font-normal text-muted-foreground text-xs">
-                Venue
-              </Label>
-              <form.AppField name="interviewVenue">
-                {(field) => (
-                  <field.TextField placeholder="Enter venue address" />
-                )}
-              </form.AppField>
-            </div>
+          {/* Date & time */}
+          <div className="flex flex-col gap-1.5">
+            <form.AppField name="interviewDate">
+              {(field) => (
+                <div suppressHydrationWarning>
+                  <field.FormDateTimePicker
+                    className="w-full"
+                    minDate={minInterviewDate}
+                  />
+                </div>
+              )}
+            </form.AppField>
           </div>
 
-          <CardFooter className="border-t px-0 pt-4">
-            <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          {/* Venue */}
+          <div className="flex flex-col gap-1.5">
+            <Label className="flex items-center gap-1.5 px-0.5 font-normal text-muted-foreground text-xs">
+              Venue
+            </Label>
+            <form.AppField name="interviewVenue">
+              {(field) => <field.TextField placeholder="Enter venue address" />}
+            </form.AppField>
+          </div>
+
+          {/* Footer */}
+          <CardFooter className="mt-0 border-t px-0 py-0">
+            <div className="flex w-full flex-col gap-2">
               <Button
+                className="h-9 w-full justify-center"
                 onClick={clearSelection}
                 size="sm"
                 type="button"
                 variant="outline"
               >
-                Clear
+                Clear selection
               </Button>
+
               <form.Subscribe
                 selector={(state) => ({
                   interviewDate: state.values.interviewDate,
@@ -103,6 +110,7 @@ export default function MeetingScheduler() {
               >
                 {(state) => (
                   <Button
+                    className="h-9 w-full justify-center gap-1.5"
                     disabled={
                       selectedCount === 0 ||
                       !state.interviewDate ||
@@ -115,7 +123,8 @@ export default function MeetingScheduler() {
                     size="sm"
                     type="button"
                   >
-                    Send Message
+                    <Send className="size-3.5" />
+                    Send message
                   </Button>
                 )}
               </form.Subscribe>

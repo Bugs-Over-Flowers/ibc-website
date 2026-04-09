@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, MoreHorizontal } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -75,7 +75,7 @@ export function ApplicationsTableRow({
 
   return (
     <TableRow
-      className={isHydrated && isSelected ? "bg-muted/50" : ""}
+      className={isHydrated && isSelected ? "bg-primary/5" : ""}
       key={application.applicationId}
     >
       <TableCell className="w-12">
@@ -95,9 +95,9 @@ export function ApplicationsTableRow({
             <Tooltip>
               <TooltipTrigger
                 aria-label="Check payment proof"
-                className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-status-red/15 text-status-red"
+                className="inline-flex size-[18px] items-center justify-center rounded-full bg-status-red/10 text-status-red"
               >
-                <AlertTriangle className="h-4 w-4" />
+                <AlertTriangle className="size-3" />
               </TooltipTrigger>
               <TooltipContent>Check Payment Proof</TooltipContent>
             </Tooltip>
@@ -111,7 +111,10 @@ export function ApplicationsTableRow({
         </div>
       </TableCell>
       <TableCell className="w-[16%]">
-        <Badge className={`${borderColor} ${textColor}`} variant="outline">
+        <Badge
+          className={`${borderColor} ${textColor} text-xs`}
+          variant="outline"
+        >
           {toPascalCaseWithSpaces(application.applicationType)}
         </Badge>
       </TableCell>
@@ -123,23 +126,21 @@ export function ApplicationsTableRow({
           </div>
         </div>
       </TableCell> */}
-      <TableCell className="w-[14%]">
-        <div className="space-y-1">
-          <div>
-            {new Date(application.applicationDate).toLocaleDateString()}
-          </div>
-        </div>
+      <TableCell className="w-[14%] font-mono text-muted-foreground text-xs">
+        {new Date(application.applicationDate).toLocaleDateString()}
       </TableCell>
-      <TableCell className="w-[12%]">
+      <TableCell className="w-[12%] pr-4 text-right">
         <Button
-          className="active:scale-95 active:opacity-80 dark:hover:bg-muted"
+          aria-label={`Open application ${application.companyName}`}
+          className="ml-auto size-8 p-0 active:scale-95 active:opacity-80 dark:hover:bg-muted"
           size="sm"
           variant="outline"
         >
           <Link
             href={`/admin/application/${application.applicationId}` as Route}
+            title={`Open application ${application.companyName}`}
           >
-            View Details
+            <MoreHorizontal className="size-4" />
           </Link>
         </Button>
       </TableCell>

@@ -13,6 +13,7 @@ import {
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { ApplicationsTableRow } from "./ApplicationsTableRow";
+import ExportPDFButton from "./ExportPDFButton";
 
 interface ApplicationsTableProps {
   applications: Awaited<ReturnType<typeof getApplications>>;
@@ -85,12 +86,17 @@ export function ApplicationsTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          {getTitle(status)}
-          <span className="ml-2 font-normal text-muted-foreground text-sm">
-            ({applications.length})
-          </span>
-        </CardTitle>
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle>
+            {getTitle(status)}
+            <span className="ml-2 font-normal text-muted-foreground text-sm">
+              ({applications.length})
+            </span>
+          </CardTitle>
+          {applications.length > 0 && (
+            <ExportPDFButton application={applications[0]} />
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -104,12 +110,21 @@ export function ApplicationsTable({
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
-              <TableHead>Company Name</TableHead>
-              <TableHead>Sector</TableHead>
-              <TableHead>Application Type</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Date Applied</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Company Name
+              </TableHead>
+              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Sector
+              </TableHead>
+              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Application Type
+              </TableHead>
+              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Date Applied
+              </TableHead>
+              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -1,5 +1,4 @@
 "use client";
-
 import { Calendar, CheckCircle, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -7,101 +6,119 @@ import type { ApplicationTab } from "./ApplicationsTabs";
 
 interface ApplicationsStatsProps {
   activeTab: ApplicationTab;
-  counts: {
-    new: number;
-    pending: number;
-    finished: number;
-  };
+  counts: { new: number; pending: number; finished: number };
   onTabChange: (tab: ApplicationTab) => void;
 }
+
+const items = [
+  {
+    tab: "new" as const,
+    label: "New Applications",
+    icon: Users,
+    activeCard:
+      "border-[#0F6E56] bg-[#E1F5EE] dark:border-[#5DCAA5] dark:bg-[#085041]",
+    activeIconWrap: "bg-[#C0DD97] dark:bg-[#0F6E56]",
+    activeIcon: "text-[#27500A] dark:text-[#9FE1CB]",
+    activeValue: "text-[#085041] dark:text-[#9FE1CB]",
+    activeDot: "bg-[#0F6E56] dark:bg-[#5DCAA5]",
+  },
+  {
+    tab: "pending" as const,
+    label: "Pending Interviews",
+    icon: Calendar,
+    activeCard:
+      "border-[#185FA5] bg-[#E6F1FB] dark:border-[#85B7EB] dark:bg-[#0C447C]",
+    activeIconWrap: "bg-[#B5D4F4] dark:bg-[#185FA5]",
+    activeIcon: "text-[#0C447C] dark:text-[#B5D4F4]",
+    activeValue: "text-[#0C447C] dark:text-[#B5D4F4]",
+    activeDot: "bg-[#185FA5] dark:bg-[#85B7EB]",
+  },
+  {
+    tab: "finished" as const,
+    label: "Finished Meetings",
+    icon: CheckCircle,
+    activeCard:
+      "border-[#854F0B] bg-[#FAEEDA] dark:border-[#EF9F27] dark:bg-[#633806]",
+    activeIconWrap: "bg-[#FAC775] dark:bg-[#854F0B]",
+    activeIcon: "text-[#633806] dark:text-[#FAC775]",
+    activeValue: "text-[#633806] dark:text-[#FAC775]",
+    activeDot: "bg-[#854F0B] dark:bg-[#EF9F27]",
+  },
+];
 
 export default function ApplicationsStats({
   activeTab,
   counts,
   onTabChange,
 }: ApplicationsStatsProps) {
-  const items = [
-    {
-      tab: "new" as const,
-      label: "New Applications",
-      value: counts.new,
-      icon: Users,
-      iconClass: "text-status-green",
-      valueClass: "text-status-green",
-      iconWrapperClass: "bg-status-green/15",
-    },
-    {
-      tab: "pending" as const,
-      label: "Pending Interviews",
-      value: counts.pending,
-      icon: Calendar,
-      iconClass: "text-status-blue",
-      valueClass: "text-status-blue",
-      iconWrapperClass: "bg-status-blue/15",
-    },
-    {
-      tab: "finished" as const,
-      label: "Finished Meetings",
-      value: counts.finished,
-      icon: CheckCircle,
-      iconClass: "text-status-orange",
-      valueClass: "text-status-orange",
-      iconWrapperClass: "bg-status-orange/15",
-    },
-  ];
-
   return (
-    <div className="grid h-full grid-cols-1 grid-rows-3 gap-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       {items.map(
         ({
           tab,
           label,
-          value,
           icon: Icon,
-          iconClass,
-          valueClass,
-          iconWrapperClass,
-        }) => (
-          <button
-            aria-pressed={activeTab === tab}
-            className="h-full text-left"
-            key={label}
-            onClick={() => onTabChange(tab)}
-            type="button"
-          >
-            <Card
-              className={cn(
-                "h-full rounded-2xl border border-border/70 transition-colors",
-                activeTab === tab && "border-primary/70 bg-primary/5",
-              )}
+          activeCard,
+          activeIconWrap,
+          activeIcon,
+          activeValue,
+          activeDot,
+        }) => {
+          const isActive = activeTab === tab;
+          return (
+            <button
+              aria-pressed={isActive}
+              className="text-left"
+              key={tab}
+              onClick={() => onTabChange(tab)}
+              type="button"
             >
-              <CardContent className="flex items-center gap-4 px-6">
-                <div
-                  className={cn(
-                    "flex size-12 items-center justify-center rounded-2xl border border-border/70",
-                    iconWrapperClass,
-                  )}
-                >
-                  <Icon className={cn("size-5", iconClass)} />
-                </div>
-
-                <div className="min-w-0">
-                  <div className="truncate text-muted-foreground text-sm">
-                    {label}
+              <Card
+                className={cn(
+                  "rounded-2xl border-[1.5px] border-border/70 bg-card transition-colors",
+                  isActive ? activeCard : "hover:bg-muted/40",
+                )}
+              >
+                <CardContent className="flex flex-col gap-3 px-4">
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={cn(
+                        "flex size-8 items-center justify-center rounded-lg bg-muted",
+                        isActive && activeIconWrap,
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "size-4",
+                          isActive ? activeIcon : "text-muted-foreground",
+                        )}
+                      />
+                    </div>
+                    <span
+                      className={cn(
+                        "size-[7px] rounded-full opacity-0 transition-opacity",
+                        isActive && `${activeDot} opacity-100`,
+                      )}
+                    />
                   </div>
-                  <div
-                    className={cn(
-                      "font-semibold text-3xl leading-none",
-                      valueClass,
-                    )}
-                  >
-                    {value}
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate text-muted-foreground text-xs">
+                      {label}
+                    </p>
+                    <p
+                      className={cn(
+                        "font-bold text-3xl leading-none tracking-tight",
+                        isActive ? activeValue : "text-foreground",
+                      )}
+                    >
+                      {counts[tab]}
+                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </button>
-        ),
+                </CardContent>
+              </Card>
+            </button>
+          );
+        },
       )}
     </div>
   );

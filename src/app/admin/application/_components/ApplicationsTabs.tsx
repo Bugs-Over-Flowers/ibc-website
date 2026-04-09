@@ -44,49 +44,24 @@ export default function ApplicationsTabs({
 
   return (
     <>
-      {activeTab === "new" ? (
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch">
-          <div className="flex flex-1 flex-col">
-            <ApplicationsStats
-              activeTab={activeTab}
-              counts={counts}
-              onTabChange={handleTabChange}
-            />
-          </div>
-          <div className="flex flex-1 flex-col">
-            <MeetingScheduler />
-          </div>
-        </div>
-      ) : activeTab === "pending" ? (
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch">
-          <div className="flex flex-1 flex-col">
-            <ApplicationsStats
-              activeTab={activeTab}
-              counts={counts}
-              onTabChange={handleTabChange}
-            />
-          </div>
-          <div className="flex flex-1 flex-col">
-            <BulkActions />
-          </div>
-        </div>
-      ) : (
-        <ApplicationsStats
-          activeTab={activeTab}
-          counts={counts}
-          onTabChange={handleTabChange}
-        />
-      )}
+      <ApplicationsStats
+        activeTab={activeTab}
+        counts={counts}
+        onTabChange={handleTabChange}
+      />
 
-      <div className="mt-4 w-full">
-        {activeTab === "new" && (
-          <div className="space-y-4">{newApplications}</div>
-        )}
-        {activeTab === "pending" && (
-          <div className="space-y-4">{pendingApplications}</div>
-        )}
-        {activeTab === "finished" && (
-          <div className="space-y-4">{finishedApplications}</div>
+      <div className="mt-6 w-full">
+        {activeTab === "finished" ? (
+          <div className="flex flex-col gap-4">{finishedApplications}</div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
+            <div className="min-w-0">
+              {activeTab === "new" ? <MeetingScheduler /> : <BulkActions />}
+            </div>
+            <div className="min-w-0">
+              {activeTab === "new" ? newApplications : pendingApplications}
+            </div>
+          </div>
         )}
       </div>
     </>
