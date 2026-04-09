@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import FeaturedMembersSection from "@/components/FeaturedMembersSection";
 import MembersBenefits from "./_components/MembersBenefits";
 import MembersCTA from "./_components/MembersCTA";
 import { MembersHero } from "./_components/MembersHero";
@@ -10,6 +11,7 @@ export default function Page() {
     <main className="min-h-screen bg-background">
       <Suspense fallback={<MembersLoading />}>
         <MembersHero />
+        <FeaturedMembersSection />
         <MembersListSection />
         <MembersBenefits />
         <MembersCTA />
