@@ -20,6 +20,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
 
   // Determine if the event is a draft (eventType is null)
   const isDraft = event.eventType === null;
+  const isPrivatePublished = !isDraft && event.eventType === "private";
   const isFinished =
     event.eventEndDate && new Date() > new Date(event.eventEndDate);
 
@@ -172,23 +173,38 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
           ? trimmedFacebookLink
           : null;
 
-      const payload = {
-        eventId: value.eventId,
-        eventTitle: value.eventTitle,
-        description: value.description,
-        eventStartDate: isoStartDate,
-        eventEndDate: isoEndDate,
-        venue: value.venue,
-        eventHeaderUrl: headerUrl || undefined,
-        eventPoster: posterUrl || undefined,
-        eventType: value.eventType,
-        facebookLink: normalizedFacebookLink,
-        ...(isDraft && {
-          registrationFee: value.registrationFee,
-        }),
-      };
-      console.log("Update payload:", payload);
-      const result = await updateEvent(payload, isDraft);
+      const result = isDraft
+        ? await updateEvent(
+            {
+              eventId: value.eventId,
+              eventTitle: value.eventTitle,
+              description: value.description,
+              eventStartDate: isoStartDate,
+              eventEndDate: isoEndDate,
+              venue: value.venue,
+              eventHeaderUrl: headerUrl || undefined,
+              eventPoster: posterUrl || undefined,
+              eventType: value.eventType,
+              facebookLink: normalizedFacebookLink,
+              registrationFee: value.registrationFee,
+            },
+            true,
+          )
+        : await updateEvent(
+            {
+              eventId: value.eventId,
+              eventTitle: value.eventTitle,
+              description: value.description,
+              eventStartDate: isoStartDate,
+              eventEndDate: isoEndDate,
+              venue: value.venue,
+              eventHeaderUrl: headerUrl || undefined,
+              eventPoster: posterUrl || undefined,
+              eventType: value.eventType ?? undefined,
+              facebookLink: normalizedFacebookLink,
+            },
+            false,
+          );
 
       if (!result.success) {
         toast.error(result.error as string);
@@ -205,5 +221,5 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
     form.reset();
   }, [form]);
 
-  return { form, router, isDraft, isFinished };
+  return { form, router, isDraft, isFinished, isPrivatePublished };
 };

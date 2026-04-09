@@ -57,6 +57,10 @@ export const updateEvent: ServerFunction<
     isDraft,
   });
 
+  const requestedPublishedEventType = !isDraft
+    ? (data as EditPublishedEventInput).eventType
+    : undefined;
+
   // Call the database function
   const { data: rpcResult, error: rpcError } = await supabase.rpc(
     "update_event_details",
@@ -107,6 +111,23 @@ export const updateEvent: ServerFunction<
     };
   }
 
+  // Allow one-way conversion from private to public for published events.
+  if (!isDraft && requestedPublishedEventType === "public") {
+    const { error: eventTypeUpdateError } = await supabase
+      .from("Event")
+      .update({ eventType: "public" })
+      .eq("eventId", data.eventId)
+      .eq("eventType", "private");
+
+    if (eventTypeUpdateError) {
+      return {
+        success: false,
+        error: eventTypeUpdateError.message,
+        data: null,
+      };
+    }
+  }
+
   updateTag(CACHE_TAGS.events.all);
   updateTag(CACHE_TAGS.events.admin);
   updateTag(CACHE_TAGS.events.public);
@@ -115,7 +136,8 @@ export const updateEvent: ServerFunction<
     success: true,
     data: {
       eventId: resultData?.eventId || data.eventId,
-      eventType: resultData?.eventType ?? "draft",
+      eventType:
+        requestedPublishedEventType ?? resultData?.eventType ?? "draft",
       message: resultData?.message || "Event updated successfully",
     },
     error: null,
