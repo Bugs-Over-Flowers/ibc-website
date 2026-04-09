@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 import { config as dotenvConfig } from "dotenv";
 import { defineBddConfig } from "playwright-bdd";
@@ -10,6 +11,9 @@ const testDir = defineBddConfig({
   steps: "__tests__/e2e/steps/**/*.ts",
   outputDir: "__tests__/e2e/generated/",
 });
+
+/** Path to saved authenticated browser state (created by auth.setup.ts) */
+const AUTH_STATE_PATH = path.join("__tests__", "e2e", ".auth", "user.json");
 
 export default defineConfig({
   testDir,
@@ -28,9 +32,21 @@ export default defineConfig({
   },
 
   projects: [
+    // ── Auth setup (runs first) ──────────────────────────────────────────
+    {
+      name: "setup",
+      testDir: "__tests__/e2e",
+      testMatch: "auth.setup.ts",
+    },
+
+    // ── Main browser tests (depend on setup) ─────────────────────────────
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: AUTH_STATE_PATH,
+      },
+      dependencies: ["setup"],
     },
   ],
 
