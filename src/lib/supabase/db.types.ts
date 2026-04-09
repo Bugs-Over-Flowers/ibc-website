@@ -641,6 +641,10 @@ export type Database = {
         Args: { p_application_type?: string; p_identifier: string };
         Returns: Json;
       };
+      check_member_exists_and_get: {
+        Args: { p_application_type?: string; p_identifier: string };
+        Returns: Json;
+      };
       check_membership_expiry: { Args: never; Returns: undefined };
       compute_primary_application_id: {
         Args: { p_member_id: string };

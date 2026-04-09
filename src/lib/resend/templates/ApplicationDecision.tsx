@@ -137,7 +137,8 @@ const text = {
 const detailsSection = {
   backgroundColor: "#f4f4f5",
   borderRadius: "4px",
-  margin: "24px 40px",
+  margin: "24px auto",
+  maxWidth: "520px",
   padding: "24px",
 };
 
