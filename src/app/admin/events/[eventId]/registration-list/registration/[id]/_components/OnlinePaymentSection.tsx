@@ -18,7 +18,7 @@ import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
-import { cn, titleCase } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { rejectPayment } from "@/server/registration/mutations/rejectPayment";
 import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 
@@ -81,6 +81,18 @@ export default function OnlinePaymentSection({
 
   const isVerifyPending = isPending && pendingAction === "accepted";
   const isRejectPending = isPending && pendingAction === "rejected";
+  const statusBadgeLabel = isVerifyPending
+    ? "Verifying..."
+    : optimisticPaymentProofStatus === "pending"
+      ? "Pending Review"
+      : optimisticPaymentProofStatus === "accepted"
+        ? "Accepted"
+        : "Rejected";
+  const acceptButtonLabel = isVerifyPending
+    ? "Verifying..."
+    : optimisticPaymentProofStatus === "accepted"
+      ? "Accepted"
+      : "Accept Payment";
 
   return (
     <>
@@ -105,7 +117,7 @@ export default function OnlinePaymentSection({
           )}
           variant="outline"
         >
-          {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
+          {statusBadgeLabel}
         </Badge>
       </div>
       <div className="flex gap-2">
@@ -114,9 +126,7 @@ export default function OnlinePaymentSection({
           disabled={isPending || optimisticPaymentProofStatus === "accepted"}
           onClick={() => handleStatusChange("accepted")}
         >
-          {isVerifyPending
-            ? "Verifying..."
-            : titleCase(optimisticPaymentProofStatus)}
+          {acceptButtonLabel}
         </Button>
         <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
           {/* Reject Button */}
