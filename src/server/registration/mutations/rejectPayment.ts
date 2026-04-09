@@ -1,11 +1,9 @@
 "use server";
 
-import { render } from "@react-email/render";
 import { revalidatePath, updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import { sendEmail } from "@/lib/email";
-import PaymentRejectedTemplate from "@/lib/resend/templates/PaymentRejectedTemplate";
 import { createActionClient } from "@/lib/supabase/server";
+import { sendRejectProofOfPayment } from "@/server/emails/mutations/sendRejectProofOfPayment";
 
 export const rejectPayment = async (registrationId: string) => {
   const supabase = await createActionClient();
@@ -60,17 +58,10 @@ export const rejectPayment = async (registrationId: string) => {
 
   // 4. Send Rejection Email
   try {
-    const emailHtml = await render(
-      PaymentRejectedTemplate({
-        eventTitle,
-        registrantName,
-      }),
-    );
-
-    await sendEmail({
-      to: principal.email,
-      subject: `Payment Rejected: ${eventTitle}`,
-      html: emailHtml,
+    await sendRejectProofOfPayment({
+      toEmail: principal.email,
+      eventTitle,
+      registrantName,
     });
   } catch (error) {
     console.error("Error sending email:", error);

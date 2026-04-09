@@ -88,11 +88,6 @@ export default function OnlinePaymentSection({
       : optimisticPaymentProofStatus === "accepted"
         ? "Accepted"
         : "Rejected";
-  const acceptButtonLabel = isVerifyPending
-    ? "Verifying..."
-    : optimisticPaymentProofStatus === "accepted"
-      ? "Accepted"
-      : "Accept Payment";
 
   return (
     <>
@@ -123,10 +118,14 @@ export default function OnlinePaymentSection({
       <div className="flex gap-2">
         {/* Accepted */}
         <Button
-          disabled={isPending || optimisticPaymentProofStatus === "accepted"}
+          disabled={
+            isPending ||
+            optimisticPaymentProofStatus === "accepted" ||
+            optimisticPaymentProofStatus === "rejected"
+          }
           onClick={() => handleStatusChange("accepted")}
         >
-          {acceptButtonLabel}
+          {isVerifyPending ? "Verifying..." : "Accept"}
         </Button>
         <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
           {/* Reject Button */}
@@ -138,11 +137,7 @@ export default function OnlinePaymentSection({
               optimisticPaymentProofStatus === "accepted"
             }
           >
-            {isRejectPending
-              ? "Rejecting..."
-              : optimisticPaymentProofStatus === "rejected"
-                ? "Rejected"
-                : "Reject Payment"}
+            {isRejectPending ? "Rejecting..." : "Reject"}
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>

@@ -112,7 +112,10 @@ async function CheckInPage({
           </div>
         </div>
       </div>
-      <CheckInDataDialog eventId={eventDayData.event.eventId} />
+      <CheckInDataDialog
+        eventId={eventDayData.event.eventId}
+        eventTitle={eventDayData.event.eventTitle}
+      />
     </>
   );
 }

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationListPageProps } from "@/lib/types/route";
 import { parseStringParam } from "@/lib/utils";
+import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import RegistrationListTable from "./RegistrationListTable";
 
@@ -13,16 +14,19 @@ export default async function RegistrationList({
   const { reg_q, reg_paymentStatus } = await searchParams;
   const cookieStore = await cookies();
 
-  const registrationList = await tryCatch(
-    getEventRegistrationList(cookieStore.getAll(), {
-      eventId,
-      searchString: parseStringParam(reg_q),
-      paymentProofStatus: parseStringParam(reg_paymentStatus),
-    }),
-  );
+  const [registrationList, eventDetails] = await Promise.all([
+    tryCatch(
+      getEventRegistrationList(cookieStore.getAll(), {
+        eventId,
+        searchString: parseStringParam(reg_q),
+        paymentProofStatus: parseStringParam(reg_paymentStatus),
+      }),
+    ),
+    tryCatch(getEventById(cookieStore.getAll(), { id: eventId })),
+  ]);
 
-  if (!registrationList.success) {
-    console.error(registrationList.error);
+  if (!registrationList.success || !eventDetails.success) {
+    console.error(registrationList.error || eventDetails.error);
     return (
       <div>
         Error: Unable to get the registration list for this event. Please
@@ -34,7 +38,10 @@ export default async function RegistrationList({
   return (
     <div className="space-y-2">
       <div className="h-8">{registrationList.data.length} results</div>
-      <RegistrationListTable registrationList={registrationList.data} />
+      <RegistrationListTable
+        eventTitle={eventDetails.data.eventTitle}
+        registrationList={registrationList.data}
+      />
     </div>
   );
 }
