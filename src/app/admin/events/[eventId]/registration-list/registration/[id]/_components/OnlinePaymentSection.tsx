@@ -88,11 +88,6 @@ export default function OnlinePaymentSection({
       : optimisticPaymentProofStatus === "accepted"
         ? "Accepted"
         : "Rejected";
-  const acceptButtonLabel = isVerifyPending
-    ? "Verifying..."
-    : optimisticPaymentProofStatus === "accepted"
-      ? "Accepted"
-      : "Accept Payment";
 
   return (
     <>
@@ -130,7 +125,7 @@ export default function OnlinePaymentSection({
           }
           onClick={() => handleStatusChange("accepted")}
         >
-          {acceptButtonLabel}
+          {isVerifyPending ? "Verifying..." : "Accept"}
         </Button>
         <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
           {/* Reject Button */}
