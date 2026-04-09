@@ -81,6 +81,18 @@ export default function OnlinePaymentSection({
 
   const isVerifyPending = isPending && pendingAction === "accepted";
   const isRejectPending = isPending && pendingAction === "rejected";
+  const statusBadgeLabel = isVerifyPending
+    ? "Verifying..."
+    : optimisticPaymentProofStatus === "pending"
+      ? "Pending Review"
+      : optimisticPaymentProofStatus === "accepted"
+        ? "Accepted"
+        : "Rejected";
+  const acceptButtonLabel = isVerifyPending
+    ? "Verifying..."
+    : optimisticPaymentProofStatus === "accepted"
+      ? "Accepted"
+      : "Accept Payment";
 
   return (
     <>
@@ -105,7 +117,7 @@ export default function OnlinePaymentSection({
           )}
           variant="outline"
         >
-          {isVerifyPending ? "Verifying..." : optimisticPaymentProofStatus}
+          {statusBadgeLabel}
         </Badge>
       </div>
       <div className="flex gap-2">
@@ -118,7 +130,7 @@ export default function OnlinePaymentSection({
           }
           onClick={() => handleStatusChange("accepted")}
         >
-          {isVerifyPending ? "Verifying..." : "Accept"}
+          {acceptButtonLabel}
         </Button>
         <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
           {/* Reject Button */}

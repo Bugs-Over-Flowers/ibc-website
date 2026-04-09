@@ -2,23 +2,18 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/db.types";
 
 /**
- * Create admin Supabase client for E2E test seeding/cleanup
- * Bypasses RLS and uses service role key
+ * Create admin Supabase client for E2E test seeding/cleanup.
+ * Bypasses RLS and uses anon key.
  */
 export function createE2EAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 
-  if (!supabaseUrl || !supabaseServiceKey) {
+  if (!supabaseUrl || !supabaseSecretKey) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
+      "Missing NEXT_PUBLIC_SUPABASE_URL and secret key (SUPABASE_SECRET_KEY)",
     );
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  return createClient<Database>(supabaseUrl, supabaseSecretKey);
 }
