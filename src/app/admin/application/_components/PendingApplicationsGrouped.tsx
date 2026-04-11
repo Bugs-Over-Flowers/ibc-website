@@ -18,6 +18,15 @@ interface PendingApplicationsGroupedProps {
   applications: Awaited<ReturnType<typeof getApplications>>;
 }
 
+function isSelectableApplication(
+  application: PendingApplicationsGroupedProps["applications"][number],
+): boolean {
+  return (
+    application.paymentMethod !== "BPI" ||
+    (application.paymentProofStatus ?? "pending") !== "pending"
+  );
+}
+
 function groupBySchedule(
   applications: PendingApplicationsGroupedProps["applications"],
 ) {
@@ -103,7 +112,7 @@ const SHARED_COLS = [
 export function PendingApplicationsGrouped({
   applications,
 }: PendingApplicationsGroupedProps) {
-  const { selectedApplicationIds, selectAll, toggleSelection } =
+  const { selectedApplicationIds, toggleSelection } =
     useSelectedApplicationsStore();
   const { sortedGroups, unscheduled } = useMemo(
     () => groupBySchedule(applications),
@@ -111,44 +120,47 @@ export function PendingApplicationsGrouped({
   );
 
   return (
-    <div className="space-y-5">
-      {sortedGroups.map((group) => {
-        const ids = group.applications.map((a) => a.applicationId);
-        const selCount = ids.filter((id) =>
-          selectedApplicationIds.has(id),
-        ).length;
-        const allSelected = ids.length > 0 && selCount === ids.length;
-        const someSelected = selCount > 0 && selCount < ids.length;
+    <div className="min-w-0 overflow-x-auto">
+      <div className="min-w-[640px] space-y-5">
+        {sortedGroups.map((group) => {
+          const selectableIds = group.applications
+            .filter(isSelectableApplication)
+            .map((a) => a.applicationId);
+          const selCount = selectableIds.filter((id) =>
+            selectedApplicationIds.has(id),
+          ).length;
+          const allSelected =
+            selectableIds.length > 0 && selCount === selectableIds.length;
+          const someSelected = selCount > 0 && selCount < selectableIds.length;
 
-        return (
-          <Card className="overflow-hidden rounded-2xl p-0" key={group.key}>
-            {/* Group header */}
-            <div className="flex items-center justify-between gap-4 border-b bg-muted/40 px-4 py-4">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                <span className="flex items-center gap-1.5 font-medium text-sm">
-                  <Calendar className="size-3.5 text-muted-foreground" />
-                  {group.dateLabel}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-0.5 text-muted-foreground text-xs">
-                    <Clock className="size-3" />
-                    {group.timeLabel}
+          return (
+            <Card className="overflow-hidden rounded-2xl p-0" key={group.key}>
+              {/* Group header */}
+              <div className="flex items-center justify-between gap-4 border-b bg-muted/40 px-4 py-4">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                  <span className="flex items-center gap-1.5 font-medium text-sm">
+                    <Calendar className="size-3.5 text-muted-foreground" />
+                    {group.dateLabel}
                   </span>
-                  <span className="flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-0.5 text-muted-foreground text-xs">
-                    <MapPin className="size-3" />
-                    {group.venue}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-0.5 text-muted-foreground text-xs">
+                      <Clock className="size-3" />
+                      {group.timeLabel}
+                    </span>
+                    <span className="flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-0.5 text-muted-foreground text-xs">
+                      <MapPin className="size-3" />
+                      {group.venue}
+                    </span>
+                  </div>
                 </div>
+                <span className="shrink-0 rounded-full border border-border bg-background px-2.5 py-0.5 text-muted-foreground text-xs">
+                  {group.applications.length} application
+                  {group.applications.length !== 1 ? "s" : ""}
+                </span>
               </div>
-              <span className="shrink-0 rounded-full border border-border bg-background px-2.5 py-0.5 text-muted-foreground text-xs">
-                {group.applications.length} application
-                {group.applications.length !== 1 ? "s" : ""}
-              </span>
-            </div>
 
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table className="min-w-[640px] table-fixed">
+              <CardContent className="p-0">
+                <Table className="w-full table-fixed">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12">
@@ -158,9 +170,13 @@ export function PendingApplicationsGrouped({
                           data-indeterminate={someSelected}
                           onCheckedChange={() => {
                             if (allSelected) {
-                              ids.forEach(toggleSelection);
+                              selectableIds.forEach(toggleSelection);
                             } else {
-                              selectAll(ids);
+                              selectableIds.forEach((id) => {
+                                if (!selectedApplicationIds.has(id)) {
+                                  toggleSelection(id);
+                                }
+                              });
                             }
                           }}
                         />
@@ -180,30 +196,29 @@ export function PendingApplicationsGrouped({
                       <ApplicationsTableRow
                         application={app}
                         key={app.applicationId}
+                        showContact={false}
                       />
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+              </CardContent>
+            </Card>
+          );
+        })}
 
-      {unscheduled.length > 0 && (
-        <Card className="overflow-hidden rounded-2xl p-0">
-          <div className="flex items-center gap-2 border-b px-4 py-3">
-            <AlertCircle className="size-3.5 text-muted-foreground" />
-            <span className="font-medium text-muted-foreground text-sm">
-              No interview scheduled
-            </span>
-            <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-muted-foreground text-xs">
-              {unscheduled.length}
-            </span>
-          </div>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table className="min-w-[640px] table-fixed">
+        {unscheduled.length > 0 && (
+          <Card className="overflow-hidden rounded-2xl p-0">
+            <div className="flex items-center gap-2 border-b px-4 py-3">
+              <AlertCircle className="size-3.5 text-muted-foreground" />
+              <span className="font-medium text-muted-foreground text-sm">
+                No interview scheduled
+              </span>
+              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+                {unscheduled.length}
+              </span>
+            </div>
+            <CardContent className="p-0">
+              <Table className="w-full table-fixed">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">
@@ -224,14 +239,15 @@ export function PendingApplicationsGrouped({
                     <ApplicationsTableRow
                       application={app}
                       key={app.applicationId}
+                      showContact={false}
                     />
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

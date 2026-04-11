@@ -33,6 +33,8 @@ export function ApplicationsTable({
   applications,
   status,
 }: ApplicationsTableProps) {
+  const showContactColumn = status === "finished";
+
   const {
     selectAll,
     clearSelection,
@@ -113,23 +115,36 @@ export function ApplicationsTable({
               <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
                 Company Name
               </TableHead>
-              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              <TableHead className="w-[24%] font-semibold text-muted-foreground text-xs uppercase tracking-wide">
                 Sector
               </TableHead>
-              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              <TableHead className="w-[14%] font-semibold text-muted-foreground text-xs uppercase tracking-wide">
                 Application Type
               </TableHead>
-              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              {showContactColumn && (
+                <TableHead className="w-[20%] font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                  Contact
+                </TableHead>
+              )}
+              <TableHead
+                className={`${showContactColumn ? "w-[10%]" : "w-[14%]"} font-semibold text-muted-foreground text-xs uppercase tracking-wide`}
+              >
                 Date Applied
               </TableHead>
-              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              <TableHead
+                className={`${showContactColumn ? "w-[10%]" : "w-[12%]"} font-semibold text-muted-foreground text-xs uppercase tracking-wide`}
+              >
                 Actions
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {applications.map((app) => (
-              <ApplicationsTableRow application={app} key={app.applicationId} />
+              <ApplicationsTableRow
+                application={app}
+                key={app.applicationId}
+                showContact={showContactColumn}
+              />
             ))}
           </TableBody>
         </Table>

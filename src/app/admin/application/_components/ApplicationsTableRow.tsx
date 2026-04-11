@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, MoreHorizontal } from "lucide-react";
+import { AlertTriangle, Eye } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ import { toPascalCaseWithSpaces } from "../_utils/formatters";
 
 interface ApplicationsTableRowProps {
   application: Awaited<ReturnType<typeof getApplications>>[number];
+  showContact?: boolean;
 }
 
 function getApplicationTypeColor(type: string): {
@@ -51,6 +52,7 @@ function getApplicationTypeColor(type: string): {
 
 export function ApplicationsTableRow({
   application,
+  showContact = true,
 }: ApplicationsTableRowProps) {
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -89,7 +91,9 @@ export function ApplicationsTableRow({
           }}
         />
       </TableCell>
-      <TableCell className="w-[24%] font-medium">
+      <TableCell
+        className={showContact ? "w-[22%] font-medium" : "w-[24%] font-medium"}
+      >
         <div className="flex items-center gap-2">
           {isPaymentProofPending && (
             <Tooltip>
@@ -105,12 +109,14 @@ export function ApplicationsTableRow({
           <span>{application.companyName}</span>
         </div>
       </TableCell>
-      <TableCell className="w-[34%] max-w-64">
+      <TableCell
+        className={showContact ? "w-[24%] max-w-56" : "w-[34%] max-w-64"}
+      >
         <div className="line-clamp-2 truncate text-sm">
           {application.Sector?.sectorName}
         </div>
       </TableCell>
-      <TableCell className="w-[16%]">
+      <TableCell className={showContact ? "w-[14%]" : "w-[16%]"}>
         <Badge
           className={`${borderColor} ${textColor} text-xs`}
           variant="outline"
@@ -118,18 +124,24 @@ export function ApplicationsTableRow({
           {toPascalCaseWithSpaces(application.applicationType)}
         </Badge>
       </TableCell>
-      {/* <TableCell>
-        <div className="text-sm">
-          <div>{application.emailAddress}</div>
-          <div className="text-muted-foreground">
-            {application.mobileNumber}
+      {showContact && (
+        <TableCell className="w-[20%]">
+          <div className="text-sm">
+            <div>{application.emailAddress}</div>
+            <div className="text-muted-foreground">
+              {application.mobileNumber}
+            </div>
           </div>
-        </div>
-      </TableCell> */}
-      <TableCell className="w-[14%] font-mono text-muted-foreground text-xs">
+        </TableCell>
+      )}
+      <TableCell
+        className={`${showContact ? "w-[10%]" : "w-[14%]"} font-mono text-muted-foreground text-xs`}
+      >
         {new Date(application.applicationDate).toLocaleDateString()}
       </TableCell>
-      <TableCell className="w-[12%] pr-4 text-right">
+      <TableCell
+        className={`${showContact ? "w-[10%]" : "w-[12%]"} pr-4 text-right`}
+      >
         <Button
           aria-label={`Open application ${application.companyName}`}
           className="ml-auto size-8 p-0 active:scale-95 active:opacity-80 dark:hover:bg-muted"
@@ -140,7 +152,7 @@ export function ApplicationsTableRow({
             href={`/admin/application/${application.applicationId}` as Route}
             title={`Open application ${application.companyName}`}
           >
-            <MoreHorizontal className="size-4" />
+            <Eye className="size-4" />
           </Link>
         </Button>
       </TableCell>
