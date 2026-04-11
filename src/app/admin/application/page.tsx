@@ -5,6 +5,7 @@ import { getApplications } from "@/server/applications/queries/getApplications";
 import ApplicationsList from "./_components/ApplicationsList";
 import { ApplicationsListSkeleton } from "./_components/ApplicationsListSkeleton";
 import ApplicationsTabs from "./_components/ApplicationsTabs";
+import ApplicationsPageLoading from "./loading";
 
 export const metadata: Metadata = {
   title: "Membership Applications | Admin",
@@ -39,7 +40,7 @@ export default async function ApplicationsPage() {
 
   return (
     <div className="space-y-6 px-2">
-      <Suspense fallback={<ApplicationsListSkeleton />}>
+      <Suspense fallback={<ApplicationsPageLoading />}>
         <div>
           <h1 className="font-bold text-3xl text-foreground">
             Membership Applications
@@ -51,9 +52,21 @@ export default async function ApplicationsPage() {
 
         <ApplicationsTabs
           counts={counts}
-          finishedApplications={<ApplicationsList status="finished" />}
-          newApplications={<ApplicationsList status="new" />}
-          pendingApplications={<ApplicationsList status="pending" />}
+          finishedApplications={
+            <Suspense fallback={<ApplicationsListSkeleton />}>
+              <ApplicationsList status="finished" />
+            </Suspense>
+          }
+          newApplications={
+            <Suspense fallback={<ApplicationsListSkeleton />}>
+              <ApplicationsList status="new" />
+            </Suspense>
+          }
+          pendingApplications={
+            <Suspense fallback={<ApplicationsListSkeleton />}>
+              <ApplicationsList status="pending" />
+            </Suspense>
+          }
         />
       </Suspense>
     </div>
