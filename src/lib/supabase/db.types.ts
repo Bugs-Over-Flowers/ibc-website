@@ -621,12 +621,68 @@ export type Database = {
           },
         ];
       };
+      WebsiteContent: {
+        Row: {
+          cardPlacement: number | null;
+          createdAt: string;
+          entryKey: string;
+          icon: string | null;
+          id: string;
+          imageUrl: string | null;
+          isActive: boolean;
+          section: Database["public"]["Enums"]["WebsiteContentSection"];
+          textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+          textValue: string | null;
+          updatedAt: string;
+        };
+        Insert: {
+          cardPlacement?: number | null;
+          createdAt?: string;
+          entryKey: string;
+          icon?: string | null;
+          id?: string;
+          imageUrl?: string | null;
+          isActive?: boolean;
+          section: Database["public"]["Enums"]["WebsiteContentSection"];
+          textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+          textValue?: string | null;
+          updatedAt?: string;
+        };
+        Update: {
+          cardPlacement?: number | null;
+          createdAt?: string;
+          entryKey?: string;
+          icon?: string | null;
+          id?: string;
+          imageUrl?: string | null;
+          isActive?: boolean;
+          section?: Database["public"]["Enums"]["WebsiteContentSection"];
+          textType?: Database["public"]["Enums"]["WebsiteContentTextType"];
+          textValue?: string | null;
+          updatedAt?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
       approve_membership_application: {
+        Args: { p_application_id: string };
+        Returns: {
+          business_member_id: string;
+          message: string;
+        }[];
+      };
+      approve_membership_renewal_application: {
+        Args: { p_application_id: string };
+        Returns: {
+          business_member_id: string;
+          message: string;
+        }[];
+      };
+      approve_membership_update_application: {
         Args: { p_application_id: string };
         Returns: {
           business_member_id: string;
@@ -1013,6 +1069,37 @@ export type Database = {
         };
         Returns: Json;
       };
+      upsert_website_content: {
+        Args: {
+          p_card_placement?: number;
+          p_entry_key: string;
+          p_icon?: string;
+          p_image_url?: string;
+          p_is_active?: boolean;
+          p_section: Database["public"]["Enums"]["WebsiteContentSection"];
+          p_text_type: Database["public"]["Enums"]["WebsiteContentTextType"];
+          p_text_value?: string;
+        };
+        Returns: {
+          cardPlacement: number | null;
+          createdAt: string;
+          entryKey: string;
+          icon: string | null;
+          id: string;
+          imageUrl: string | null;
+          isActive: boolean;
+          section: Database["public"]["Enums"]["WebsiteContentSection"];
+          textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+          textValue: string | null;
+          updatedAt: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "WebsiteContent";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
     };
     Enums: {
       ApplicationMemberType: "corporate" | "personal";
@@ -1026,6 +1113,14 @@ export type Database = {
       PaymentProofStatus: "pending" | "accepted" | "rejected";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
       SponsoredRegistrationStatus: "active" | "full" | "disabled";
+      WebsiteContentSection:
+        | "vision_mission"
+        | "goals"
+        | "company_thrusts"
+        | "board_of_trustees"
+        | "secretariat"
+        | "landing_page_benefits";
+      WebsiteContentTextType: "Paragraph" | "Title" | "Subtitle";
     };
     CompositeTypes: {
       participant_list_item: {
@@ -1205,6 +1300,15 @@ export const Constants = {
       PaymentProofStatus: ["pending", "accepted", "rejected"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
       SponsoredRegistrationStatus: ["active", "full", "disabled"],
+      WebsiteContentSection: [
+        "vision_mission",
+        "goals",
+        "company_thrusts",
+        "board_of_trustees",
+        "secretariat",
+        "landing_page_benefits",
+      ],
+      WebsiteContentTextType: ["Paragraph", "Title", "Subtitle"],
     },
   },
 } as const;
