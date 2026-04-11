@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  Building2,
-  Globe,
-  Palette,
-  Shield,
-  TrendingUp,
-  Users,
-} from "lucide-react";
 import { motion } from "motion/react";
 import { resolveWebsiteContentIcon } from "@/app/(public)/_lib/websiteContentIconMap";
 import RichTextDisplay from "@/components/RichTextDisplay";
