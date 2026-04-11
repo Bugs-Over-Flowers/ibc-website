@@ -9,6 +9,7 @@ import BackButton from "../_components/BackButton";
 import CheckInListContent from "./_components/CheckInListContent";
 import CheckInListTabWrapper from "./_components/CheckInListTabWrapper";
 import DraftEventEmptyComponent from "./_components/DraftEventEmptyComponent";
+import CheckInListPageLoading, { CheckInListContentSkeleton } from "./loading";
 
 type CheckInPageWrapperProps =
   PageProps<"/admin/events/[eventId]/check-in-list">;
@@ -20,14 +21,7 @@ export default function CheckInPageWrapper({
 }) {
   return (
     <div className="space-y-6">
-      <Suspense
-        fallback={
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <div className="size-3.5 animate-spin rounded-full border-2 border-border border-t-muted-foreground" />
-            Loading check-in data...
-          </div>
-        }
-      >
+      <Suspense fallback={<CheckInListPageLoading />}>
         <BackButtonWrapper params={params} />
         <CheckInPage params={params} />
       </Suspense>
@@ -113,14 +107,7 @@ async function CheckInPage({
             key={eventDay.eventDayId}
             value={eventDay.eventDayId}
           >
-            <Suspense
-              fallback={
-                <div className="flex items-center gap-2 py-6 text-muted-foreground text-sm">
-                  <div className="size-3.5 animate-spin rounded-full border-2 border-border border-t-muted-foreground" />
-                  Loading check-ins...
-                </div>
-              }
-            >
+            <Suspense fallback={<CheckInListContentSkeleton />}>
               <CheckInListContent
                 eventDayId={eventDay.eventDayId}
                 eventDayLabel={eventDay.label}

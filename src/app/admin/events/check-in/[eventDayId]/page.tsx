@@ -10,6 +10,7 @@ import EventDayDetails from "./_components/EventDayDetails";
 import QuickOnsiteRegistrationCard from "./_components/QuickOnsiteRegistrationCard";
 import QRCodeScanner from "./_components/qr-scanning/QRCodeScanner";
 import CheckInRegistrationPanel from "./_components/registration-list/CheckInRegistrationPanel";
+import CheckInPageLoading from "./loading";
 
 type CheckInPageProps = PageProps<"/admin/events/check-in/[eventDayId]">;
 
@@ -22,14 +23,7 @@ export default function CheckInPageWrapper({
 }) {
   return (
     <div className="space-y-6 px-2">
-      <Suspense
-        fallback={
-          <div className="flex items-center gap-2 py-10 text-muted-foreground text-sm">
-            <div className="size-3.5 animate-spin rounded-full border-2 border-border border-t-muted-foreground" />
-            Loading check-in station...
-          </div>
-        }
-      >
+      <Suspense fallback={<CheckInPageLoading />}>
         <CheckInPage params={params} searchParams={searchParams} />
       </Suspense>
     </div>
