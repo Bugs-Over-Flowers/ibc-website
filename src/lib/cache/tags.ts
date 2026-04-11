@@ -23,6 +23,10 @@ export const CACHE_TAGS = {
     stats: "registrations:stats",
     event: "registrations:event",
   },
+  sponsoredRegistrations: {
+    all: "sponsored-registrations:all",
+    admin: "sponsored-registrations:admin",
+  },
   checkIns: {
     all: "check-ins:all",
     list: "check-ins:list",
