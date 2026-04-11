@@ -11,7 +11,13 @@ import tryCatch from "@/lib/server/tryCatch";
 import { updateRegistrationPaymentProofStatus } from "@/server/registration/mutations/updateRegistrationPaymentProofStatus";
 
 interface UsePaymentProofDecisionActionsProps {
-  registrationId: string;
+  page: "check-in" | "registration-details";
+  registrationData: {
+    registrationId: string;
+    eventTitle: string;
+    registrantName: string;
+    registrantEmail: string;
+  };
   onAcceptAction?: (registrationId: string) => Promise<unknown>;
   onRejectAction?: (registrationId: string) => Promise<unknown>;
   onStatusChange?: (status: PaymentProofStatus) => void;
@@ -19,7 +25,8 @@ interface UsePaymentProofDecisionActionsProps {
 }
 
 export function usePaymentProofDecisionActions({
-  registrationId,
+  page,
+  registrationData,
   onAcceptAction,
   onRejectAction,
   onStatusChange,
@@ -28,10 +35,14 @@ export function usePaymentProofDecisionActions({
   const { execute: acceptProof, isPending: isAccepting } = useAction(
     tryCatch(async () =>
       onAcceptAction
-        ? onAcceptAction(registrationId)
+        ? onAcceptAction(registrationData.registrationId)
         : updateRegistrationPaymentProofStatus({
-            registrationId,
+            page,
+            eventTitle: registrationData.eventTitle,
+            registrationId: registrationData.registrationId,
             status: "accepted",
+            toEmail: registrationData.registrantEmail,
+            registrantName: registrationData.registrantName,
           }),
     ),
     {
@@ -50,10 +61,14 @@ export function usePaymentProofDecisionActions({
   const { execute: rejectProof, isPending: isRejecting } = useAction(
     tryCatch(async () =>
       onRejectAction
-        ? onRejectAction(registrationId)
+        ? onRejectAction(registrationData.registrationId)
         : updateRegistrationPaymentProofStatus({
-            registrationId,
+            page,
+            eventTitle: registrationData.eventTitle,
+            registrationId: registrationData.registrationId,
             status: "rejected",
+            toEmail: registrationData.registrantEmail,
+            registrantName: registrationData.registrantName,
           }),
     ),
     {

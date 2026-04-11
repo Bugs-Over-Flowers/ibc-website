@@ -26,13 +26,16 @@ interface RegistrationRowActionsProps {
     paymentMethod: Enums<"PaymentMethod">;
     paymentProofStatus: Enums<"PaymentProofStatus">;
     affiliation: string;
+    registrantName: string;
   };
+  eventTitle: string;
   isDetailsPage: boolean;
 }
 
 export default function RegistrationRowActions({
   data,
   isDetailsPage,
+  eventTitle,
 }: RegistrationRowActionsProps) {
   const { eventId } = useParams<{ eventId: string }>();
 
@@ -93,7 +96,6 @@ export default function RegistrationRowActions({
 
       {shouldShowPaymentProofAction && (
         <PaymentProofReviewDialog
-          enforcePendingDecision={false}
           initialPaymentProofStatus={data.paymentProofStatus}
           onAcceptAction={async (id) => {
             const result = await verifyPayment(id);
@@ -107,7 +109,13 @@ export default function RegistrationRowActions({
             setPaymentProofDialog(false);
           }}
           open={paymentProofDialog}
-          registrationId={data.registrationId}
+          page="registration-details"
+          registrationData={{
+            registrationId: data.registrationId,
+            eventTitle,
+            registrantName: data.registrantName,
+            registrantEmail: data.email,
+          }}
         />
       )}
     </>

@@ -186,7 +186,7 @@ export const ServerRegistrationSchema = z.object({
   step1: StandardRegistrationStep1Schema,
   step2: StandardRegistrationStep2Schema,
   step4: StandardRegistrationStep4Schema,
-  sponsoredRegistrationId: z.string().uuid().optional().nullable(),
+  sponsoredRegistrationId: z.uuid().optional().nullable(),
   step3: z.discriminatedUnion("paymentMethod", [
     z.object({
       paymentMethod: z.literal("online"),
@@ -199,3 +199,16 @@ export const ServerRegistrationSchema = z.object({
 });
 
 export type ServerRegistrationSchema = z.infer<typeof ServerRegistrationSchema>;
+
+/**
+ * Zod schema for validating RPC response at runtime.
+ * Ensures type safety for data returned from database.
+ */
+export const SubmitRegistrationResponseSchema = z.object({
+  registrationId: z.uuid(),
+  message: z.string(),
+});
+
+export type SubmitRegistrationResponseSchema = z.infer<
+  typeof SubmitRegistrationResponseSchema
+>;

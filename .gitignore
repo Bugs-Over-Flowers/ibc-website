@@ -19,6 +19,8 @@ __tests__/cypress-videos
 /playwright-report/
 /test-results/
 /.playwright/
+__tests__/e2e/generated/
+__tests__/e2e/.auth/
 
 # next.js
 /.next/

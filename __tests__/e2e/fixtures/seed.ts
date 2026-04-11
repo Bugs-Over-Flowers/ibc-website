@@ -19,31 +19,43 @@ export interface E2ETestData {
   };
 }
 
-/**
- * Seed unique test data for E2E registration tests
- * Creates an event and optionally a business member
- */
-export async function seedE2ERegistrationData(options?: {
+interface SeedOptions {
   eventType?: "public" | "private";
   createBusinessMember?: boolean;
-}): Promise<E2ETestData> {
+  eventTiming?: "upcoming" | "past";
+  titlePrefix?: string;
+}
+
+/**
+ * Seed unique test data for E2E registration tests.
+ * Creates an event and optionally a business member.
+ */
+export async function seedE2ERegistrationData(
+  options?: SeedOptions,
+): Promise<E2ETestData> {
   const timestamp = Date.now();
   const supabase = createE2EAdminClient();
+  const eventTiming = options?.eventTiming ?? "upcoming";
+
+  const startOffsetDays = eventTiming === "past" ? -8 : 7;
+  const endOffsetDays = eventTiming === "past" ? -7 : 8;
 
   // Create test event
   const eventData: EventInsert = {
-    eventTitle: `E2E Test Event ${timestamp}`,
+    eventTitle: `${options?.titlePrefix ?? "E2E Test Event"} ${timestamp}`,
     description: "Test event for E2E registration flow testing",
     eventStartDate: new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000,
+      Date.now() + startOffsetDays * 24 * 60 * 60 * 1000,
     ).toISOString(),
-    eventEndDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString(),
+    eventEndDate: new Date(
+      Date.now() + endOffsetDays * 24 * 60 * 60 * 1000,
+    ).toISOString(),
     venue: "E2E Test Venue",
     eventType: options?.eventType ?? "public",
     registrationFee: 500,
     eventHeaderUrl: "https://picsum.photos/800/400",
     maxGuest: 10,
-    publishedAt: new Date().toISOString(), // Make event visible
+    publishedAt: new Date().toISOString(),
   };
 
   const { data: event, error: eventError } = await supabase
@@ -68,11 +80,11 @@ export async function seedE2ERegistrationData(options?: {
     const memberData: BusinessMemberInsert = {
       businessName: `E2E Test Company ${timestamp}`,
       identifier: `e2e-${timestamp}`,
-      sectorId: 1, // Technology (from seed.sql)
+      sectorId: 1,
       websiteURL: "https://e2e-test.local",
       logoImageURL: "https://picsum.photos/200/200",
       joinDate: new Date().toISOString(),
-      membershipStatus: "paid", // Valid enum value
+      membershipStatus: "paid",
       lastPaymentDate: new Date().toISOString(),
       membershipExpiryDate: new Date(
         Date.now() + 365 * 24 * 60 * 60 * 1000,
