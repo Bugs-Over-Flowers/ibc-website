@@ -23,12 +23,17 @@ import PaymentProofViewPanel from "./PaymentProofViewPanel";
 type PaymentProofStatus = Enums<"PaymentProofStatus">;
 
 interface PaymentProofReviewDialogProps {
+  page: "check-in" | "registration-details";
   open: boolean;
   onOpenChange?: (open: boolean) => void;
-  registrationId: string;
+  registrationData: {
+    registrationId: string;
+    eventTitle: string;
+    registrantName: string;
+    registrantEmail: string;
+  };
   initialPaymentProofStatus: PaymentProofStatus;
   trigger?: React.ReactElement;
-  enforcePendingDecision?: boolean;
   onAcceptAction?: (registrationId: string) => Promise<unknown>;
   onRejectAction?: (registrationId: string) => Promise<unknown>;
   onReplaceAction?: (input: {
@@ -62,12 +67,12 @@ function getStatusClassName(status: PaymentProofStatus): string {
 }
 
 export default function PaymentProofReviewDialog({
+  page,
   open,
   onOpenChange,
-  registrationId,
+  registrationData,
   initialPaymentProofStatus,
   trigger,
-  enforcePendingDecision = true,
   onAcceptAction,
   onRejectAction,
   onReplaceAction,
@@ -98,12 +103,16 @@ export default function PaymentProofReviewDialog({
     isSignedUrlImageError,
     setIsSignedUrlImageError,
     isFetchingSignedUrl,
-  } = usePaymentProofSignedUrlAction({ open, registrationId });
+  } = usePaymentProofSignedUrlAction({
+    open,
+    registrationId: registrationData.registrationId,
+  });
 
   // Accept / Reject actions
   const { acceptProof, rejectProof, isAccepting, isRejecting } =
     usePaymentProofDecisionActions({
-      registrationId,
+      page,
+      registrationData,
       onAcceptAction,
       onRejectAction,
       onStatusChange,
@@ -112,7 +121,7 @@ export default function PaymentProofReviewDialog({
 
   // Replace proof + accept action
   const { isReplacing, handleReplaceAndAccept } = useReplacePaymentProofAction({
-    registrationId,
+    registrationId: registrationData.registrationId,
     onReplaceAction,
     onStatusChange,
     onProofPathChange,
@@ -124,15 +133,13 @@ export default function PaymentProofReviewDialog({
   });
 
   // Derived flags
+
+  // check if any action is pending
   const isAnyActionPending =
     isFetchingSignedUrl || isAccepting || isRejecting || isReplacing;
-  const isDecisionLocked =
-    enforcePendingDecision && paymentProofStatus !== "pending";
-  const canAccept = !isDecisionLocked && paymentProofStatus !== "accepted";
-  const canReject =
-    !isDecisionLocked &&
-    paymentProofStatus !== "rejected" &&
-    paymentProofStatus !== "accepted";
+
+  // check if decision is locked (the status has already been resolved by the admin)
+  const isDecisionLocked = paymentProofStatus !== "pending";
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
@@ -189,7 +196,7 @@ export default function PaymentProofReviewDialog({
           )}
         </div>
 
-        <DialogFooter className="mt-1 flex-wrap border-t pt-4 max-sm:[&>*]:w-full">
+        <DialogFooter className="mt-1 flex-wrap border-t pt-4 max-sm:*:w-full">
           {/* Camera or Upload mode Buttons */}
           {(mode === "camera" || mode === "upload") && (
             <>
@@ -293,7 +300,7 @@ export default function PaymentProofReviewDialog({
               </Button>
 
               <Button
-                disabled={isAnyActionPending || !canReject}
+                disabled={isAnyActionPending || isDecisionLocked}
                 onClick={() => rejectProof()}
                 variant="outline"
               >
@@ -301,7 +308,7 @@ export default function PaymentProofReviewDialog({
               </Button>
 
               <Button
-                disabled={isAnyActionPending || !canAccept}
+                disabled={isAnyActionPending || isDecisionLocked}
                 onClick={() => acceptProof()}
               >
                 {isAccepting ? "Accepting..." : "Accept"}
