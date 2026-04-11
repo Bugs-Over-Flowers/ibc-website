@@ -74,8 +74,16 @@ export async function getMembers(
   const membersWithSignedLogos = await Promise.all(
     (data as MemberWithSector[]).map(async (member: MemberWithSector) => {
       const { Application, ...memberWithoutApplication } = member;
+      const todayDate = new Date().toISOString().slice(0, 10);
+      const normalizedFeaturedExpirationDate =
+        member.featuredExpirationDate &&
+        member.featuredExpirationDate >= todayDate
+          ? member.featuredExpirationDate
+          : null;
+
       return {
         ...memberWithoutApplication,
+        featuredExpirationDate: normalizedFeaturedExpirationDate,
         logoImageURL: await signLogoUrl(member.logoImageURL),
         primaryApplicationId: member.primaryApplicationId,
       };

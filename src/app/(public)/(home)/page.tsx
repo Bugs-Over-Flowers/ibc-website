@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import FeaturedMembersSection from "@/components/FeaturedMembersSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import FacebookCTASection from "./_components/FacebookRedirect";
 import { FeaturedEventsHero } from "./_components/FeaturedEventsHero";
@@ -19,6 +20,9 @@ export default function Page() {
       <FeaturesSection />
       <Suspense>
         <FeaturedEventsSection />
+      </Suspense>
+      <Suspense>
+        <FeaturedMembersSection />
       </Suspense>
       <FacebookCTASection />
       <MembershipCTA />
