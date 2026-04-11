@@ -43,7 +43,7 @@ export async function getWebsiteContentSection(
   const defaults = getDefaultsBySection(parsedSection);
   const supabase = await createActionClient();
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("WebsiteContent")
     .select(
       "section, entryKey, textType, textValue, icon, imageUrl, cardPlacement, updatedAt",

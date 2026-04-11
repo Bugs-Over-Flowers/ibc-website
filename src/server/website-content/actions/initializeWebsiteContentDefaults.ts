@@ -25,7 +25,7 @@ export async function initializeWebsiteContentDefaults(
   const defaults = getDefaultsBySection(parsedSection);
   const supabase = await createActionClient();
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("WebsiteContent")
     .select("entryKey, textType")
     .eq("section", parsedSection)

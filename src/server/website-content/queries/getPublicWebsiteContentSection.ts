@@ -69,7 +69,7 @@ async function getPublicWebsiteContentSectionCached(
   );
 
   const supabase = await createClient(requestCookies);
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("WebsiteContent")
     .select("entryKey, textType, textValue, icon, imageUrl, cardPlacement")
     .eq("section", parsedSection)

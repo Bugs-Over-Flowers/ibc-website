@@ -8,14 +8,14 @@ export async function upsertWebsiteContentRow(
 ) {
   const supabase = await createActionClient();
 
-  const { error } = await (supabase as any).rpc("upsert_website_content", {
+  const { error } = await supabase.rpc("upsert_website_content", {
     p_section: input.section,
     p_entry_key: input.entryKey,
     p_text_type: input.textType,
-    p_text_value: input.textValue ?? null,
-    p_icon: input.icon ?? null,
-    p_image_url: input.imageUrl ?? null,
-    p_card_placement: input.cardPlacement ?? null,
+    p_text_value: input.textValue ?? undefined,
+    p_icon: input.icon ?? undefined,
+    p_image_url: input.imageUrl ?? undefined,
+    p_card_placement: input.cardPlacement ?? undefined,
     p_is_active: true,
   });
 
