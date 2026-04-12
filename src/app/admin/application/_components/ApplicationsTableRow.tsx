@@ -22,6 +22,20 @@ interface ApplicationsTableRowProps {
   showContact?: boolean;
 }
 
+function formatAppliedDate(dateValue: string): string {
+  const isoDate = dateValue.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
+    return `${isoDate.slice(8, 10)}/${isoDate.slice(5, 7)}/${isoDate.slice(0, 4)}`;
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(new Date(dateValue));
+}
+
 function getApplicationTypeColor(type: string): {
   borderColor: string;
   textColor: string;
@@ -74,6 +88,7 @@ export function ApplicationsTableRow({
   const isPaymentProofPending =
     application.paymentMethod === "BPI" && paymentProofStatus === "pending";
   const isSelectionDisabled = isPaymentProofPending;
+  const formattedAppliedDate = formatAppliedDate(application.applicationDate);
 
   return (
     <TableRow
@@ -137,7 +152,7 @@ export function ApplicationsTableRow({
       <TableCell
         className={`${showContact ? "w-[10%]" : "w-[14%]"} font-mono text-muted-foreground text-xs`}
       >
-        {new Date(application.applicationDate).toLocaleDateString()}
+        {formattedAppliedDate}
       </TableCell>
       <TableCell
         className={`${showContact ? "w-[10%]" : "w-[12%]"} pr-4 text-right`}
