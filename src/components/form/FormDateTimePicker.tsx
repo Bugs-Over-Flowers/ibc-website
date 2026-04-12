@@ -87,7 +87,7 @@ const FormDateTimePicker: React.FC<FormDateTimePickerProps> = ({
     <Field className={className} data-invalid={isInvalid}>
       {label && <Label className="mb-2 block">{label}</Label>}
 
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3">
         <div className="flex flex-1 flex-col gap-2">
           <Label className="px-1 font-normal text-muted-foreground text-xs">
             Date
@@ -131,7 +131,7 @@ const FormDateTimePicker: React.FC<FormDateTimePickerProps> = ({
           </Popover>
         </div>
 
-        <div className="flex w-32 flex-col gap-2">
+        <div className="flex w-full flex-col gap-2">
           <Label className="px-1 font-normal text-muted-foreground text-xs">
             Time
           </Label>

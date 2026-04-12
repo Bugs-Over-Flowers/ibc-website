@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import FeaturedMembersSection from "@/components/FeaturedMembersSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPublicWebsiteContentSection } from "@/server/website-content/queries/getPublicWebsiteContentSection";
 import FacebookCTASection from "./_components/FacebookRedirect";
@@ -32,6 +33,9 @@ export default async function Page() {
       <FeaturesSection featuresData={featuresData} />
       <Suspense>
         <FeaturedEventsSection />
+      </Suspense>
+      <Suspense>
+        <FeaturedMembersSection />
       </Suspense>
       <FacebookCTASection />
       <MembershipCTA />

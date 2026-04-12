@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,9 @@ import type { getMembers } from "@/server/members/queries/getMembers";
 interface MembersTableRowProps {
   member: Awaited<ReturnType<typeof getMembers>>[number];
   isSelected: boolean;
+  onFeatureClick: (
+    member: Awaited<ReturnType<typeof getMembers>>[number],
+  ) => void;
   onSelectedChange: (selected: boolean) => void;
   showCheckbox?: boolean;
 }
@@ -20,12 +24,19 @@ interface MembersTableRowProps {
 export function MembersTableRow({
   member,
   isSelected,
+  onFeatureClick,
   onSelectedChange,
   showCheckbox = false,
 }: MembersTableRowProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = member.logoImageURL && !imageError;
   const router = useRouter();
+  const todayDate = new Date().toISOString().slice(0, 10);
+  const normalizedFeaturedExpirationDate =
+    member.featuredExpirationDate && member.featuredExpirationDate >= todayDate
+      ? member.featuredExpirationDate
+      : null;
+  const isCurrentlyFeatured = !!normalizedFeaturedExpirationDate;
 
   const joinedDate = new Date(member.joinDate);
   const formattedJoinDate = Number.isNaN(joinedDate.getTime())
@@ -35,6 +46,15 @@ export function MembersTableRow({
         day: "numeric",
         year: "numeric",
       });
+  const formattedFeaturedUntil = normalizedFeaturedExpirationDate
+    ? new Date(
+        `${normalizedFeaturedExpirationDate}T00:00:00`,
+      ).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
 
   const handleCardClick = () => {
     if (showCheckbox) {
@@ -155,6 +175,15 @@ export function MembersTableRow({
           {member.Sector?.sectorName || "—"}
         </p>
 
+        {formattedFeaturedUntil ? (
+          <Badge
+            className="w-fit bg-primary/10 text-[10px] text-primary"
+            variant="secondary"
+          >
+            Featured until {formattedFeaturedUntil}
+          </Badge>
+        ) : null}
+
         <Separator className="opacity-50" />
 
         {/* Meta */}
@@ -171,6 +200,20 @@ export function MembersTableRow({
             <span>Joined {formattedJoinDate}</span>
           </div>
         </div>
+
+        <Button
+          className="mt-1 h-9 w-full rounded-lg"
+          disabled={isCurrentlyFeatured}
+          onClick={(e) => {
+            e.stopPropagation();
+            onFeatureClick(member);
+          }}
+          size="sm"
+          type="button"
+          variant="outline"
+        >
+          {isCurrentlyFeatured ? "Already Featured" : "Feature Member"}
+        </Button>
       </div>
     </article>
   );

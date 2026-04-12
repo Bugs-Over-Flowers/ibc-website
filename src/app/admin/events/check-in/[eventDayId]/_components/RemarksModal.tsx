@@ -14,8 +14,6 @@ import { useAppForm } from "@/hooks/_formHooks";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
 
 export default function RemarksModal() {
-  const editedRemarks = useAttendanceStore((state) => state.editedRemarks);
-
   const setSelectedRemarkParticipantId = useAttendanceStore(
     (state) => state.setSelectedRemarkParticipantId,
   );
@@ -45,7 +43,6 @@ export default function RemarksModal() {
     onSubmit: ({ value }) => {
       if (!selectedRemarkParticipantId) return;
       setRemark(selectedRemarkParticipantId, value.remark?.trim() || "");
-      console.log("Remark saved", selectedRemarkParticipantId);
       setSelectedRemarkParticipantId(null);
     },
   });
@@ -53,13 +50,6 @@ export default function RemarksModal() {
   const handleSetInitialState = useEffectEvent(
     (selectedRemarkParticipantId: string | null) => {
       if (selectedRemarkParticipantId !== "") {
-        console.log("Setting initial state: ");
-        console.log("edited remarks: ", editedRemarks);
-
-        console.log(
-          "participant remark:",
-          getEditingParticipantRemark(selectedRemarkParticipantId),
-        );
         form.reset();
       }
     },
@@ -73,15 +63,9 @@ export default function RemarksModal() {
 
   return (
     <Dialog open={!!selectedRemarkParticipantId}>
-      <DialogContent showCloseButton={false}>
-        <form
-          onSubmit={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-        >
-          <DialogTitle>
+      <DialogContent className="max-w-sm gap-0 p-0" showCloseButton={false}>
+        <div className="border-b px-5 py-4">
+          <DialogTitle className="font-medium text-base">
             Remarks -{" "}
             {
               scannedData?.participants.find(
@@ -89,24 +73,39 @@ export default function RemarksModal() {
               )?.firstName
             }
           </DialogTitle>
+          <p className="mt-0.5 text-muted-foreground text-xs">
+            Add a note for this participant's check-in.
+          </p>
+        </div>
 
-          <form.AppField name="remark">
-            {(field) => (
-              <div className="space-y-4 py-4">
-                <field.TextareaField
-                  placeholder="Enter remarks here..."
-                  rows={4}
-                />
-                <div className="text-muted-foreground text-sm">
-                  {field.state.value?.length || 0} / 500 characters
+        <form
+          className="flex flex-col"
+          onSubmit={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <div className="px-5 py-4">
+            <form.AppField name="remark">
+              {(field) => (
+                <div className="flex flex-col gap-1.5">
+                  <field.TextareaField
+                    placeholder="Enter remarks here..."
+                    rows={4}
+                  />
+                  <p className="text-right text-muted-foreground text-xs">
+                    {field.state.value?.length || 0} / 500
+                  </p>
                 </div>
-              </div>
-            )}
-          </form.AppField>
+              )}
+            </form.AppField>
+          </div>
 
-          <DialogFooter>
+          <DialogFooter className="justify-end gap-2 border-t px-5 py-3">
             <Button
               onClick={() => setSelectedRemarkParticipantId(null)}
+              size="sm"
               type="button"
               variant="outline"
             >
