@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { MembershipApplicationData } from "@/hooks/membershipApplication.store";
+import { resolveMemberLogoUrl } from "@/lib/storage/memberLogo";
 import { cn } from "@/lib/utils";
 import type { Sector } from "@/server/membership/queries/getSectors";
 
@@ -204,7 +205,8 @@ export function Step4Review({ applicationData, sectors }: StepProps) {
     setLogoPreview(null);
   }, [applicationData.step2.logoImage]);
 
-  const logoSrc = logoPreview || applicationData.step2.logoImageURL || null;
+  const logoSrc =
+    logoPreview || resolveMemberLogoUrl(applicationData.step2.logoImageURL);
   const principalRepresentative = applicationData.step3.representatives.find(
     (rep) => rep.companyMemberType === "principal",
   );

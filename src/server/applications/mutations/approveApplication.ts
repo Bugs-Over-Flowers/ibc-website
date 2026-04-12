@@ -3,6 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import type { Enums } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ApplicationDecisionInput } from "@/lib/validation/application/application";
 import { applicationDecisionSchema } from "@/lib/validation/application/application";
@@ -12,6 +13,19 @@ const ApproveApplicationResponseSchema = z.object({
   business_member_id: z.string().uuid(),
   message: z.string(),
 });
+
+type ApplicationType = Enums<"ApplicationType">;
+
+const APPROVAL_RPC_BY_TYPE: Record<
+  ApplicationType,
+  | "approve_membership_application"
+  | "approve_membership_renewal_application"
+  | "approve_membership_update_application"
+> = {
+  newMember: "approve_membership_application",
+  renewal: "approve_membership_renewal_application",
+  updating: "approve_membership_update_application",
+};
 
 // Approve an application and create a BusinessMember record
 export async function approveApplication(input: ApplicationDecisionInput) {
@@ -47,22 +61,18 @@ export async function approveApplication(input: ApplicationDecisionInput) {
     throw new Error("Applicant email is missing for this application");
   }
 
-  // Check if already approved
-  if (application.businessMemberId) {
-    throw new Error("Application has already been approved");
+  const applicationType = application.applicationType as ApplicationType;
+  const approvalRpc = APPROVAL_RPC_BY_TYPE[applicationType];
+
+  if (!approvalRpc) {
+    throw new Error(
+      `Unsupported application type: ${application.applicationType}`,
+    );
   }
 
-  // Validate required fields for member creation
-  if (!application.sectorId) {
-    throw new Error("Sector ID is required to approve application");
-  }
-
-  const { data: rpcData, error: rpcError } = await supabase.rpc(
-    "approve_membership_application",
-    {
-      p_application_id: parsed.applicationId,
-    },
-  );
+  const { data: rpcData, error: rpcError } = await supabase.rpc(approvalRpc, {
+    p_application_id: parsed.applicationId,
+  });
 
   if (rpcError) {
     throw new Error(`Failed to approve application: ${rpcError.message}`);
@@ -94,7 +104,7 @@ export async function approveApplication(input: ApplicationDecisionInput) {
 
   return {
     success: true as const,
-    message: "Application approved successfully",
+    message: rpcRow.message || "Application approved successfully",
     businessMemberId: rpcRow.business_member_id,
   };
 }

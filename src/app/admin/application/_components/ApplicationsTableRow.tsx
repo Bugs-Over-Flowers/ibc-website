@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
-import { toPascalCaseWithSpaces } from "../_utils/formatters";
+import { getApplicationTypeLabel } from "../_utils/applicationTypes";
 
 interface ApplicationsTableRowProps {
   application: Awaited<ReturnType<typeof getApplications>>[number];
@@ -112,7 +112,7 @@ export function ApplicationsTableRow({
       </TableCell>
       <TableCell className="w-[16%]">
         <Badge className={`${borderColor} ${textColor}`} variant="outline">
-          {toPascalCaseWithSpaces(application.applicationType)}
+          {getApplicationTypeLabel(application.applicationType)}
         </Badge>
       </TableCell>
       {/* <TableCell>

@@ -1,8 +1,7 @@
 import { cookies } from "next/headers";
 import { getApplications } from "@/server/applications/queries/getApplications";
-import { ApplicationsTable } from "./ApplicationsTable";
+import { ApplicationsByType } from "./ApplicationsByType";
 import { EmptyApplicationsState } from "./EmptyApplicationsState";
-import { PendingApplicationsGrouped } from "./PendingApplicationsGrouped";
 
 interface ApplicationsListProps {
   status: "new" | "pending" | "finished";
@@ -43,11 +42,7 @@ export default async function ApplicationsList({
     return <EmptyApplicationsState status={status} />;
   }
 
-  if (status === "pending") {
-    return <PendingApplicationsGrouped applications={filteredApplications} />;
-  }
-
   return (
-    <ApplicationsTable applications={filteredApplications} status={status} />
+    <ApplicationsByType applications={filteredApplications} status={status} />
   );
 }
