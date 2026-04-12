@@ -3,31 +3,101 @@
 import { User } from "lucide-react";
 import { motion } from "motion/react";
 
-const boardOfTrustees = [
-  { name: "Juan Jose Jamora III", position: "Chairman Emeritus" },
-  { name: "Ma. Luisa Segovia", position: "President" },
-  { name: "Herminio Maravilla", position: "Chairman" },
-  { name: "Jose Paolo Treñas", position: "Vice President" },
-  { name: "Allen Son Tan", position: "Corporate Secretary" },
-  { name: "Phillipp Chua", position: "Treasurer" },
-  { name: "Atty. George Que", position: "Legal Counsel" },
-  { name: "Francis De la Cruz", position: "Trustee" },
-  { name: "Jose Hautea, Jr.", position: "Trustee" },
-  { name: "Philip Joel Lataquin", position: "Trustee" },
-  { name: "Jose Layson, Jr.", position: "Trustee" },
-  { name: "Arsenio Rafael III", position: "Trustee" },
-  { name: "Atty. Fritzie Diez-Treñas", position: "Trustee" },
-  { name: "Engr. Terence Uygongco", position: "Trustee" },
-  { name: "Anatole Dan Viray", position: "Trustee" },
+type MemberCard = {
+  title: string;
+  subtitle: string;
+  group: string | null;
+  imageUrl?: string;
+};
+
+const boardOfTrustees: MemberCard[] = [
+  {
+    title: "Juan Jose Jamora III",
+    subtitle: "Chairman Emeritus",
+    group: "featured",
+  },
+  { title: "Ma. Luisa Segovia", subtitle: "President", group: "featured" },
+  { title: "Herminio Maravilla", subtitle: "Chairman", group: "officers" },
+  {
+    title: "Jose Paolo Treñas",
+    subtitle: "Vice President",
+    group: "officers",
+  },
+  {
+    title: "Allen Son Tan",
+    subtitle: "Corporate Secretary",
+    group: "officers",
+  },
+  { title: "Phillipp Chua", subtitle: "Treasurer", group: "officers" },
+  {
+    title: "Atty. George Que",
+    subtitle: "Legal Counsel",
+    group: "officers",
+  },
+  { title: "Francis De la Cruz", subtitle: "Trustee", group: "trustees" },
+  { title: "Jose Hautea, Jr.", subtitle: "Trustee", group: "trustees" },
+  {
+    title: "Philip Joel Lataquin",
+    subtitle: "Trustee",
+    group: "trustees",
+  },
+  { title: "Jose Layson, Jr.", subtitle: "Trustee", group: "trustees" },
+  { title: "Arsenio Rafael III", subtitle: "Trustee", group: "trustees" },
+  {
+    title: "Atty. Fritzie Diez-Treñas",
+    subtitle: "Trustee",
+    group: "trustees",
+  },
+  {
+    title: "Engr. Terence Uygongco",
+    subtitle: "Trustee",
+    group: "trustees",
+  },
+  { title: "Anatole Dan Viray", subtitle: "Trustee", group: "trustees" },
 ];
 
-const secretariat = [
-  { name: "Herminia Ore", position: "Finance, Marketing, and Promotion" },
-  { name: "Clea Angela Drilon", position: "Administrative Officer" },
-  { name: "Joel Germino", position: "General Services" },
+const secretariat: MemberCard[] = [
+  {
+    title: "Herminia Ore",
+    subtitle: "Finance, Marketing, and Promotion",
+    group: null,
+  },
+  {
+    title: "Clea Angela Drilon",
+    subtitle: "Administrative Officer",
+    group: null,
+  },
+  { title: "Joel Germino", subtitle: "General Services", group: null },
 ];
 
-export function AboutBoard() {
+interface AboutBoardProps {
+  boardCards?: MemberCard[];
+  secretariatCards?: MemberCard[];
+}
+
+export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
+  const resolvedBoardCards =
+    boardCards && boardCards.length > 0 ? boardCards : boardOfTrustees;
+  const featuredBoardCards = resolvedBoardCards.filter(
+    (member) => member.group === "featured",
+  );
+  const officerBoardCards = resolvedBoardCards.filter(
+    (member) => member.group === "officers",
+  );
+  const trusteeBoardCards = resolvedBoardCards.filter(
+    (member) => member.group === "trustees",
+  );
+  const otherBoardCards = resolvedBoardCards.filter(
+    (member) =>
+      !member.group ||
+      !["featured", "officers", "trustees"].includes(member.group),
+  );
+
+  const resolvedSecretariatCards =
+    secretariatCards && secretariatCards.length > 0
+      ? secretariatCards
+      : secretariat;
+
   return (
     <>
       <section className="py-24">
@@ -53,11 +123,11 @@ export function AboutBoard() {
 
           {/* Featured Board Members (Chairman Emeritus, President) */}
           <div className="mb-10 flex flex-wrap justify-center gap-8">
-            {boardOfTrustees.slice(0, 2).map((member, index) => (
+            {featuredBoardCards.map((member, index) => (
               <motion.div
                 className="flex h-[340px] w-[260px] flex-col items-center justify-center rounded-3xl bg-card/95 p-8 text-center shadow-xl ring-1 ring-border/50 backdrop-blur-xl"
                 initial={{ opacity: 0, y: 20 }}
-                key={member.name}
+                key={member.title}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 viewport={{ once: true }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -66,10 +136,10 @@ export function AboutBoard() {
                   <User className="h-16 w-16 text-primary/40" />
                 </div>
                 <h3 className="mb-2 font-bold text-foreground text-lg">
-                  {member.name}
+                  {member.title}
                 </h3>
                 <p className="font-medium text-base text-primary">
-                  {member.position}
+                  {member.subtitle}
                 </p>
               </motion.div>
             ))}
@@ -77,11 +147,11 @@ export function AboutBoard() {
 
           {/* Officers: Chairman, Vice President, Corporate Secretary, Treasurer, Legal Counsel */}
           <div className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-            {boardOfTrustees.slice(2, 7).map((member, index) => (
+            {officerBoardCards.map((member, index) => (
               <motion.div
                 className="group mx-auto flex h-[300px] w-[220px] flex-col items-center justify-center overflow-hidden rounded-xl border border-border bg-card"
                 initial={{ opacity: 0, y: 20 }}
-                key={member.name}
+                key={member.title}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 viewport={{ once: true }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -90,20 +160,20 @@ export function AboutBoard() {
                   <User className="h-12 w-12 text-primary/30" />
                 </div>
                 <h3 className="mb-2 font-semibold text-base text-foreground">
-                  {member.name}
+                  {member.title}
                 </h3>
-                <p className="text-primary text-xs">{member.position}</p>
+                <p className="text-primary text-xs">{member.subtitle}</p>
               </motion.div>
             ))}
           </div>
 
           {/* Trustees: 8, 4 columns, 2 rows */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
-            {boardOfTrustees.slice(7).map((member, index) => (
+            {[...trusteeBoardCards, ...otherBoardCards].map((member, index) => (
               <motion.div
                 className="group mx-auto flex h-[300px] w-[220px] flex-col items-center justify-center overflow-hidden rounded-xl border border-border bg-card"
                 initial={{ opacity: 0, y: 20 }}
-                key={member.name}
+                key={member.title}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 viewport={{ once: true }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -112,9 +182,9 @@ export function AboutBoard() {
                   <User className="h-12 w-12 text-primary/30" />
                 </div>
                 <h3 className="mb-2 font-semibold text-base text-foreground">
-                  {member.name}
+                  {member.title}
                 </h3>
-                <p className="text-primary text-xs">{member.position}</p>
+                <p className="text-primary text-xs">{member.subtitle}</p>
               </motion.div>
             ))}
           </div>
@@ -142,11 +212,11 @@ export function AboutBoard() {
           </motion.div>
 
           <div className="mx-auto grid max-w-3xl gap-8 sm:grid-cols-3">
-            {secretariat.map((member, index) => (
+            {resolvedSecretariatCards.map((member, index) => (
               <motion.div
                 className="group overflow-hidden rounded-xl border border-border bg-background"
                 initial={{ opacity: 0, y: 20 }}
-                key={member.name}
+                key={member.title}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -154,9 +224,9 @@ export function AboutBoard() {
                 <div className="relative aspect-square overflow-hidden"></div>
                 <div className="p-5 text-center">
                   <h3 className="font-semibold text-foreground">
-                    {member.name}
+                    {member.title}
                   </h3>
-                  <p className="text-primary text-sm">{member.position}</p>
+                  <p className="text-primary text-sm">{member.subtitle}</p>
                 </div>
               </motion.div>
             ))}

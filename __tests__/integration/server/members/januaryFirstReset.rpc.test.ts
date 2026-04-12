@@ -38,8 +38,6 @@ const hasDbEnv =
 
 const describeIfDb = hasDbEnv ? describe : describe.skip;
 
-type AdminClient = ReturnType<typeof createAdminClient>;
-
 function createAdminClient() {
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error(
