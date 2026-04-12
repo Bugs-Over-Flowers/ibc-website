@@ -21,7 +21,8 @@ interface EditEventFormProps {
 }
 
 export function EditEventForm({ event }: EditEventFormProps) {
-  const { form, router, isDraft, isFinished } = useEditEventForm({ event });
+  const { form, router, isDraft, isFinished, isPrivatePublished } =
+    useEditEventForm({ event });
 
   // Finished events can only edit the Facebook link
   if (isFinished && !isDraft) {
@@ -111,7 +112,9 @@ export function EditEventForm({ event }: EditEventFormProps) {
       <p className="mb-6 text-lg text-muted-foreground">
         {isDraft
           ? "This is a draft event. All fields are editable."
-          : "This is a published event. Only title, description, dates, venue, and image can be edited."}
+          : isPrivatePublished
+            ? "This is a published private event. You can edit details and make it public."
+            : "This is a published event. Only title, description, dates, venue, and image can be edited."}
       </p>
 
       <div className="min-h-screen rounded-lg">
@@ -413,13 +416,31 @@ export function EditEventForm({ event }: EditEventFormProps) {
                         </Popover>
                       </>
                     ) : (
-                      <Button
-                        className="w-full sm:w-auto"
-                        disabled={isSubmitting || !isDirty}
-                        type="submit"
-                      >
-                        {isSubmitting ? "Saving..." : "Save Changes"}
-                      </Button>
+                      <>
+                        {isPrivatePublished && (
+                          <Button
+                            className="w-full sm:w-auto"
+                            disabled={isSubmitting}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              form.setFieldValue("eventType", "public");
+                              form.handleSubmit();
+                            }}
+                            type="button"
+                          >
+                            {isSubmitting ? "Saving..." : "Make Public"}
+                          </Button>
+                        )}
+
+                        <Button
+                          className="w-full sm:w-auto"
+                          disabled={isSubmitting || !isDirty}
+                          type="submit"
+                        >
+                          {isSubmitting ? "Saving..." : "Save Changes"}
+                        </Button>
+                      </>
                     )}
                   </>
                 )}
