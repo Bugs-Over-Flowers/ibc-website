@@ -78,6 +78,7 @@ const initialState: MembershipApplicationStore = {
     step1: {
       applicationType: "newMember",
       businessMemberIdentifier: "",
+      businessMemberId: "",
     },
     step2: {
       companyName: "",
@@ -215,7 +216,7 @@ const useMembershipApplicationStore = create<
     }),
     {
       name: "membership-application-storage",
-      version: 7,
+      version: 8,
       migrate: (persistedState, version) => {
         if (version < 4) {
           const oldState =
@@ -282,6 +283,26 @@ const useMembershipApplicationStore = create<
                 null,
             },
           } as MembershipApplicationStore;
+        }
+
+        if (version < 8) {
+          const oldState =
+            persistedState as Partial<MembershipApplicationStore>;
+
+          return {
+            ...initialState,
+            ...oldState,
+            applicationData: {
+              ...initialState.applicationData,
+              ...oldState?.applicationData,
+              step1: {
+                ...initialState.applicationData.step1,
+                ...oldState?.applicationData?.step1,
+                businessMemberId:
+                  oldState?.applicationData?.step1?.businessMemberId ?? "",
+              },
+            },
+          };
         }
 
         return persistedState as MembershipApplicationStore;

@@ -219,6 +219,10 @@ export const useMembershipStep1 = () => {
             );
 
             setApplicationData({
+              step1: {
+                ...refinedValue,
+                businessMemberId: data.businessMemberId ?? "",
+              },
               step2: {
                 companyName: data.companyName ?? "",
                 companyAddress: data.companyAddress ?? "",
@@ -268,6 +272,12 @@ export const useMembershipStep1 = () => {
       // Reset validation when application type changes
       if (refinedValue.applicationType === "newMember") {
         resetMemberValidation();
+        setApplicationData({
+          step1: {
+            ...refinedValue,
+            businessMemberId: "",
+          },
+        });
       }
 
       if (meta.nextStep) {
@@ -275,7 +285,15 @@ export const useMembershipStep1 = () => {
       }
 
       setApplicationData({
-        step1: refinedValue,
+        step1: {
+          ...refinedValue,
+          businessMemberId:
+            refinedValue.applicationType === "newMember"
+              ? ""
+              : (refinedValue.businessMemberId ??
+                memberValidation.memberInfo.businessMemberId ??
+                ""),
+        },
       });
     },
   });

@@ -35,6 +35,10 @@ export const useMembershipStep4 = ({
     (state) => state.memberValidation.memberInfo.businessMemberId,
   );
 
+  const storedBusinessMemberId = useMembershipApplicationStore(
+    (state) => state.applicationData?.step1?.businessMemberId,
+  );
+
   const defaultApplicationDataStep4 = useMembershipApplicationStore(
     (state) => state.applicationData?.step4,
   );
@@ -136,7 +140,7 @@ export const useMembershipStep4 = ({
           const businessMemberId =
             applicationData.step1.applicationType === "newMember"
               ? undefined
-              : verifiedBusinessMemberId;
+              : storedBusinessMemberId || verifiedBusinessMemberId;
 
           const res = await submitMembershipApplication({
             applicationType: applicationData.step1.applicationType,
