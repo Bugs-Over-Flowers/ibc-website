@@ -27,6 +27,9 @@ export const useMembershipStep4 = ({
   const setIsSubmitted = useMembershipApplicationStore(
     (state) => state.setIsSubmitted,
   );
+  const resetMemberValidationRateLimit = useMembershipApplicationStore(
+    (state) => state.resetMemberValidationRateLimit,
+  );
   const setStep = useMembershipApplicationStore((state) => state.setStep);
   const resetStore = useMembershipApplicationStore((state) => state.resetStore);
 
@@ -180,6 +183,8 @@ export const useMembershipStep4 = ({
       const identifier = (data as { identifier?: string })?.identifier ?? "";
 
       toast.success("Application submitted successfully!");
+
+      resetMemberValidationRateLimit();
 
       // Reset the form data but preserve rate limiting data
       resetStore();

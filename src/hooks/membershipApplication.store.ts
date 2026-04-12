@@ -9,6 +9,21 @@ import type {
 
 export const MAX_STEPS = 5;
 
+function getManilaDateKey(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return `${year}-${month}-${day}`;
+}
+
 export interface MembershipApplicationData {
   step1: MembershipApplicationStep1Schema;
   step2: MembershipApplicationStep2Schema;
@@ -28,6 +43,7 @@ interface MembershipApplicationStore {
     lastValidatedMemberIdentifier: string | null;
     lastValidatedApplicationType: "renewal" | "updating" | null;
     remainingTime: number;
+    lastRateLimitResetDate: string | null;
     memberInfo: {
       companyName?: string;
       membershipStatus?: string;
@@ -58,6 +74,8 @@ interface MembershipApplicationStoreActions {
     applicationType?: "renewal" | "updating" | null,
   ) => void;
   setMemberValidationRemainingTime: (time: number) => void;
+  setMemberValidationRateLimitDate: (date: string | null) => void;
+  resetMemberValidationRateLimit: () => void;
   resetMemberValidation: () => void;
 }
 
@@ -72,6 +90,7 @@ const initialState: MembershipApplicationStore = {
     lastValidatedMemberIdentifier: null,
     lastValidatedApplicationType: null,
     remainingTime: 0,
+    lastRateLimitResetDate: null,
     memberInfo: {},
   },
   applicationData: {
@@ -161,6 +180,9 @@ const useMembershipApplicationStore = create<
               attemptCount: state.memberValidation?.attemptCount ?? 0,
               cooldownEndTime: state.memberValidation?.cooldownEndTime ?? null,
               remainingTime: state.memberValidation?.remainingTime ?? 0,
+              lastRateLimitResetDate:
+                state.memberValidation?.lastRateLimitResetDate ??
+                getManilaDateKey(),
             },
           };
         }),
@@ -203,6 +225,25 @@ const useMembershipApplicationStore = create<
           memberValidation: { ...state.memberValidation, remainingTime: time },
         })),
 
+      setMemberValidationRateLimitDate: (date) =>
+        set((state) => ({
+          memberValidation: {
+            ...state.memberValidation,
+            lastRateLimitResetDate: date,
+          },
+        })),
+
+      resetMemberValidationRateLimit: () =>
+        set((state) => ({
+          memberValidation: {
+            ...state.memberValidation,
+            attemptCount: 0,
+            cooldownEndTime: null,
+            remainingTime: 0,
+            lastRateLimitResetDate: getManilaDateKey(),
+          },
+        })),
+
       resetMemberValidation: () =>
         set((state) => ({
           memberValidation: {
@@ -216,7 +257,7 @@ const useMembershipApplicationStore = create<
     }),
     {
       name: "membership-application-storage",
-      version: 8,
+      version: 9,
       migrate: (persistedState, version) => {
         if (version < 4) {
           const oldState =
@@ -301,6 +342,22 @@ const useMembershipApplicationStore = create<
                 businessMemberId:
                   oldState?.applicationData?.step1?.businessMemberId ?? "",
               },
+            },
+          };
+        }
+
+        if (version < 9) {
+          const oldState =
+            persistedState as Partial<MembershipApplicationStore>;
+
+          return {
+            ...initialState,
+            ...oldState,
+            memberValidation: {
+              ...initialState.memberValidation,
+              ...oldState?.memberValidation,
+              lastRateLimitResetDate:
+                oldState?.memberValidation?.lastRateLimitResetDate ?? null,
             },
           };
         }

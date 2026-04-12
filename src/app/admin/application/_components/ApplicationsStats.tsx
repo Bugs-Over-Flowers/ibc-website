@@ -9,10 +9,15 @@ interface ApplicationsStatsProps {
   counts: Partial<Record<ApplicationTab, number>>;
   availableTabs: ApplicationTab[];
   group: ApplicationGroup;
-  interviewBreakdown?: {
-    newMember: number;
-    renewal: number;
-  } | null;
+  interviewBreakdownByTab?: Partial<
+    Record<
+      ApplicationTab,
+      {
+        newMember: number;
+        renewal: number;
+      }
+    >
+  > | null;
   onTabChange: (tab: ApplicationTab) => void;
 }
 
@@ -57,7 +62,7 @@ export default function ApplicationsStats({
   counts,
   availableTabs,
   group,
-  interviewBreakdown,
+  interviewBreakdownByTab,
   onTabChange,
 }: ApplicationsStatsProps) {
   const visibleItems = items
@@ -87,6 +92,7 @@ export default function ApplicationsStats({
           activeDot,
         }) => {
           const isActive = activeTab === tab;
+          const tabBreakdown = interviewBreakdownByTab?.[tab];
           return (
             <button
               aria-pressed={isActive}
@@ -127,10 +133,10 @@ export default function ApplicationsStats({
                     <p className="truncate text-muted-foreground text-xs">
                       {label}
                     </p>
-                    {group === "interview" && interviewBreakdown && (
+                    {group === "interview" && tabBreakdown && (
                       <p className="text-[11px] text-muted-foreground">
-                        NM: {interviewBreakdown.newMember} | RN:{" "}
-                        {interviewBreakdown.renewal}
+                        New Member: {tabBreakdown.newMember} | Renewal:{" "}
+                        {tabBreakdown.renewal}
                       </p>
                     )}
                     <p

@@ -12,7 +12,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import type { ApplicationStatusResponse } from "@/lib/types/application";
 import { zodValidator } from "@/lib/utils";
 import { checkApplicationStatusSchema } from "@/lib/validation/application/check-status";
-import { checkApplicationStatus } from "@/server/applications/queries/checkApplicationStatus";
+import { checkApplicationStatus } from "../_utils/checkApplicationStatus";
 import { ApplicationStatusResult } from "./ApplicationStatusResult";
 
 export function ApplicationStatusForm() {

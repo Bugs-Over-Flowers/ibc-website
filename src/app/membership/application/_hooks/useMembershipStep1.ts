@@ -12,6 +12,21 @@ const defaultMeta: FormSubmitMeta = {
   nextStep: false,
 };
 
+function getManilaDateKey(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return `${year}-${month}-${day}`;
+}
+
 function toBirthdate(value?: string): Date {
   if (!value) {
     return undefined as unknown as Date;
@@ -76,6 +91,12 @@ export const useMembershipStep1 = () => {
   const setMemberValidationCooldown = useMembershipApplicationStore(
     (state) => state.setMemberValidationCooldown,
   );
+  const setMemberValidationRateLimitDate = useMembershipApplicationStore(
+    (state) => state.setMemberValidationRateLimitDate,
+  );
+  const resetMemberValidationRateLimit = useMembershipApplicationStore(
+    (state) => state.resetMemberValidationRateLimit,
+  );
   const setMemberValidationStatus = useMembershipApplicationStore(
     (state) => state.setMemberValidationStatus,
   );
@@ -102,6 +123,11 @@ export const useMembershipStep1 = () => {
         (refinedValue.applicationType === "renewal" ||
           refinedValue.applicationType === "updating")
       ) {
+        const today = getManilaDateKey();
+        if (memberValidation.lastRateLimitResetDate !== today) {
+          resetMemberValidationRateLimit();
+        }
+
         // Check cooldown first - this applies regardless of identifier input
         const now = Date.now();
         if (
@@ -168,6 +194,7 @@ export const useMembershipStep1 = () => {
 
               const newAttemptCount = memberValidation.attemptCount + 1;
               setMemberValidationAttempt(newAttemptCount);
+              setMemberValidationRateLimitDate(today);
 
               if (newAttemptCount >= 3) {
                 const cooldownEnd = now + 30000; // temporary // 900000; // 15 minutes permanently
@@ -193,6 +220,7 @@ export const useMembershipStep1 = () => {
 
               const newAttemptCount = memberValidation.attemptCount + 1;
               setMemberValidationAttempt(newAttemptCount);
+              setMemberValidationRateLimitDate(today);
 
               if (newAttemptCount >= 3) {
                 const cooldownEnd = now + 30000;
@@ -256,6 +284,7 @@ export const useMembershipStep1 = () => {
 
             const newAttemptCount = memberValidation.attemptCount + 1;
             setMemberValidationAttempt(newAttemptCount);
+            setMemberValidationRateLimitDate(today);
 
             if (newAttemptCount >= 3) {
               const cooldownEnd = now + 30000;

@@ -36,6 +36,18 @@ const statusColors = {
   interview: "bg-purple-500/10 text-purple-400 border-purple-500/20",
 };
 
+const applicationTypeLabels = {
+  newMember: "New Member",
+  renewal: "Renewal",
+  updating: "Update Info",
+} as const;
+
+const applicationTypeColors = {
+  newMember: "bg-emerald-500/10 text-emerald-500 border-emerald-500/50",
+  renewal: "bg-orange-500/10 text-orange-500 border-orange-500/50",
+  updating: "bg-blue-500/10 text-blue-500 border-blue-500/50",
+} as const;
+
 interface ApplicationStatusResultProps {
   result: ApplicationStatusResponse;
 }
@@ -68,19 +80,29 @@ export function ApplicationStatusResult({
   };
 
   const statusBadge = getStatusBadge();
+  const applicationTypeLabel = applicationTypeLabels[result.applicationType];
+  const applicationTypeColor = applicationTypeColors[result.applicationType];
 
   return (
     <div className="grid w-full gap-6 lg:grid-cols-2 lg:gap-8">
       {/* Application Information Card */}
       <TooltipProvider>
         <Card className="flex flex-col overflow-hidden border-white/5 bg-[#161e2e] p-0 shadow-2xl">
-          <div className="border-white/5 border-b bg-[#1f2937]/50 p-6">
+          <div className="flex items-center justify-between border-white/5 border-b bg-[#1f2937]/50 p-6">
             <h3 className="flex items-center gap-3 font-semibold text-lg text-white">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
                 <FileText className="h-5 w-5" />
               </div>
               Application Details
             </h3>
+            <div
+              className={cn(
+                "rounded-full border px-3 py-1 font-bold text-[10px] uppercase tracking-wider shadow-sm",
+                applicationTypeColor,
+              )}
+            >
+              {applicationTypeLabel}
+            </div>
           </div>
           <CardContent className="grid flex-1 gap-6 p-6">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -321,13 +343,14 @@ export function ApplicationStatusResult({
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold text-amber-400 text-base">
-                      Awaiting Interview Schedule
+                      {result.applicationType === "updating"
+                        ? "Information Update in Progress"
+                        : "Awaiting Interview Schedule"}
                     </h4>
                     <p className="text-amber-200/70 text-sm leading-relaxed">
-                      Your application is currently under review by the Iloilo
-                      Business Club. An interview date and venue will be
-                      scheduled shortly, and you will be notified via email once
-                      confirmed. Thank you for your patience.
+                      {result.applicationType === "updating"
+                        ? "Your application is currently being reviewed by the Iloilo Business Club. Your information will be automatically updated upon approval. Thank you for your patience."
+                        : "Your application is currently under review by the Iloilo Business Club. An interview date and venue will be scheduled shortly, and you will be notified via email once confirmed. Thank you for your patience."}
                     </p>
                   </div>
                 </div>

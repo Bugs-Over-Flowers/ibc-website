@@ -83,12 +83,8 @@ export default function ApplicationsTabs({
   const showMeetingScheduler =
     activeGroup === "interview" && activeTab === "new";
 
-  const activeInterviewBreakdown:
-    | InterviewTypeBreakdown[keyof InterviewTypeBreakdown]
-    | null =
-    activeGroup === "interview"
-      ? counts.interview.typeBreakdown[activeTab]
-      : null;
+  const interviewBreakdownByTab =
+    activeGroup === "interview" ? counts.interview.typeBreakdown : null;
 
   const activeContent =
     activeGroup === "interview"
@@ -135,7 +131,7 @@ export default function ApplicationsTabs({
         availableTabs={availableTabs}
         counts={activeCounts}
         group={activeGroup}
-        interviewBreakdown={activeInterviewBreakdown}
+        interviewBreakdownByTab={interviewBreakdownByTab}
         onTabChange={handleTabChange}
       />
 
