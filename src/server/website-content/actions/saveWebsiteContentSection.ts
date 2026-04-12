@@ -1,7 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
-import { CACHE_PROFILES } from "@/lib/cache/profiles";
+import { revalidatePath, updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { saveWebsiteContentSectionSchema } from "../schemas";
 import type { SaveWebsiteContentSectionInput } from "../types";
@@ -82,12 +81,9 @@ export async function saveWebsiteContentSection(
   revalidatePath("/", "page");
   revalidatePath("/about", "page");
   revalidatePath("/admin/website-content", "page");
-  revalidateTag(CACHE_TAGS.websiteContent.all, CACHE_PROFILES.realtime60s);
-  revalidateTag(CACHE_TAGS.websiteContent.public, CACHE_PROFILES.realtime60s);
-  revalidateTag(
-    WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsed.section],
-    CACHE_PROFILES.realtime60s,
-  );
+  updateTag(CACHE_TAGS.websiteContent.all);
+  updateTag(CACHE_TAGS.websiteContent.public);
+  updateTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsed.section]);
 
   return { updatedAt: new Date().toISOString() };
 }

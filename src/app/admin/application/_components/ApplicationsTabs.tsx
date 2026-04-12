@@ -211,13 +211,6 @@ export default function ApplicationsTabs({
                 onClick={() => handleTabChange(tab.id)}
                 ref={(el) => {
                   buttonRefs.current[tab.id] = el;
-                  // Update indicator when active tab's ref is set
-                  if (el && tab.id === activeTab) {
-                    setIndicatorStyle({
-                      x: el.offsetLeft,
-                      width: el.offsetWidth,
-                    });
-                  }
                 }}
                 title={tab.label}
                 type="button"

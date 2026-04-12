@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import type { LandingBenefitsSectionProps } from "../../_types/section-props";
 import { LucideIconPicker } from "../LucideIconPicker";
-import { MarkdownTextarea } from "../MarkdownTextarea";
+import { MarkdownTextarea } from "../RichTextEditorField";
 
 export function LandingBenefitsSection({
   cards,

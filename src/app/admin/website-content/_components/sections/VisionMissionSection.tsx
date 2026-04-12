@@ -1,7 +1,7 @@
 "use client";
 
 import type { VisionMissionSectionProps } from "../../_types/section-props";
-import { MarkdownTextarea } from "../MarkdownTextarea";
+import { MarkdownTextarea } from "../RichTextEditorField";
 
 export function VisionMissionSection({
   visionParagraph,

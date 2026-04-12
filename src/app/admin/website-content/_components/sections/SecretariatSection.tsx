@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import type { ChangeEvent, DragEvent } from "react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/client";
 import type { SecretariatSectionProps } from "../../_types/section-props";
 
 function reorderInList<T extends { entryKey: string }>(
@@ -30,19 +32,50 @@ export function SecretariatSection({
   onCardFieldChange,
   onCardsReorder,
 }: SecretariatSectionProps) {
+  const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
   const handleImageSelect =
-    (entryKey: string) => (event: ChangeEvent<HTMLInputElement>) => {
+    (entryKey: string) => async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (!file) {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = typeof reader.result === "string" ? reader.result : "";
-        onCardFieldChange(entryKey, "imageUrl", result);
-      };
-      reader.readAsDataURL(file);
+      if (!file.type.startsWith("image/")) {
+        toast.error("Invalid file type. Please select an image.");
+        event.target.value = "";
+        return;
+      }
+
+      if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        toast.error("Image too large. Maximum size is 5MB.");
+        event.target.value = "";
+        return;
+      }
+
+      const supabase = await createClient();
+      const extension = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const filePath = `website-content/secretariat/${entryKey}-${crypto.randomUUID()}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("headerimage")
+        .upload(filePath, file, {
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        toast.error(`Image upload failed: ${uploadError.message}`);
+        event.target.value = "";
+        return;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("headerimage").getPublicUrl(filePath);
+
+      onCardFieldChange(entryKey, "imageUrl", publicUrl);
+      event.target.value = "";
     };
 
   const handleDrop = (event: DragEvent<HTMLElement>, overEntryKey: string) => {
@@ -97,10 +130,10 @@ export function SecretariatSection({
           <p className="font-medium text-sm">Image</p>
           <div className="flex flex-col gap-2">
             <label
-              className="inline-flex w-fit cursor-pointer items-center justify-center rounded-md border border-input bg-background px-4 py-2 font-medium text-sm shadow-sm hover:bg-accent hover:text-accent-foreground"
+              className="flex h-24 w-full cursor-pointer items-center justify-center rounded-md border border-border border-dashed bg-muted/30 px-4 py-2 text-center font-medium text-muted-foreground text-sm transition-colors hover:border-primary hover:bg-muted"
               htmlFor={`secretariat-image-${card.entryKey}`}
             >
-              Add Image
+              Insert Image Here
             </label>
             <input
               accept="image/*"
