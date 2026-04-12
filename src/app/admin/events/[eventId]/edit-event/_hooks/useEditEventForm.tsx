@@ -200,7 +200,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
               venue: value.venue,
               eventHeaderUrl: headerUrl || undefined,
               eventPoster: posterUrl || undefined,
-              eventType: value.eventType ?? undefined,
+              eventType: value.eventType === "public" ? "public" : undefined,
               facebookLink: normalizedFacebookLink,
             },
             false,

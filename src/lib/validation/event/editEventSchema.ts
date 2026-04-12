@@ -29,7 +29,7 @@ export const editDraftEventSchema = baseEditEventSchema.extend({
 
 // Published events can only edit limited fields
 export const editPublishedEventSchema = baseEditEventSchema.extend({
-  eventType: z.enum(["public", "private"]).optional(),
+  eventType: z.literal("public").optional(),
   eventImage: z.array(z.instanceof(File)).optional(),
   eventHeaderUrl: z.url().optional(),
   eventPoster: z.array(z.instanceof(File)).optional(),
@@ -51,7 +51,7 @@ export const editDraftEventServerSchema = baseEditEventSchema
 
 export const editPublishedEventServerSchema = baseEditEventSchema
   .extend({
-    eventType: z.enum(["public", "private"]).optional(),
+    eventType: z.literal("public").optional(),
     eventHeaderUrl: z.url().optional(),
     eventPoster: z.url().optional(),
   })
