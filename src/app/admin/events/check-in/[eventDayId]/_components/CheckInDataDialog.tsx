@@ -1,16 +1,9 @@
 "use client";
 
-import { CircleAlert } from "lucide-react";
+import { AlertTriangle, XCircle } from "lucide-react";
 import { useParams } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Item, ItemMedia } from "@/components/ui/item";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
@@ -106,42 +99,42 @@ export default function CheckInDataDialog({
       open={!!scannedData}
     >
       <DialogContent
-        className="flex max-h-[90vh] w-[95vw] flex-col sm:max-w-3xl"
+        className="flex max-h-[90vh] w-[95vw] flex-col gap-0 p-0 sm:max-w-2xl"
         showCloseButton={false}
       >
-        <div className="flex w-full flex-col justify-between gap-10 border-b pb-3 sm:flex-row">
-          <div className="flex flex-col gap-1">
-            <DialogTitle className="flex flex-col gap-2 font-bold text-xl tracking-tight">
-              Check-in Confirmation
+        <div className="flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <DialogTitle className="font-medium text-base">
+              Check-in confirmation
             </DialogTitle>
-            <div className="font-medium text-muted-foreground text-sm">
+            <p className="mt-0.5 text-muted-foreground text-sm">
               {scannedData.affiliation}
-            </div>
-            <Badge className="mt-2 font-mono text-xs" variant="outline">
+            </p>
+            <code className="mt-2 inline-flex rounded border border-border bg-muted px-2 py-0.5 font-mono text-muted-foreground text-xs">
               {scannedData.identifier}
-            </Badge>
+            </code>
           </div>
           {scannedData.paymentProofStatus !== "accepted" && (
-            <DataDialogProofStatusMessage
+            <PaymentStatusNotice
               paymentProofStatus={scannedData.paymentProofStatus}
             />
           )}
         </div>
-        <div className="flex-1 overflow-y-auto px-1 py-2">
-          {/* Pass optimistic data to table, but prioritize fetched Data */}
+
+        <div className="flex-1 overflow-y-auto px-5 py-4">
           <CheckInTable data={scannedData || optimistic} />
         </div>
 
-        <DialogFooter className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-between">
+        <div className="flex flex-col-reverse gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
           <Button
-            className="w-full sm:w-auto"
             disabled={isPending}
             onClick={() => setCheckInDialogOpen(false)}
+            size="sm"
             variant="outline"
           >
             Close
           </Button>
-          <div className="w-full space-x-2 sm:w-auto">
+          <div className="flex gap-2">
             {scannedData.paymentMethod === "BPI" &&
               scannedData.proofImage &&
               registrant && (
@@ -154,54 +147,51 @@ export default function CheckInDataDialog({
                 />
               )}
             <Button
-              className="w-full sm:w-auto"
+              className="gap-1.5"
               disabled={
                 (selectedCount === 0 && !hasCheckedInRemarkEdits()) || isPending
               }
               onClick={handleCheckIn}
+              size="sm"
             >
-              {isPending ? (
-                <>
-                  <Spinner className="mr-2" />
-                  Processing...
-                </>
-              ) : selectedCount > 0 ? (
-                <>Check In Selected ({selectedCount})</>
-              ) : hasCheckedInRemarkEdits() ? (
-                <>Update Remarks</>
-              ) : (
-                <>Check In Selected ({selectedCount})</>
-              )}
+              {isPending && <Spinner className="size-3.5" />}
+              {isPending
+                ? "Processing..."
+                : selectedCount > 0
+                  ? `Check in selected (${selectedCount})`
+                  : hasCheckedInRemarkEdits()
+                    ? "Update remarks"
+                    : "Check in selected (0)"}
             </Button>
           </div>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-interface DataDialogProofStatusMessageProps {
-  paymentProofStatus: (typeof PaymentProofStatusEnum.options)[number];
-}
-
-function DataDialogProofStatusMessage({
+function PaymentStatusNotice({
   paymentProofStatus,
-}: DataDialogProofStatusMessageProps) {
-  const colorClass =
-    paymentProofStatus === "pending"
-      ? "text-yellow-600 border-yellow-300"
-      : paymentProofStatus === "rejected" && "text-red-500 border-red-300";
+}: {
+  paymentProofStatus: (typeof PaymentProofStatusEnum.options)[number];
+}) {
+  const isPending = paymentProofStatus === "pending";
+
   return (
-    <Item className={cn("sm:w-max", colorClass)} variant={"outline"}>
-      <ItemMedia>
-        <CircleAlert />
-      </ItemMedia>
-      <div>
-        {paymentProofStatus === "pending"
-          ? "This payment is still pending review."
-          : paymentProofStatus === "rejected" &&
-            "This payment has been rejected."}
-      </div>
-    </Item>
+    <div
+      className={cn(
+        "flex items-center gap-2 rounded-lg border px-3 py-2 font-medium text-xs",
+        isPending
+          ? "border-[#EF9F27] bg-[#FAEEDA] text-[#633806] dark:border-[#854F0B] dark:bg-[#412402] dark:text-[#FAC775]"
+          : "border-[#F09595] bg-[#FCEBEB] text-[#791F1F] dark:border-[#A32D2D] dark:bg-[#501313] dark:text-[#F7C1C1]",
+      )}
+    >
+      {isPending ? (
+        <AlertTriangle className="size-3.5 shrink-0" />
+      ) : (
+        <XCircle className="size-3.5 shrink-0" />
+      )}
+      {isPending ? "Payment is pending review" : "Payment has been rejected"}
+    </div>
   );
 }
