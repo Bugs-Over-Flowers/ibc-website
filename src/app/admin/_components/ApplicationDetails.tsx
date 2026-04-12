@@ -5,17 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import { toPascalCaseWithSpaces } from "../application/_utils/formatters";
 import { ApplicationHeader } from "../application/[id]/_components/ApplicationHeader";
-import { CompanyInfoCard } from "../application/[id]/_components/CompanyInfoCard";
-import { ContactInfoCard } from "../application/[id]/_components/ContactInfoCard";
-import { PaymentInfoCard } from "../application/[id]/_components/PaymentInfoCard";
-import { RepresentativesCard } from "../application/[id]/_components/RepresentativesCard";
 
 interface ApplicationDetailsProps {
   applicationId: string;
@@ -481,67 +476,17 @@ export async function ApplicationDetails({
 
   return (
     <>
-      {source === "members" || source === "history" ? (
-        <Link
-          className="mb-2 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
-          href={backLink.href}
-        >
-          <ChevronLeft className="h-5 w-5" />
-          {backLink.label}
-        </Link>
-      ) : (
-        <Link href={backLink.href}>
-          <Button
-            className="mb-4 border border-border active:scale-95 active:opacity-80"
-            size="sm"
-            variant="ghost"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            {backLink.label}
-          </Button>
-        </Link>
-      )}
+      <Link
+        className="mb-2 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
+        href={backLink.href}
+      >
+        <ChevronLeft className="h-5 w-5" />
+        {backLink.label}
+      </Link>
 
       <ApplicationHeader application={application} />
 
-      {source === "members" ? (
-        <MemberReviewDetails application={application} />
-      ) : (
-        <>
-          <CompanyInfoCard
-            applicationMemberType={toPascalCaseWithSpaces(
-              application.applicationMemberType,
-            )}
-            applicationType={toPascalCaseWithSpaces(
-              application.applicationType,
-            )}
-            companyAddress={toPascalCaseWithSpaces(application.companyAddress)}
-            companyName={application.companyName}
-            sectorName={
-              application.Sector?.sectorName
-                ? toPascalCaseWithSpaces(application.Sector.sectorName)
-                : undefined
-            }
-            websiteURL={application.websiteURL}
-          />
-
-          <ContactInfoCard
-            emailAddress={application.emailAddress}
-            landline={application.landline}
-            mobileNumber={application.mobileNumber}
-          />
-
-          <RepresentativesCard members={application.ApplicationMember} />
-
-          <PaymentInfoCard
-            applicationDate={new Date(application.applicationDate)}
-            paymentMethod={application.paymentMethod}
-            paymentProofStatus={toPascalCaseWithSpaces(
-              application.paymentProofStatus,
-            )}
-          />
-        </>
-      )}
+      <MemberReviewDetails application={application} />
     </>
   );
 }
