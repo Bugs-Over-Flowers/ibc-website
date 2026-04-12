@@ -1,8 +1,7 @@
 "use client";
-
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { AlertCircle, Calendar, Clock, MapPin } from "lucide-react";
 import { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
@@ -19,10 +18,15 @@ interface PendingApplicationsGroupedProps {
   applications: Awaited<ReturnType<typeof getApplications>>;
 }
 
-/**
- * Groups pending applications by their interview schedule.
- * Each unique combination of date + AM/PM period + venue gets its own group.
- */
+function isSelectableApplication(
+  application: PendingApplicationsGroupedProps["applications"][number],
+): boolean {
+  return (
+    application.paymentMethod !== "BPI" ||
+    (application.paymentProofStatus ?? "pending") !== "pending"
+  );
+}
+
 function groupBySchedule(
   applications: PendingApplicationsGroupedProps["applications"],
 ) {
@@ -37,7 +41,6 @@ function groupBySchedule(
       applications: typeof applications;
     }
   >();
-
   const unscheduled: typeof applications = [];
 
   for (const app of applications) {
@@ -45,136 +48,147 @@ function groupBySchedule(
       unscheduled.push(app);
       continue;
     }
-
-    const interviewDate = new Date(app.Interview.interviewDate);
+    const d = new Date(app.Interview.interviewDate);
     const venue = app.Interview.interviewVenue || "No venue";
-
-    // Create a group key based on: year-month-day-hour-minute-venue
-    // This groups by exact date+time+venue
-    const year = interviewDate.getFullYear();
-    const month = interviewDate.getMonth();
-    const day = interviewDate.getDate();
-    const hours = interviewDate.getHours();
-    const minutes = interviewDate.getMinutes();
-
-    const groupKey = `${year}-${month}-${day}-${hours}-${minutes}-${venue}`;
-
-    const dateLabel = interviewDate.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-    const timeLabel = interviewDate.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-
-    if (!groups.has(groupKey)) {
-      groups.set(groupKey, {
-        key: groupKey,
-        date: interviewDate,
-        dateLabel,
-        timeLabel,
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${d.getHours()}-${d.getMinutes()}-${venue}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        date: d,
+        dateLabel: d.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        timeLabel: d.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }),
         venue,
         applications: [],
       });
     }
-
-    const group = groups.get(groupKey);
-    if (group) {
-      group.applications.push(app);
-    }
+    groups.get(key)?.applications.push(app);
   }
 
-  // Sort groups by date (earliest first)
-  const sortedGroups = Array.from(groups.values()).sort(
-    (a, b) => a.date.getTime() - b.date.getTime(),
-  );
-
-  return { sortedGroups, unscheduled };
+  return {
+    sortedGroups: Array.from(groups.values()).sort(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    ),
+    unscheduled,
+  };
 }
+
+const SHARED_COLS = [
+  {
+    className:
+      "w-[24%] text-xs font-medium uppercase tracking-wide text-muted-foreground",
+    label: "Company name",
+  },
+  {
+    className:
+      "w-[34%] text-xs font-medium uppercase tracking-wide text-muted-foreground",
+    label: "Sector",
+  },
+  {
+    className:
+      "w-[16%] text-xs font-medium uppercase tracking-wide text-muted-foreground",
+    label: "Application type",
+  },
+  {
+    className:
+      "w-[14%] text-xs font-medium uppercase tracking-wide text-muted-foreground",
+    label: "Date applied",
+  },
+  {
+    className:
+      "w-[12%] pr-4 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground",
+    label: "Actions",
+  },
+] as const;
 
 export function PendingApplicationsGrouped({
   applications,
 }: PendingApplicationsGroupedProps) {
-  const { selectedApplicationIds, selectAll, toggleSelection } =
+  const { selectedApplicationIds, toggleSelection } =
     useSelectedApplicationsStore();
-
   const { sortedGroups, unscheduled } = useMemo(
     () => groupBySchedule(applications),
     [applications],
   );
 
   return (
-    <div className="space-y-6">
-      {sortedGroups.map((group) => {
-        const groupAppIds = group.applications.map((a) => a.applicationId);
-        const selectedInGroup = groupAppIds.filter((id) =>
-          selectedApplicationIds.has(id),
-        ).length;
-        const allInGroupSelected =
-          groupAppIds.length > 0 && selectedInGroup === groupAppIds.length;
-        const someInGroupSelected =
-          selectedInGroup > 0 && selectedInGroup < groupAppIds.length;
+    <div className="min-w-0 overflow-x-auto">
+      <div className="min-w-[640px] space-y-5">
+        {sortedGroups.map((group) => {
+          const selectableIds = group.applications
+            .filter(isSelectableApplication)
+            .map((a) => a.applicationId);
+          const selCount = selectableIds.filter((id) =>
+            selectedApplicationIds.has(id),
+          ).length;
+          const allSelected =
+            selectableIds.length > 0 && selCount === selectableIds.length;
+          const someSelected = selCount > 0 && selCount < selectableIds.length;
 
-        return (
-          <Card key={group.key}>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                    <Calendar className="size-4 text-muted-foreground" />
+          return (
+            <Card className="overflow-hidden rounded-2xl p-0" key={group.key}>
+              {/* Group header */}
+              <div className="flex items-center justify-between gap-4 border-b bg-muted/40 px-4 py-4">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                  <span className="flex items-center gap-1.5 font-medium text-sm">
+                    <Calendar className="size-3.5 text-muted-foreground" />
                     {group.dateLabel}
-                  </CardTitle>
-                  <div className="flex flex-wrap items-center gap-3 text-muted-foreground text-sm">
-                    <span className="flex items-center gap-1.5">
-                      <Clock className="size-3.5" />
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-0.5 text-muted-foreground text-xs">
+                      <Clock className="size-3" />
                       {group.timeLabel}
                     </span>
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="size-3.5" />
+                    <span className="flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-0.5 text-muted-foreground text-xs">
+                      <MapPin className="size-3" />
                       {group.venue}
                     </span>
                   </div>
                 </div>
-                <span className="whitespace-nowrap text-muted-foreground text-sm">
+                <span className="shrink-0 rounded-full border border-border bg-background px-2.5 py-0.5 text-muted-foreground text-xs">
                   {group.applications.length} application
                   {group.applications.length !== 1 ? "s" : ""}
                 </span>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="w-full overflow-x-auto">
-                <Table className="min-w-[760px] table-fixed">
+
+              <CardContent className="p-0">
+                <Table className="w-full table-fixed">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12">
                         <Checkbox
                           aria-label="Select all in group"
-                          checked={allInGroupSelected}
-                          data-indeterminate={someInGroupSelected}
+                          checked={allSelected}
+                          data-indeterminate={someSelected}
                           onCheckedChange={() => {
-                            if (allInGroupSelected) {
-                              // Deselect only this group's apps
-                              groupAppIds.forEach((id) => {
-                                toggleSelection(id);
-                              });
+                            if (allSelected) {
+                              selectableIds.forEach(toggleSelection);
                             } else {
-                              selectAll(groupAppIds);
+                              selectableIds.forEach((id) => {
+                                if (!selectedApplicationIds.has(id)) {
+                                  toggleSelection(id);
+                                }
+                              });
                             }
                           }}
                         />
                       </TableHead>
-                      <TableHead className="w-[24%]">Company Name</TableHead>
-                      <TableHead className="w-[34%]">Sector</TableHead>
-                      <TableHead className="w-[16%]">
-                        Application Type
-                      </TableHead>
-                      <TableHead className="w-[14%]">Date Applied</TableHead>
-                      <TableHead className="w-[12%]">Actions</TableHead>
+                      {SHARED_COLS.map((column) => (
+                        <TableHead
+                          className={column.className}
+                          key={column.label}
+                        >
+                          {column.label}
+                        </TableHead>
+                      ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -182,39 +196,42 @@ export function PendingApplicationsGrouped({
                       <ApplicationsTableRow
                         application={app}
                         key={app.applicationId}
+                        showContact={false}
                       />
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+              </CardContent>
+            </Card>
+          );
+        })}
 
-      {unscheduled.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base text-muted-foreground md:text-lg">
-              No Interview Scheduled
-              <span className="ml-2 font-normal text-sm">
-                ({unscheduled.length})
+        {unscheduled.length > 0 && (
+          <Card className="overflow-hidden rounded-2xl p-0">
+            <div className="flex items-center gap-2 border-b px-4 py-3">
+              <AlertCircle className="size-3.5 text-muted-foreground" />
+              <span className="font-medium text-muted-foreground text-sm">
+                No interview scheduled
               </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full overflow-x-auto">
-              <Table className="min-w-[760px] table-fixed">
+              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+                {unscheduled.length}
+              </span>
+            </div>
+            <CardContent className="p-0">
+              <Table className="w-full table-fixed">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">
                       <Checkbox disabled />
                     </TableHead>
-                    <TableHead className="w-[24%]">Company Name</TableHead>
-                    <TableHead className="w-[34%]">Sector</TableHead>
-                    <TableHead className="w-[16%]">Application Type</TableHead>
-                    <TableHead className="w-[14%]">Date Applied</TableHead>
-                    <TableHead className="w-[12%]">Actions</TableHead>
+                    {SHARED_COLS.map((column) => (
+                      <TableHead
+                        className={column.className}
+                        key={column.label}
+                      >
+                        {column.label}
+                      </TableHead>
+                    ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -222,14 +239,15 @@ export function PendingApplicationsGrouped({
                     <ApplicationsTableRow
                       application={app}
                       key={app.applicationId}
+                      showContact={false}
                     />
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

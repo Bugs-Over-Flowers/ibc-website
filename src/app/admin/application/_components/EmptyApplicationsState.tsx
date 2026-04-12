@@ -4,7 +4,6 @@ import {
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
-  EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
 
@@ -26,9 +25,8 @@ export function EmptyApplicationsState({
 }: EmptyApplicationsStateProps) {
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent className="py-12">
         <Empty>
-          <EmptyMedia />
           <EmptyHeader>
             <EmptyTitle>No applications found</EmptyTitle>
             <EmptyDescription>{getDescription(status)}</EmptyDescription>
