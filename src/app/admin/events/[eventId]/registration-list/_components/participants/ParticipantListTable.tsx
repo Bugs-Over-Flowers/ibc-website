@@ -20,93 +20,85 @@ interface ParticipantListProps {
   participantList: ParticipantListItem[];
 }
 
+const SortHeader = ({
+  label,
+  sorted,
+  onSort,
+}: {
+  label: string;
+  sorted: "asc" | "desc" | false;
+  onSort: () => void;
+}) => (
+  <Button
+    className="h-auto p-0 font-medium text-[11px] text-muted-foreground uppercase tracking-wider hover:bg-transparent hover:text-foreground"
+    onClick={onSort}
+    type="button"
+    variant="ghost"
+  >
+    {label}
+    {sorted === "asc" ? (
+      <ArrowDownAZ className="ml-1 size-3" />
+    ) : sorted === "desc" ? (
+      <ArrowUpZA className="ml-1 size-3" />
+    ) : null}
+  </Button>
+);
+
 export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
   {
     accessorKey: "affiliation",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          Affiliation
-          {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
-          ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <SortHeader
+        label="Affiliation"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
+    ),
     cell: ({ row }) => {
       const { affiliation } = row.original;
-      return <>{affiliation}</>;
+      return <span className="text-muted-foreground">{affiliation}</span>;
     },
   },
   {
     accessorKey: "firstName",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          First Name
-          {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
-          ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <SortHeader
+        label="First Name"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
+    ),
     cell: ({ row }) => {
       const { firstName } = row.original;
-      return <>{firstName}</>;
+      return <span className="text-sm">{firstName}</span>;
     },
   },
   {
     accessorKey: "lastName",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          Last Name
-          {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
-          ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <SortHeader
+        label="Last Name"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
+    ),
     cell: ({ row }) => {
       const { lastName } = row.original;
-      return <>{lastName}</>;
+      return <span className="text-sm">{lastName}</span>;
     },
   },
   {
     accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          Email
-          {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
-          ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <SortHeader
+        label="Email"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
+    ),
     cell: ({ row }) => {
       const { email } = row.original;
-      return <>{email}</>;
+      return <span className="text-muted-foreground">{email}</span>;
     },
   },
   {
@@ -114,41 +106,41 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
     header: "Contact Number",
     cell: ({ row }) => {
       const { contactNumber } = row.original;
-      return <>{contactNumber}</>;
+      return <span className="text-muted-foreground">{contactNumber}</span>;
     },
   },
   {
     accessorKey: "registrationDate",
     sortingFn: "datetime",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          Registration Date
-          {column.getIsSorted() === "asc" ? (
-            <CalendarArrowDown />
-          ) : column.getIsSorted() === "desc" ? (
-            <CalendarArrowUp />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <Button
+        className="h-auto p-0 font-medium text-[11px] text-muted-foreground uppercase tracking-wider hover:bg-transparent hover:text-foreground"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        type="button"
+        variant="ghost"
+      >
+        Registration Date
+        {column.getIsSorted() === "asc" ? (
+          <CalendarArrowDown className="ml-1 size-3" />
+        ) : column.getIsSorted() === "desc" ? (
+          <CalendarArrowUp className="ml-1 size-3" />
+        ) : null}
+      </Button>
+    ),
     cell: ({ row }) => {
       return (
-        <>
+        <span className="text-muted-foreground">
           {formatDate(
             new Date(row.original.registrationDate),
             "MMM d, h:mm aaa",
           )}
-        </>
+        </span>
       );
     },
   },
   {
     accessorKey: "actions",
-    header: "Actions",
+    header: "",
     enableHiding: false,
     cell: ({ row }) => {
       const { registrationId } = row.original;
@@ -199,10 +191,14 @@ export default function ParticipantListTable({
     });
   };
   return (
-    <div className="space-y-2">
-      <div className="flex h-8 justify-between">
-        <div>{participantList.length} results</div>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="rounded-full border border-border bg-muted/50 px-3 py-1 text-muted-foreground text-xs">
+          {participantList.length}{" "}
+          {participantList.length === 1 ? "participant" : "participants"}
+        </span>
         <Button
+          className="gap-1.5"
           disabled={participantList.length === 0}
           onClick={() => {
             handleExport(participantList);
@@ -210,7 +206,7 @@ export default function ParticipantListTable({
           size="sm"
           variant="outline"
         >
-          <Download className="size-4" />
+          <Download className="size-3.5" />
           Export to Excel
         </Button>
       </div>

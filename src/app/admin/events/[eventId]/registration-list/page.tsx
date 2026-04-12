@@ -1,75 +1,76 @@
-import type { Route } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import BackButton from "@/app/admin/events/[eventId]/_components/BackButton";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
 import type { RegistrationListPageProps } from "@/lib/types/route";
-import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
 import ParticipantList from "./_components/participants/ParticipantList";
 import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";
 import RegistrationListStats from "./_components/RegistrationListStats";
 import RegistrationTabs from "./_components/RegistrationsTabs";
 import RegistrationList from "./_components/registrations/RegistrationList";
 import RegistrationsSearchAndFilter from "./_components/registrations/RegistrationsSearchAndFilter";
+import RegistrationListPageLoading, {
+  RegistrationFiltersSkeleton,
+  RegistrationStatsSkeleton,
+  RegistrationTableSkeleton,
+} from "./loading";
 
 export default function RegistrationPageWrapper({
   params,
   searchParams,
 }: RegistrationListPageProps) {
   return (
-    <main className="flex flex-col gap-4 p-5 md:p-10">
-      <Suspense
-        fallback={
-          <Link href={`/admin/events` as Route}>
-            <Button variant="outline">Back to Event Page</Button>
-          </Link>
-        }
-      >
+    <Suspense fallback={<RegistrationListPageLoading />}>
+      <div className="space-y-6">
         <BackButtonWrapper params={params} />
-      </Suspense>
-      <RegistrationTabs>
-        {/*Registration and Participant Stats*/}
-        <div className="py-3">
-          <Suspense fallback={<StatsSkeleton />}>
-            <RegistrationListStats params={params} />
-          </Suspense>
+
+        <div>
+          <h1 className="font-semibold text-2xl text-foreground">
+            Registration list
+          </h1>
+          <p className="max-w-5xl text-muted-foreground text-sm">
+            Review registrations and participants for this event.
+          </p>
         </div>
 
-        {/* Registration List */}
-        <TabsContent className="flex flex-col gap-4" value="registrations">
-          {/* Stats */}
+        <RegistrationTabs>
+          <div className="mt-4">
+            <Suspense fallback={<RegistrationStatsSkeleton />}>
+              <RegistrationListStats params={params} />
+            </Suspense>
+          </div>
 
-          {/* Search and Filter */}
-          <Suspense
-            fallback={<Skeleton className="h-32 rounded-xl bg-neutral-200" />}
+          <TabsContent
+            className="mt-4 flex flex-col gap-4"
+            value="registrations"
           >
-            <RegistrationsSearchAndFilter />
-          </Suspense>
+            <Suspense fallback={<RegistrationFiltersSkeleton />}>
+              <RegistrationsSearchAndFilter />
+            </Suspense>
 
-          {/* Table */}
-          <Suspense fallback={<TableSkeleton columns={5} />}>
-            <RegistrationList params={params} searchParams={searchParams} />
-          </Suspense>
-        </TabsContent>
+            <Suspense
+              fallback={<RegistrationTableSkeleton variant="registrations" />}
+            >
+              <RegistrationList params={params} searchParams={searchParams} />
+            </Suspense>
+          </TabsContent>
 
-        {/* Participants List */}
-        <TabsContent className="flex flex-col gap-4" value="participants">
-          {/* Search and Filter*/}
-          <Suspense
-            fallback={<Skeleton className="h-32 rounded-xl bg-neutral-200" />}
+          <TabsContent
+            className="mt-4 flex flex-col gap-4"
+            value="participants"
           >
-            <ParticipantsSearchAndFilter />
-          </Suspense>
+            <Suspense fallback={<RegistrationFiltersSkeleton />}>
+              <ParticipantsSearchAndFilter />
+            </Suspense>
 
-          {/* Table and export */}
-          <Suspense fallback={<TableSkeleton columns={5} />}>
-            <ParticipantList params={params} searchParams={searchParams} />
-          </Suspense>
-        </TabsContent>
-      </RegistrationTabs>
-    </main>
+            <Suspense
+              fallback={<RegistrationTableSkeleton variant="participants" />}
+            >
+              <ParticipantList params={params} searchParams={searchParams} />
+            </Suspense>
+          </TabsContent>
+        </RegistrationTabs>
+      </div>
+    </Suspense>
   );
 }
 

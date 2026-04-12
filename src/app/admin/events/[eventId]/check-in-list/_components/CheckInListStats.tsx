@@ -1,56 +1,73 @@
 "use client";
 
-import { BarChart, CheckCircle, Users2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { BarChart3, CheckCircle2, Users2 } from "lucide-react";
 
 interface CheckInListStatsProps {
-  eventTitle: string;
   eventDayLabel: string;
   totalExpected: number;
   checkedInCount: number;
 }
 
 export default function CheckInListStats({
-  eventTitle: _eventTitle,
   eventDayLabel,
   totalExpected,
   checkedInCount,
 }: CheckInListStatsProps) {
   const percentage =
     totalExpected > 0 ? Math.round((checkedInCount / totalExpected) * 100) : 0;
+  const remaining = totalExpected - checkedInCount;
+
+  const stats = [
+    {
+      label: "Expected participants",
+      icon: Users2,
+      value: totalExpected.toLocaleString(),
+      sub: "Total registered for this event",
+      valueClass: "",
+    },
+    {
+      label: `Checked in - ${eventDayLabel}`,
+      icon: CheckCircle2,
+      value: checkedInCount.toLocaleString(),
+      sub: `${percentage}% attendance rate`,
+      valueClass: "text-[#27500A] dark:text-[#9FE1CB]",
+      progress: percentage,
+    },
+    {
+      label: `Attendance rate - ${eventDayLabel}`,
+      icon: BarChart3,
+      value: `${percentage}%`,
+      sub: `${remaining} participant${remaining !== 1 ? "s" : ""} yet to check in`,
+      valueClass: "text-[#185FA5] dark:text-[#85B7EB]",
+    },
+  ];
 
   return (
-    <div className="flex w-full flex-col justify-between gap-2 md:gap-4 lg:flex-row">
-      {[
-        {
-          label: "Expected Participants",
-          data: totalExpected,
-          className: "text-blue-600",
-          icon: <Users2 />,
-        },
-        {
-          label: `Checked In (${eventDayLabel})`,
-          data: checkedInCount,
-          className: "text-green-600",
-          icon: <CheckCircle />,
-        },
-        {
-          label: `Attendance Rate (${eventDayLabel})`,
-          data: `${percentage}%`,
-          className: "text-purple-600",
-          icon: <BarChart />,
-        },
-      ].map(({ label, data, className, icon }) => (
-        <Card className="h-36 w-full" key={label}>
-          <CardContent className="flex h-full flex-col justify-between">
-            <div className="flex items-center gap-2">
-              {icon}
-              <h3 className="font-medium text-lg">{label}</h3>
-            </div>
-            <p className={cn("font-medium text-lg", className)}>{data}</p>
-          </CardContent>
-        </Card>
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+      {stats.map(({ label, icon: Icon, value, sub, valueClass, progress }) => (
+        <div
+          className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-card p-4"
+          key={label}
+        >
+          <div className="flex items-center gap-1.5 font-medium text-[11px] text-muted-foreground uppercase tracking-wider">
+            <Icon className="size-3.5" />
+            {label}
+          </div>
+          <div>
+            <p className={`font-medium text-3xl leading-none ${valueClass}`}>
+              {value}
+            </p>
+            {progress !== undefined && (
+              <div className="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-[#639922] transition-all dark:bg-[#97C459]"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            )}
+            <p className="mt-1.5 text-muted-foreground text-xs">{sub}</p>
+          </div>
+        </div>
       ))}
     </div>
   );
