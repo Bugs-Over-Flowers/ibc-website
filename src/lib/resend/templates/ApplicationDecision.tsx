@@ -11,28 +11,81 @@ import {
 } from "@react-email/components";
 
 interface ApplicationDecisionEmailProps {
+  applicationType: "newMember" | "renewal" | "updating";
   companyName: string;
   decision: "approved" | "rejected";
   notes?: string;
 }
 
 export default function ApplicationDecisionEmail({
+  applicationType,
   companyName,
   decision,
   notes,
 }: ApplicationDecisionEmailProps) {
-  const isApproved = decision === "approved";
-  const previewText = isApproved
-    ? "IBC Membership Application Approved"
-    : "IBC Membership Application Update";
+  const contentMap = {
+    approved: {
+      newMember: {
+        detailsLabel: "Next Steps",
+        detailsText:
+          "Your membership for the current year is now in good standing. Please note that membership dues are billed annually and must be paid each year to keep your membership active.",
+        headingText: "Your membership application is approved",
+        introText:
+          "We are pleased to inform you that your membership application with the Iloilo Business Club has been approved.",
+        previewText: "IBC Membership Application Approved",
+      },
+      renewal: {
+        detailsLabel: "What this means",
+        detailsText:
+          "Your membership for the current year remains in good standing. Please be reminded that membership dues are paid annually and must be settled each year to maintain active membership status.",
+        headingText: "Your membership renewal is approved",
+        introText:
+          "We are pleased to inform you that your membership renewal request with the Iloilo Business Club has been approved.",
+        previewText: "IBC Membership Renewal Approved",
+      },
+      updating: {
+        detailsLabel: "What this means",
+        detailsText:
+          "Your member records will be updated in our system based on your approved submission. If further verification is needed for specific fields, our team will contact you.",
+        headingText: "Your information update is approved",
+        introText:
+          "We are pleased to inform you that your request to update your membership information has been approved.",
+        previewText: "IBC Membership Information Update Approved",
+      },
+    },
+    rejected: {
+      newMember: {
+        detailsLabel: "What this means",
+        detailsText:
+          "You may review your submission details and reapply in the future. We also encourage you to stay connected with Iloilo Business Club events and programs.",
+        headingText: "Your membership application update",
+        introText:
+          "Thank you for your interest in joining the Iloilo Business Club. After careful review, we are unable to proceed with your membership application at this time.",
+        previewText: "IBC Membership Application Update",
+      },
+      renewal: {
+        detailsLabel: "What this means",
+        detailsText:
+          "Your current membership status will follow existing club policy until renewal requirements are completed. If you need guidance on the requirements, please contact our office.",
+        headingText: "Your membership renewal update",
+        introText:
+          "Thank you for submitting your membership renewal request. After careful review, we are unable to approve your renewal at this time.",
+        previewText: "IBC Membership Renewal Update",
+      },
+      updating: {
+        detailsLabel: "What this means",
+        detailsText:
+          "Some submitted changes may require correction or additional verification. Please coordinate with our office so we can guide you on the required next steps.",
+        headingText: "Your information update request update",
+        introText:
+          "Thank you for submitting your member information update request. After review, we are unable to approve the request at this time.",
+        previewText: "IBC Membership Information Update Request Update",
+      },
+    },
+  } as const;
 
-  const headingText = isApproved
-    ? "Your membership application is approved"
-    : "Your membership application update";
-
-  const introText = isApproved
-    ? `We are pleased to inform you that your membership application with the Iloilo Business Club has been approved.`
-    : `Thank you for your interest in joining the Iloilo Business Club. After careful review, we are unable to proceed with your application at this time.`;
+  const { detailsLabel, detailsText, headingText, introText, previewText } =
+    contentMap[decision][applicationType];
 
   const notesLines = (notes || "").trim().split("\n").filter(Boolean);
 
@@ -47,24 +100,10 @@ export default function ApplicationDecisionEmail({
           <Text style={text}>Dear {companyName},</Text>
           <Text style={text}>{introText}</Text>
 
-          {isApproved ? (
-            <Section style={detailsSection}>
-              <Text style={detailLabel}>Next Steps</Text>
-              <Text style={detailValue}>
-                Our team will reach out with onboarding details and membership
-                orientation. Please watch for a follow-up email with your
-                account information.
-              </Text>
-            </Section>
-          ) : (
-            <Section style={detailsSection}>
-              <Text style={detailLabel}>What this means</Text>
-              <Text style={detailValue}>
-                We encourage you to stay connected with our events and consider
-                reapplying in the future.
-              </Text>
-            </Section>
-          )}
+          <Section style={detailsSection}>
+            <Text style={detailLabel}>{detailsLabel}</Text>
+            <Text style={detailValue}>{detailsText}</Text>
+          </Section>
 
           {notesLines.length > 0 && (
             <>

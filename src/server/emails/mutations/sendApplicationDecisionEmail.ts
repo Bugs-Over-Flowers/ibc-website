@@ -6,6 +6,7 @@ import ApplicationDecisionEmail from "@/lib/resend/templates/ApplicationDecision
 
 interface SendApplicationDecisionEmailProps {
   to: string;
+  applicationType: "newMember" | "renewal" | "updating";
   companyName: string;
   decision: "approved" | "rejected";
   notes?: string;
@@ -13,6 +14,7 @@ interface SendApplicationDecisionEmailProps {
 
 export async function sendApplicationDecisionEmail({
   to,
+  applicationType,
   companyName,
   decision,
   notes,
@@ -20,13 +22,24 @@ export async function sendApplicationDecisionEmail({
   [error: string | null, data: { success: true } | null]
 > {
   try {
-    const subject =
-      decision === "approved"
-        ? "IBC Membership Application Approved"
-        : "IBC Membership Application Update";
+    const subjectMap = {
+      approved: {
+        newMember: "IBC Membership Application Approved",
+        renewal: "IBC Membership Renewal Approved",
+        updating: "IBC Membership Information Update Approved",
+      },
+      rejected: {
+        newMember: "IBC Membership Application Update",
+        renewal: "IBC Membership Renewal Update",
+        updating: "IBC Membership Information Update Request Update",
+      },
+    } as const;
+
+    const subject = subjectMap[decision][applicationType];
 
     const html = await render(
       ApplicationDecisionEmail({
+        applicationType,
         companyName,
         decision,
         notes,
@@ -36,6 +49,7 @@ export async function sendApplicationDecisionEmail({
 
     const text = await render(
       ApplicationDecisionEmail({
+        applicationType,
         companyName,
         decision,
         notes,

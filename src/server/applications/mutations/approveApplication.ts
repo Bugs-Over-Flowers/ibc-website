@@ -84,6 +84,7 @@ export async function approveApplication(input: ApplicationDecisionInput) {
 
   const [emailError] = await sendApplicationDecisionEmail({
     to: recipientEmail,
+    applicationType,
     companyName: application.companyName,
     decision: "approved",
     notes: parsed.notes,
