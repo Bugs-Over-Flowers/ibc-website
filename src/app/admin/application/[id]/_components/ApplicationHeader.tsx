@@ -15,7 +15,7 @@ import type { Enums } from "@/lib/supabase/db.types";
 import { updatePaymentProofStatus } from "@/server/applications/mutations/updatePaymentProofStatus";
 import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import ExportPDFButton from "../../_components/ExportPDFButton";
-import { PaymentProofModal } from "./PaymentProofModal";
+import { PaymentProofModal } from "../../_components/PaymentProofModal";
 
 interface ApplicationHeaderProps {
   application: Awaited<ReturnType<typeof getApplicationDetailsById>>;

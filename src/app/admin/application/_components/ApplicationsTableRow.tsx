@@ -3,19 +3,20 @@
 import { AlertTriangle, Eye } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useAction } from "@/hooks/useAction";
+import tryCatch from "@/lib/server/tryCatch";
+import { updatePaymentProofStatus } from "@/server/applications/mutations/updatePaymentProofStatus";
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { toPascalCaseWithSpaces } from "../_utils/formatters";
+import { PaymentProofModal } from "./PaymentProofModal";
 
 interface ApplicationsTableRowProps {
   application: Awaited<ReturnType<typeof getApplications>>[number];
@@ -69,6 +70,7 @@ export function ApplicationsTableRow({
   showContact = true,
 }: ApplicationsTableRowProps) {
   const [isHydrated, setIsHydrated] = useState(false);
+  const router = useRouter();
 
   // Ensure Zustand store state is only used after hydration
   useEffect(() => {
@@ -90,6 +92,39 @@ export function ApplicationsTableRow({
   const isSelectionDisabled = isPaymentProofPending;
   const formattedAppliedDate = formatAppliedDate(application.applicationDate);
 
+  const proofImage = application.ProofImage?.[0];
+  const hasProofImage = !!proofImage;
+
+  const { execute: updateProofStatus, isPending: isUpdatingStatus } = useAction(
+    tryCatch(updatePaymentProofStatus),
+    {
+      onSuccess: () => {
+        router.refresh();
+      },
+      onError: (error) => {
+        toast.error(error);
+      },
+    },
+  );
+
+  const handleDecision = (status: "accepted" | "rejected") => {
+    updateProofStatus({
+      applicationId: application.applicationId,
+      status,
+    });
+  };
+
+  const PERSONAL_REGISTRATION_FEE = 5000;
+  const CORPORATE_REGISTRATION_FEE = 10000;
+  const membershipTypeLabel =
+    application.applicationMemberType === "personal"
+      ? "Personal Membership"
+      : "Corporate Membership";
+  const expectedRegistrationFee =
+    application.applicationMemberType === "corporate"
+      ? CORPORATE_REGISTRATION_FEE
+      : PERSONAL_REGISTRATION_FEE;
+
   return (
     <TableRow
       className={isHydrated && isSelected ? "bg-primary/5" : ""}
@@ -110,16 +145,26 @@ export function ApplicationsTableRow({
         className={showContact ? "w-[22%] font-medium" : "w-[24%] font-medium"}
       >
         <div className="flex items-center gap-2">
-          {isPaymentProofPending && (
-            <Tooltip>
-              <TooltipTrigger
-                aria-label="Check payment proof"
-                className="inline-flex size-[18px] items-center justify-center rounded-full bg-status-red/10 text-status-red"
-              >
-                <AlertTriangle className="size-3" />
-              </TooltipTrigger>
-              <TooltipContent>Check Payment Proof</TooltipContent>
-            </Tooltip>
+          {isPaymentProofPending && hasProofImage && (
+            <PaymentProofModal
+              expectedRegistrationFee={expectedRegistrationFee}
+              isDecisionLocked={paymentProofStatus !== "pending"}
+              isUpdatingStatus={isUpdatingStatus}
+              membershipTypeLabel={membershipTypeLabel}
+              onDecision={handleDecision}
+              paymentProofStatus={paymentProofStatus}
+              proofImagePath={proofImage.path}
+              trigger={
+                <button
+                  aria-label="Check payment proof"
+                  className="inline-flex size-[18px] items-center justify-center rounded-full bg-status-red/10 text-status-red transition-colors hover:bg-status-red/20"
+                  title="Check Payment Proof"
+                  type="button"
+                >
+                  <AlertTriangle className="size-3" />
+                </button>
+              }
+            />
           )}
           <span>{application.companyName}</span>
         </div>
