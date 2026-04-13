@@ -2,11 +2,22 @@
 import { Calendar, CheckCircle, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { ApplicationTab } from "./ApplicationsTabs";
+import type { ApplicationGroup, ApplicationTab } from "./ApplicationsTabs";
 
 interface ApplicationsStatsProps {
   activeTab: ApplicationTab;
-  counts: { new: number; pending: number; finished: number };
+  counts: Partial<Record<ApplicationTab, number>>;
+  availableTabs: ApplicationTab[];
+  group: ApplicationGroup;
+  interviewBreakdownByTab?: Partial<
+    Record<
+      ApplicationTab,
+      {
+        newMember: number;
+        renewal: number;
+      }
+    >
+  > | null;
   onTabChange: (tab: ApplicationTab) => void;
 }
 
@@ -49,11 +60,27 @@ const items = [
 export default function ApplicationsStats({
   activeTab,
   counts,
+  availableTabs,
+  group,
+  interviewBreakdownByTab,
   onTabChange,
 }: ApplicationsStatsProps) {
+  const visibleItems = items
+    .filter((item) => availableTabs.includes(item.tab))
+    .map((item) =>
+      item.tab === "finished" && group === "updating"
+        ? { ...item, label: "Finished Updates" }
+        : item,
+    );
+
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      {items.map(
+    <div
+      className={cn(
+        "grid grid-cols-1 gap-3",
+        visibleItems.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3",
+      )}
+    >
+      {visibleItems.map(
         ({
           tab,
           label,
@@ -65,6 +92,7 @@ export default function ApplicationsStats({
           activeDot,
         }) => {
           const isActive = activeTab === tab;
+          const tabBreakdown = interviewBreakdownByTab?.[tab];
           return (
             <button
               aria-pressed={isActive}
@@ -105,13 +133,19 @@ export default function ApplicationsStats({
                     <p className="truncate text-muted-foreground text-xs">
                       {label}
                     </p>
+                    {group === "interview" && tabBreakdown && (
+                      <p className="text-[11px] text-muted-foreground">
+                        New Member: {tabBreakdown.newMember} | Renewal:{" "}
+                        {tabBreakdown.renewal}
+                      </p>
+                    )}
                     <p
                       className={cn(
                         "font-bold text-3xl leading-none tracking-tight",
                         isActive ? activeValue : "text-foreground",
                       )}
                     >
-                      {counts[tab]}
+                      {counts[tab] ?? 0}
                     </p>
                   </div>
                 </CardContent>

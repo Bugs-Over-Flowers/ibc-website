@@ -82,6 +82,7 @@ export type InterviewDetails = {
 export type ApplicationStatusResponse = {
   applicationId: string;
   identifier: string;
+  applicationType: "newMember" | "updating" | "renewal";
   applicationStatus: "new" | "pending" | "approved" | "rejected";
   applicationDate: string;
   companyName: string;

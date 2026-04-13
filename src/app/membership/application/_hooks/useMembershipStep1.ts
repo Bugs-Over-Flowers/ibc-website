@@ -2,14 +2,78 @@ import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import useMembershipApplicationStore from "@/hooks/membershipApplication.store";
 import tryCatch from "@/lib/server/tryCatch";
+import { resolveMemberLogoUrl } from "@/lib/storage/memberLogo";
 import type { FormSubmitMeta } from "@/lib/types/FormSubmitMeta";
 import { zodValidator } from "@/lib/utils";
 import { MembershipApplicationStep1Schema } from "@/lib/validation/membership/application";
-import { checkMemberExists } from "@/server/membership/queries/checkMemberExists";
+import { checkMemberExistsAndGet } from "@/server/membership/queries/checkMemberExistsAndGet";
 
 const defaultMeta: FormSubmitMeta = {
   nextStep: false,
 };
+
+function getManilaDateKey(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return `${year}-${month}-${day}`;
+}
+
+function toBirthdate(value?: string): Date {
+  if (!value) {
+    return undefined as unknown as Date;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return undefined as unknown as Date;
+  }
+
+  return date;
+}
+
+function toRepresentative(
+  representative:
+    | {
+        firstName?: string;
+        lastName?: string;
+        emailAddress?: string;
+        mobileNumber?: string;
+        landline?: string;
+        mailingAddress?: string;
+        companyDesignation?: string;
+        birthdate?: string;
+        nationality?: string;
+        sex?: string;
+      }
+    | undefined,
+  type: "principal" | "alternate",
+) {
+  const representativeSex: "male" | "female" =
+    representative?.sex === "female" ? "female" : "male";
+
+  return {
+    companyMemberType: type,
+    firstName: representative?.firstName ?? "",
+    lastName: representative?.lastName ?? "",
+    mailingAddress: representative?.mailingAddress ?? "",
+    sex: representativeSex,
+    nationality: representative?.nationality ?? "",
+    birthdate: toBirthdate(representative?.birthdate),
+    companyDesignation: representative?.companyDesignation ?? "",
+    landline: representative?.landline ?? "",
+    mobileNumber: representative?.mobileNumber ?? "",
+    emailAddress: representative?.emailAddress ?? "",
+  };
+}
 
 export const useMembershipStep1 = () => {
   const setStep = useMembershipApplicationStore((state) => state.setStep);
@@ -26,6 +90,12 @@ export const useMembershipStep1 = () => {
   );
   const setMemberValidationCooldown = useMembershipApplicationStore(
     (state) => state.setMemberValidationCooldown,
+  );
+  const setMemberValidationRateLimitDate = useMembershipApplicationStore(
+    (state) => state.setMemberValidationRateLimitDate,
+  );
+  const resetMemberValidationRateLimit = useMembershipApplicationStore(
+    (state) => state.resetMemberValidationRateLimit,
   );
   const setMemberValidationStatus = useMembershipApplicationStore(
     (state) => state.setMemberValidationStatus,
@@ -53,6 +123,11 @@ export const useMembershipStep1 = () => {
         (refinedValue.applicationType === "renewal" ||
           refinedValue.applicationType === "updating")
       ) {
+        const today = getManilaDateKey();
+        if (memberValidation.lastRateLimitResetDate !== today) {
+          resetMemberValidationRateLimit();
+        }
+
         // Check cooldown first - this applies regardless of identifier input
         const now = Date.now();
         if (
@@ -100,7 +175,7 @@ export const useMembershipStep1 = () => {
         if (!alreadyValidated) {
           try {
             const result = await tryCatch(
-              checkMemberExists({
+              checkMemberExistsAndGet({
                 identifier: currentMemberIdentifier,
                 applicationType: currentAppType,
               }),
@@ -119,9 +194,10 @@ export const useMembershipStep1 = () => {
 
               const newAttemptCount = memberValidation.attemptCount + 1;
               setMemberValidationAttempt(newAttemptCount);
+              setMemberValidationRateLimitDate(today);
 
               if (newAttemptCount >= 3) {
-                const cooldownEnd = now + 900000; // 15 minutes
+                const cooldownEnd = now + 30000; // temporary // 900000; // 15 minutes permanently
                 setMemberValidationCooldown(cooldownEnd);
                 toast.error(
                   "Too many failed attempts. Please wait 15 minutes before trying again.",
@@ -144,6 +220,7 @@ export const useMembershipStep1 = () => {
 
               const newAttemptCount = memberValidation.attemptCount + 1;
               setMemberValidationAttempt(newAttemptCount);
+              setMemberValidationRateLimitDate(today);
 
               if (newAttemptCount >= 3) {
                 const cooldownEnd = now + 30000;
@@ -168,6 +245,31 @@ export const useMembershipStep1 = () => {
               currentMemberIdentifier,
               currentAppType,
             );
+
+            setApplicationData({
+              step1: {
+                ...refinedValue,
+                businessMemberId: data.businessMemberId ?? "",
+              },
+              step2: {
+                companyName: data.companyName ?? "",
+                companyAddress: data.companyAddress ?? "",
+                sectorId: String(data.sectorId ?? ""),
+                landline: data.landline ?? "",
+                mobileNumber: data.mobileNumber ?? "",
+                emailAddress: data.emailAddress ?? "",
+                websiteURL: data.websiteURL ?? "",
+                logoImageURL: resolveMemberLogoUrl(data.logoImageURL) ?? "",
+                logoImage: undefined,
+              },
+              step3: {
+                representatives: [
+                  toRepresentative(data.principalRepresentative, "principal"),
+                  toRepresentative(data.alternateRepresentative, "alternate"),
+                ],
+              },
+            });
+
             toast.success(`Member verified: ${data.companyName}`);
           } catch {
             setMemberValidationStatus(
@@ -182,6 +284,7 @@ export const useMembershipStep1 = () => {
 
             const newAttemptCount = memberValidation.attemptCount + 1;
             setMemberValidationAttempt(newAttemptCount);
+            setMemberValidationRateLimitDate(today);
 
             if (newAttemptCount >= 3) {
               const cooldownEnd = now + 30000;
@@ -198,6 +301,12 @@ export const useMembershipStep1 = () => {
       // Reset validation when application type changes
       if (refinedValue.applicationType === "newMember") {
         resetMemberValidation();
+        setApplicationData({
+          step1: {
+            ...refinedValue,
+            businessMemberId: "",
+          },
+        });
       }
 
       if (meta.nextStep) {
@@ -205,7 +314,15 @@ export const useMembershipStep1 = () => {
       }
 
       setApplicationData({
-        step1: refinedValue,
+        step1: {
+          ...refinedValue,
+          businessMemberId:
+            refinedValue.applicationType === "newMember"
+              ? ""
+              : (refinedValue.businessMemberId ??
+                memberValidation.memberInfo.businessMemberId ??
+                ""),
+        },
       });
     },
   });

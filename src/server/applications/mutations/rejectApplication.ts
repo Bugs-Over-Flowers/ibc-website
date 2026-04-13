@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ApplicationDecisionInput } from "@/lib/validation/application/application";
 import { applicationDecisionSchema } from "@/lib/validation/application/application";
@@ -30,6 +31,7 @@ export async function rejectApplication(input: ApplicationDecisionInput) {
     .from("Application")
     .select(
       `
+      applicationType,
       companyName,
       emailAddress,
       ApplicationMember(emailAddress)
@@ -52,6 +54,7 @@ export async function rejectApplication(input: ApplicationDecisionInput) {
 
   const [emailError] = await sendApplicationDecisionEmail({
     to: recipientEmail,
+    applicationType: application.applicationType,
     companyName: application.companyName,
     decision: "rejected",
     notes: parsed.notes,
@@ -61,8 +64,8 @@ export async function rejectApplication(input: ApplicationDecisionInput) {
     throw new Error(emailError);
   }
 
-  // updateTag(CACHE_TAGS.applications.all);
-  // updateTag(CACHE_TAGS.applications.admin);
+  updateTag(CACHE_TAGS.applications.all);
+  updateTag(CACHE_TAGS.applications.admin);
 
   revalidatePath("/admin/application");
 

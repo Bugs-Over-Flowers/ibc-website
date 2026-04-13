@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   type QuickOnsiteRegistrationInput,
@@ -53,6 +54,14 @@ export async function quickOnsiteRegistrationRPC(
   if (!rpcResults) {
     throw new Error("No data returned from quick onsite registration");
   }
+
+  updateTag(CACHE_TAGS.registrations.all);
+  updateTag(CACHE_TAGS.registrations.list);
+  updateTag(CACHE_TAGS.registrations.details);
+  updateTag(CACHE_TAGS.registrations.stats);
+  updateTag(CACHE_TAGS.registrations.event);
+  updateTag(CACHE_TAGS.events.registrations);
+  updateTag(CACHE_TAGS.checkIns.stats);
 
   revalidatePath(`/admin/events/check-in`);
 

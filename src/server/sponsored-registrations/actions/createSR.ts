@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   type CreateSRInput,
@@ -75,6 +76,9 @@ export async function createSR(
         "Failed to create sponsored registration: Unknown error",
     );
   }
+
+  updateTag(CACHE_TAGS.sponsoredRegistrations.all);
+  updateTag(CACHE_TAGS.sponsoredRegistrations.admin);
 
   revalidatePath("/admin/sponsored-registration", "page");
   revalidatePath(

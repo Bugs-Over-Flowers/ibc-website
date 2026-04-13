@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { MembershipGuidelines } from "@/app/membership/application/_components/MembershipGuidelines";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -472,6 +473,12 @@ export function Step5Payment({ form, applicationData }: StepProps) {
           accurate. Once submitted, your application will undergo review by the
           Membership Committee.
         </p>
+
+        <MembershipGuidelines
+          className="mx-auto mt-3 w-full max-w-3xl"
+          collapsible
+          compact
+        />
       </div>
     </div>
   );
