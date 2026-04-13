@@ -104,7 +104,9 @@ export async function getDashboardData(
   cacheTag(CACHE_TAGS.members.admin);
   cacheTag(CACHE_TAGS.events.admin);
   cacheTag(CACHE_TAGS.registrations.stats);
+  cacheTag(CACHE_TAGS.checkIns.stats);
   cacheTag(CACHE_TAGS.evaluations.admin);
+  cacheTag(CACHE_TAGS.sponsoredRegistrations.admin);
 
   const supabase = await createClient(requestCookies);
 

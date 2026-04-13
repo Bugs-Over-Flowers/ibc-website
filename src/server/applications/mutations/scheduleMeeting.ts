@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ScheduleMeetingInput } from "@/lib/validation/application/application";
 import { scheduleMeetingSchema } from "@/lib/validation/application/application";
@@ -150,8 +151,8 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
       `Interview linking failed: ${rpcResult?.[0]?.message || "Unknown error"}`,
     );
   }
-  // updateTag(CACHE_TAGS.applications.all);
-  // updateTag(CACHE_TAGS.applications.admin);
+  updateTag(CACHE_TAGS.applications.all);
+  updateTag(CACHE_TAGS.applications.admin);
 
   revalidatePath("/admin/application");
 

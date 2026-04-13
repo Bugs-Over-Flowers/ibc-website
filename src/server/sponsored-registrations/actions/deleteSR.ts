@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 
 const deleteSRSchema = z.object({
@@ -53,6 +54,9 @@ export async function deleteSR(
       `Failed to delete sponsored registration: ${error?.message || "Unknown error"}`,
     );
   }
+
+  updateTag(CACHE_TAGS.sponsoredRegistrations.all);
+  updateTag(CACHE_TAGS.sponsoredRegistrations.admin);
 
   revalidatePath(
     `/admin/events/${parsed.eventId}/sponsored-registrations`,
