@@ -81,37 +81,36 @@ export function PaymentProofModal({
       {trigger ? (
         <DialogTrigger render={trigger} />
       ) : (
-        <DialogTrigger>
-          <button
-            className="group relative flex h-[88px] w-[88px] flex-col items-center justify-center gap-1.5 overflow-hidden rounded-xl border border-border bg-muted/40 transition-colors hover:border-border/80 hover:bg-muted/60"
-            type="button"
-          >
-            <Image
-              alt="Payment proof thumbnail"
-              className="absolute inset-0 h-full w-full object-cover opacity-20 transition-opacity group-hover:opacity-30"
-              fill
-              src={proofImagePath}
-            />
-            <svg
-              className="relative size-5 text-muted-foreground"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.5"
-              viewBox="0 0 24 24"
-            >
-              <title>Payment proof icon</title>
-              <rect height="18" rx="2" width="18" x="3" y="3" />
-              <line x1="3" x2="21" y1="8" y2="8" />
-              <line x1="3" x2="21" y1="16" y2="16" />
-              <line x1="8" x2="8" y1="8" y2="16" />
-            </svg>
-            <span className="relative font-medium text-muted-foreground text-xs">
-              Proof
-            </span>
-          </button>
-        </DialogTrigger>
+        <DialogTrigger
+          render={
+            <Button className="group relative flex h-[88px] w-[88px] flex-col items-center justify-center gap-1.5 overflow-hidden rounded-xl border border-border bg-muted/40 transition-colors hover:border-border/80 hover:bg-muted/60">
+              <Image
+                alt="Payment proof thumbnail"
+                className="absolute inset-0 h-full w-full object-cover opacity-20 transition-opacity group-hover:opacity-30"
+                fill
+                src={proofImagePath}
+              />
+              <svg
+                className="relative size-5 text-muted-foreground"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
+                viewBox="0 0 24 24"
+              >
+                <title>Payment proof icon</title>
+                <rect height="18" rx="2" width="18" x="3" y="3" />
+                <line x1="3" x2="21" y1="8" y2="8" />
+                <line x1="3" x2="21" y1="16" y2="16" />
+                <line x1="8" x2="8" y1="8" y2="16" />
+              </svg>
+              <span className="relative font-medium text-muted-foreground text-xs">
+                Proof
+              </span>
+            </Button>
+          }
+        />
       )}
 
       <DialogContent className="max-h-[calc(100vh-2rem)] w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] gap-0 overflow-y-auto p-0 sm:w-auto sm:max-w-2xl">

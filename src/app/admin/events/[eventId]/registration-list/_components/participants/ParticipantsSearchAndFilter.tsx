@@ -69,7 +69,6 @@ export default function ParticipantsSearchAndFilter() {
                   className="h-9 shrink-0"
                   isSubmittingLabel="Searching"
                   label="Search"
-                  variant="outline"
                 />
               </form.AppForm>
             </div>
