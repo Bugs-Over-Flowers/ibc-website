@@ -30,6 +30,7 @@ export async function rejectApplication(input: ApplicationDecisionInput) {
     .from("Application")
     .select(
       `
+      applicationType,
       companyName,
       emailAddress,
       ApplicationMember(emailAddress)
@@ -52,6 +53,7 @@ export async function rejectApplication(input: ApplicationDecisionInput) {
 
   const [emailError] = await sendApplicationDecisionEmail({
     to: recipientEmail,
+    applicationType: application.applicationType,
     companyName: application.companyName,
     decision: "rejected",
     notes: parsed.notes,

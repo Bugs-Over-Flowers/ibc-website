@@ -12,7 +12,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import type { ApplicationStatusResponse } from "@/lib/types/application";
 import { zodValidator } from "@/lib/utils";
 import { checkApplicationStatusSchema } from "@/lib/validation/application/check-status";
-import { checkApplicationStatus } from "@/server/applications/queries/checkApplicationStatus";
+import { checkApplicationStatus } from "../_utils/checkApplicationStatus";
 import { ApplicationStatusResult } from "./ApplicationStatusResult";
 
 export function ApplicationStatusForm() {
@@ -59,7 +59,7 @@ export function ApplicationStatusForm() {
   if (result) {
     return (
       <div className="flex w-full flex-col justify-center">
-        <div className="fade-in slide-in-from-bottom-4 mx-auto w-full max-w-5xl animate-in space-y-6 duration-500">
+        <div className="fade-in slide-in-from-bottom-4 mx-auto w-full max-w-5xl animate-in space-y-4 duration-500 sm:space-y-6">
           <ApplicationStatusResult result={result} />
           <div className="flex justify-center">
             <Button

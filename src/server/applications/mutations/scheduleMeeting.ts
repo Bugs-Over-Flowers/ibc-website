@@ -44,6 +44,7 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     .select(
       `
       applicationId,
+      applicationType,
       companyName,
       emailAddress,
       ApplicationMember(firstName, lastName, emailAddress)
@@ -57,6 +58,16 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
 
   if (!applications || applications.length === 0) {
     throw new Error("No applications found");
+  }
+
+  const updateInfoApplications = applications.filter(
+    (app) => app.applicationType === "updating",
+  );
+
+  if (updateInfoApplications.length > 0) {
+    throw new Error(
+      "Update Info applications do not require interview scheduling",
+    );
   }
 
   // Pre-render the email template once (instead of 2N renders for N recipients)

@@ -25,17 +25,64 @@ export default async function ApplicationsPage() {
         | "rejected"
         | undefined;
 
+      const isInterviewType =
+        app.applicationType === "newMember" ||
+        app.applicationType === "renewal";
+      const isUpdatingType = app.applicationType === "updating";
+
       if (status === "new") {
-        acc.new += 1;
+        if (isInterviewType) {
+          acc.interview.new += 1;
+          if (app.applicationType === "newMember") {
+            acc.interview.typeBreakdown.new.newMember += 1;
+          }
+          if (app.applicationType === "renewal") {
+            acc.interview.typeBreakdown.new.renewal += 1;
+          }
+        }
+        if (isUpdatingType) {
+          acc.updating.new += 1;
+        }
       } else if (status === "pending") {
-        acc.pending += 1;
+        if (isInterviewType) {
+          acc.interview.pending += 1;
+          if (app.applicationType === "newMember") {
+            acc.interview.typeBreakdown.pending.newMember += 1;
+          }
+          if (app.applicationType === "renewal") {
+            acc.interview.typeBreakdown.pending.renewal += 1;
+          }
+        }
       } else if (status === "approved" || status === "rejected") {
-        acc.finished += 1;
+        if (isInterviewType) {
+          acc.interview.finished += 1;
+          if (app.applicationType === "newMember") {
+            acc.interview.typeBreakdown.finished.newMember += 1;
+          }
+          if (app.applicationType === "renewal") {
+            acc.interview.typeBreakdown.finished.renewal += 1;
+          }
+        }
+        if (isUpdatingType) {
+          acc.updating.finished += 1;
+        }
       }
 
       return acc;
     },
-    { new: 0, pending: 0, finished: 0 },
+    {
+      interview: {
+        new: 0,
+        pending: 0,
+        finished: 0,
+        typeBreakdown: {
+          new: { newMember: 0, renewal: 0 },
+          pending: { newMember: 0, renewal: 0 },
+          finished: { newMember: 0, renewal: 0 },
+        },
+      },
+      updating: { new: 0, finished: 0 },
+    },
   );
 
   return (
@@ -52,21 +99,35 @@ export default async function ApplicationsPage() {
 
         <ApplicationsTabs
           counts={counts}
-          finishedApplications={
-            <Suspense fallback={<ApplicationsListSkeleton />}>
-              <ApplicationsList status="finished" />
-            </Suspense>
-          }
-          newApplications={
-            <Suspense fallback={<ApplicationsListSkeleton />}>
-              <ApplicationsList status="new" />
-            </Suspense>
-          }
-          pendingApplications={
-            <Suspense fallback={<ApplicationsListSkeleton />}>
-              <ApplicationsList status="pending" />
-            </Suspense>
-          }
+          interviewApplications={{
+            finished: (
+              <Suspense fallback={<ApplicationsListSkeleton />}>
+                <ApplicationsList group="interview" status="finished" />
+              </Suspense>
+            ),
+            new: (
+              <Suspense fallback={<ApplicationsListSkeleton />}>
+                <ApplicationsList group="interview" status="new" />
+              </Suspense>
+            ),
+            pending: (
+              <Suspense fallback={<ApplicationsListSkeleton />}>
+                <ApplicationsList group="interview" status="pending" />
+              </Suspense>
+            ),
+          }}
+          updateInfoApplications={{
+            finished: (
+              <Suspense fallback={<ApplicationsListSkeleton />}>
+                <ApplicationsList group="updating" status="finished" />
+              </Suspense>
+            ),
+            new: (
+              <Suspense fallback={<ApplicationsListSkeleton />}>
+                <ApplicationsList group="updating" status="new" />
+              </Suspense>
+            ),
+          }}
         />
       </Suspense>
     </div>

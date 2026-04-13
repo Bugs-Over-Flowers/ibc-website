@@ -18,6 +18,7 @@ import ExportPDFButton from "./ExportPDFButton";
 interface ApplicationsTableProps {
   applications: Awaited<ReturnType<typeof getApplications>>;
   status: "new" | "pending" | "finished";
+  title?: string;
 }
 
 function getTitle(status: "new" | "pending" | "finished"): string {
@@ -32,6 +33,7 @@ function getTitle(status: "new" | "pending" | "finished"): string {
 export function ApplicationsTable({
   applications,
   status,
+  title,
 }: ApplicationsTableProps) {
   const showContactColumn = status === "finished";
 
@@ -90,7 +92,7 @@ export function ApplicationsTable({
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle>
-            {getTitle(status)}
+            {title ?? getTitle(status)}
             <span className="ml-2 font-normal text-muted-foreground text-sm">
               ({applications.length})
             </span>

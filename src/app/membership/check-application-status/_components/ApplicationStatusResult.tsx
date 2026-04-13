@@ -36,6 +36,18 @@ const statusColors = {
   interview: "bg-purple-500/10 text-purple-400 border-purple-500/20",
 };
 
+const applicationTypeLabels = {
+  newMember: "New Member",
+  renewal: "Renewal",
+  updating: "Update Info",
+} as const;
+
+const applicationTypeColors = {
+  newMember: "bg-emerald-500/10 text-emerald-500 border-emerald-500/50",
+  renewal: "bg-orange-500/10 text-orange-500 border-orange-500/50",
+  updating: "bg-blue-500/10 text-blue-500 border-blue-500/50",
+} as const;
+
 interface ApplicationStatusResultProps {
   result: ApplicationStatusResponse;
 }
@@ -68,21 +80,31 @@ export function ApplicationStatusResult({
   };
 
   const statusBadge = getStatusBadge();
+  const applicationTypeLabel = applicationTypeLabels[result.applicationType];
+  const applicationTypeColor = applicationTypeColors[result.applicationType];
 
   return (
     <div className="grid w-full gap-6 lg:grid-cols-2 lg:gap-8">
       {/* Application Information Card */}
       <TooltipProvider>
         <Card className="flex flex-col overflow-hidden border-white/5 bg-[#161e2e] p-0 shadow-2xl">
-          <div className="border-white/5 border-b bg-[#1f2937]/50 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-white/5 border-b bg-[#1f2937]/50 p-4 sm:p-6">
             <h3 className="flex items-center gap-3 font-semibold text-lg text-white">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
                 <FileText className="h-5 w-5" />
               </div>
               Application Details
             </h3>
+            <div
+              className={cn(
+                "shrink-0 rounded-full border px-3 py-1 font-bold text-[10px] uppercase tracking-wider shadow-sm",
+                applicationTypeColor,
+              )}
+            >
+              {applicationTypeLabel}
+            </div>
           </div>
-          <CardContent className="grid flex-1 gap-6 p-6">
+          <CardContent className="grid flex-1 gap-6 p-4 sm:p-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <Tooltip>
                 <TooltipTrigger className="cursor-help">
@@ -94,7 +116,7 @@ export function ApplicationStatusResult({
                       <p className="font-medium text-slate-400 text-xs uppercase tracking-wider">
                         Company Name
                       </p>
-                      <p className="mt-0.5 truncate font-semibold text-white text-xs">
+                      <p className="mt-0.5 break-words font-semibold text-white text-xs sm:truncate">
                         {result.companyName}
                       </p>
                     </div>
@@ -115,7 +137,7 @@ export function ApplicationStatusResult({
                       <p className="font-medium text-slate-400 text-xs uppercase tracking-wider">
                         Application Date
                       </p>
-                      <p className="mt-0.5 truncate font-semibold text-white text-xs">
+                      <p className="mt-0.5 break-words font-semibold text-white text-xs sm:truncate">
                         {formatDate(result.applicationDate)}
                       </p>
                     </div>
@@ -146,7 +168,7 @@ export function ApplicationStatusResult({
             <div className="flex items-center justify-center text-slate-500">
               <p className="flex items-center gap-2 text-xxs">
                 <Info className="h-3 w-3" />
-                Hover over details to see full information
+                Tap or hover over details to see full information
               </p>
             </div>
           </CardContent>
@@ -155,7 +177,7 @@ export function ApplicationStatusResult({
         {/* Status Details Card */}
         {result.applicationStatus === "rejected" ? (
           <Card className="flex flex-col overflow-hidden border-white/5 bg-[#161e2e] p-0 shadow-2xl">
-            <div className="border-white/5 border-b bg-[#1f2937]/50 p-6">
+            <div className="border-white/5 border-b bg-[#1f2937]/50 p-4 sm:p-6">
               <h3 className="flex items-center gap-3 font-semibold text-lg text-red-400">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10 text-red-400">
                   <XCircle className="h-5 w-5" />
@@ -163,7 +185,7 @@ export function ApplicationStatusResult({
                 Application Rejected
               </h3>
             </div>
-            <CardContent className="flex flex-1 flex-col justify-center p-6">
+            <CardContent className="flex flex-1 flex-col justify-center p-4 sm:p-6">
               <div className="h-full rounded-xl border border-red-500/10 bg-red-950/20 p-6">
                 <div className="flex items-start gap-4">
                   <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-400">
@@ -199,7 +221,7 @@ export function ApplicationStatusResult({
           </Card>
         ) : result.applicationStatus === "approved" ? (
           <Card className="flex flex-col overflow-hidden border-white/5 bg-[#161e2e] p-0 shadow-2xl">
-            <div className="border-white/5 border-b bg-[#1f2937]/50 p-6">
+            <div className="border-white/5 border-b bg-[#1f2937]/50 p-4 sm:p-6">
               <h3 className="flex items-center gap-3 font-semibold text-emerald-400 text-lg">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
                   <BadgeCheck className="h-5 w-5" />
@@ -207,7 +229,7 @@ export function ApplicationStatusResult({
                 Membership Approved
               </h3>
             </div>
-            <CardContent className="flex flex-1 flex-col justify-center p-6">
+            <CardContent className="flex flex-1 flex-col justify-center p-4 sm:p-6">
               <div className="h-full rounded-xl border border-emerald-500/10 bg-emerald-950/20 p-6">
                 <div className="flex items-start gap-4">
                   <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
@@ -234,7 +256,7 @@ export function ApplicationStatusResult({
           </Card>
         ) : result.hasInterview && result.interview ? (
           <Card className="flex flex-col overflow-hidden border-white/5 bg-[#161e2e] p-0 shadow-2xl">
-            <div className="border-white/5 border-b bg-[#1f2937]/50 p-6">
+            <div className="border-white/5 border-b bg-[#1f2937]/50 p-4 sm:p-6">
               <h3 className="flex items-center gap-3 font-semibold text-emerald-400 text-lg">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
                   <CheckCircle2 className="h-5 w-5" />
@@ -242,7 +264,7 @@ export function ApplicationStatusResult({
                 Interview Scheduled
               </h3>
             </div>
-            <CardContent className="grid flex-1 gap-6 p-6">
+            <CardContent className="grid flex-1 gap-6 p-4 sm:p-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Tooltip>
                   <TooltipTrigger className="w-full cursor-help">
@@ -254,7 +276,7 @@ export function ApplicationStatusResult({
                         <p className="font-medium text-slate-400 text-xs uppercase tracking-wider">
                           Date & Time
                         </p>
-                        <p className="mt-0.5 truncate font-semibold text-white text-xxs">
+                        <p className="mt-0.5 break-words font-semibold text-white text-xs sm:truncate">
                           {formatDateTime(result.interview.interviewDate)}
                         </p>
                       </div>
@@ -275,7 +297,7 @@ export function ApplicationStatusResult({
                         <p className="font-medium text-slate-400 text-xs uppercase tracking-wider">
                           Venue
                         </p>
-                        <p className="mt-0.5 truncate font-semibold text-white text-xs">
+                        <p className="mt-0.5 break-words font-semibold text-white text-xs sm:truncate">
                           {result.interview.interviewVenue}
                         </p>
                       </div>
@@ -305,7 +327,7 @@ export function ApplicationStatusResult({
           </Card>
         ) : (
           <Card className="flex flex-col overflow-hidden border-white/5 bg-[#161e2e] p-0 shadow-2xl">
-            <div className="border-white/5 border-b bg-[#1f2937]/50 p-6">
+            <div className="border-white/5 border-b bg-[#1f2937]/50 p-4 sm:p-6">
               <h3 className="flex items-center gap-3 font-semibold text-amber-400 text-lg">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
                   <Clock className="h-5 w-5" />
@@ -313,7 +335,7 @@ export function ApplicationStatusResult({
                 Under Review
               </h3>
             </div>
-            <CardContent className="flex flex-1 flex-col justify-center p-6">
+            <CardContent className="flex flex-1 flex-col justify-center p-4 sm:p-6">
               <div className="h-full rounded-xl border border-amber-500/10 bg-amber-950/20 p-6">
                 <div className="flex items-start gap-4">
                   <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-400">
@@ -321,13 +343,14 @@ export function ApplicationStatusResult({
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold text-amber-400 text-base">
-                      Awaiting Interview Schedule
+                      {result.applicationType === "updating"
+                        ? "Information Update in Progress"
+                        : "Awaiting Interview Schedule"}
                     </h4>
                     <p className="text-amber-200/70 text-sm leading-relaxed">
-                      Your application is currently under review by the Iloilo
-                      Business Club. An interview date and venue will be
-                      scheduled shortly, and you will be notified via email once
-                      confirmed. Thank you for your patience.
+                      {result.applicationType === "updating"
+                        ? "Your application is currently being reviewed by the Iloilo Business Club. Your information will be automatically updated upon approval. Thank you for your patience."
+                        : "Your application is currently under review by the Iloilo Business Club. An interview date and venue will be scheduled shortly, and you will be notified via email once confirmed. Thank you for your patience."}
                     </p>
                   </div>
                 </div>

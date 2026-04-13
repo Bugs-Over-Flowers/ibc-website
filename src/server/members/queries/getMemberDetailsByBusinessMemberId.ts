@@ -9,6 +9,7 @@ export type MemberDetailsByBusinessMemberId = {
   businessMemberId: string;
   businessName: string;
   identifier: string;
+  sectorId: number | null;
   websiteURL: string | null;
   logoImageURL: string | null;
   joinDate: string;
@@ -17,6 +18,7 @@ export type MemberDetailsByBusinessMemberId = {
   sectorName: string | null;
   latestApplication: {
     applicationId: string;
+    sectorId: number | null;
     companyAddress: string | null;
     emailAddress: string | null;
     landline: string | null;
@@ -59,6 +61,7 @@ export async function getMemberDetailsByBusinessMemberId(
       businessMemberId,
       businessName,
       identifier,
+      sectorId,
       websiteURL,
       logoImageURL,
       joinDate,
@@ -84,6 +87,7 @@ export async function getMemberDetailsByBusinessMemberId(
       .select(
         `
         applicationId,
+        sectorId,
         companyAddress,
         emailAddress,
         landline,
@@ -147,6 +151,7 @@ export async function getMemberDetailsByBusinessMemberId(
     businessMemberId: member.businessMemberId,
     businessName: member.businessName,
     identifier: member.identifier,
+    sectorId: member.sectorId,
     websiteURL: member.websiteURL,
     logoImageURL: await signLogoUrl(member.logoImageURL),
     joinDate: member.joinDate,
@@ -156,6 +161,7 @@ export async function getMemberDetailsByBusinessMemberId(
     latestApplication: latestApplication
       ? {
           applicationId: latestApplication.applicationId,
+          sectorId: latestApplication.sectorId,
           companyAddress: latestApplication.companyAddress,
           emailAddress: latestApplication.emailAddress,
           landline: latestApplication.landline,
