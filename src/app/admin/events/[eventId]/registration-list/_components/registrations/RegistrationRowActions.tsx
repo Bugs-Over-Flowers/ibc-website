@@ -6,12 +6,12 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import PaymentProofReviewDialog from "@/app/admin/events/_components/PaymentProof/PaymentProofReviewDialog";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Enums } from "@/lib/supabase/db.types";
@@ -46,13 +46,22 @@ export default function RegistrationRowActions({
   return (
     <>
       <DropdownMenu modal={false}>
-        <DropdownMenuTrigger>
-          <MoreHorizontal />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className={"w-46"}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              className="size-7 p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              size="sm"
+              variant="ghost"
+            >
+              <MoreHorizontal className="size-3.5" />
+            </Button>
+          }
+        />
+        <DropdownMenuContent align="end" className="w-44">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
             {!isDetailsPage && (
               <DropdownMenuItem
                 nativeButton={false}
@@ -62,7 +71,7 @@ export default function RegistrationRowActions({
                       `/admin/events/${eventId}/registration-list/registration/${data.registrationId}` as Route
                     }
                   >
-                    <ChevronRight />
+                    <ChevronRight className="size-3.5" />
                     Registration Details
                   </Link>
                 }
@@ -70,13 +79,13 @@ export default function RegistrationRowActions({
             )}
 
             <DropdownMenuItem onClick={() => setQrcodeDialog(true)}>
-              <QrCodeIcon />
+              <QrCodeIcon className="size-3.5" />
               QR Code
             </DropdownMenuItem>
 
             {shouldShowPaymentProofAction && (
               <DropdownMenuItem onClick={() => setPaymentProofDialog(true)}>
-                <Images />
+                <Images className="size-3.5" />
                 Review Payment Proof
               </DropdownMenuItem>
             )}

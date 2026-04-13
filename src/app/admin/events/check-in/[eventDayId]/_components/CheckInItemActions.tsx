@@ -1,9 +1,8 @@
-import { ChevronRightIcon, Ellipsis } from "lucide-react";
+import { ChevronRight, MoreHorizontal, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { StopPropagationButton } from "@/components/StopPropagationButton";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -16,10 +15,8 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
 import type { ParticipantCheckInRow } from "../_types/checkInTable";
 
 interface CheckInItemActionsProps {
@@ -38,33 +35,34 @@ export default function CheckInItemActions({
 }: CheckInItemActionsProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const router = useRouter();
+
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
             <Button
+              className="size-7 p-0"
               onClick={(e) => {
                 e.stopPropagation();
               }}
-              variant={"outline"}
+              size="sm"
+              variant="ghost"
             >
-              <Ellipsis />
+              <MoreHorizontal className="size-3.5" />
             </Button>
           }
         />
-        <DropdownMenuContent>
+        <DropdownMenuContent align="end" className="w-44">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>More</DropdownMenuLabel>
-            <Separator />
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
                 setIsDetailsOpen(true);
               }}
             >
-              <ChevronRightIcon />
-              Details
+              <User className="size-3.5" />
+              Participant details
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={(e) => {
@@ -74,66 +72,45 @@ export default function CheckInItemActions({
                 );
               }}
             >
-              <ChevronRightIcon />
-              Registration
+              <ChevronRight className="size-3.5" />
+              View registration
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-      <ParticipantDetailsDialog
-        contactNumber={participant.contactNumber}
-        email={participant.email}
-        fullName={`${participant.firstName} ${participant.lastName}`}
-        isOpen={isDetailsOpen}
-        setIsOpen={setIsDetailsOpen}
-      />
-    </>
-  );
-}
 
-interface ParticipantDetailsDialogProps {
-  email: string;
-  fullName: string;
-  contactNumber: string;
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-}
-
-function ParticipantDetailsDialog({
-  email,
-  fullName,
-  contactNumber,
-  isOpen,
-  setIsOpen,
-}: ParticipantDetailsDialogProps) {
-  return (
-    <Dialog onOpenChange={setIsOpen} open={isOpen}>
-      <DialogContent showCloseButton={false}>
-        <DialogTitle>{fullName}</DialogTitle>
-        <Card>
-          <CardContent>
-            <div className="flex flex-col gap-4">
-              <div>
-                <h4 className="font-medium">Email</h4>
-                <p className="text-muted-foreground text-sm">{email}</p>
-              </div>
-              <div>
-                <h4 className="font-medium">Contact Number</h4>
-                <p className="text-muted-foreground text-sm">{contactNumber}</p>
-              </div>
+      <Dialog onOpenChange={setIsDetailsOpen} open={isDetailsOpen}>
+        <DialogContent className="max-w-sm gap-0 p-0" showCloseButton={false}>
+          <div className="border-b px-5 py-4">
+            <DialogTitle className="font-medium text-base">
+              {participant.firstName} {participant.lastName}
+            </DialogTitle>
+          </div>
+          <div className="flex flex-col gap-3 px-5 py-4">
+            <div>
+              <p className="mb-1 font-medium text-[11px] text-muted-foreground uppercase tracking-wider">
+                Email
+              </p>
+              <p className="text-sm">{participant.email}</p>
             </div>
-          </CardContent>
-        </Card>
-        <DialogFooter>
-          <DialogClose
-            render={
-              <StopPropagationButton variant={"outline"}>
-                Close
-              </StopPropagationButton>
-            }
-          />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <div>
+              <p className="mb-1 font-medium text-[11px] text-muted-foreground uppercase tracking-wider">
+                Contact number
+              </p>
+              <p className="text-sm">{participant.contactNumber}</p>
+            </div>
+          </div>
+          <DialogFooter className="justify-end border-t px-5 py-3">
+            <DialogClose
+              render={
+                <StopPropagationButton size="sm" variant="outline">
+                  Close
+                </StopPropagationButton>
+              }
+            />
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

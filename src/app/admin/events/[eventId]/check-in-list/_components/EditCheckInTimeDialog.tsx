@@ -66,9 +66,11 @@ export default function EditCheckInTimeDialog({
 
   return (
     <Dialog onOpenChange={onOpenChange} open={isOpen}>
-      <DialogContent>
+      <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Edit Check-In Time</DialogTitle>
+          <DialogTitle className="font-medium text-base">
+            Edit check-in time
+          </DialogTitle>
         </DialogHeader>
         <form
           onSubmit={(e) => {
@@ -77,12 +79,13 @@ export default function EditCheckInTimeDialog({
           }}
         >
           <form.AppField name="checkInTime">
-            {(field) => <field.FormDateTimePicker label="Check-In Time" />}
+            {(field) => <field.FormDateTimePicker label="Check-in time" />}
           </form.AppField>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter className="mt-5">
             <Button
               onClick={() => onOpenChange(false)}
+              size="sm"
               type="button"
               variant="outline"
             >

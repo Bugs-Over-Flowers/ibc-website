@@ -2,12 +2,12 @@ import { ChevronRight, MoreHorizontal } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -21,12 +21,22 @@ export default function ParticipantRowActions({
   const { eventId } = useParams<{ eventId: string }>();
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <MoreHorizontal />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className={"w-46"}>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            className="size-7 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            size="sm"
+            variant="ghost"
+          >
+            <MoreHorizontal className="size-3.5" />
+          </Button>
+        }
+      />
+      <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
             nativeButton={false}
             render={
@@ -35,7 +45,7 @@ export default function ParticipantRowActions({
                   `/admin/events/${eventId}/registration-list/registration/${registrationId}` as Route
                 }
               >
-                <ChevronRight />
+                <ChevronRight className="size-3.5" />
                 Registration Details
               </Link>
             }

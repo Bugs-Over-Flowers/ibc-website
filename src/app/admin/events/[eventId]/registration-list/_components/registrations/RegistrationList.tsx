@@ -28,7 +28,7 @@ export default async function RegistrationList({
   if (!registrationList.success || !eventDetails.success) {
     console.error(registrationList.error || eventDetails.error);
     return (
-      <div>
+      <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-destructive text-sm">
         Error: Unable to get the registration list for this event. Please
         refresh the page.
       </div>
@@ -36,12 +36,9 @@ export default async function RegistrationList({
   }
 
   return (
-    <div className="space-y-2">
-      <div className="h-8">{registrationList.data.length} results</div>
-      <RegistrationListTable
-        eventTitle={eventDetails.data.eventTitle}
-        registrationList={registrationList.data}
-      />
-    </div>
+    <RegistrationListTable
+      eventTitle={eventDetails.data.eventTitle}
+      registrationList={registrationList.data}
+    />
   );
 }

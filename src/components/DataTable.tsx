@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -30,6 +31,8 @@ interface DataTableProps<TData, TValue> {
   };
   enableClearSorting?: boolean;
   clearSortingLabel?: string;
+  tableContainerClassName?: string;
+  tableHeaderClassName?: string;
   children?: (table: TableType<TData>) => React.ReactNode;
 }
 
@@ -39,6 +42,8 @@ export function DataTable<TData, TValue>({
   paginationControls,
   enableClearSorting = false,
   clearSortingLabel = "Clear sorting",
+  tableContainerClassName,
+  tableHeaderClassName,
   children,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -77,9 +82,14 @@ export function DataTable<TData, TValue>({
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-md border">
+      <div
+        className={cn(
+          "overflow-x-auto rounded-md border",
+          tableContainerClassName,
+        )}
+      >
         <Table>
-          <TableHeader className="bg-secondary/10">
+          <TableHeader className={cn("bg-secondary/10", tableHeaderClassName)}>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
