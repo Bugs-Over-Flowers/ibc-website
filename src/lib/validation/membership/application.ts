@@ -13,10 +13,12 @@ export const MembershipApplicationStep1Schema = z
   .object({
     applicationType: ApplicationTypeEnum,
     businessMemberIdentifier: z.string().optional(),
-    businessMemberId: z.preprocess(
-      (value) => (value === "" ? undefined : value),
-      z.uuid().optional(),
-    ),
+    businessMemberId: z
+      .preprocess(
+        (value) => (value === "" ? undefined : value),
+        z.uuid().optional(),
+      )
+      .optional(),
   })
   .superRefine((data, ctx) => {
     if (
