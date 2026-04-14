@@ -6,7 +6,6 @@ import { cookies } from "next/headers";
 import { applyRealtime60sCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
-import { getDefaultsBySection } from "../defaults/getDefaultsBySection";
 import { websiteContentSectionSchema } from "../schemas";
 import type { WebsiteContentSection } from "../types";
 
@@ -50,6 +49,32 @@ type WebsiteContentRow = {
   cardPlacement: number | null;
 };
 
+function normalizePersonalImageUrl(imageUrl: string | null) {
+  if (!imageUrl) {
+    return "";
+  }
+
+  if (/^https?:\/\//i.test(imageUrl)) {
+    return imageUrl.replace("/headerimage/", "/personalimage/");
+  }
+
+  const cleaned = imageUrl.replace(/^\/+/, "");
+  if (cleaned.startsWith("storage/v1/object/")) {
+    const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!baseUrl) {
+      return "";
+    }
+    return `${baseUrl}/${cleaned.replace("/headerimage/", "/personalimage/")}`;
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!baseUrl) {
+    return "";
+  }
+
+  return `${baseUrl}/storage/v1/object/public/personalimage/${cleaned}`;
+}
+
 async function getPublicWebsiteContentSectionCached(
   requestCookies: RequestCookie[],
   section: WebsiteContentSection,
@@ -62,11 +87,6 @@ async function getPublicWebsiteContentSectionCached(
 
   const parsedSection = websiteContentSectionSchema.parse(section);
   cacheTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsedSection]);
-
-  const defaults = getDefaultsBySection(parsedSection);
-  const defaultsByEntryKey = new Map(
-    defaults.cards.map((card) => [card.entryKey, card]),
-  );
 
   const supabase = await createClient(requestCookies);
   const { data, error } = await supabase
@@ -113,7 +133,6 @@ async function getPublicWebsiteContentSectionCached(
   const cardsByEntryKey = new Map<string, PublicWebsiteContentCard>();
 
   for (const row of rows) {
-    const defaultCard = defaultsByEntryKey.get(row.entryKey);
     const existing = cardsByEntryKey.get(row.entryKey) ?? {
       entryKey: row.entryKey,
       title: "",
@@ -122,7 +141,7 @@ async function getPublicWebsiteContentSectionCached(
       icon: "",
       imageUrl: "",
       cardPlacement: row.cardPlacement ? String(row.cardPlacement) : "",
-      group: defaultCard?.group ?? null,
+      group: null,
     };
 
     if (row.textType === "Title") {
@@ -136,7 +155,7 @@ async function getPublicWebsiteContentSectionCached(
     }
 
     existing.icon = row.icon ?? existing.icon;
-    existing.imageUrl = row.imageUrl ?? existing.imageUrl;
+    existing.imageUrl = normalizePersonalImageUrl(row.imageUrl);
     existing.cardPlacement = row.cardPlacement
       ? String(row.cardPlacement)
       : existing.cardPlacement;
