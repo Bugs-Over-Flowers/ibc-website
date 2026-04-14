@@ -1,7 +1,5 @@
-import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { getEventsForSelect } from "@/server/sponsored-registrations/queries/getEventsForSelect";
+import BackButton from "./BackButton";
 import { CreateSRForm } from "./CreateSRForm";
 import type { CreateSREventOption } from "./types";
 
@@ -27,12 +25,10 @@ export async function CreateSRPageContent() {
       <div className="px-4 pt-8 pb-24 text-primary-foreground sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <Link href="/admin/sponsored-registration">
-              <Button className="text-primary-foreground" variant="secondary">
-                <ChevronLeft className="h-4 w-4" />
-                Back to Sponsored Registrations
-              </Button>
-            </Link>
+            <BackButton
+              href="/admin/sponsored-registration"
+              label="Back to Sponsored Registrations"
+            />
           </div>
 
           <h1 className="mb-4 font-extrabold text-4xl text-foreground tracking-tight md:text-5xl">

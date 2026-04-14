@@ -64,7 +64,7 @@ export default function RegistrationListTable({
       accessorKey: "registrationIdentifier",
       header: "Identifier",
       cell: ({ row }) => (
-        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+        <code className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs">
           {row.original.registrationIdentifier}
         </code>
       ),
@@ -101,9 +101,12 @@ export default function RegistrationListTable({
       cell: ({ row }) => {
         const { email, firstName, lastName } = row.original.registrant;
         return (
-          <span className="text-sm">
-            {firstName} {lastName} ({email})
-          </span>
+          <div className="flex flex-col gap-1">
+            <span className="font-medium text-sm">
+              {firstName} {lastName}
+            </span>
+            <span className="text-muted-foreground text-xs">{email}</span>
+          </div>
         );
       },
     },
@@ -158,7 +161,7 @@ export default function RegistrationListTable({
       header: "Payment Method",
       cell: ({ row }) => (
         <Badge className="capitalize" variant="outline">
-          {String(row.getValue("paymentMethod")).toLowerCase()}
+          {String(row.getValue("paymentMethod")).toUpperCase()}
         </Badge>
       ),
     },

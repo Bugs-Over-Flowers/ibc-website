@@ -23,13 +23,15 @@ export default function RegistrationPageWrapper({
       <div className="space-y-6">
         <BackButtonWrapper params={params} />
 
-        <div>
-          <h1 className="font-semibold text-2xl text-foreground">
-            Registration list
-          </h1>
-          <p className="max-w-5xl text-muted-foreground text-sm">
-            Review registrations and participants for this event.
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-bold text-3xl text-foreground">
+              Registration List
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Review registrations and participants for this event
+            </p>
+          </div>
         </div>
 
         <RegistrationTabs>
