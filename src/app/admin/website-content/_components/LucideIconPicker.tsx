@@ -9,15 +9,23 @@ import {
   Bell,
   BookOpen,
   Briefcase,
+  Building,
   Building2,
+  Calendar,
   CalendarDays,
   Camera,
   CheckCircle2,
+  CheckSquare2,
+  CircleDollarSign,
   ClipboardCheck,
+  Clock3,
   Cloud,
   Cog,
   Compass,
   Cpu,
+  CreditCard,
+  DollarSign,
+  FileCheck2,
   FileText,
   Flag,
   Gem,
@@ -27,6 +35,7 @@ import {
   Handshake,
   Heart,
   Home,
+  IdCard,
   Landmark,
   Lightbulb,
   Mail,
@@ -34,17 +43,31 @@ import {
   Megaphone,
   Palette,
   Phone,
+  QrCode,
   Rocket,
+  Search,
   Shield,
   Sparkles,
   Star,
+  Tag,
   Target,
   TrendingUp,
   Trophy,
+  UploadCloud,
+  UserCircle,
+  UserPlus,
   Users,
+  Wallet,
   Wrench,
   Zap,
 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface LucideIconPickerProps {
@@ -61,18 +84,34 @@ const ICON_OPTIONS: IconOption[] = [
   { name: "Activity", Icon: Activity },
   { name: "Anchor", Icon: Anchor },
   { name: "Bell", Icon: Bell },
+  { name: "Building", Icon: Building },
   { name: "BookOpen", Icon: BookOpen },
   { name: "CalendarDays", Icon: CalendarDays },
+  { name: "Calendar", Icon: Calendar },
   { name: "Camera", Icon: Camera },
+  { name: "CircleDollarSign", Icon: CircleDollarSign },
+  { name: "Clock3", Icon: Clock3 },
+  { name: "CheckSquare2", Icon: CheckSquare2 },
   { name: "Cloud", Icon: Cloud },
   { name: "Compass", Icon: Compass },
+  { name: "CreditCard", Icon: CreditCard },
+  { name: "DollarSign", Icon: DollarSign },
+  { name: "FileCheck2", Icon: FileCheck2 },
   { name: "FileText", Icon: FileText },
   { name: "Gift", Icon: Gift },
   { name: "Home", Icon: Home },
+  { name: "IdCard", Icon: IdCard },
   { name: "Mail", Icon: Mail },
   { name: "MapPin", Icon: MapPin },
   { name: "Phone", Icon: Phone },
+  { name: "QrCode", Icon: QrCode },
+  { name: "Search", Icon: Search },
+  { name: "Tag", Icon: Tag },
+  { name: "UploadCloud", Icon: UploadCloud },
+  { name: "UserCircle", Icon: UserCircle },
+  { name: "UserPlus", Icon: UserPlus },
   { name: "Zap", Icon: Zap },
+  { name: "Wallet", Icon: Wallet },
   { name: "Handshake", Icon: Handshake },
   { name: "TrendingUp", Icon: TrendingUp },
   { name: "Users", Icon: Users },
@@ -106,32 +145,67 @@ export function LucideIconPicker({
   selectedIcon,
   onSelect,
 }: LucideIconPickerProps) {
+  const [open, setOpen] = useState(false);
+
+  const selectedOption = useMemo(
+    () => ICON_OPTIONS.find((option) => option.name === selectedIcon),
+    [selectedIcon],
+  );
+
+  const SelectedIcon = selectedOption?.Icon;
+
   return (
     <div className="space-y-2">
       <p className="font-medium text-sm">Choose Icon</p>
-      <div className="grid auto-cols-max grid-flow-col grid-rows-3 gap-2 overflow-x-auto overflow-y-hidden rounded-lg border border-border p-3">
-        {ICON_OPTIONS.map(({ name, Icon }) => {
-          const isSelected = selectedIcon === name;
+      <Popover onOpenChange={setOpen} open={open}>
+        <PopoverTrigger
+          aria-label="Select icon"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "h-9 w-36 justify-between overflow-hidden px-3",
+          )}
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            {SelectedIcon ? (
+              <SelectedIcon className="h-4 w-4 shrink-0" />
+            ) : null}
+            <span className="truncate text-sm">
+              {selectedOption?.name ?? "Choose an icon"}
+            </span>
+          </span>
+        </PopoverTrigger>
 
-          return (
-            <button
-              aria-label={name}
-              className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-md border p-2 text-left text-sm transition-colors",
-                isSelected
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border hover:bg-muted",
-              )}
-              key={name}
-              onClick={() => onSelect(name)}
-              title={name}
-              type="button"
-            >
-              <Icon className="h-5 w-5" />
-            </button>
-          );
-        })}
-      </div>
+        <PopoverContent align="start" className="w-72 p-3">
+          <div className="max-h-64 overflow-y-auto pr-1">
+            <div className="grid grid-cols-6 gap-2">
+              {ICON_OPTIONS.map(({ name, Icon }) => {
+                const isSelected = selectedIcon === name;
+
+                return (
+                  <button
+                    aria-label={name}
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-md border p-1 text-left transition-colors",
+                      isSelected
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:bg-muted",
+                    )}
+                    key={name}
+                    onClick={() => {
+                      onSelect(name);
+                      setOpen(false);
+                    }}
+                    title={name}
+                    type="button"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
