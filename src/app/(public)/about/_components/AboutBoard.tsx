@@ -2,6 +2,7 @@
 
 import { User } from "lucide-react";
 import { motion } from "motion/react";
+import Image from "next/image";
 
 type MemberCard = {
   title: string;
@@ -9,6 +10,8 @@ type MemberCard = {
   group: string | null;
   imageUrl?: string;
 };
+
+type BoardGroup = "featured" | "officers" | "trustees" | "other";
 
 const boardOfTrustees: MemberCard[] = [
   {
@@ -78,19 +81,48 @@ interface AboutBoardProps {
 export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
   const resolvedBoardCards =
     boardCards && boardCards.length > 0 ? boardCards : boardOfTrustees;
+
+  const resolveBoardGroup = (member: MemberCard, index: number): BoardGroup => {
+    const normalized = member.group?.trim().toLowerCase();
+
+    if (normalized === "featured") {
+      return "featured";
+    }
+    if (normalized === "officer" || normalized === "officers") {
+      return "officers";
+    }
+    if (normalized === "trustee" || normalized === "trustees") {
+      return "trustees";
+    }
+    if (normalized === "other" || normalized === "others") {
+      return "other";
+    }
+
+    if (member.subtitle.trim().toLowerCase().includes("trustee")) {
+      return "trustees";
+    }
+
+    // Fallback to legacy board ordering when group metadata is missing.
+    if (index <= 1) {
+      return "featured";
+    }
+    if (index <= 6) {
+      return "officers";
+    }
+    return "trustees";
+  };
+
   const featuredBoardCards = resolvedBoardCards.filter(
-    (member) => member.group === "featured",
+    (member, index) => resolveBoardGroup(member, index) === "featured",
   );
   const officerBoardCards = resolvedBoardCards.filter(
-    (member) => member.group === "officers",
+    (member, index) => resolveBoardGroup(member, index) === "officers",
   );
   const trusteeBoardCards = resolvedBoardCards.filter(
-    (member) => member.group === "trustees",
+    (member, index) => resolveBoardGroup(member, index) === "trustees",
   );
   const otherBoardCards = resolvedBoardCards.filter(
-    (member) =>
-      !member.group ||
-      !["featured", "officers", "trustees"].includes(member.group),
+    (member, index) => resolveBoardGroup(member, index) === "other",
   );
 
   const resolvedSecretariatCards =
@@ -133,7 +165,18 @@ export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
                 whileInView={{ opacity: 1, y: 0 }}
               >
                 <div className="relative mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
-                  <User className="h-16 w-16 text-primary/40" />
+                  {member.imageUrl ? (
+                    <Image
+                      alt={member.title}
+                      className="h-24 w-24 rounded-full object-cover"
+                      height={96}
+                      src={member.imageUrl}
+                      unoptimized
+                      width={96}
+                    />
+                  ) : (
+                    <User className="h-16 w-16 text-primary/40" />
+                  )}
                 </div>
                 <h3 className="mb-2 font-bold text-foreground text-lg">
                   {member.title}
@@ -157,7 +200,18 @@ export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
                 whileInView={{ opacity: 1, y: 0 }}
               >
                 <div className="relative mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                  <User className="h-12 w-12 text-primary/30" />
+                  {member.imageUrl ? (
+                    <Image
+                      alt={member.title}
+                      className="h-20 w-20 rounded-full object-cover"
+                      height={80}
+                      src={member.imageUrl}
+                      unoptimized
+                      width={80}
+                    />
+                  ) : (
+                    <User className="h-12 w-12 text-primary/30" />
+                  )}
                 </div>
                 <h3 className="mb-2 font-semibold text-base text-foreground">
                   {member.title}
@@ -179,7 +233,18 @@ export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
                 whileInView={{ opacity: 1, y: 0 }}
               >
                 <div className="relative mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                  <User className="h-12 w-12 text-primary/30" />
+                  {member.imageUrl ? (
+                    <Image
+                      alt={member.title}
+                      className="h-20 w-20 rounded-full object-cover"
+                      height={80}
+                      src={member.imageUrl}
+                      unoptimized
+                      width={80}
+                    />
+                  ) : (
+                    <User className="h-12 w-12 text-primary/30" />
+                  )}
                 </div>
                 <h3 className="mb-2 font-semibold text-base text-foreground">
                   {member.title}
@@ -221,7 +286,21 @@ export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
                 viewport={{ once: true }}
                 whileInView={{ opacity: 1, y: 0 }}
               >
-                <div className="relative aspect-square overflow-hidden"></div>
+                <div className="relative aspect-square overflow-hidden">
+                  {member.imageUrl ? (
+                    <Image
+                      alt={member.title}
+                      className="h-full w-full object-cover"
+                      fill
+                      src={member.imageUrl}
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-primary/5">
+                      <User className="h-12 w-12 text-primary/30" />
+                    </div>
+                  )}
+                </div>
                 <div className="p-5 text-center">
                   <h3 className="font-semibold text-foreground">
                     {member.title}
