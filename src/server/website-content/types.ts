@@ -35,22 +35,6 @@ export interface WebsiteContentSectionData {
   updatedAt: string | null;
 }
 
-export interface WebsiteContentDefaultCard {
-  entryKey: string;
-  title: string;
-  subtitle: string;
-  paragraph: string;
-  icon: string;
-  imageUrl: string;
-  cardPlacement: number | null;
-  group: string | null;
-}
-
-export interface WebsiteContentSectionDefaults {
-  placeholders: WebsiteContentFormState;
-  cards: WebsiteContentDefaultCard[];
-}
-
 export type WebsiteContentRow = {
   section: WebsiteContentSection;
   entryKey: string;

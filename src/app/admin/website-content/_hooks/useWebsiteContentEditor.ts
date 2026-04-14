@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import { getWebsiteContentSection } from "@/server/website-content/actions/getWebsiteContentSection";
-import { initializeWebsiteContentDefaults } from "@/server/website-content/actions/initializeWebsiteContentDefaults";
 import { saveWebsiteContentSection } from "@/server/website-content/actions/saveWebsiteContentSection";
 import type {
   WebsiteContentCardState,
@@ -100,30 +99,6 @@ export function useWebsiteContentEditor(
     },
   );
 
-  const { execute: seedDefaults, isPending: isInitializingDefaults } =
-    useAction(tryCatch(initializeWebsiteContentDefaults), {
-      onSuccess: async (result: { seededCount: number; updatedAt: string }) => {
-        if (activeSection) {
-          setUpdatedAtBySection((prev) => ({
-            ...prev,
-            [activeSection]: result.updatedAt,
-          }));
-          await loadSection(activeSection);
-        }
-
-        if (result.seededCount > 0) {
-          toast.success(`Seeded ${result.seededCount} default content rows`);
-        } else {
-          toast.info(
-            "No missing rows found. Default set is already initialized.",
-          );
-        }
-      },
-      onError: (error) => {
-        toast.error(error);
-      },
-    });
-
   useEffect(() => {
     if (!activeSection) {
       return;
@@ -214,6 +189,51 @@ export function useWebsiteContentEditor(
     }
   };
 
+  const addCard = (group: string | null = null) => {
+    if (!activeSection || activeSection === "vision_mission") {
+      return;
+    }
+
+    setCards((prev) => {
+      const maxPlacement = prev.reduce((max, card) => {
+        const placement = Number(card.cardPlacement);
+        if (Number.isFinite(placement) && placement > max) {
+          return placement;
+        }
+        return max;
+      }, 0);
+
+      const nextPlacement = String(maxPlacement + 1);
+      const entryKey = `${activeSection}_${Date.now()}_${Math.random()
+        .toString(36)
+        .slice(2, 8)}`;
+
+      const next = [
+        ...prev,
+        {
+          entryKey,
+          title: "",
+          subtitle: "",
+          paragraph: "",
+          icon: "",
+          imageUrl: "",
+          cardPlacement: nextPlacement,
+          group,
+        },
+      ];
+
+      setCachedSectionContentBySection((cachePrev) => ({
+        ...cachePrev,
+        [activeSection]: {
+          form: cachePrev[activeSection]?.form ?? form,
+          cards: next,
+        },
+      }));
+
+      return next;
+    });
+  };
+
   const save = async () => {
     if (!activeSection) {
       return;
@@ -226,23 +246,14 @@ export function useWebsiteContentEditor(
     });
   };
 
-  const initializeDefaults = async () => {
-    if (!activeSection) {
-      return;
-    }
-
-    await seedDefaults(activeSection);
-  };
-
   return {
     form,
     cards,
     setField,
     setCardField,
     replaceCards,
+    addCard,
     save,
-    initializeDefaults,
-    isInitializingDefaults,
     isSavingSection,
     isLoadingSection,
     placeholders,
