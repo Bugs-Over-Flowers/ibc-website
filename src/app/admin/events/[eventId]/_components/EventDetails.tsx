@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   Calendar,
   CheckSquare,
-  ChevronLeft,
   ClipboardList,
   Clock,
   Edit,
@@ -25,6 +24,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventStats } from "@/server/events/queries/getEventStats";
 import AddFacebookLinkButton from "./AddFacebookLinkButton";
+import BackButton from "./BackButton";
 
 export default async function EventDetails({
   params,
@@ -206,16 +206,7 @@ export default async function EventDetails({
     <div className="space-y-6 pb-8">
       {/* Back Navigation */}
       <div className="flex w-full justify-start">
-        <Button
-          className="justify-start gap-1 bg-transparent px-0 text-primary transition-colors hover:bg-transparent hover:text-primary/80 focus:bg-transparent active:bg-transparent"
-          nativeButton={false}
-          render={
-            <Link href={"/admin/events" as Route}>
-              <ChevronLeft className="h-5 w-5" />
-              Back to Events
-            </Link>
-          }
-        />
+        <BackButton href={"/admin/events" as Route} label="Back to Events" />
       </div>
 
       {/* Hero Card */}
