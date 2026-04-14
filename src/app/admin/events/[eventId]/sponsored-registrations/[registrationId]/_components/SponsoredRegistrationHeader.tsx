@@ -10,7 +10,7 @@ import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
-import { updateSRSponsorName } from "@/server/sponsored-registrations/actions/updateSR";
+import { updateSRSponsorName } from "@/server/sponsored-registrations/mutations/updateSR";
 import { getStatusColor } from "../../_components/utils";
 
 type SponsoredRegistration =

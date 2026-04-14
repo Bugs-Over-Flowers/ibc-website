@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { featureMember } from "@/server/members/actions/featureMember";
+import { featureMember } from "@/server/members/mutations/featureMember";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
 export type FeatureableMember = Awaited<ReturnType<typeof getMembers>>[number];

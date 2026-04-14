@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
-import { deleteSR } from "@/server/sponsored-registrations/actions/deleteSR";
-import { updateSRStatus } from "@/server/sponsored-registrations/actions/updateSR";
+import { deleteSR } from "@/server/sponsored-registrations/mutations/deleteSR";
+import { updateSRStatus } from "@/server/sponsored-registrations/mutations/updateSR";
 import { SponsoredRegistrationCard } from "./SponsoredRegistrationCard";
 
 type Event = Database["public"]["Tables"]["Event"]["Row"];
