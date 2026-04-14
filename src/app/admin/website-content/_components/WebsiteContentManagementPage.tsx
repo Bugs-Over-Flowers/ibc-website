@@ -4,14 +4,13 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import {
   Building2,
   Compass,
-  Grip,
   Landmark,
   Sparkles,
   Target,
   Users,
   XIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useWebsiteContentEditor } from "../_hooks/useWebsiteContentEditor";
@@ -89,7 +88,6 @@ const sectionCards = [
 
 export function WebsiteContentManagementPage() {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
-  const [isPlacementMode, setIsPlacementMode] = useState(false);
   const {
     form,
     cards,
@@ -97,9 +95,8 @@ export function WebsiteContentManagementPage() {
     setField,
     setCardField,
     replaceCards,
+    addCard,
     save,
-    initializeDefaults,
-    isInitializingDefaults,
     isSavingSection,
     isLoadingSection,
     updatedAtBySection,
@@ -109,15 +106,6 @@ export function WebsiteContentManagementPage() {
     () => sectionCards.find((section) => section.key === activeSection) ?? null,
     [activeSection],
   );
-
-  const placementSupported =
-    activeSection === "board_of_trustees" || activeSection === "secretariat";
-
-  useEffect(() => {
-    if (!placementSupported && isPlacementMode) {
-      setIsPlacementMode(false);
-    }
-  }, [placementSupported, isPlacementMode]);
 
   const updatedAtDisplay = (section: SectionKey) => {
     const updatedAt = updatedAtBySection[section];
@@ -153,6 +141,7 @@ export function WebsiteContentManagementPage() {
         return (
           <GoalsSection
             cards={cards}
+            onAddCard={() => addCard()}
             onCardFieldChange={setCardField}
             placeholders={placeholders}
           />
@@ -162,6 +151,7 @@ export function WebsiteContentManagementPage() {
         return (
           <CompanyThrustsSection
             cards={cards}
+            onAddCard={() => addCard()}
             onCardFieldChange={setCardField}
             placeholders={placeholders}
           />
@@ -171,7 +161,7 @@ export function WebsiteContentManagementPage() {
         return (
           <BoardOfTrusteesSection
             cards={cards}
-            isPlacementMode={isPlacementMode}
+            onAddCard={(group) => addCard(group)}
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
             placeholders={placeholders}
@@ -182,7 +172,7 @@ export function WebsiteContentManagementPage() {
         return (
           <SecretariatSection
             cards={cards}
-            isPlacementMode={isPlacementMode}
+            onAddCard={() => addCard()}
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
             placeholders={placeholders}
@@ -193,6 +183,7 @@ export function WebsiteContentManagementPage() {
         return (
           <LandingBenefitsSection
             cards={cards}
+            onAddCard={() => addCard()}
             onCardFieldChange={setCardField}
             placeholders={placeholders}
           />
@@ -296,38 +287,8 @@ export function WebsiteContentManagementPage() {
 
                 <div className="border-border border-t bg-background px-6 py-4 sm:px-7">
                   <div className="flex flex-wrap justify-end gap-2">
-                    {placementSupported ? (
-                      <Button
-                        onClick={() => setIsPlacementMode((prev) => !prev)}
-                        type="button"
-                        variant={isPlacementMode ? "default" : "outline"}
-                      >
-                        <Grip className="mr-2 h-4 w-4" />
-                        {isPlacementMode
-                          ? "Placement Mode: ON"
-                          : "Edit Placement"}
-                      </Button>
-                    ) : null}
                     <Button
-                      disabled={
-                        isInitializingDefaults ||
-                        isSavingSection ||
-                        isLoadingSection
-                      }
-                      onClick={initializeDefaults}
-                      type="button"
-                      variant="outline"
-                    >
-                      {isInitializingDefaults
-                        ? "Initializing..."
-                        : "Use Default Card Set"}
-                    </Button>
-                    <Button
-                      disabled={
-                        isInitializingDefaults ||
-                        isSavingSection ||
-                        isLoadingSection
-                      }
+                      disabled={isSavingSection || isLoadingSection}
                       onClick={save}
                     >
                       {isSavingSection ? "Saving..." : "Save Changes"}

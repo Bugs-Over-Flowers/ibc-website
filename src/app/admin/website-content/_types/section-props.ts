@@ -25,6 +25,7 @@ export interface VisionMissionSectionProps {
 export interface GoalsSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
+  onAddCard: () => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
@@ -35,6 +36,7 @@ export interface GoalsSectionProps {
 export interface CompanyThrustsSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
+  onAddCard: () => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
@@ -45,7 +47,7 @@ export interface CompanyThrustsSectionProps {
 export interface BoardOfTrusteesSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
-  isPlacementMode: boolean;
+  onAddCard: (group: "featured" | "officers" | "trustees" | "other") => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
@@ -57,7 +59,7 @@ export interface BoardOfTrusteesSectionProps {
 export interface SecretariatSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
-  isPlacementMode: boolean;
+  onAddCard: () => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
@@ -69,6 +71,7 @@ export interface SecretariatSectionProps {
 export interface LandingBenefitsSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
+  onAddCard: () => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
