@@ -2,8 +2,10 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation, useSortable } from "@dnd-kit/react/sortable";
+import { useForm } from "@tanstack/react-form";
 import { GripVertical } from "lucide-react";
 import Image from "next/image";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { reorderInList } from "../../_hooks/reorderInList";
@@ -37,6 +39,18 @@ export function SecretariatSection({
       group: "secretariat",
     });
 
+    const form = useForm({
+      defaultValues: {
+        title: card.title,
+        subtitle: card.subtitle,
+      },
+    });
+
+    useEffect(() => {
+      form.setFieldValue("title", card.title);
+      form.setFieldValue("subtitle", card.subtitle);
+    }, [card.subtitle, card.title, form]);
+
     return (
       <div
         className="aspect-[1/1.05] rounded-lg border border-border p-4"
@@ -58,25 +72,37 @@ export function SecretariatSection({
         <div className="flex flex-col gap-3">
           <div className="space-y-2">
             <p className="font-medium text-sm">Card Title</p>
-            <Input
-              onChange={(event) =>
-                onCardFieldChange(card.entryKey, "title", event.target.value)
-              }
-              placeholder={placeholders.title || "Herminia Ore"}
-              value={card.title}
-            />
+            <form.Field name="title">
+              {(field) => (
+                <Input
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    field.handleChange(value);
+                    onCardFieldChange(card.entryKey, "title", value);
+                  }}
+                  placeholder={placeholders.title || "Herminia Ore"}
+                  value={field.state.value}
+                />
+              )}
+            </form.Field>
           </div>
           <div className="space-y-2">
             <p className="font-medium text-sm">Card Subtitle</p>
-            <Input
-              onChange={(event) =>
-                onCardFieldChange(card.entryKey, "subtitle", event.target.value)
-              }
-              placeholder={
-                placeholders.subtitle || "Finance, Marketing, and Promotion"
-              }
-              value={card.subtitle}
-            />
+            <form.Field name="subtitle">
+              {(field) => (
+                <Input
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    field.handleChange(value);
+                    onCardFieldChange(card.entryKey, "subtitle", value);
+                  }}
+                  placeholder={
+                    placeholders.subtitle || "Finance, Marketing, and Promotion"
+                  }
+                  value={field.state.value}
+                />
+              )}
+            </form.Field>
           </div>
 
           <div className="space-y-2">
