@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { getWebsiteContentSection } from "@/server/website-content/actions/getWebsiteContentSection";
-import { saveWebsiteContentSection } from "@/server/website-content/actions/saveWebsiteContentSection";
+import { getWebsiteContentSection } from "@/server/website-content/mutations/getWebsiteContentSection";
+import { saveWebsiteContentSection } from "@/server/website-content/mutations/saveWebsiteContentSection";
 import type {
   WebsiteContentCardState,
   WebsiteContentFormState,
