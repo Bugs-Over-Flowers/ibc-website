@@ -43,6 +43,7 @@ export type WebsiteContentRow = {
   icon: string | null;
   imageUrl: string | null;
   cardPlacement: number | null;
+  group: string | null;
   updatedAt: string;
 };
 
@@ -60,6 +61,7 @@ export interface UpsertWebsiteContentRowInput {
   icon?: string | null;
   imageUrl?: string | null;
   cardPlacement?: number | null;
+  group?: string | null;
 }
 
 export const emptyWebsiteContentForm: WebsiteContentFormState = {

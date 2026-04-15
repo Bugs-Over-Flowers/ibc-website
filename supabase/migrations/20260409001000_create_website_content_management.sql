@@ -21,6 +21,7 @@ CREATE TABLE "public"."WebsiteContent" (
   "textValue" text,
   "icon" text,
   "imageUrl" text,
+  "group" text,
   "cardPlacement" integer,
   "isActive" boolean DEFAULT true NOT NULL,
   "createdAt" timestamp with time zone DEFAULT now() NOT NULL,

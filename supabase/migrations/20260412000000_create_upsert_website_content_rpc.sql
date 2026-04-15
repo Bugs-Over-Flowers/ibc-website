@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION "public"."upsert_website_content"(
   "p_text_value" text DEFAULT NULL,
   "p_icon" text DEFAULT NULL,
   "p_image_url" text DEFAULT NULL,
+  "p_group" text DEFAULT NULL,
   "p_card_placement" integer DEFAULT NULL,
   "p_is_active" boolean DEFAULT true
 ) RETURNS "public"."WebsiteContent"
@@ -22,6 +23,10 @@ BEGIN
       'secretariat',
       'landing_page_benefits'
     ) THEN
+    PERFORM pg_advisory_xact_lock(
+      hashtextextended(p_section::text || ':' || p_text_type::text, 0)
+    );
+
     SELECT COALESCE(MAX(wc."cardPlacement"), 0) + 1
     INTO v_card_placement
     FROM "public"."WebsiteContent" wc
@@ -38,6 +43,7 @@ BEGIN
     "textValue",
     "icon",
     "imageUrl",
+    "group",
     "cardPlacement",
     "isActive"
   ) VALUES (
@@ -47,6 +53,7 @@ BEGIN
     p_text_value,
     p_icon,
     p_image_url,
+    p_group,
     v_card_placement,
     p_is_active
   )
@@ -55,6 +62,7 @@ BEGIN
     "textValue" = EXCLUDED."textValue",
     "icon" = EXCLUDED."icon",
     "imageUrl" = EXCLUDED."imageUrl",
+    "group" = EXCLUDED."group",
     "cardPlacement" = EXCLUDED."cardPlacement",
     "isActive" = EXCLUDED."isActive"
   RETURNING *
@@ -71,6 +79,7 @@ ALTER FUNCTION "public"."upsert_website_content"(
   "p_text_value" text,
   "p_icon" text,
   "p_image_url" text,
+  "p_group" text,
   "p_card_placement" integer,
   "p_is_active" boolean
 ) OWNER TO "postgres";
@@ -82,6 +91,7 @@ REVOKE ALL ON FUNCTION "public"."upsert_website_content"(
   "p_text_value" text,
   "p_icon" text,
   "p_image_url" text,
+  "p_group" text,
   "p_card_placement" integer,
   "p_is_active" boolean
 ) FROM PUBLIC;
@@ -93,6 +103,7 @@ GRANT EXECUTE ON FUNCTION "public"."upsert_website_content"(
   "p_text_value" text,
   "p_icon" text,
   "p_image_url" text,
+  "p_group" text,
   "p_card_placement" integer,
   "p_is_active" boolean
 ) TO "authenticated";
@@ -104,6 +115,7 @@ GRANT EXECUTE ON FUNCTION "public"."upsert_website_content"(
   "p_text_value" text,
   "p_icon" text,
   "p_image_url" text,
+  "p_group" text,
   "p_card_placement" integer,
   "p_is_active" boolean
 ) TO "service_role";
