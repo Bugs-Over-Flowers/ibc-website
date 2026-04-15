@@ -47,6 +47,7 @@ type WebsiteContentRow = {
   icon: string | null;
   imageUrl: string | null;
   cardPlacement: number | null;
+  group: string | null;
 };
 
 function normalizePersonalImageUrl(imageUrl: string | null) {
@@ -91,7 +92,9 @@ async function getPublicWebsiteContentSectionCached(
   const supabase = await createClient(requestCookies);
   const { data, error } = await supabase
     .from("WebsiteContent")
-    .select("entryKey, textType, textValue, icon, imageUrl, cardPlacement")
+    .select(
+      "entryKey, textType, textValue, icon, imageUrl, cardPlacement, group",
+    )
     .eq("section", parsedSection)
     .eq("isActive", true);
 
@@ -99,7 +102,9 @@ async function getPublicWebsiteContentSectionCached(
     throw new Error(`Failed to fetch website content: ${error.message}`);
   }
 
-  const rows = ((data as WebsiteContentRow[] | null) ?? []).filter(Boolean);
+  const rows = ((data as unknown as WebsiteContentRow[] | null) ?? []).filter(
+    Boolean,
+  );
 
   if (rows.length === 0) {
     return {
@@ -159,6 +164,7 @@ async function getPublicWebsiteContentSectionCached(
     existing.cardPlacement = row.cardPlacement
       ? String(row.cardPlacement)
       : existing.cardPlacement;
+    existing.group = row.group ?? existing.group;
 
     cardsByEntryKey.set(row.entryKey, existing);
   }
