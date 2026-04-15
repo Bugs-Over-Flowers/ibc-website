@@ -220,7 +220,7 @@ export function MembersTableRow({
             type="button"
           >
             <Star className="size-3 fill-current" />
-            Already featured
+            Already Featured
           </button>
         ) : (
           <button

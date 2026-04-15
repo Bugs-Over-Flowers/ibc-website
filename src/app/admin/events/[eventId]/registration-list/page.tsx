@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import BackButton from "@/app/admin/events/[eventId]/_components/BackButton";
+import BackButton from "@/app/admin/_components/BackButton";
 import { TabsContent } from "@/components/ui/tabs";
 import type { RegistrationListPageProps } from "@/lib/types/route";
 import ParticipantList from "./_components/participants/ParticipantList";

@@ -15,6 +15,7 @@ import type { Route } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import BackButton from "@/app/admin/_components/BackButton";
 import { EvaluationQRDownloader } from "@/components/qr/EvaluationQRDownloader";
 import RichTextDisplay from "@/components/RichTextDisplay";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,6 @@ import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventStats } from "@/server/events/queries/getEventStats";
 import AddFacebookLinkButton from "./AddFacebookLinkButton";
-import BackButton from "./BackButton";
 
 export default async function EventDetails({
   params,

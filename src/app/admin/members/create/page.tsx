@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import BackButton from "@/app/admin/_components/BackButton";
 import { getAllSectors } from "@/server/members/queries/getAllSectors";
-import BackButton from "./_components/BackButton";
 import { CreateManualMemberFormWrapper } from "./_components/forms/CreateManualMemberFormWrapper";
 import CreateMemberLoading from "./loading";
 

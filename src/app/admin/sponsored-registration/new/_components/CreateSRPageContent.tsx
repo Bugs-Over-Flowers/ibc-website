@@ -1,5 +1,5 @@
+import BackButton from "@/app/admin/_components/BackButton";
 import { getEventsForSelect } from "@/server/sponsored-registrations/queries/getEventsForSelect";
-import BackButton from "./BackButton";
 import { CreateSRForm } from "./CreateSRForm";
 import type { CreateSREventOption } from "./types";
 
