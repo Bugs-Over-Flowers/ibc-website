@@ -42,6 +42,8 @@ const STATUS_CONFIG = {
     notice:
       "bg-[#EAF3DE] text-[#27500A] border-[#97C459] dark:bg-[#173404] dark:text-[#C0DD97] dark:border-[#3B6D11]",
     label: "Payment accepted",
+    triggerLabel: "Accepted",
+    icon: "text-[#27500A] dark:text-[#C0DD97]",
     Icon: CircleCheckBig,
   },
   rejected: {
@@ -49,6 +51,8 @@ const STATUS_CONFIG = {
     notice:
       "bg-[#FCEBEB] text-[#791F1F] border-[#F09595] dark:bg-[#501313] dark:text-[#F7C1C1] dark:border-[#A32D2D]",
     label: "Payment rejected",
+    triggerLabel: "Rejected",
+    icon: "text-[#791F1F] dark:text-[#F7C1C1]",
     Icon: XCircle,
   },
   pending: {
@@ -56,6 +60,8 @@ const STATUS_CONFIG = {
     notice:
       "bg-[#FAEEDA] text-[#633806] border-[#EF9F27] dark:bg-[#412402] dark:text-[#FAC775] dark:border-[#854F0B]",
     label: "Awaiting review",
+    triggerLabel: "Pending",
+    icon: "text-[#633806] dark:text-[#FAC775]",
     Icon: AlertTriangle,
   },
 } as const;
@@ -90,23 +96,14 @@ export function PaymentProofModal({
                 fill
                 src={proofImagePath}
               />
-              <svg
-                className="relative size-5 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.5"
-                viewBox="0 0 24 24"
+              <Icon className={cn("relative size-5", status.icon)} />
+              <span
+                className={cn(
+                  "relative rounded-full border px-2 py-0.5 font-medium text-[10px] leading-none",
+                  status.chip,
+                )}
               >
-                <title>Payment proof icon</title>
-                <rect height="18" rx="2" width="18" x="3" y="3" />
-                <line x1="3" x2="21" y1="8" y2="8" />
-                <line x1="3" x2="21" y1="16" y2="16" />
-                <line x1="8" x2="8" y1="8" y2="16" />
-              </svg>
-              <span className="relative font-medium text-muted-foreground text-xs">
-                Proof
+                {status.triggerLabel}
               </span>
             </Button>
           }

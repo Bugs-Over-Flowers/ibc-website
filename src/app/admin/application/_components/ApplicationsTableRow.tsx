@@ -157,7 +157,7 @@ export function ApplicationsTableRow({
               trigger={
                 <button
                   aria-label="Check payment proof"
-                  className="inline-flex size-[18px] items-center justify-center rounded-full bg-status-red/10 text-status-red transition-colors hover:bg-status-red/20"
+                  className="inline-flex size-[18px] items-center justify-center rounded-full bg-status-orange/10 text-status-red transition-colors hover:bg-status-red/20"
                   title="Check Payment Proof"
                   type="button"
                 >
