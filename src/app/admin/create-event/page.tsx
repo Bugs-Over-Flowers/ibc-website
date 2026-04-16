@@ -1,6 +1,6 @@
 import { Suspense } from "react";
+import { CreateEventForm } from "./_components/forms/CreateEventForm";
 import { CreateEventFormSkeleton } from "./_components/forms/CreateEventFormSkeleton";
-import { CreateEventForm } from "./_components/forms/createEventForm";
 
 export default function CreateEventPage() {
   return (
