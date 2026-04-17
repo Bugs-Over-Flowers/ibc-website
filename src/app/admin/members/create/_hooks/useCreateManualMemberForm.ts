@@ -10,7 +10,7 @@ import {
   type ManualMemberInput,
   ManualMemberSchema,
 } from "@/lib/validation/membership/manualMember";
-import { createManualMember } from "@/server/members/actions/createManualMember";
+import { createManualMember } from "@/server/members/mutations/createManualMember";
 
 export function useCreateManualMemberForm() {
   const router = useRouter();

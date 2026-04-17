@@ -47,7 +47,7 @@ export async function checkInParticipants(
   updateTag(CACHE_TAGS.checkIns.eventDay);
   updateTag(CACHE_TAGS.events.checkIns);
 
-  revalidatePath(`/admin/events/check-in/${parsed.eventDayId}`);
+  revalidatePath("/admin/events/check-in/[eventDayId]", "page");
 
   return {
     checkInCount: data.length,

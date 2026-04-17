@@ -4,10 +4,11 @@ import { updateTag } from "next/cache";
 import { after } from "next/server";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
+import { getManilaDateKey } from "@/lib/validation/members/feature";
 
 export async function cleanupExpiredFeaturedMembers(): Promise<void> {
   const supabase = await createActionClient();
-  const todayDate = new Date().toISOString().slice(0, 10);
+  const todayDate = getManilaDateKey();
 
   const { error } = await supabase
     .from("BusinessMember")

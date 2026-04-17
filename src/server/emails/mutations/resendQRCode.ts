@@ -1,6 +1,6 @@
 "use server";
-import { render } from "@react-email/render";
 import { revalidatePath } from "next/cache";
+import { render } from "react-email";
 import { sendEmail } from "@/lib/email";
 import { formatDate } from "@/lib/events/eventUtils";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
