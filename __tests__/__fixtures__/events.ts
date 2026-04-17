@@ -12,8 +12,8 @@ export const mockEvent: Event = {
   eventEndDate: "2024-12-01T18:00:00Z",
   eventType: "public",
   registrationFee: 100,
-  availableSlots: null,
-  maxGuest: null,
   publishedAt: "2024-11-01T09:00:00Z",
   updatedAt: "2024-11-15T12:00:00Z",
+  eventPoster: null,
+  facebookLink: null,
 };

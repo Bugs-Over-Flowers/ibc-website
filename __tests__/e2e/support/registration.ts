@@ -23,6 +23,7 @@ export type RegistrationScenarioState = {
   selectedAffiliation?: AffiliationType;
   selectedPaymentMethod?: PaymentType;
   registrantEmail?: string;
+  persistedRegistrationId?: string;
 };
 
 const VALID_REGISTRANT = {
@@ -121,7 +122,13 @@ export async function openEventDetailsFromEvents(
   setActiveEvent(world, alias);
   const { eventId, eventTitle } = getActiveEventOrThrow(world);
 
+  await page.getByText(eventTitle).scrollIntoViewIfNeeded();
   await expect(page.getByText(eventTitle)).toBeVisible();
+
+  await page
+    .locator(`a[href="/events/${eventId}"]`)
+    .first()
+    .scrollIntoViewIfNeeded();
   await page.locator(`a[href="/events/${eventId}"]`).first().click();
   await expect(page).toHaveURL(new RegExp(`/events/${eventId}$`));
 }

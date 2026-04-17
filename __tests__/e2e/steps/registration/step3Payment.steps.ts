@@ -26,8 +26,8 @@ When(
 
 When(
   "I select {string} payment on step 3",
-  async ({ page }, payment: string) => {
-    await selectPaymentMethod(page, parsePayment(payment));
+  async ({ page, world }, payment: string) => {
+    await selectPaymentMethod(page, world, parsePayment(payment));
   },
 );
 
