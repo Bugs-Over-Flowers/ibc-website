@@ -1,11 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Banknote, ExternalLink } from "lucide-react";
+import { Banknote } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { FacebookIcon } from "@/components/icons/SocialIcons";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
@@ -21,23 +20,6 @@ export default function EventRegistrationCard({
   event,
 }: EventRegistrationCardProps) {
   const { eventId } = useParams<{ eventId: string }>();
-
-  const facebookLink = event.facebookLink?.trim() ?? "";
-  const displayFacebookLink = (() => {
-    if (!facebookLink) return null;
-    const truncate = (value: string) =>
-      value.length > 48 ? `${value.slice(0, 45)}...` : value;
-
-    try {
-      const url = new URL(facebookLink);
-      const path = url.pathname.replace(/\/$/, "");
-      const condensed = `${url.hostname}${path}` || url.hostname;
-      return truncate(condensed);
-    } catch {
-      const normalized = facebookLink.replace(/^https?:\/\//i, "");
-      return truncate(normalized);
-    }
-  })();
 
   return (
     <motion.div
@@ -76,21 +58,6 @@ export default function EventRegistrationCard({
               >
                 Register for This Event
               </Link>
-
-              {displayFacebookLink && (
-                <a
-                  className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 py-3 text-center text-muted-foreground text-sm transition-colors hover:border-primary/30 hover:bg-accent hover:text-foreground"
-                  href={facebookLink}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <FacebookIcon className="h-4 w-4 text-[#1877F2]" />
-                  <span className="break-all font-medium">
-                    {displayFacebookLink}
-                  </span>
-                  <ExternalLink className="h-4 w-4 shrink-0" />
-                </a>
-              )}
             </div>
           </CardContent>
         </Card>

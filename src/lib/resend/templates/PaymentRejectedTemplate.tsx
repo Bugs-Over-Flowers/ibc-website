@@ -47,8 +47,9 @@ export default function PaymentRejectedTemplate({
                 </Text>
 
                 <Text className="font-bold text-green-700">
-                  If you already paid online please bring clear copy of your
-                  proof of payment on the event venue on the day of the event.
+                  If you already paid online, please bring a clear copy of
+                  your proof of payment to the event venue on the day of the
+                  event.
                 </Text>
 
                 <Text className="text-gray-700">
