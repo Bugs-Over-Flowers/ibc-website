@@ -2,10 +2,6 @@ import { expect } from "@playwright/test";
 import {
   clickNext,
   fillValidStep2Registrant,
-  parseAffiliation,
-  parsePayment,
-  selectPaymentMethod,
-  uploadPaymentProof,
 } from "../../support/registration";
 import { Then, When } from "./bdd";
 
