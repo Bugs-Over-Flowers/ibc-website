@@ -1,11 +1,20 @@
 import "server-only";
 
-import { cookies } from "next/headers";
+import { cacheTag } from "next/cache";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyAdmin5mCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 
-export async function getSectors(search?: string) {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
+export async function getSectors(
+  requestCookies: RequestCookie[],
+  search?: string,
+) {
+  "use cache";
+  applyAdmin5mCache();
+  cacheTag(CACHE_TAGS.sectors.all);
+
+  const supabase = await createClient(requestCookies);
 
   let query = supabase.from("Sector").select("*");
 
