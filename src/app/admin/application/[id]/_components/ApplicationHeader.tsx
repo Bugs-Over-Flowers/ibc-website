@@ -102,11 +102,16 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
         {/* Payment Proof Section */}
         {hasProofImage && (
           <PaymentProofModal
+            applicationId={application.applicationId}
             expectedRegistrationFee={expectedRegistrationFee}
             isDecisionLocked={isDecisionLocked}
             isUpdatingStatus={isUpdatingStatus}
             membershipTypeLabel={membershipTypeLabel}
             onDecision={handleDecision}
+            onProofReplaced={({ paymentProofStatus }) => {
+              setPaymentProofStatus(paymentProofStatus);
+              router.refresh();
+            }}
             paymentProofStatus={paymentProofStatus}
             proofImagePath={proofImage.path}
           />

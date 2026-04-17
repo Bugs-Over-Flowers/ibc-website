@@ -147,11 +147,15 @@ export function ApplicationsTableRow({
         <div className="flex items-center gap-2">
           {isPaymentProofPending && hasProofImage && (
             <PaymentProofModal
+              applicationId={application.applicationId}
               expectedRegistrationFee={expectedRegistrationFee}
               isDecisionLocked={paymentProofStatus !== "pending"}
               isUpdatingStatus={isUpdatingStatus}
               membershipTypeLabel={membershipTypeLabel}
               onDecision={handleDecision}
+              onProofReplaced={() => {
+                router.refresh();
+              }}
               paymentProofStatus={paymentProofStatus}
               proofImagePath={proofImage.path}
               trigger={
