@@ -51,8 +51,6 @@ BEGIN
 END;
 $function$;
 
-CREATE EXTENSION IF NOT EXISTS pg_cron;
-
 DO $cron$
 BEGIN
     -- Recreate jobs safely so this migration remains idempotent.
