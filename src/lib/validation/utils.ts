@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 import { Constants } from "../supabase/db.types";
 
 export const phoneSchema = z

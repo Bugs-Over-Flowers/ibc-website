@@ -16,7 +16,7 @@ import { useAppForm } from "@/hooks/_formHooks";
 import tryCatch from "@/lib/server/tryCatch";
 import { zodValidator } from "@/lib/utils";
 import { createSRFormSchema } from "@/lib/validation/sponsored-registration/sponsored-registration";
-import { createSR } from "@/server/sponsored-registrations/actions/createSR";
+import { createSR } from "@/server/sponsored-registrations/mutations/createSR";
 import { CreateSREventPreview } from "./CreateSREventPreview";
 import { CreateSRFeePreview } from "./CreateSRFeePreview";
 import type { CreateSREventOption } from "./types";

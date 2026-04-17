@@ -9,7 +9,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import { uploadCompanyLogo } from "@/lib/storage/uploadCompanyLogo";
 import { titleCase } from "@/lib/utils";
 import type { ManualMemberInput } from "@/lib/validation/membership/manualMember";
-import { createManualMember } from "@/server/members/actions/createManualMember";
+import { createManualMember } from "@/server/members/mutations/createManualMember";
 
 export const useCreateManualMemberStep3 = () => {
   const router = useRouter();

@@ -1,7 +1,7 @@
 import { test as base, createBdd } from "playwright-bdd";
-import type { RegistrationWorld } from "./types";
+import type { RegistrationScenarioState } from "../../support/registration";
 
-export const test = base.extend<{ world: RegistrationWorld }>({
+export const test = base.extend<{ world: RegistrationScenarioState }>({
   world: async ({ page: _page }, use) => {
     await use({});
   },

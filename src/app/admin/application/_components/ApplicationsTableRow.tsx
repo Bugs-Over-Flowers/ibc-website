@@ -150,17 +150,21 @@ export function ApplicationsTableRow({
         <div className="flex items-center gap-2">
           {isPaymentProofPending && hasProofImage && (
             <PaymentProofModal
+              applicationId={application.applicationId}
               expectedRegistrationFee={expectedRegistrationFee}
               isDecisionLocked={paymentProofStatus !== "pending"}
               isUpdatingStatus={isUpdatingStatus}
               membershipTypeLabel={membershipTypeLabel}
               onDecision={handleDecision}
+              onProofReplaced={() => {
+                router.refresh();
+              }}
               paymentProofStatus={paymentProofStatus}
               proofImagePath={proofImage.path}
               trigger={
                 <button
                   aria-label="Check payment proof"
-                  className="inline-flex size-[18px] items-center justify-center rounded-full bg-status-red/10 text-status-red transition-colors hover:bg-status-red/20"
+                  className="inline-flex size-[18px] items-center justify-center rounded-full bg-status-orange/10 text-status-red transition-colors hover:bg-status-red/20"
                   title="Check Payment Proof"
                   type="button"
                 >

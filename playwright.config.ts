@@ -3,8 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 import { config as dotenvConfig } from "dotenv";
 import { defineBddConfig } from "playwright-bdd";
 
-// Reuse same env as Vitest
-dotenvConfig({ path: ".env.testing" });
+// Reuse same env as Vitest and override shell values.
+dotenvConfig({ path: ".env.testing", override: true });
 
 const testDir = defineBddConfig({
   featuresRoot: "__tests__/e2e/features",

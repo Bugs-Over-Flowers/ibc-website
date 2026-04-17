@@ -1,15 +1,15 @@
 import { createE2EAdminClient } from "../helpers/supabase";
-import { type E2ETestData, seedE2ERegistrationData } from "./seed";
+import { seedE2ERegistrationData } from "./seed";
 
-export interface SeededStandardRegistrationData {
-  publicUpcoming: E2ETestData;
-  privateUpcoming: E2ETestData;
-  pastPublic: E2ETestData;
+export type SeededStandardRegistrationData = {
+  publicUpcoming: Awaited<ReturnType<typeof seedE2ERegistrationData>>;
+  privateUpcoming: Awaited<ReturnType<typeof seedE2ERegistrationData>>;
+  pastPublic: Awaited<ReturnType<typeof seedE2ERegistrationData>>;
   member: {
     businessMemberId: string;
     businessName: string;
   };
-}
+};
 
 export async function seedStandardRegistrationScenarioData(): Promise<SeededStandardRegistrationData> {
   // create an upcoming and public event
@@ -55,6 +55,10 @@ export async function cleanupStandardRegistrationScenarioData(
 ): Promise<void> {
   const supabase = createE2EAdminClient();
 
+  if (!data.publicUpcoming || !data.privateUpcoming || !data.pastPublic) {
+    throw new Error("Seed data is missing required events for cleanup");
+  }
+
   const eventIds = [
     data.publicUpcoming.event.eventId,
     data.privateUpcoming.event.eventId,
@@ -73,7 +77,9 @@ export async function cleanupStandardRegistrationScenarioData(
     );
   }
 
-  const registrationIds = registrationRows.map((row) => row.registrationId);
+  const registrationIds = (registrationRows ?? []).map(
+    (row) => row.registrationId,
+  );
 
   if (registrationIds.length > 0) {
     const { data: participantRows, error: participantSelectError } =
@@ -88,7 +94,9 @@ export async function cleanupStandardRegistrationScenarioData(
       );
     }
 
-    const participantIds = participantRows.map((row) => row.participantId);
+    const participantIds = (participantRows ?? []).map(
+      (row) => row.participantId,
+    );
 
     if (participantIds.length > 0) {
       const { error: checkInDeleteError } = await supabase

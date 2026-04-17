@@ -1,6 +1,6 @@
 "use server";
 
-import { render } from "@react-email/render";
+import { render } from "react-email";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import { sendEmail } from "@/lib/email";
 import { formatDate } from "@/lib/events/eventUtils";
