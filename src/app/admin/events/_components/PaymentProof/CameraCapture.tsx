@@ -7,11 +7,15 @@ import { Button } from "@/components/ui/button";
 interface CameraCaptureProps {
   disabled?: boolean;
   onCapture: (file: File) => void;
+  facingMode?: "user" | "environment";
+  mirrored?: boolean; // <-- Added new mirrored prop
 }
 
 export default function CameraCapture({
   disabled = false,
   onCapture,
+  facingMode = "environment",
+  mirrored = false, // <-- Defaults to false
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -29,7 +33,7 @@ export default function CameraCapture({
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: false,
           video: {
-            facingMode: "environment",
+            facingMode,
           },
         });
 
@@ -68,7 +72,7 @@ export default function CameraCapture({
       });
       streamRef.current = null;
     };
-  }, []);
+  }, [facingMode]);
 
   const handleCapture = async () => {
     const videoElement = videoRef.current;
@@ -90,6 +94,12 @@ export default function CameraCapture({
     if (!context) {
       setCameraError("Failed to capture image. Please try again.");
       return;
+    }
+
+    // Conditionally flip the image before drawing to canvas if mirrored is true
+    if (mirrored) {
+      context.translate(canvas.width, 0);
+      context.scale(-1, 1);
     }
 
     context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
@@ -122,7 +132,10 @@ export default function CameraCapture({
         {!cameraError && (
           <video
             autoPlay
-            className="h-full w-full object-cover"
+            // Conditionally apply Tailwind's -scale-x-100 class
+            className={`h-full w-full object-cover ${
+              mirrored ? "-scale-x-100" : ""
+            }`}
             muted
             playsInline
             ref={videoRef}
@@ -141,7 +154,7 @@ export default function CameraCapture({
         disabled={disabled || isStarting || !!cameraError}
         onClick={handleCapture}
       >
-        <CameraIcon />
+        <CameraIcon className="mr-2 h-4 w-4" />
         Capture Photo
       </Button>
     </div>

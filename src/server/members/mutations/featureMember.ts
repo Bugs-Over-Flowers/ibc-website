@@ -33,7 +33,9 @@ export async function featureMember(input: FeatureMemberInput): Promise<{
     throw new Error("Member not found");
   }
 
-  // Invalidate cache for featured members
+  // Invalidate featured and related member list caches used by public displays.
+  updateTag(CACHE_TAGS.members.all);
+  updateTag(CACHE_TAGS.members.public);
   updateTag(CACHE_TAGS.members.featured);
   // Also invalidate admin list as it shows feature status
   revalidatePath("/admin/members");
