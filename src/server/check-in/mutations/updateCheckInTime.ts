@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   UpdateCheckInTimeInput,
@@ -20,11 +21,12 @@ export async function updateCheckInTime(
 
   if (error) throw new Error(error.message);
 
-  // updateTag(CACHE_TAGS.checkIns.all);
-  // updateTag(CACHE_TAGS.checkIns.list);
-  // updateTag(CACHE_TAGS.checkIns.stats);
+  updateTag(CACHE_TAGS.checkIns.all);
+  updateTag(CACHE_TAGS.checkIns.list);
+  updateTag(CACHE_TAGS.checkIns.stats);
+  updateTag(CACHE_TAGS.events.checkIns);
 
-  revalidatePath(`/admin/events/[eventId]/check-in-list`);
+  revalidatePath("/admin/events/[eventId]/check-in-list", "page");
 
   return { success: true };
 }

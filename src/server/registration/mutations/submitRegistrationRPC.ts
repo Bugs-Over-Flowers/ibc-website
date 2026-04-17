@@ -1,18 +1,13 @@
 "use server";
 
-import { z } from "zod";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
-import { ServerRegistrationSchema } from "@/lib/validation/registration/standard";
+import {
+  ServerRegistrationSchema,
+  SubmitRegistrationResponseSchema,
+} from "@/lib/validation/registration/standard";
 import { createRegistrationIdentifier } from "@/lib/validation/utils";
-
-/**
- * Zod schema for validating RPC response at runtime.
- * Ensures type safety for data returned from database.
- */
-const SubmitRegistrationResponseSchema = z.object({
-  registrationId: z.string().uuid(),
-  message: z.string(),
-});
 
 /**
  * Server action to submit event registration to database via RPC call.
@@ -101,6 +96,19 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   }
 
   const validatedResponse = SubmitRegistrationResponseSchema.parse(rpcResults);
+
+  updateTag(CACHE_TAGS.registrations.all);
+  updateTag(CACHE_TAGS.registrations.list);
+  updateTag(CACHE_TAGS.registrations.details);
+  updateTag(CACHE_TAGS.registrations.stats);
+  updateTag(CACHE_TAGS.registrations.event);
+  updateTag(CACHE_TAGS.events.registrations);
+  updateTag(CACHE_TAGS.checkIns.stats);
+
+  if (sponsoredRegistrationId) {
+    updateTag(CACHE_TAGS.sponsoredRegistrations.all);
+    updateTag(CACHE_TAGS.sponsoredRegistrations.admin);
+  }
 
   return {
     rpcResults: validatedResponse,

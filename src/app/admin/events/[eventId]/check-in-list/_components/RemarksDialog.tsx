@@ -21,15 +21,27 @@ export default function RemarksDialog({
 }: RemarksDialogProps) {
   return (
     <Dialog>
-      <DialogTrigger render={<Button size="sm" variant="outline" />}>
+      <DialogTrigger
+        render={
+          <Button
+            className="h-7 gap-1.5 px-2.5 text-xs"
+            size="sm"
+            variant="outline"
+          />
+        }
+      >
         <MessageSquare />
         View
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Remarks for {participantName}</DialogTitle>
+          <DialogTitle className="font-medium text-base">
+            Remarks - {participantName}
+          </DialogTitle>
         </DialogHeader>
-        <div className="rounded-md border p-4 text-sm">{remarks}</div>
+        <div className="rounded-lg border bg-muted/30 px-4 py-3 text-foreground text-sm leading-relaxed">
+          {remarks}
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -1,6 +1,9 @@
 import "server-only";
 
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyRealtime60sCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,6 +27,11 @@ export type SponsoredRegistrationWithEvent = {
 export async function getAllSponsoredRegistrationsWithEvent(
   cookies: RequestCookie[],
 ): Promise<SponsoredRegistrationWithEvent[]> {
+  "use cache";
+  applyRealtime60sCache();
+  cacheTag(CACHE_TAGS.sponsoredRegistrations.all);
+  cacheTag(CACHE_TAGS.sponsoredRegistrations.admin);
+
   const supabase = await createClient(cookies);
 
   const { data, error } = await supabase.rpc(

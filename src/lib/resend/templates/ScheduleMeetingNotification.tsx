@@ -10,7 +10,7 @@ import {
   Row,
   Section,
   Text,
-} from "@react-email/components";
+} from "react-email";
 import { sanitizeEmailHtml } from "@/lib/resend/utils/sanitizeEmailHtml";
 
 interface MeetingNotificationEmailProps {

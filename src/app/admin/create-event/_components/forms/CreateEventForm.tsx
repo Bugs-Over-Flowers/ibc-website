@@ -218,34 +218,35 @@ export function CreateEventForm() {
                     <Popover>
                       <PopoverTrigger
                         render={
-                          <Button disabled={isSubmitting}>
-                            {isSubmitting ? "Creating..." : "Create Event"}
+                          <Button disabled={isSubmitting} type="submit">
+                            Save and Publish
                             <ChevronDown className="ml-2 h-4 w-4" />
                           </Button>
                         }
                       />
-
-                      <PopoverContent align="end" className="w-40 p-0">
-                        <div className="flex flex-col">
+                      <PopoverContent align="end" className="w-56 p-2">
+                        <div className="flex flex-col gap-1">
                           <Button
-                            className="justify-start rounded-none"
+                            className="justify-start"
                             onClick={() => {
                               form.setFieldValue("eventType", "public");
                               form.handleSubmit();
                             }}
+                            type="button"
                             variant="ghost"
                           >
-                            Public Event
+                            Save and Publish as Public
                           </Button>
                           <Button
-                            className="justify-start rounded-none"
+                            className="justify-start"
                             onClick={() => {
                               form.setFieldValue("eventType", "private");
                               form.handleSubmit();
                             }}
+                            type="button"
                             variant="ghost"
                           >
-                            Private Event
+                            Save and Publish as Private
                           </Button>
                         </div>
                       </PopoverContent>

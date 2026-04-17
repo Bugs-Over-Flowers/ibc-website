@@ -1,4 +1,4 @@
-import { Hr, Link, Section, Text } from "@react-email/components";
+import { Hr, Section, Text } from "react-email";
 
 export default function TermsAndConditions() {
   return (
@@ -82,7 +82,7 @@ export default function TermsAndConditions() {
 
       <Hr style={{ borderColor: "#e5e7eb", margin: "16px 0" }} />
 
-      <Text
+      {/*<Text
         style={{
           fontSize: "11px",
           color: "#9ca3af",
@@ -99,7 +99,7 @@ export default function TermsAndConditions() {
         >
           info@iloilobusinessclub.com
         </Link>
-      </Text>
+      </Text>*/}
     </Section>
   );
 }

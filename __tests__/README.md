@@ -421,3 +421,42 @@ A: No! Tests should NEVER run against production. Always use local Supabase for 
 
 4. **Read test logs** - Vitest provides detailed error messages
 5. **Ask the team** - Share error messages and steps to reproduce
+
+## 🎭 E2E BDD (Playwright-BDD)
+
+E2E registration tests use **Playwright + playwright-bdd** with Gherkin feature files.
+
+### Registration Feature Files
+
+- `__tests__/e2e/features/registration/standard-registration-navigation.feature`
+- `__tests__/e2e/features/registration/standard-registration-steps.feature`
+- `__tests__/e2e/features/registration/standard-registration-status.feature`
+
+### Generate BDD Tests
+
+```bash
+bun run bddgen
+```
+
+### Run E2E Suites
+
+```bash
+# All e2e scenarios
+bun run test:e2e
+
+# Default no-submit registration coverage
+bun run test:e2e:no-submit
+
+# Deferred submit-required scenarios
+bun run test:e2e:requires-submit
+
+# Explicit grep (equivalent)
+bun run test:e2e --grep "@registration.*@no-submit"
+bun run test:e2e --grep "@registration.*@requires-submit"
+```
+
+### Notes
+
+- `@no-submit` scenarios stop at Step 4 review.
+- `@requires-submit` scenarios assert persisted DB rules (payment status and affiliation XOR).
+- Test data is seeded/cleaned per scenario via BDD hooks with explicit UUID-based cleanup.

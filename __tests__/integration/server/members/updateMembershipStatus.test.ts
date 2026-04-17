@@ -29,11 +29,12 @@ vi.mock("@/lib/supabase/server", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 // Must use dynamic import so mocks are resolved first
 const { updateMembershipStatus } = await import(
-  "@/server/members/actions/updateMembershipStatus"
+  "@/server/members/mutations/manualUpdateMembershipStatus"
 );
 
 describe("updateMembershipStatus", () => {
@@ -105,6 +106,16 @@ describe("updateMembershipStatus", () => {
         status: "paid",
       }),
     ).rejects.toThrow("No members selected");
+  });
+
+  // ❌ ERROR FLOW: Missing status
+  it("should throw error when status is missing", async () => {
+    await expect(
+      updateMembershipStatus({
+        memberIds: ["bm-001"],
+        status: undefined as never,
+      }),
+    ).rejects.toThrow("Status is required");
   });
 
   // ❌ ERROR FLOW: Supabase returns error

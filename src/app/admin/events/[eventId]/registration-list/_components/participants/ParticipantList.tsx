@@ -28,7 +28,11 @@ export default async function ParticipantList({
     ),
   ]);
   if (!participantList.success || !eventDetails.success) {
-    return <div>Error: {participantList.error || eventDetails.error}</div>;
+    return (
+      <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-destructive text-sm">
+        Error: {participantList.error || eventDetails.error}
+      </div>
+    );
   }
   return (
     <ParticipantListTable

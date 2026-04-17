@@ -3,6 +3,7 @@ export const CACHE_TAGS = {
     all: "events:all",
     admin: "events:admin",
     public: "events:public",
+    details: "events:details",
     registrations: "events:registrations",
     checkIns: "events:check-ins",
   },
@@ -10,6 +11,7 @@ export const CACHE_TAGS = {
     all: "members:all",
     admin: "members:admin",
     public: "members:public",
+    featured: "members:featured",
   },
   applications: {
     all: "applications:all",
@@ -21,6 +23,10 @@ export const CACHE_TAGS = {
     details: "registrations:details",
     stats: "registrations:stats",
     event: "registrations:event",
+  },
+  sponsoredRegistrations: {
+    all: "sponsored-registrations:all",
+    admin: "sponsored-registrations:admin",
   },
   checkIns: {
     all: "check-ins:all",

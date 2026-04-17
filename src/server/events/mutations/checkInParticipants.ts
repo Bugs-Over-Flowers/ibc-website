@@ -3,7 +3,8 @@
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 import "server-only";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
   CheckInParticipantsInput,
   type CheckInParticipantsOutput,
@@ -40,13 +41,13 @@ export async function checkInParticipants(
     throw new Error(error.message);
   }
 
-  // updateTag(CACHE_TAGS.checkIns.all);
-  // updateTag(CACHE_TAGS.checkIns.list);
-  // updateTag(CACHE_TAGS.checkIns.stats);
-  // updateTag(CACHE_TAGS.checkIns.eventDay);
-  // updateTag(CACHE_TAGS.events.checkIns);
+  updateTag(CACHE_TAGS.checkIns.all);
+  updateTag(CACHE_TAGS.checkIns.list);
+  updateTag(CACHE_TAGS.checkIns.stats);
+  updateTag(CACHE_TAGS.checkIns.eventDay);
+  updateTag(CACHE_TAGS.events.checkIns);
 
-  revalidatePath(`/admin/events/check-in/${parsed.eventDayId}`);
+  revalidatePath("/admin/events/check-in/[eventDayId]", "page");
 
   return {
     checkInCount: data.length,

@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
@@ -10,11 +11,11 @@ import {
 } from "@/lib/validation/membership/manualMember";
 
 const SubmitMembershipResponseSchema = z.object({
-  applicationId: z.string().uuid(),
+  applicationId: z.uuid(),
 });
 
 const ApproveMembershipResponseSchema = z.object({
-  business_member_id: z.string().uuid(),
+  business_member_id: z.uuid(),
 });
 
 type MembershipStatus = Database["public"]["Enums"]["MembershipStatus"];
@@ -132,6 +133,12 @@ export async function createManualMember(
       );
     }
   }
+
+  updateTag(CACHE_TAGS.applications.all);
+  updateTag(CACHE_TAGS.applications.admin);
+  updateTag(CACHE_TAGS.members.all);
+  updateTag(CACHE_TAGS.members.admin);
+  updateTag(CACHE_TAGS.members.public);
 
   revalidatePath("/admin/application");
   revalidatePath("/admin/members");

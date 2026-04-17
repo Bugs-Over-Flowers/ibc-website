@@ -106,27 +106,6 @@ export function DashboardClient({ data }: DashboardClientProps) {
         <RecentActivityPanel initialActivities={data.recentActivity} />
         <div className="space-y-4">
           <QuickActionsPanel />
-        </div>
-        <div className="space-y-4">
-          <TopSectorsPanel sectors={data.members.membersBySector} />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1">
-            <StatCard
-              badge={`${data.sponsoredRegistrations.activeSponsoredLinks} active`}
-              description="Overall conversion rate across sponsored links"
-              icon={<Handshake className="h-4 w-4" />}
-              title="Sponsored Link Conversions"
-              tone="violet"
-              value={`${data.sponsoredRegistrations.usageRate}%`}
-            />
-            <StatCard
-              badge={`${data.members.totalActiveMembers} active`}
-              description="Members currently marked inactive or expired"
-              icon={<FileWarning className="h-4 w-4" />}
-              title="Inactive / Expired Members"
-              tone="rose"
-              value={String(data.members.totalInactiveOrExpiredMembers)}
-            />
-          </div>
           <Card className="border-border/60 bg-card/80 shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg">Top Performing Links</CardTitle>
@@ -157,6 +136,27 @@ export function DashboardClient({ data }: DashboardClientProps) {
               ))}
             </CardContent>
           </Card>
+        </div>
+        <div className="space-y-4">
+          <TopSectorsPanel sectors={data.members.membersBySector} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1">
+            <StatCard
+              badge={`${data.sponsoredRegistrations.activeSponsoredLinks} active`}
+              description="Overall conversion rate across sponsored links"
+              icon={<Handshake className="h-4 w-4" />}
+              title="Sponsored Link Conversions"
+              tone="violet"
+              value={`${data.sponsoredRegistrations.usageRate}%`}
+            />
+            <StatCard
+              badge={`${data.members.totalActiveMembers} active`}
+              description="Members currently marked inactive or expired"
+              icon={<FileWarning className="h-4 w-4" />}
+              title="Inactive / Expired Members"
+              tone="rose"
+              value={String(data.members.totalInactiveOrExpiredMembers)}
+            />
+          </div>
         </div>
       </section>
     </div>

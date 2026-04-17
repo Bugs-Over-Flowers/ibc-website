@@ -1,7 +1,8 @@
 "use server";
-import { render } from "@react-email/render";
 import { revalidatePath } from "next/cache";
+import { render } from "react-email";
 import { sendEmail } from "@/lib/email";
+import { formatDate } from "@/lib/events/eventUtils";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import ResendQRCodeTemplate from "@/lib/resend/templates/ResendQRCodeTemplate";
 import { createActionClient } from "@/lib/supabase/server";
@@ -46,6 +47,23 @@ export const resendQRCode = async ({
     throw new Error("Event not found");
   }
 
+  const eventDateRange =
+    eventDetails.eventStartDate && eventDetails.eventEndDate
+      ? `${formatDate(
+          eventDetails.eventStartDate,
+          "MMMM d, yyyy, h:mm a",
+          "Asia/Manila",
+        )} to ${formatDate(
+          eventDetails.eventEndDate,
+          "MMMM d, yyyy, h:mm a",
+          "Asia/Manila",
+        )}`
+      : formatDate(
+          eventDetails.eventStartDate || eventDetails.eventEndDate || null,
+          "MMMM d, yyyy, h:mm a",
+          "Asia/Manila",
+        );
+
   // get registration details
   const { data: participants } = await supabase
     .from("Participant")
@@ -68,8 +86,10 @@ export const resendQRCode = async ({
 
   const html = await render(
     ResendQRCodeTemplate({
-      email: toEmail,
       eventDetails,
+      eventDateRange,
+      eventVenue: eventDetails.venue ?? "TBA",
+      registrationIdentifier: qrData,
       self: {
         email: toEmail,
         fullName: `${registrantDetails.firstName} ${registrantDetails.lastName}`,

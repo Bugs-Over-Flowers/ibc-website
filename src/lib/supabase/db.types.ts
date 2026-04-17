@@ -621,6 +621,48 @@ export type Database = {
           },
         ];
       };
+      WebsiteContent: {
+        Row: {
+          cardPlacement: number | null;
+          createdAt: string;
+          entryKey: string;
+          icon: string | null;
+          id: string;
+          imageUrl: string | null;
+          isActive: boolean;
+          section: Database["public"]["Enums"]["WebsiteContentSection"];
+          textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+          textValue: string | null;
+          updatedAt: string;
+        };
+        Insert: {
+          cardPlacement?: number | null;
+          createdAt?: string;
+          entryKey: string;
+          icon?: string | null;
+          id?: string;
+          imageUrl?: string | null;
+          isActive?: boolean;
+          section: Database["public"]["Enums"]["WebsiteContentSection"];
+          textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+          textValue?: string | null;
+          updatedAt?: string;
+        };
+        Update: {
+          cardPlacement?: number | null;
+          createdAt?: string;
+          entryKey?: string;
+          icon?: string | null;
+          id?: string;
+          imageUrl?: string | null;
+          isActive?: boolean;
+          section?: Database["public"]["Enums"]["WebsiteContentSection"];
+          textType?: Database["public"]["Enums"]["WebsiteContentTextType"];
+          textValue?: string | null;
+          updatedAt?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -633,11 +675,29 @@ export type Database = {
           message: string;
         }[];
       };
+      approve_membership_renewal_application: {
+        Args: { p_application_id: string };
+        Returns: {
+          business_member_id: string;
+          message: string;
+        }[];
+      };
+      approve_membership_update_application: {
+        Args: { p_application_id: string };
+        Returns: {
+          business_member_id: string;
+          message: string;
+        }[];
+      };
       check_application_status: {
         Args: { p_application_identifier: string };
         Returns: Json;
       };
       check_member_exists: {
+        Args: { p_application_type?: string; p_identifier: string };
+        Returns: Json;
+      };
+      check_member_exists_and_get: {
         Args: { p_application_type?: string; p_identifier: string };
         Returns: Json;
       };
@@ -908,7 +968,24 @@ export type Database = {
         };
       };
       january_first_reset: { Args: never; Returns: undefined };
+      process_membership_statuses: {
+        Args: { p_reference_time?: string };
+        Returns: undefined;
+      };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
+      quick_onsite_registration: {
+        Args: {
+          p_business_member_id?: string;
+          p_event_day_id: string;
+          p_event_id: string;
+          p_identifier: string;
+          p_member_type: string;
+          p_non_member_name?: string;
+          p_registrant?: Json;
+          p_remark?: string;
+        };
+        Returns: Json;
+      };
       schedule_interviews_batch: {
         Args: { p_interview_data: Json };
         Returns: {
@@ -992,6 +1069,37 @@ export type Database = {
         };
         Returns: Json;
       };
+      upsert_website_content: {
+        Args: {
+          p_card_placement?: number;
+          p_entry_key: string;
+          p_icon?: string;
+          p_image_url?: string;
+          p_is_active?: boolean;
+          p_section: Database["public"]["Enums"]["WebsiteContentSection"];
+          p_text_type: Database["public"]["Enums"]["WebsiteContentTextType"];
+          p_text_value?: string;
+        };
+        Returns: {
+          cardPlacement: number | null;
+          createdAt: string;
+          entryKey: string;
+          icon: string | null;
+          id: string;
+          imageUrl: string | null;
+          isActive: boolean;
+          section: Database["public"]["Enums"]["WebsiteContentSection"];
+          textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+          textValue: string | null;
+          updatedAt: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "WebsiteContent";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
     };
     Enums: {
       ApplicationMemberType: "corporate" | "personal";
@@ -1005,6 +1113,14 @@ export type Database = {
       PaymentProofStatus: "pending" | "accepted" | "rejected";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
       SponsoredRegistrationStatus: "active" | "full" | "disabled";
+      WebsiteContentSection:
+        | "vision_mission"
+        | "goals"
+        | "company_thrusts"
+        | "board_of_trustees"
+        | "secretariat"
+        | "landing_page_benefits";
+      WebsiteContentTextType: "Paragraph" | "Title" | "Subtitle";
     };
     CompositeTypes: {
       participant_list_item: {
@@ -1184,6 +1300,15 @@ export const Constants = {
       PaymentProofStatus: ["pending", "accepted", "rejected"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
       SponsoredRegistrationStatus: ["active", "full", "disabled"],
+      WebsiteContentSection: [
+        "vision_mission",
+        "goals",
+        "company_thrusts",
+        "board_of_trustees",
+        "secretariat",
+        "landing_page_benefits",
+      ],
+      WebsiteContentTextType: ["Paragraph", "Title", "Subtitle"],
     },
   },
 } as const;

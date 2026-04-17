@@ -3,26 +3,24 @@ import {
   Container,
   Head,
   Heading,
+  Hr,
   Html,
   Img,
   Preview,
-  pixelBasedPreset,
-  Row,
   Section,
-  Tailwind,
   Text,
-} from "@react-email/components";
+} from "react-email";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
-import CustomFont from "../components/Font";
-import Footer from "../components/Footer";
 import TermsAndConditions from "../components/TermsAndConditions";
 
 interface ResendQRCodeProps {
-  email: string;
   eventDetails: Pick<
     RegistrationStoreEventDetails,
-    "eventTitle" | "eventStartDate" | "eventHeaderUrl" | "eventEndDate"
+    "eventTitle" | "eventHeaderUrl"
   >;
+  eventDateRange: string;
+  eventVenue: string;
+  registrationIdentifier: string;
   self: {
     fullName: string;
     email: string;
@@ -32,12 +30,15 @@ interface ResendQRCodeProps {
     email: string;
   }[];
 }
+
 export default function ResendQRCode({
   eventDetails,
+  eventDateRange,
+  eventVenue,
+  registrationIdentifier,
   otherParticipants,
   self,
 }: ResendQRCodeProps) {
-  // Template implementation here
   if (!eventDetails.eventHeaderUrl) {
     throw new Error("Event header URL is required");
   }
@@ -47,79 +48,86 @@ export default function ResendQRCode({
     otherParticipants &&
     otherParticipants.length > 0 &&
     ` and the following participants`;
+
   return (
     <Html>
-      <Head>
-        <CustomFont />
-        <title>{previewString}</title>
-      </Head>
-      <Tailwind
-        config={{
-          presets: [pixelBasedPreset],
-        }}
-      >
-        <Body>
-          <Preview>{previewString}</Preview>
-          <Section>
-            <Row align="center">
-              <Container className="text-center">
-                <Img
-                  alt={eventDetails.eventTitle}
-                  src={eventDetails.eventHeaderUrl}
-                  style={{ maxWidth: "448px", margin: "0 auto" }}
-                  width="100%"
-                />
-              </Container>
-            </Row>
-            <Row>
-              <Text className="text-center text-3xl">
-                Your QR Code for Sign In has been resent to you.
-              </Text>
-            </Row>
-            <br />
+      <Head />
+      <Preview>{previewString}</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <Img
+            alt={eventDetails.eventTitle}
+            src={eventDetails.eventHeaderUrl}
+            style={{ maxWidth: "600px", margin: "0 auto", width: "100%" }}
+          />
 
-            <Row className="text-center">
-              {/** biome-ignore lint/performance/noImgElement: using react-email */}
-              <img
-                alt="Check-in QR Code"
-                height="300"
-                src="cid:qrCodeCID"
-                style={{ maxWidth: "448px", margin: "0 auto" }}
-                width="300"
-              />
-            </Row>
-            <Row className="text-center">
-              <Text className="text-center">
-                Please keep a copy of the QR code for you{" "}
-                {otherParticipantsString} to sign in to the event.
-              </Text>
-              <Section className="mx-4">
-                <Heading as="h2">Participants under this registration:</Heading>
-                <ol className="space-y-4">
-                  <li className="text-start">
-                    {self.fullName} - {self.email}
-                  </li>
-                  {otherParticipants &&
-                    otherParticipants.length > 0 &&
-                    otherParticipants.map((participant, index) => (
-                      <li
-                        className="text-start"
-                        key={`participant-${
-                          // biome-ignore lint/suspicious/noArrayIndexKey: It's okay
-                          index
-                        }`}
-                      >
-                        {participant.fullName} - {participant.email}
-                      </li>
-                    ))}
-                </ol>
-              </Section>
-            </Row>
+          <Heading style={h1}>QR Code for Sign In</Heading>
+
+          <Text style={text}>
+            Your QR Code for Sign In to{" "}
+            <strong>{eventDetails.eventTitle}</strong> has been resent to you.
+          </Text>
+
+          <Section style={detailsSection}>
+            <Text style={detailLabel}>Event</Text>
+            <Text style={detailValue}>{eventDetails.eventTitle}</Text>
+            <Text style={detailLabel}>Date</Text>
+            <Text style={detailValue}>{eventDateRange}</Text>
+            <Text style={detailLabel}>Venue</Text>
+            <Text style={detailValue}>{eventVenue}</Text>
           </Section>
+
+          <Section style={{ textAlign: "center", margin: "32px 0" }}>
+            {/** biome-ignore lint/performance/noImgElement: using react-email */}
+            <img
+              alt="Check-in QR Code"
+              height="300"
+              src="cid:qrCodeCID"
+              style={{ maxWidth: "300px", margin: "0 auto" }}
+              width="300"
+            />
+          </Section>
+
+          <Text style={text}>
+            Please keep a copy of the QR code for you {otherParticipantsString}{" "}
+            to sign in to the event.
+          </Text>
+
+          <Section style={detailsSection}>
+            <Text style={detailLabel}>Registration Identifier</Text>
+            <Text style={detailValue}>
+              <code style={detailValueMono}>{registrationIdentifier}</code>
+            </Text>
+            <Text style={detailLabel}>
+              Participants under this registration
+            </Text>
+            <Text style={detailValue}>
+              • {self.fullName} ({self.email}) - <strong>Registrant</strong>
+            </Text>
+            {otherParticipants &&
+              otherParticipants.length > 0 &&
+              otherParticipants.map((participant) => (
+                <Text key={participant.email} style={detailValue}>
+                  • {participant.fullName} ({participant.email})
+                </Text>
+              ))}
+          </Section>
+
           <TermsAndConditions />
-          <Footer />
-        </Body>
-      </Tailwind>
+
+          <Hr style={hr} />
+
+          <Text style={footer}>
+            If you have questions, reply to this email and we will be happy to
+            assist.
+            <br />
+            <br />
+            Best regards,
+            <br />
+            Iloilo Business Club
+          </Text>
+        </Container>
+      </Body>
     </Html>
   );
 }
@@ -128,10 +136,11 @@ ResendQRCode.PreviewProps = {
   eventDetails: {
     eventId: "1010",
     eventTitle: "Awarding Ceremony 2024",
-    eventStartDate: "",
-    eventEndDate: "",
     eventHeaderUrl: "https://placehold.co/600x400",
   },
+  eventDateRange: "January 20, 2024, 12:00 PM to January 25, 2024, 8:00 PM",
+  eventVenue: "Grand Ballroom, Iloilo Convention Center",
+  registrationIdentifier: "IBC-REG-2026-0001",
   otherParticipants: [
     { fullName: "John Doe", email: "john.doe@example.com" },
     { fullName: "Jane Smith", email: "jane.smith@example.com" },
@@ -140,4 +149,74 @@ ResendQRCode.PreviewProps = {
     fullName: "Alice Johnson",
     email: "alice.johnson@example.com",
   },
+};
+
+const main = {
+  backgroundColor: "#f6f9fc",
+  fontFamily:
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+};
+
+const container = {
+  backgroundColor: "#ffffff",
+  margin: "0 auto",
+  padding: "20px 0 48px",
+  marginBottom: "64px",
+  maxWidth: "600px",
+};
+
+const h1 = {
+  color: "#333",
+  fontSize: "24px",
+  fontWeight: "bold",
+  margin: "40px 0",
+  padding: "0 40px",
+};
+
+const text = {
+  color: "#333",
+  fontSize: "16px",
+  lineHeight: "26px",
+  padding: "0 40px",
+};
+
+const hr = {
+  borderColor: "#e6ebf1",
+  margin: "20px 40px",
+};
+
+const footer = {
+  color: "#8898aa",
+  fontSize: "14px",
+  lineHeight: "24px",
+  padding: "0 40px",
+  marginTop: "32px",
+};
+
+const detailsSection = {
+  backgroundColor: "#f4f4f5",
+  borderRadius: "4px",
+  margin: "24px auto",
+  maxWidth: "520px",
+  padding: "24px",
+};
+
+const detailLabel = {
+  color: "#71717a",
+  fontSize: "14px",
+  fontWeight: "600",
+  marginBottom: "4px",
+  marginTop: "16px",
+};
+
+const detailValue = {
+  color: "#18181b",
+  fontSize: "16px",
+  fontWeight: "500",
+  margin: "0 0 8px 0",
+};
+
+const detailValueMono = {
+  fontFamily:
+    'ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace',
 };

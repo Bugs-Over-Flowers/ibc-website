@@ -1,24 +1,40 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Eye } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useAction } from "@/hooks/useAction";
+import tryCatch from "@/lib/server/tryCatch";
+import { updatePaymentProofStatus } from "@/server/applications/mutations/updatePaymentProofStatus";
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { toPascalCaseWithSpaces } from "../_utils/formatters";
+import { PaymentProofModal } from "./PaymentProofModal";
 
 interface ApplicationsTableRowProps {
   application: Awaited<ReturnType<typeof getApplications>>[number];
+  showContact?: boolean;
+}
+
+function formatAppliedDate(dateValue: string): string {
+  const isoDate = dateValue.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
+    return `${isoDate.slice(8, 10)}/${isoDate.slice(5, 7)}/${isoDate.slice(0, 4)}`;
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(new Date(dateValue));
 }
 
 function getApplicationTypeColor(type: string): {
@@ -51,8 +67,10 @@ function getApplicationTypeColor(type: string): {
 
 export function ApplicationsTableRow({
   application,
+  showContact = true,
 }: ApplicationsTableRowProps) {
   const [isHydrated, setIsHydrated] = useState(false);
+  const router = useRouter();
 
   // Ensure Zustand store state is only used after hydration
   useEffect(() => {
@@ -72,10 +90,44 @@ export function ApplicationsTableRow({
   const isPaymentProofPending =
     application.paymentMethod === "BPI" && paymentProofStatus === "pending";
   const isSelectionDisabled = isPaymentProofPending;
+  const formattedAppliedDate = formatAppliedDate(application.applicationDate);
+
+  const proofImage = application.ProofImage?.[0];
+  const hasProofImage = !!proofImage;
+
+  const { execute: updateProofStatus, isPending: isUpdatingStatus } = useAction(
+    tryCatch(updatePaymentProofStatus),
+    {
+      onSuccess: () => {
+        router.refresh();
+      },
+      onError: (error) => {
+        toast.error(error);
+      },
+    },
+  );
+
+  const handleDecision = (status: "accepted" | "rejected") => {
+    updateProofStatus({
+      applicationId: application.applicationId,
+      status,
+    });
+  };
+
+  const PERSONAL_REGISTRATION_FEE = 5000;
+  const CORPORATE_REGISTRATION_FEE = 10000;
+  const membershipTypeLabel =
+    application.applicationMemberType === "personal"
+      ? "Personal Membership"
+      : "Corporate Membership";
+  const expectedRegistrationFee =
+    application.applicationMemberType === "corporate"
+      ? CORPORATE_REGISTRATION_FEE
+      : PERSONAL_REGISTRATION_FEE;
 
   return (
     <TableRow
-      className={isHydrated && isSelected ? "bg-muted/50" : ""}
+      className={isHydrated && isSelected ? "bg-primary/5" : ""}
       key={application.applicationId}
     >
       <TableCell className="w-12">
@@ -89,57 +141,82 @@ export function ApplicationsTableRow({
           }}
         />
       </TableCell>
-      <TableCell className="w-[24%] font-medium">
+      <TableCell
+        className={showContact ? "w-[22%] font-medium" : "w-[24%] font-medium"}
+      >
         <div className="flex items-center gap-2">
-          {isPaymentProofPending && (
-            <Tooltip>
-              <TooltipTrigger
-                aria-label="Check payment proof"
-                className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-status-red/15 text-status-red"
-              >
-                <AlertTriangle className="h-4 w-4" />
-              </TooltipTrigger>
-              <TooltipContent>Check Payment Proof</TooltipContent>
-            </Tooltip>
+          {isPaymentProofPending && hasProofImage && (
+            <PaymentProofModal
+              applicationId={application.applicationId}
+              expectedRegistrationFee={expectedRegistrationFee}
+              isDecisionLocked={paymentProofStatus !== "pending"}
+              isUpdatingStatus={isUpdatingStatus}
+              membershipTypeLabel={membershipTypeLabel}
+              onDecision={handleDecision}
+              onProofReplaced={() => {
+                router.refresh();
+              }}
+              paymentProofStatus={paymentProofStatus}
+              proofImagePath={proofImage.path}
+              trigger={
+                <button
+                  aria-label="Check payment proof"
+                  className="inline-flex size-[18px] items-center justify-center rounded-full bg-status-orange/10 text-status-red transition-colors hover:bg-status-red/20"
+                  title="Check Payment Proof"
+                  type="button"
+                >
+                  <AlertTriangle className="size-3" />
+                </button>
+              }
+            />
           )}
           <span>{application.companyName}</span>
         </div>
       </TableCell>
-      <TableCell className="w-[34%] max-w-64">
+      <TableCell
+        className={showContact ? "w-[24%] max-w-56" : "w-[34%] max-w-64"}
+      >
         <div className="line-clamp-2 truncate text-sm">
           {application.Sector?.sectorName}
         </div>
       </TableCell>
-      <TableCell className="w-[16%]">
-        <Badge className={`${borderColor} ${textColor}`} variant="outline">
+      <TableCell className={showContact ? "w-[14%]" : "w-[16%]"}>
+        <Badge
+          className={`${borderColor} ${textColor} text-xs`}
+          variant="outline"
+        >
           {toPascalCaseWithSpaces(application.applicationType)}
         </Badge>
       </TableCell>
-      {/* <TableCell>
-        <div className="text-sm">
-          <div>{application.emailAddress}</div>
-          <div className="text-muted-foreground">
-            {application.mobileNumber}
+      {showContact && (
+        <TableCell className="w-[20%]">
+          <div className="text-sm">
+            <div>{application.emailAddress}</div>
+            <div className="text-muted-foreground">
+              {application.mobileNumber}
+            </div>
           </div>
-        </div>
-      </TableCell> */}
-      <TableCell className="w-[14%]">
-        <div className="space-y-1">
-          <div>
-            {new Date(application.applicationDate).toLocaleDateString()}
-          </div>
-        </div>
+        </TableCell>
+      )}
+      <TableCell
+        className={`${showContact ? "w-[10%]" : "w-[14%]"} font-mono text-muted-foreground text-xs`}
+      >
+        {formattedAppliedDate}
       </TableCell>
-      <TableCell className="w-[12%]">
+      <TableCell
+        className={`${showContact ? "w-[10%]" : "w-[12%]"} pr-4 text-right`}
+      >
         <Button
-          className="active:scale-95 active:opacity-80 dark:hover:bg-muted"
+          aria-label={`Open application ${application.companyName}`}
+          className="ml-auto size-8 p-0 active:scale-95 active:opacity-80 dark:hover:bg-muted"
           size="sm"
           variant="outline"
         >
           <Link
             href={`/admin/application/${application.applicationId}` as Route}
+            title={`Open application ${application.companyName}`}
           >
-            View Details
+            <Eye className="size-4" />
           </Link>
         </Button>
       </TableCell>

@@ -27,12 +27,19 @@ export const useMembershipStep4 = ({
   const setIsSubmitted = useMembershipApplicationStore(
     (state) => state.setIsSubmitted,
   );
+  const resetMemberValidationRateLimit = useMembershipApplicationStore(
+    (state) => state.resetMemberValidationRateLimit,
+  );
   const setStep = useMembershipApplicationStore((state) => state.setStep);
   const resetStore = useMembershipApplicationStore((state) => state.resetStore);
 
   // Get the verified businessMemberId (UUID) returned from identifier validation
   const verifiedBusinessMemberId = useMembershipApplicationStore(
     (state) => state.memberValidation.memberInfo.businessMemberId,
+  );
+
+  const storedBusinessMemberId = useMembershipApplicationStore(
+    (state) => state.applicationData?.step1?.businessMemberId,
   );
 
   const defaultApplicationDataStep4 = useMembershipApplicationStore(
@@ -136,7 +143,7 @@ export const useMembershipStep4 = ({
           const businessMemberId =
             applicationData.step1.applicationType === "newMember"
               ? undefined
-              : verifiedBusinessMemberId;
+              : storedBusinessMemberId || verifiedBusinessMemberId;
 
           const res = await submitMembershipApplication({
             applicationType: applicationData.step1.applicationType,
@@ -176,6 +183,8 @@ export const useMembershipStep4 = ({
       const identifier = (data as { identifier?: string })?.identifier ?? "";
 
       toast.success("Application submitted successfully!");
+
+      resetMemberValidationRateLimit();
 
       // Reset the form data but preserve rate limiting data
       resetStore();

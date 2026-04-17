@@ -18,7 +18,7 @@ export default function CheckInListTabWrapper({
   tabs,
   children,
   checkInCounts,
-  eventTitle,
+  eventTitle: _eventTitle,
   totalExpected,
 }: CheckInListTabWrapperProps) {
   const [activeTab, setActiveTab] = useState(tabs[0]?.eventDayId ?? "");
@@ -27,26 +27,26 @@ export default function CheckInListTabWrapper({
     return <DraftEventEmptyComponent />;
   }
 
-  // Find the current event day label
-  const currentEventDay = tabs.find((day) => day.eventDayId === activeTab);
-  const currentDayLabel = currentEventDay?.label ?? "Day 1";
+  const currentDay = tabs.find((d) => d.eventDayId === activeTab);
+  const currentDayLabel = currentDay?.label ?? "Day 1";
   const currentCheckedInCount = checkInCounts[activeTab] ?? 0;
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Stats Section */}
+    <div className="flex flex-col gap-5">
       <CheckInListStats
         checkedInCount={currentCheckedInCount}
         eventDayLabel={currentDayLabel}
-        eventTitle={eventTitle}
         totalExpected={totalExpected}
       />
 
-      {/* Tabs */}
       <Tabs onValueChange={setActiveTab} value={activeTab}>
-        <TabsList className="gap-3">
-          {tabs?.map((eventDay) => (
-            <TabsTrigger key={eventDay.eventDayId} value={eventDay.eventDayId}>
+        <TabsList className="h-9 gap-1 rounded-lg bg-muted p-1">
+          {tabs.map((eventDay) => (
+            <TabsTrigger
+              className="rounded-md px-4 text-sm data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              key={eventDay.eventDayId}
+              value={eventDay.eventDayId}
+            >
               {eventDay.label}
             </TabsTrigger>
           ))}

@@ -437,32 +437,42 @@ $$;
 ALTER FUNCTION "public"."check_member_exists"("p_identifier" "text", "p_application_type" "text") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."check_membership_expiry"() RETURNS "void"
+CREATE OR REPLACE FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone DEFAULT now()) RETURNS "void"
     LANGUAGE "plpgsql"
     AS $$
 DECLARE
     current_year_start date;
     next_year_start date;
 BEGIN
-    -- Calculate January 1st of current year and next year
-    current_year_start := DATE_TRUNC('year', NOW())::date;
-    next_year_start := current_year_start + INTERVAL '1 year';
+  current_year_start := DATE_TRUNC('year', p_reference_time)::date;
+  next_year_start := (current_year_start + INTERVAL '1 year')::date;
 
-    -- Step 1: First, cancel members who are already unpaid AND expired
-    -- (These are members who were given a grace period last year and didn't pay)
+  -- Step 1: cancel members who were already unpaid and are now expired.
     UPDATE "BusinessMember"
     SET "membershipStatus" = 'cancelled'
-    WHERE "membershipExpiryDate" < NOW()
+  WHERE "membershipExpiryDate" IS NOT NULL
+    AND "membershipExpiryDate" < p_reference_time
     AND "membershipStatus" = 'unpaid';
 
-    -- Step 2: Then, handle expired paid members
-    -- Give them a grace period: become unpaid with new expiry
+  -- Step 2: expired paid members enter grace period until next Jan 1.
     UPDATE "BusinessMember"
-    SET
-        "membershipStatus" = 'unpaid',
-        "membershipExpiryDate" = next_year_start
-    WHERE "membershipExpiryDate" < NOW()
+  SET "membershipStatus" = 'unpaid',
+    "membershipExpiryDate" = next_year_start
+  WHERE "membershipExpiryDate" IS NOT NULL
+    AND "membershipExpiryDate" < p_reference_time
     AND "membershipStatus" = 'paid';
+END;
+$$;
+
+
+ALTER FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."check_membership_expiry"() RETURNS "void"
+  LANGUAGE "plpgsql"
+  AS $$
+BEGIN
+  PERFORM "public"."process_membership_statuses"(NOW());
 END;
 $$;
 
@@ -1475,20 +1485,8 @@ CREATE OR REPLACE FUNCTION "public"."january_first_reset"() RETURNS "void"
     LANGUAGE "plpgsql"
     AS $$
 BEGIN
-    -- On Jan 1, update statuses:
-    -- active → unpaid (if expired)
-    -- unpaid → overdue
-    UPDATE "BusinessMember"
-    SET "membershipStatus" =
-        CASE
-            WHEN "membershipStatus" = 'active'::"MembershipStatus"
-                 AND "membershipExpiryDate" < NOW()
-            THEN 'unpaid'::"MembershipStatus"
-            WHEN "membershipStatus" = 'unpaid'::"MembershipStatus"
-            THEN 'overdue'::"MembershipStatus"
-            ELSE "membershipStatus"
-        END
-    WHERE "membershipStatus" IN ('active'::"MembershipStatus", 'unpaid'::"MembershipStatus");
+  -- Use Jan 1 of the current year to support deterministic annual reset logic.
+  PERFORM "public"."process_membership_statuses"(DATE_TRUNC('year', NOW()));
 END;
 $$;
 
@@ -3666,6 +3664,12 @@ GRANT ALL ON FUNCTION "public"."handle_event_days"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."january_first_reset"() TO "anon";
 GRANT ALL ON FUNCTION "public"."january_first_reset"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."january_first_reset"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone) TO "anon";
+GRANT ALL ON FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone) TO "service_role";
 
 
 

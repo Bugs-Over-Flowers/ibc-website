@@ -45,7 +45,7 @@ export default async function ApplicationDetailPage({
     : "applications";
 
   return (
-    <div className="container mx-auto space-y-6 py-8">
+    <div className="container mx-auto space-y-6">
       <Suspense fallback={<DetailsSkeleton />}>
         <ApplicationDetails
           applicationId={id}
