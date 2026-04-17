@@ -1,251 +1,151 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  type ReactNode,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { type ReactNode, useState } from "react";
 import { useTabSelections } from "../_hooks/useTabSelections";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import BulkActions from "./ApplicationBulkActions";
+import ApplicationsStats from "./ApplicationsStats";
 import MeetingScheduler from "./MeetingScheduler";
 
+export type ApplicationTab = "new" | "pending" | "finished";
+export type ApplicationGroup = "interview" | "updating";
+
+type InterviewTypeBreakdown = {
+  new: { newMember: number; renewal: number };
+  pending: { newMember: number; renewal: number };
+  finished: { newMember: number; renewal: number };
+};
+
 interface ApplicationsTabsProps {
-  newApplications: ReactNode;
-  pendingApplications: ReactNode;
-  finishedApplications: ReactNode;
-  stats: ReactNode;
+  interviewApplications: {
+    new: ReactNode;
+    pending: ReactNode;
+    finished: ReactNode;
+  };
+  updateInfoApplications: {
+    new: ReactNode;
+    finished: ReactNode;
+  };
+  counts: {
+    interview: {
+      new: number;
+      pending: number;
+      finished: number;
+      typeBreakdown: InterviewTypeBreakdown;
+    };
+    updating: { new: number; finished: number };
+  };
 }
 
 export default function ApplicationsTabs({
-  newApplications,
-  pendingApplications,
-  finishedApplications,
-  stats,
+  interviewApplications,
+  updateInfoApplications,
+  counts,
 }: ApplicationsTabsProps) {
-  const [activeTab, setActiveTab] = useState<"new" | "pending" | "finished">(
-    "new",
-  );
-  const [isMobile, setIsMobile] = useState(false);
-  const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
-  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [activeGroup, setActiveGroup] = useState<ApplicationGroup>("interview");
+  const [activeTab, setActiveTab] = useState<ApplicationTab>("new");
   const { selectedApplicationIds, clearSelection, selectAll } =
     useSelectedApplicationsStore();
 
-  // Update indicator on tab change and initial mount
-  useLayoutEffect(() => {
-    const activeButton = buttonRefs.current[activeTab];
-    if (activeButton) {
-      setIndicatorStyle({
-        x: activeButton.offsetLeft,
-        width: activeButton.offsetWidth,
-      });
-    }
-  }, [activeTab]);
-
-  // Handle window resize to recalculate indicator position
-  useEffect(() => {
-    const updateIndicator = () => {
-      const activeButton = buttonRefs.current[activeTab];
-      if (activeButton) {
-        setIndicatorStyle({
-          x: activeButton.offsetLeft,
-          width: activeButton.offsetWidth,
-        });
-      }
-    };
-
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-      // Recalculate indicator after resize
-      updateIndicator();
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, [activeTab]);
-
   const { handleTabChange: handleTabSelectionChange } = useTabSelections({
+    activeGroup,
     activeTab,
     selectedApplicationIds: Array.from(selectedApplicationIds),
     clearSelection,
     selectAll,
   });
 
-  const handleTabChange = (newTab: "new" | "pending" | "finished") => {
+  const handleTabChange = (newTab: ApplicationTab) => {
     handleTabSelectionChange(newTab);
     setActiveTab(newTab);
   };
 
-  const tabs = [
-    { id: "new", label: "New Applications" },
-    { id: "pending", label: "Pending Interviews" },
-    { id: "finished", label: "Finished" },
-  ] as const;
+  const handleGroupChange = (group: ApplicationGroup) => {
+    if (group === activeGroup) {
+      return;
+    }
+
+    clearSelection();
+    setActiveGroup(group);
+    setActiveTab("new");
+  };
+
+  const availableTabs: ApplicationTab[] =
+    activeGroup === "interview"
+      ? ["new", "pending", "finished"]
+      : ["new", "finished"];
+
+  const activeCounts =
+    activeGroup === "interview"
+      ? counts.interview
+      : { new: counts.updating.new, finished: counts.updating.finished };
+
+  const showMeetingScheduler =
+    activeGroup === "interview" && activeTab === "new";
+
+  const interviewBreakdownByTab =
+    activeGroup === "interview" ? counts.interview.typeBreakdown : null;
+
+  const activeContent =
+    activeGroup === "interview"
+      ? activeTab === "new"
+        ? interviewApplications.new
+        : activeTab === "pending"
+          ? interviewApplications.pending
+          : interviewApplications.finished
+      : activeTab === "new"
+        ? updateInfoApplications.new
+        : updateInfoApplications.finished;
 
   return (
     <>
-      <AnimatePresence mode={isMobile ? "wait" : "popLayout"}>
-        {activeTab === "new" ? (
-          <motion.div
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-stretch gap-6 lg:flex-row"
-            exit={{ opacity: isMobile ? 0 : 1 }}
-            initial={{ opacity: isMobile ? 0 : 1 }}
-            key="new"
-            transition={{ duration: isMobile ? 0.2 : 0.5 }}
-          >
-            <motion.div
-              animate={{ x: 0, opacity: 1 }}
-              className="flex flex-2 flex-col"
-              exit={{ x: isMobile ? 0 : -800, opacity: 1 }}
-              initial={{ x: isMobile ? 0 : -800, opacity: 1 }}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              <MeetingScheduler />
-            </motion.div>
+      <div className="inline-flex items-center gap-1 rounded-full border border-border bg-muted p-1">
+        <button
+          aria-pressed={activeGroup === "interview"}
+          className={`rounded-full px-4 py-1.5 text-sm transition ${
+            activeGroup === "interview"
+              ? "bg-background font-medium text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+          onClick={() => handleGroupChange("interview")}
+          type="button"
+        >
+          New Member & Renewal
+        </button>
+        <button
+          aria-pressed={activeGroup === "updating"}
+          className={`rounded-full px-4 py-1.5 text-sm transition ${
+            activeGroup === "updating"
+              ? "bg-background font-medium text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+          onClick={() => handleGroupChange("updating")}
+          type="button"
+        >
+          Update Info
+        </button>
+      </div>
 
-            <motion.div
-              animate={{ opacity: 1 }}
-              className="flex flex-1 flex-col"
-              exit={{ opacity: 1 }}
-              initial={{ opacity: 1 }}
-              layoutId={isMobile ? undefined : "stats-container"}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              {stats}
-            </motion.div>
-          </motion.div>
-        ) : activeTab === "pending" ? (
-          <motion.div
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-stretch gap-6 lg:flex-row"
-            exit={{ opacity: isMobile ? 0 : 1 }}
-            initial={{ opacity: isMobile ? 0 : 1 }}
-            key="pending"
-            transition={{ duration: isMobile ? 0.2 : 0.5 }}
-          >
-            <motion.div
-              animate={{ x: 0, opacity: 1 }}
-              className="flex flex-1 flex-col"
-              exit={{ x: isMobile ? 0 : -500, opacity: 1 }}
-              initial={{ x: isMobile ? 0 : -500, opacity: 1 }}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              <BulkActions />
-            </motion.div>
+      <ApplicationsStats
+        activeTab={activeTab}
+        availableTabs={availableTabs}
+        counts={activeCounts}
+        group={activeGroup}
+        interviewBreakdownByTab={interviewBreakdownByTab}
+        onTabChange={handleTabChange}
+      />
 
-            <motion.div
-              animate={{ opacity: 1 }}
-              className="flex flex-2 flex-col"
-              exit={{ opacity: 1 }}
-              initial={{ opacity: 1 }}
-              layoutId={isMobile ? undefined : "stats-container"}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              {stats}
-            </motion.div>
-          </motion.div>
+      <div className="mt-6 w-full">
+        {activeTab === "finished" ? (
+          <div className="flex flex-col gap-4">{activeContent}</div>
         ) : (
-          <motion.div
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-stretch"
-            exit={{ opacity: isMobile ? 0 : 1 }}
-            initial={{ opacity: isMobile ? 0 : 1 }}
-            key="finished"
-            transition={{ duration: isMobile ? 0.2 : 0.3 }}
-          >
-            <motion.div
-              animate={{ opacity: 1 }}
-              className="flex w-full flex-col"
-              exit={{ opacity: 1 }}
-              initial={{ opacity: 1 }}
-              layoutId={isMobile ? undefined : "stats-container"}
-              transition={{ duration: isMobile ? 0.2 : 0.5 }}
-            >
-              {stats}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="w-full">
-        <div className="relative">
-          <div
-            className="relative grid grid-cols-3 gap-0.5 overflow-hidden rounded-md border border-border bg-background p-1 sm:gap-0"
-            ref={containerRef}
-          >
-            {indicatorStyle.width > 0 && (
-              <motion.div
-                animate={{
-                  x: indicatorStyle.x,
-                  width: indicatorStyle.width,
-                }}
-                className="absolute rounded-md bg-primary/20"
-                style={{
-                  top: "4px",
-                  height: "calc(100% - 8px)",
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 380,
-                  damping: 30,
-                }}
-              />
-            )}
-
-            {tabs.map((tab) => (
-              <button
-                className={`relative z-10 whitespace-nowrap px-0.5 py-2 font-medium text-xs transition-colors duration-200 sm:text-sm ${
-                  activeTab === tab.id
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }
-                `}
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                ref={(el) => {
-                  buttonRefs.current[tab.id] = el;
-                  // Update indicator when active tab's ref is set
-                  if (el && tab.id === activeTab) {
-                    setIndicatorStyle({
-                      x: el.offsetLeft,
-                      width: el.offsetWidth,
-                    });
-                  }
-                }}
-                title={tab.label}
-                type="button"
-              >
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="inline sm:hidden">
-                  {tab.id === "new"
-                    ? "New"
-                    : tab.id === "pending"
-                      ? "Pending"
-                      : "Finished"}
-                </span>
-              </button>
-            ))}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
+            <div className="min-w-0">
+              {showMeetingScheduler ? <MeetingScheduler /> : <BulkActions />}
+            </div>
+            <div className="min-w-0">{activeContent}</div>
           </div>
-        </div>
-
-        <div className="mt-4">
-          {activeTab === "new" && (
-            <div className="space-y-4">{newApplications}</div>
-          )}
-          {activeTab === "pending" && (
-            <div className="space-y-4">{pendingApplications}</div>
-          )}
-          {activeTab === "finished" && (
-            <div className="space-y-4">{finishedApplications}</div>
-          )}
-        </div>
+        )}
       </div>
     </>
   );

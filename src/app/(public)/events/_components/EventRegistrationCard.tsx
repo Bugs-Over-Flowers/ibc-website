@@ -5,7 +5,6 @@ import { Banknote } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
@@ -21,29 +20,6 @@ export default function EventRegistrationCard({
   event,
 }: EventRegistrationCardProps) {
   const { eventId } = useParams<{ eventId: string }>();
-
-  const [_copied, setCopied] = useState(false);
-  const facebookLink = event.facebookLink?.trim() ?? "";
-  const _displayFacebookLink = (() => {
-    if (!facebookLink) return null;
-    const truncate = (value: string) =>
-      value.length > 48 ? `${value.slice(0, 45)}...` : value;
-
-    try {
-      const url = new URL(facebookLink);
-      const path = url.pathname.replace(/\/$/, "");
-      const condensed = `${url.hostname}${path}` || url.hostname;
-      return truncate(condensed);
-    } catch {
-      const normalized = facebookLink.replace(/^https?:\/\//i, "");
-      return truncate(normalized);
-    }
-  })();
-  const _handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <motion.div

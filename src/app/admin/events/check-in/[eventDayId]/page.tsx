@@ -1,14 +1,16 @@
 import { cookies } from "next/headers";
 import { Suspense } from "react";
-import CenterSpinner from "@/components/CenterSpinner";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
 import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
+import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import CheckInDataDialog from "./_components/CheckInDataDialog";
 import EventDayDetails from "./_components/EventDayDetails";
+import QuickOnsiteRegistrationCard from "./_components/QuickOnsiteRegistrationCard";
 import QRCodeScanner from "./_components/qr-scanning/QRCodeScanner";
 import CheckInRegistrationPanel from "./_components/registration-list/CheckInRegistrationPanel";
+import CheckInPageLoading from "./loading";
 
 type CheckInPageProps = PageProps<"/admin/events/check-in/[eventDayId]">;
 
@@ -20,8 +22,8 @@ export default function CheckInPageWrapper({
   searchParams: CheckInPageProps["searchParams"];
 }) {
   return (
-    <div className="space-y-4">
-      <Suspense fallback={<CenterSpinner />}>
+    <div className="space-y-6 px-2">
+      <Suspense fallback={<CheckInPageLoading />}>
         <CheckInPage params={params} searchParams={searchParams} />
       </Suspense>
     </div>
@@ -46,13 +48,21 @@ async function CheckInPage({
 
   const { data: eventDayData } = await tryCatch(
     getEventDayDetails(cookieStore.getAll(), {
-      eventDayId: eventDayId,
+      eventDayId,
     }),
   );
 
   if (!eventDayData?.event) {
-    return <div>Event Day not found</div>;
+    return (
+      <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-destructive text-sm">
+        Event day not found.
+      </div>
+    );
   }
+
+  const { data: membersData, error: membersError } = await tryCatch(
+    getAllMembers(cookieStore.getAll()),
+  );
 
   const { data: registrationListData, error: registrationListError } =
     await tryCatch(
@@ -63,43 +73,51 @@ async function CheckInPage({
       }),
     );
 
-  if (!registrationListData || !registrationListData) {
-    return <div>Failed to load registration list.</div>;
+  if (!registrationListData || membersError || !membersData) {
+    return (
+      <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-destructive text-sm">
+        Failed to load registration list.
+      </div>
+    );
   }
 
   return (
     <>
-      <div className="space-y-4">
-        <div className="grid gap-6 lg:grid-cols-[350px_1fr] xl:grid-cols-[400px_1fr]">
-          <div className="flex flex-col gap-6">
-            <QRCodeScanner eventId={eventDayData.event.eventId} />
-            <div className="sticky top-6 max-h-[calc(100vh-7.5rem)] overflow-auto">
-              <EventDayDetails
-                eventDayData={{
-                  eventTitle: eventDayData.event.eventTitle,
-                  eventDate: eventDayData.eventDate,
-                  label: eventDayData.label,
-                  venue: eventDayData.event.venue,
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="min-w-0">
-            <CheckInRegistrationPanel
-              errorMessage={
-                registrationListError
-                  ? "Failed to load registration list."
-                  : undefined
-              }
+      <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
+        <div className="flex flex-col gap-4">
+          <QRCodeScanner eventId={eventDayData.event.eventId} />
+          <div className="sticky top-4 flex max-h-[calc(100vh-7rem)] flex-col gap-4 overflow-auto">
+            <EventDayDetails
+              eventDayData={{
+                eventTitle: eventDayData.event.eventTitle,
+                eventDate: eventDayData.eventDate,
+                label: eventDayData.label,
+                venue: eventDayData.event.venue,
+              }}
+            />
+            <QuickOnsiteRegistrationCard
               eventDayId={eventDayId}
               eventId={eventDayData.event.eventId}
-              registrationList={registrationListData}
+              members={membersData}
             />
           </div>
         </div>
+
+        <CheckInRegistrationPanel
+          errorMessage={
+            registrationListError
+              ? "Failed to load registration list."
+              : undefined
+          }
+          eventDayId={eventDayId}
+          eventId={eventDayData.event.eventId}
+          registrationList={registrationListData}
+        />
       </div>
-      <CheckInDataDialog eventId={eventDayData.event.eventId} />
+      <CheckInDataDialog
+        eventId={eventDayData.event.eventId}
+        eventTitle={eventDayData.event.eventTitle}
+      />
     </>
   );
 }

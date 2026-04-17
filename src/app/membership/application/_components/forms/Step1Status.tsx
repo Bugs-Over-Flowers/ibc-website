@@ -3,13 +3,13 @@ import type { LucideIcon } from "lucide-react";
 import {
   AlertCircle,
   CheckCircle2,
-  Info,
   Loader2,
   RefreshCw,
   UserRoundPen,
   UserRoundPlus,
 } from "lucide-react";
 import { useEffect } from "react";
+import { MembershipGuidelines } from "@/app/membership/application/_components/MembershipGuidelines";
 import type { useMembershipStep1 } from "@/app/membership/application/_hooks/useMembershipStep1";
 import { useMemberValidationTimer } from "@/app/membership/application/_hooks/useMemberValidationTimer";
 import { Field, FieldError } from "@/components/ui/field";
@@ -93,27 +93,7 @@ export function Step1Status({
 
   return (
     <div className="space-y-8">
-      <div className="space-y-4 rounded-xl border-0 p-0">
-        <div className="flex items-center gap-2 font-bold text-primary">
-          <Info className="h-5 w-5" />
-          <span className="font-medium text-lg">Membership Guidelines</span>
-        </div>
-
-        <ul className="list-disc space-y-2 pl-5 text-muted-foreground text-sm">
-          <li>Memberships are dated on the first day of the payment month.</li>
-          <li>
-            Corporate members may request representative updates if reassigned.
-          </li>
-          <li>
-            Memberships remain subject to Membership Committee endorsement and
-            Board approval.
-          </li>
-          <li>
-            By continuing, you consent to processing under the Data Privacy Act
-            of 2012.
-          </li>
-        </ul>
-      </div>
+      <MembershipGuidelines />
 
       <div className="space-y-4">
         <Label className="font-bold text-base">Select Membership Status</Label>

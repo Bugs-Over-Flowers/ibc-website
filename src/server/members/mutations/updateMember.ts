@@ -55,7 +55,6 @@ export async function updateMember(input: UpdateMemberInput) {
       companyAddress,
       emailAddress,
       landline,
-      faxNumber,
       mobileNumber,
       websiteURL,
       sectorId,

@@ -2,7 +2,6 @@
 import { type IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { Card, CardContent } from "@/components/ui/card";
 import { RegistrationIdentifier } from "@/lib/validation/utils";
 import useAttendanceStore from "../../_hooks/useAttendanceStore";
 import { useScanQR } from "../../_hooks/useScanQR";
@@ -26,59 +25,57 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
     if (scanPending || detectedCodes.length === 0) return;
 
     const code = detectedCodes[0].rawValue;
-    console.log("Scanned code:", code);
-
-    // check the qr if valid
     const parsedIdentifier = RegistrationIdentifier.safeParse(code);
     if (!parsedIdentifier.success) {
-      console.error("Invalid QR code scanned. Not an identifier.");
-      toast.error("Invalid QR code scanned. Not an identifier.");
+      toast.error("Invalid QR code - not a valid registration identifier.");
       return;
     }
 
     await scanQRData(code, eventDayId);
   };
-  return (
-    <Card className="h-fit w-full overflow-hidden border-2 border-primary/20 shadow-lg">
-      <CardContent className="p-0">
-        <div className="relative aspect-square w-full bg-black">
-          <Scanner
-            components={{
-              finder: false,
-              onOff: true,
-            }}
-            formats={["qr_code"]}
-            onScan={handleScan}
-            paused={isCameraPaused}
-            styles={{
-              container: { width: "100%", height: "100%" },
-              video: { objectFit: "cover" },
-            }}
-          />
 
-          {/* Status Overlay */}
-          <div className="absolute inset-x-0 bottom-0 flex justify-center bg-linear-to-t from-black/80 to-transparent p-4">
-            <div
-              className={`flex items-center gap-2 rounded-full px-4 py-1.5 font-medium text-white text-xs shadow-sm backdrop-blur-md ${
-                isCameraPaused ? "bg-yellow-500/80" : "bg-green-500/80"
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border/70 bg-card">
+      <div className="relative aspect-square w-full bg-black">
+        <Scanner
+          components={{ finder: false, onOff: true }}
+          formats={["qr_code"]}
+          onScan={handleScan}
+          paused={isCameraPaused}
+          styles={{
+            container: { width: "100%", height: "100%" },
+            video: { objectFit: "cover" },
+          }}
+        />
+        <div className="absolute inset-x-0 bottom-0 flex justify-center pb-4">
+          <div
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-medium text-xs backdrop-blur-sm ${
+              isCameraPaused
+                ? "border-amber-500/40 bg-amber-900/60 text-amber-200"
+                : "border-emerald-500/40 bg-emerald-900/60 text-emerald-200"
+            }`}
+          >
+            <span
+              className={`size-1.5 rounded-full ${
+                isCameraPaused ? "bg-amber-400" : "animate-pulse bg-emerald-400"
               }`}
-            >
-              <div
-                className={`h-2 w-2 rounded-full ${
-                  isCameraPaused
-                    ? "bg-yellow-200"
-                    : "animate-pulse bg-green-200"
-                }`}
-              />
-              {isCameraPaused
-                ? scanPending
-                  ? "Processing..."
-                  : "Paused"
-                : "Ready to Scan"}
-            </div>
+            />
+            {isCameraPaused
+              ? scanPending
+                ? "Processing..."
+                : "Paused"
+              : "Ready to scan"}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div className="flex items-center justify-between border-t px-4 py-2.5">
+        <span className="font-medium text-foreground text-xs">
+          QR code scanner
+        </span>
+        <span className="text-muted-foreground text-xs">
+          Point camera at QR code
+        </span>
+      </div>
+    </div>
   );
 }

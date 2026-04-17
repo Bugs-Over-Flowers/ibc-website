@@ -29,7 +29,7 @@ export function RecentActivityPanel({
   });
 
   return (
-    <Card className="border-border/60 bg-card/80 shadow-sm">
+    <Card className="h-fit self-start border-border/60 bg-card/80 shadow-sm">
       <CardHeader className="space-y-3">
         <CardTitle className="text-lg">Recent Activity</CardTitle>
         <div className="relative">

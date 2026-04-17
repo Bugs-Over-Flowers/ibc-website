@@ -14,6 +14,8 @@ export const getEventById = async (
   applyAdmin5mCache();
   cacheTag(CACHE_TAGS.events.all);
   cacheTag(CACHE_TAGS.events.admin);
+  cacheTag(CACHE_TAGS.events.public);
+  cacheTag(CACHE_TAGS.events.details);
 
   const supabase = await createClient(requestCookies);
 
