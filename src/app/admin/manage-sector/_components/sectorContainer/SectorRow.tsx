@@ -1,9 +1,11 @@
 import { Building2 } from "lucide-react";
+import { cookies } from "next/headers";
 import { getSectors } from "@/server/sectors/queries";
 import SectorActionsDropdown from "./SectorActionsDropdown";
 
 export default async function SectorRow({ search }: { search?: string }) {
-  const sectors = await getSectors(search);
+  const cookieStore = await cookies();
+  const sectors = await getSectors(cookieStore.getAll(), search);
 
   if (sectors.length === 0) {
     return (
