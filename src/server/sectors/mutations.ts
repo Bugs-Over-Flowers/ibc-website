@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 
 import {
@@ -48,6 +49,8 @@ export async function createSector(input: z.infer<typeof createSectorSchema>) {
     throw new Error(error.message);
   }
 
+  updateTag(CACHE_TAGS.sectors.all);
+
   revalidatePath("/admin");
   return { id: data.sectorId };
 }
@@ -69,6 +72,8 @@ export async function updateSector(input: z.infer<typeof updateSectorSchema>) {
   if (error) {
     throw new Error(error.message);
   }
+
+  updateTag(CACHE_TAGS.sectors.all);
 
   revalidatePath("/admin");
   return { id: data.sectorId };
@@ -209,6 +214,11 @@ export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
   if (error) {
     throw new Error(error.message);
   }
+
+  updateTag(CACHE_TAGS.sectors.all);
+  updateTag(CACHE_TAGS.members.all);
+  updateTag(CACHE_TAGS.members.admin);
+  updateTag(CACHE_TAGS.members.public);
 
   revalidatePath("/admin/manage-sector");
   return { success: true };
