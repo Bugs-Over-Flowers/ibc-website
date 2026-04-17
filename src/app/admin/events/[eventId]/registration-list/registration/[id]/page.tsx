@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import tryCatch from "@/lib/server/tryCatch";
 import { getRegistrationData } from "@/server/registration/queries/getRegistrationData";
 import RegistrationDetails from "./_components/RegistrationDetails";
+
+export const metadata: Metadata = {
+  title: "Registration Details | Admin",
+  description: "View individual registration and participant information.",
+};
 
 type RegistrationPageParams =
   PageProps<"/admin/events/[eventId]/registration-list/registration/[id]">["params"];

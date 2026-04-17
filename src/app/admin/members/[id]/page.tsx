@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { MembersDetails } from "./_components/MembersDetails";
 import { DetailsSkeleton } from "./loading";
+
+export const metadata: Metadata = {
+  title: "Member Details | Admin",
+  description: "View complete member profile and application history.",
+};
 
 interface PageProps {
   params: Promise<{ id: string }>;

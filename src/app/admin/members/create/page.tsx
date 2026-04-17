@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import BackButton from "@/app/admin/_components/BackButton";
 import { getAllSectors } from "@/server/members/queries/getAllSectors";
 import { CreateManualMemberFormWrapper } from "./_components/forms/CreateManualMemberFormWrapper";
 import CreateMemberLoading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Create Member | Admin",
+  description: "Manually add a new member to the directory.",
+};
 
 export default async function CreateMemberPage() {
   const cookieStore = await cookies();

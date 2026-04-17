@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import BackButton from "@/app/admin/_components/BackButton";
 import { TabsContent } from "@/components/ui/tabs";
@@ -13,6 +14,11 @@ import RegistrationListPageLoading, {
   RegistrationStatsSkeleton,
   RegistrationTableSkeleton,
 } from "./loading";
+
+export const metadata: Metadata = {
+  title: "Registration List | Admin",
+  description: "View and manage event registrations and participants.",
+};
 
 export default function RegistrationPageWrapper({
   params,
