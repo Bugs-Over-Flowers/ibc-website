@@ -51,5 +51,9 @@ async function RegistrationDetailsPage({
     );
   }
 
-  return <RegistrationDetails data={registration} />;
+  return (
+    <div className="space-y-6">
+      <RegistrationDetails data={registration} />
+    </div>
+  );
 }
