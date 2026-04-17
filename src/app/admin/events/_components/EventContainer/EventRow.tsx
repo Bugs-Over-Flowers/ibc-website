@@ -1,4 +1,4 @@
-import { Calendar, Eye, MapPin, MoreVertical, Ticket } from "lucide-react";
+import { Calendar, Eye, MapPin, Ticket } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
