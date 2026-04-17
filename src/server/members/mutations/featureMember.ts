@@ -1,25 +1,19 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
-import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
+import {
+  type FeatureMemberInput,
+  FeatureMemberSchema,
+} from "@/lib/validation/members/feature";
 
-const featureMemberSchema = z.object({
-  memberId: z.string().uuid(),
-  featuredExpirationDate: z
-    .string()
-    .date()
-    .refine(
-      (date) => date >= new Date().toISOString().slice(0, 10),
-      "Feature expiration date cannot be earlier than today.",
-    ),
-});
-
-export async function featureMember(
-  input: z.infer<typeof featureMemberSchema>,
-) {
-  const parsed = featureMemberSchema.parse(input);
+export async function featureMember(input: FeatureMemberInput): Promise<{
+  success: boolean;
+  memberId: string;
+  featuredExpirationDate: string;
+}> {
+  const parsed = FeatureMemberSchema.parse(input);
 
   const supabase = await createActionClient();
   const formattedDate = parsed.featuredExpirationDate;
