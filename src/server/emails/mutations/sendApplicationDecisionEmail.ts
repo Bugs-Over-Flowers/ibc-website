@@ -1,6 +1,6 @@
 "use server";
 
-import { render } from "@react-email/render";
+import { render } from "react-email";
 import { sendEmail } from "@/lib/email";
 import ApplicationDecisionEmail from "@/lib/resend/templates/ApplicationDecision";
 
