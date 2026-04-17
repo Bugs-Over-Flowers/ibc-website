@@ -8,7 +8,7 @@ import {
   Preview,
   Section,
   Text,
-} from "@react-email/components";
+} from "react-email";
 
 interface ApplicationDecisionEmailProps {
   applicationType: "newMember" | "renewal" | "updating";
