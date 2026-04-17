@@ -626,6 +626,7 @@ export type Database = {
           cardPlacement: number | null;
           createdAt: string;
           entryKey: string;
+          group: string | null;
           icon: string | null;
           id: string;
           imageUrl: string | null;
@@ -639,6 +640,7 @@ export type Database = {
           cardPlacement?: number | null;
           createdAt?: string;
           entryKey: string;
+          group?: string | null;
           icon?: string | null;
           id?: string;
           imageUrl?: string | null;
@@ -652,6 +654,7 @@ export type Database = {
           cardPlacement?: number | null;
           createdAt?: string;
           entryKey?: string;
+          group?: string | null;
           icon?: string | null;
           id?: string;
           imageUrl?: string | null;
@@ -1069,37 +1072,72 @@ export type Database = {
         };
         Returns: Json;
       };
-      upsert_website_content: {
-        Args: {
-          p_card_placement?: number;
-          p_entry_key: string;
-          p_icon?: string;
-          p_image_url?: string;
-          p_is_active?: boolean;
-          p_section: Database["public"]["Enums"]["WebsiteContentSection"];
-          p_text_type: Database["public"]["Enums"]["WebsiteContentTextType"];
-          p_text_value?: string;
-        };
-        Returns: {
-          cardPlacement: number | null;
-          createdAt: string;
-          entryKey: string;
-          icon: string | null;
-          id: string;
-          imageUrl: string | null;
-          isActive: boolean;
-          section: Database["public"]["Enums"]["WebsiteContentSection"];
-          textType: Database["public"]["Enums"]["WebsiteContentTextType"];
-          textValue: string | null;
-          updatedAt: string;
-        };
-        SetofOptions: {
-          from: "*";
-          to: "WebsiteContent";
-          isOneToOne: true;
-          isSetofReturn: false;
-        };
-      };
+      upsert_website_content:
+        | {
+            Args: {
+              p_card_placement?: number;
+              p_entry_key: string;
+              p_icon?: string;
+              p_image_url?: string;
+              p_is_active?: boolean;
+              p_section: Database["public"]["Enums"]["WebsiteContentSection"];
+              p_text_type: Database["public"]["Enums"]["WebsiteContentTextType"];
+              p_text_value?: string;
+            };
+            Returns: {
+              cardPlacement: number | null;
+              createdAt: string;
+              entryKey: string;
+              group: string | null;
+              icon: string | null;
+              id: string;
+              imageUrl: string | null;
+              isActive: boolean;
+              section: Database["public"]["Enums"]["WebsiteContentSection"];
+              textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+              textValue: string | null;
+              updatedAt: string;
+            };
+            SetofOptions: {
+              from: "*";
+              to: "WebsiteContent";
+              isOneToOne: true;
+              isSetofReturn: false;
+            };
+          }
+        | {
+            Args: {
+              p_card_placement?: number;
+              p_entry_key: string;
+              p_group?: string;
+              p_icon?: string;
+              p_image_url?: string;
+              p_is_active?: boolean;
+              p_section: Database["public"]["Enums"]["WebsiteContentSection"];
+              p_text_type: Database["public"]["Enums"]["WebsiteContentTextType"];
+              p_text_value?: string;
+            };
+            Returns: {
+              cardPlacement: number | null;
+              createdAt: string;
+              entryKey: string;
+              group: string | null;
+              icon: string | null;
+              id: string;
+              imageUrl: string | null;
+              isActive: boolean;
+              section: Database["public"]["Enums"]["WebsiteContentSection"];
+              textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+              textValue: string | null;
+              updatedAt: string;
+            };
+            SetofOptions: {
+              from: "*";
+              to: "WebsiteContent";
+              isOneToOne: true;
+              isSetofReturn: false;
+            };
+          };
     };
     Enums: {
       ApplicationMemberType: "corporate" | "personal";
