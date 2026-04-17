@@ -11,11 +11,11 @@ import {
 } from "@/lib/validation/membership/manualMember";
 
 const SubmitMembershipResponseSchema = z.object({
-  applicationId: z.string().uuid(),
+  applicationId: z.uuid(),
 });
 
 const ApproveMembershipResponseSchema = z.object({
-  business_member_id: z.string().uuid(),
+  business_member_id: z.uuid(),
 });
 
 type MembershipStatus = Database["public"]["Enums"]["MembershipStatus"];

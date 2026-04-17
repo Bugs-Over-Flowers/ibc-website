@@ -1,6 +1,6 @@
 "use server";
 
-import { render } from "@react-email/render";
+import { render } from "react-email";
 import { sendEmail } from "@/lib/email";
 import PaymentRejectedTemplate from "@/lib/resend/templates/PaymentRejectedTemplate";
 

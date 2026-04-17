@@ -92,6 +92,8 @@ export async function updateRegistrationPaymentProofStatus(
     message:
       nextStatus === "accepted"
         ? "Payment proof accepted"
-        : `Payment proof rejected with rejection email${emailSent ? "sent" : "not sent. "}`,
+        : emailSent
+          ? "Payment proof rejected. Rejection email sent."
+          : "Payment proof rejected. Rejection email not sent.",
   };
 }

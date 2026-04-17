@@ -9,8 +9,8 @@ import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
-import { deleteSR } from "@/server/sponsored-registrations/actions/deleteSR";
-import { updateSRStatus } from "@/server/sponsored-registrations/actions/updateSR";
+import { deleteSR } from "@/server/sponsored-registrations/mutations/deleteSR";
+import { updateSRStatus } from "@/server/sponsored-registrations/mutations/updateSR";
 import { ConfirmDeleteDialog } from "../../_components/ConfirmDeleteDialog";
 
 type SponsoredRegistration =
