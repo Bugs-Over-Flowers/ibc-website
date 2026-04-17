@@ -41,7 +41,6 @@ describe("parseStatusFilter (MembersList)", () => {
 
   // ❌ ERROR FLOW: Invalid status returns undefined
   it("should return undefined for invalid status", () => {
-    expect(parseStatusFilter("active")).toBeUndefined();
     expect(parseStatusFilter("deleted")).toBeUndefined();
     expect(parseStatusFilter("")).toBeUndefined();
   });
@@ -122,12 +121,12 @@ describe("Member selection business logic", () => {
 
   // ✅ HAPPY FLOW: Enabled when conditions are met
   it("should be enabled when members selected and status chosen", () => {
-    expect(computeIsUpdateDisabled(false, 2, "paid")).toBe(false);
+    expect(computeIsUpdateDisabled(false, 2, "active")).toBe(false);
   });
 
   // ❌ ERROR FLOW: Disabled when no members selected
   it("should be disabled when no members are selected", () => {
-    expect(computeIsUpdateDisabled(false, 0, "paid")).toBe(true);
+    expect(computeIsUpdateDisabled(false, 0, "active")).toBe(true);
   });
 
   // ❌ ERROR FLOW: Disabled when no status selected
@@ -137,7 +136,7 @@ describe("Member selection business logic", () => {
 
   // ❌ ERROR FLOW: Disabled while action is pending
   it("should be disabled while action is pending", () => {
-    expect(computeIsUpdateDisabled(true, 2, "paid")).toBe(true);
+    expect(computeIsUpdateDisabled(true, 2, "active")).toBe(true);
   });
 
   // ❌ ERROR FLOW: Disabled when all conditions fail
@@ -219,7 +218,7 @@ describe("hasActiveFilters (MemberFilters)", () => {
 
   // ✅ HAPPY FLOW: Status filter active
   it("should return true when status is not all", () => {
-    expect(hasActiveFilters("paid", "all", "")).toBe(true);
+    expect(hasActiveFilters("active", "all", "")).toBe(true);
   });
 
   // ✅ HAPPY FLOW: Sector filter active

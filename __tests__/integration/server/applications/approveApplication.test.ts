@@ -57,6 +57,7 @@ describe("approveApplication", () => {
         applicationId: "app-001",
         companyName: "Acme Technologies",
         emailAddress: "admin@acme.example.com",
+        applicationType: "newMember",
         businessMemberId: null,
         sectorId: 1,
         ApplicationMember: [{ emailAddress: "john@acme.example.com" }],
@@ -80,7 +81,7 @@ describe("approveApplication", () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.message).toBe("Application approved successfully");
+    expect(result.message).toBe("Application approved");
     expect(result.businessMemberId).toBe(
       "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     );
@@ -104,6 +105,7 @@ describe("approveApplication", () => {
         applicationId: "app-001",
         companyName: "Acme",
         emailAddress: "admin@acme.example.com",
+        applicationType: "newMember",
         businessMemberId: null,
         sectorId: 1,
         ApplicationMember: [],
@@ -148,6 +150,7 @@ describe("approveApplication", () => {
         applicationId: "app-001",
         companyName: "Acme",
         emailAddress: "admin@acme.example.com",
+        applicationType: "newMember",
         businessMemberId: "bm-existing-001", // Already approved
         sectorId: 1,
         ApplicationMember: [],
@@ -170,6 +173,7 @@ describe("approveApplication", () => {
         applicationId: "app-001",
         companyName: "Acme",
         emailAddress: "admin@acme.example.com",
+        applicationType: "newMember",
         businessMemberId: null,
         sectorId: null, // Missing
         ApplicationMember: [],
@@ -207,6 +211,7 @@ describe("approveApplication", () => {
         applicationId: "app-001",
         companyName: "Acme",
         emailAddress: "admin@acme.example.com",
+        applicationType: "newMember",
         businessMemberId: null,
         sectorId: 1,
         ApplicationMember: [],
@@ -234,6 +239,7 @@ describe("approveApplication", () => {
         applicationId: "app-001",
         companyName: "Acme",
         emailAddress: "admin@acme.example.com",
+        applicationType: "newMember",
         businessMemberId: null,
         sectorId: 1,
         ApplicationMember: [],
@@ -266,6 +272,7 @@ describe("approveApplication", () => {
         applicationId: "app-001",
         companyName: "Acme",
         emailAddress: null,
+        applicationType: "newMember",
         businessMemberId: null,
         sectorId: 1,
         ApplicationMember: [{ emailAddress: null }],
@@ -298,6 +305,7 @@ describe("approveApplication", () => {
         applicationId: "app-001",
         companyName: "Acme",
         emailAddress: null,
+        applicationType: "newMember",
         businessMemberId: null,
         sectorId: 1,
         ApplicationMember: [{ emailAddress: "fallback@acme.example.com" }],
