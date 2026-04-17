@@ -1,12 +1,13 @@
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { expect, test as setup } from "@playwright/test";
+import { test as setup } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { config as dotenvConfig } from "dotenv";
 import { createE2EAdminClient } from "./helpers/supabase";
 
-// Ensure env vars are available in Playwright worker processes
-dotenvConfig({ path: ".env.testing" });
+// Ensure env vars are available in Playwright worker processes.
+dotenvConfig({ path: ".env.testing", override: true });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,7 +27,7 @@ function getSupabaseCookieName(supabaseUrl: string): string {
   return `sb-${hostname}-auth-token`;
 }
 
-setup("authenticate", async ({ page }) => {
+setup("authenticate", async () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
@@ -84,10 +85,7 @@ setup("authenticate", async ({ page }) => {
 
   const session = signInData.session;
 
-  // ── 3. Inject session cookie into the browser ────────────────────────
-  // Navigate first so we have a page context on the right domain
-  await page.goto("/");
-
+  // ── 3. Build Playwright storage state (no browser launch needed) ─────
   const cookieName = getSupabaseCookieName(supabaseUrl);
   const cookieValue = JSON.stringify({
     access_token: session.access_token,
@@ -99,29 +97,26 @@ setup("authenticate", async ({ page }) => {
     user: session.user,
   });
 
-  // Set the cookie the same way @supabase/ssr does — URI-encoded JSON value
-  const baseUrl = new URL("http://localhost:3000");
-  await page.context().addCookies([
-    {
-      name: cookieName,
-      value: encodeURIComponent(cookieValue),
-      domain: baseUrl.hostname,
-      path: "/",
-      httpOnly: false,
-      secure: false,
-      sameSite: "Lax",
-    },
-  ]);
+  const storageState = {
+    cookies: [
+      {
+        name: cookieName,
+        value: encodeURIComponent(cookieValue),
+        domain: "localhost",
+        path: "/",
+        expires: session.expires_at ?? -1,
+        httpOnly: false,
+        secure: false,
+        sameSite: "Lax" as const,
+      },
+    ],
+    origins: [],
+  };
 
-  // ── 4. Verify the session is active ──────────────────────────────────
-  // Reload to pick up the cookie on the server side
-  await page.reload();
-
-  // Quick sanity check — the Supabase cookie should exist in the browser
-  const cookies = await page.context().cookies();
-  const authCookie = cookies.find((c) => c.name.startsWith("sb-"));
-  expect(authCookie, "Auth cookie should be present").toBeTruthy();
-
-  // ── 5. Save authenticated state for other projects ───────────────────
-  await page.context().storageState({ path: AUTH_STATE_PATH });
+  await mkdir(dirname(AUTH_STATE_PATH), { recursive: true });
+  await writeFile(
+    AUTH_STATE_PATH,
+    JSON.stringify(storageState, null, 2),
+    "utf-8",
+  );
 });
