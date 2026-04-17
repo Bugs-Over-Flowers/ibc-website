@@ -1,45 +1,106 @@
 import { createE2EAdminClient } from "../helpers/supabase";
 
 /**
- * Clean up E2E test data created with a specific timestamp
+ * Clean up E2E test data created with a specific timestamp.
  */
-export async function cleanupE2EData(timestamp: number) {
+export async function cleanupE2EData(timestamp: number): Promise<void> {
   const supabase = createE2EAdminClient();
+  const eventId = `e2e-event-${timestamp}`;
+  const businessMemberId = `e2e-member-${timestamp}`;
 
-  // Delete in correct order (respect foreign keys)
+  const { data: registrationRows, error: registrationSelectError } =
+    await supabase
+      .from("Registration")
+      .select("registrationId")
+      .eq("eventId", eventId);
 
-  // 1. Delete CheckIns
-  await supabase
-    .from("CheckIn")
+  if (registrationSelectError) {
+    throw new Error(
+      `Failed to fetch registrations for cleanup: ${registrationSelectError.message}`,
+    );
+  }
+
+  const registrationIds = registrationRows.map((row) => row.registrationId);
+
+  if (registrationIds.length > 0) {
+    const { data: participantRows, error: participantSelectError } =
+      await supabase
+        .from("Participant")
+        .select("participantId")
+        .in("registrationId", registrationIds);
+
+    if (participantSelectError) {
+      throw new Error(
+        `Failed to fetch participants for cleanup: ${participantSelectError.message}`,
+      );
+    }
+
+    const participantIds = participantRows.map((row) => row.participantId);
+
+    if (participantIds.length > 0) {
+      const { error: checkInDeleteError } = await supabase
+        .from("CheckIn")
+        .delete()
+        .in("participantId", participantIds);
+
+      if (checkInDeleteError) {
+        throw new Error(
+          `Failed to cleanup check-ins: ${checkInDeleteError.message}`,
+        );
+      }
+    }
+
+    const { error: participantDeleteError } = await supabase
+      .from("Participant")
+      .delete()
+      .in("registrationId", registrationIds);
+
+    if (participantDeleteError) {
+      throw new Error(
+        `Failed to cleanup participants: ${participantDeleteError.message}`,
+      );
+    }
+
+    const { error: proofDeleteError } = await supabase
+      .from("ProofImage")
+      .delete()
+      .in("registrationId", registrationIds);
+
+    if (proofDeleteError) {
+      throw new Error(
+        `Failed to cleanup payment proofs: ${proofDeleteError.message}`,
+      );
+    }
+
+    const { error: registrationDeleteError } = await supabase
+      .from("Registration")
+      .delete()
+      .in("registrationId", registrationIds);
+
+    if (registrationDeleteError) {
+      throw new Error(
+        `Failed to cleanup registrations: ${registrationDeleteError.message}`,
+      );
+    }
+  }
+
+  const { error: eventDeleteError } = await supabase
+    .from("Event")
     .delete()
-    .like("participantId", `%${timestamp}%`);
+    .eq("eventId", eventId);
 
-  // 2. Delete Participants
-  await supabase
-    .from("Participant")
-    .delete()
-    .like("registrationId", `e2e-reg-${timestamp}%`);
+  if (eventDeleteError) {
+    throw new Error(`Failed to cleanup events: ${eventDeleteError.message}`);
+  }
 
-  // 3. Delete ProofImages
-  await supabase
-    .from("ProofImage")
-    .delete()
-    .like("registrationId", `e2e-reg-${timestamp}%`);
-
-  // 4. Delete Registrations
-  await supabase
-    .from("Registration")
-    .delete()
-    .like("registrationId", `e2e-reg-${timestamp}%`);
-
-  // 5. Delete Events
-  await supabase.from("Event").delete().eq("eventId", `e2e-event-${timestamp}`);
-
-  // 6. Delete Business Members
-  await supabase
+  const { error: memberDeleteError } = await supabase
     .from("BusinessMember")
     .delete()
-    .eq("businessMemberId", `e2e-member-${timestamp}`);
+    .eq("businessMemberId", businessMemberId);
 
-  console.log(`✅ Cleaned up E2E data for timestamp: ${timestamp}`);
+  if (memberDeleteError) {
+    throw new Error(
+      `Failed to cleanup business member: ${memberDeleteError.message}`,
+    );
+  }
 }

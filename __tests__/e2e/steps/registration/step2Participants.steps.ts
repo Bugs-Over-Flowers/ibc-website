@@ -1,6 +1,9 @@
 import { expect } from "@playwright/test";
+import {
+  clickNext,
+  fillValidStep2Registrant,
+} from "../../support/registration";
 import { Then, When } from "./bdd";
-import { clickNext, fillValidStep2Registrant } from "./helpers";
 
 When(
   "I continue from step 2 with empty participant fields",

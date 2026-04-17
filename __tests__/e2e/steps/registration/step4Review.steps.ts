@@ -1,6 +1,13 @@
 import { expect } from "@playwright/test";
+import {
+  clickNext,
+  fillValidStep2Registrant,
+  parseAffiliation,
+  parsePayment,
+  selectPaymentMethod,
+  uploadPaymentProof,
+} from "../../support/registration";
 import { Then, When } from "./bdd";
-import { clickNext, fillValidStep2Registrant } from "./helpers";
 
 When(
   "I complete step 2 with one additional participant",

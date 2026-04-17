@@ -1,31 +1,16 @@
 import { expect } from "@playwright/test";
-import { Then, When } from "./bdd";
 import {
   clickNext,
   completeToStep3,
   continueInfoToRegistrationForm,
   openRegistrationInfoFromEvents,
+  parseAffiliation,
   parseEventAlias,
+  parsePayment,
   selectPaymentMethod,
   uploadPaymentProof,
-} from "./helpers";
-import type { AffiliationType, PaymentType } from "./types";
-
-function parseAffiliation(value: string): AffiliationType {
-  if (value === "member" || value === "non-member") {
-    return value;
-  }
-
-  throw new Error(`Invalid affiliation type: ${value}`);
-}
-
-function parsePayment(value: string): PaymentType {
-  if (value === "online" || value === "onsite") {
-    return value;
-  }
-
-  throw new Error(`Invalid payment type: ${value}`);
-}
+} from "../../support/registration";
+import { Then, When } from "./bdd";
 
 When(
   "I open the registration form for the {string} event and complete steps 1 and 2 as {string}",
@@ -41,8 +26,8 @@ When(
 
 When(
   "I select {string} payment on step 3",
-  async ({ page, world }, payment: string) => {
-    await selectPaymentMethod(page, world, parsePayment(payment));
+  async ({ page }, payment: string) => {
+    await selectPaymentMethod(page, parsePayment(payment));
   },
 );
 

@@ -1,22 +1,14 @@
 import { expect } from "@playwright/test";
-import { Given, Then, When } from "./bdd";
 import {
   clickNext,
   completeStep1,
   continueInfoToRegistrationForm,
   openRegistrationInfoFromEvents,
+  parseAffiliation,
   parseEventAlias,
   selectAffiliation,
-} from "./helpers";
-import type { AffiliationType } from "./types";
-
-function parseAffiliation(value: string): AffiliationType {
-  if (value === "member" || value === "non-member") {
-    return value;
-  }
-
-  throw new Error(`Invalid affiliation type: ${value}`);
-}
+} from "../../support/registration";
+import { Given, Then, When } from "./bdd";
 
 Given(
   "I open the registration form for the {string} event from the events page",
