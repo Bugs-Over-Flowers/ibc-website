@@ -45,6 +45,12 @@ export default function PaymentRejectedTemplate({
                   We are writing to inform you that your payment proof for the
                   event <strong>{eventTitle}</strong> has been rejected.
                 </Text>
+
+                <Text className="font-bold text-green-700">
+                  If you already paid online please bring clear copy of your
+                  proof of payment on the event venue on the day of the event.
+                </Text>
+
                 <Text className="text-gray-700">
                   This may be due to an unclear image, incorrect amount, or
                   other issues with the provided proof.
