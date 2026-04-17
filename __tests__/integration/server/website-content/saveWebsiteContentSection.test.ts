@@ -302,8 +302,8 @@ describe("saveWebsiteContentSection", () => {
   it("should process section even if not in enum (schema mocked for testing)", async () => {
     // Note: In actual usage, Zod validation would catch this.
     // With mocked schema, we're testing the save logic, not validation.
-    const input = {
-      section: "goals" as any,
+    const input: SaveWebsiteContentSectionInput = {
+      section: "goals",
       form: {
         title: "unused",
         subtitle: "unused",
