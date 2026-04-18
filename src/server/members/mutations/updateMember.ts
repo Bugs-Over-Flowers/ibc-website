@@ -27,6 +27,16 @@ export async function updateMember(input: UpdateMemberInput) {
 
   const supabase = await createActionClient();
 
+  const { data: selectedSector, error: selectedSectorError } = await supabase
+    .from("Sector")
+    .select("sectorName")
+    .eq("sectorId", sectorId)
+    .single();
+
+  if (selectedSectorError || !selectedSector) {
+    throw new Error("Failed to resolve selected sector name");
+  }
+
   // 1. Update BusinessMember
   const { error: memberError } = await supabase
     .from("BusinessMember")
@@ -46,8 +56,7 @@ export async function updateMember(input: UpdateMemberInput) {
     throw new Error(`Failed to update member: ${JSON.stringify(memberError)}`);
   }
 
-  // 2. Update Application
-  // Note: Application table also has sectorId, websiteURL
+  // 2. Update Primary Application snapshot
   const { error: appError } = await supabase
     .from("Application")
     .update({
@@ -57,7 +66,7 @@ export async function updateMember(input: UpdateMemberInput) {
       landline,
       mobileNumber,
       websiteURL,
-      sectorId,
+      sectorName: selectedSector.sectorName,
     })
     .eq("applicationId", applicationId);
 

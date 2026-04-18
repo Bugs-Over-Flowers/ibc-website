@@ -25,7 +25,6 @@ export async function getApplications(
       `
       *,
       ApplicationMember(*),
-      Sector(sectorId, sectorName),
       ProofImage(proofImageId, path),
       Interview!Application_interviewId_fkey(interviewId, interviewDate, interviewVenue, status)
     `,

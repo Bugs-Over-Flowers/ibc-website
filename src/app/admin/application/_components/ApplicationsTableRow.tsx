@@ -177,7 +177,7 @@ export function ApplicationsTableRow({
         className={showContact ? "w-[24%] max-w-56" : "w-[34%] max-w-64"}
       >
         <div className="line-clamp-2 truncate text-sm">
-          {application.Sector?.sectorName}
+          {application.sectorName || "N/A"}
         </div>
       </TableCell>
       <TableCell className={showContact ? "w-[14%]" : "w-[16%]"}>
