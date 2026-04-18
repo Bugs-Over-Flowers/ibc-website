@@ -260,62 +260,78 @@ CREATE OR REPLACE FUNCTION "public"."approve_membership_application"("p_applicat
     LANGUAGE "plpgsql"
     AS $$
 DECLARE
-  v_application record;
+  v_existing_business_member_id uuid;
+  v_company_name text;
+  v_email_address text;
+  v_sector_name text;
+  v_website_url text;
+  v_logo_image_url text;
   v_member_id uuid;
   v_linked_count integer := 0;
+  v_sector_id bigint;
 BEGIN
-  SELECT *
-  INTO v_application
-  FROM "public"."Application"
-  WHERE "applicationId" = p_application_id
+  SELECT
+    a."businessMemberId",
+    a."companyName",
+    a."emailAddress",
+    a."sectorName",
+    a."websiteURL",
+    a."logoImageURL"
+  INTO
+    v_existing_business_member_id,
+    v_company_name,
+    v_email_address,
+    v_sector_name,
+    v_website_url,
+    v_logo_image_url
+  FROM public."Application" a
+  WHERE a."applicationId" = p_application_id
   FOR UPDATE;
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Application not found';
   END IF;
 
-  IF v_application."businessMemberId" IS NOT NULL THEN
+  IF v_existing_business_member_id IS NOT NULL THEN
     RAISE EXCEPTION 'Application has already been approved';
   END IF;
 
-  IF v_application."sectorId" IS NULL THEN
-    RAISE EXCEPTION 'Sector ID is required to approve application';
+  IF v_sector_name IS NULL OR btrim(v_sector_name) = '' THEN
+    RAISE EXCEPTION 'Sector name is required to approve application';
   END IF;
 
-  INSERT INTO "public"."BusinessMember" (
-    "businessName",
-    "sectorId",
-    "websiteURL",
-    "logoImageURL",
-    "joinDate",
-    "primaryApplicationId"
+  SELECT s."sectorId"
+  INTO v_sector_id
+  FROM public."Sector" s
+  WHERE lower(btrim(s."sectorName")) = lower(btrim(v_sector_name))
+  ORDER BY s."sectorId"
+  LIMIT 1;
+
+  IF v_sector_id IS NULL THEN
+    RAISE EXCEPTION
+      'Sector "%" is not available. Please update the application to a valid sector before approval.',
+      v_sector_name;
+  END IF;
+
+  INSERT INTO public."BusinessMember" (
+    "businessName", "sectorId", "websiteURL", "logoImageURL", "joinDate", "primaryApplicationId"
   )
   VALUES (
-    v_application."companyName",
-    v_application."sectorId",
-    COALESCE(v_application."websiteURL", ''),
-    v_application."logoImageURL",
-    CURRENT_DATE,
-    v_application."applicationId"
+    v_company_name, v_sector_id, COALESCE(v_website_url, ''), v_logo_image_url, CURRENT_DATE, p_application_id
   )
   RETURNING "businessMemberId" INTO v_member_id;
 
-  -- Approve the current application
-  UPDATE "public"."Application"
-  SET
-    "businessMemberId" = v_member_id,
-    "applicationStatus" = 'approved'
+  UPDATE public."Application"
+  SET "businessMemberId" = v_member_id, "applicationStatus" = 'approved'
   WHERE "applicationId" = p_application_id;
 
-  -- Link previous rejected applications to this business member history
-  -- using both companyName and emailAddress to reduce false matches.
-  UPDATE "public"."Application" a
+  UPDATE public."Application" a
   SET "businessMemberId" = v_member_id
   WHERE a."businessMemberId" IS NULL
     AND a."applicationStatus" = 'rejected'
     AND a."applicationId" <> p_application_id
-    AND lower(trim(a."companyName")) = lower(trim(v_application."companyName"))
-    AND lower(trim(a."emailAddress")) = lower(trim(v_application."emailAddress"));
+    AND lower(trim(a."companyName")) = lower(trim(v_company_name))
+    AND lower(trim(a."emailAddress")) = lower(trim(v_email_address));
 
   GET DIAGNOSTICS v_linked_count = ROW_COUNT;
 
@@ -1262,104 +1278,114 @@ DECLARE
   pending_regs bigint := 0;
   participants_total bigint := 0;
   attended_total bigint := 0;
-  day_rec record;
   days_arr jsonb := '[]'::jsonb;
-  day_obj jsonb;
-  participants_day bigint;
-  attended_day bigint;
   has_event_days boolean;
 BEGIN
-  SELECT COUNT(*) INTO total_regs
+  SELECT
+    COUNT(*)::bigint,
+    COUNT(*) FILTER (
+      WHERE r."paymentProofStatus" = 'accepted'::"PaymentProofStatus"
+    )::bigint,
+    COUNT(*) FILTER (
+      WHERE r."paymentProofStatus" = 'pending'::"PaymentProofStatus"
+    )::bigint
+  INTO total_regs, verified_regs, pending_regs
   FROM "Registration" r
   WHERE r."eventId" = p_event_id;
-
-  SELECT COUNT(*) INTO verified_regs
-  FROM "Registration" r
-  WHERE r."eventId" = p_event_id
-    AND lower(coalesce(r."paymentProofStatus"::text, '')) = 'accepted';
-
-  SELECT COUNT(*) INTO pending_regs
-  FROM "Registration" r
-  WHERE r."eventId" = p_event_id
-    AND lower(coalesce(r."paymentProofStatus"::text, '')) = 'pending';
 
   SELECT COUNT(DISTINCT p."participantId") INTO participants_total
   FROM "Participant" p
-  JOIN "Registration" r ON p."registrationId" = r."registrationId"
-  WHERE r."eventId" = p_event_id;
+  JOIN "Registration" r ON r."registrationId" = p."registrationId"
+  WHERE r."eventId" = p_event_id
+    AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus";
 
   SELECT COUNT(DISTINCT ci."participantId") INTO attended_total
   FROM "CheckIn" ci
   JOIN "Participant" p ON p."participantId" = ci."participantId"
   JOIN "Registration" r ON r."registrationId" = p."registrationId"
-  WHERE r."eventId" = p_event_id;
+  WHERE r."eventId" = p_event_id
+    AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus";
 
   SELECT EXISTS(SELECT 1 FROM "EventDay" ed WHERE ed."eventId" = p_event_id)
   INTO has_event_days;
 
   IF has_event_days THEN
-    FOR day_rec IN
-      SELECT ed."eventDayId" AS day_id, ed."label" AS day_label, ed."eventDate" AS day_date
+    WITH accepted_checkins AS (
+      SELECT
+        ci."eventDayId",
+        ci."participantId"
+      FROM "CheckIn" ci
+      JOIN "Participant" p ON p."participantId" = ci."participantId"
+      JOIN "Registration" r ON r."registrationId" = p."registrationId"
+      WHERE r."eventId" = p_event_id
+        AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus"
+    ),
+    day_counts AS (
+      SELECT
+        ed."eventDayId" AS day_id,
+        ed."label" AS day_label,
+        ed."eventDate" AS day_date,
+        COUNT(DISTINCT ac."participantId") AS participants
       FROM "EventDay" ed
+      LEFT JOIN accepted_checkins ac ON ac."eventDayId" = ed."eventDayId"
       WHERE ed."eventId" = p_event_id
-      ORDER BY ed."eventDate", ed."eventDayId"
-    LOOP
-      SELECT COUNT(DISTINCT ci."participantId") INTO participants_day
-      FROM "CheckIn" ci
-      JOIN "Participant" p ON p."participantId" = ci."participantId"
-      JOIN "Registration" r ON r."registrationId" = p."registrationId"
-      WHERE r."eventId" = p_event_id
-        AND ci."eventDayId" = day_rec.day_id;
-
-      attended_day := participants_day;
-
-      day_obj := jsonb_build_object(
-        'day_id', day_rec.day_id,
-        'day_label', coalesce(day_rec.day_label, to_char(day_rec.day_date, 'YYYY-MM-DD')),
-        'day_date', day_rec.day_date,
-        'participants', coalesce(participants_day, 0),
-        'attended', coalesce(attended_day, 0)
-      );
-
-      days_arr := days_arr || jsonb_build_array(day_obj);
-    END LOOP;
+      GROUP BY ed."eventDayId", ed."label", ed."eventDate"
+    )
+    SELECT COALESCE(
+      jsonb_agg(
+        jsonb_build_object(
+          'day_id', day_id,
+          'day_label', coalesce(day_label, to_char(day_date, 'YYYY-MM-DD')),
+          'day_date', day_date,
+          'participants', participants,
+          'attended', participants
+        )
+        ORDER BY day_date, day_id
+      ),
+      '[]'::jsonb
+    ) INTO days_arr
+    FROM day_counts;
   ELSE
-    FOR day_rec IN
-      SELECT (ci."date"::date) AS day_date
+    WITH accepted_checkins AS (
+      SELECT
+        ci."date"::date AS day_date,
+        ci."participantId"
       FROM "CheckIn" ci
       JOIN "Participant" p ON p."participantId" = ci."participantId"
       JOIN "Registration" r ON r."registrationId" = p."registrationId"
       WHERE r."eventId" = p_event_id
-      GROUP BY ci."date"::date
-      ORDER BY ci."date"::date
-    LOOP
-      SELECT COUNT(DISTINCT ci."participantId") INTO participants_day
-      FROM "CheckIn" ci
-      JOIN "Participant" p ON p."participantId" = ci."participantId"
-      JOIN "Registration" r ON r."registrationId" = p."registrationId"
-      WHERE r."eventId" = p_event_id
-        AND ci."date"::date = day_rec.day_date;
-
-      attended_day := participants_day;
-
-      day_obj := jsonb_build_object(
-        'day_id', NULL,
-        'day_label', to_char(day_rec.day_date, 'YYYY-MM-DD'),
-        'day_date', day_rec.day_date,
-        'participants', coalesce(participants_day, 0),
-        'attended', coalesce(attended_day, 0)
-      );
-
-      days_arr := days_arr || jsonb_build_array(day_obj);
-    END LOOP;
+        AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus"
+    ),
+    day_counts AS (
+      SELECT
+        day_date,
+        COUNT(DISTINCT "participantId") AS participants
+      FROM accepted_checkins
+      GROUP BY day_date
+    )
+    SELECT COALESCE(
+      jsonb_agg(
+        jsonb_build_object(
+          'day_id', null,
+          'day_label', to_char(day_date, 'YYYY-MM-DD'),
+          'day_date', day_date,
+          'participants', participants,
+          'attended', participants
+        )
+        ORDER BY day_date
+      ),
+      '[]'::jsonb
+    ) INTO days_arr
+    FROM day_counts;
   END IF;
 
   RETURN jsonb_build_object(
+    'event_id', p_event_id::text,
     'total_registrations', coalesce(total_regs, 0),
     'verified_registrations', coalesce(verified_regs, 0),
     'pending_registrations', coalesce(pending_regs, 0),
-    'total_participants', coalesce(participants_total, 0),
-    'total_attended', coalesce(attended_total, 0),
+    'participants', coalesce(participants_total, 0),
+    'attended', coalesce(attended_total, 0),
     'event_days', days_arr
   );
 END;
@@ -2376,62 +2402,56 @@ DECLARE
   v_app_type_enum "ApplicationType";
   v_pay_method_enum "PaymentMethod";
   v_pay_status_enum "PaymentProofStatus";
-  v_sector_id int;
+  v_sector_name text;
   v_business_member_id uuid;
-  v_member_exists boolean;
   representative jsonb;
   v_rep_type_text text;
 BEGIN
-
-  -- Generate UUID for application ID
   v_application_id := gen_random_uuid();
-  
-  -- Generate human-readable identifier: ibc-app-XXXXXXXX (first 8 chars of UUID)
   v_identifier := 'ibc-app-' || left(replace(v_application_id::text, '-', ''), 8);
 
-  -- 1. Validate Inputs & Enums
   v_app_type_enum := p_application_type::"ApplicationType";
   v_pay_method_enum := p_payment_method::"PaymentMethod";
   v_pay_status_enum := 'pending'::"PaymentProofStatus";
 
-  -- Validate: Online payment requires proof (Checking against 'BPI')
-  IF v_pay_method_enum = 'BPI' AND (p_payment_proof_url IS NULL OR p_payment_proof_url = '') THEN
+  IF v_pay_method_enum = 'BPI'
+     AND (p_payment_proof_url IS NULL OR btrim(p_payment_proof_url) = '') THEN
     RAISE EXCEPTION 'Proof of payment is required for online transactions.';
   END IF;
 
-  -- Extract Sector ID
-  v_sector_id := (p_company_details->>'sectorId')::int;
-  
-  -- Extract Business Member ID (for renewals and updates)
-  IF p_company_details->>'businessMemberId' IS NOT NULL AND p_company_details->>'businessMemberId' != '' THEN
+  v_sector_name := NULLIF(btrim(p_company_details->>'sectorName'), '');
+  IF v_sector_name IS NULL THEN
+    RAISE EXCEPTION 'Industry/Sector is required.';
+  END IF;
+
+  IF p_company_details->>'businessMemberId' IS NOT NULL
+     AND btrim(p_company_details->>'businessMemberId') <> '' THEN
     v_business_member_id := (p_company_details->>'businessMemberId')::uuid;
   ELSE
     v_business_member_id := NULL;
   END IF;
 
-  -- 2. Validate Business Member ID for Renewal and Update Info applications
   IF v_app_type_enum IN ('renewal', 'updating') THEN
-    -- Business Member ID is required for renewal and updating
     IF v_business_member_id IS NULL THEN
       RAISE EXCEPTION 'Member ID is required for % applications.', p_application_type;
     END IF;
 
-    -- Check if member exists in BusinessMember table
-    SELECT EXISTS(
-      SELECT 1 FROM "BusinessMember" WHERE "businessMemberId" = v_business_member_id
-    ) INTO v_member_exists;
-
-    IF NOT v_member_exists THEN
-      RAISE EXCEPTION 'Member ID % does not exist. Please provide a valid IBC Member ID.', v_business_member_id;
+    IF NOT EXISTS (
+      SELECT 1
+      FROM "BusinessMember"
+      WHERE "businessMemberId" = v_business_member_id
+    ) THEN
+      RAISE EXCEPTION
+        'Member ID % does not exist. Please provide a valid IBC Member ID.',
+        v_business_member_id;
     END IF;
   END IF;
 
-  -- 3. Insert into "Application" Table
   INSERT INTO "Application" (
     "applicationId",
     "identifier",
     "businessMemberId",
-    "sectorId",
+    "sectorName",
     "logoImageURL",
     "applicationDate",
     "applicationType",
@@ -2444,11 +2464,12 @@ BEGIN
     "paymentMethod",
     "websiteURL",
     "applicationMemberType"
-  ) VALUES (
+  )
+  VALUES (
     v_application_id,
     v_identifier,
     v_business_member_id,
-    v_sector_id,
+    v_sector_name,
     p_company_details->>'logoImageURL',
     NOW(),
     v_app_type_enum,
@@ -2463,18 +2484,15 @@ BEGIN
     p_application_member_type::"ApplicationMemberType"
   );
 
-  -- 4. Handle Proof of Payment
   IF v_pay_method_enum = 'BPI' THEN
-    INSERT INTO "ProofImage" ("applicationId", "path") 
+    INSERT INTO "ProofImage" ("applicationId", "path")
     VALUES (v_application_id, p_payment_proof_url);
   END IF;
 
-  -- 5. Insert Representatives
-  IF jsonb_array_length(p_representatives) > 0 THEN
-    FOR representative IN SELECT * FROM jsonb_array_elements(p_representatives)
+  IF jsonb_array_length(COALESCE(p_representatives, '[]'::jsonb)) > 0 THEN
+    FOR representative IN
+      SELECT * FROM jsonb_array_elements(COALESCE(p_representatives, '[]'::jsonb))
     LOOP
-      
-      -- Extract the type (principal or alternate)
       v_rep_type_text := representative->>'memberType';
 
       INSERT INTO "ApplicationMember" (
@@ -2490,7 +2508,8 @@ BEGIN
         "landline",
         "mobileNumber",
         "emailAddress"
-      ) VALUES (
+      )
+      VALUES (
         v_application_id,
         v_rep_type_text::"CompanyMemberType",
         representative->>'firstName',
@@ -2507,7 +2526,6 @@ BEGIN
     END LOOP;
   END IF;
 
-  -- 6. Return Success with application type info
   RETURN jsonb_build_object(
     'applicationId', v_application_id,
     'identifier', v_identifier,
@@ -2530,16 +2548,6 @@ $$;
 
 
 ALTER FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text") OWNER TO "postgres";
-
-
-COMMENT ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text") IS 'Submits a membership application for new members, renewals, or information updates.
-- newMember: New membership application (no businessMemberId required)
-- renewal: Membership renewal (requires businessMemberId from existing member)
-- updating: Information update (requires businessMemberId, fixed ₱2,000 fee)
-
-Returns both applicationId (UUID) and identifier (ibc-app-XXXXXXXX format).
-For renewal and updating: validates that the provided businessMemberId exists in the BusinessMember table.';
-
 
 
 CREATE OR REPLACE FUNCTION "public"."toggle_sr_status"("p_sponsored_registration_id" "uuid") RETURNS json
@@ -3217,7 +3225,7 @@ ALTER FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteCo
 CREATE TABLE IF NOT EXISTS "public"."Application" (
     "applicationId" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "businessMemberId" "uuid",
-    "sectorId" bigint,
+    "sectorName" "text",
     "logoImageURL" "text" NOT NULL,
     "applicationDate" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL,
     "applicationType" "public"."ApplicationType" NOT NULL,
@@ -3606,11 +3614,6 @@ ALTER TABLE ONLY "public"."Application"
 
 ALTER TABLE ONLY "public"."Application"
     ADD CONSTRAINT "Application_interviewId_fkey" FOREIGN KEY ("interviewId") REFERENCES "public"."Interview"("interviewId") ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-
-ALTER TABLE ONLY "public"."Application"
-    ADD CONSTRAINT "Application_sectorId_fkey" FOREIGN KEY ("sectorId") REFERENCES "public"."Sector"("sectorId") ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 
