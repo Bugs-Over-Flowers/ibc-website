@@ -14,9 +14,7 @@ After("@registration", async ({ world }) => {
   }
 
   world.seedData = undefined;
-  world.activeEventAlias = undefined;
-  world.activeEventId = undefined;
-  world.activeEventTitle = undefined;
+  world.activeEvent = undefined;
   world.selectedAffiliation = undefined;
   world.selectedPaymentMethod = undefined;
   world.registrantEmail = undefined;

@@ -11,7 +11,7 @@ import {
  * ============================================================================
  *
  * Tests the filtering logic used in ApplicationsList component to categorize
- * applications into "new", "pending", and "finished" tabs.
+ * applications into group + status combinations.
  *
  * This logic is extracted here because the component is a Server Component
  * and cannot be rendered in unit tests. We test the pure business logic.
@@ -23,9 +23,20 @@ import {
  */
 function filterApplicationsByStatus(
   applications: ApplicationWithMembers[],
+  group: "interview" | "updating",
   status: "new" | "pending" | "finished",
 ) {
-  return applications.filter((app) => {
+  const groupFiltered = applications.filter((app) => {
+    if (group === "interview") {
+      return (
+        app.applicationType === "newMember" || app.applicationType === "renewal"
+      );
+    }
+
+    return app.applicationType === "updating";
+  });
+
+  return groupFiltered.filter((app) => {
     if (status === "new") {
       return app.applicationStatus === "new";
     }
@@ -43,17 +54,55 @@ function filterApplicationsByStatus(
 }
 
 describe("filterApplicationsByStatus", () => {
-  // ✅ HAPPY FLOW: Filter new applications
-  it('should return only "new" applications when status is "new"', () => {
-    const result = filterApplicationsByStatus(mockApplications, "new");
+  // ✅ HAPPY FLOW: Filter interview group new applications
+  it('should return only "new" applications for the interview group', () => {
+    const result = filterApplicationsByStatus(
+      mockApplications,
+      "interview",
+      "new",
+    );
 
     expect(result.length).toBe(2); // app-001 and app-002
     expect(result.every((app) => app.applicationStatus === "new")).toBe(true);
   });
 
+  // ✅ HAPPY FLOW: Filter updating group new applications
+  it('should return only "new" applications for the updating group', () => {
+    const updatingApplications = [
+      createMockApplication({
+        applicationId: "u-001",
+        applicationStatus: "new",
+        applicationType: "updating",
+      }),
+      createMockApplication({
+        applicationId: "u-002",
+        applicationStatus: "approved",
+        applicationType: "updating",
+      }),
+      createMockApplication({
+        applicationId: "u-003",
+        applicationStatus: "new",
+        applicationType: "renewal",
+      }),
+    ];
+
+    const result = filterApplicationsByStatus(
+      updatingApplications,
+      "updating",
+      "new",
+    );
+
+    expect(result.length).toBe(1);
+    expect(result[0].applicationId).toBe("u-001");
+  });
+
   // ✅ HAPPY FLOW: Filter pending applications
   it('should return only "pending" applications when status is "pending"', () => {
-    const result = filterApplicationsByStatus(mockApplications, "pending");
+    const result = filterApplicationsByStatus(
+      mockApplications,
+      "interview",
+      "pending",
+    );
 
     expect(result.length).toBe(1); // app-003
     expect(result.every((app) => app.applicationStatus === "pending")).toBe(
@@ -64,7 +113,11 @@ describe("filterApplicationsByStatus", () => {
 
   // ✅ HAPPY FLOW: Filter finished applications (approved + rejected)
   it('should return "approved" and "rejected" applications when status is "finished"', () => {
-    const result = filterApplicationsByStatus(mockApplications, "finished");
+    const result = filterApplicationsByStatus(
+      mockApplications,
+      "interview",
+      "finished",
+    );
 
     expect(result.length).toBe(2); // app-004 (approved) and app-005 (rejected)
     expect(
@@ -78,33 +131,67 @@ describe("filterApplicationsByStatus", () => {
 
   // ✅ HAPPY FLOW: Each application appears in exactly one tab
   it("should ensure all applications are accounted for across all tabs", () => {
-    const newApps = filterApplicationsByStatus(mockApplications, "new");
-    const pendingApps = filterApplicationsByStatus(mockApplications, "pending");
-    const finishedApps = filterApplicationsByStatus(
+    const interviewNew = filterApplicationsByStatus(
       mockApplications,
+      "interview",
+      "new",
+    );
+    const interviewPending = filterApplicationsByStatus(
+      mockApplications,
+      "interview",
+      "pending",
+    );
+    const interviewFinished = filterApplicationsByStatus(
+      mockApplications,
+      "interview",
+      "finished",
+    );
+    const updatingNew = filterApplicationsByStatus(
+      mockApplications,
+      "updating",
+      "new",
+    );
+    const updatingFinished = filterApplicationsByStatus(
+      mockApplications,
+      "updating",
       "finished",
     );
 
-    const totalFiltered =
-      newApps.length + pendingApps.length + finishedApps.length;
-    expect(totalFiltered).toBe(mockApplications.length);
+    const allFiltered = [
+      ...interviewNew,
+      ...interviewPending,
+      ...interviewFinished,
+      ...updatingNew,
+      ...updatingFinished,
+    ];
+
+    expect(allFiltered.length).toBe(mockApplications.length);
   });
 
   // ✅ HAPPY FLOW: No duplicates across tabs
   it("should not have the same application in multiple tabs", () => {
-    const newIds = filterApplicationsByStatus(mockApplications, "new").map(
-      (a) => a.applicationId,
-    );
+    const newIds = filterApplicationsByStatus(
+      mockApplications,
+      "interview",
+      "new",
+    ).map((a) => a.applicationId);
     const pendingIds = filterApplicationsByStatus(
       mockApplications,
+      "interview",
       "pending",
     ).map((a) => a.applicationId);
     const finishedIds = filterApplicationsByStatus(
       mockApplications,
+      "interview",
+      "finished",
+    ).map((a) => a.applicationId);
+    const updatingIds = filterApplicationsByStatus(
+      mockApplications,
+      "updating",
       "finished",
     ).map((a) => a.applicationId);
 
-    const allIds = [...newIds, ...pendingIds, ...finishedIds];
+    const allIds = [...newIds, ...pendingIds, ...finishedIds, ...updatingIds];
     const uniqueIds = new Set(allIds);
 
     expect(allIds.length).toBe(uniqueIds.size);
@@ -112,7 +199,7 @@ describe("filterApplicationsByStatus", () => {
 
   // ❌ ERROR FLOW: Empty applications array
   it("should return empty array when no applications exist", () => {
-    const result = filterApplicationsByStatus([], "new");
+    const result = filterApplicationsByStatus([], "interview", "new");
 
     expect(result).toEqual([]);
   });
@@ -123,9 +210,14 @@ describe("filterApplicationsByStatus", () => {
       createMockApplication({ applicationStatus: "new" }),
     ];
 
-    const pending = filterApplicationsByStatus(onlyNewApplications, "pending");
+    const pending = filterApplicationsByStatus(
+      onlyNewApplications,
+      "interview",
+      "pending",
+    );
     const finished = filterApplicationsByStatus(
       onlyNewApplications,
+      "interview",
       "finished",
     );
 
@@ -141,7 +233,7 @@ describe("filterApplicationsByStatus", () => {
       createMockApplication({ applicationId: "a3", applicationStatus: "new" }),
     ];
 
-    const result = filterApplicationsByStatus(allNew, "new");
+    const result = filterApplicationsByStatus(allNew, "interview", "new");
 
     expect(result.length).toBe(3);
   });
@@ -163,7 +255,11 @@ describe("filterApplicationsByStatus", () => {
       }),
     ];
 
-    const result = filterApplicationsByStatus(mixedFinished, "finished");
+    const result = filterApplicationsByStatus(
+      mixedFinished,
+      "interview",
+      "finished",
+    );
 
     expect(result.length).toBe(3);
     expect(

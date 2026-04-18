@@ -26,7 +26,7 @@ export async function updateCheckInTime(
   updateTag(CACHE_TAGS.checkIns.stats);
   updateTag(CACHE_TAGS.events.checkIns);
 
-  revalidatePath(`/admin/events/[eventId]/check-in-list`);
+  revalidatePath("/admin/events/[eventId]/check-in-list", "page");
 
   return { success: true };
 }

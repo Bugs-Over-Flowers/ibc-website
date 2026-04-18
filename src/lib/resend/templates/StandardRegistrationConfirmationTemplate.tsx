@@ -9,7 +9,7 @@ import {
   Preview,
   Section,
   Text,
-} from "@react-email/components";
+} from "react-email";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import TermsAndConditions from "../components/TermsAndConditions";
 

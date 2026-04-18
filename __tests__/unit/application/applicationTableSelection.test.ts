@@ -44,8 +44,8 @@ describe("isSelectable (ApplicationsTable)", () => {
     expect(isSelectable(app)).toBe(true);
   });
 
-  // ✅ HAPPY FLOW: BPI with approved proof is selectable
-  it("should be selectable when BPI with approved proof", () => {
+  // ✅ HAPPY FLOW: BPI with accepted proof is selectable
+  it("should be selectable when BPI with accepted proof", () => {
     const app = createMockApplication({
       paymentMethod: "BPI",
       paymentProofStatus: "accepted",
@@ -208,9 +208,9 @@ describe("Payment proof warning indicator", () => {
     expect(isPaymentProofPending("ONSITE", "pending")).toBe(false);
   });
 
-  // ❌ ERROR FLOW: BPI with approved proof should not show warning
-  it("should not show warning for BPI with approved proof", () => {
-    expect(isPaymentProofPending("BPI", "approved")).toBe(false);
+  // ❌ ERROR FLOW: BPI with accepted proof should not show warning
+  it("should not show warning for BPI with accepted proof", () => {
+    expect(isPaymentProofPending("BPI", "accepted")).toBe(false);
   });
 
   // ❌ ERROR FLOW: Null payment method should not show warning

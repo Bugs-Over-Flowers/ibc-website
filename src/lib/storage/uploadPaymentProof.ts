@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
 import { createClient } from "@/lib/supabase/client";
-import { getExtensionFromMimeType } from "@/lib/utils";
 
 /**
  * Uploads payment proof file to Supabase storage.
@@ -11,20 +10,21 @@ import { getExtensionFromMimeType } from "@/lib/utils";
  * 3. Constructs the final path with the correct file extension
  *
  * @param file - Payment proof image file from user
- * @returns Path to uploaded file in storage (format: "reg-{uuid}.{extension}")
+ * @returns Path to uploaded file in storage (format: "{prefix}-{uuid}")
  * @throws Error if upload fails
  *
  * @example
- * const path = await uploadPaymentProof(imageFile);
- * // Returns: "reg-abc123-def456.jpeg"
+ * const path = await uploadPaymentProof(imageFile, { prefix: "reg" });
+ * // Returns: "reg-abc123-def456"
  */
-export async function uploadPaymentProof(file: File): Promise<string> {
+export async function uploadPaymentProof(
+  file: File,
+  options?: { prefix?: "reg" | "app" },
+): Promise<string> {
   const uuid = uuidv4();
   const supabase = await createClient();
-
-  // Extract file extension from MIME type (e.g., "image/jpeg" → "jpeg")
-  const extension = getExtensionFromMimeType(file.type);
-  const filePath = `reg-${uuid}`;
+  const prefix = options?.prefix ?? "reg";
+  const filePath = `${prefix}-${uuid}`;
 
   const { data, error } = await supabase.storage
     .from("paymentproofs")
@@ -37,5 +37,5 @@ export async function uploadPaymentProof(file: File): Promise<string> {
     throw new Error(`Failed to upload payment proof: ${error.message}`);
   }
 
-  return `${data.path}.${extension}`;
+  return data.path;
 }

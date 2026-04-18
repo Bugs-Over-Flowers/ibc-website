@@ -3,10 +3,13 @@ import {
   AlertTriangle,
   CheckIcon,
   CircleCheckBig,
+  RefreshCw,
   XCircle,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
+import CameraCapture from "@/app/admin/events/_components/PaymentProof/CameraCapture";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,10 +22,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
+import { useAction } from "@/hooks/useAction";
+import { isValidImageUploadFile } from "@/lib/fileUpload";
+import tryCatch from "@/lib/server/tryCatch";
+import { uploadPaymentProof } from "@/lib/storage/uploadPaymentProof";
 import type { Enums } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
+import { replaceApplicationPaymentProofAndAccept } from "@/server/applications/mutations/replaceApplicationPaymentProofAndAccept";
 
 interface PaymentProofModalProps {
+  applicationId: string;
   proofImagePath: string;
   paymentProofStatus: Enums<"PaymentProofStatus">;
   membershipTypeLabel: string;
@@ -30,6 +39,10 @@ interface PaymentProofModalProps {
   isUpdatingStatus: boolean;
   isDecisionLocked: boolean;
   onDecision: (status: "accepted" | "rejected") => void;
+  onProofReplaced?: (input: {
+    paymentProofStatus: Enums<"PaymentProofStatus">;
+    proofImagePath: string;
+  }) => void;
   trigger?: React.ReactElement;
 }
 
@@ -42,6 +55,8 @@ const STATUS_CONFIG = {
     notice:
       "bg-[#EAF3DE] text-[#27500A] border-[#97C459] dark:bg-[#173404] dark:text-[#C0DD97] dark:border-[#3B6D11]",
     label: "Payment accepted",
+    triggerLabel: "Accepted",
+    icon: "text-[#27500A] dark:text-[#C0DD97]",
     Icon: CircleCheckBig,
   },
   rejected: {
@@ -49,6 +64,8 @@ const STATUS_CONFIG = {
     notice:
       "bg-[#FCEBEB] text-[#791F1F] border-[#F09595] dark:bg-[#501313] dark:text-[#F7C1C1] dark:border-[#A32D2D]",
     label: "Payment rejected",
+    triggerLabel: "Rejected",
+    icon: "text-[#791F1F] dark:text-[#F7C1C1]",
     Icon: XCircle,
   },
   pending: {
@@ -56,11 +73,14 @@ const STATUS_CONFIG = {
     notice:
       "bg-[#FAEEDA] text-[#633806] border-[#EF9F27] dark:bg-[#412402] dark:text-[#FAC775] dark:border-[#854F0B]",
     label: "Awaiting review",
+    triggerLabel: "Pending",
+    icon: "text-[#633806] dark:text-[#FAC775]",
     Icon: AlertTriangle,
   },
 } as const;
 
 export function PaymentProofModal({
+  applicationId,
   proofImagePath,
   paymentProofStatus,
   membershipTypeLabel,
@@ -68,15 +88,74 @@ export function PaymentProofModal({
   isUpdatingStatus,
   isDecisionLocked,
   onDecision,
+  onProofReplaced,
   trigger,
 }: PaymentProofModalProps) {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"view" | "camera">("view");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const status = STATUS_CONFIG[paymentProofStatus] ?? STATUS_CONFIG.pending;
   const { Icon } = status;
   const isPersonal = expectedRegistrationFee === PERSONAL_FEE;
+  const canReplaceProof =
+    paymentProofStatus === "rejected" || paymentProofStatus === "accepted";
+
+  const { execute: replaceProof, isPending: isReplacingProof } = useAction(
+    tryCatch(replaceApplicationPaymentProofAndAccept),
+    {
+      onSuccess: (data) => {
+        onProofReplaced?.({
+          paymentProofStatus: data.paymentProofStatus,
+          proofImagePath: data.proofImagePath,
+        });
+        toast.success("Payment proof updated and accepted.");
+        setSelectedFile(null);
+      },
+      onError: (error) => {
+        toast.error(error);
+      },
+    },
+  );
+
+  const isProcessing = isUpdatingStatus || isReplacingProof || isUploadingFile;
+
+  const handleReplaceAndAccept = async () => {
+    if (!selectedFile) {
+      toast.error("Please select a file first.");
+      return;
+    }
+
+    if (!isValidImageUploadFile(selectedFile)) {
+      toast.error("Invalid file type or size. Only PNG/JPG up to 5MB.");
+      return;
+    }
+
+    setIsUploadingFile(true);
+    try {
+      const uploadedPath = await uploadPaymentProof(selectedFile, {
+        prefix: "app",
+      });
+      await replaceProof({ applicationId, uploadedPath });
+    } catch {
+      toast.error("Failed to upload payment proof.");
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
 
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
+    <Dialog
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        if (!nextOpen) {
+          setMode("view");
+          setSelectedFile(null);
+        }
+      }}
+      open={open}
+    >
       {/* Trigger */}
       {trigger ? (
         <DialogTrigger render={trigger} />
@@ -90,23 +169,14 @@ export function PaymentProofModal({
                 fill
                 src={proofImagePath}
               />
-              <svg
-                className="relative size-5 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.5"
-                viewBox="0 0 24 24"
+              <Icon className={cn("relative size-5", status.icon)} />
+              <span
+                className={cn(
+                  "relative rounded-full border px-2 py-0.5 font-medium text-[10px] leading-none",
+                  status.chip,
+                )}
               >
-                <title>Payment proof icon</title>
-                <rect height="18" rx="2" width="18" x="3" y="3" />
-                <line x1="3" x2="21" y1="8" y2="8" />
-                <line x1="3" x2="21" y1="16" y2="16" />
-                <line x1="8" x2="8" y1="8" y2="16" />
-              </svg>
-              <span className="relative font-medium text-muted-foreground text-xs">
-                Proof
+                {status.triggerLabel}
               </span>
             </Button>
           }
@@ -114,7 +184,9 @@ export function PaymentProofModal({
       )}
 
       <DialogContent className="max-h-[calc(100vh-2rem)] w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] gap-0 overflow-y-auto p-0 sm:w-auto sm:max-w-2xl">
-        <DialogHeader className="border-b px-5 py-4">
+        <DialogHeader
+          className={cn("border-b px-5 py-4", mode === "camera" && "hidden")}
+        >
           <DialogTitle className="font-medium text-base">
             Verify payment proof
           </DialogTitle>
@@ -124,9 +196,19 @@ export function PaymentProofModal({
         </DialogHeader>
 
         {/* Body: 2-col grid */}
-        <div className="grid md:grid-cols-2">
+        <div
+          className={cn(
+            "grid md:grid-cols-2",
+            mode === "camera" && "grid-cols-1 md:grid-cols-1",
+          )}
+        >
           {/* Left: info panel */}
-          <div className="flex flex-col gap-4 border-b bg-muted/30 p-5 md:border-r md:border-b-0">
+          <div
+            className={cn(
+              "flex flex-col gap-4 border-b bg-muted/30 p-5 md:border-r md:border-b-0",
+              mode === "camera" && "hidden",
+            )}
+          >
             {/* Membership type */}
             <div className="flex flex-col gap-1.5">
               <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
@@ -226,45 +308,125 @@ export function PaymentProofModal({
 
           {/* Right: image */}
           <div className="flex items-stretch p-5">
-            <ImageZoom className="min-h-[240px] w-full overflow-hidden rounded-lg border bg-muted/30 md:min-h-[320px]">
-              <Image
-                alt="Payment proof"
-                className="h-full w-full object-contain"
-                fill
-                src={proofImagePath}
-              />
-            </ImageZoom>
+            {mode === "camera" ? (
+              <div className="w-full">
+                <CameraCapture
+                  disabled={isProcessing}
+                  facingMode="user"
+                  onCapture={(file) => {
+                    setSelectedFile(file);
+                    setMode("view");
+                    toast.success("Photo captured. Click Replace & Accept.");
+                  }}
+                />
+              </div>
+            ) : (
+              <ImageZoom className="min-h-[240px] w-full overflow-hidden rounded-lg border bg-muted/30 md:min-h-[320px]">
+                <Image
+                  alt="Payment proof"
+                  className="h-full w-full object-contain"
+                  fill
+                  src={proofImagePath}
+                />
+              </ImageZoom>
+            )}
           </div>
         </div>
 
-        <DialogFooter className="border-t px-5 py-3">
-          <div className="flex w-full items-center justify-between gap-3">
-            <p className="text-muted-foreground text-xs">
-              {isDecisionLocked
-                ? "Decision has been recorded and locked."
-                : `Verify the amount matches ₱${expectedRegistrationFee.toLocaleString()} before deciding.`}
-            </p>
-            <div className="flex shrink-0 gap-2">
-              <Button
-                className="gap-1.5 border-[#F09595] text-[#791F1F] hover:bg-[#FCEBEB] dark:border-[#A32D2D] dark:text-[#F7C1C1] dark:hover:bg-[#501313]"
-                disabled={isUpdatingStatus || isDecisionLocked}
-                onClick={() => onDecision("rejected")}
-                size="sm"
-                variant="outline"
-              >
-                <XCircle className="size-3.5" />
-                {isUpdatingStatus ? "Saving…" : "Reject"}
-              </Button>
-              <Button
-                className="gap-1.5 border border-[#97C459] bg-[#EAF3DE] text-[#27500A] hover:bg-[#C0DD97] dark:border-[#3B6D11] dark:bg-[#27500A] dark:text-[#C0DD97] dark:hover:bg-[#3B6D11]"
-                disabled={isUpdatingStatus || isDecisionLocked}
-                onClick={() => onDecision("accepted")}
-                size="sm"
-              >
-                <CheckIcon className="size-3.5" />
-                {isUpdatingStatus ? "Saving…" : "Accept"}
-              </Button>
-            </div>
+        <DialogFooter
+          className={cn(
+            "flex w-full border-t px-5 py-3",
+            mode === "camera" && "pt-2",
+          )}
+        >
+          <div className={"flex w-full items-center justify-end gap-3"}>
+            {canReplaceProof ? (
+              <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                <input
+                  accept="image/png,image/jpeg,image/jpg"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    setSelectedFile(file);
+                  }}
+                  ref={fileInputRef}
+                  type="file"
+                />
+
+                {mode === "camera" && (
+                  <Button
+                    disabled={isProcessing}
+                    onClick={() => setMode("view")}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    Back to Proof
+                  </Button>
+                )}
+                {mode !== "camera" && (
+                  <>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => setMode("camera")}
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                    >
+                      Use Camera
+                    </Button>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => fileInputRef.current?.click()}
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                    >
+                      Upload File
+                    </Button>
+                    <span className="max-w-[140px] truncate text-muted-foreground text-xs">
+                      {selectedFile?.name ?? "No file chosen"}
+                    </span>
+                    <Button
+                      disabled={isProcessing || !selectedFile}
+                      onClick={handleReplaceAndAccept}
+                      size="sm"
+                      type="button"
+                    >
+                      <RefreshCw
+                        className={cn(
+                          "size-3.5",
+                          isProcessing && "animate-spin",
+                        )}
+                      />
+                      {isProcessing ? "Updating…" : "Replace & Accept"}
+                    </Button>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="flex shrink-0 gap-2">
+                <Button
+                  className="gap-1.5 border-[#F09595] text-[#791F1F] hover:bg-[#FCEBEB] dark:border-[#A32D2D] dark:text-[#F7C1C1] dark:hover:bg-[#501313]"
+                  disabled={isUpdatingStatus || isDecisionLocked}
+                  onClick={() => onDecision("rejected")}
+                  size="sm"
+                  variant="outline"
+                >
+                  <XCircle className="size-3.5" />
+                  {isUpdatingStatus ? "Saving…" : "Reject"}
+                </Button>
+                <Button
+                  className="gap-1.5 border border-[#97C459] bg-[#EAF3DE] text-[#27500A] hover:bg-[#C0DD97] dark:border-[#3B6D11] dark:bg-[#27500A] dark:text-[#C0DD97] dark:hover:bg-[#3B6D11]"
+                  disabled={isUpdatingStatus || isDecisionLocked}
+                  onClick={() => onDecision("accepted")}
+                  size="sm"
+                >
+                  <CheckIcon className="size-3.5" />
+                  {isUpdatingStatus ? "Saving…" : "Accept"}
+                </Button>
+              </div>
+            )}
           </div>
         </DialogFooter>
       </DialogContent>
