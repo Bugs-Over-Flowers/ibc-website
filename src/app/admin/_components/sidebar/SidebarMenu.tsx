@@ -4,6 +4,7 @@ import {
   Building2,
   Calendar,
   FileText,
+  Globe,
   HandCoins,
   LayoutDashboard,
   MessageSquareDiff,
@@ -48,6 +49,11 @@ const menuItems = [
     title: "Sectors",
     icon: Building2,
     href: "/admin/manage-sector",
+  },
+  {
+    title: "Website Content",
+    icon: Globe,
+    href: "/admin/website-content",
   },
 ];
 
