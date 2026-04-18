@@ -24,7 +24,7 @@ export function EditEventForm({ event }: EditEventFormProps) {
 
   if (isFinished && !isDraft) {
     return (
-      <div className="min-h-screen bg-slate-50/50">
+      <div className="min-h-screen">
         <EditEventTopBar eventId={event.eventId} />
 
         <div className="mx-auto max-w-7xl py-5">
@@ -45,7 +45,7 @@ export function EditEventForm({ event }: EditEventFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen">
       <EditEventTopBar eventId={event.eventId} />
 
       <div className="mx-auto max-w-7xl py-5">
