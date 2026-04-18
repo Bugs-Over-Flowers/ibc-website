@@ -17,34 +17,6 @@ interface RegistrationDetailsProps {
   data: Awaited<ReturnType<typeof getRegistrationData>>;
 }
 
-function DetailRow({
-  label,
-  value,
-  valueClassName,
-  truncate,
-  valueTitle,
-}: {
-  label: string;
-  value: React.ReactNode;
-  valueClassName?: string;
-  truncate?: boolean;
-  valueTitle?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={`font-semibold text-base leading-tight ${valueClassName ?? ""}`}
-        title={valueTitle}
-      >
-        <span className={cn("block", truncate && "truncate")}>{value}</span>
-      </span>
-    </div>
-  );
-}
-
 function StatTile({
   icon,
   label,
@@ -197,78 +169,38 @@ export default function RegistrationDetails({
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="space-y-6">
-          <Card className={sectionCardClass}>
-            <CardContent className={sectionContentClass}>
-              <div className="flex items-center gap-2 font-bold text-primary">
-                <Building2 className="h-5 w-5" />
-                <span className="text-base uppercase tracking-wide">
-                  Registration Overview
-                </span>
-              </div>
+        <Card className={sectionCardClass}>
+          <CardContent className={sectionContentClass}>
+            <div className="flex items-center gap-2 font-bold text-primary">
+              <Users className="h-5 w-5" />
+              <span className="text-base uppercase tracking-wide">
+                Participants
+              </span>
+              <Badge className="ml-1" variant="secondary">
+                {participantsCount}
+              </Badge>
+            </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <DetailRow
-                  label="Event"
-                  truncate
-                  value={data.event.eventTitle}
-                  valueTitle={data.event.eventTitle}
-                />
-                <DetailRow
-                  label="Registration ID"
-                  truncate
-                  value={data.registrationId}
-                  valueTitle={data.registrationId}
-                />
-                <DetailRow
-                  label="Registrant Name"
-                  truncate
-                  value={`${data.registrant.firstName} ${data.registrant.lastName}`}
-                  valueTitle={`${data.registrant.firstName} ${data.registrant.lastName}`}
-                />
-                <DetailRow
-                  label="Registrant Email"
-                  truncate
-                  value={data.registrant.email}
-                  valueTitle={data.registrant.email}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={sectionCardClass}>
-            <CardContent className={sectionContentClass}>
-              <div className="flex items-center gap-2 font-bold text-primary">
-                <Users className="h-5 w-5" />
-                <span className="text-base uppercase tracking-wide">
-                  Participants
-                </span>
-                <Badge className="ml-1" variant="secondary">
-                  {participantsCount}
-                </Badge>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              <ParticipantCard
+                contactNumber={data.registrant.contactNumber}
+                email={data.registrant.email}
+                fullName={`${data.registrant.firstName} ${data.registrant.lastName}`}
+                key={data.registrant.participantId}
+                registrant={data.registrant.isPrincipal}
+              />
+              {data.otherParticipants.map((participant) => (
                 <ParticipantCard
-                  contactNumber={data.registrant.contactNumber}
-                  email={data.registrant.email}
-                  fullName={`${data.registrant.firstName} ${data.registrant.lastName}`}
-                  key={data.registrant.participantId}
-                  registrant={data.registrant.isPrincipal}
+                  contactNumber={participant.contactNumber}
+                  email={participant.email}
+                  fullName={`${participant.firstName} ${participant.lastName}`}
+                  key={participant.participantId}
+                  registrant={participant.isPrincipal}
                 />
-                {data.otherParticipants.map((participant) => (
-                  <ParticipantCard
-                    contactNumber={participant.contactNumber}
-                    email={participant.email}
-                    fullName={`${participant.firstName} ${participant.lastName}`}
-                    key={participant.participantId}
-                    registrant={participant.isPrincipal}
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         <div>
           <Card className={sectionCardClass}>
@@ -281,7 +213,14 @@ export default function RegistrationDetails({
               </div>
 
               <div className="space-y-4">
-                <DetailRow label="Payment Method" value={data.paymentMethod} />
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                    Payment Method
+                  </span>
+                  <span className="font-semibold text-base leading-tight">
+                    <span className="block">{data.paymentMethod}</span>
+                  </span>
+                </div>
 
                 {data.signedUrl &&
                 typeof data.signedUrl === "string" &&

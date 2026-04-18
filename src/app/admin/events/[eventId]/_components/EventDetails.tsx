@@ -15,6 +15,7 @@ import type { Route } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+
 import BackButton from "@/app/admin/_components/BackButton";
 import { EvaluationQRDownloader } from "@/components/qr/EvaluationQRDownloader";
 import RichTextDisplay from "@/components/RichTextDisplay";
@@ -87,31 +88,26 @@ export default async function EventDetails({
       label: "Total Registrations",
       value: eventStats.total_registrations,
       colorClass: "text-status-blue",
-      bgClass: "bg-status-blue/10",
     },
     {
       label: "Verified",
       value: eventStats.verified_registrations,
       colorClass: "text-status-green",
-      bgClass: "bg-status-green/10",
     },
     {
       label: "Pending",
       value: eventStats.pending_registrations,
       colorClass: "text-status-orange",
-      bgClass: "bg-status-orange/10",
     },
     {
       label: "Participants",
       value: eventStats.participants,
       colorClass: "text-status-purple",
-      bgClass: "bg-status-purple/10",
     },
     {
       label: "Attended",
       value: eventStats.attended,
       colorClass: "text-status-teal",
-      bgClass: "bg-status-teal/10",
     },
   ];
 
@@ -304,7 +300,7 @@ export default async function EventDetails({
                       {label}
                     </p>
                     <p
-                      className={`truncate font-medium text-sm ${primaryClass ?? ""}`}
+                      className={`truncate font-medium text-sm ${primaryClass}`}
                     >
                       {primary}
                     </p>
@@ -323,7 +319,7 @@ export default async function EventDetails({
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {statItems.map(({ label, value, colorClass, bgClass }) => (
+        {statItems.map(({ label, value, colorClass }) => (
           <Card
             className="border-border/60 shadow-sm transition-shadow hover:shadow-md"
             key={label}
@@ -333,9 +329,6 @@ export default async function EventDetails({
                 {label}
               </p>
               <div className={`flex items-center gap-2`}>
-                <div
-                  className={`h-2 w-2 rounded-full ${bgClass} ${colorClass} ring-2 ring-current ring-opacity-30`}
-                />
                 <span
                   className={`font-bold text-2xl tabular-nums ${colorClass}`}
                 >
