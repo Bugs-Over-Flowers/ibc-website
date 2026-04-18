@@ -4,6 +4,7 @@ import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { applyRealtime60sCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getAppDataEncryptionKey } from "@/lib/security/encryption";
 import { createClient } from "@/lib/supabase/server";
 import {
   type RegistrationItem,
@@ -34,6 +35,7 @@ export const getEventRegistrationList = async (
   cacheTag(CACHE_TAGS.registrations.event);
 
   const supabase = await createClient(requestCookies);
+  const encryptionKey = getAppDataEncryptionKey();
   const parsedPaymentProofStatus = paymentProofStatus
     ? PaymentProofStatusEnum.safeParse(paymentProofStatus)
     : undefined;
@@ -41,6 +43,7 @@ export const getEventRegistrationList = async (
   let query = supabase.rpc("get_registration_list", {
     p_event_id: eventId,
     p_search_text: searchString,
+    p_encryption_key: encryptionKey,
     p_payment_proof_status: parsedPaymentProofStatus?.success
       ? parsedPaymentProofStatus.data
       : undefined,

@@ -68,8 +68,8 @@ async function CheckInPage({
     await tryCatch(
       getEventRegistrationList(cookieStore.getAll(), {
         eventId: eventDayData.event.eventId,
-        paymentProofStatus,
         searchString: searchQuery,
+        paymentProofStatus,
       }),
     );
 

@@ -1,5 +1,6 @@
 "use server";
 
+import { getAppDataEncryptionKey } from "@/lib/security/encryption";
 import type { ServerFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
@@ -30,6 +31,7 @@ export const submitMembershipApplication: ServerFunction<
   }
 
   const supabase = await createActionClient();
+  const encryptionKey = getAppDataEncryptionKey();
 
   console.log(
     "Submitting application with payment method:",
@@ -65,6 +67,7 @@ export const submitMembershipApplication: ServerFunction<
     p_payment_method: parsed.data.paymentMethod === "BPI" ? "BPI" : "ONSITE",
     p_payment_proof_url: parsed.data.paymentProofUrl,
     p_application_member_type: parsed.data.applicationMemberType,
+    p_encryption_key: encryptionKey,
   });
 
   if (error) {

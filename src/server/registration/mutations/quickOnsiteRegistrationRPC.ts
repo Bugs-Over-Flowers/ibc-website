@@ -2,6 +2,7 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getAppDataEncryptionKey } from "@/lib/security/encryption";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   type QuickOnsiteRegistrationInput,
@@ -18,6 +19,7 @@ export async function quickOnsiteRegistrationRPC(
   const parsedData = QuickOnsiteRegistrationInputSchema.parse(data);
 
   const supabase = await createActionClient();
+  const encryptionKey = getAppDataEncryptionKey();
 
   const registrationIdentifier = createRegistrationIdentifier();
 
@@ -40,6 +42,7 @@ export async function quickOnsiteRegistrationRPC(
       p_member_type: memberDetails.member,
       p_identifier: registrationIdentifier,
       p_remark: remark?.trim() || undefined,
+      p_encryption_key: encryptionKey,
     },
   );
 

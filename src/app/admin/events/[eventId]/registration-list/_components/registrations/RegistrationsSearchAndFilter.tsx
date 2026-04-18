@@ -152,7 +152,6 @@ export default function RegistrationSearchAndFilter() {
           className="h-9 md:ml-auto"
           onClick={() => {
             const params = new URLSearchParams(searchParams.toString());
-            params.delete("reg_q");
             params.delete("reg_paymentStatus");
             pushWithParams(params);
           }}

@@ -3,6 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getAppDataEncryptionKey } from "@/lib/security/encryption";
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
@@ -38,6 +39,7 @@ export async function createManualMember(
   }
 
   const supabase = await createActionClient();
+  const encryptionKey = getAppDataEncryptionKey();
   const sectorId = Number.parseInt(parsed.data.sectorId, 10);
 
   if (Number.isNaN(sectorId) || sectorId <= 0) {
@@ -73,6 +75,7 @@ export async function createManualMember(
       })),
       p_payment_method: "ONSITE",
       p_application_member_type: parsed.data.applicationMemberType,
+      p_encryption_key: encryptionKey,
     },
   );
 

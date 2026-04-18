@@ -2,6 +2,7 @@
 
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getAppDataEncryptionKey } from "@/lib/security/encryption";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   ServerRegistrationSchema,
@@ -39,6 +40,7 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   const parsedData = ServerRegistrationSchema.parse(data);
 
   const supabase = await createActionClient();
+  const encryptionKey = getAppDataEncryptionKey();
 
   const registrationIdentifier = createRegistrationIdentifier();
 
@@ -64,6 +66,7 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
       p_identifier: registrationIdentifier,
       // Sponsored registration: send ID if exists, otherwise undefined
       p_sponsored_registration_id: sponsoredRegistrationId || undefined,
+      p_encryption_key: encryptionKey,
     },
   );
 

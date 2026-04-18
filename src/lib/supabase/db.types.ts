@@ -7,10 +7,30 @@ export type Json =
   | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5";
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
   public: {
     Tables: {
@@ -23,17 +43,24 @@ export type Database = {
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           businessMemberId: string | null;
           companyAddress: string;
+          companyAddressEncrypted: string | null;
           companyName: string;
+          companyNameEncrypted: string | null;
           emailAddress: string;
+          emailAddressEncrypted: string | null;
+          encryptionKeyVersion: number;
           identifier: string;
           interviewId: string | null;
           landline: string;
+          landlineEncrypted: string | null;
           logoImageURL: string;
           mobileNumber: string;
+          mobileNumberEncrypted: string | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
           sectorId: number | null;
           websiteURL: string;
+          websiteURLEncrypted: string | null;
         };
         Insert: {
           applicationDate?: string;
@@ -43,17 +70,24 @@ export type Database = {
           applicationType: Database["public"]["Enums"]["ApplicationType"];
           businessMemberId?: string | null;
           companyAddress: string;
+          companyAddressEncrypted?: string | null;
           companyName: string;
+          companyNameEncrypted?: string | null;
           emailAddress: string;
+          emailAddressEncrypted?: string | null;
+          encryptionKeyVersion?: number;
           identifier: string;
           interviewId?: string | null;
           landline: string;
+          landlineEncrypted?: string | null;
           logoImageURL: string;
           mobileNumber: string;
+          mobileNumberEncrypted?: string | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           sectorId?: number | null;
           websiteURL: string;
+          websiteURLEncrypted?: string | null;
         };
         Update: {
           applicationDate?: string;
@@ -63,17 +97,24 @@ export type Database = {
           applicationType?: Database["public"]["Enums"]["ApplicationType"];
           businessMemberId?: string | null;
           companyAddress?: string;
+          companyAddressEncrypted?: string | null;
           companyName?: string;
+          companyNameEncrypted?: string | null;
           emailAddress?: string;
+          emailAddressEncrypted?: string | null;
+          encryptionKeyVersion?: number;
           identifier?: string;
           interviewId?: string | null;
           landline?: string;
+          landlineEncrypted?: string | null;
           logoImageURL?: string;
           mobileNumber?: string;
+          mobileNumberEncrypted?: string | null;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           sectorId?: number | null;
           websiteURL?: string;
+          websiteURLEncrypted?: string | null;
         };
         Relationships: [
           {
@@ -104,46 +145,79 @@ export type Database = {
           applicationId: string;
           applicationMemberId: string;
           birthdate: string;
+          birthdateEncrypted: string | null;
           companyDesignation: string;
+          companyDesignationEncrypted: string | null;
           companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
+          emailAddressEncrypted: string | null;
+          encryptionKeyVersion: number;
           firstName: string;
+          firstNameEncrypted: string | null;
           landline: string;
+          landlineEncrypted: string | null;
           lastName: string;
+          lastNameEncrypted: string | null;
           mailingAddress: string;
+          mailingAddressEncrypted: string | null;
           mobileNumber: string;
+          mobileNumberEncrypted: string | null;
           nationality: string;
+          nationalityEncrypted: string | null;
           sex: string;
+          sexEncrypted: string | null;
         };
         Insert: {
           applicationId: string;
           applicationMemberId?: string;
           birthdate: string;
+          birthdateEncrypted?: string | null;
           companyDesignation: string;
+          companyDesignationEncrypted?: string | null;
           companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
+          emailAddressEncrypted?: string | null;
+          encryptionKeyVersion?: number;
           firstName: string;
+          firstNameEncrypted?: string | null;
           landline: string;
+          landlineEncrypted?: string | null;
           lastName: string;
+          lastNameEncrypted?: string | null;
           mailingAddress: string;
+          mailingAddressEncrypted?: string | null;
           mobileNumber: string;
+          mobileNumberEncrypted?: string | null;
           nationality: string;
+          nationalityEncrypted?: string | null;
           sex: string;
+          sexEncrypted?: string | null;
         };
         Update: {
           applicationId?: string;
           applicationMemberId?: string;
           birthdate?: string;
+          birthdateEncrypted?: string | null;
           companyDesignation?: string;
+          companyDesignationEncrypted?: string | null;
           companyMemberType?: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress?: string;
+          emailAddressEncrypted?: string | null;
+          encryptionKeyVersion?: number;
           firstName?: string;
+          firstNameEncrypted?: string | null;
           landline?: string;
+          landlineEncrypted?: string | null;
           lastName?: string;
+          lastNameEncrypted?: string | null;
           mailingAddress?: string;
+          mailingAddressEncrypted?: string | null;
           mobileNumber?: string;
+          mobileNumberEncrypted?: string | null;
           nationality?: string;
+          nationalityEncrypted?: string | null;
           sex?: string;
+          sexEncrypted?: string | null;
         };
         Relationships: [
           {
@@ -427,28 +501,43 @@ export type Database = {
       Participant: {
         Row: {
           contactNumber: string;
+          contactNumberEncrypted: string | null;
           email: string;
+          emailEncrypted: string | null;
+          encryptionKeyVersion: number;
           firstName: string;
+          firstNameEncrypted: string | null;
           isPrincipal: boolean;
           lastName: string;
+          lastNameEncrypted: string | null;
           participantId: string;
           registrationId: string;
         };
         Insert: {
           contactNumber: string;
+          contactNumberEncrypted?: string | null;
           email: string;
+          emailEncrypted?: string | null;
+          encryptionKeyVersion?: number;
           firstName: string;
+          firstNameEncrypted?: string | null;
           isPrincipal?: boolean;
           lastName: string;
+          lastNameEncrypted?: string | null;
           participantId?: string;
           registrationId: string;
         };
         Update: {
           contactNumber?: string;
+          contactNumberEncrypted?: string | null;
           email?: string;
+          emailEncrypted?: string | null;
+          encryptionKeyVersion?: number;
           firstName?: string;
+          firstNameEncrypted?: string | null;
           isPrincipal?: boolean;
           lastName?: string;
+          lastNameEncrypted?: string | null;
           participantId?: string;
           registrationId?: string;
         };
@@ -501,9 +590,11 @@ export type Database = {
       Registration: {
         Row: {
           businessMemberId: string | null;
+          encryptionKeyVersion: number;
           eventId: string;
           identifier: string;
           nonMemberName: string | null;
+          nonMemberNameEncrypted: string | null;
           numberOfParticipants: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
@@ -513,9 +604,11 @@ export type Database = {
         };
         Insert: {
           businessMemberId?: string | null;
+          encryptionKeyVersion?: number;
           eventId: string;
           identifier: string;
           nonMemberName?: string | null;
+          nonMemberNameEncrypted?: string | null;
           numberOfParticipants?: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
@@ -525,9 +618,11 @@ export type Database = {
         };
         Update: {
           businessMemberId?: string | null;
+          encryptionKeyVersion?: number;
           eventId?: string;
           identifier?: string;
           nonMemberName?: string | null;
+          nonMemberNameEncrypted?: string | null;
           numberOfParticipants?: number | null;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
@@ -692,6 +787,10 @@ export type Database = {
           message: string;
         }[];
       };
+      backfill_sensitive_encryption: {
+        Args: { p_encryption_key: string };
+        Returns: undefined;
+      };
       check_application_status: {
         Args: { p_application_identifier: string };
         Returns: Json;
@@ -718,6 +817,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      decrypt_text: {
+        Args: { p_cipher_text: string; p_encryption_key: string };
+        Returns: string;
+      };
       delete_evaluation: {
         Args: { eval_id: string };
         Returns: {
@@ -728,6 +831,10 @@ export type Database = {
       delete_sr: {
         Args: { p_sponsored_registration_id: string };
         Returns: Json;
+      };
+      encrypt_text: {
+        Args: { p_encryption_key: string; p_plain_text: string };
+        Returns: string;
       };
       get_all_evaluations: {
         Args: never;
@@ -827,16 +934,31 @@ export type Database = {
           venue: string;
         }[];
       };
-      get_event_participant_list: {
-        Args: { p_event_id: string; p_search_text?: string };
-        Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
-        SetofOptions: {
-          from: "*";
-          to: "participant_list_item";
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
-      };
+      get_event_participant_list:
+        | {
+            Args: { p_event_id: string; p_search_text?: string };
+            Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
+            SetofOptions: {
+              from: "*";
+              to: "participant_list_item";
+              isOneToOne: false;
+              isSetofReturn: true;
+            };
+          }
+        | {
+            Args: {
+              p_encryption_key?: string;
+              p_event_id: string;
+              p_search_text?: string;
+            };
+            Returns: Database["public"]["CompositeTypes"]["participant_list_item"][];
+            SetofOptions: {
+              from: "*";
+              to: "participant_list_item";
+              isOneToOne: false;
+              isSetofReturn: true;
+            };
+          };
       get_event_status: { Args: { p_event_id: string }; Returns: Json };
       get_events_for_select: {
         Args: never;
@@ -851,20 +973,36 @@ export type Database = {
         Args: { p_member_id: string };
         Returns: string;
       };
-      get_registration_list: {
-        Args: {
-          p_event_id: string;
-          p_payment_proof_status?: Database["public"]["Enums"]["PaymentProofStatus"];
-          p_search_text?: string;
-        };
-        Returns: Database["public"]["CompositeTypes"]["registration_list_item"][];
-        SetofOptions: {
-          from: "*";
-          to: "registration_list_item";
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
-      };
+      get_registration_list:
+        | {
+            Args: {
+              p_event_id: string;
+              p_payment_proof_status?: Database["public"]["Enums"]["PaymentProofStatus"];
+              p_search_text?: string;
+            };
+            Returns: Database["public"]["CompositeTypes"]["registration_list_item"][];
+            SetofOptions: {
+              from: "*";
+              to: "registration_list_item";
+              isOneToOne: false;
+              isSetofReturn: true;
+            };
+          }
+        | {
+            Args: {
+              p_encryption_key?: string;
+              p_event_id: string;
+              p_payment_proof_status?: Database["public"]["Enums"]["PaymentProofStatus"];
+              p_search_text?: string;
+            };
+            Returns: Database["public"]["CompositeTypes"]["registration_list_item"][];
+            SetofOptions: {
+              from: "*";
+              to: "registration_list_item";
+              isOneToOne: false;
+              isSetofReturn: true;
+            };
+          };
       get_registration_list_checkin: {
         Args: { p_identifier: string; p_today?: string };
         Returns: Database["public"]["CompositeTypes"]["registration_details_result"];
@@ -979,6 +1117,7 @@ export type Database = {
       quick_onsite_registration: {
         Args: {
           p_business_member_id?: string;
+          p_encryption_key?: string;
           p_event_day_id: string;
           p_event_id: string;
           p_identifier: string;
@@ -1015,6 +1154,7 @@ export type Database = {
       submit_event_registration: {
         Args: {
           p_business_member_id?: string;
+          p_encryption_key?: string;
           p_event_id: string;
           p_identifier: string;
           p_member_type: string;
@@ -1030,6 +1170,7 @@ export type Database = {
       submit_event_registration_standard: {
         Args: {
           p_business_member_id?: string;
+          p_encryption_key?: string;
           p_event_id: string;
           p_identifier: string;
           p_member_type: string;
@@ -1046,6 +1187,7 @@ export type Database = {
           p_application_member_type: string;
           p_application_type: string;
           p_company_details: Json;
+          p_encryption_key?: string;
           p_payment_method: string;
           p_payment_proof_url?: string;
           p_representatives: Json;
@@ -1325,6 +1467,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],

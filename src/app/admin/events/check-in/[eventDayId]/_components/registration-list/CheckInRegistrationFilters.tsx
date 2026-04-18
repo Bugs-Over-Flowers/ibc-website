@@ -33,24 +33,21 @@ export default function CheckInRegistrationFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const searchQueryParam = useMemo(
-    () => searchParams.get("check_q") || "",
-    [searchParams],
-  );
-
   const selectedPaymentStatus = useMemo<PaymentStatusFilter>(() => {
     const rawValue = searchParams.get("check_paymentStatus") || "all";
 
     return isPaymentStatusFilter(rawValue) ? rawValue : "all";
   }, [searchParams]);
 
-  const [searchQuery, setSearchQuery] = useState(searchQueryParam);
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("check_q") || "",
+  );
   const hasActiveFilters =
-    searchQueryParam.trim() !== "" || selectedPaymentStatus !== "all";
+    searchQuery.trim() !== "" || selectedPaymentStatus !== "all";
 
   useEffect(() => {
-    setSearchQuery(searchQueryParam);
-  }, [searchQueryParam]);
+    setSearchQuery(searchParams.get("check_q") || "");
+  }, [searchParams]);
 
   const updateSearchParams = (
     nextQuery: string,

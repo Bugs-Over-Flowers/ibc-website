@@ -55,9 +55,8 @@ export async function getRegistrationsBySponsoredId(
     sponsoredRegistrationId: row.sponsoredRegistrationId,
     nonMemberName: row.nonMemberName,
     numberOfParticipants: row.numberOfParticipants,
-    paymentStatus: (row as RpcRow).paymentStatus,
-    paymentMethod: row.paymentMethod,
     paymentProofStatus: row.paymentProofStatus,
+    paymentMethod: row.paymentMethod,
     registrationDate: row.registrationDate,
     identifier: row.identifier,
     participants: Array.isArray(row.participants)
