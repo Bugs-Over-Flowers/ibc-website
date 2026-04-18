@@ -28,7 +28,7 @@ export function CreateEventForm() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen">
       <CreateEventTopBar />
 
       <div className="mx-auto max-w-7xl py-5">
