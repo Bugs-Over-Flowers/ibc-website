@@ -1,5 +1,3 @@
-
-
 CREATE OR REPLACE FUNCTION "public"."get_event_status"("p_event_id" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
     AS $$
@@ -26,7 +24,7 @@ BEGIN
 
   SELECT COUNT(DISTINCT p."participantId") INTO participants_total
   FROM "Participant" p
-  JOIN "Registration" r ON p."registrationId" = r."registrationId"
+  JOIN "Registration" r ON r."registrationId" = p."registrationId"
   WHERE r."eventId" = p_event_id
     AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus";
 
@@ -37,7 +35,8 @@ BEGIN
   WHERE r."eventId" = p_event_id
     AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus";
 
-  SELECT EXISTS(SELECT 1 FROM "EventDay" ed WHERE ed."eventId" = p_event_id) INTO has_event_days;
+  SELECT EXISTS(SELECT 1 FROM "EventDay" ed WHERE ed."eventId" = p_event_id)
+  INTO has_event_days;
 
   IF has_event_days THEN
     WITH accepted_checkins AS (
