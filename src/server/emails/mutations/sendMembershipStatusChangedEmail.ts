@@ -1,6 +1,6 @@
 "use server";
 
-import { render } from "@react-email/render";
+import { render } from "react-email";
 import { sendEmail } from "@/lib/email";
 import MembershipStatusChangedEmail from "@/lib/resend/templates/MembershipStatusChanged";
 import type { Database } from "@/lib/supabase/db.types";

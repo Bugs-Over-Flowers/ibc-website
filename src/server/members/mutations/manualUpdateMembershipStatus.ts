@@ -5,15 +5,10 @@ import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 import { sendMembershipStatusNotifications } from "@/server/members/mutations/sendMembershipStatusNotifications";
-
-type MembershipStatus = Database["public"]["Enums"]["MembershipStatus"];
-
-type MemberStatusTransition = {
-  businessMemberId: string;
-  businessName: string;
-  previousStatus: MembershipStatus;
-  currentStatus: MembershipStatus;
-};
+import type {
+  MemberStatusTransition,
+  MembershipStatus,
+} from "@/server/members/types";
 
 interface UpdateMembershipStatusInput {
   memberIds: string[];

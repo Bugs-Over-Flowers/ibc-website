@@ -3,15 +3,10 @@
 import type { Database } from "@/lib/supabase/db.types";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendMembershipStatusNotifications } from "@/server/members/mutations/sendMembershipStatusNotifications";
-
-type MembershipStatus = Database["public"]["Enums"]["MembershipStatus"];
-
-type MemberStatusTransition = {
-  businessMemberId: string;
-  businessName: string;
-  previousStatus: MembershipStatus;
-  currentStatus: MembershipStatus;
-};
+import type {
+  MemberStatusTransition,
+  MembershipStatus,
+} from "@/server/members/types";
 
 type MemberSnapshot = {
   businessMemberId: string;
@@ -112,7 +107,12 @@ async function processAndNotify(referenceTime: Date) {
  * Intended for scheduled execution.
  */
 export async function resetMemberStatuses() {
-  const currentYear = new Date().getFullYear();
+  const currentYear = Number(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Manila",
+      year: "numeric",
+    }).format(new Date()),
+  );
   const referenceTime = new Date(`${currentYear}-01-01T00:00:00+08:00`);
 
   const result = await processAndNotify(referenceTime);

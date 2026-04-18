@@ -3,15 +3,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/db.types";
 import { sendMembershipStatusChangedEmail } from "@/server/emails/mutations/sendMembershipStatusChangedEmail";
-
-type MembershipStatus = Database["public"]["Enums"]["MembershipStatus"];
-
-type MemberStatusTransition = {
-  businessMemberId: string;
-  businessName: string;
-  previousStatus: MembershipStatus;
-  currentStatus: MembershipStatus;
-};
+import type {
+  MemberStatusTransition,
+  MembershipStatus,
+} from "@/server/members/types";
 
 type NotificationSummary = {
   transitionedCount: number;
@@ -105,6 +100,11 @@ export async function sendMembershipStatusNotifications(
     appIds,
   );
 
+  // Build a map for O(1) lookups instead of O(n) .find() calls per transition
+  const memberMap = new Map(
+    (members ?? []).map((member) => [member.businessMemberId, member]),
+  );
+
   const jobs: Array<{
     to: string;
     businessName: string;
@@ -113,9 +113,7 @@ export async function sendMembershipStatusNotifications(
   }> = [];
 
   for (const transition of transitions) {
-    const member = (members ?? []).find(
-      (row) => row.businessMemberId === transition.businessMemberId,
-    );
+    const member = memberMap.get(transition.businessMemberId);
 
     if (!member?.primaryApplicationId) {
       continue;
@@ -135,15 +133,22 @@ export async function sendMembershipStatusNotifications(
   let sentEmails = 0;
   let failedEmails = 0;
 
-  const results = await Promise.allSettled(
-    jobs.map((job) => sendMembershipStatusChangedEmail(job)),
-  );
+  // Process jobs in batches of 5 for better backpressure control.
+  // Nodemailer's connection pool (maxConnections: 5) handles per-connection limits;
+  // batching prevents memory overhead and timeouts from unbounded concurrency.
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < jobs.length; i += BATCH_SIZE) {
+    const batch = jobs.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map((job) => sendMembershipStatusChangedEmail(job)),
+    );
 
-  for (const result of results) {
-    if (result.status === "fulfilled" && !result.value[0]) {
-      sentEmails += 1;
-    } else {
-      failedEmails += 1;
+    for (const result of results) {
+      if (result.status === "fulfilled" && !result.value[0]) {
+        sentEmails += 1;
+      } else {
+        failedEmails += 1;
+      }
     }
   }
 
