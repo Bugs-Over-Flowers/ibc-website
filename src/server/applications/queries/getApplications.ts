@@ -89,7 +89,7 @@ export async function getApplications(
   };
 
   const applicationsWithSignedLogos = await Promise.all(
-    data.map(async (application) => {
+    (data as ApplicationWithMembers[]).map(async (application) => {
       const proofImage = application.ProofImage?.[0];
       const signedProofImage = proofImage
         ? {
@@ -106,10 +106,6 @@ export async function getApplications(
       };
     }),
   );
-
-  if (!applicationsWithSignedLogos) {
-    return [];
-  }
 
   return applicationsWithSignedLogos;
 }
