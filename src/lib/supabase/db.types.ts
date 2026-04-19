@@ -161,7 +161,7 @@ export type Database = {
           membershipStatus:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -177,7 +177,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -193,7 +193,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId?: string;
           sectorId?: number;
           websiteURL?: string;
         };
