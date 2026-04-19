@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",
+    "@dnd-kit/react": "^0.4.0",
     "@react-pdf/renderer": "^4.5.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.3",
@@ -97,7 +98,6 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.12",
     "@playwright/test": "^1.59.1",
-    "@react-email/preview-server": "5.2.10",
     "@tailwindcss/postcss": "^4.2.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
