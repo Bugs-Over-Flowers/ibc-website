@@ -3,6 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getAppDataEncryptionKey } from "@/lib/security/encryption";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   type CreateSRInput,
@@ -34,6 +35,7 @@ export async function createSR(
   const parsed = createSRSchema.parse(input);
 
   const supabase = await createActionClient();
+  const encryptionKey = getAppDataEncryptionKey();
 
   const { data: eventData, error: eventError } = await supabase
     .from("Event")
@@ -60,6 +62,7 @@ export async function createSR(
     p_sponsored_by: parsed.sponsoredBy,
     p_fee_deduction: parsed.feeDeduction,
     p_max_sponsored_guests: parsed.maxSponsoredGuests,
+    p_encryption_key: encryptionKey,
   });
 
   if (error) {

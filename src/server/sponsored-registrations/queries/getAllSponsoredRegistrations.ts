@@ -4,6 +4,7 @@ import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { applyRealtime60sCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getAppDataEncryptionKey } from "@/lib/security/encryption";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -33,9 +34,11 @@ export async function getAllSponsoredRegistrationsWithEvent(
   cacheTag(CACHE_TAGS.sponsoredRegistrations.admin);
 
   const supabase = await createClient(cookies);
+  const encryptionKey = getAppDataEncryptionKey();
 
   const { data, error } = await supabase.rpc(
     "get_all_sponsored_registrations_with_event",
+    { p_encryption_key: encryptionKey },
   );
 
   if (error) {

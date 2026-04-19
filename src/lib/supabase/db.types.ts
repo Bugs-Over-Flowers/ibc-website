@@ -48,7 +48,6 @@ export type Database = {
           companyNameEncrypted: string | null;
           emailAddress: string;
           emailAddressEncrypted: string | null;
-          encryptionKeyVersion: number;
           identifier: string;
           interviewId: string | null;
           landline: string;
@@ -58,7 +57,7 @@ export type Database = {
           mobileNumberEncrypted: string | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId: number | null;
+          sectorName: string | null;
           websiteURL: string;
           websiteURLEncrypted: string | null;
         };
@@ -75,7 +74,6 @@ export type Database = {
           companyNameEncrypted?: string | null;
           emailAddress: string;
           emailAddressEncrypted?: string | null;
-          encryptionKeyVersion?: number;
           identifier: string;
           interviewId?: string | null;
           landline: string;
@@ -85,7 +83,7 @@ export type Database = {
           mobileNumberEncrypted?: string | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId?: number | null;
+          sectorName?: string | null;
           websiteURL: string;
           websiteURLEncrypted?: string | null;
         };
@@ -102,7 +100,6 @@ export type Database = {
           companyNameEncrypted?: string | null;
           emailAddress?: string;
           emailAddressEncrypted?: string | null;
-          encryptionKeyVersion?: number;
           identifier?: string;
           interviewId?: string | null;
           landline?: string;
@@ -112,7 +109,7 @@ export type Database = {
           mobileNumberEncrypted?: string | null;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId?: number | null;
+          sectorName?: string | null;
           websiteURL?: string;
           websiteURLEncrypted?: string | null;
         };
@@ -131,13 +128,6 @@ export type Database = {
             referencedRelation: "Interview";
             referencedColumns: ["interviewId"];
           },
-          {
-            foreignKeyName: "Application_sectorId_fkey";
-            columns: ["sectorId"];
-            isOneToOne: false;
-            referencedRelation: "Sector";
-            referencedColumns: ["sectorId"];
-          },
         ];
       };
       ApplicationMember: {
@@ -151,7 +141,6 @@ export type Database = {
           companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
           emailAddressEncrypted: string | null;
-          encryptionKeyVersion: number;
           firstName: string;
           firstNameEncrypted: string | null;
           landline: string;
@@ -177,7 +166,6 @@ export type Database = {
           companyMemberType: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress: string;
           emailAddressEncrypted?: string | null;
-          encryptionKeyVersion?: number;
           firstName: string;
           firstNameEncrypted?: string | null;
           landline: string;
@@ -203,7 +191,6 @@ export type Database = {
           companyMemberType?: Database["public"]["Enums"]["CompanyMemberType"];
           emailAddress?: string;
           emailAddressEncrypted?: string | null;
-          encryptionKeyVersion?: number;
           firstName?: string;
           firstNameEncrypted?: string | null;
           landline?: string;
@@ -242,7 +229,7 @@ export type Database = {
           membershipStatus:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -258,7 +245,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -274,7 +261,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId?: string;
           sectorId?: number;
           websiteURL?: string;
         };
@@ -504,7 +491,6 @@ export type Database = {
           contactNumberEncrypted: string | null;
           email: string;
           emailEncrypted: string | null;
-          encryptionKeyVersion: number;
           firstName: string;
           firstNameEncrypted: string | null;
           isPrincipal: boolean;
@@ -518,7 +504,6 @@ export type Database = {
           contactNumberEncrypted?: string | null;
           email: string;
           emailEncrypted?: string | null;
-          encryptionKeyVersion?: number;
           firstName: string;
           firstNameEncrypted?: string | null;
           isPrincipal?: boolean;
@@ -532,7 +517,6 @@ export type Database = {
           contactNumberEncrypted?: string | null;
           email?: string;
           emailEncrypted?: string | null;
-          encryptionKeyVersion?: number;
           firstName?: string;
           firstNameEncrypted?: string | null;
           isPrincipal?: boolean;
@@ -590,7 +574,6 @@ export type Database = {
       Registration: {
         Row: {
           businessMemberId: string | null;
-          encryptionKeyVersion: number;
           eventId: string;
           identifier: string;
           nonMemberName: string | null;
@@ -604,7 +587,6 @@ export type Database = {
         };
         Insert: {
           businessMemberId?: string | null;
-          encryptionKeyVersion?: number;
           eventId: string;
           identifier: string;
           nonMemberName?: string | null;
@@ -618,7 +600,6 @@ export type Database = {
         };
         Update: {
           businessMemberId?: string | null;
-          encryptionKeyVersion?: number;
           eventId?: string;
           identifier?: string;
           nonMemberName?: string | null;
@@ -676,6 +657,7 @@ export type Database = {
           feeDeduction: number;
           maxSponsoredGuests: number | null;
           sponsoredBy: string;
+          sponsoredByEncrypted: string | null;
           sponsoredRegistrationId: string;
           status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
           updatedAt: string;
@@ -688,6 +670,7 @@ export type Database = {
           feeDeduction?: number;
           maxSponsoredGuests?: number | null;
           sponsoredBy: string;
+          sponsoredByEncrypted?: string | null;
           sponsoredRegistrationId?: string;
           status?: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
           updatedAt?: string;
@@ -700,6 +683,7 @@ export type Database = {
           feeDeduction?: number;
           maxSponsoredGuests?: number | null;
           sponsoredBy?: string;
+          sponsoredByEncrypted?: string | null;
           sponsoredRegistrationId?: string;
           status?: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
           updatedAt?: string;
@@ -808,15 +792,26 @@ export type Database = {
         Args: { p_member_id: string };
         Returns: string;
       };
-      create_sponsored_registration: {
-        Args: {
-          p_event_id: string;
-          p_fee_deduction: number;
-          p_max_sponsored_guests?: number;
-          p_sponsored_by: string;
-        };
-        Returns: Json;
-      };
+      create_sponsored_registration:
+        | {
+            Args: {
+              p_event_id: string;
+              p_fee_deduction: number;
+              p_max_sponsored_guests?: number;
+              p_sponsored_by: string;
+            };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_encryption_key?: string;
+              p_event_id: string;
+              p_fee_deduction: number;
+              p_max_sponsored_guests?: number;
+              p_sponsored_by: string;
+            };
+            Returns: Json;
+          };
       decrypt_text: {
         Args: { p_cipher_text: string; p_encryption_key: string };
         Returns: string;
@@ -874,23 +869,41 @@ export type Database = {
           uuid: string;
         }[];
       };
-      get_all_sponsored_registrations_with_event: {
-        Args: never;
-        Returns: {
-          created_at: string;
-          event_end_date: string;
-          event_id: string;
-          event_start_date: string;
-          event_title: string;
-          max_sponsored_guests: number;
-          sponsored_by: string;
-          sponsored_registration_id: string;
-          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
-          updated_at: string;
-          used_count: number;
-          uuid: string;
-        }[];
-      };
+      get_all_sponsored_registrations_with_event:
+        | {
+            Args: never;
+            Returns: {
+              created_at: string;
+              event_end_date: string;
+              event_id: string;
+              event_start_date: string;
+              event_title: string;
+              max_sponsored_guests: number;
+              sponsored_by: string;
+              sponsored_registration_id: string;
+              status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+              updated_at: string;
+              used_count: number;
+              uuid: string;
+            }[];
+          }
+        | {
+            Args: { p_encryption_key?: string };
+            Returns: {
+              created_at: string;
+              event_end_date: string;
+              event_id: string;
+              event_start_date: string;
+              event_title: string;
+              max_sponsored_guests: number;
+              sponsored_by: string;
+              sponsored_registration_id: string;
+              status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+              updated_at: string;
+              used_count: number;
+              uuid: string;
+            }[];
+          };
       get_application_history: { Args: { p_member_id: string }; Returns: Json };
       get_evaluation_by_id: {
         Args: { eval_id: string };
@@ -1039,13 +1052,58 @@ export type Database = {
           sponsoredRegistrationId: string;
         }[];
       };
-      get_sponsored_registration_by_id: {
-        Args: { registration_id: string };
+      get_sponsored_registration_by_id:
+        | {
+            Args: { registration_id: string };
+            Returns: {
+              createdAt: string;
+              eventId: string;
+              feeDeduction: number;
+              maxSponsoredGuests: number | null;
+              sponsoredBy: string;
+              sponsoredByEncrypted: string | null;
+              sponsoredRegistrationId: string;
+              status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+              updatedAt: string;
+              usedCount: number;
+              uuid: string;
+            }[];
+            SetofOptions: {
+              from: "*";
+              to: "SponsoredRegistration";
+              isOneToOne: false;
+              isSetofReturn: true;
+            };
+          }
+        | {
+            Args: { p_encryption_key?: string; registration_id: string };
+            Returns: {
+              createdAt: string;
+              eventId: string;
+              feeDeduction: number;
+              maxSponsoredGuests: number | null;
+              sponsoredBy: string;
+              sponsoredByEncrypted: string | null;
+              sponsoredRegistrationId: string;
+              status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+              updatedAt: string;
+              usedCount: number;
+              uuid: string;
+            }[];
+            SetofOptions: {
+              from: "*";
+              to: "SponsoredRegistration";
+              isOneToOne: false;
+              isSetofReturn: true;
+            };
+          };
+      get_sponsored_registration_by_uuid: {
+        Args: { p_uuid: string };
         Returns: {
           createdAt: string;
           eventId: string;
           feeDeduction: number;
-          maxSponsoredGuests: number | null;
+          maxSponsoredGuests: number;
           sponsoredBy: string;
           sponsoredRegistrationId: string;
           status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
@@ -1053,26 +1111,7 @@ export type Database = {
           usedCount: number;
           uuid: string;
         }[];
-        SetofOptions: {
-          from: "*";
-          to: "SponsoredRegistration";
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
       };
-      get_sponsored_registration_by_uuid:
-        | {
-            Args: { p_uuid: string };
-            Returns: {
-              error: true;
-            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
-          }
-        | {
-            Args: { p_uuid: string };
-            Returns: {
-              error: true;
-            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
-          };
       get_sponsored_registrations_with_details: {
         Args: { p_event_id: string };
         Returns: {
@@ -1087,27 +1126,51 @@ export type Database = {
           updated_at: string;
         }[];
       };
-      get_sr_by_event_id: {
-        Args: { p_event_id: string };
-        Returns: {
-          createdAt: string;
-          eventId: string;
-          feeDeduction: number;
-          maxSponsoredGuests: number | null;
-          sponsoredBy: string;
-          sponsoredRegistrationId: string;
-          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
-          updatedAt: string;
-          usedCount: number;
-          uuid: string;
-        }[];
-        SetofOptions: {
-          from: "*";
-          to: "SponsoredRegistration";
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
-      };
+      get_sr_by_event_id:
+        | {
+            Args: { p_event_id: string };
+            Returns: {
+              createdAt: string;
+              eventId: string;
+              feeDeduction: number;
+              maxSponsoredGuests: number | null;
+              sponsoredBy: string;
+              sponsoredByEncrypted: string | null;
+              sponsoredRegistrationId: string;
+              status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+              updatedAt: string;
+              usedCount: number;
+              uuid: string;
+            }[];
+            SetofOptions: {
+              from: "*";
+              to: "SponsoredRegistration";
+              isOneToOne: false;
+              isSetofReturn: true;
+            };
+          }
+        | {
+            Args: { p_encryption_key?: string; p_event_id: string };
+            Returns: {
+              createdAt: string;
+              eventId: string;
+              feeDeduction: number;
+              maxSponsoredGuests: number | null;
+              sponsoredBy: string;
+              sponsoredByEncrypted: string | null;
+              sponsoredRegistrationId: string;
+              status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+              updatedAt: string;
+              usedCount: number;
+              uuid: string;
+            }[];
+            SetofOptions: {
+              from: "*";
+              to: "SponsoredRegistration";
+              isOneToOne: false;
+              isSetofReturn: true;
+            };
+          };
       january_first_reset: { Args: never; Returns: undefined };
       process_membership_statuses: {
         Args: { p_reference_time?: string };
@@ -1211,6 +1274,14 @@ export type Database = {
           p_start_date?: string;
           p_title?: string;
           p_venue?: string;
+        };
+        Returns: Json;
+      };
+      update_sponsored_registration_sponsor_name: {
+        Args: {
+          p_encryption_key?: string;
+          p_sponsored_by: string;
+          p_sponsored_registration_id: string;
         };
         Returns: Json;
       };

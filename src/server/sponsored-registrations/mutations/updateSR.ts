@@ -3,15 +3,37 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getAppDataEncryptionKey } from "@/lib/security/encryption";
+
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 
 type SponsoredRegistration =
   Database["public"]["Tables"]["SponsoredRegistration"]["Row"];
 
+const updateSRSponsorNameResponseSchema = z.object({
+  success: z.boolean(),
+  data: z
+    .object({
+      createdAt: z.string(),
+      eventId: z.string(),
+      feeDeduction: z.number(),
+      maxSponsoredGuests: z.number().nullable(),
+      sponsoredBy: z.string(),
+      sponsoredByEncrypted: z.string().nullable(),
+      sponsoredRegistrationId: z.string(),
+      status: z.enum(["active", "full", "disabled"]),
+      updatedAt: z.string(),
+      usedCount: z.number(),
+      uuid: z.string(),
+    })
+    .optional(),
+  error: z.string().optional(),
+});
+
 const updateSRSchema = z.object({
-  sponsoredRegistrationId: z.string().uuid("Invalid ID format"),
-  eventId: z.string().uuid("Invalid Event ID format"),
+  sponsoredRegistrationId: z.uuid("Invalid ID format"),
+  eventId: z.uuid("Invalid Event ID format"),
 });
 
 type UpdateSRInput = z.infer<typeof updateSRSchema>;
@@ -58,17 +80,28 @@ export async function updateSRSponsorName(
   const parsed = updateSRSponsorNameSchema.parse(input);
 
   const supabase = await createActionClient();
+  const encryptionKey = getAppDataEncryptionKey();
 
-  const { data, error } = await supabase
-    .from("SponsoredRegistration")
-    .update({ sponsoredBy: parsed.sponsoredBy })
-    .eq("sponsoredRegistrationId", parsed.sponsoredRegistrationId)
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc(
+    "update_sponsored_registration_sponsor_name",
+    {
+      p_sponsored_registration_id: parsed.sponsoredRegistrationId,
+      p_sponsored_by: parsed.sponsoredBy,
+      p_encryption_key: encryptionKey,
+    },
+  );
 
-  if (error || !data) {
+  if (error) {
     throw new Error(
       `Failed to update sponsor name: ${error?.message || "Unknown error"}`,
+    );
+  }
+
+  const response = updateSRSponsorNameResponseSchema.parse(data);
+
+  if (!response.success || !response.data) {
+    throw new Error(
+      response.error || "Failed to update sponsor name: Unknown error",
     );
   }
 
@@ -81,5 +114,5 @@ export async function updateSRSponsorName(
   );
   revalidatePath("/admin/sponsored-registration", "page");
 
-  return data;
+  return response.data;
 }

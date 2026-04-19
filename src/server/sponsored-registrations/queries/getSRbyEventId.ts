@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { getAppDataEncryptionKey } from "@/lib/security/encryption";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,9 +13,11 @@ export async function getSRbyEventId(
 ): Promise<SponsoredRegistration[]> {
   const cookieStore = await cookies();
   const supabase = await createClient(cookieStore.getAll());
+  const encryptionKey = getAppDataEncryptionKey();
 
   const { data, error } = await supabase.rpc("get_sr_by_event_id", {
     p_event_id: eventId,
+    p_encryption_key: encryptionKey,
   });
 
   if (error) {
@@ -27,5 +30,9 @@ export async function getSRbyEventId(
     throw new Error("Failed to fetch sponsored registrations");
   }
 
-  return (data as SponsoredRegistration[]) || [];
+  if (!data) {
+    return [];
+  }
+
+  return data as SponsoredRegistration[];
 }

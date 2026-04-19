@@ -8,8 +8,7 @@ ALTER TABLE "public"."Application"
   ADD COLUMN IF NOT EXISTS "landlineEncrypted" bytea,
   ADD COLUMN IF NOT EXISTS "mobileNumberEncrypted" bytea,
   ADD COLUMN IF NOT EXISTS "emailAddressEncrypted" bytea,
-  ADD COLUMN IF NOT EXISTS "websiteURLEncrypted" bytea,
-  ADD COLUMN IF NOT EXISTS "encryptionKeyVersion" smallint NOT NULL DEFAULT 1;
+  ADD COLUMN IF NOT EXISTS "websiteURLEncrypted" bytea;
 
 ALTER TABLE "public"."ApplicationMember"
   ADD COLUMN IF NOT EXISTS "firstNameEncrypted" bytea,
@@ -21,19 +20,19 @@ ALTER TABLE "public"."ApplicationMember"
   ADD COLUMN IF NOT EXISTS "companyDesignationEncrypted" bytea,
   ADD COLUMN IF NOT EXISTS "landlineEncrypted" bytea,
   ADD COLUMN IF NOT EXISTS "mobileNumberEncrypted" bytea,
-  ADD COLUMN IF NOT EXISTS "emailAddressEncrypted" bytea,
-  ADD COLUMN IF NOT EXISTS "encryptionKeyVersion" smallint NOT NULL DEFAULT 1;
+  ADD COLUMN IF NOT EXISTS "emailAddressEncrypted" bytea;
 
 ALTER TABLE "public"."Registration"
-  ADD COLUMN IF NOT EXISTS "nonMemberNameEncrypted" bytea,
-  ADD COLUMN IF NOT EXISTS "encryptionKeyVersion" smallint NOT NULL DEFAULT 1;
+  ADD COLUMN IF NOT EXISTS "nonMemberNameEncrypted" bytea;
 
 ALTER TABLE "public"."Participant"
   ADD COLUMN IF NOT EXISTS "firstNameEncrypted" bytea,
   ADD COLUMN IF NOT EXISTS "lastNameEncrypted" bytea,
   ADD COLUMN IF NOT EXISTS "contactNumberEncrypted" bytea,
-  ADD COLUMN IF NOT EXISTS "emailEncrypted" bytea,
-  ADD COLUMN IF NOT EXISTS "encryptionKeyVersion" smallint NOT NULL DEFAULT 1;
+  ADD COLUMN IF NOT EXISTS "emailEncrypted" bytea;
+
+ALTER TABLE "public"."SponsoredRegistration"
+  ADD COLUMN IF NOT EXISTS "sponsoredByEncrypted" bytea;
 
 CREATE OR REPLACE FUNCTION "public"."encrypt_text"("p_plain_text" text, "p_encryption_key" text) RETURNS bytea
   LANGUAGE "sql"
@@ -132,6 +131,196 @@ BEGIN
     OR "lastNameEncrypted" IS NULL
     OR "contactNumberEncrypted" IS NULL
     OR "emailEncrypted" IS NULL;
+
+UPDATE "SponsoredRegistration"
+  SET "sponsoredByEncrypted" = "public"."encrypt_text"("sponsoredBy", p_encryption_key)
+  WHERE "sponsoredByEncrypted" IS NULL;
+END;
+$$;
+
+DROP FUNCTION IF EXISTS "public"."create_sponsored_registration"("uuid", "text", "numeric", "bigint", "text");
+
+CREATE OR REPLACE FUNCTION "public"."create_sponsored_registration"("p_event_id" "uuid", "p_sponsored_by" "text", "p_fee_deduction" numeric, "p_max_sponsored_guests" bigint DEFAULT NULL::bigint, "p_encryption_key" "text" DEFAULT NULL::text) RETURNS "jsonb"
+  LANGUAGE "plpgsql" SECURITY DEFINER
+  SET "search_path" TO 'public'
+  AS $$
+DECLARE
+  v_row public."SponsoredRegistration"%ROWTYPE;
+BEGIN
+  IF p_encryption_key IS NULL OR btrim(p_encryption_key) = '' THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'encryption key is required'
+    );
+  END IF;
+
+  IF p_fee_deduction IS NULL THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'feeDeduction is required'
+    );
+  END IF;
+
+  IF p_fee_deduction < 0 THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'feeDeduction cannot be negative'
+    );
+  END IF;
+
+  INSERT INTO public."SponsoredRegistration" (
+    "eventId",
+    "sponsoredBy",
+    "sponsoredByEncrypted",
+    "feeDeduction",
+    "maxSponsoredGuests",
+    "status",
+    "uuid"
+  )
+  VALUES (
+    p_event_id,
+    p_sponsored_by,
+    "public"."encrypt_text"(p_sponsored_by, p_encryption_key),
+    p_fee_deduction,
+    p_max_sponsored_guests,
+    'active'::public."SponsoredRegistrationStatus",
+    gen_random_uuid()::text
+  )
+  RETURNING * INTO v_row;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'data', to_jsonb(v_row)
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', SQLERRM
+    );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION "public"."update_sponsored_registration_sponsor_name"("p_sponsored_registration_id" "uuid", "p_sponsored_by" "text", "p_encryption_key" "text" DEFAULT NULL::text) RETURNS "jsonb"
+  LANGUAGE "plpgsql" SECURITY DEFINER
+  SET "search_path" TO 'public'
+  AS $$
+DECLARE
+  v_row public."SponsoredRegistration"%ROWTYPE;
+BEGIN
+  IF p_encryption_key IS NULL OR btrim(p_encryption_key) = '' THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'encryption key is required'
+    );
+  END IF;
+
+  UPDATE public."SponsoredRegistration"
+  SET
+    "sponsoredBy" = p_sponsored_by,
+    "sponsoredByEncrypted" = "public"."encrypt_text"(p_sponsored_by, p_encryption_key)
+  WHERE "sponsoredRegistrationId" = p_sponsored_registration_id
+  RETURNING * INTO v_row;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'Sponsored registration not found'
+    );
+  END IF;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'data', to_jsonb(v_row)
+  );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid", "p_encryption_key" "text" DEFAULT NULL::text) RETURNS SETOF "public"."SponsoredRegistration"
+  LANGUAGE "plpgsql"
+  SECURITY DEFINER
+  SET "search_path" TO 'public'
+  AS $$
+BEGIN
+  IF p_encryption_key IS NULL OR btrim(p_encryption_key) = '' THEN
+    RAISE EXCEPTION 'Encryption key is required';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    sr."sponsoredRegistrationId",
+    sr."uuid",
+    sr."eventId",
+    COALESCE("public"."decrypt_text"(sr."sponsoredByEncrypted", p_encryption_key), sr."sponsoredBy") AS "sponsoredBy",
+    sr."sponsoredByEncrypted",
+    sr."feeDeduction",
+    sr."maxSponsoredGuests",
+    sr."usedCount",
+    sr."status",
+    sr."createdAt",
+    sr."updatedAt"
+  FROM "SponsoredRegistration" sr
+  WHERE sr."sponsoredRegistrationId" = registration_id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION "public"."get_sr_by_event_id"("p_event_id" "uuid", "p_encryption_key" "text" DEFAULT NULL::text) RETURNS SETOF "public"."SponsoredRegistration"
+  LANGUAGE "plpgsql"
+  STABLE SECURITY DEFINER
+  SET "search_path" TO 'public'
+  AS $$
+BEGIN
+  IF p_encryption_key IS NULL OR btrim(p_encryption_key) = '' THEN
+    RAISE EXCEPTION 'Encryption key is required';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    sr."sponsoredRegistrationId",
+    sr."uuid",
+    sr."eventId",
+    COALESCE("public"."decrypt_text"(sr."sponsoredByEncrypted", p_encryption_key), sr."sponsoredBy") AS "sponsoredBy",
+    sr."sponsoredByEncrypted",
+    sr."feeDeduction",
+    sr."maxSponsoredGuests",
+    sr."usedCount",
+    sr."status",
+    sr."createdAt",
+    sr."updatedAt"
+  FROM "SponsoredRegistration" sr
+  WHERE sr."eventId" = p_event_id
+  ORDER BY sr."createdAt" DESC;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION "public"."get_all_sponsored_registrations_with_event"("p_encryption_key" "text" DEFAULT NULL::text) RETURNS TABLE("created_at" timestamp with time zone, "event_end_date" timestamp with time zone, "event_id" uuid, "event_start_date" timestamp with time zone, "event_title" text, "max_sponsored_guests" bigint, "sponsored_by" text, "sponsored_registration_id" uuid, "status" public."SponsoredRegistrationStatus", "updated_at" timestamp with time zone, "used_count" bigint, "uuid" text)
+  LANGUAGE "plpgsql"
+  STABLE SECURITY DEFINER
+  SET "search_path" TO 'public'
+  AS $$
+BEGIN
+  IF p_encryption_key IS NULL OR btrim(p_encryption_key) = '' THEN
+    RAISE EXCEPTION 'Encryption key is required';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    sr."createdAt",
+    e."eventEndDate",
+    sr."eventId",
+    e."eventStartDate",
+    e."eventTitle",
+    sr."maxSponsoredGuests",
+    COALESCE("public"."decrypt_text"(sr."sponsoredByEncrypted", p_encryption_key), sr."sponsoredBy") AS "sponsored_by",
+    sr."sponsoredRegistrationId",
+    sr."status",
+    sr."updatedAt",
+    sr."usedCount",
+    sr."uuid"
+  FROM "SponsoredRegistration" sr
+  LEFT JOIN "Event" e ON e."eventId" = sr."eventId"
+  ORDER BY sr."createdAt" DESC;
 END;
 $$;
 
@@ -755,6 +944,12 @@ REVOKE ALL ON FUNCTION "public"."submit_membership_application"("p_application_t
 REVOKE ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid", "p_encryption_key" "text") FROM "anon";
 REVOKE ALL ON FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_encryption_key" "text") FROM "anon";
 REVOKE ALL ON FUNCTION "public"."quick_onsite_registration"("p_event_day_id" "uuid", "p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_registrant" "jsonb", "p_remark" "text", "p_encryption_key" "text") FROM "anon";
+REVOKE ALL ON FUNCTION "public"."encrypt_text"("p_plain_text" "text", "p_encryption_key" "text") FROM "anon";
+REVOKE ALL ON FUNCTION "public"."encrypt_text"("p_plain_text" "text", "p_encryption_key" "text") FROM "authenticated";
+REVOKE ALL ON FUNCTION "public"."encrypt_text"("p_plain_text" "text", "p_encryption_key" "text") FROM "service_role";
+REVOKE ALL ON FUNCTION "public"."decrypt_text"("p_cipher_text" "bytea", "p_encryption_key" "text") FROM "anon";
+REVOKE ALL ON FUNCTION "public"."decrypt_text"("p_cipher_text" "bytea", "p_encryption_key" "text") FROM "authenticated";
+REVOKE ALL ON FUNCTION "public"."decrypt_text"("p_cipher_text" "bytea", "p_encryption_key" "text") FROM "service_role";
 
 GRANT ALL ON FUNCTION "public"."get_event_participant_list"("p_event_id" "uuid", "p_search_text" "text", "p_encryption_key" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_event_participant_list"("p_event_id" "uuid", "p_search_text" "text", "p_encryption_key" "text") TO "service_role";
@@ -768,5 +963,10 @@ GRANT ALL ON FUNCTION "public"."submit_event_registration_standard"("p_event_id"
 GRANT ALL ON FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_encryption_key" "text") TO "service_role";
 GRANT ALL ON FUNCTION "public"."quick_onsite_registration"("p_event_day_id" "uuid", "p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_registrant" "jsonb", "p_remark" "text", "p_encryption_key" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."quick_onsite_registration"("p_event_day_id" "uuid", "p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_registrant" "jsonb", "p_remark" "text", "p_encryption_key" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."create_sponsored_registration"("p_event_id" "uuid", "p_sponsored_by" "text", "p_fee_deduction" numeric, "p_max_sponsored_guests" bigint, "p_encryption_key" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."create_sponsored_registration"("p_event_id" "uuid", "p_sponsored_by" "text", "p_fee_deduction" numeric, "p_max_sponsored_guests" bigint, "p_encryption_key" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."create_sponsored_registration"("p_event_id" "uuid", "p_sponsored_by" "text", "p_fee_deduction" numeric, "p_max_sponsored_guests" bigint, "p_encryption_key" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_sponsor_name"("p_sponsored_registration_id" "uuid", "p_sponsored_by" "text", "p_encryption_key" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_sponsored_registration_sponsor_name"("p_sponsored_registration_id" "uuid", "p_sponsored_by" "text", "p_encryption_key" "text") TO "service_role";
 
 COMMIT;
