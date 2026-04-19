@@ -41,7 +41,7 @@ export const submitMembershipApplication: ServerFunction<
     p_company_details: {
       name: parsed.data.companyName,
       address: parsed.data.companyAddress,
-      sectorId: parsed.data.sectorId,
+      sectorName: parsed.data.sectorName,
       landline: parsed.data.landline,
       mobile: parsed.data.mobileNumber,
       email: parsed.data.emailAddress,

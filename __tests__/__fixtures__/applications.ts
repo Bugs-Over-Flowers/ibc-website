@@ -23,9 +23,8 @@ export function createMockApplication(
     mobileNumber: "+639171234567",
     paymentMethod: "ONSITE",
     paymentProofStatus: "pending",
-    sectorId: 1,
+    sectorName: "Technology",
     websiteURL: "https://acme.example.com",
-    Sector: { sectorId: 1, sectorName: "Technology" },
     ApplicationMember: [
       {
         applicationId: "app-001",
@@ -62,8 +61,7 @@ export const mockApplications: ApplicationWithMembers[] = [
     applicationType: "renewal",
     paymentMethod: "BPI",
     paymentProofStatus: "pending",
-    sectorId: 2,
-    Sector: { sectorId: 2, sectorName: "Finance" },
+    sectorName: "Finance",
     applicationDate: "2025-06-02T10:00:00Z",
   }),
   createMockApplication({
@@ -72,8 +70,7 @@ export const mockApplications: ApplicationWithMembers[] = [
     emailAddress: "contact@gamma.example.com",
     applicationStatus: "pending",
     applicationType: "newMember",
-    sectorId: 3,
-    Sector: { sectorId: 3, sectorName: "Healthcare" },
+    sectorName: "Healthcare",
     applicationDate: "2025-05-20T10:00:00Z",
   }),
   createMockApplication({
@@ -82,8 +79,7 @@ export const mockApplications: ApplicationWithMembers[] = [
     emailAddress: "admin@delta.example.com",
     applicationStatus: "approved",
     applicationType: "updating",
-    sectorId: 4,
-    Sector: { sectorId: 4, sectorName: "Manufacturing" },
+    sectorName: "Manufacturing",
     applicationDate: "2025-04-15T10:00:00Z",
   }),
   createMockApplication({
@@ -92,8 +88,7 @@ export const mockApplications: ApplicationWithMembers[] = [
     emailAddress: "info@epsilon.example.com",
     applicationStatus: "rejected",
     applicationType: "newMember",
-    sectorId: 1,
-    Sector: { sectorId: 1, sectorName: "Technology" },
+    sectorName: "Technology",
     applicationDate: "2025-04-10T10:00:00Z",
   }),
 ];

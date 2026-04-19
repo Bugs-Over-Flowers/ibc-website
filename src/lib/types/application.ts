@@ -24,10 +24,6 @@ export interface ApplicationWithMembers
     membershipExpiryDate: string | null;
     sectorId: number;
   } | null;
-  Sector: {
-    sectorId: number;
-    sectorName: string;
-  };
   ProofImage: {
     proofImageId: string;
     path: string;
