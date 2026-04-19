@@ -111,6 +111,11 @@ public = true
 file_size_limit = "5MiB"
 allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
 objects_path = "./headerimage"
+[storage.buckets.personalimage]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
+objects_path = "./personalimage"
 [storage.buckets.paymentproofs]
 public = false
 file_size_limit = "10MiB"
