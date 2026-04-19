@@ -17,7 +17,6 @@ export async function getApplicationDetailsById(
       *,
       ApplicationMember(*),
       BusinessMember(businessMemberId, identifier, businessName, websiteURL, joinDate, membershipStatus, membershipExpiryDate, sectorId),
-      Sector(sectorId, sectorName),
       ProofImage(proofImageId, path)
     `,
     )

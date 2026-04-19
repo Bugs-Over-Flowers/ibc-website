@@ -93,7 +93,7 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
             <div class="value">${application.companyName}</div>
 
             <div class="label">Sector:</div>
-            <div class="value">${application.Sector?.sectorName || "N/A"}</div>
+            <div class="value">${application.sectorName || "N/A"}</div>
 
             <div class="label">Website:</div>
             <div class="value">${application.websiteURL}</div>
