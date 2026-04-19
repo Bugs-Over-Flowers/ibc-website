@@ -32,7 +32,7 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId: number | null;
+          sectorName: string | null;
           websiteURL: string;
         };
         Insert: {
@@ -52,7 +52,7 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId?: number | null;
+          sectorName?: string | null;
           websiteURL: string;
         };
         Update: {
@@ -72,7 +72,7 @@ export type Database = {
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId?: number | null;
+          sectorName?: string | null;
           websiteURL?: string;
         };
         Relationships: [
@@ -89,13 +89,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "Interview";
             referencedColumns: ["interviewId"];
-          },
-          {
-            foreignKeyName: "Application_sectorId_fkey";
-            columns: ["sectorId"];
-            isOneToOne: false;
-            referencedRelation: "Sector";
-            referencedColumns: ["sectorId"];
           },
         ];
       };
@@ -168,7 +161,7 @@ export type Database = {
           membershipStatus:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -184,7 +177,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -200,7 +193,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId?: string;
           sectorId?: number;
           websiteURL?: string;
         };
