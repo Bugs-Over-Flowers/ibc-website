@@ -8,7 +8,7 @@ import {
   Preview,
   Section,
   Text,
-} from "@react-email/components";
+} from "react-email";
 import type { Database } from "@/lib/supabase/db.types";
 
 type MembershipStatus = Database["public"]["Enums"]["MembershipStatus"];

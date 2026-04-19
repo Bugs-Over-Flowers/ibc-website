@@ -167,7 +167,7 @@ function MemberReviewDetails({
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <DetailRow
                 label="Industry Sector"
-                value={application.Sector?.sectorName || "N/A"}
+                value={application.sectorName || "N/A"}
               />
               <DetailRow
                 label="Website"
