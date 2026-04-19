@@ -61,7 +61,7 @@ alter table "public"."Registration" alter column "paymentProofStatus" set defaul
 alter table "public"."Registration" alter column "paymentProofStatus" set data type public."PaymentProofStatus" using "paymentProofStatus"::text::public."PaymentProofStatus";
 alter table "public"."SponsoredRegistration" alter column "status" set default 'active'::public."SponsoredRegistrationStatus";
 alter table "public"."SponsoredRegistration" alter column "status" set data type public."SponsoredRegistrationStatus" using "status"::text::public."SponsoredRegistrationStatus";
-alter table "public"."WebsiteContent" add column "group" text;
+alter table "public"."WebsiteContent" add column if not exists "group" text;
 alter table "public"."WebsiteContent" alter column "section" set data type public."WebsiteContentSection" using "section"::text::public."WebsiteContentSection";
 alter table "public"."WebsiteContent" alter column "textType" set data type public."WebsiteContentTextType" using "textType"::text::public."WebsiteContentTextType";
 alter table "public"."Application" add constraint "Application_businessMemberId_fkey" FOREIGN KEY ("businessMemberId") REFERENCES public."BusinessMember"("businessMemberId") ON UPDATE CASCADE ON DELETE CASCADE not valid;
@@ -2048,28 +2048,3 @@ CREATE TRIGGER tr_update_participant_count AFTER INSERT OR DELETE OR UPDATE ON p
 CREATE TRIGGER tr_update_sponsored_registration_used_count_from_participant AFTER INSERT OR DELETE ON public."Participant" FOR EACH ROW EXECUTE FUNCTION public.update_sponsored_registration_used_count_from_participant();
 CREATE TRIGGER tr_update_sponsored_registration_used_count AFTER INSERT OR DELETE OR UPDATE OF "sponsoredRegistrationId" ON public."Registration" FOR EACH ROW EXECUTE FUNCTION public.update_sponsored_registration_used_count_from_registration();
 CREATE TRIGGER set_website_content_updated_at BEFORE UPDATE ON public."WebsiteContent" FOR EACH ROW EXECUTE FUNCTION public.update_website_content_updated_at();
-create policy "personalimage_delete_authenticated"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to authenticated
-using ((bucket_id = 'personalimage'::text));
-create policy "personalimage_insert_authenticated"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to authenticated
-with check ((bucket_id = 'personalimage'::text));
-create policy "personalimage_select_authenticated"
-  on "storage"."objects"
-  as permissive
-  for select
-  to authenticated
-using ((bucket_id = 'personalimage'::text));
-create policy "personalimage_update_authenticated"
-  on "storage"."objects"
-  as permissive
-  for update
-  to authenticated
-using ((bucket_id = 'personalimage'::text))
-with check ((bucket_id = 'personalimage'::text));
