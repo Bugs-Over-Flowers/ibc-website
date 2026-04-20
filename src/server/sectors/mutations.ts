@@ -137,7 +137,7 @@ export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
 
   const { data: members, error: membersError } = await supabase
     .from("BusinessMember")
-    .select("businessMemberId")
+    .select("businessMemberId, primaryApplicationId")
     .eq("sectorId", parsed.id);
 
   if (membersError) {
@@ -149,6 +149,15 @@ export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
   const hasBulkReassign = Boolean(parsed.reassignSectorId);
   const memberReassignments = parsed.memberReassignments ?? [];
   const hasMemberSpecificAssignments = memberReassignments.length > 0;
+
+  const resolvedReassignments = hasMemberSpecificAssignments
+    ? memberReassignments
+    : parsed.reassignSectorId
+      ? membersToReassign.map((member) => ({
+          memberId: member.businessMemberId,
+          sectorId: parsed.reassignSectorId as number,
+        }))
+      : [];
 
   if (hasMembers) {
     if (!hasBulkReassign && !hasMemberSpecificAssignments) {
@@ -203,6 +212,57 @@ export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
       if (reassignmentError) {
         throw new Error(reassignmentError.message);
       }
+    }
+
+    const sectorIds = [
+      ...new Set(resolvedReassignments.map((item) => item.sectorId)),
+    ];
+
+    if (sectorIds.length > 0) {
+      const { data: sectorRows, error: sectorsError } = await supabase
+        .from("Sector")
+        .select("sectorId, sectorName")
+        .in("sectorId", sectorIds);
+
+      if (sectorsError) {
+        throw new Error(sectorsError.message);
+      }
+
+      const sectorNameById = new Map(
+        (sectorRows ?? []).map((sector) => [
+          sector.sectorId,
+          sector.sectorName,
+        ]),
+      );
+
+      await Promise.all(
+        resolvedReassignments.map(async (assignment) => {
+          const member = membersToReassign.find(
+            (row) => row.businessMemberId === assignment.memberId,
+          );
+
+          if (!member?.primaryApplicationId) {
+            return;
+          }
+
+          const sectorName = sectorNameById.get(assignment.sectorId);
+
+          if (!sectorName) {
+            throw new Error(
+              "Failed to resolve sector name during reassignment",
+            );
+          }
+
+          const { error: applicationUpdateError } = await supabase
+            .from("Application")
+            .update({ sectorName })
+            .eq("applicationId", member.primaryApplicationId);
+
+          if (applicationUpdateError) {
+            throw new Error(applicationUpdateError.message);
+          }
+        }),
+      );
     }
   }
 

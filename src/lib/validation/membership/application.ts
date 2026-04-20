@@ -179,7 +179,9 @@ export const MembershipApplicationSchema = z
     applicationMemberType: ApplicationMemberTypeEnum,
     businessMemberId: z.string().optional(),
     companyName: z.string().min(1, "Company name is required"),
-    sectorId: z.number({ message: "Industry/Sector is required" }),
+    sectorName: z
+      .string({ message: "Industry/Sector is required" })
+      .min(1, "Industry/Sector is required"),
     companyAddress: z.string().min(1, "Company address is required"),
     websiteURL: z.string().min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),

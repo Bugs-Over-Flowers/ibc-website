@@ -32,7 +32,7 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId: number | null;
+          sectorName: string | null;
           websiteURL: string;
         };
         Insert: {
@@ -52,7 +52,7 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId?: number | null;
+          sectorName?: string | null;
           websiteURL: string;
         };
         Update: {
@@ -72,7 +72,7 @@ export type Database = {
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId?: number | null;
+          sectorName?: string | null;
           websiteURL?: string;
         };
         Relationships: [
@@ -89,13 +89,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "Interview";
             referencedColumns: ["interviewId"];
-          },
-          {
-            foreignKeyName: "Application_sectorId_fkey";
-            columns: ["sectorId"];
-            isOneToOne: false;
-            referencedRelation: "Sector";
-            referencedColumns: ["sectorId"];
           },
         ];
       };
@@ -168,7 +161,7 @@ export type Database = {
           membershipStatus:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -184,7 +177,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -200,7 +193,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId?: string;
           sectorId?: number;
           websiteURL?: string;
         };
@@ -626,6 +619,7 @@ export type Database = {
           cardPlacement: number | null;
           createdAt: string;
           entryKey: string;
+          group: string | null;
           icon: string | null;
           id: string;
           imageUrl: string | null;
@@ -639,6 +633,7 @@ export type Database = {
           cardPlacement?: number | null;
           createdAt?: string;
           entryKey: string;
+          group?: string | null;
           icon?: string | null;
           id?: string;
           imageUrl?: string | null;
@@ -652,6 +647,7 @@ export type Database = {
           cardPlacement?: number | null;
           createdAt?: string;
           entryKey?: string;
+          group?: string | null;
           icon?: string | null;
           id?: string;
           imageUrl?: string | null;
@@ -919,19 +915,21 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_sponsored_registration_by_uuid:
-        | {
-            Args: { p_uuid: string };
-            Returns: {
-              error: true;
-            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
-          }
-        | {
-            Args: { p_uuid: string };
-            Returns: {
-              error: true;
-            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
-          };
+      get_sponsored_registration_by_uuid: {
+        Args: { p_uuid: string };
+        Returns: {
+          createdAt: string;
+          eventId: string;
+          feeDeduction: number;
+          maxSponsoredGuests: number;
+          sponsoredBy: string;
+          sponsoredRegistrationId: string;
+          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt: string;
+          usedCount: number;
+          uuid: string;
+        }[];
+      };
       get_sponsored_registrations_with_details: {
         Args: { p_event_id: string };
         Returns: {
@@ -1069,37 +1067,72 @@ export type Database = {
         };
         Returns: Json;
       };
-      upsert_website_content: {
-        Args: {
-          p_card_placement?: number;
-          p_entry_key: string;
-          p_icon?: string;
-          p_image_url?: string;
-          p_is_active?: boolean;
-          p_section: Database["public"]["Enums"]["WebsiteContentSection"];
-          p_text_type: Database["public"]["Enums"]["WebsiteContentTextType"];
-          p_text_value?: string;
-        };
-        Returns: {
-          cardPlacement: number | null;
-          createdAt: string;
-          entryKey: string;
-          icon: string | null;
-          id: string;
-          imageUrl: string | null;
-          isActive: boolean;
-          section: Database["public"]["Enums"]["WebsiteContentSection"];
-          textType: Database["public"]["Enums"]["WebsiteContentTextType"];
-          textValue: string | null;
-          updatedAt: string;
-        };
-        SetofOptions: {
-          from: "*";
-          to: "WebsiteContent";
-          isOneToOne: true;
-          isSetofReturn: false;
-        };
-      };
+      upsert_website_content:
+        | {
+            Args: {
+              p_card_placement?: number;
+              p_entry_key: string;
+              p_icon?: string;
+              p_image_url?: string;
+              p_is_active?: boolean;
+              p_section: Database["public"]["Enums"]["WebsiteContentSection"];
+              p_text_type: Database["public"]["Enums"]["WebsiteContentTextType"];
+              p_text_value?: string;
+            };
+            Returns: {
+              cardPlacement: number | null;
+              createdAt: string;
+              entryKey: string;
+              group: string | null;
+              icon: string | null;
+              id: string;
+              imageUrl: string | null;
+              isActive: boolean;
+              section: Database["public"]["Enums"]["WebsiteContentSection"];
+              textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+              textValue: string | null;
+              updatedAt: string;
+            };
+            SetofOptions: {
+              from: "*";
+              to: "WebsiteContent";
+              isOneToOne: true;
+              isSetofReturn: false;
+            };
+          }
+        | {
+            Args: {
+              p_card_placement?: number;
+              p_entry_key: string;
+              p_group?: string;
+              p_icon?: string;
+              p_image_url?: string;
+              p_is_active?: boolean;
+              p_section: Database["public"]["Enums"]["WebsiteContentSection"];
+              p_text_type: Database["public"]["Enums"]["WebsiteContentTextType"];
+              p_text_value?: string;
+            };
+            Returns: {
+              cardPlacement: number | null;
+              createdAt: string;
+              entryKey: string;
+              group: string | null;
+              icon: string | null;
+              id: string;
+              imageUrl: string | null;
+              isActive: boolean;
+              section: Database["public"]["Enums"]["WebsiteContentSection"];
+              textType: Database["public"]["Enums"]["WebsiteContentTextType"];
+              textValue: string | null;
+              updatedAt: string;
+            };
+            SetofOptions: {
+              from: "*";
+              to: "WebsiteContent";
+              isOneToOne: true;
+              isSetofReturn: false;
+            };
+          };
     };
     Enums: {
       ApplicationMemberType: "corporate" | "personal";
