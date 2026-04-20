@@ -1909,31 +1909,6 @@ $$;
 ALTER FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "text") RETURNS TABLE("sponsoredRegistrationId" "uuid", "uuid" "text", "eventId" "uuid", "sponsoredBy" "text", "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, "status" "public"."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
-    LANGUAGE "plpgsql" STABLE
-    AS $$
-BEGIN
-  RETURN QUERY
-  SELECT
-    sr."sponsoredRegistrationId",
-    sr."uuid",
-    sr."eventId",
-    sr."sponsoredBy",
-    sr."feeDeduction",
-    sr."maxSponsoredGuests",
-    sr."usedCount",
-    sr."status",
-    sr."createdAt",
-    sr."updatedAt"
-  FROM public."SponsoredRegistration" sr
-  WHERE sr."uuid" = p_uuid;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "text") OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "uuid") RETURNS TABLE("sponsoredRegistrationId" "uuid", "uuid" "uuid", "eventId" "uuid", "sponsoredBy" "text", "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, "status" "public"."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
     LANGUAGE "plpgsql" STABLE
     AS $$
@@ -2561,7 +2536,8 @@ ALTER FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid"
 
 
 CREATE OR REPLACE FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text" DEFAULT NULL::"text") RETURNS "jsonb"
-    LANGUAGE "plpgsql"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_application_id uuid;
@@ -4538,12 +4514,6 @@ GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "service_role";
 GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "text") TO "service_role";
 
 
 
