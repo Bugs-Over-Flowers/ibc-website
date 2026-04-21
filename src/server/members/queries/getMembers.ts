@@ -4,6 +4,7 @@ import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { applyAdmin5mCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { signLogoUrl } from "@/lib/storage/signedUrls";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 import type { MemberFilterInput } from "@/lib/validation/application/application";
@@ -12,6 +13,11 @@ export async function getMembers(
   requestCookies: RequestCookie[],
   filters?: MemberFilterInput,
 ) {
+  "use cache";
+  applyAdmin5mCache();
+  cacheTag(CACHE_TAGS.members.all);
+  cacheTag(CACHE_TAGS.members.admin);
+
   const supabase = await createClient(requestCookies);
 
   let query = supabase
@@ -53,24 +59,6 @@ export async function getMembers(
       }> | null;
     };
 
-  const signLogoUrl = async (path: string | null) => {
-    if (!path) return null;
-
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      return path;
-    }
-
-    const { data: signed, error } = await supabase.storage
-      .from("logoimage")
-      .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
-
-    if (!error && signed?.signedUrl) {
-      return signed.signedUrl;
-    }
-
-    return null;
-  };
-
   const membersWithSignedLogos = await Promise.all(
     (data as MemberWithSector[]).map(async (member: MemberWithSector) => {
       const { Application, ...memberWithoutApplication } = member;
@@ -84,7 +72,7 @@ export async function getMembers(
       return {
         ...memberWithoutApplication,
         featuredExpirationDate: normalizedFeaturedExpirationDate,
-        logoImageURL: await signLogoUrl(member.logoImageURL),
+        logoImageURL: await signLogoUrl(supabase, member.logoImageURL),
         primaryApplicationId: member.primaryApplicationId,
       };
     }),
