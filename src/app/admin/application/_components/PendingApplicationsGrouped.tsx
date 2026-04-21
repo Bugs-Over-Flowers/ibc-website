@@ -112,7 +112,7 @@ const SHARED_COLS = [
 export function PendingApplicationsGrouped({
   applications,
 }: PendingApplicationsGroupedProps) {
-  const { selectedApplicationIds, toggleSelection } =
+  const { selectedApplicationIds, toggleSelection, isSelectionLocked } =
     useSelectedApplicationsStore();
   const { sortedGroups, unscheduled } = useMemo(
     () => groupBySchedule(applications),
@@ -168,7 +168,9 @@ export function PendingApplicationsGrouped({
                           aria-label="Select all in group"
                           checked={allSelected}
                           data-indeterminate={someSelected}
+                          disabled={isSelectionLocked}
                           onCheckedChange={() => {
+                            if (isSelectionLocked) return;
                             if (allSelected) {
                               selectableIds.forEach(toggleSelection);
                             } else {

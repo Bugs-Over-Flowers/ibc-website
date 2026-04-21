@@ -1,5 +1,18 @@
 "use client";
 
+import {
+  ArrowLeft,
+  Camera,
+  Check,
+  CheckCircle2,
+  Clock,
+  CreditCard,
+  RefreshCw,
+  Save,
+  Upload,
+  X,
+  XCircle,
+} from "lucide-react";
 import { usePaymentProofDecisionActions } from "@/app/admin/events/_hooks/usePaymentProofDecisionActions";
 import { usePaymentProofDialogState } from "@/app/admin/events/_hooks/usePaymentProofDialogState";
 import { usePaymentProofSignedUrlAction } from "@/app/admin/events/_hooks/usePaymentProofSignedUrlAction";
@@ -55,14 +68,23 @@ function getStatusMessage(status: PaymentProofStatus): string {
   }
 }
 
-function getStatusClassName(status: PaymentProofStatus): string {
+function getStatusConfig(status: PaymentProofStatus) {
   switch (status) {
     case "accepted":
-      return "border-green-200 bg-green-50 text-green-700";
+      return {
+        className: "border-green-200 bg-green-50 text-green-700",
+        icon: <CheckCircle2 className="size-3" />,
+      };
     case "rejected":
-      return "border-red-200 bg-red-50 text-red-700";
+      return {
+        className: "border-red-200 bg-red-50 text-red-700",
+        icon: <XCircle className="size-3" />,
+      };
     default:
-      return "border-yellow-200 bg-yellow-50 text-yellow-700";
+      return {
+        className: "border-yellow-200 bg-yellow-50 text-yellow-700",
+        icon: <Clock className="size-3" />,
+      };
   }
 }
 
@@ -79,7 +101,6 @@ export default function PaymentProofReviewDialog({
   onStatusChange,
   onProofPathChange,
 }: PaymentProofReviewDialogProps) {
-  // UI state: mode, preview file, dialog open/close reset
   const {
     uploadSubmitRef,
     mode,
@@ -97,7 +118,6 @@ export default function PaymentProofReviewDialog({
     handleFileSelect,
   } = usePaymentProofDialogState({ initialPaymentProofStatus, onOpenChange });
 
-  // Fetch signed URL when dialog opens
   const {
     signedUrl,
     isSignedUrlImageError,
@@ -108,7 +128,6 @@ export default function PaymentProofReviewDialog({
     registrationId: registrationData.registrationId,
   });
 
-  // Accept / Reject actions
   const { acceptProof, rejectProof, isAccepting, isRejecting } =
     usePaymentProofDecisionActions({
       page,
@@ -119,7 +138,6 @@ export default function PaymentProofReviewDialog({
       onStatusResolved: setPaymentProofStatus,
     });
 
-  // Replace proof + accept action
   const { isReplacing, handleReplaceAndAccept } = useReplacePaymentProofAction({
     registrationId: registrationData.registrationId,
     onReplaceAction,
@@ -132,14 +150,10 @@ export default function PaymentProofReviewDialog({
     },
   });
 
-  // Derived flags
-
-  // check if any action is pending
   const isAnyActionPending =
     isFetchingSignedUrl || isAccepting || isRejecting || isReplacing;
-
-  // check if decision is locked (the status has already been resolved by the admin)
   const isDecisionLocked = paymentProofStatus !== "pending";
+  const statusConfig = getStatusConfig(paymentProofStatus);
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
@@ -148,25 +162,31 @@ export default function PaymentProofReviewDialog({
         className="flex w-[95vw] flex-col p-4 sm:max-w-3xl sm:p-6"
         outsideScroll
       >
+        {/* Header */}
         <div className="space-y-3 pr-8">
-          <DialogTitle>{dialogTitle}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 font-medium text-base">
+            <CreditCard className="size-4 text-muted-foreground" />
+            {dialogTitle}
+          </DialogTitle>
 
-          <div className="space-y-3">
+          <div className="flex flex-col gap-1.5">
             <Badge
               className={cn(
-                "w-fit capitalize",
-                getStatusClassName(paymentProofStatus),
+                "flex w-fit items-center gap-1.5 capitalize",
+                statusConfig.className,
               )}
               variant="outline"
             >
+              {statusConfig.icon}
               {paymentProofStatus}
             </Badge>
-            <div className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm">
               {getStatusMessage(paymentProofStatus)}
-            </div>
+            </p>
           </div>
         </div>
 
+        {/* Content panel */}
         <div className="py-4">
           {mode === "camera" && (
             <CameraCapture
@@ -174,18 +194,15 @@ export default function PaymentProofReviewDialog({
               onCapture={handleCapture}
             />
           )}
-
           {mode === "upload" && (
             <PaymentProofUploadPanel
               onFileSelect={handleFileSelect}
               submitRef={uploadSubmitRef}
             />
           )}
-
           {mode === "preview" && (
             <PaymentProofPreviewPanel previewUrl={previewUrl} />
           )}
-
           {mode === "view" && (
             <PaymentProofViewPanel
               isFetchingSignedUrl={isFetchingSignedUrl}
@@ -196,8 +213,9 @@ export default function PaymentProofReviewDialog({
           )}
         </div>
 
-        <DialogFooter className="mt-1 flex-wrap border-t pt-4 max-sm:*:w-full">
-          {/* Camera or Upload mode Buttons */}
+        {/* Footer */}
+        <DialogFooter className="mt-1 flex-wrap gap-2 border-t pt-4 max-sm:*:w-full">
+          {/* Camera / Upload mode */}
           {(mode === "camera" || mode === "upload") && (
             <>
               <Button
@@ -208,9 +226,9 @@ export default function PaymentProofReviewDialog({
                 }}
                 variant="outline"
               >
+                <ArrowLeft className="size-3.5" />
                 Back to Proof
               </Button>
-
               <Button
                 disabled={isAnyActionPending}
                 onClick={() => {
@@ -219,9 +237,9 @@ export default function PaymentProofReviewDialog({
                 }}
                 variant="outline"
               >
+                <Upload className="size-3.5" />
                 Use Upload
               </Button>
-
               <Button
                 disabled={isAnyActionPending}
                 onClick={() => {
@@ -230,21 +248,22 @@ export default function PaymentProofReviewDialog({
                 }}
                 variant="outline"
               >
+                <Camera className="size-3.5" />
                 Use Camera
               </Button>
-
               {mode === "upload" && (
                 <Button
                   disabled={isAnyActionPending}
                   onClick={() => uploadSubmitRef.current?.()}
                 >
+                  <Check className="size-3.5" />
                   Review Selected File
                 </Button>
               )}
             </>
           )}
 
-          {/* Preview Mode Buttons */}
+          {/* Preview mode */}
           {mode === "preview" && (
             <>
               <Button
@@ -255,18 +274,27 @@ export default function PaymentProofReviewDialog({
                 }}
                 variant="outline"
               >
-                {previewSource === "upload" ? "Pick Another File" : "Retake"}
+                {previewSource === "upload" ? (
+                  <>
+                    <RefreshCw className="size-3.5" /> Pick Another File
+                  </>
+                ) : (
+                  <>
+                    <Camera className="size-3.5" /> Retake
+                  </>
+                )}
               </Button>
               <Button
                 disabled={isAnyActionPending || !selectedFile}
                 onClick={() => handleReplaceAndAccept(selectedFile)}
               >
+                <Save className="size-3.5" />
                 {isReplacing ? "Saving..." : "Save and Accept"}
               </Button>
             </>
           )}
 
-          {/* View Proof of Payment Buttons */}
+          {/* View mode */}
           {mode === "view" && (
             <>
               <Button
@@ -274,9 +302,9 @@ export default function PaymentProofReviewDialog({
                 onClick={() => handleOpenChange(false)}
                 variant="outline"
               >
+                <X className="size-3.5" />
                 Close
               </Button>
-
               <Button
                 disabled={isAnyActionPending}
                 onClick={() => {
@@ -285,9 +313,9 @@ export default function PaymentProofReviewDialog({
                 }}
                 variant="outline"
               >
+                <Camera className="size-3.5" />
                 Use Camera
               </Button>
-
               <Button
                 disabled={isAnyActionPending}
                 onClick={() => {
@@ -296,21 +324,24 @@ export default function PaymentProofReviewDialog({
                 }}
                 variant="outline"
               >
+                <Upload className="size-3.5" />
                 Upload File
               </Button>
-
               <Button
+                className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
                 disabled={isAnyActionPending || isDecisionLocked}
                 onClick={() => rejectProof()}
                 variant="outline"
               >
+                <XCircle className="size-3.5" />
                 {isRejecting ? "Rejecting..." : "Reject"}
               </Button>
-
               <Button
+                className="bg-green-700 hover:bg-green-800"
                 disabled={isAnyActionPending || isDecisionLocked}
                 onClick={() => acceptProof()}
               >
+                <CheckCircle2 className="size-3.5" />
                 {isAccepting ? "Accepting..." : "Accept"}
               </Button>
             </>

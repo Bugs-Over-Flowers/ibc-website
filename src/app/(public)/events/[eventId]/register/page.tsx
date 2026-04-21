@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import type { RegistrationRouteProps } from "@/lib/types/route";
+
+export const metadata: Metadata = {
+  title: "Event Registration",
+  description: "Complete your registration for this event.",
+};
 
 interface SponsoredRegisterPageProps extends RegistrationRouteProps {
   searchParams: Promise<{ sr?: string | string[] }>;

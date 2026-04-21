@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
+import { QrCode, RotateCcw } from "lucide-react";
 import Image from "next/image";
 import { type FormEvent, useEffect, useState } from "react";
 import { useResendEmail } from "@/app/admin/events/[eventId]/registration-list/_hooks/useResendEmail";
@@ -61,20 +61,27 @@ export default function QRCodeDialog({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogContent>
+      <DialogContent className="max-w-sm">
         <form className="space-y-3" onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>QR Code</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 font-medium text-base">
+              <QrCode className="size-4 text-muted-foreground" />
+              QR Code
+            </DialogTitle>
             <DialogDescription>
-              Registration Identifier:{" "}
-              <strong> {registrationIdentifier}</strong>
+              Registration ID:{" "}
+              <strong className="font-medium text-foreground">
+                {registrationIdentifier}
+              </strong>
             </DialogDescription>
           </DialogHeader>
+
           <form.AppField name="email">
             {(field) =>
               qrURL === "" ? (
-                <div className="relative size-50">
-                  <Skeleton className="absolute h-full w-full bg-neutral-300" />
+                <div className="flex flex-col items-center gap-2 rounded-lg border bg-muted/30 p-4">
+                  <Skeleton className="size-[120px] bg-neutral-300" />
+                  <Skeleton className="h-3 w-24 bg-neutral-300" />
                 </div>
               ) : (
                 <>
@@ -83,38 +90,49 @@ export default function QRCodeDialog({
                     email={email}
                     registrationIdentifier={registrationIdentifier}
                   >
-                    <div className="relative size-50">
-                      <Image
-                        alt="QR Code"
-                        fill
-                        sizes="(min-width: 640px) 512px, 100vw"
-                        src={qrURL}
-                      />
+                    <div className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border bg-muted/30 p-4 transition-colors hover:bg-muted/50">
+                      <div className="relative size-[120px]">
+                        <Image alt="QR Code" fill sizes="120px" src={qrURL} />
+                      </div>
+                      <span className="text-muted-foreground text-xs">
+                        Click to download
+                      </span>
+                      <span className="font-medium font-mono text-foreground text-xs">
+                        {registrationIdentifier}
+                      </span>
                     </div>
                   </QRDownloader>
-                  <Field>
-                    <h4>Resend QR Code</h4>
-                    <div className="flex gap-2">
-                      <field.TextField label="Send to" />
-                      {field.state.value !== email && (
-                        <Button
-                          className="self-end"
-                          onClick={() => field.handleChange(email)}
-                          type="button"
-                        >
-                          <RotateCcw />
-                        </Button>
-                      )}
-                    </div>
-                  </Field>
+
+                  <div className="space-y-2 pt-1">
+                    <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                      Resend QR Code
+                    </p>
+                    <Field>
+                      <div className="flex gap-2">
+                        <field.TextField label="Send to" />
+                        {field.state.value !== email && (
+                          <Button
+                            className="self-end"
+                            onClick={() => field.handleChange(email)}
+                            size="icon"
+                            type="button"
+                            variant="outline"
+                          >
+                            <RotateCcw className="size-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </Field>
+                  </div>
                 </>
               )
             }
           </form.AppField>
+
           <DialogFooter>
             <form.AppForm>
               <form.SubmitButton
-                isSubmittingLabel="Sending Email"
+                isSubmittingLabel="Sending..."
                 label="Resend Email"
               />
             </form.AppForm>

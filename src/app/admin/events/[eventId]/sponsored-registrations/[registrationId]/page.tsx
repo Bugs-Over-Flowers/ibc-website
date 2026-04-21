@@ -1,17 +1,23 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import BackButton from "@/app/admin/_components/BackButton";
 import { getEventStatus } from "@/lib/events/eventUtils";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getRegistrationsBySponsoredId } from "@/server/sponsored-registrations/queries/getRegistrationsBySponsoredId";
 import { getSponsoredRegistrationById } from "@/server/sponsored-registrations/queries/getSponsoredRegistrationById";
-import { DetailBackButton } from "./_components/DetailBackButton";
 import { RegisteredGuestsTable } from "./_components/RegisteredGuestsTable";
 import { SlotUtilizationCard } from "./_components/SlotUtilizationCard";
 import { SponsoredLinkCard } from "./_components/SponsoredLinkCard";
 import { SponsoredRegistrationActions } from "./_components/SponsoredRegistrationActions";
 import { SponsoredRegistrationHeader } from "./_components/SponsoredRegistrationHeader";
 import SponsoredRegistrationDetailLoading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Sponsored Link Details | Admin",
+  description: "View sponsored link metrics and registered guests.",
+};
 
 type SponsoredRegistrationDetailProps =
   PageProps<"/admin/events/[eventId]/sponsored-registrations/[registrationId]">;
@@ -131,7 +137,10 @@ async function DetailContent({
 
   return (
     <>
-      <DetailBackButton />
+      <BackButton
+        href="/admin/sponsored-registration"
+        label="Back to Sponsored Registrations"
+      />
 
       <SponsoredRegistrationHeader
         eventId={eventId}
