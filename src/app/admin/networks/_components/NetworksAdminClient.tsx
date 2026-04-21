@@ -50,13 +50,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  resolveNetworkLogoUrl,
-  uploadNetworkLogo,
-} from "@/lib/storage/networkLogo";
+import { resolveNetworkLogoUrl } from "@/lib/storage/networkLogo";
 import { createNetwork } from "@/server/networks/mutations/createNetwork";
 import { deleteNetwork } from "@/server/networks/mutations/deleteNetwork";
 import { updateNetwork } from "@/server/networks/mutations/updateNetwork";
+import { uploadNetworkLogo } from "@/server/networks/mutations/uploadNetworkLogo";
 import type { Network } from "@/server/networks/types";
 
 type NetworkFormState = {
@@ -193,7 +191,9 @@ export function NetworksAdminClient({
       const localPreview = URL.createObjectURL(file);
       setLogoPreview(localPreview);
 
-      const uploadedUrl = await uploadNetworkLogo(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadedUrl = await uploadNetworkLogo(formData);
       setFormState((prev) => ({ ...prev, logoUrl: uploadedUrl }));
       setLogoPreview(uploadedUrl);
       toast.success("Logo uploaded successfully.");

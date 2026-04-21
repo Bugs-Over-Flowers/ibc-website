@@ -3,7 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import { createActionClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import {
   type UpdateNetworkInput,
   updateNetworkSchema,
@@ -32,7 +32,7 @@ export async function updateNetwork(
     logo_url: parsed.logoUrl,
   };
 
-  const supabase = await createActionClient();
+  const supabase = await createAdminClient();
 
   const { data, error } = await supabase
     .from("Networks")

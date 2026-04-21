@@ -1,6 +1,4 @@
-import { createClient } from "@/lib/supabase/client";
-
-const NETWORK_LOGO_BUCKET = "network-logos";
+export const NETWORK_LOGO_BUCKET = "network-logos";
 const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
 const INVALID_LOGO_HOSTS = new Set(["your-project.supabase.co"]);
 const ALLOWED_LOGO_MIME_TYPES = new Set([
@@ -20,34 +18,6 @@ export function validateNetworkLogoFile(file: File): string | null {
   }
 
   return null;
-}
-
-export async function uploadNetworkLogo(file: File): Promise<string> {
-  const validationError = validateNetworkLogoFile(file);
-  if (validationError) {
-    throw new Error(validationError);
-  }
-
-  const extension = file.name.split(".").pop()?.toLowerCase() ?? "png";
-  const filePath = `network-${crypto.randomUUID()}.${extension}`;
-  const supabase = await createClient();
-
-  const { error } = await supabase.storage
-    .from(NETWORK_LOGO_BUCKET)
-    .upload(filePath, file, {
-      contentType: file.type,
-      upsert: false,
-    });
-
-  if (error) {
-    throw new Error(`Failed to upload logo: ${error.message}`);
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from(NETWORK_LOGO_BUCKET).getPublicUrl(filePath);
-
-  return publicUrl;
 }
 
 export function resolveNetworkLogoUrl(logoUrl?: string | null): string | null {

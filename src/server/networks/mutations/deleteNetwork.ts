@@ -3,7 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import { createActionClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 const networkIdSchema = z.uuid("Invalid network ID");
 
@@ -11,7 +11,7 @@ export async function deleteNetwork(
   networkId: string,
 ): Promise<{ id: string }> {
   const parsedId = networkIdSchema.parse(networkId);
-  const supabase = await createActionClient();
+  const supabase = await createAdminClient();
 
   const { error } = await supabase.from("Networks").delete().eq("id", parsedId);
 
