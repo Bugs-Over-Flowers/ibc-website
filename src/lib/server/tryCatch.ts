@@ -1,29 +1,25 @@
-import type { ServerFunction, ServerFunctionResult } from "./types";
+import type { AsyncFunction, AsyncResult } from "./types";
 
 function tryCatch<TInput extends unknown[], TOutput>(
   fn: (...args: TInput) => Promise<TOutput>,
-): ServerFunction<TInput, TOutput, string>;
+): AsyncFunction<TInput, TOutput, string>;
 
 function tryCatch<TOutput>(
   promise: Promise<TOutput>,
-): Promise<ServerFunctionResult<TOutput, string>>;
+): Promise<AsyncResult<TOutput, string>>;
 
 function tryCatch<TInput extends unknown[], TOutput>(
   fnOrPromise: ((...args: TInput) => Promise<TOutput>) | Promise<TOutput>,
 ):
-  | ServerFunction<TInput, TOutput, string>
-  | Promise<ServerFunctionResult<TOutput, string>> {
-  const handleSuccess = (
-    data: TOutput,
-  ): ServerFunctionResult<TOutput, string> => ({
+  | AsyncFunction<TInput, TOutput, string>
+  | Promise<AsyncResult<TOutput, string>> {
+  const handleSuccess = (data: TOutput): AsyncResult<TOutput, string> => ({
     success: true,
     data,
     error: null,
   });
 
-  const handleError = (
-    error: unknown,
-  ): ServerFunctionResult<TOutput, string> => {
+  const handleError = (error: unknown): AsyncResult<TOutput, string> => {
     const message = error instanceof Error ? error.message : String(error);
     return { success: false, data: null, error: message };
   };

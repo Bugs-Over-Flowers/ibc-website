@@ -1,6 +1,8 @@
 "use server";
 
-import type { ServerFunction } from "@/lib/server/types";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
+import type { AsyncFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   type MembershipApplicationInput,
@@ -15,7 +17,7 @@ type SubmitApplicationOutput = {
   message: string;
 };
 
-export const submitMembershipApplication: ServerFunction<
+export const submitMembershipApplication: AsyncFunction<
   [MembershipApplicationInput],
   SubmitApplicationOutput
 > = async (input) => {
@@ -102,6 +104,9 @@ export const submitMembershipApplication: ServerFunction<
       emailError,
     );
   }
+
+  updateTag(CACHE_TAGS.applications.all);
+  updateTag(CACHE_TAGS.applications.admin);
 
   return { success: true, data: result, error: null };
 };
