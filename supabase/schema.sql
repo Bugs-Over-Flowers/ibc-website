@@ -1005,7 +1005,7 @@ CREATE OR REPLACE FUNCTION "public"."compute_primary_application_id"("p_member_i
   SELECT a."applicationId"
   FROM public."Application" a
   WHERE a."memberId" = p_member_id
-  ORDER BY 
+  ORDER BY
     CASE a."applicationStatus"
       WHEN 'approved' THEN 3
       WHEN 'pending' THEN 2
@@ -1086,9 +1086,9 @@ declare
 begin
   delete from "EvaluationForm"
   where "evaluationId" = eval_id;
-  
+
   get diagnostics deleted_count = row_count;
-  
+
   if deleted_count = 0 then
     return query select false, 'Evaluation not found'::text;
   else
@@ -1689,7 +1689,7 @@ BEGIN
   WITH
   -- registration and event details
   base_data AS (
-    SELECT 
+    SELECT
       r."registrationId",
       r."nonMemberName",
       r."businessMemberId",
@@ -1711,13 +1711,13 @@ BEGIN
   ),
 
   check_in_list AS (
-    SELECT 
+    SELECT
       p.*,
       ci.remarks,
       ci.date,
       -- Check if a CheckIn exists for this participant on the current event day(s)
       EXISTS (
-        SELECT 1 
+        SELECT 1
         FROM "CheckIn" ci
         JOIN current_event_day ced ON ci."eventDayId" = ced."eventDayId"
         WHERE ci."participantId" = p."participantId"
@@ -1741,12 +1741,12 @@ BEGIN
         to_jsonb(cil.*) || jsonb_build_object(
           'checkedIn', cil.is_checked_in
         )
-        ORDER BY 
-          "lastName" ASC,      
+        ORDER BY
+          "lastName" ASC,
           "firstName" ASC
       )
       FROM check_in_list cil
-     
+
     ),
     -- event day(s) details today
     (
@@ -1762,7 +1762,7 @@ BEGIN
       -- Check if today is within the event date range
       (p_today >= bd."eventStartDate" AND p_today <= bd."eventEndDate")
     )
-  INTO 
+  INTO
     v_result.registration_details,
     v_result.event_details,
     v_result.check_in_list,
@@ -1772,7 +1772,7 @@ BEGIN
 
   FROM base_data bd
   LEFT JOIN "BusinessMember" bm ON bd."businessMemberId" = bm."businessMemberId";
-  
+
   -- Check if registration exists
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Registration Not Found';
@@ -1909,6 +1909,31 @@ $$;
 ALTER FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "text") RETURNS TABLE("sponsoredRegistrationId" "uuid", "uuid" "text", "eventId" "uuid", "sponsoredBy" "text", "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, "status" "public"."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
+    LANGUAGE "plpgsql" STABLE
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    sr."sponsoredRegistrationId",
+    sr."uuid",
+    sr."eventId",
+    sr."sponsoredBy",
+    sr."feeDeduction",
+    sr."maxSponsoredGuests",
+    sr."usedCount",
+    sr."status",
+    sr."createdAt",
+    sr."updatedAt"
+  FROM public."SponsoredRegistration" sr
+  WHERE sr."uuid" = p_uuid;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "text") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "uuid") RETURNS TABLE("sponsoredRegistrationId" "uuid", "uuid" "uuid", "eventId" "uuid", "sponsoredBy" "text", "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, "status" "public"."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
     LANGUAGE "plpgsql" STABLE
     AS $$
@@ -1940,7 +1965,7 @@ CREATE OR REPLACE FUNCTION "public"."get_sponsored_registrations_with_details"("
     AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     sr.id,
     sr.event_id,
     sr.sponsor_id,
@@ -1991,7 +2016,7 @@ BEGIN
   -- Case 2: Event is inserted or updated with eventType = 'public' or 'private'
   -- Ensure dates are present before generating days
   IF (NEW."eventType" IN ('public', 'private') AND NEW."eventStartDate" IS NOT NULL AND NEW."eventEndDate" IS NOT NULL) THEN
-    
+
     -- 1. Delete days that are outside the new range
     DELETE FROM public."EventDay"
     WHERE "eventId" = NEW."eventId"
@@ -2002,16 +2027,16 @@ BEGIN
     WHILE day_date <= NEW."eventEndDate" LOOP
       -- Check if exists
       IF NOT EXISTS (
-        SELECT 1 FROM public."EventDay" 
+        SELECT 1 FROM public."EventDay"
         WHERE "eventId" = NEW."eventId" AND "eventDate" = day_date
       ) THEN
         -- Generate label (e.g., "Day 1")
         day_label := 'Day ' || (day_date - NEW."eventStartDate"::DATE + 1)::TEXT;
-        
+
         INSERT INTO public."EventDay" ("eventId", "eventDate", "label")
         VALUES (NEW."eventId", day_date, day_label);
       END IF;
-      
+
       day_date := day_date + 1;
     END LOOP;
 
@@ -2020,7 +2045,7 @@ BEGIN
     UPDATE public."EventDay"
     SET label = 'Day ' || ("eventDate" - NEW."eventStartDate"::DATE + 1)::TEXT
     WHERE "eventId" = NEW."eventId";
-    
+
   END IF;
 
   RETURN NEW;
@@ -2115,7 +2140,7 @@ BEGIN
   WHILE v_current_date <= v_end_date LOOP
     INSERT INTO "EventDay" ("eventId", "eventDate", "label")
     VALUES (p_event_id, v_current_date, 'Day ' || v_day_number);
-    
+
     v_current_date := v_current_date + 1;
     v_day_number := v_day_number + 1;
   END LOOP;
@@ -2277,8 +2302,8 @@ CREATE OR REPLACE FUNCTION "public"."set_membership_expiry"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$BEGIN
     IF NEW."lastPaymentDate" IS NOT NULL THEN
-        NEW."membershipExpiryDate" = 
-            DATE_TRUNC('year', NEW."lastPaymentDate") 
+        NEW."membershipExpiryDate" =
+            DATE_TRUNC('year', NEW."lastPaymentDate")
             + INTERVAL '1 year';
         NEW."membershipStatus" = 'paid'::"MembershipStatus";
     END IF;
@@ -2536,8 +2561,7 @@ ALTER FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid"
 
 
 CREATE OR REPLACE FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text" DEFAULT NULL::"text") RETURNS "jsonb"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO 'public'
+    LANGUAGE "plpgsql"
     AS $$
 DECLARE
   v_application_id uuid;
@@ -2992,7 +3016,7 @@ DECLARE
   affected_member uuid;
 BEGIN
   affected_member := COALESCE(NEW."businessMemberId", OLD."businessMemberId");
-  
+
   IF affected_member IS NOT NULL THEN
     UPDATE "BusinessMember"
     SET "primaryApplicationId" = (
@@ -3004,7 +3028,7 @@ BEGIN
     )
     WHERE "businessMemberId" = affected_member;
   END IF;
-  
+
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
@@ -3036,7 +3060,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
       END IF;
-      
+
       -- Update count for new sponsored registration
       IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
         UPDATE public."SponsoredRegistration"
@@ -3047,7 +3071,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
       END IF;
-      
+
       RETURN NEW;
     END IF;
     v_sponsored_registration_id := NEW."sponsoredRegistrationId";
@@ -3154,7 +3178,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = OLD."sponsoredRegistrationId";
       END IF;
-      
+
       -- Update count for new sponsored registration (count participants)
       IF NEW."sponsoredRegistrationId" IS NOT NULL THEN
         UPDATE public."SponsoredRegistration"
@@ -3166,7 +3190,7 @@ BEGIN
         )
         WHERE "sponsoredRegistrationId" = NEW."sponsoredRegistrationId";
       END IF;
-      
+
       RETURN NEW;
     END IF;
     v_sponsored_registration_id := NEW."sponsoredRegistrationId";
@@ -4818,34 +4842,3 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

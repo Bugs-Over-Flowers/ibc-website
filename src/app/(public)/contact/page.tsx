@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ContactInfoCards } from "./_components/ContactCards";
 import { ContactFAQ } from "./_components/ContactFAQ";
@@ -5,6 +6,11 @@ import { ContactForm } from "./_components/ContactForm";
 import { ContactHero } from "./_components/ContactHero";
 import { ContactMap } from "./_components/ContactMap";
 import Loading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Contact Us",
+  description: "Get in touch with IBC for inquiries and support.",
+};
 
 export default function ContactPage() {
   return (

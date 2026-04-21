@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import tryCatch from "@/lib/server/tryCatch";
@@ -11,6 +12,11 @@ import QuickOnsiteRegistrationCard from "./_components/QuickOnsiteRegistrationCa
 import QRCodeScanner from "./_components/qr-scanning/QRCodeScanner";
 import CheckInRegistrationPanel from "./_components/registration-list/CheckInRegistrationPanel";
 import CheckInPageLoading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Event Check-In | Admin",
+  description: "Scan QR codes and check in event attendees.",
+};
 
 type CheckInPageProps = PageProps<"/admin/events/check-in/[eventDayId]">;
 

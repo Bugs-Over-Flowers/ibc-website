@@ -1,16 +1,10 @@
 "use client";
 
 import { format } from "date-fns";
-import {
-  CalendarDays,
-  ChevronLeft,
-  Clock,
-  MessageSquare,
-  Star,
-  User,
-} from "lucide-react";
+import { CalendarDays, Clock, MessageSquare, Star, User } from "lucide-react";
 import type { Route } from "next";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import BackButton from "@/app/admin/_components/BackButton";
 import { getEvaluationRatingQuestions } from "@/lib/evaluation/evaluationQuestions";
 import { renderStars } from "@/lib/evaluation/ratingStarsClient";
 import {
@@ -25,7 +19,6 @@ interface EvaluationCardProps {
 }
 
 export function EvaluationCard({ evaluation }: EvaluationCardProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const eventTitle = evaluation.event_title || "Unknown Event";
   const createdAt = new Date(evaluation.created_at);
@@ -33,29 +26,17 @@ export function EvaluationCard({ evaluation }: EvaluationCardProps) {
   const ratingValues = ratings.map((r) => r.value);
   const overallRating = calculateOverallRating(ratingValues);
 
-  const handleClick = () => {
-    const eventId = searchParams.get("eventId");
-    const targetPath = eventId
-      ? `/admin/events/${eventId}/evaluations`
-      : "/admin/evaluation";
-    router.push(targetPath as Route);
-  };
-
   const eventId = searchParams.get("eventId");
+  const backButtonHref: Route = eventId
+    ? (`/admin/events/${eventId}/evaluations` as Route)
+    : "/admin/evaluation";
   const backButtonLabel = eventId
     ? "Back to Event Evaluations"
     : "Back to Evaluations";
 
   return (
     <form className="mx-auto max-w-full space-y-6">
-      <button
-        className="flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
-        onClick={() => handleClick()}
-        type="button"
-      >
-        <ChevronLeft className="h-5 w-5" />
-        {backButtonLabel}
-      </button>
+      <BackButton href={backButtonHref} label={backButtonLabel} />
 
       {/* Event Details Card */}
       <div className="rounded-xl border border-border bg-linear-to-br from-primary/5 to-transparent p-6 sm:p-8">

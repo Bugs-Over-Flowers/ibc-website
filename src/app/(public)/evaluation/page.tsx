@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { EvaluationForm } from "./_components/EvaluationForm";
 import { Header } from "./_components/Header";
 import EvaluationLoading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Event Evaluation",
+  description: "Provide feedback on your event experience.",
+};
 
 interface EvaluationPageProps {
   searchParams: Promise<{ eventId?: string }>;
