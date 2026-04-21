@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getPublicWebsiteContentSection } from "@/server/website-content/queries/getPublicWebsiteContentSection";
 import { AboutBoard } from "./_components/AboutBoard";
@@ -6,6 +7,12 @@ import { AboutHero } from "./_components/AboutHero";
 import AboutStory from "./_components/AboutStory";
 import { AboutThrusts } from "./_components/AboutThrusts";
 import { AboutVisionMission } from "./_components/AboutVisionMission";
+
+export const metadata: Metadata = {
+  title: "About IBC",
+  description:
+    "Learn about our vision, mission, leadership board, and strategic initiatives.",
+};
 
 export default async function AboutPage() {
   const [

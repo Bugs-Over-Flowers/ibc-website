@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Network Partners",
+  description: "Explore network partners and initiatives.",
+};
+
 export default function Page() {
   return (
     <main className="min-h-screen bg-background">

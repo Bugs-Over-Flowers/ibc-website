@@ -83,13 +83,16 @@ export function ApplicationsTableRow({
   const toggleSelection = useSelectedApplicationsStore(
     (state) => state.toggleSelection,
   );
+  const isSelectionLocked = useSelectedApplicationsStore(
+    (state) => state.isSelectionLocked,
+  );
   const { borderColor, textColor } = getApplicationTypeColor(
     application.applicationType,
   );
   const paymentProofStatus = application.paymentProofStatus ?? "pending";
   const isPaymentProofPending =
     application.paymentMethod === "BPI" && paymentProofStatus === "pending";
-  const isSelectionDisabled = isPaymentProofPending;
+  const isSelectionDisabled = isPaymentProofPending || isSelectionLocked;
   const formattedAppliedDate = formatAppliedDate(application.applicationDate);
 
   const proofImage = application.ProofImage?.[0];

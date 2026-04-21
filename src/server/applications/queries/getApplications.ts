@@ -89,24 +89,22 @@ export async function getApplications(
   };
 
   const applicationsWithSignedLogos = await Promise.all(
-    (data as ApplicationWithMembers[]).map(
-      async (application: ApplicationWithMembers) => {
-        const proofImage = application.ProofImage?.[0];
-        const signedProofImage = proofImage
-          ? {
-              ...proofImage,
-              path:
-                (await signPaymentProofUrl(proofImage.path)) ?? proofImage.path,
-            }
-          : undefined;
+    (data as ApplicationWithMembers[]).map(async (application) => {
+      const proofImage = application.ProofImage?.[0];
+      const signedProofImage = proofImage
+        ? {
+            ...proofImage,
+            path:
+              (await signPaymentProofUrl(proofImage.path)) ?? proofImage.path,
+          }
+        : undefined;
 
-        return {
-          ...application,
-          logoImageURL: await signLogoUrl(application.logoImageURL),
-          ProofImage: signedProofImage ? [signedProofImage] : [],
-        };
-      },
-    ),
+      return {
+        ...application,
+        logoImageURL: await signLogoUrl(application.logoImageURL),
+        ProofImage: signedProofImage ? [signedProofImage] : [],
+      };
+    }),
   );
 
   return applicationsWithSignedLogos;

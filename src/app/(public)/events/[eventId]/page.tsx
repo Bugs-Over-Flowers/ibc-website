@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { getEventById } from "@/server/events/queries/getEventById";
@@ -5,6 +6,11 @@ import { EventDetailsContent } from "../_components/EventDetailsContent";
 import { EventDetailsHero } from "../_components/EventDetailsHero";
 import EventPageDetailsLoading from "./loading";
 import NotFound from "./not-found";
+
+export const metadata: Metadata = {
+  title: "Event Details",
+  description: "View event details, schedule, and registration information.",
+};
 
 export default async function EventDetailsPage({
   params,

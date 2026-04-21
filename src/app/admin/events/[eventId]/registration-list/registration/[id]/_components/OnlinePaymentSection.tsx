@@ -90,21 +90,26 @@ export default function OnlinePaymentSection({
         : "Rejected";
 
   return (
-    <>
+    <div className="space-y-4">
       {proofImageURL && (
-        <>
-          <ImageZoom className="relative h-96 w-full touch-none select-none">
-            <Image
-              alt="Proof of Payment Image"
-              className="object-contain"
-              fill
-              src={proofImageURL}
-            />
-          </ImageZoom>
-          <div className="text-neutral-600">click on the image to zoom in</div>
-        </>
+        <div className="space-y-2">
+          <div className="overflow-hidden rounded-xl border border-border/50 bg-muted/20 p-2">
+            <ImageZoom className="relative h-80 w-full touch-none select-none rounded-lg bg-background">
+              <Image
+                alt="Proof of Payment Image"
+                className="object-contain"
+                fill
+                src={proofImageURL}
+              />
+            </ImageZoom>
+          </div>
+          <p className="text-muted-foreground text-xs">
+            Click image to zoom in.
+          </p>
+        </div>
       )}
-      <div>
+
+      <div className="flex items-center">
         <Badge
           className={cn(
             "capitalize",
@@ -115,22 +120,27 @@ export default function OnlinePaymentSection({
           {statusBadgeLabel}
         </Badge>
       </div>
-      <div className="flex gap-2">
-        {/* Accepted */}
+
+      <div className="flex flex-wrap gap-2">
         <Button
+          className="min-w-24"
           disabled={
             isPending ||
             optimisticPaymentProofStatus === "accepted" ||
             optimisticPaymentProofStatus === "rejected"
           }
           onClick={() => handleStatusChange("accepted")}
+          size="sm"
         >
           {isVerifyPending ? "Verifying..." : "Accept"}
         </Button>
+
         <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
-          {/* Reject Button */}
           <AlertDialogTrigger
-            className={buttonVariants({ variant: "destructive" })}
+            className={cn(
+              buttonVariants({ size: "sm", variant: "destructive" }),
+              "min-w-24",
+            )}
             disabled={
               isPending ||
               optimisticPaymentProofStatus === "rejected" ||
@@ -163,6 +173,6 @@ export default function OnlinePaymentSection({
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </>
+    </div>
   );
 }
