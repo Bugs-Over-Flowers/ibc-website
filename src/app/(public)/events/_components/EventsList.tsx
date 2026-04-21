@@ -4,15 +4,14 @@ import { motion } from "framer-motion";
 import { Calendar } from "lucide-react";
 import { useMemo, useState } from "react";
 import { staggerContainer } from "@/lib/animations/stagger";
+import type { EventStatus } from "@/lib/events/eventUtils";
 import { getEventCategory } from "@/lib/events/eventUtils";
 import type { Tables } from "@/lib/supabase/db.types";
 import { EventCard } from "./EventCard";
-import { EventsSearch } from "./EventSearch";
 import { FeaturedEventList } from "./FeaturedEventList";
+import { EventsSearch } from "./search/EventSearch";
 
 type Event = Tables<"Event">;
-
-import type { EventStatus } from "@/lib/events/eventUtils";
 
 type FilterOption = "all" | EventStatus;
 
