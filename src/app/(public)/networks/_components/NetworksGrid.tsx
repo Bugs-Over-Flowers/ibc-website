@@ -54,7 +54,7 @@ export function NetworksGrid({ networks }: NetworksGridProps) {
                 >
                   {/* Header */}
                   <div className="flex items-start gap-3 border-border border-b px-4 py-4">
-                    <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-popover">
+                    <div className="relative flex aspect-square size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-popover">
                       {logoUrl ? (
                         <Image
                           alt={`${network.organization} logo`}
