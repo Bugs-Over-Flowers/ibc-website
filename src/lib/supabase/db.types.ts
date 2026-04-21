@@ -915,19 +915,21 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_sponsored_registration_by_uuid:
-        | {
-            Args: { p_uuid: string };
-            Returns: {
-              error: true;
-            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
-          }
-        | {
-            Args: { p_uuid: string };
-            Returns: {
-              error: true;
-            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
-          };
+      get_sponsored_registration_by_uuid: {
+        Args: { p_uuid: string };
+        Returns: {
+          createdAt: string;
+          eventId: string;
+          feeDeduction: number;
+          maxSponsoredGuests: number;
+          sponsoredBy: string;
+          sponsoredRegistrationId: string;
+          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt: string;
+          usedCount: number;
+          uuid: string;
+        }[];
+      };
       get_sponsored_registrations_with_details: {
         Args: { p_event_id: string };
         Returns: {

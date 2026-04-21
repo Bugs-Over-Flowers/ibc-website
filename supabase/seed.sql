@@ -25,7 +25,7 @@ CASCADE;
 -- =============================================================================
 -- Insert Test Sectors
 -- =============================================================================
-INSERT INTO "Sector" ("sectorName") VALUES
+INSERT INTO "public"."Sector" ("sectorName") VALUES
   ('Technology'),
   ('Manufacturing'),
   ('Services'),
