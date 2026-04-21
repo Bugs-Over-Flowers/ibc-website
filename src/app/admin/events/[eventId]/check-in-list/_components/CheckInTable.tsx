@@ -2,7 +2,8 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
-import { ArrowDownAZ, ArrowUpZA, Clock, Download } from "lucide-react";
+import { Clock, Download } from "lucide-react";
+import { AdminTableSortHeader } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { exportToExcel } from "@/lib/export/excel";
@@ -19,30 +20,6 @@ interface CheckInTableProps {
   eventDayLabel: string;
 }
 
-const SortHeader = ({
-  label,
-  sorted,
-  onSort,
-}: {
-  label: string;
-  sorted: "asc" | "desc" | false;
-  onSort: () => void;
-}) => (
-  <Button
-    className="h-auto p-0 font-medium text-[11px] text-muted-foreground uppercase tracking-wider hover:bg-transparent hover:text-foreground"
-    onClick={onSort}
-    type="button"
-    variant="ghost"
-  >
-    {label}
-    {sorted === "asc" ? (
-      <ArrowDownAZ className="ml-1 size-3" />
-    ) : sorted === "desc" ? (
-      <ArrowUpZA className="ml-1 size-3" />
-    ) : null}
-  </Button>
-);
-
 const getCheckInListColumns = (
   eventDayId: string,
 ): ColumnDef<CheckInListRow>[] => [
@@ -50,7 +27,7 @@ const getCheckInListColumns = (
     accessorKey: "checkInTime",
     sortingFn: "datetime",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="Time"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}
@@ -75,7 +52,7 @@ const getCheckInListColumns = (
   {
     accessorKey: "firstName",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="First name"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}
@@ -85,7 +62,7 @@ const getCheckInListColumns = (
   {
     accessorKey: "lastName",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="Last name"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}
@@ -95,7 +72,7 @@ const getCheckInListColumns = (
   {
     accessorKey: "affiliation",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="Affiliation"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}
@@ -108,7 +85,7 @@ const getCheckInListColumns = (
   {
     accessorKey: "email",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="Email"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}

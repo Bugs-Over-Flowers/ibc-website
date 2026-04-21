@@ -3,15 +3,12 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
 import {
-  ArrowDownAZ,
-  ArrowUpZA,
-  CalendarArrowDown,
-  CalendarArrowUp,
-} from "lucide-react";
+  AdminTableDateSortHeader,
+  AdminTableSortHeader,
+  PaymentStatusBadge,
+} from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { RegistrationItem } from "@/lib/validation/registration-management";
 import RegistrationRowActions from "./RegistrationRowActions";
 
@@ -19,39 +16,6 @@ interface RegistrationListProps {
   eventTitle: string;
   registrationList: RegistrationItem[];
 }
-
-const PAYMENT_STYLES = {
-  accepted:
-    "border-[#97C459] bg-[#EAF3DE] text-[#27500A] dark:border-[#3B6D11] dark:bg-[#173404] dark:text-[#C0DD97]",
-  pending:
-    "border-[#EF9F27] bg-[#FAEEDA] text-[#633806] dark:border-[#854F0B] dark:bg-[#412402] dark:text-[#FAC775]",
-  rejected:
-    "border-[#F09595] bg-[#FCEBEB] text-[#791F1F] dark:border-[#A32D2D] dark:bg-[#501313] dark:text-[#F7C1C1]",
-} as const;
-
-const SortHeader = ({
-  label,
-  sorted,
-  onSort,
-}: {
-  label: string;
-  sorted: "asc" | "desc" | false;
-  onSort: () => void;
-}) => (
-  <Button
-    className="h-auto p-0 font-medium text-[11px] text-muted-foreground uppercase tracking-wider hover:bg-transparent hover:text-foreground"
-    onClick={onSort}
-    type="button"
-    variant="ghost"
-  >
-    {label}
-    {sorted === "asc" ? (
-      <ArrowDownAZ className="ml-1 size-3" />
-    ) : sorted === "desc" ? (
-      <ArrowUpZA className="ml-1 size-3" />
-    ) : null}
-  </Button>
-);
 
 export default function RegistrationListTable({
   registrationList,
@@ -72,7 +36,7 @@ export default function RegistrationListTable({
     {
       accessorKey: "affiliation",
       header: ({ column }) => (
-        <SortHeader
+        <AdminTableSortHeader
           label="Affiliation"
           onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
           sorted={column.getIsSorted()}
@@ -92,7 +56,7 @@ export default function RegistrationListTable({
         return aName.localeCompare(bName);
       },
       header: ({ column }) => (
-        <SortHeader
+        <AdminTableSortHeader
           label="Registrant"
           onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
           sorted={column.getIsSorted()}
@@ -114,19 +78,11 @@ export default function RegistrationListTable({
       accessorKey: "registrationDate",
       sortingFn: "datetime",
       header: ({ column }) => (
-        <Button
-          className="h-auto p-0 font-medium text-[11px] text-muted-foreground uppercase tracking-wider hover:bg-transparent hover:text-foreground"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          type="button"
-          variant="ghost"
-        >
-          Registration Date
-          {column.getIsSorted() === "asc" ? (
-            <CalendarArrowDown className="ml-1 size-3" />
-          ) : column.getIsSorted() === "desc" ? (
-            <CalendarArrowUp className="ml-1 size-3" />
-          ) : null}
-        </Button>
+        <AdminTableDateSortHeader
+          label="Registration Date"
+          onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          sorted={column.getIsSorted()}
+        />
       ),
       cell: ({ row }) => {
         const { registrationDate } = row.original;
@@ -140,21 +96,9 @@ export default function RegistrationListTable({
     {
       accessorKey: "paymentProofStatus",
       header: "Payment Status",
-      cell: ({ row }) => {
-        const paymentProofStatus = row.original
-          .paymentProofStatus as keyof typeof PAYMENT_STYLES;
-
-        return (
-          <span
-            className={cn(
-              "inline-flex items-center rounded-full border px-2 py-0.5 font-medium text-[11px] uppercase",
-              PAYMENT_STYLES[paymentProofStatus] ?? PAYMENT_STYLES.pending,
-            )}
-          >
-            {paymentProofStatus}
-          </span>
-        );
-      },
+      cell: ({ row }) => (
+        <PaymentStatusBadge status={row.original.paymentProofStatus} />
+      ),
     },
     {
       accessorKey: "paymentMethod",
