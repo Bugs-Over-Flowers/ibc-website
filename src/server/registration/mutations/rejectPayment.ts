@@ -1,8 +1,8 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import { revalidatePath } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
+import { invalidateRegistrationCaches } from "@/server/actions.utils";
 import { sendRejectProofOfPayment } from "@/server/emails/mutations/sendRejectProofOfPayment";
 
 export const rejectPayment = async (registrationId: string) => {
@@ -68,12 +68,7 @@ export const rejectPayment = async (registrationId: string) => {
     throw new Error("Failed to process rejection email");
   }
 
-  updateTag(CACHE_TAGS.registrations.all);
-  updateTag(CACHE_TAGS.registrations.list);
-  updateTag(CACHE_TAGS.registrations.details);
-  updateTag(CACHE_TAGS.registrations.stats);
-  updateTag(CACHE_TAGS.registrations.event);
-  updateTag(CACHE_TAGS.events.registrations);
+  invalidateRegistrationCaches();
 
   if (eventId) {
     revalidatePath(`/admin/events/${eventId}/registration-list`, "page");
