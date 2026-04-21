@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { connection } from "next/server";
 import { ScheduleInterview } from "./_components/ScheduleInterview";
+
+export const metadata: Metadata = {
+  title: "Schedule Interview | Admin",
+  description: "Schedule interviews for membership applicants.",
+};
 
 export default async function ScheduleInterviewPage() {
   // Ensure this route runs at request-time under Cache Components.
