@@ -4,7 +4,7 @@ import {
   NETWORK_LOGO_BUCKET,
   validateNetworkLogoFile,
 } from "@/lib/storage/networkLogo";
-import { createActionClient, createAdminClient } from "@/lib/supabase/server";
+import { createActionClient } from "@/lib/supabase/server";
 
 export async function uploadNetworkLogo(formData: FormData): Promise<string> {
   const fileValue = formData.get("file");
@@ -31,9 +31,8 @@ export async function uploadNetworkLogo(formData: FormData): Promise<string> {
 
   const extension = fileValue.name.split(".").pop()?.toLowerCase() ?? "png";
   const filePath = `network-${crypto.randomUUID()}.${extension}`;
-  const adminClient = await createAdminClient();
 
-  const { error: uploadError } = await adminClient.storage
+  const { error: uploadError } = await actionClient.storage
     .from(NETWORK_LOGO_BUCKET)
     .upload(filePath, fileValue, {
       contentType: fileValue.type,
@@ -46,7 +45,7 @@ export async function uploadNetworkLogo(formData: FormData): Promise<string> {
 
   const {
     data: { publicUrl },
-  } = adminClient.storage.from(NETWORK_LOGO_BUCKET).getPublicUrl(filePath);
+  } = actionClient.storage.from(NETWORK_LOGO_BUCKET).getPublicUrl(filePath);
 
   return publicUrl;
 }
