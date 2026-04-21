@@ -3,10 +3,10 @@ import React from "react";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import useRegistrationStore from "@/hooks/registration.store";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
-import Step1 from "./Step1";
-import Step2 from "./Step2";
-import Step3 from "./Step3";
-import Step4 from "./Step4";
+import Step1 from "./step1/Step1";
+import Step2 from "./step2/Step2";
+import Step3 from "./step3/Step3";
+import Step4 from "./step4/Step4";
 
 interface RegistrationFormProps {
   members: Awaited<ReturnType<typeof getAllMembers>>;

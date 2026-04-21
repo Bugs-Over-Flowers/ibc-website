@@ -8,12 +8,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
 import { cn } from "@/lib/utils";
 import { PaymentMethodEnum } from "@/lib/validation/utils";
-import { useRegistrationStep3 } from "../../_hooks/useRegistrationStep3";
-import RegistrationStepHeader from "./RegistrationStepHeader";
+import { useRegistrationStep3 } from "../../../_hooks/useRegistrationStep3";
 import {
   PaymentProofDropzone,
   RegistrationPaymentSummary,
-} from "./registration-payment";
+} from "../RegistrationPayment";
+import RegistrationStepHeader from "../RegistrationStepHeader";
 
 const PAYMENT_OPTIONS = [
   {
