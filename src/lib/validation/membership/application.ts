@@ -106,7 +106,7 @@ export const MembershipApplicationStep2Schema = z
       .max(1024 * 1024 * 5, "File size must be less than 5MB")
       .refine(
         (file) => validateFileTypeMime(file),
-        "Only JPEG, PNG, and PDF files are allowed",
+        "Only JPEG and PNG files are allowed",
       )
       .optional(),
   })
@@ -151,7 +151,7 @@ export const MembershipApplicationStep4Schema = z
       .max(1024 * 1024 * 5, "File size must be less than 5MB")
       .refine(
         (file) => validateFileTypeMime(file),
-        "Only JPEG, PNG, and PDF files are allowed",
+        "Only JPEG and PNG files are allowed",
       )
       .optional(),
   })

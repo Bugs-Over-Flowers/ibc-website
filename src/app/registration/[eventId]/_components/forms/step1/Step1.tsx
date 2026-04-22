@@ -8,8 +8,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useRegistrationStore from "@/hooks/registration.store";
 import { cn } from "@/lib/utils";
 import type { getAllMembers } from "@/server/members/queries/getAllMembers";
-import { useRegistrationStep1 } from "../../_hooks/useRegistrationStep1";
-import RegistrationStepHeader from "./RegistrationStepHeader";
+import { useRegistrationStep1 } from "../../../_hooks/useRegistrationStep1";
+import RegistrationStepHeader from "../RegistrationStepHeader";
 
 interface Step1Props {
   members: Awaited<ReturnType<typeof getAllMembers>>;

@@ -1,5 +1,5 @@
+import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
-import { DetailRow } from "./DetailRow";
 
 interface PaymentInfoCardProps {
   paymentMethod: string;

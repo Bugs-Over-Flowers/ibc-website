@@ -1,9 +1,7 @@
 import "server-only";
 
-import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { applyRealtime60sCache } from "@/lib/cache/profiles";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
 export type EventDayStat = {
@@ -29,30 +27,54 @@ type EventStatsRpcResponse = Partial<EventStats> & {
   total_attended?: number;
 };
 
+const EventDayStatSchema = z.object({
+  day_id: z.string().nullable(),
+  day_label: z.string(),
+  day_date: z.string(),
+  participants: z.coerce.number().int().nonnegative(),
+  attended: z.coerce.number().int().nonnegative(),
+});
+
+const EventStatsRpcSchema = z.object({
+  event_id: z.string().optional(),
+  total_registrations: z.coerce.number().int().nonnegative().optional(),
+  verified_registrations: z.coerce.number().int().nonnegative().optional(),
+  pending_registrations: z.coerce.number().int().nonnegative().optional(),
+  participants: z.coerce.number().int().nonnegative().optional(),
+  attended: z.coerce.number().int().nonnegative().optional(),
+  total_participants: z.coerce.number().int().nonnegative().optional(),
+  total_attended: z.coerce.number().int().nonnegative().optional(),
+  event_days: z.array(EventDayStatSchema).optional(),
+});
+
+const EventStatsSchema = z.object({
+  event_id: z.string(),
+  total_registrations: z.coerce.number().int().nonnegative(),
+  verified_registrations: z.coerce.number().int().nonnegative(),
+  pending_registrations: z.coerce.number().int().nonnegative(),
+  participants: z.coerce.number().int().nonnegative(),
+  attended: z.coerce.number().int().nonnegative(),
+  event_days: z.array(EventDayStatSchema),
+});
+
 const normalizeEventStats = (
   eventId: string,
   data: EventStatsRpcResponse,
-): EventStats => ({
-  event_id: data.event_id ?? eventId,
-  total_registrations: data.total_registrations ?? 0,
-  verified_registrations: data.verified_registrations ?? 0,
-  pending_registrations: data.pending_registrations ?? 0,
-  participants: data.participants ?? data.total_participants ?? 0,
-  attended: data.attended ?? data.total_attended ?? 0,
-  event_days: data.event_days ?? [],
-});
+): EventStats =>
+  EventStatsSchema.parse({
+    event_id: data.event_id ?? eventId,
+    total_registrations: data.total_registrations ?? 0,
+    verified_registrations: data.verified_registrations ?? 0,
+    pending_registrations: data.pending_registrations ?? 0,
+    participants: data.participants ?? data.total_participants ?? 0,
+    attended: data.attended ?? data.total_attended ?? 0,
+    event_days: data.event_days ?? [],
+  });
 
 export const getEventStats = async (
   requestCookies: RequestCookie[],
   { eventId }: { eventId: string },
 ): Promise<EventStats> => {
-  "use cache";
-  applyRealtime60sCache();
-  cacheTag(CACHE_TAGS.events.all);
-  cacheTag(CACHE_TAGS.events.registrations);
-  cacheTag(CACHE_TAGS.events.checkIns);
-  cacheTag(CACHE_TAGS.registrations.event);
-
   const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase.rpc("get_event_status", {
@@ -64,5 +86,5 @@ export const getEventStats = async (
     throw new Error(error.message);
   }
 
-  return normalizeEventStats(eventId, data as EventStatsRpcResponse);
+  return normalizeEventStats(eventId, EventStatsRpcSchema.parse(data));
 };

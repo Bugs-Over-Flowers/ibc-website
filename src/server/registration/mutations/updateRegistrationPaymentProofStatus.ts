@@ -1,11 +1,10 @@
 "use server";
 
-import { updateTag } from "next/cache";
 import { z } from "zod";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
+import { invalidateRegistrationCaches } from "@/server/actions.utils";
 import { sendRejectProofOfPayment } from "@/server/emails/mutations/sendRejectProofOfPayment";
 
 const updateRegistrationPaymentProofStatusSchema = z.object({
@@ -80,12 +79,7 @@ export async function updateRegistrationPaymentProofStatus(
     emailSent = success;
   }
 
-  updateTag(CACHE_TAGS.registrations.all);
-  updateTag(CACHE_TAGS.registrations.list);
-  updateTag(CACHE_TAGS.registrations.details);
-  updateTag(CACHE_TAGS.registrations.stats);
-  updateTag(CACHE_TAGS.registrations.event);
-  updateTag(CACHE_TAGS.events.registrations);
+  invalidateRegistrationCaches();
 
   return {
     status: nextStatus,

@@ -3,7 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import type { ServerFunction } from "@/lib/server/types";
+import type { AsyncFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 
 const facebookLinkSchema = z.preprocess(
@@ -32,7 +32,7 @@ const updateFacebookLinkSchema = z.object({
 type UpdateFacebookLinkInput = z.infer<typeof updateFacebookLinkSchema>;
 type UpdateFacebookLinkResponse = { message: string };
 
-export const updateFacebookLink: ServerFunction<
+export const updateFacebookLink: AsyncFunction<
   [UpdateFacebookLinkInput],
   UpdateFacebookLinkResponse
 > = async (input) => {

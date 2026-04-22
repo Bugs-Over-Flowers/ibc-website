@@ -2,6 +2,7 @@ import { Building2, MapPin, User } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { useCreateManualMemberStep3 } from "@/app/admin/members/create/_hooks/useCreateManualMemberStep3";
+import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -10,29 +11,6 @@ import { cn } from "@/lib/utils";
 interface Step3ReviewProps {
   form: ReturnType<typeof useCreateManualMemberStep3>["form"];
   memberData: ReturnType<typeof useCreateManualMemberStep3>["memberData"];
-}
-
-function DetailRow({
-  label,
-  value,
-  valueClassName,
-}: {
-  label: string;
-  value: React.ReactNode;
-  valueClassName?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={cn("font-semibold text-base leading-tight", valueClassName)}
-      >
-        {value}
-      </span>
-    </div>
-  );
 }
 
 function formatBirthdate(value?: Date): string {
@@ -65,16 +43,12 @@ function RepresentativeField({
   valueClassName?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={cn("font-semibold text-sm leading-tight", valueClassName)}
-      >
-        {value}
-      </span>
-    </div>
+    <DetailRow
+      label={label}
+      size="sm"
+      value={value}
+      valueClassName={valueClassName}
+    />
   );
 }
 

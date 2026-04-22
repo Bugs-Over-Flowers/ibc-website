@@ -29,7 +29,7 @@ function formatAppliedDate(dateValue: string): string {
     return `${isoDate.slice(8, 10)}/${isoDate.slice(5, 7)}/${isoDate.slice(0, 4)}`;
   }
 
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat("en-PH", {
     day: "2-digit",
     month: "2-digit",
     timeZone: "UTC",

@@ -19,8 +19,8 @@ import { Label } from "@/components/ui/label";
 import { useFieldContext } from "@/hooks/_formHooks";
 import useRegistrationStore from "@/hooks/registration.store";
 import type { StandardRegistrationStep2Schema } from "@/lib/validation/registration/standard";
-import { useRegistrationStep2 } from "../../_hooks/useRegistrationStep2";
-import RegistrationStepHeader from "./RegistrationStepHeader";
+import { useRegistrationStep2 } from "../../../_hooks/useRegistrationStep2";
+import RegistrationStepHeader from "../RegistrationStepHeader";
 
 const MAX_OTHER_PARTICIPANTS = 9;
 

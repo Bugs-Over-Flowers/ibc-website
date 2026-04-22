@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import BackButton from "@/app/admin/_components/BackButton";
+import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -18,29 +19,6 @@ interface ApplicationDetailsProps {
   memberId?: string;
 }
 
-function DetailRow({
-  label,
-  value,
-  valueClassName,
-}: {
-  label: string;
-  value: React.ReactNode;
-  valueClassName?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={`font-semibold text-base leading-tight ${valueClassName ?? ""}`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
 function RepresentativeField({
   label,
   value,
@@ -51,16 +29,12 @@ function RepresentativeField({
   valueClassName?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={`font-semibold text-sm leading-tight ${valueClassName ?? ""}`}
-      >
-        {value}
-      </span>
-    </div>
+    <DetailRow
+      label={label}
+      size="sm"
+      value={value}
+      valueClassName={valueClassName}
+    />
   );
 }
 

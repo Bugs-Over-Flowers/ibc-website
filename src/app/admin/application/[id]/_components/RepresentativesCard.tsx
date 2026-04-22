@@ -1,7 +1,7 @@
+import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import { toPascalCaseWithSpaces } from "../../_utils/formatters";
-import { DetailRow } from "./DetailRow";
 
 interface RepresentativesCardProps {
   members: Awaited<

@@ -6,7 +6,7 @@ import { TabsContent } from "@/components/ui/tabs";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/server";
 import { getCheckInStats } from "@/server/check-in/queries/getCheckInStats";
-import { getEventDays } from "@/server/events/mutations/getEventDays";
+import { getEventDays } from "@/server/events/queries/getEventDays";
 import CheckInListContent from "./_components/CheckInListContent";
 import CheckInListTabWrapper from "./_components/CheckInListTabWrapper";
 import DraftEventEmptyComponent from "./_components/DraftEventEmptyComponent";
