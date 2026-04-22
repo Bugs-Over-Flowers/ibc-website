@@ -222,7 +222,10 @@ const useMembershipApplicationStore = create<
 
       setMemberValidationRemainingTime: (time) =>
         set((state) => ({
-          memberValidation: { ...state.memberValidation, remainingTime: time },
+          memberValidation: {
+            ...state.memberValidation,
+            remainingTime: time,
+          },
         })),
 
       setMemberValidationRateLimitDate: (date) =>
@@ -234,226 +237,20 @@ const useMembershipApplicationStore = create<
         })),
 
       resetMemberValidationRateLimit: () =>
-        set((state) => ({
+        set({
           memberValidation: {
-            ...state.memberValidation,
-            attemptCount: 0,
-            cooldownEndTime: null,
-            remainingTime: 0,
+            ...initialState.memberValidation,
             lastRateLimitResetDate: getManilaDateKey(),
           },
-        })),
+        }),
 
       resetMemberValidation: () =>
-        set((state) => ({
-          memberValidation: {
-            ...state.memberValidation,
-            validationStatus: "idle",
-            lastValidatedMemberIdentifier: null,
-            lastValidatedApplicationType: null,
-            memberInfo: {},
-          },
-        })),
+        set({
+          memberValidation: initialState.memberValidation,
+        }),
     }),
     {
       name: "membership-application-storage",
-      version: 9,
-      migrate: (persistedState, version) => {
-        if (version < 4) {
-          const oldState =
-            persistedState as Partial<MembershipApplicationStore>;
-          return {
-            ...initialState,
-            memberValidation: {
-              ...initialState.memberValidation,
-              attemptCount: oldState?.memberValidation?.attemptCount ?? 0,
-              cooldownEndTime:
-                oldState?.memberValidation?.cooldownEndTime ?? null,
-            },
-          };
-        }
-
-        if (version < 6) {
-          const oldState =
-            persistedState as Partial<MembershipApplicationStore>;
-
-          const firstRepresentative =
-            oldState?.applicationData?.step3?.representatives?.[0];
-          const secondRepresentative =
-            oldState?.applicationData?.step3?.representatives?.[1];
-
-          return {
-            ...initialState,
-            ...oldState,
-            applicationData: {
-              ...initialState.applicationData,
-              ...oldState?.applicationData,
-              step3: {
-                representatives: [
-                  {
-                    ...initialState.applicationData.step3.representatives[0],
-                    ...firstRepresentative,
-                    companyMemberType: "principal",
-                  },
-                  {
-                    ...initialState.applicationData.step3.representatives[1],
-                    ...secondRepresentative,
-                    companyMemberType: "alternate",
-                  },
-                ],
-              },
-            },
-          };
-        }
-
-        if (version < 7) {
-          const oldState =
-            persistedState as Partial<MembershipApplicationStore> & {
-              memberValidation?: {
-                lastValidatedMemberId?: string | null;
-              };
-            };
-
-          return {
-            ...oldState,
-            memberValidation: {
-              ...oldState?.memberValidation,
-              lastValidatedMemberIdentifier:
-                oldState?.memberValidation?.lastValidatedMemberIdentifier ??
-                oldState?.memberValidation?.lastValidatedMemberId ??
-                null,
-            },
-          } as MembershipApplicationStore;
-        }
-
-        if (version < 8) {
-          const oldState =
-            persistedState as Partial<MembershipApplicationStore>;
-
-          return {
-            ...initialState,
-            ...oldState,
-            applicationData: {
-              ...initialState.applicationData,
-              ...oldState?.applicationData,
-              step1: {
-                ...initialState.applicationData.step1,
-                ...oldState?.applicationData?.step1,
-                businessMemberId:
-                  oldState?.applicationData?.step1?.businessMemberId ?? "",
-              },
-            },
-          };
-        }
-
-        if (version < 9) {
-          const oldState =
-            persistedState as Partial<MembershipApplicationStore>;
-
-          return {
-            ...initialState,
-            ...oldState,
-            memberValidation: {
-              ...initialState.memberValidation,
-              ...oldState?.memberValidation,
-              lastRateLimitResetDate:
-                oldState?.memberValidation?.lastRateLimitResetDate ?? null,
-            },
-          };
-        }
-
-        return persistedState as MembershipApplicationStore;
-      },
-      partialize: (state) =>
-        ({
-          step: state.step,
-          isSubmitted: state.isSubmitted,
-          memberValidation: state.memberValidation,
-          applicationData: {
-            step1: state.applicationData.step1,
-            step2: {
-              companyName: state.applicationData.step2.companyName,
-              companyAddress: state.applicationData.step2.companyAddress,
-              sectorId: state.applicationData.step2.sectorId,
-              landline: state.applicationData.step2.landline,
-              mobileNumber: state.applicationData.step2.mobileNumber,
-              emailAddress: state.applicationData.step2.emailAddress,
-              websiteURL: state.applicationData.step2.websiteURL,
-              logoImageURL: state.applicationData.step2.logoImageURL,
-              logoImage: undefined,
-            },
-            step3: {
-              representatives: state.applicationData.step3.representatives.map(
-                (rep) => ({
-                  ...rep,
-                  birthdate: rep.birthdate
-                    ? new Date(rep.birthdate).toISOString()
-                    : undefined,
-                }),
-              ),
-            },
-            step4: {
-              applicationMemberType:
-                state.applicationData.step4.applicationMemberType,
-              paymentMethod: state.applicationData.step4.paymentMethod,
-              paymentProofUrl: state.applicationData.step4.paymentProofUrl,
-              paymentProof: undefined,
-            },
-          },
-        }) as unknown as MembershipApplicationStore,
-      onRehydrateStorage: () => (state) => {
-        if (!state) return;
-
-        if (state.applicationData?.step3?.representatives) {
-          state.applicationData.step3.representatives =
-            state.applicationData.step3.representatives
-              .slice(0, 2)
-              .map((rep, index) => {
-                const serialized = rep as unknown as {
-                  birthdate?: string | Date;
-                };
-
-                let birthdateValue: Date | undefined;
-
-                if (serialized.birthdate) {
-                  birthdateValue =
-                    serialized.birthdate instanceof Date
-                      ? serialized.birthdate
-                      : new Date(serialized.birthdate);
-                }
-
-                return {
-                  ...rep,
-                  companyMemberType: (index === 0
-                    ? "principal"
-                    : "alternate") as "principal" | "alternate",
-                  birthdate: birthdateValue as Date,
-                };
-              });
-
-          if (state.applicationData.step3.representatives.length < 2) {
-            state.applicationData.step3.representatives = [
-              {
-                ...initialState.applicationData.step3.representatives[0],
-                ...state.applicationData.step3.representatives[0],
-                companyMemberType: "principal",
-              },
-              {
-                ...initialState.applicationData.step3.representatives[1],
-                companyMemberType: "alternate",
-              },
-            ];
-          }
-        }
-
-        if (state.applicationData?.step2) {
-          state.applicationData.step2.logoImage = undefined;
-        }
-
-        if (state.applicationData?.step4) {
-          state.applicationData.step4.paymentProof = undefined;
-        }
-      },
     },
   ),
 );

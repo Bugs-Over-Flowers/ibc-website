@@ -35,6 +35,7 @@ interface RegistrationStoreActions {
   clearSponsorInfo: () => void;
   resetStore: () => void;
 }
+
 const initialState: RegistrationStore = {
   step: 1,
   eventDetails: null,
@@ -116,7 +117,6 @@ const useRegistrationStore = create<
       partialize: (state) => {
         const { registrationData, ...rest } = state;
 
-        // Exclude paymentProof from step3
         const sanitizedRegistrationData = registrationData
           ? {
               ...registrationData,
