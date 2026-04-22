@@ -894,16 +894,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_registration_list_checkin: {
-        Args: { p_identifier: string; p_today?: string };
-        Returns: Database["public"]["CompositeTypes"]["registration_details_result"];
-        SetofOptions: {
-          from: "*";
-          to: "registration_details_result";
-          isOneToOne: true;
-          isSetofReturn: false;
-        };
-      };
       get_registration_list_stats: {
         Args: { p_event_id: string };
         Returns: Database["public"]["CompositeTypes"]["registration_stats"];

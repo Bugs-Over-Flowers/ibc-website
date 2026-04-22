@@ -129,7 +129,7 @@ objects_path = "./logoimage"
 [storage.buckets.network-logos]
 public = true
 file_size_limit = "5MiB"
-allowed_mime_types = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"]
+allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
 objects_path = "./network-logos"
 
 # Allow connections via S3 compatible clients
