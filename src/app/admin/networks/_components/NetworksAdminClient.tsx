@@ -42,6 +42,14 @@ export function NetworksAdminClient({
     });
 
     return filtered.sort((a, b) => {
+      if (sortBy === "organization-asc") {
+        return a.organization.localeCompare(b.organization);
+      }
+
+      if (sortBy === "organization-desc") {
+        return b.organization.localeCompare(a.organization);
+      }
+
       const timeA = new Date(a.createdAt).getTime();
       const timeB = new Date(b.createdAt).getTime();
       return sortBy === "newest" ? timeB - timeA : timeA - timeB;

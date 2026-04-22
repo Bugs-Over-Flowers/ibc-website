@@ -148,7 +148,7 @@ export function NetworkFormFields({
             onChange={(event) =>
               onFieldChange("representativeName", event.target.value)
             }
-            placeholder="Representative name"
+            placeholder="Representative Name"
             value={formState.representativeName}
           />
         </div>
@@ -170,13 +170,13 @@ export function NetworkFormFields({
             onChange={(event) =>
               onFieldChange("representativePosition", event.target.value)
             }
-            placeholder="Representative position"
+            placeholder="Representative Position"
             value={formState.representativePosition}
           />
         </div>
       </div>
 
-      <div className="grid gap-3 rounded-lg border bg-muted/20 p-3">
+      <div className="grid gap-3 rounded-lg pt-3">
         <Label htmlFor="network-logo">Logo Upload</Label>
 
         <p className="text-muted-foreground text-xs">

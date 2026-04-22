@@ -9,7 +9,11 @@ export type NetworkFormState = {
   logoUrl: string | null;
 };
 
-export type SortOption = "newest" | "oldest";
+export type SortOption =
+  | "newest"
+  | "oldest"
+  | "organization-asc"
+  | "organization-desc";
 
 export const EMPTY_FORM: NetworkFormState = {
   organization: "",

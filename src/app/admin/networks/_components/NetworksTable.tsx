@@ -1,20 +1,16 @@
-import { Building2, Pencil, Trash2 } from "lucide-react";
+import { Building2, MapPin, Pencil, Trash2 } from "lucide-react";
+import { motion } from "motion/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { fadeInUp } from "@/lib/animations/fade";
+import { staggerContainer } from "@/lib/animations/stagger";
 import { resolveNetworkLogoUrl } from "@/lib/storage/networkLogo";
+import { cn } from "@/lib/utils";
 import type { Network } from "@/server/networks/types";
 
 interface NetworksTableProps {
@@ -23,73 +19,93 @@ interface NetworksTableProps {
   onDelete: (network: Network) => void;
 }
 
+function RepAvatar({ name }: { name: string }) {
+  const initials = name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border bg-muted/40 font-medium text-[10px] text-secondary">
+      {initials}
+    </div>
+  );
+}
+
 export function NetworksTable({
   networks,
   onEdit,
   onDelete,
 }: NetworksTableProps) {
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Logo</TableHead>
-            <TableHead>Organization</TableHead>
-            <TableHead>Location/Type</TableHead>
-            <TableHead>Representative</TableHead>
-            <TableHead className="w-[120px] text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {networks.length === 0 ? (
-            <TableRow>
-              <TableCell
-                className="py-10 text-center text-muted-foreground"
-                colSpan={5}
-              >
-                No networks found.
-              </TableCell>
-            </TableRow>
-          ) : (
-            networks.map((network) => {
+    <section className="bg-background py-2">
+      <motion.div
+        animate="visible"
+        className="mx-auto max-w-7xl"
+        initial="hidden"
+        variants={staggerContainer}
+      >
+        {networks.length > 0 ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {networks.map((network) => {
               const logoUrl = resolveNetworkLogoUrl(network.logoUrl);
 
               return (
-                <TableRow key={network.id}>
-                  <TableCell>
-                    <div className="relative h-12 w-12 overflow-hidden rounded-md border bg-muted/30">
+                <motion.article
+                  animate="visible"
+                  className={cn(
+                    "flex flex-col overflow-hidden rounded-2xl border border-border bg-card",
+                    "transition-all duration-200 hover:-translate-y-0.5 hover:border-input",
+                  )}
+                  initial="hidden"
+                  key={network.id}
+                  variants={fadeInUp}
+                >
+                  <div className="flex items-start gap-3 border-border border-b px-4 py-4">
+                    <div className="relative flex aspect-square size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-popover">
                       {logoUrl ? (
                         <Image
                           alt={`${network.organization} logo`}
                           className="object-cover"
                           fill
-                          sizes="48px"
+                          sizes="44px"
                           src={logoUrl}
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center">
-                          <Building2 className="h-5 w-5 text-muted-foreground" />
-                        </div>
+                        <Building2 className="size-4 text-muted-foreground" />
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className="max-w-[280px]">
-                    <p className="truncate font-medium">
-                      {network.organization}
-                    </p>
-                    <p className="mt-1 line-clamp-2 text-muted-foreground text-xs">
+                    <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                      <h3 className="line-clamp-2 font-medium text-card-foreground text-sm leading-snug">
+                        {network.organization}
+                      </h3>
+                      <span className="inline-flex w-fit items-center gap-1 rounded-full border border-ring/30 bg-primary/10 px-2 py-0.5 font-medium text-[11px] text-primary">
+                        <MapPin className="size-2.5 shrink-0" />
+                        {network.locationType}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 px-4 py-3">
+                    <p className="line-clamp-3 text-muted-foreground text-xs leading-relaxed">
                       {network.about}
                     </p>
-                  </TableCell>
-                  <TableCell>{network.locationType}</TableCell>
-                  <TableCell>
-                    <p className="font-medium">{network.representativeName}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {network.representativePosition}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1">
+                  </div>
+
+                  <div className="flex items-center gap-2.5 border-border border-t bg-muted/20 px-4 py-3">
+                    <RepAvatar name={network.representativeName} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-card-foreground text-xs">
+                        {network.representativeName}
+                      </p>
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {network.representativePosition}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1">
                       <Tooltip>
                         <TooltipTrigger
                           render={
@@ -123,13 +139,35 @@ export function NetworksTable({
                         <TooltipContent>Delete network</TooltipContent>
                       </Tooltip>
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </motion.article>
               );
-            })
-          )}
-        </TableBody>
-      </Table>
-    </div>
+            })}
+          </div>
+        ) : (
+          <motion.div
+            animate="visible"
+            className="overflow-hidden rounded-2xl border border-border bg-card"
+            initial="hidden"
+            variants={fadeInUp}
+          >
+            <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+              <div className="flex size-12 items-center justify-center rounded-xl border border-border bg-popover">
+                <Building2 className="size-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="font-medium text-card-foreground text-sm">
+                  No networks found
+                </p>
+                <p className="mt-1 max-w-xs text-muted-foreground text-xs leading-relaxed">
+                  Networks will appear here as organisations and representatives
+                  are added.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </motion.div>
+    </section>
   );
 }
