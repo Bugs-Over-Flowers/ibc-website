@@ -42,10 +42,7 @@ export async function getWebsiteContentSection(
     };
   }
 
-  const latestUpdatedAt =
-    rows
-      .map((row) => row.updatedAt)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null;
+  const latestUpdatedAt = rows[0]?.updatedAt ?? null;
 
   if (parsedSection === "vision_mission") {
     const visionRow = rows.find(

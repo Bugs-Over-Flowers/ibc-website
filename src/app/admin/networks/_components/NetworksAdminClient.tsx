@@ -1,10 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { resolveNetworkLogoUrl } from "@/lib/storage/networkLogo";
-import { createNetwork } from "@/server/networks/mutations/createNetwork";
 import { deleteNetwork } from "@/server/networks/mutations/deleteNetwork";
 import { updateNetwork } from "@/server/networks/mutations/updateNetwork";
 import { uploadNetworkLogo } from "@/server/networks/mutations/uploadNetworkLogo";
@@ -34,7 +33,6 @@ export function NetworksAdminClient({
   const [networks, setNetworks] = useState<Network[]>(initialNetworks);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingNetwork, setEditingNetwork] = useState<Network | null>(null);
   const [formState, setFormState] = useState<NetworkFormState>(EMPTY_FORM);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -42,6 +40,24 @@ export function NetworksAdminClient({
   const [isUploading, setIsUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Network | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const logoPreviewObjectUrlRef = useRef<string | null>(null);
+
+  const clearLogoPreviewObjectUrl = useCallback(() => {
+    if (logoPreviewObjectUrlRef.current) {
+      URL.revokeObjectURL(logoPreviewObjectUrlRef.current);
+      logoPreviewObjectUrlRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearLogoPreviewObjectUrl();
+    };
+  }, [clearLogoPreviewObjectUrl]);
+
+  useEffect(() => {
+    setNetworks(initialNetworks);
+  }, [initialNetworks]);
 
   const filteredNetworks = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -61,24 +77,16 @@ export function NetworksAdminClient({
     });
   }, [networks, searchQuery, sortBy]);
 
-  const openCreateDialog = () => {
-    setEditingNetwork(null);
-    setFormState(EMPTY_FORM);
-    setLogoPreview(null);
-    setIsDialogOpen(true);
-  };
-
   const openEditDialog = (network: Network) => {
+    clearLogoPreviewObjectUrl();
     setEditingNetwork(network);
     setFormState(mapNetworkToFormState(network));
     setLogoPreview(resolveNetworkLogoUrl(network.logoUrl));
-    setIsDialogOpen(true);
   };
 
   const closeDialog = (open: boolean) => {
-    setIsDialogOpen(open);
-
     if (!open) {
+      clearLogoPreviewObjectUrl();
       setEditingNetwork(null);
       setFormState(EMPTY_FORM);
       setLogoPreview(null);
@@ -102,13 +110,16 @@ export function NetworksAdminClient({
     setIsUploading(true);
 
     try {
+      clearLogoPreviewObjectUrl();
       const localPreview = URL.createObjectURL(file);
+      logoPreviewObjectUrlRef.current = localPreview;
       setLogoPreview(localPreview);
 
       const formData = new FormData();
       formData.append("file", file);
       const uploadedUrl = await uploadNetworkLogo(formData);
       setFormState((prev) => ({ ...prev, logoUrl: uploadedUrl }));
+      clearLogoPreviewObjectUrl();
       setLogoPreview(uploadedUrl);
       toast.success("Logo uploaded successfully.");
     } catch (error) {
@@ -121,6 +132,10 @@ export function NetworksAdminClient({
   };
 
   const handleSave = async () => {
+    if (!editingNetwork) {
+      return;
+    }
+
     const normalized = normalizeFormState(formState);
 
     if (!isFormValid(normalized)) {
@@ -131,20 +146,12 @@ export function NetworksAdminClient({
     setIsSaving(true);
 
     try {
-      if (editingNetwork) {
-        const updated = await updateNetwork(editingNetwork.id, normalized);
+      const updated = await updateNetwork(editingNetwork.id, normalized);
 
-        setNetworks((prev) =>
-          prev.map((network) =>
-            network.id === updated.id ? updated : network,
-          ),
-        );
-        toast.success("Network updated.");
-      } else {
-        const created = await createNetwork(normalized);
-        setNetworks((prev) => [created, ...prev]);
-        toast.success("Network created.");
-      }
+      setNetworks((prev) =>
+        prev.map((network) => (network.id === updated.id ? updated : network)),
+      );
+      toast.success("Network updated.");
 
       closeDialog(false);
       router.refresh();
@@ -187,7 +194,7 @@ export function NetworksAdminClient({
 
   return (
     <div className="space-y-6 px-2">
-      <NetworksHeader onAddNetwork={openCreateDialog} />
+      <NetworksHeader />
 
       <NetworksFilters
         onSearchQueryChange={setSearchQuery}
@@ -212,11 +219,12 @@ export function NetworksAdminClient({
         onLogoUpload={handleLogoUpload}
         onOpenChange={closeDialog}
         onRemoveLogo={() => {
+          clearLogoPreviewObjectUrl();
           setFormState((prev) => ({ ...prev, logoUrl: null }));
           setLogoPreview(null);
         }}
         onSave={handleSave}
-        open={isDialogOpen}
+        open={Boolean(editingNetwork)}
       />
 
       <DeleteNetworkDialog

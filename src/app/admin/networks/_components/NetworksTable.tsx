@@ -9,6 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { resolveNetworkLogoUrl } from "@/lib/storage/networkLogo";
 import type { Network } from "@/server/networks/types";
 
@@ -85,22 +90,38 @@ export function NetworksTable({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">
-                      <Button
-                        onClick={() => onEdit(network)}
-                        size="icon-sm"
-                        type="button"
-                        variant="ghost"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        onClick={() => onDelete(network)}
-                        size="icon-sm"
-                        type="button"
-                        variant="ghost"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              aria-label="Edit network"
+                              onClick={() => onEdit(network)}
+                              size="icon-sm"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <TooltipContent>Edit network</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              aria-label="Delete network"
+                              onClick={() => onDelete(network)}
+                              size="icon-sm"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          }
+                        />
+                        <TooltipContent>Delete network</TooltipContent>
+                      </Tooltip>
                     </div>
                   </TableCell>
                 </TableRow>

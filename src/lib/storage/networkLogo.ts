@@ -4,13 +4,12 @@ const INVALID_LOGO_HOSTS = new Set(["your-project.supabase.co"]);
 const ALLOWED_LOGO_MIME_TYPES = new Set([
   "image/png",
   "image/jpeg",
-  "image/webp",
-  "image/svg+xml",
+  "image/jpg",
 ]);
 
 export function validateNetworkLogoFile(file: File): string | null {
   if (!ALLOWED_LOGO_MIME_TYPES.has(file.type)) {
-    return "Invalid logo type. Use PNG, JPG, WEBP, or SVG.";
+    return "Invalid logo type. Use PNG or JPG/JPEG.";
   }
 
   if (file.size > MAX_LOGO_SIZE_BYTES) {
