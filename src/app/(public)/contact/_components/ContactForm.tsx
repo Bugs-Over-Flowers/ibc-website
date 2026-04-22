@@ -79,8 +79,8 @@ ${new Date().toLocaleString()}
 ──────────────────────────
 Sent via Website Contact Form
     `.trim();
-
-    const mailto = `mailto:siaotongkj@gmail.com?subject=${encodeURIComponent(`Contact Form Inquiry — ${inquiryType}`)}&body=${encodeURIComponent(emailBody)}`;
+    // Change email here to change recipient (should be placed in .env.local for production)
+    const mailto = `mailto:${process.env.EMAIL_MESSAGE_RECIPIENT}?subject=${encodeURIComponent(`Contact Form Inquiry — ${inquiryType}`)}&body=${encodeURIComponent(emailBody)}`;
 
     window.location.href = mailto;
 
