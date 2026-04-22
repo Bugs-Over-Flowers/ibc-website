@@ -197,7 +197,7 @@ export const useMembershipStep1 = () => {
               setMemberValidationRateLimitDate(today);
 
               if (newAttemptCount >= 3) {
-                const cooldownEnd = now + 3000; // temporary // 900000; // 15 minutes permanently
+                const cooldownEnd = now + 900000; // 15 minutes permanently
                 setMemberValidationCooldown(cooldownEnd);
                 toast.error(
                   "Too many failed attempts. Please wait 15 minutes before trying again.",
@@ -223,10 +223,10 @@ export const useMembershipStep1 = () => {
               setMemberValidationRateLimitDate(today);
 
               if (newAttemptCount >= 3) {
-                const cooldownEnd = now + 30000;
+                const cooldownEnd = now + 900000; // 15 minutes
                 setMemberValidationCooldown(cooldownEnd);
                 toast.error(
-                  "Too many failed attempts. Please wait 30 seconds before trying again.",
+                  "Too many failed attempts. Please wait 15 minutes before trying again.",
                 );
               }
               return;

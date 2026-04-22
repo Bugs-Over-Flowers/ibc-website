@@ -84,7 +84,7 @@ export const useMembershipStep4 = ({
             );
             if (!isValidLogoType) {
               throw new Error(
-                "Invalid logo file type. Only JPEG, PNG, and PDF files are allowed.",
+                "Invalid logo file type. Only JPEG and PNG files are allowed.",
               );
             }
 
@@ -115,7 +115,7 @@ export const useMembershipStep4 = ({
             );
             if (!isValidProofType) {
               throw new Error(
-                "Invalid payment proof file type. Only JPEG, PNG, and PDF files are allowed.",
+                "Invalid payment proof file type. Only JPEG and PNG files are allowed.",
               );
             }
 

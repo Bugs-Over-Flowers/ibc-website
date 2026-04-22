@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type {
   MembershipApplicationStep1Schema,
   MembershipApplicationStep2Schema,
@@ -8,6 +8,7 @@ import type {
 } from "@/lib/validation/membership/application";
 
 export const MAX_STEPS = 5;
+const MEMBERSHIP_APPLICATION_STORAGE_VERSION = 1;
 
 function getManilaDateKey(): string {
   const parts = new Intl.DateTimeFormat("en-PH", {
@@ -22,6 +23,54 @@ function getManilaDateKey(): string {
   const day = parts.find((part) => part.type === "day")?.value;
 
   return `${year}-${month}-${day}`;
+}
+
+function toBirthdate(value: unknown): Date {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    const date = new Date(value);
+    if (!Number.isNaN(date.getTime())) {
+      return date;
+    }
+  }
+
+  return undefined as unknown as Date;
+}
+
+function sanitizeApplicationDataForPersist(
+  applicationData: MembershipApplicationData,
+): MembershipApplicationData {
+  return {
+    ...applicationData,
+    step2: {
+      ...applicationData.step2,
+      logoImage: undefined,
+    },
+    step4: {
+      ...applicationData.step4,
+      paymentProof: undefined,
+    },
+  };
+}
+
+function normalizeApplicationDataAfterHydration(
+  applicationData: MembershipApplicationData,
+): MembershipApplicationData {
+  return {
+    ...sanitizeApplicationDataForPersist(applicationData),
+    step3: {
+      ...applicationData.step3,
+      representatives: applicationData.step3.representatives.map(
+        (representative) => ({
+          ...representative,
+          birthdate: toBirthdate(representative.birthdate),
+        }),
+      ) as MembershipApplicationStep3Schema["representatives"],
+    },
+  };
 }
 
 export interface MembershipApplicationData {
@@ -251,6 +300,42 @@ const useMembershipApplicationStore = create<
     }),
     {
       name: "membership-application-storage",
+      version: MEMBERSHIP_APPLICATION_STORAGE_VERSION,
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        step: state.step,
+        applicationData: sanitizeApplicationDataForPersist(
+          state.applicationData,
+        ),
+        isSubmitted: state.isSubmitted,
+        resetKey: state.resetKey,
+        memberValidation: state.memberValidation,
+      }),
+      migrate: (persistedState) => {
+        if (!persistedState || typeof persistedState !== "object") {
+          return persistedState;
+        }
+
+        const typedState =
+          persistedState as Partial<MembershipApplicationStore>;
+
+        if (typedState.applicationData) {
+          typedState.applicationData = normalizeApplicationDataAfterHydration(
+            typedState.applicationData as MembershipApplicationData,
+          );
+        }
+
+        return typedState;
+      },
+      onRehydrateStorage: () => (state) => {
+        if (!state?.applicationData) {
+          return;
+        }
+
+        state.applicationData = normalizeApplicationDataAfterHydration(
+          state.applicationData,
+        );
+      },
     },
   ),
 );
