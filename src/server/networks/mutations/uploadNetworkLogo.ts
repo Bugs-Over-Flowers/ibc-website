@@ -29,7 +29,12 @@ export async function uploadNetworkLogo(formData: FormData): Promise<string> {
     throw new Error("You must be signed in to upload a logo.");
   }
 
-  const extension = fileValue.name.split(".").pop()?.toLowerCase() ?? "png";
+  const extensionByMimeType: Record<string, string> = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+  };
+  const extension = extensionByMimeType[fileValue.type] ?? "png";
   const filePath = `network-${crypto.randomUUID()}.${extension}`;
 
   const { error: uploadError } = await actionClient.storage

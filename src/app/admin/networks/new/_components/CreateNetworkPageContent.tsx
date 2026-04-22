@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { NetworkFormFields } from "@/app/admin/networks/_components/NetworkFormFields";
 import {
@@ -25,6 +25,20 @@ export function CreateNetworkPageContent() {
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const logoPreviewObjectUrlRef = useRef<string | null>(null);
+
+  const clearLogoPreviewObjectUrl = useCallback(() => {
+    if (logoPreviewObjectUrlRef.current) {
+      URL.revokeObjectURL(logoPreviewObjectUrlRef.current);
+      logoPreviewObjectUrlRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearLogoPreviewObjectUrl();
+    };
+  }, [clearLogoPreviewObjectUrl]);
 
   const handleFieldChange = (field: keyof typeof EMPTY_FORM, value: string) => {
     setFormState((prev) => ({
@@ -38,7 +52,9 @@ export function CreateNetworkPageContent() {
       return;
     }
 
+    clearLogoPreviewObjectUrl();
     const localPreview = URL.createObjectURL(file);
+    logoPreviewObjectUrlRef.current = localPreview;
     setLogoPreview(localPreview);
     setPendingLogoFile(file);
   };
@@ -66,6 +82,7 @@ export function CreateNetworkPageContent() {
       await createNetwork(normalized);
       toast.success("Network created.");
       setFormState(EMPTY_FORM);
+      clearLogoPreviewObjectUrl();
       setLogoPreview(null);
       setPendingLogoFile(null);
       setSubmitAttempted(false);
@@ -120,6 +137,7 @@ export function CreateNetworkPageContent() {
           onLogoUpload={handleLogoUpload}
           onRemoveLogo={() => {
             setFormState((prev) => ({ ...prev, logoUrl: null }));
+            clearLogoPreviewObjectUrl();
             setLogoPreview(null);
             setPendingLogoFile(null);
           }}

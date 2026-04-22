@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { resolveNetworkLogoUrl } from "@/lib/storage/networkLogo";
 import { deleteNetwork } from "@/server/networks/mutations/deleteNetwork";
@@ -40,6 +40,20 @@ export function NetworksAdminClient({
   const [isUploading, setIsUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Network | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const logoPreviewObjectUrlRef = useRef<string | null>(null);
+
+  const clearLogoPreviewObjectUrl = useCallback(() => {
+    if (logoPreviewObjectUrlRef.current) {
+      URL.revokeObjectURL(logoPreviewObjectUrlRef.current);
+      logoPreviewObjectUrlRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearLogoPreviewObjectUrl();
+    };
+  }, [clearLogoPreviewObjectUrl]);
 
   useEffect(() => {
     setNetworks(initialNetworks);
@@ -64,6 +78,7 @@ export function NetworksAdminClient({
   }, [networks, searchQuery, sortBy]);
 
   const openEditDialog = (network: Network) => {
+    clearLogoPreviewObjectUrl();
     setEditingNetwork(network);
     setFormState(mapNetworkToFormState(network));
     setLogoPreview(resolveNetworkLogoUrl(network.logoUrl));
@@ -71,6 +86,7 @@ export function NetworksAdminClient({
 
   const closeDialog = (open: boolean) => {
     if (!open) {
+      clearLogoPreviewObjectUrl();
       setEditingNetwork(null);
       setFormState(EMPTY_FORM);
       setLogoPreview(null);
@@ -94,13 +110,16 @@ export function NetworksAdminClient({
     setIsUploading(true);
 
     try {
+      clearLogoPreviewObjectUrl();
       const localPreview = URL.createObjectURL(file);
+      logoPreviewObjectUrlRef.current = localPreview;
       setLogoPreview(localPreview);
 
       const formData = new FormData();
       formData.append("file", file);
       const uploadedUrl = await uploadNetworkLogo(formData);
       setFormState((prev) => ({ ...prev, logoUrl: uploadedUrl }));
+      clearLogoPreviewObjectUrl();
       setLogoPreview(uploadedUrl);
       toast.success("Logo uploaded successfully.");
     } catch (error) {
@@ -200,6 +219,7 @@ export function NetworksAdminClient({
         onLogoUpload={handleLogoUpload}
         onOpenChange={closeDialog}
         onRemoveLogo={() => {
+          clearLogoPreviewObjectUrl();
           setFormState((prev) => ({ ...prev, logoUrl: null }));
           setLogoPreview(null);
         }}
