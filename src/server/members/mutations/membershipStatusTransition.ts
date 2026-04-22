@@ -107,7 +107,7 @@ async function processAndNotify(referenceTime: Date) {
  */
 export async function resetMemberStatuses() {
   const currentYear = Number(
-    new Intl.DateTimeFormat("en-CA", {
+    new Intl.DateTimeFormat("en-PH", {
       timeZone: "Asia/Manila",
       year: "numeric",
     }).format(new Date()),
