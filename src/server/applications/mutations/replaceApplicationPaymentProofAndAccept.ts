@@ -3,46 +3,18 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import {
+  extractStorageObjectPath,
+  normalizeLegacyStoragePath,
+  PAYMENT_PROOFS_BUCKET,
+  signPaymentProofUrl,
+} from "@/lib/storage/paymentProof";
 import { createActionClient } from "@/lib/supabase/server";
-
-const PAYMENT_PROOFS_BUCKET = "paymentproofs";
 
 const replaceApplicationPaymentProofAndAcceptSchema = z.object({
   applicationId: z.string().uuid(),
   uploadedPath: z.string().min(1),
 });
-
-function extractPaymentProofPath(path: string): string {
-  const trimmedPath = path.trim();
-
-  if (trimmedPath === "") {
-    throw new Error("Payment proof path is empty");
-  }
-
-  if (trimmedPath.startsWith("http://") || trimmedPath.startsWith("https://")) {
-    const url = new URL(trimmedPath);
-    const marker = `/${PAYMENT_PROOFS_BUCKET}/`;
-    const markerIndex = url.pathname.indexOf(marker);
-
-    if (markerIndex < 0) {
-      throw new Error("Invalid payment proof URL");
-    }
-
-    const extractedPath = url.pathname.slice(markerIndex + marker.length);
-
-    if (!extractedPath) {
-      throw new Error("Invalid payment proof URL path");
-    }
-
-    return extractedPath;
-  }
-
-  return trimmedPath;
-}
-
-function normalizeLegacyPaymentProofPath(path: string): string {
-  return path.replace(/\.[A-Za-z0-9]+$/, "");
-}
 
 export async function replaceApplicationPaymentProofAndAccept(input: {
   applicationId: string;
@@ -71,7 +43,10 @@ export async function replaceApplicationPaymentProofAndAccept(input: {
 
   const existingProof = application.ProofImage?.[0];
   const oldPath = existingProof?.path ?? null;
-  const normalizedUploadedPath = extractPaymentProofPath(uploadedPath);
+  const normalizedUploadedPath = extractStorageObjectPath(
+    uploadedPath,
+    PAYMENT_PROOFS_BUCKET,
+  );
 
   if (existingProof?.proofImageId) {
     const { error: updateProofError } = await supabase
@@ -105,10 +80,10 @@ export async function replaceApplicationPaymentProofAndAccept(input: {
   }
 
   if (oldPath) {
-    const normalizedOldPath = normalizeLegacyPaymentProofPath(
-      extractPaymentProofPath(oldPath),
+    const normalizedOldPath = normalizeLegacyStoragePath(
+      extractStorageObjectPath(oldPath, PAYMENT_PROOFS_BUCKET),
     );
-    const normalizedNewPath = normalizeLegacyPaymentProofPath(
+    const normalizedNewPath = normalizeLegacyStoragePath(
       normalizedUploadedPath,
     );
 
@@ -132,16 +107,13 @@ export async function replaceApplicationPaymentProofAndAccept(input: {
   revalidatePath("/admin/application");
   revalidatePath(`/admin/application/${applicationId}`);
 
-  const { data: signedProofImage, error: signedProofImageError } =
-    await supabase.storage
-      .from(PAYMENT_PROOFS_BUCKET)
-      .createSignedUrl(normalizedUploadedPath, 60 * 60 * 24 * 30);
+  const signedProofImage = await signPaymentProofUrl(
+    supabase,
+    normalizedUploadedPath,
+  );
 
   return {
     paymentProofStatus: "accepted" as const,
-    proofImagePath:
-      !signedProofImageError && signedProofImage?.signedUrl
-        ? signedProofImage.signedUrl
-        : normalizedUploadedPath,
+    proofImagePath: signedProofImage ?? normalizedUploadedPath,
   };
 }

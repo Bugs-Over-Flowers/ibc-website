@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export function getManilaDateKey(): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
+  const parts = new Intl.DateTimeFormat("en-PH", {
     timeZone: "Asia/Manila",
     year: "numeric",
     month: "2-digit",

@@ -14,6 +14,14 @@ import {
 import { draftEvent } from "@/server/events/mutations/draftEvent";
 import { publishEvent } from "@/server/events/mutations/publishEvent";
 
+type CreateEventSubmitMeta = {
+  submitMode: "selected" | "draft" | "public" | "private";
+};
+
+const defaultSubmitMeta: CreateEventSubmitMeta = {
+  submitMode: "selected",
+};
+
 export const useCreateEventForm = () => {
   const router = useRouter();
   const form = useAppForm({
@@ -31,6 +39,7 @@ export const useCreateEventForm = () => {
     },
 
     validationLogic: revalidateLogic(),
+    onSubmitMeta: defaultSubmitMeta,
 
     validators: {
       onDynamic: ({ value }) => {
@@ -43,9 +52,7 @@ export const useCreateEventForm = () => {
       },
     },
 
-    onSubmit: async ({ value }) => {
-      console.log("Submitting form to server...", value);
-
+    onSubmit: async ({ value, meta }) => {
       const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
       let headerUrl: string | null | undefined = null;
       let posterUrl: string | null | undefined = null;
@@ -147,15 +154,25 @@ export const useCreateEventForm = () => {
           ? trimmedFacebookLink
           : undefined;
 
+      const resolvedEventType =
+        meta.submitMode === "draft"
+          ? null
+          : meta.submitMode === "public"
+            ? "public"
+            : meta.submitMode === "private"
+              ? "private"
+              : value.eventType;
+
       const payload = {
         ...value,
+        eventType: resolvedEventType,
         eventImage: headerUrl,
         eventPoster: posterUrl,
         facebookLink: normalizedFacebookLink,
       };
 
       const result =
-        value.eventType === null
+        resolvedEventType === null
           ? await draftEvent(payload as DraftEventInput)
           : await publishEvent(payload as PublishEventInput);
 
@@ -165,7 +182,7 @@ export const useCreateEventForm = () => {
       }
 
       const message =
-        value.eventType === null
+        resolvedEventType === null
           ? "Saved event as draft"
           : "Event created successfully!";
 

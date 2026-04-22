@@ -7,7 +7,7 @@ type ClientLocalDateTimeProps = {
   fallback: string;
 };
 
-const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
+const dateTimeFormatter = new Intl.DateTimeFormat("en-PH", {
   month: "short",
   day: "numeric",
   year: "numeric",

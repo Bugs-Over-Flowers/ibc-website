@@ -45,53 +45,77 @@ export default function RegistrationRowActions({
 
   return (
     <>
-      <DropdownMenu modal={false}>
-        <DropdownMenuTrigger
-          render={
+      {isDetailsPage ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            onClick={() => setQrcodeDialog(true)}
+            size="sm"
+            variant="outline"
+          >
+            <QrCodeIcon className="mr-1.5 size-3.5" />
+            QR Code
+          </Button>
+
+          {shouldShowPaymentProofAction && (
             <Button
-              className="size-7 p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
+              onClick={() => setPaymentProofDialog(true)}
               size="sm"
-              variant="ghost"
+              variant="outline"
             >
-              <MoreHorizontal className="size-3.5" />
+              <Images className="mr-1.5 size-3.5" />
+              Review Payment Proof
             </Button>
-          }
-        />
-        <DropdownMenuContent align="end" className="w-44">
-          <DropdownMenuGroup>
-            {!isDetailsPage && (
-              <DropdownMenuItem
-                nativeButton={false}
-                render={
-                  <Link
-                    href={
-                      `/admin/events/${eventId}/registration-list/registration/${data.registrationId}` as Route
-                    }
-                  >
-                    <ChevronRight className="size-3.5" />
-                    Registration Details
-                  </Link>
-                }
-              />
-            )}
+          )}
+        </div>
+      ) : (
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                className="size-7 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                size="sm"
+                variant="ghost"
+              >
+                <MoreHorizontal className="size-3.5" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuGroup>
+              {!isDetailsPage && (
+                <DropdownMenuItem
+                  nativeButton={false}
+                  render={
+                    <Link
+                      href={
+                        `/admin/events/${eventId}/registration-list/registration/${data.registrationId}` as Route
+                      }
+                    >
+                      <ChevronRight className="size-3.5" />
+                      Registration Details
+                    </Link>
+                  }
+                />
+              )}
 
-            <DropdownMenuItem onClick={() => setQrcodeDialog(true)}>
-              <QrCodeIcon className="size-3.5" />
-              QR Code
-            </DropdownMenuItem>
-
-            {shouldShowPaymentProofAction && (
-              <DropdownMenuItem onClick={() => setPaymentProofDialog(true)}>
-                <Images className="size-3.5" />
-                Review Payment Proof
+              <DropdownMenuItem onClick={() => setQrcodeDialog(true)}>
+                <QrCodeIcon className="size-3.5" />
+                QR Code
               </DropdownMenuItem>
-            )}
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+
+              {shouldShowPaymentProofAction && (
+                <DropdownMenuItem onClick={() => setPaymentProofDialog(true)}>
+                  <Images className="size-3.5" />
+                  Review Payment Proof
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       <QRCodeDialog
         affiliation={data.affiliation}

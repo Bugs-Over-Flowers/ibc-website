@@ -42,6 +42,7 @@ export function ApplicationsTable({
     clearSelection,
     selectedApplicationIds,
     removeApplication,
+    isSelectionLocked,
   } = useSelectedApplicationsStore();
 
   const isSelectable = useCallback(
@@ -111,6 +112,7 @@ export function ApplicationsTable({
                   aria-label="Select all applications"
                   checked={allSelected}
                   data-indeterminate={someSelected}
+                  disabled={isSelectionLocked}
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>

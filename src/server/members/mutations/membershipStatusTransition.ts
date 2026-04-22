@@ -1,6 +1,5 @@
 "use server";
 
-import type { Database } from "@/lib/supabase/db.types";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendMembershipStatusNotifications } from "@/server/members/mutations/sendMembershipStatusNotifications";
 import type {
@@ -108,7 +107,7 @@ async function processAndNotify(referenceTime: Date) {
  */
 export async function resetMemberStatuses() {
   const currentYear = Number(
-    new Intl.DateTimeFormat("en-CA", {
+    new Intl.DateTimeFormat("en-PH", {
       timeZone: "Asia/Manila",
       year: "numeric",
     }).format(new Date()),

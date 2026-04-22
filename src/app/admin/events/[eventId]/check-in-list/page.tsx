@@ -1,15 +1,21 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import BackButton from "@/app/admin/_components/BackButton";
 import { TabsContent } from "@/components/ui/tabs";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/server";
 import { getCheckInStats } from "@/server/check-in/queries/getCheckInStats";
-import { getEventDays } from "@/server/events/mutations/getEventDays";
-import BackButton from "../_components/BackButton";
+import { getEventDays } from "@/server/events/queries/getEventDays";
 import CheckInListContent from "./_components/CheckInListContent";
 import CheckInListTabWrapper from "./_components/CheckInListTabWrapper";
 import DraftEventEmptyComponent from "./_components/DraftEventEmptyComponent";
 import CheckInListPageLoading, { CheckInListContentSkeleton } from "./loading";
+
+export const metadata: Metadata = {
+  title: "Check-In List | Admin",
+  description: "Manage event check-in across event days.",
+};
 
 type CheckInPageWrapperProps =
   PageProps<"/admin/events/[eventId]/check-in-list">;

@@ -8,6 +8,7 @@ import {
   SubmitRegistrationResponseSchema,
 } from "@/lib/validation/registration/standard";
 import { createRegistrationIdentifier } from "@/lib/validation/utils";
+import { invalidateRegistrationCaches } from "@/server/actions.utils";
 
 /**
  * Server action to submit event registration to database via RPC call.
@@ -97,12 +98,7 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
 
   const validatedResponse = SubmitRegistrationResponseSchema.parse(rpcResults);
 
-  updateTag(CACHE_TAGS.registrations.all);
-  updateTag(CACHE_TAGS.registrations.list);
-  updateTag(CACHE_TAGS.registrations.details);
-  updateTag(CACHE_TAGS.registrations.stats);
-  updateTag(CACHE_TAGS.registrations.event);
-  updateTag(CACHE_TAGS.events.registrations);
+  invalidateRegistrationCaches();
   updateTag(CACHE_TAGS.checkIns.stats);
 
   if (sponsoredRegistrationId) {

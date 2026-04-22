@@ -417,6 +417,42 @@ export type Database = {
           },
         ];
       };
+      Networks: {
+        Row: {
+          about: string;
+          created_at: string;
+          id: string;
+          location_type: string;
+          logo_url: string | null;
+          organization: string;
+          representative_name: string;
+          representative_position: string;
+          updated_at: string;
+        };
+        Insert: {
+          about: string;
+          created_at?: string;
+          id?: string;
+          location_type: string;
+          logo_url?: string | null;
+          organization: string;
+          representative_name: string;
+          representative_position: string;
+          updated_at?: string;
+        };
+        Update: {
+          about?: string;
+          created_at?: string;
+          id?: string;
+          location_type?: string;
+          logo_url?: string | null;
+          organization?: string;
+          representative_name?: string;
+          representative_position?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       Participant: {
         Row: {
           contactNumber: string;
@@ -858,16 +894,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_registration_list_checkin: {
-        Args: { p_identifier: string; p_today?: string };
-        Returns: Database["public"]["CompositeTypes"]["registration_details_result"];
-        SetofOptions: {
-          from: "*";
-          to: "registration_details_result";
-          isOneToOne: true;
-          isSetofReturn: false;
-        };
-      };
       get_registration_list_stats: {
         Args: { p_event_id: string };
         Returns: Database["public"]["CompositeTypes"]["registration_stats"];
@@ -965,6 +991,7 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      is_admin_user: { Args: never; Returns: boolean };
       january_first_reset: { Args: never; Returns: undefined };
       process_membership_statuses: {
         Args: { p_reference_time?: string };

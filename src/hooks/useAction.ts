@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useOptimistic, useState, useTransition } from "react";
-import type { ServerFunction } from "@/lib/server/types";
+import type { AsyncFunction } from "@/lib/server/types";
 
 interface UseActionOptions<TOutput, TError = Error | string> {
   /**
@@ -80,7 +80,7 @@ export function useAction<
   TOutput,
   TError = Error | string,
 >(
-  action: ServerFunction<TInput, TOutput, TError>,
+  action: AsyncFunction<TInput, TOutput, TError>,
   options: UseActionOptions<TOutput, TError> = {},
 ) {
   const [error, setError] = useState<TError | null>(null);
@@ -158,7 +158,7 @@ export function useOptimisticAction<
   TOptimisticState,
   TError = Error | string,
 >(
-  action: ServerFunction<TInput, TOutput, TError>,
+  action: AsyncFunction<TInput, TOutput, TError>,
   initialOptimisticState: TOptimisticState,
   options: UseOptimisticActionOptions<
     TInput,

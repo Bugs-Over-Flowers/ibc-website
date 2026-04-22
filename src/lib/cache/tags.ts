@@ -41,6 +41,11 @@ export const CACHE_TAGS = {
   sectors: {
     all: "sectors:all",
   },
+  networks: {
+    all: "networks:all",
+    admin: "networks:admin",
+    public: "networks:public",
+  },
   websiteContent: {
     all: "website-content:all",
     public: "website-content:public",
