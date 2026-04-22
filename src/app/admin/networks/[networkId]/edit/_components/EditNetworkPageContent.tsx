@@ -5,21 +5,33 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  EMPTY_FORM,
   isFormValid,
+  mapNetworkToFormState,
+  type NetworkFormState,
   normalizeFormState,
 } from "@/app/admin/networks/_components/networkForm";
+import CreateNetworkMainSections from "@/app/admin/networks/new/_components/CreateNetworkMainSections";
+import CreateNetworkSidebar from "@/app/admin/networks/new/_components/CreateNetworkSidebar";
+import CreateNetworkTopBar from "@/app/admin/networks/new/_components/CreateNetworkTopBar";
 import { resolveNetworkLogoUrl } from "@/lib/storage/networkLogo";
-import { createNetwork } from "@/server/networks/mutations/createNetwork";
+import { updateNetwork } from "@/server/networks/mutations/updateNetwork";
 import { uploadNetworkLogo } from "@/server/networks/mutations/uploadNetworkLogo";
-import CreateNetworkMainSections from "./CreateNetworkMainSections";
-import CreateNetworkSidebar from "./CreateNetworkSidebar";
-import CreateNetworkTopBar from "./CreateNetworkTopBar";
+import type { Network } from "@/server/networks/types";
 
-export function CreateNetworkPageContent() {
+type EditNetworkPageContentProps = {
+  network: Network;
+};
+
+export default function EditNetworkPageContent({
+  network,
+}: EditNetworkPageContentProps) {
   const router = useRouter();
-  const [formState, setFormState] = useState(EMPTY_FORM);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [formState, setFormState] = useState<NetworkFormState>(
+    mapNetworkToFormState(network),
+  );
+  const [logoPreview, setLogoPreview] = useState<string | null>(
+    resolveNetworkLogoUrl(network.logoUrl),
+  );
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -39,7 +51,7 @@ export function CreateNetworkPageContent() {
     };
   }, [clearLogoPreviewObjectUrl]);
 
-  const handleFieldChange = (field: keyof typeof EMPTY_FORM, value: string) => {
+  const handleFieldChange = (field: keyof NetworkFormState, value: string) => {
     setFormState((prev) => ({
       ...prev,
       [field]: value,
@@ -78,14 +90,10 @@ export function CreateNetworkPageContent() {
         normalized = { ...normalized, logoUrl: uploadedUrl };
       }
 
-      await createNetwork(normalized);
-      toast.success("Network created.");
-      setFormState(EMPTY_FORM);
-      clearLogoPreviewObjectUrl();
-      setLogoPreview(null);
-      setPendingLogoFile(null);
-      setSubmitAttempted(false);
+      await updateNetwork(network.id, normalized);
+      toast.success("Network updated.");
       router.replace("/admin/networks" as Route);
+      router.refresh();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to save network.";
@@ -107,11 +115,11 @@ export function CreateNetworkPageContent() {
     representativePosition:
       submitAttempted && normalizedForm.representativePosition.length === 0,
   };
-  const canCreate = isFormValid(normalizedForm);
+  const canSave = isFormValid(normalizedForm);
 
   return (
     <div className="min-h-screen">
-      <CreateNetworkTopBar />
+      <CreateNetworkTopBar crumbLabel="Edit Network" />
 
       <div className="mx-auto max-w-7xl py-5">
         <form
@@ -124,6 +132,8 @@ export function CreateNetworkPageContent() {
           <div className="grid grid-cols-1 items-start gap-8 px-2 xl:grid-cols-[1fr_320px]">
             <CreateNetworkMainSections
               currentLogo={currentLogo}
+              description="Update organization details, representative information, and logo from one place."
+              detailsDescription="Keep public-facing network data accurate and up to date."
               formState={formState}
               invalidFields={invalidFields}
               isUploading={isUploading}
@@ -135,6 +145,7 @@ export function CreateNetworkPageContent() {
                 setLogoPreview(null);
                 setPendingLogoFile(null);
               }}
+              title="Edit Network"
             />
 
             <CreateNetworkSidebar
@@ -142,13 +153,15 @@ export function CreateNetworkPageContent() {
               formState={formState}
               isSaving={isSaving}
               isUploading={isUploading}
-              isValid={canCreate}
+              isValid={canSave}
               onCancel={() => {
                 router.push("/admin/networks" as Route);
               }}
               onCreate={() => {
                 void handleSave();
               }}
+              submitLabel="Save Changes"
+              submittingLabel="Saving Changes..."
             />
           </div>
         </form>

@@ -1,26 +1,16 @@
 "use client";
 
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { resolveNetworkLogoUrl } from "@/lib/storage/networkLogo";
 import { deleteNetwork } from "@/server/networks/mutations/deleteNetwork";
-import { updateNetwork } from "@/server/networks/mutations/updateNetwork";
-import { uploadNetworkLogo } from "@/server/networks/mutations/uploadNetworkLogo";
 import type { Network } from "@/server/networks/types";
 import { DeleteNetworkDialog } from "./DeleteNetworkDialog";
-import { NetworkFormDialog } from "./NetworkFormDialog";
 import { NetworksFilters } from "./NetworksFilters";
 import { NetworksHeader } from "./NetworksHeader";
 import { NetworksTable } from "./NetworksTable";
-import {
-  EMPTY_FORM,
-  isFormValid,
-  mapNetworkToFormState,
-  type NetworkFormState,
-  normalizeFormState,
-  type SortOption,
-} from "./networkForm";
+import type { SortOption } from "./networkForm";
 
 interface NetworksAdminClientProps {
   initialNetworks: Network[];
@@ -33,27 +23,8 @@ export function NetworksAdminClient({
   const [networks, setNetworks] = useState<Network[]>(initialNetworks);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const [editingNetwork, setEditingNetwork] = useState<Network | null>(null);
-  const [formState, setFormState] = useState<NetworkFormState>(EMPTY_FORM);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Network | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const logoPreviewObjectUrlRef = useRef<string | null>(null);
-
-  const clearLogoPreviewObjectUrl = useCallback(() => {
-    if (logoPreviewObjectUrlRef.current) {
-      URL.revokeObjectURL(logoPreviewObjectUrlRef.current);
-      logoPreviewObjectUrlRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      clearLogoPreviewObjectUrl();
-    };
-  }, [clearLogoPreviewObjectUrl]);
 
   useEffect(() => {
     setNetworks(initialNetworks);
@@ -77,91 +48,8 @@ export function NetworksAdminClient({
     });
   }, [networks, searchQuery, sortBy]);
 
-  const openEditDialog = (network: Network) => {
-    clearLogoPreviewObjectUrl();
-    setEditingNetwork(network);
-    setFormState(mapNetworkToFormState(network));
-    setLogoPreview(resolveNetworkLogoUrl(network.logoUrl));
-  };
-
-  const closeDialog = (open: boolean) => {
-    if (!open) {
-      clearLogoPreviewObjectUrl();
-      setEditingNetwork(null);
-      setFormState(EMPTY_FORM);
-      setLogoPreview(null);
-      setIsSaving(false);
-      setIsUploading(false);
-    }
-  };
-
-  const handleFieldChange = (field: keyof NetworkFormState, value: string) => {
-    setFormState((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleLogoUpload = async (file: File | undefined) => {
-    if (!file) {
-      return;
-    }
-
-    setIsUploading(true);
-
-    try {
-      clearLogoPreviewObjectUrl();
-      const localPreview = URL.createObjectURL(file);
-      logoPreviewObjectUrlRef.current = localPreview;
-      setLogoPreview(localPreview);
-
-      const formData = new FormData();
-      formData.append("file", file);
-      const uploadedUrl = await uploadNetworkLogo(formData);
-      setFormState((prev) => ({ ...prev, logoUrl: uploadedUrl }));
-      clearLogoPreviewObjectUrl();
-      setLogoPreview(uploadedUrl);
-      toast.success("Logo uploaded successfully.");
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to upload logo.";
-      toast.error(errorMessage);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!editingNetwork) {
-      return;
-    }
-
-    const normalized = normalizeFormState(formState);
-
-    if (!isFormValid(normalized)) {
-      toast.error("Please fill out all required fields.");
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      const updated = await updateNetwork(editingNetwork.id, normalized);
-
-      setNetworks((prev) =>
-        prev.map((network) => (network.id === updated.id ? updated : network)),
-      );
-      toast.success("Network updated.");
-
-      closeDialog(false);
-      router.refresh();
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to save network.";
-      toast.error(errorMessage);
-    } finally {
-      setIsSaving(false);
-    }
+  const handleEdit = (network: Network) => {
+    router.push(`/admin/networks/${network.id}/edit` as Route);
   };
 
   const handleDelete = async () => {
@@ -190,8 +78,6 @@ export function NetworksAdminClient({
     }
   };
 
-  const currentLogo = logoPreview ?? resolveNetworkLogoUrl(formState.logoUrl);
-
   return (
     <div className="space-y-6 px-2">
       <NetworksHeader />
@@ -206,25 +92,7 @@ export function NetworksAdminClient({
       <NetworksTable
         networks={filteredNetworks}
         onDelete={setDeleteTarget}
-        onEdit={openEditDialog}
-      />
-
-      <NetworkFormDialog
-        currentLogo={currentLogo}
-        editingNetwork={editingNetwork}
-        formState={formState}
-        isSaving={isSaving}
-        isUploading={isUploading}
-        onFieldChange={handleFieldChange}
-        onLogoUpload={handleLogoUpload}
-        onOpenChange={closeDialog}
-        onRemoveLogo={() => {
-          clearLogoPreviewObjectUrl();
-          setFormState((prev) => ({ ...prev, logoUrl: null }));
-          setLogoPreview(null);
-        }}
-        onSave={handleSave}
-        open={Boolean(editingNetwork)}
+        onEdit={handleEdit}
       />
 
       <DeleteNetworkDialog
