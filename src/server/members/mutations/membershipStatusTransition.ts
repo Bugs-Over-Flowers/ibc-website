@@ -1,6 +1,5 @@
 "use server";
 
-import type { Database } from "@/lib/supabase/db.types";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendMembershipStatusNotifications } from "@/server/members/mutations/sendMembershipStatusNotifications";
 import type {
