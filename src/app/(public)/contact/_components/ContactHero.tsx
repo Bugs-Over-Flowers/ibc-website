@@ -1,28 +1,35 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { HeroBackgroundCarousel } from "@/components/website/HeroBackgroundCarousel";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
 
-export function ContactHero() {
+interface ContactHeroProps {
+  backgroundImages?: string[];
+}
+
+const CONTACT_HERO_FALLBACK_IMAGES = [
+  "/images/backgrounds/bg-3.jpg",
+  "/images/backgrounds/bg-1.jpg",
+  "/images/backgrounds/bg-2.jpg",
+  "/images/backgrounds/bg-about.jpg",
+  "/images/backgrounds/bg-4.jpg",
+];
+
+export function ContactHero({ backgroundImages }: ContactHeroProps) {
+  const images =
+    backgroundImages && backgroundImages.length > 0
+      ? backgroundImages
+      : CONTACT_HERO_FALLBACK_IMAGES;
+
   return (
     <section className="relative flex min-h-[60vh] items-center overflow-hidden pt-32 pb-16">
-      {/* Static Background Image */}
-      <motion.div
-        animate={{ opacity: 1, scale: 1 }}
-        className="absolute inset-0"
-        initial={{ opacity: 0, scale: 1.1 }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
-      >
-        <Image
-          alt="Contact Us Background"
-          className="object-cover opacity-20"
-          fill
-          priority
-          src="/images/backgrounds/bg-3.jpg"
-        />
-      </motion.div>
+      <HeroBackgroundCarousel
+        alt="Contact Us Background"
+        images={images}
+        opacityClass="opacity-20"
+      />
 
       {/* Animated Blur Orbs */}
       <motion.div

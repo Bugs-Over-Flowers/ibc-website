@@ -1179,7 +1179,8 @@ export type Database = {
         | "company_thrusts"
         | "board_of_trustees"
         | "secretariat"
-        | "landing_page_benefits";
+        | "landing_page_benefits"
+        | "hero_section";
       WebsiteContentTextType: "Paragraph" | "Title" | "Subtitle";
     };
     CompositeTypes: {
@@ -1367,6 +1368,7 @@ export const Constants = {
         "board_of_trustees",
         "secretariat",
         "landing_page_benefits",
+        "hero_section",
       ],
       WebsiteContentTextType: ["Paragraph", "Title", "Subtitle"],
     },
