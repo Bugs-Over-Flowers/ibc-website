@@ -24,7 +24,8 @@ export const getRegistrationData = async (
        businessMember:BusinessMember(businessMemberId, businessName),
        nonMemberName,
        identifier,
-       ProofImage(path)
+       ProofImage(path),
+       note
        `,
     )
     .eq("registrationId", registrationId)

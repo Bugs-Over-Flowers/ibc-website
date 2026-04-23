@@ -1,7 +1,14 @@
 "use client";
 
 import { format } from "date-fns";
-import { Building2, CalendarDays, CreditCard, Hash, Users } from "lucide-react";
+import {
+  Building2,
+  CalendarDays,
+  CreditCard,
+  Hash,
+  StickyNote,
+  Users,
+} from "lucide-react";
 import type { Route } from "next";
 import { useParams } from "next/navigation";
 import BackButton from "@/app/admin/_components/BackButton";
@@ -138,7 +145,6 @@ export default function RegistrationDetails({
             />
           </div>
         </div>
-
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatTile
             icon={<Hash className="h-4 w-4" />}
@@ -166,6 +172,14 @@ export default function RegistrationDetails({
             value={participantsCount}
           />
         </div>
+
+        {data.note && (
+          <StatTile
+            icon={<StickyNote className="h-4 w-4" />}
+            label="Note"
+            value={data.note}
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
@@ -223,19 +237,15 @@ export default function RegistrationDetails({
                 </div>
 
                 {data.signedUrl &&
-                typeof data.signedUrl === "string" &&
-                data.signedUrl.trim() !== "" ? (
-                  <OnlinePaymentSection
-                    getStatusColor={getStatusColor}
-                    paymentProofStatus={paymentProofStatus}
-                    proofImageURL={data.signedUrl.trim()}
-                    registrationId={data.registrationId}
-                  />
-                ) : (
-                  <p className="text-muted-foreground text-sm">
-                    No payment proof uploaded for this registration.
-                  </p>
-                )}
+                  typeof data.signedUrl === "string" &&
+                  data.signedUrl.trim() !== "" && (
+                    <OnlinePaymentSection
+                      getStatusColor={getStatusColor}
+                      paymentProofStatus={paymentProofStatus}
+                      proofImageURL={data.signedUrl.trim()}
+                      registrationId={data.registrationId}
+                    />
+                  )}
               </div>
             </CardContent>
           </Card>

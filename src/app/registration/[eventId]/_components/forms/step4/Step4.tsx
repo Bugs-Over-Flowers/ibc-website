@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +9,7 @@ import type { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { useRegistrationStep4 } from "../../../_hooks/useRegistrationStep4";
 import RegistrationStepHeader from "../RegistrationStepHeader";
 import Step4EventReviewSection from "./Step4EventReviewSection";
+import Step4NoteSection from "./Step4NoteSection";
 import Step4PaymentReviewSection from "./Step4PaymentReviewSection";
 import Step4RegistrantReviewSection from "./Step4RegistrantReviewSection";
 import Step4TermsSection from "./Step4TermsSection";
@@ -60,7 +63,7 @@ export default function Step4({ members }: Step4Props) {
     return () => URL.revokeObjectURL(previewUrl);
   }, [selectedPaymentProof]);
 
-  const onSubmit = (e?: React.SubmitEvent<HTMLFormElement>) => {
+  const onSubmit = (e?: React.SubmitEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -101,6 +104,7 @@ export default function Step4({ members }: Step4Props) {
             sponsoredBy={sponsoredBy}
           />
 
+          <Step4NoteSection form={form} />
           <Step4TermsSection form={form} />
         </CardContent>
 
