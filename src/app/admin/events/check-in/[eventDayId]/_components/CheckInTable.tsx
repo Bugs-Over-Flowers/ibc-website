@@ -216,6 +216,7 @@ export default function CheckInTable({ data }: CheckInTableProps) {
           toggleParticipantSelection(row.original.participantId);
         }}
         data={participants}
+        getRowId={(row) => row.participantId}
         onRowSelectionChange={setSelectedParticipants}
         rowSelection={selectedParticipants}
       />
