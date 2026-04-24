@@ -33,9 +33,9 @@ export default function EventActionsDropdown({
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger
           aria-label="Event actions"
-          className="rounded-full p-2 transition-colors hover:bg-muted md:rounded-md"
+          className="flex size-6 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-muted/50 hover:text-foreground"
         >
-          <MoreVertical size={20} />
+          <MoreVertical className="size-3.5" />
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"

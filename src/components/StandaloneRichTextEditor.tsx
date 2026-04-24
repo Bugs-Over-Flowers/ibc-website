@@ -25,6 +25,8 @@ interface StandaloneRichTextEditorProps {
   onChange: (html: string) => void;
   placeholder?: string;
   className?: string;
+  showHeadingTools?: boolean;
+  showListTools?: boolean;
 }
 
 function StandaloneRichTextEditor({
@@ -32,6 +34,8 @@ function StandaloneRichTextEditor({
   onChange,
   placeholder = "Enter message...",
   className,
+  showHeadingTools = true,
+  showListTools = true,
 }: StandaloneRichTextEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
@@ -86,7 +90,7 @@ function StandaloneRichTextEditor({
             onClick={() => editor.chain().focus().toggleBold().run()}
             size="sm"
             type="button"
-            variant={editor.isActive("bold") ? "secondary" : "ghost"}
+            variant="ghost"
           >
             <Bold className="h-4 w-4" />
           </Button>
@@ -95,78 +99,84 @@ function StandaloneRichTextEditor({
             onClick={() => editor.chain().focus().toggleItalic().run()}
             size="sm"
             type="button"
-            variant={editor.isActive("italic") ? "secondary" : "ghost"}
+            variant="ghost"
           >
             <Italic className="h-4 w-4" />
           </Button>
         </ButtonGroup>
 
-        <ButtonGroupSeparator orientation="vertical" />
+        {showHeadingTools ? (
+          <ButtonGroupSeparator orientation="vertical" />
+        ) : null}
 
-        <ButtonGroup>
-          <Button
-            aria-label="Heading 1"
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 1 }).run()
-            }
-            size="sm"
-            type="button"
-            variant={
-              editor.isActive("heading", { level: 1 }) ? "secondary" : "ghost"
-            }
-          >
-            <Heading1 className="h-4 w-4" />
-          </Button>
-          <Button
-            aria-label="Heading 2"
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 2 }).run()
-            }
-            size="sm"
-            type="button"
-            variant={
-              editor.isActive("heading", { level: 2 }) ? "secondary" : "ghost"
-            }
-          >
-            <Heading2 className="h-4 w-4" />
-          </Button>
-          <Button
-            aria-label="Heading 3"
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 3 }).run()
-            }
-            size="sm"
-            type="button"
-            variant={
-              editor.isActive("heading", { level: 3 }) ? "secondary" : "ghost"
-            }
-          >
-            <Heading3 className="h-4 w-4" />
-          </Button>
-        </ButtonGroup>
+        {showHeadingTools ? (
+          <ButtonGroup>
+            <Button
+              aria-label="Heading 1"
+              onClick={() =>
+                editor.chain().focus().toggleHeading({ level: 1 }).run()
+              }
+              size="sm"
+              type="button"
+              variant={
+                editor.isActive("heading", { level: 1 }) ? "secondary" : "ghost"
+              }
+            >
+              <Heading1 className="h-4 w-4" />
+            </Button>
+            <Button
+              aria-label="Heading 2"
+              onClick={() =>
+                editor.chain().focus().toggleHeading({ level: 2 }).run()
+              }
+              size="sm"
+              type="button"
+              variant={
+                editor.isActive("heading", { level: 2 }) ? "secondary" : "ghost"
+              }
+            >
+              <Heading2 className="h-4 w-4" />
+            </Button>
+            <Button
+              aria-label="Heading 3"
+              onClick={() =>
+                editor.chain().focus().toggleHeading({ level: 3 }).run()
+              }
+              size="sm"
+              type="button"
+              variant={
+                editor.isActive("heading", { level: 3 }) ? "secondary" : "ghost"
+              }
+            >
+              <Heading3 className="h-4 w-4" />
+            </Button>
+          </ButtonGroup>
+        ) : null}
 
-        <ButtonGroupSeparator orientation="vertical" />
+        {showListTools ? <ButtonGroupSeparator orientation="vertical" /> : null}
 
-        <ButtonGroup>
-          <Button
-            aria-label="Bullet List"
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            size="sm"
-            type="button"
-            variant={editor.isActive("bulletList") ? "secondary" : "ghost"}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            aria-label="Ordered List"
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            size="sm"
-            type="button"
-            variant={editor.isActive("orderedList") ? "secondary" : "ghost"}
-          >
-            <ListOrdered className="h-4 w-4" />
-          </Button>
-        </ButtonGroup>
+        {showListTools ? (
+          <ButtonGroup>
+            <Button
+              aria-label="Bullet List"
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              size="sm"
+              type="button"
+              variant={editor.isActive("bulletList") ? "secondary" : "ghost"}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              aria-label="Ordered List"
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              size="sm"
+              type="button"
+              variant={editor.isActive("orderedList") ? "secondary" : "ghost"}
+            >
+              <ListOrdered className="h-4 w-4" />
+            </Button>
+          </ButtonGroup>
+        ) : null}
       </div>
       {/* Editor Content */}
       <EditorContent editor={editor} />

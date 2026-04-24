@@ -1,11 +1,7 @@
 import { fileTypeFromBuffer } from "file-type";
 
 // Allowed file types for uploads
-export const ALLOWED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "application/pdf",
-];
+export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"];
 
 /**
  * Validates file type both by MIME type and actual file content
@@ -24,8 +20,7 @@ export const validateFileType = async (file: File): Promise<boolean> => {
     const fileType = await fileTypeFromBuffer(buffer);
 
     if (!fileType) {
-      // For PDFs, file-type might not detect it, so fallback to MIME type check
-      return file.type === "application/pdf";
+      return false;
     }
 
     return ALLOWED_IMAGE_TYPES.includes(fileType.mime);

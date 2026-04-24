@@ -1,14 +1,17 @@
 import "server-only";
 
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyAdmin5mCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { signLogoUrl } from "@/lib/storage/signedUrls";
 import { createClient } from "@/lib/supabase/server";
 
 export type MemberDetailsByBusinessMemberId = {
   businessMemberId: string;
   businessName: string;
   identifier: string;
+  sectorId: number | null;
   websiteURL: string | null;
   logoImageURL: string | null;
   joinDate: string;
@@ -17,6 +20,7 @@ export type MemberDetailsByBusinessMemberId = {
   sectorName: string | null;
   latestApplication: {
     applicationId: string;
+    sectorName: string | null;
     companyAddress: string | null;
     emailAddress: string | null;
     landline: string | null;
@@ -46,7 +50,7 @@ export async function getMemberDetailsByBusinessMemberId(
   requestCookies: RequestCookie[],
 ): Promise<MemberDetailsByBusinessMemberId> {
   "use cache";
-  cacheLife("admin5m");
+  applyAdmin5mCache();
   cacheTag(CACHE_TAGS.members.all);
   cacheTag(CACHE_TAGS.members.admin);
 
@@ -59,6 +63,7 @@ export async function getMemberDetailsByBusinessMemberId(
       businessMemberId,
       businessName,
       identifier,
+      sectorId,
       websiteURL,
       logoImageURL,
       joinDate,
@@ -84,6 +89,7 @@ export async function getMemberDetailsByBusinessMemberId(
       .select(
         `
         applicationId,
+        sectorName,
         companyAddress,
         emailAddress,
         landline,
@@ -118,26 +124,6 @@ export async function getMemberDetailsByBusinessMemberId(
     );
   }
 
-  const signLogoUrl = async (path: string | null) => {
-    if (!path) {
-      return null;
-    }
-
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      return path;
-    }
-
-    const { data: signed, error: signedError } = await supabase.storage
-      .from("logoimage")
-      .createSignedUrl(path, 60 * 60 * 24 * 30);
-
-    if (!signedError && signed?.signedUrl) {
-      return signed.signedUrl;
-    }
-
-    return null;
-  };
-
   const sectorName =
     member.Sector && "sectorName" in member.Sector
       ? (member.Sector.sectorName as string | null)
@@ -147,8 +133,9 @@ export async function getMemberDetailsByBusinessMemberId(
     businessMemberId: member.businessMemberId,
     businessName: member.businessName,
     identifier: member.identifier,
+    sectorId: member.sectorId,
     websiteURL: member.websiteURL,
-    logoImageURL: await signLogoUrl(member.logoImageURL),
+    logoImageURL: await signLogoUrl(supabase, member.logoImageURL),
     joinDate: member.joinDate,
     membershipStatus: member.membershipStatus,
     membershipExpiryDate: member.membershipExpiryDate,
@@ -156,6 +143,7 @@ export async function getMemberDetailsByBusinessMemberId(
     latestApplication: latestApplication
       ? {
           applicationId: latestApplication.applicationId,
+          sectorName: latestApplication.sectorName,
           companyAddress: latestApplication.companyAddress,
           emailAddress: latestApplication.emailAddress,
           landline: latestApplication.landline,

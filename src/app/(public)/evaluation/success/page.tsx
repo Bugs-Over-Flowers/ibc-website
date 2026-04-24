@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { EvaluationSuccessContent } from "./_components/EvaluationSuccessContent";
+
+export const metadata: Metadata = {
+  title: "Evaluation Submitted",
+  description: "Thank you for sharing your feedback.",
+};
 
 interface EvaluationSuccessPageProps {
   searchParams: Promise<{ eventId?: string }>;

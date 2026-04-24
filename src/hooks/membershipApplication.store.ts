@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type {
   MembershipApplicationStep1Schema,
   MembershipApplicationStep2Schema,
@@ -8,6 +8,70 @@ import type {
 } from "@/lib/validation/membership/application";
 
 export const MAX_STEPS = 5;
+const MEMBERSHIP_APPLICATION_STORAGE_VERSION = 1;
+
+function getManilaDateKey(): string {
+  const parts = new Intl.DateTimeFormat("en-PH", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return `${year}-${month}-${day}`;
+}
+
+function toBirthdate(value: unknown): Date {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    const date = new Date(value);
+    if (!Number.isNaN(date.getTime())) {
+      return date;
+    }
+  }
+
+  return undefined as unknown as Date;
+}
+
+function sanitizeApplicationDataForPersist(
+  applicationData: MembershipApplicationData,
+): MembershipApplicationData {
+  return {
+    ...applicationData,
+    step2: {
+      ...applicationData.step2,
+      logoImage: undefined,
+    },
+    step4: {
+      ...applicationData.step4,
+      paymentProof: undefined,
+    },
+  };
+}
+
+function normalizeApplicationDataAfterHydration(
+  applicationData: MembershipApplicationData,
+): MembershipApplicationData {
+  return {
+    ...sanitizeApplicationDataForPersist(applicationData),
+    step3: {
+      ...applicationData.step3,
+      representatives: applicationData.step3.representatives.map(
+        (representative) => ({
+          ...representative,
+          birthdate: toBirthdate(representative.birthdate),
+        }),
+      ) as MembershipApplicationStep3Schema["representatives"],
+    },
+  };
+}
 
 export interface MembershipApplicationData {
   step1: MembershipApplicationStep1Schema;
@@ -28,6 +92,7 @@ interface MembershipApplicationStore {
     lastValidatedMemberIdentifier: string | null;
     lastValidatedApplicationType: "renewal" | "updating" | null;
     remainingTime: number;
+    lastRateLimitResetDate: string | null;
     memberInfo: {
       companyName?: string;
       membershipStatus?: string;
@@ -58,6 +123,8 @@ interface MembershipApplicationStoreActions {
     applicationType?: "renewal" | "updating" | null,
   ) => void;
   setMemberValidationRemainingTime: (time: number) => void;
+  setMemberValidationRateLimitDate: (date: string | null) => void;
+  resetMemberValidationRateLimit: () => void;
   resetMemberValidation: () => void;
 }
 
@@ -72,12 +139,14 @@ const initialState: MembershipApplicationStore = {
     lastValidatedMemberIdentifier: null,
     lastValidatedApplicationType: null,
     remainingTime: 0,
+    lastRateLimitResetDate: null,
     memberInfo: {},
   },
   applicationData: {
     step1: {
       applicationType: "newMember",
       businessMemberIdentifier: "",
+      businessMemberId: "",
     },
     step2: {
       companyName: "",
@@ -160,6 +229,9 @@ const useMembershipApplicationStore = create<
               attemptCount: state.memberValidation?.attemptCount ?? 0,
               cooldownEndTime: state.memberValidation?.cooldownEndTime ?? null,
               remainingTime: state.memberValidation?.remainingTime ?? 0,
+              lastRateLimitResetDate:
+                state.memberValidation?.lastRateLimitResetDate ??
+                getManilaDateKey(),
             },
           };
         }),
@@ -199,182 +271,70 @@ const useMembershipApplicationStore = create<
 
       setMemberValidationRemainingTime: (time) =>
         set((state) => ({
-          memberValidation: { ...state.memberValidation, remainingTime: time },
+          memberValidation: {
+            ...state.memberValidation,
+            remainingTime: time,
+          },
         })),
 
-      resetMemberValidation: () =>
+      setMemberValidationRateLimitDate: (date) =>
         set((state) => ({
           memberValidation: {
             ...state.memberValidation,
-            validationStatus: "idle",
-            lastValidatedMemberIdentifier: null,
-            lastValidatedApplicationType: null,
-            memberInfo: {},
+            lastRateLimitResetDate: date,
           },
         })),
+
+      resetMemberValidationRateLimit: () =>
+        set({
+          memberValidation: {
+            ...initialState.memberValidation,
+            lastRateLimitResetDate: getManilaDateKey(),
+          },
+        }),
+
+      resetMemberValidation: () =>
+        set({
+          memberValidation: initialState.memberValidation,
+        }),
     }),
     {
       name: "membership-application-storage",
-      version: 7,
-      migrate: (persistedState, version) => {
-        if (version < 4) {
-          const oldState =
-            persistedState as Partial<MembershipApplicationStore>;
-          return {
-            ...initialState,
-            memberValidation: {
-              ...initialState.memberValidation,
-              attemptCount: oldState?.memberValidation?.attemptCount ?? 0,
-              cooldownEndTime:
-                oldState?.memberValidation?.cooldownEndTime ?? null,
-            },
-          };
+      version: MEMBERSHIP_APPLICATION_STORAGE_VERSION,
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        step: state.step,
+        applicationData: sanitizeApplicationDataForPersist(
+          state.applicationData,
+        ),
+        isSubmitted: state.isSubmitted,
+        resetKey: state.resetKey,
+        memberValidation: state.memberValidation,
+      }),
+      migrate: (persistedState) => {
+        if (!persistedState || typeof persistedState !== "object") {
+          return persistedState;
         }
 
-        if (version < 6) {
-          const oldState =
-            persistedState as Partial<MembershipApplicationStore>;
+        const typedState =
+          persistedState as Partial<MembershipApplicationStore>;
 
-          const firstRepresentative =
-            oldState?.applicationData?.step3?.representatives?.[0];
-          const secondRepresentative =
-            oldState?.applicationData?.step3?.representatives?.[1];
-
-          return {
-            ...initialState,
-            ...oldState,
-            applicationData: {
-              ...initialState.applicationData,
-              ...oldState?.applicationData,
-              step3: {
-                representatives: [
-                  {
-                    ...initialState.applicationData.step3.representatives[0],
-                    ...firstRepresentative,
-                    companyMemberType: "principal",
-                  },
-                  {
-                    ...initialState.applicationData.step3.representatives[1],
-                    ...secondRepresentative,
-                    companyMemberType: "alternate",
-                  },
-                ],
-              },
-            },
-          };
+        if (typedState.applicationData) {
+          typedState.applicationData = normalizeApplicationDataAfterHydration(
+            typedState.applicationData as MembershipApplicationData,
+          );
         }
 
-        if (version < 7) {
-          const oldState =
-            persistedState as Partial<MembershipApplicationStore> & {
-              memberValidation?: {
-                lastValidatedMemberId?: string | null;
-              };
-            };
-
-          return {
-            ...oldState,
-            memberValidation: {
-              ...oldState?.memberValidation,
-              lastValidatedMemberIdentifier:
-                oldState?.memberValidation?.lastValidatedMemberIdentifier ??
-                oldState?.memberValidation?.lastValidatedMemberId ??
-                null,
-            },
-          } as MembershipApplicationStore;
-        }
-
-        return persistedState as MembershipApplicationStore;
+        return typedState;
       },
-      partialize: (state) =>
-        ({
-          step: state.step,
-          isSubmitted: state.isSubmitted,
-          memberValidation: state.memberValidation,
-          applicationData: {
-            step1: state.applicationData.step1,
-            step2: {
-              companyName: state.applicationData.step2.companyName,
-              companyAddress: state.applicationData.step2.companyAddress,
-              sectorId: state.applicationData.step2.sectorId,
-              landline: state.applicationData.step2.landline,
-              mobileNumber: state.applicationData.step2.mobileNumber,
-              emailAddress: state.applicationData.step2.emailAddress,
-              websiteURL: state.applicationData.step2.websiteURL,
-              logoImageURL: state.applicationData.step2.logoImageURL,
-              logoImage: undefined,
-            },
-            step3: {
-              representatives: state.applicationData.step3.representatives.map(
-                (rep) => ({
-                  ...rep,
-                  birthdate: rep.birthdate
-                    ? new Date(rep.birthdate).toISOString()
-                    : undefined,
-                }),
-              ),
-            },
-            step4: {
-              applicationMemberType:
-                state.applicationData.step4.applicationMemberType,
-              paymentMethod: state.applicationData.step4.paymentMethod,
-              paymentProofUrl: state.applicationData.step4.paymentProofUrl,
-              paymentProof: undefined,
-            },
-          },
-        }) as unknown as MembershipApplicationStore,
       onRehydrateStorage: () => (state) => {
-        if (!state) return;
-
-        if (state.applicationData?.step3?.representatives) {
-          state.applicationData.step3.representatives =
-            state.applicationData.step3.representatives
-              .slice(0, 2)
-              .map((rep, index) => {
-                const serialized = rep as unknown as {
-                  birthdate?: string | Date;
-                };
-
-                let birthdateValue: Date | undefined;
-
-                if (serialized.birthdate) {
-                  birthdateValue =
-                    serialized.birthdate instanceof Date
-                      ? serialized.birthdate
-                      : new Date(serialized.birthdate);
-                }
-
-                return {
-                  ...rep,
-                  companyMemberType: (index === 0
-                    ? "principal"
-                    : "alternate") as "principal" | "alternate",
-                  birthdate: birthdateValue as Date,
-                };
-              });
-
-          if (state.applicationData.step3.representatives.length < 2) {
-            state.applicationData.step3.representatives = [
-              {
-                ...initialState.applicationData.step3.representatives[0],
-                ...state.applicationData.step3.representatives[0],
-                companyMemberType: "principal",
-              },
-              {
-                ...initialState.applicationData.step3.representatives[1],
-                companyMemberType: "alternate",
-              },
-            ];
-          }
+        if (!state?.applicationData) {
+          return;
         }
 
-        if (state.applicationData?.step2) {
-          state.applicationData.step2.logoImage = undefined;
-        }
-
-        if (state.applicationData?.step4) {
-          state.applicationData.step4.paymentProof = undefined;
-        }
+        state.applicationData = normalizeApplicationDataAfterHydration(
+          state.applicationData,
+        );
       },
     },
   ),

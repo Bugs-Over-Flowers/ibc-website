@@ -2,10 +2,12 @@ import { Building2, MapPin, User } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
+import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { MembershipApplicationData } from "@/hooks/membershipApplication.store";
+import { resolveMemberLogoUrl } from "@/lib/storage/memberLogo";
 import { cn } from "@/lib/utils";
 import type { Sector } from "@/server/membership/queries/getSectors";
 
@@ -13,29 +15,6 @@ interface StepProps {
   form: ReturnType<typeof useMembershipStep4>["form"];
   applicationData: MembershipApplicationData;
   sectors: Sector[];
-}
-
-function DetailRow({
-  label,
-  value,
-  valueClassName,
-}: {
-  label: string;
-  value: React.ReactNode;
-  valueClassName?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={cn("font-semibold text-base leading-tight", valueClassName)}
-      >
-        {value}
-      </span>
-    </div>
-  );
 }
 
 function formatEnumValue(value?: string): string {
@@ -81,16 +60,12 @@ function RepresentativeField({
   valueClassName?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={cn("font-semibold text-sm leading-tight", valueClassName)}
-      >
-        {value}
-      </span>
-    </div>
+    <DetailRow
+      label={label}
+      size="sm"
+      value={value}
+      valueClassName={valueClassName}
+    />
   );
 }
 
@@ -204,7 +179,8 @@ export function Step4Review({ applicationData, sectors }: StepProps) {
     setLogoPreview(null);
   }, [applicationData.step2.logoImage]);
 
-  const logoSrc = logoPreview || applicationData.step2.logoImageURL || null;
+  const logoSrc =
+    logoPreview || resolveMemberLogoUrl(applicationData.step2.logoImageURL);
   const principalRepresentative = applicationData.step3.representatives.find(
     (rep) => rep.companyMemberType === "principal",
   );

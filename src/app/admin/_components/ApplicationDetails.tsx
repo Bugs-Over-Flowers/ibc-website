@@ -1,49 +1,22 @@
-import { Building2, ChevronLeft, CreditCard, MapPin, User } from "lucide-react";
+import { Building2, CreditCard, MapPin, User } from "lucide-react";
 import type { Route } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import BackButton from "@/app/admin/_components/BackButton";
+import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import { toPascalCaseWithSpaces } from "../application/_utils/formatters";
 import { ApplicationHeader } from "../application/[id]/_components/ApplicationHeader";
-import { CompanyInfoCard } from "../application/[id]/_components/CompanyInfoCard";
-import { ContactInfoCard } from "../application/[id]/_components/ContactInfoCard";
-import { PaymentInfoCard } from "../application/[id]/_components/PaymentInfoCard";
-import { RepresentativesCard } from "../application/[id]/_components/RepresentativesCard";
 
 interface ApplicationDetailsProps {
   applicationId: string;
   source: "applications" | "members" | "history";
   memberId?: string;
-}
-
-function DetailRow({
-  label,
-  value,
-  valueClassName,
-}: {
-  label: string;
-  value: React.ReactNode;
-  valueClassName?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={`font-semibold text-base leading-tight ${valueClassName ?? ""}`}
-      >
-        {value}
-      </span>
-    </div>
-  );
 }
 
 function RepresentativeField({
@@ -56,16 +29,12 @@ function RepresentativeField({
   valueClassName?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={`font-semibold text-sm leading-tight ${valueClassName ?? ""}`}
-      >
-        {value}
-      </span>
-    </div>
+    <DetailRow
+      label={label}
+      size="sm"
+      value={value}
+      valueClassName={valueClassName}
+    />
   );
 }
 
@@ -172,7 +141,7 @@ function MemberReviewDetails({
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <DetailRow
                 label="Industry Sector"
-                value={application.Sector?.sectorName || "N/A"}
+                value={application.sectorName || "N/A"}
               />
               <DetailRow
                 label="Website"
@@ -481,67 +450,11 @@ export async function ApplicationDetails({
 
   return (
     <>
-      {source === "members" || source === "history" ? (
-        <Link
-          className="mb-2 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
-          href={backLink.href}
-        >
-          <ChevronLeft className="h-5 w-5" />
-          {backLink.label}
-        </Link>
-      ) : (
-        <Link href={backLink.href}>
-          <Button
-            className="mb-4 border border-border active:scale-95 active:opacity-80"
-            size="sm"
-            variant="ghost"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            {backLink.label}
-          </Button>
-        </Link>
-      )}
+      <BackButton href={backLink.href} label={backLink.label} />
 
       <ApplicationHeader application={application} />
 
-      {source === "members" ? (
-        <MemberReviewDetails application={application} />
-      ) : (
-        <>
-          <CompanyInfoCard
-            applicationMemberType={toPascalCaseWithSpaces(
-              application.applicationMemberType,
-            )}
-            applicationType={toPascalCaseWithSpaces(
-              application.applicationType,
-            )}
-            companyAddress={toPascalCaseWithSpaces(application.companyAddress)}
-            companyName={application.companyName}
-            sectorName={
-              application.Sector?.sectorName
-                ? toPascalCaseWithSpaces(application.Sector.sectorName)
-                : undefined
-            }
-            websiteURL={application.websiteURL}
-          />
-
-          <ContactInfoCard
-            emailAddress={application.emailAddress}
-            landline={application.landline}
-            mobileNumber={application.mobileNumber}
-          />
-
-          <RepresentativesCard members={application.ApplicationMember} />
-
-          <PaymentInfoCard
-            applicationDate={new Date(application.applicationDate)}
-            paymentMethod={application.paymentMethod}
-            paymentProofStatus={toPascalCaseWithSpaces(
-              application.paymentProofStatus,
-            )}
-          />
-        </>
-      )}
+      <MemberReviewDetails application={application} />
     </>
   );
 }

@@ -2,13 +2,17 @@ import path from "node:path";
 import { config as dotenvConfig } from "dotenv";
 import { defineConfig } from "vitest/config";
 
-// Load .env.testing file when running tests
-dotenvConfig({ path: ".env.testing" });
+// Load .env.testing file when running tests and override shell values.
+dotenvConfig({ path: ".env.testing", override: true });
 
 export default defineConfig({
   test: {
     environment: "happy-dom",
     globals: true,
+    deps: {
+      // Ensure CJS/dual packages expose expected named imports in Vitest.
+      interopDefault: true,
+    },
     include: [
       "__tests__/unit/**/*.{test,spec}.{ts,tsx}",
       "__tests__/integration/**/*.{test,spec}.{ts,tsx}",

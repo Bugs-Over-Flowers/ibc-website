@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import type { ScheduleMeetingInput } from "@/lib/validation/application/application";
 import { scheduleMeetingSchema } from "@/lib/validation/application/application";
@@ -44,6 +45,7 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
     .select(
       `
       applicationId,
+      applicationType,
       companyName,
       emailAddress,
       ApplicationMember(firstName, lastName, emailAddress)
@@ -57,6 +59,16 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
 
   if (!applications || applications.length === 0) {
     throw new Error("No applications found");
+  }
+
+  const updateInfoApplications = applications.filter(
+    (app) => app.applicationType === "updating",
+  );
+
+  if (updateInfoApplications.length > 0) {
+    throw new Error(
+      "Update Info applications do not require interview scheduling",
+    );
   }
 
   // Pre-render the email template once (instead of 2N renders for N recipients)
@@ -139,8 +151,8 @@ export async function scheduleMeeting(input: ScheduleMeetingInput) {
       `Interview linking failed: ${rpcResult?.[0]?.message || "Unknown error"}`,
     );
   }
-  // updateTag(CACHE_TAGS.applications.all);
-  // updateTag(CACHE_TAGS.applications.admin);
+  updateTag(CACHE_TAGS.applications.all);
+  updateTag(CACHE_TAGS.applications.admin);
 
   revalidatePath("/admin/application");
 

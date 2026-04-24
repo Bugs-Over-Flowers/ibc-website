@@ -16,7 +16,7 @@ import { useAppForm } from "@/hooks/_formHooks";
 import tryCatch from "@/lib/server/tryCatch";
 import { zodValidator } from "@/lib/utils";
 import { createSRFormSchema } from "@/lib/validation/sponsored-registration/sponsored-registration";
-import { createSR } from "@/server/sponsored-registrations/actions/createSR";
+import { createSR } from "@/server/sponsored-registrations/mutations/createSR";
 import { CreateSREventPreview } from "./CreateSREventPreview";
 import { CreateSRFeePreview } from "./CreateSRFeePreview";
 import type { CreateSREventOption } from "./types";
@@ -79,6 +79,8 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
   const selectedEvent = events.find(
     (event) => event.eventId === selectedEventId,
   );
+  const sponsorshipNumberFieldClassName =
+    "grid h-full gap-2 [grid-template-rows:auto_auto_minmax(3rem,auto)_auto]";
 
   return (
     <form
@@ -143,10 +145,11 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
           </CardHeader>
 
           <CardContent className="space-y-5 pb-5 sm:px-6 sm:py-2">
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
               <form.AppField name="feeDeduction">
                 {(field) => (
                   <field.NumberField
+                    className={sponsorshipNumberFieldClassName}
                     description="Discount amount deducted per registration. Must not exceed the selected event registration fee"
                     label="Fee Deduction (PHP)"
                     min={0}
@@ -159,7 +162,8 @@ export function CreateSRForm({ events }: CreateSRFormProps) {
               <form.AppField name="maxSponsoredGuests">
                 {(field) => (
                   <field.NumberField
-                    description="Maximum number of successful registrations allowed"
+                    className={sponsorshipNumberFieldClassName}
+                    description="Maximum number of successful registrations allowed for this sponsored link"
                     label="Maximum Guests"
                     min={1}
                     placeholder="e.g., 10"

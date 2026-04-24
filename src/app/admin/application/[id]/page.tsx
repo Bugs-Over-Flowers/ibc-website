@@ -12,9 +12,15 @@
  *
  * Uses the shared ApplicationDetails component from `@/app/admin/_components/`.
  */
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ApplicationDetails } from "@/app/admin/_components/ApplicationDetails";
 import { DetailsSkeleton } from "./_components/DetailsSkeleton";
+
+export const metadata: Metadata = {
+  title: "Application Details | Admin",
+  description: "Review membership application and schedule interviews.",
+};
 
 /** Valid values for the `source` search param. */
 type ApplicationSource = "applications" | "members" | "history";
@@ -45,7 +51,7 @@ export default async function ApplicationDetailPage({
     : "applications";
 
   return (
-    <div className="container mx-auto space-y-6 py-8">
+    <div className="container mx-auto space-y-6">
       <Suspense fallback={<DetailsSkeleton />}>
         <ApplicationDetails
           applicationId={id}

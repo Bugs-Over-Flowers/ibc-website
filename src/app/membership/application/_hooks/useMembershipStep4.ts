@@ -11,10 +11,15 @@ import { MembershipApplicationStep4Schema } from "@/lib/validation/membership/ap
 import { submitMembershipApplication } from "@/server/membership/mutations/submitApplication";
 
 interface UseMembershipStep4Props {
+  sectors?: Array<{
+    sectorId: number;
+    sectorName: string;
+  }>;
   onSuccess?: () => void;
 }
 
 export const useMembershipStep4 = ({
+  sectors = [],
   onSuccess,
 }: UseMembershipStep4Props = {}) => {
   const router = useRouter();
@@ -27,12 +32,19 @@ export const useMembershipStep4 = ({
   const setIsSubmitted = useMembershipApplicationStore(
     (state) => state.setIsSubmitted,
   );
+  const resetMemberValidationRateLimit = useMembershipApplicationStore(
+    (state) => state.resetMemberValidationRateLimit,
+  );
   const setStep = useMembershipApplicationStore((state) => state.setStep);
   const resetStore = useMembershipApplicationStore((state) => state.resetStore);
 
   // Get the verified businessMemberId (UUID) returned from identifier validation
   const verifiedBusinessMemberId = useMembershipApplicationStore(
     (state) => state.memberValidation.memberInfo.businessMemberId,
+  );
+
+  const storedBusinessMemberId = useMembershipApplicationStore(
+    (state) => state.applicationData?.step1?.businessMemberId,
   );
 
   const defaultApplicationDataStep4 = useMembershipApplicationStore(
@@ -72,7 +84,7 @@ export const useMembershipStep4 = ({
             );
             if (!isValidLogoType) {
               throw new Error(
-                "Invalid logo file type. Only JPEG, PNG, and PDF files are allowed.",
+                "Invalid logo file type. Only JPEG and PNG files are allowed.",
               );
             }
 
@@ -103,7 +115,7 @@ export const useMembershipStep4 = ({
             );
             if (!isValidProofType) {
               throw new Error(
-                "Invalid payment proof file type. Only JPEG, PNG, and PDF files are allowed.",
+                "Invalid payment proof file type. Only JPEG and PNG files are allowed.",
               );
             }
 
@@ -136,7 +148,18 @@ export const useMembershipStep4 = ({
           const businessMemberId =
             applicationData.step1.applicationType === "newMember"
               ? undefined
-              : verifiedBusinessMemberId;
+              : storedBusinessMemberId || verifiedBusinessMemberId;
+
+          const selectedSectorName =
+            sectors.find(
+              (sector) =>
+                String(sector.sectorId) ===
+                String(applicationData.step2.sectorId),
+            )?.sectorName ?? "";
+
+          if (!selectedSectorName) {
+            throw new Error("Industry/Sector is required");
+          }
 
           const res = await submitMembershipApplication({
             applicationType: applicationData.step1.applicationType,
@@ -144,7 +167,7 @@ export const useMembershipStep4 = ({
             businessMemberId,
             companyName: applicationData.step2.companyName,
             companyAddress: applicationData.step2.companyAddress,
-            sectorId: Number(applicationData.step2.sectorId),
+            sectorName: selectedSectorName,
             websiteURL: applicationData.step2.websiteURL,
             emailAddress: applicationData.step2.emailAddress,
             landline: applicationData.step2.landline,
@@ -176,6 +199,8 @@ export const useMembershipStep4 = ({
       const identifier = (data as { identifier?: string })?.identifier ?? "";
 
       toast.success("Application submitted successfully!");
+
+      resetMemberValidationRateLimit();
 
       // Reset the form data but preserve rate limiting data
       resetStore();

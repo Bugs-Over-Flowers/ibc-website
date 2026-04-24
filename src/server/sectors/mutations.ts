@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 
 import {
@@ -48,6 +49,8 @@ export async function createSector(input: z.infer<typeof createSectorSchema>) {
     throw new Error(error.message);
   }
 
+  updateTag(CACHE_TAGS.sectors.all);
+
   revalidatePath("/admin");
   return { id: data.sectorId };
 }
@@ -69,6 +72,8 @@ export async function updateSector(input: z.infer<typeof updateSectorSchema>) {
   if (error) {
     throw new Error(error.message);
   }
+
+  updateTag(CACHE_TAGS.sectors.all);
 
   revalidatePath("/admin");
   return { id: data.sectorId };
@@ -132,7 +137,7 @@ export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
 
   const { data: members, error: membersError } = await supabase
     .from("BusinessMember")
-    .select("businessMemberId")
+    .select("businessMemberId, primaryApplicationId")
     .eq("sectorId", parsed.id);
 
   if (membersError) {
@@ -144,6 +149,15 @@ export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
   const hasBulkReassign = Boolean(parsed.reassignSectorId);
   const memberReassignments = parsed.memberReassignments ?? [];
   const hasMemberSpecificAssignments = memberReassignments.length > 0;
+
+  const resolvedReassignments = hasMemberSpecificAssignments
+    ? memberReassignments
+    : parsed.reassignSectorId
+      ? membersToReassign.map((member) => ({
+          memberId: member.businessMemberId,
+          sectorId: parsed.reassignSectorId as number,
+        }))
+      : [];
 
   if (hasMembers) {
     if (!hasBulkReassign && !hasMemberSpecificAssignments) {
@@ -199,6 +213,57 @@ export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
         throw new Error(reassignmentError.message);
       }
     }
+
+    const sectorIds = [
+      ...new Set(resolvedReassignments.map((item) => item.sectorId)),
+    ];
+
+    if (sectorIds.length > 0) {
+      const { data: sectorRows, error: sectorsError } = await supabase
+        .from("Sector")
+        .select("sectorId, sectorName")
+        .in("sectorId", sectorIds);
+
+      if (sectorsError) {
+        throw new Error(sectorsError.message);
+      }
+
+      const sectorNameById = new Map(
+        (sectorRows ?? []).map((sector) => [
+          sector.sectorId,
+          sector.sectorName,
+        ]),
+      );
+
+      await Promise.all(
+        resolvedReassignments.map(async (assignment) => {
+          const member = membersToReassign.find(
+            (row) => row.businessMemberId === assignment.memberId,
+          );
+
+          if (!member?.primaryApplicationId) {
+            return;
+          }
+
+          const sectorName = sectorNameById.get(assignment.sectorId);
+
+          if (!sectorName) {
+            throw new Error(
+              "Failed to resolve sector name during reassignment",
+            );
+          }
+
+          const { error: applicationUpdateError } = await supabase
+            .from("Application")
+            .update({ sectorName })
+            .eq("applicationId", member.primaryApplicationId);
+
+          if (applicationUpdateError) {
+            throw new Error(applicationUpdateError.message);
+          }
+        }),
+      );
+    }
   }
 
   const { error } = await supabase
@@ -209,6 +274,11 @@ export async function deleteSector(input: z.infer<typeof deleteSectorSchema>) {
   if (error) {
     throw new Error(error.message);
   }
+
+  updateTag(CACHE_TAGS.sectors.all);
+  updateTag(CACHE_TAGS.members.all);
+  updateTag(CACHE_TAGS.members.admin);
+  updateTag(CACHE_TAGS.members.public);
 
   revalidatePath("/admin/manage-sector");
   return { success: true };

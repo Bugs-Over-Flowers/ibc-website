@@ -1,6 +1,6 @@
 "use server";
 
-import type { ServerFunction } from "@/lib/server/types";
+import type { AsyncFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 
 export type EnrollMfaOutput = {
@@ -13,7 +13,7 @@ export type EnrollMfaOutput = {
   };
 };
 
-export const enrollMfa: ServerFunction<
+export const enrollMfa: AsyncFunction<
   [undefined],
   EnrollMfaOutput
 > = async () => {
@@ -59,7 +59,7 @@ export const enrollMfa: ServerFunction<
   return { success: true, data, error: null };
 };
 
-export const verifyMfa: ServerFunction<
+export const verifyMfa: AsyncFunction<
   [{ factorId: string; code: string }],
   { success: boolean }
 > = async ({ factorId, code }) => {
@@ -91,7 +91,7 @@ export const verifyMfa: ServerFunction<
   return { success: true, data: { success: true }, error: null };
 };
 
-export const loginVerifyMfa: ServerFunction<
+export const loginVerifyMfa: AsyncFunction<
   [string],
   { success: boolean }
 > = async (code) => {

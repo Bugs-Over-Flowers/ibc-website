@@ -1,18 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import type { Tables } from "@/lib/supabase/db.types";
-
-type Event = Tables<"Event">;
-
-import { MessageSquare } from "lucide-react";
+import { ExternalLink, MessageSquare } from "lucide-react";
 import type { Route } from "next";
+import { useRouter } from "next/navigation";
+import { FacebookIcon } from "@/components/icons/SocialIcons";
 import { Button } from "@/components/ui/button";
 import { staggerContainer } from "@/lib/animations/stagger";
 import { getEventStatus } from "@/lib/events/eventUtils";
+import type { Tables } from "@/lib/supabase/db.types";
 import { EventInfoCard } from "./EventInfoCard";
 import EventRegistrationCard from "./EventRegistrationCard";
+
+type Event = Tables<"Event">;
 
 interface EventDetailsContentProps {
   event: Event;
@@ -21,6 +21,31 @@ interface EventDetailsContentProps {
 export function EventDetailsContent({ event }: EventDetailsContentProps) {
   const router = useRouter();
   const status = getEventStatus(event.eventStartDate, event.eventEndDate);
+  const safeFacebookLink = (() => {
+    const rawLink = event.facebookLink?.trim();
+    if (!rawLink) {
+      return null;
+    }
+
+    try {
+      const parsed = new URL(rawLink);
+      const isHttpProtocol =
+        parsed.protocol === "https:" || parsed.protocol === "http:";
+      const hostname = parsed.hostname.toLowerCase();
+      const isFacebookDomain =
+        hostname === "fb.me" ||
+        hostname === "facebook.com" ||
+        hostname.endsWith(".facebook.com");
+
+      if (!isHttpProtocol || !isFacebookDomain) {
+        return null;
+      }
+
+      return parsed.toString();
+    } catch {
+      return null;
+    }
+  })();
 
   const handleEvaluationClick = () => {
     router.push(`/evaluation?eventId=${event.eventId}` as Route);
@@ -48,7 +73,7 @@ export function EventDetailsContent({ event }: EventDetailsContentProps) {
               <EventRegistrationCard event={event} />
             </motion.div>
           ) : (
-            <div className="flex flex-col justify-end lg:col-span-2">
+            <div className="flex flex-col justify-end gap-3 lg:col-span-2">
               <Button
                 className="h-12 w-full rounded-2xl border-border bg-transparent text-foreground hover:bg-accent"
                 onClick={handleEvaluationClick}
@@ -58,6 +83,21 @@ export function EventDetailsContent({ event }: EventDetailsContentProps) {
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Submit Feedback
               </Button>
+
+              {safeFacebookLink && (
+                <a
+                  className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-foreground transition-colors hover:border-primary/30 hover:bg-accent"
+                  href={safeFacebookLink}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <FacebookIcon className="h-5 w-5 text-[#1877F2]" />
+                  <span className="flex-1 font-medium">
+                    Event Facebook Link
+                  </span>
+                  <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </a>
+              )}
             </div>
           )}
         </div>

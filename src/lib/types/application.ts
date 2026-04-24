@@ -24,10 +24,6 @@ export interface ApplicationWithMembers
     membershipExpiryDate: string | null;
     sectorId: number;
   } | null;
-  Sector: {
-    sectorId: number;
-    sectorName: string;
-  };
   ProofImage: {
     proofImageId: string;
     path: string;
@@ -82,6 +78,7 @@ export type InterviewDetails = {
 export type ApplicationStatusResponse = {
   applicationId: string;
   identifier: string;
+  applicationType: "newMember" | "updating" | "renewal";
   applicationStatus: "new" | "pending" | "approved" | "rejected";
   applicationDate: string;
   companyName: string;

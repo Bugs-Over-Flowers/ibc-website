@@ -2,13 +2,16 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
-import { ArrowDownAZ, ArrowUpZA, Clock, Download } from "lucide-react";
+import { Clock, Download } from "lucide-react";
+import { AdminTableSortHeader } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { exportToExcel } from "@/lib/export/excel";
 import type { CheckInListItem } from "@/lib/validation/check-in/check-in-list";
 import CheckInRowActions from "./CheckInRowActions";
 import RemarksDialog from "./RemarksDialog";
+
+type CheckInListRow = CheckInListItem & { name: string };
 
 interface CheckInTableProps {
   eventTitle: string;
@@ -17,8 +20,6 @@ interface CheckInTableProps {
   eventDayLabel: string;
 }
 
-type CheckInListRow = CheckInListItem & { name: string };
-
 const getCheckInListColumns = (
   eventDayId: string,
 ): ColumnDef<CheckInListRow>[] => [
@@ -26,111 +27,91 @@ const getCheckInListColumns = (
     accessorKey: "checkInTime",
     sortingFn: "datetime",
     header: ({ column }) => (
-      <Button
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        type="button"
-        variant={"ghost"}
-      >
-        Check-In Time
-        {column.getIsSorted() === "asc" ? (
-          <Clock className="size-4 rotate-180" />
-        ) : column.getIsSorted() === "desc" ? (
-          <Clock className="size-4" />
-        ) : null}
-      </Button>
+      <AdminTableSortHeader
+        label="Time"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
     ),
-    cell: ({ row }) =>
-      formatDate(new Date(row.original.checkInTime), "h:mm aaa"),
+    cell: ({ row }) => (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#85B7EB] bg-[#E6F1FB] px-2 py-0.5 font-medium text-[#0C447C] text-xs dark:border-[#185FA5] dark:bg-[#042C53] dark:text-[#B5D4F4]">
+        <Clock className="size-3" />
+        {formatDate(new Date(row.original.checkInTime), "h:mm aaa")}
+      </span>
+    ),
   },
   {
     accessorKey: "identifier",
-    cell: ({ row }) => {
-      return <pre>{row.original.identifier}</pre>;
-    },
+    header: "Identifier",
+    cell: ({ row }) => (
+      <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+        {row.original.identifier}
+      </code>
+    ),
   },
   {
     accessorKey: "firstName",
     header: ({ column }) => (
-      <Button
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        type="button"
-        variant={"ghost"}
-      >
-        First Name
-        {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ className="size-4" />
-        ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA className="size-4" />
-        ) : null}
-      </Button>
+      <AdminTableSortHeader
+        label="First name"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
     ),
   },
   {
     accessorKey: "lastName",
     header: ({ column }) => (
-      <Button
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        type="button"
-        variant={"ghost"}
-      >
-        Last Name
-        {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ className="size-4" />
-        ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA className="size-4" />
-        ) : null}
-      </Button>
+      <AdminTableSortHeader
+        label="Last name"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
     ),
   },
   {
     accessorKey: "affiliation",
     header: ({ column }) => (
-      <Button
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        type="button"
-        variant={"ghost"}
-      >
-        Affiliation
-        {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ className="size-4" />
-        ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA className="size-4" />
-        ) : null}
-      </Button>
+      <AdminTableSortHeader
+        label="Affiliation"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
     ),
-    cell: ({ row }) => row.original.affiliation,
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">{row.original.affiliation}</span>
+    ),
   },
-
   {
     accessorKey: "email",
     header: ({ column }) => (
-      <Button
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        type="button"
-        variant={"ghost"}
-      >
-        Email
-        {column.getIsSorted() === "asc" ? (
-          <ArrowDownAZ className="size-4" />
-        ) : column.getIsSorted() === "desc" ? (
-          <ArrowUpZA className="size-4" />
-        ) : null}
-      </Button>
+      <AdminTableSortHeader
+        label="Email"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
     ),
-    cell: ({ row }) => row.original.email,
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">{row.original.email}</span>
+    ),
   },
   {
     accessorKey: "contactNumber",
-    header: "Contact Number",
-    cell: ({ row }) => row.original.contactNumber,
+    header: "Contact",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">
+        {row.original.contactNumber}
+      </span>
+    ),
   },
   {
     accessorKey: "remarks",
-    id: "remarks",
     header: "Remarks",
     cell: ({ row }) => {
       const { remarks, firstName, lastName } = row.original;
-      if (!remarks) return null;
+      if (!remarks) {
+        return <span className="text-muted-foreground/40">-</span>;
+      }
       return (
         <RemarksDialog
           participantName={`${firstName} ${lastName}`}
@@ -141,7 +122,7 @@ const getCheckInListColumns = (
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "",
     enableHiding: false,
     cell: ({ row }) => (
       <CheckInRowActions
@@ -155,38 +136,14 @@ const getCheckInListColumns = (
 ];
 
 const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
-  {
-    accessorKey: "checkInTime",
-    header: "Time", // Custom Excel header
-  },
-  {
-    accessorKey: "identifier",
-    header: "Identifier", // Custom Excel header
-  },
-  {
-    accessorKey: "affiliation",
-    header: "Affiliation", // Custom Excel header
-  },
-  {
-    accessorKey: "firstName",
-    header: "First Name", // Custom Excel header
-  },
-  {
-    accessorKey: "lastName",
-    header: "Last Name", // Custom Excel header
-  },
-  {
-    accessorKey: "email",
-    header: "Email Address", // Custom Excel header
-  },
-  {
-    accessorKey: "contactNumber",
-    header: "Phone Number", // Custom Excel header
-  },
-  {
-    accessorKey: "remarks",
-    header: "Remarks", // Custom Excel header
-  },
+  { accessorKey: "checkInTime", header: "Time" },
+  { accessorKey: "identifier", header: "Identifier" },
+  { accessorKey: "affiliation", header: "Affiliation" },
+  { accessorKey: "firstName", header: "First Name" },
+  { accessorKey: "lastName", header: "Last Name" },
+  { accessorKey: "email", header: "Email Address" },
+  { accessorKey: "contactNumber", header: "Phone Number" },
+  { accessorKey: "remarks", header: "Remarks" },
 ];
 
 export default function CheckInTable({
@@ -195,12 +152,12 @@ export default function CheckInTable({
   eventDayId,
   eventDayLabel,
 }: CheckInTableProps) {
-  const tableData: CheckInListRow[] = checkIns.map((checkIn) => ({
-    ...checkIn,
-    name: `${checkIn.firstName} ${checkIn.lastName}`,
+  const tableData: CheckInListRow[] = checkIns.map((c) => ({
+    ...c,
+    name: `${c.firstName} ${c.lastName}`,
   }));
 
-  const handleExportToExcel = async () => {
+  const handleExport = async () => {
     await exportToExcel({
       data: tableData,
       columns: getExcelColumns(),
@@ -208,23 +165,27 @@ export default function CheckInTable({
       sheetName: "Check-In List",
       excludeColumns: ["actions"],
       formatters: {
-        checkInTime: (value) => formatDate(new Date(String(value)), "h:mm aaa"),
+        checkInTime: (v) => formatDate(new Date(String(v)), "h:mm aaa"),
       },
     });
   };
+
   return (
-    <div className="space-y-2">
-      <div className="flex h-8 items-center justify-between">
-        <div className="text-muted-foreground text-sm">
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="rounded-full border border-border bg-muted/50 px-3 py-1 text-muted-foreground text-xs">
           {checkIns.length}{" "}
           {checkIns.length === 1 ? "participant" : "participants"} checked in
-        </div>
-        <div>
-          <Button onClick={handleExportToExcel} size="sm" variant="outline">
-            <Download className="size-4" />
-            Export to Excel
-          </Button>
-        </div>
+        </span>
+        <Button
+          className="gap-1.5"
+          onClick={handleExport}
+          size="sm"
+          variant="outline"
+        >
+          <Download className="size-3.5" />
+          Export to Excel
+        </Button>
       </div>
       <DataTable
         columns={getCheckInListColumns(eventDayId)}

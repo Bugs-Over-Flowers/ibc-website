@@ -10,6 +10,11 @@
   "js/ts.experimental.useTsgo": true,
   "chat.tools.terminal.autoApprove": {
     "bun": true,
-    "ForEach-Object": true
+    "ForEach-Object": true,
+    "Set-Content": true,
+    "Resolve-Path": true,
+    "New-Object": true,
+    "Test-Path": true,
+    "ConvertFrom-Json": true
   }
 }

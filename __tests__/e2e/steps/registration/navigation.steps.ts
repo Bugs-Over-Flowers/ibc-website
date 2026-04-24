@@ -1,5 +1,4 @@
 import { expect } from "@playwright/test";
-import { Given, Then, When } from "./bdd";
 import {
   continueInfoToRegistrationForm,
   getActiveEventOrThrow,
@@ -8,7 +7,8 @@ import {
   openRegistrationInfoFromDetails,
   openRegistrationInfoFromEvents,
   parseEventAlias,
-} from "./helpers";
+} from "../../support/registration";
+import { Given, Then, When } from "./bdd";
 
 Given("seeded standard registration data is available", async ({ world }) => {
   expect(world.seedData).toBeDefined();

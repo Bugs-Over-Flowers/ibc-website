@@ -13,10 +13,12 @@ import {
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { ApplicationsTableRow } from "./ApplicationsTableRow";
+import ExportPDFButton from "./ExportPDFButton";
 
 interface ApplicationsTableProps {
   applications: Awaited<ReturnType<typeof getApplications>>;
   status: "new" | "pending" | "finished";
+  title?: string;
 }
 
 function getTitle(status: "new" | "pending" | "finished"): string {
@@ -31,12 +33,16 @@ function getTitle(status: "new" | "pending" | "finished"): string {
 export function ApplicationsTable({
   applications,
   status,
+  title,
 }: ApplicationsTableProps) {
+  const showContactColumn = status === "finished";
+
   const {
     selectAll,
     clearSelection,
     selectedApplicationIds,
     removeApplication,
+    isSelectionLocked,
   } = useSelectedApplicationsStore();
 
   const isSelectable = useCallback(
@@ -85,12 +91,17 @@ export function ApplicationsTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          {getTitle(status)}
-          <span className="ml-2 font-normal text-muted-foreground text-sm">
-            ({applications.length})
-          </span>
-        </CardTitle>
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle>
+            {title ?? getTitle(status)}
+            <span className="ml-2 font-normal text-muted-foreground text-sm">
+              ({applications.length})
+            </span>
+          </CardTitle>
+          {applications.length > 0 && (
+            <ExportPDFButton application={applications[0]} />
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -101,20 +112,43 @@ export function ApplicationsTable({
                   aria-label="Select all applications"
                   checked={allSelected}
                   data-indeterminate={someSelected}
+                  disabled={isSelectionLocked}
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
-              <TableHead>Company Name</TableHead>
-              <TableHead>Sector</TableHead>
-              <TableHead>Application Type</TableHead>
-              {/* <TableHead>Contact</TableHead> */}
-              <TableHead>Date Applied</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Company Name
+              </TableHead>
+              <TableHead className="w-[24%] font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Sector
+              </TableHead>
+              <TableHead className="w-[14%] font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Application Type
+              </TableHead>
+              {showContactColumn && (
+                <TableHead className="w-[20%] font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                  Contact
+                </TableHead>
+              )}
+              <TableHead
+                className={`${showContactColumn ? "w-[10%]" : "w-[14%]"} font-semibold text-muted-foreground text-xs uppercase tracking-wide`}
+              >
+                Date Applied
+              </TableHead>
+              <TableHead
+                className={`${showContactColumn ? "w-[10%]" : "w-[12%]"} font-semibold text-muted-foreground text-xs uppercase tracking-wide`}
+              >
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {applications.map((app) => (
-              <ApplicationsTableRow application={app} key={app.applicationId} />
+              <ApplicationsTableRow
+                application={app}
+                key={app.applicationId}
+                showContact={showContactColumn}
+              />
             ))}
           </TableBody>
         </Table>

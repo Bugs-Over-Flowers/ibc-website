@@ -13,6 +13,12 @@ export const MembershipApplicationStep1Schema = z
   .object({
     applicationType: ApplicationTypeEnum,
     businessMemberIdentifier: z.string().optional(),
+    businessMemberId: z
+      .preprocess(
+        (value) => (value === "" ? undefined : value),
+        z.uuid().optional(),
+      )
+      .optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -100,7 +106,7 @@ export const MembershipApplicationStep2Schema = z
       .max(1024 * 1024 * 5, "File size must be less than 5MB")
       .refine(
         (file) => validateFileTypeMime(file),
-        "Only JPEG, PNG, and PDF files are allowed",
+        "Only JPEG and PNG files are allowed",
       )
       .optional(),
   })
@@ -145,7 +151,7 @@ export const MembershipApplicationStep4Schema = z
       .max(1024 * 1024 * 5, "File size must be less than 5MB")
       .refine(
         (file) => validateFileTypeMime(file),
-        "Only JPEG, PNG, and PDF files are allowed",
+        "Only JPEG and PNG files are allowed",
       )
       .optional(),
   })
@@ -173,7 +179,9 @@ export const MembershipApplicationSchema = z
     applicationMemberType: ApplicationMemberTypeEnum,
     businessMemberId: z.string().optional(),
     companyName: z.string().min(1, "Company name is required"),
-    sectorId: z.number({ message: "Industry/Sector is required" }),
+    sectorName: z
+      .string({ message: "Industry/Sector is required" })
+      .min(1, "Industry/Sector is required"),
     companyAddress: z.string().min(1, "Company address is required"),
     websiteURL: z.string().min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),

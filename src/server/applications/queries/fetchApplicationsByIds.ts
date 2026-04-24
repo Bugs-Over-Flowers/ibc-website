@@ -1,4 +1,4 @@
-import "server-only";
+"use server";
 
 import { createActionClient } from "@/lib/supabase/server";
 

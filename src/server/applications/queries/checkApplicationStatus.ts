@@ -1,16 +1,10 @@
-import "server-only";
-
-import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import type { ApplicationStatusResponse } from "@/lib/types/application";
 
 export async function checkApplicationStatus(
   identifier: string,
-  requestCookies?: RequestCookie[],
 ): Promise<ApplicationStatusResponse> {
-  const cookieStore = requestCookies || (await cookies()).getAll();
-  const supabase = await createClient(cookieStore);
+  const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("check_application_status", {
     p_application_identifier: identifier,

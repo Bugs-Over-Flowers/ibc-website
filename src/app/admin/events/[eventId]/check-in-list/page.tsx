@@ -1,14 +1,21 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import BackButton from "@/app/admin/_components/BackButton";
 import { TabsContent } from "@/components/ui/tabs";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/server";
 import { getCheckInStats } from "@/server/check-in/queries/getCheckInStats";
-import { getEventDays } from "@/server/events/mutations/getEventDays";
-import BackButton from "../_components/BackButton";
+import { getEventDays } from "@/server/events/queries/getEventDays";
 import CheckInListContent from "./_components/CheckInListContent";
 import CheckInListTabWrapper from "./_components/CheckInListTabWrapper";
 import DraftEventEmptyComponent from "./_components/DraftEventEmptyComponent";
+import CheckInListPageLoading, { CheckInListContentSkeleton } from "./loading";
+
+export const metadata: Metadata = {
+  title: "Check-In List | Admin",
+  description: "Manage event check-in across event days.",
+};
 
 type CheckInPageWrapperProps =
   PageProps<"/admin/events/[eventId]/check-in-list">;
@@ -19,14 +26,12 @@ export default function CheckInPageWrapper({
   params: CheckInPageWrapperProps["params"];
 }) {
   return (
-    <main className="flex flex-col gap-4 p-5 md:p-10">
-      <Suspense>
+    <div className="space-y-6">
+      <Suspense fallback={<CheckInListPageLoading />}>
         <BackButtonWrapper params={params} />
-      </Suspense>
-      <Suspense fallback={<div>Loading check-in data...</div>}>
         <CheckInPage params={params} />
       </Suspense>
-    </main>
+    </div>
   );
 }
 
@@ -49,7 +54,9 @@ async function CheckInPage({
   // Fetch event days
   const result = await tryCatch(getEventDays({ eventId }));
   if (!result.success) {
-    return <div className="text-destructive">Failed to load event days.</div>;
+    return (
+      <p className="text-destructive text-sm">Failed to load event days.</p>
+    );
   }
   const eventDays = result.data;
 
@@ -64,7 +71,7 @@ async function CheckInPage({
 
   if (!event) {
     return (
-      <div className="text-destructive">Failed to load event details.</div>
+      <p className="text-destructive text-sm">Failed to load event details.</p>
     );
   }
 
@@ -79,45 +86,43 @@ async function CheckInPage({
 
   if (!statsResult.success) {
     return (
-      <div className="text-destructive">Failed to load check-in stats.</div>
+      <p className="text-destructive text-sm">Failed to load check-in stats.</p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="font-bold text-2xl">
-        {event?.eventTitle
-          ? `${event.eventTitle} - Check-In List`
-          : "Check-In List"}
-      </h1>
+    <div className="flex flex-col gap-5">
+      <div>
+        <h1 className="font-semibold text-2xl text-foreground">
+          {event.eventTitle} - check-in list
+        </h1>
+        <p className="max-w-5xl text-muted-foreground text-sm">
+          Monitor attendance and manage check-in records per event day.
+        </p>
+      </div>
 
-      {/* Only render tabs if stats loaded successfully */}
-      {statsResult.success ? (
-        <CheckInListTabWrapper
-          checkInCounts={statsResult.data.checkInCounts}
-          eventTitle={event?.eventTitle ?? "Event"}
-          tabs={eventDays}
-          totalExpected={statsResult.data.totalExpected}
-        >
-          {eventDays.map((eventDay) => (
-            <TabsContent
-              className="flex flex-col gap-4"
-              key={eventDay.eventDayId}
-              value={eventDay.eventDayId}
-            >
-              <Suspense fallback={<div>Loading check-ins...</div>}>
-                <CheckInListContent
-                  eventDayId={eventDay.eventDayId}
-                  eventDayLabel={eventDay.label}
-                  eventTitle={event?.eventTitle}
-                />
-              </Suspense>
-            </TabsContent>
-          ))}
-        </CheckInListTabWrapper>
-      ) : (
-        <div className="text-destructive">Failed to load statistics.</div>
-      )}
+      <CheckInListTabWrapper
+        checkInCounts={statsResult.data.checkInCounts}
+        eventTitle={event.eventTitle ?? "Event"}
+        tabs={eventDays}
+        totalExpected={statsResult.data.totalExpected}
+      >
+        {eventDays.map((eventDay) => (
+          <TabsContent
+            className="mt-4 flex flex-col gap-4"
+            key={eventDay.eventDayId}
+            value={eventDay.eventDayId}
+          >
+            <Suspense fallback={<CheckInListContentSkeleton />}>
+              <CheckInListContent
+                eventDayId={eventDay.eventDayId}
+                eventDayLabel={eventDay.label}
+                eventTitle={event.eventTitle}
+              />
+            </Suspense>
+          </TabsContent>
+        ))}
+      </CheckInListTabWrapper>
     </div>
   );
 }

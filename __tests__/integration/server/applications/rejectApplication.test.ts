@@ -63,6 +63,7 @@ describe("rejectApplication", () => {
       data: {
         companyName: "Acme Technologies",
         emailAddress: "admin@acme.example.com",
+        applicationType: "newMember",
         ApplicationMember: [],
       },
       error: null,
@@ -91,6 +92,7 @@ describe("rejectApplication", () => {
       data: {
         companyName: "Beta Corp",
         emailAddress: "info@beta.example.com",
+        applicationType: "renewal",
         ApplicationMember: [],
       },
       error: null,
@@ -119,6 +121,7 @@ describe("rejectApplication", () => {
       data: {
         companyName: "Acme",
         emailAddress: "admin@acme.example.com",
+        applicationType: "newMember",
         ApplicationMember: [],
       },
       error: null,
@@ -180,6 +183,7 @@ describe("rejectApplication", () => {
       data: {
         companyName: "NoEmail Corp",
         emailAddress: null,
+        applicationType: "newMember",
         ApplicationMember: [{ emailAddress: null }],
       },
       error: null,
@@ -200,6 +204,7 @@ describe("rejectApplication", () => {
       data: {
         companyName: "Acme",
         emailAddress: "admin@acme.example.com",
+        applicationType: "newMember",
         ApplicationMember: [],
       },
       error: null,
@@ -231,6 +236,7 @@ describe("rejectApplication", () => {
       data: {
         companyName: "Gamma Inc",
         emailAddress: null,
+        applicationType: "newMember",
         ApplicationMember: [{ emailAddress: "contact@gamma.example.com" }],
       },
       error: null,

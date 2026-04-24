@@ -2,13 +2,11 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
+import { Download } from "lucide-react";
 import {
-  ArrowDownAZ,
-  ArrowUpZA,
-  CalendarArrowDown,
-  CalendarArrowUp,
-  Download,
-} from "lucide-react";
+  AdminTableDateSortHeader,
+  AdminTableSortHeader,
+} from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { exportToExcel } from "@/lib/export/excel";
@@ -23,90 +21,58 @@ interface ParticipantListProps {
 export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
   {
     accessorKey: "affiliation",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          Affiliation
-          {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
-          ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <AdminTableSortHeader
+        label="Affiliation"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
+    ),
     cell: ({ row }) => {
       const { affiliation } = row.original;
-      return <>{affiliation}</>;
+      return <span className="text-muted-foreground">{affiliation}</span>;
     },
   },
   {
     accessorKey: "firstName",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          First Name
-          {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
-          ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <AdminTableSortHeader
+        label="First Name"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
+    ),
     cell: ({ row }) => {
       const { firstName } = row.original;
-      return <>{firstName}</>;
+      return <span className="text-sm">{firstName}</span>;
     },
   },
   {
     accessorKey: "lastName",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          Last Name
-          {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
-          ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <AdminTableSortHeader
+        label="Last Name"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
+    ),
     cell: ({ row }) => {
       const { lastName } = row.original;
-      return <>{lastName}</>;
+      return <span className="text-sm">{lastName}</span>;
     },
   },
   {
     accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          Email
-          {column.getIsSorted() === "asc" ? (
-            <ArrowDownAZ />
-          ) : column.getIsSorted() === "desc" ? (
-            <ArrowUpZA />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <AdminTableSortHeader
+        label="Email"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
+    ),
     cell: ({ row }) => {
       const { email } = row.original;
-      return <>{email}</>;
+      return <span className="text-muted-foreground">{email}</span>;
     },
   },
   {
@@ -114,41 +80,33 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
     header: "Contact Number",
     cell: ({ row }) => {
       const { contactNumber } = row.original;
-      return <>{contactNumber}</>;
+      return <span className="text-muted-foreground">{contactNumber}</span>;
     },
   },
   {
     accessorKey: "registrationDate",
     sortingFn: "datetime",
-    header: ({ column }) => {
-      return (
-        <Button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          variant={"ghost"}
-        >
-          Registration Date
-          {column.getIsSorted() === "asc" ? (
-            <CalendarArrowDown />
-          ) : column.getIsSorted() === "desc" ? (
-            <CalendarArrowUp />
-          ) : null}
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <AdminTableDateSortHeader
+        label="Registration Date"
+        onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        sorted={column.getIsSorted()}
+      />
+    ),
     cell: ({ row }) => {
       return (
-        <>
+        <span className="text-muted-foreground">
           {formatDate(
             new Date(row.original.registrationDate),
             "MMM d, h:mm aaa",
           )}
-        </>
+        </span>
       );
     },
   },
   {
     accessorKey: "actions",
-    header: "Actions",
+    header: "",
     enableHiding: false,
     cell: ({ row }) => {
       const { registrationId } = row.original;
@@ -199,10 +157,14 @@ export default function ParticipantListTable({
     });
   };
   return (
-    <div className="space-y-2">
-      <div className="flex h-8 justify-between">
-        <div>{participantList.length} results</div>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="rounded-full border border-border bg-muted/50 px-3 py-1 text-muted-foreground text-xs">
+          {participantList.length}{" "}
+          {participantList.length === 1 ? "participant" : "participants"}
+        </span>
         <Button
+          className="gap-1.5"
           disabled={participantList.length === 0}
           onClick={() => {
             handleExport(participantList);
@@ -210,7 +172,7 @@ export default function ParticipantListTable({
           size="sm"
           variant="outline"
         >
-          <Download className="size-4" />
+          <Download className="size-3.5" />
           Export to Excel
         </Button>
       </div>

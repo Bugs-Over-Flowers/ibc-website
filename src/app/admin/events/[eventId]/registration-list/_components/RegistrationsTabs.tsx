@@ -23,9 +23,19 @@ export default function RegistrationTabs({ children }: RegistrationTabsProps) {
 
   return (
     <Tabs onValueChange={handleTabChange} value={currentTab}>
-      <TabsList>
-        <TabsTrigger value="registrations">Registrations</TabsTrigger>
-        <TabsTrigger value="participants">Participants</TabsTrigger>
+      <TabsList className="h-9 gap-1 rounded-lg bg-muted p-1">
+        <TabsTrigger
+          className="rounded-md px-4 text-sm data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none"
+          value="registrations"
+        >
+          Registrations
+        </TabsTrigger>
+        <TabsTrigger
+          className="rounded-md px-4 text-sm data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none"
+          value="participants"
+        >
+          Participants
+        </TabsTrigger>
       </TabsList>
       {children}
     </Tabs>

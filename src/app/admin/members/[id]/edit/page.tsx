@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import tryCatch from "@/lib/server/tryCatch";
@@ -5,6 +6,11 @@ import { getApplicationDetailsById } from "@/server/applications/queries/getAppl
 import { getAllSectors } from "@/server/members/queries/getAllSectors";
 import { getMemberById } from "@/server/members/queries/getMemberById";
 import { EditMemberForm } from "./_components/EditMemberForm";
+
+export const metadata: Metadata = {
+  title: "Edit Member | Admin",
+  description: "Update member information and business details.",
+};
 
 type EditMemberPageProps = PageProps<"/admin/members/[id]/edit">;
 

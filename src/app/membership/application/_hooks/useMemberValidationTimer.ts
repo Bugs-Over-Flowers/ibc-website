@@ -1,6 +1,21 @@
 import { useEffect } from "react";
 import useMembershipApplicationStore from "@/hooks/membershipApplication.store";
 
+function getManilaDateKey(): string {
+  const parts = new Intl.DateTimeFormat("en-PH", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return `${year}-${month}-${day}`;
+}
+
 /**
  * Custom hook to manage persistent timer for member validation cooldown.
  * This timer persists across page navigation and browser sessions.
@@ -17,12 +32,19 @@ export function useMemberValidationTimer() {
   const setMemberValidationRemainingTime = useMembershipApplicationStore(
     (state) => state.setMemberValidationRemainingTime,
   );
-  const setMemberValidationAttempt = useMembershipApplicationStore(
-    (state) => state.setMemberValidationAttempt,
+  const lastRateLimitResetDate = useMembershipApplicationStore(
+    (state) => state.memberValidation.lastRateLimitResetDate,
   );
-  const setMemberValidationCooldown = useMembershipApplicationStore(
-    (state) => state.setMemberValidationCooldown,
+  const resetMemberValidationRateLimit = useMembershipApplicationStore(
+    (state) => state.resetMemberValidationRateLimit,
   );
+
+  useEffect(() => {
+    const today = getManilaDateKey();
+    if (lastRateLimitResetDate !== today) {
+      resetMemberValidationRateLimit();
+    }
+  }, [lastRateLimitResetDate, resetMemberValidationRateLimit]);
 
   useEffect(() => {
     if (!cooldownEndTime) {
@@ -40,8 +62,7 @@ export function useMemberValidationTimer() {
       if (remaining <= 0) {
         // Timer has expired — reset attempts so user gets a fresh set
         setMemberValidationRemainingTime(0);
-        setMemberValidationAttempt(0);
-        setMemberValidationCooldown(null);
+        resetMemberValidationRateLimit();
       } else {
         setMemberValidationRemainingTime(remainingSeconds);
       }
@@ -57,8 +78,7 @@ export function useMemberValidationTimer() {
   }, [
     cooldownEndTime,
     setMemberValidationRemainingTime,
-    setMemberValidationAttempt,
-    setMemberValidationCooldown,
+    resetMemberValidationRateLimit,
   ]);
 
   return {

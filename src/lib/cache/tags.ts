@@ -3,6 +3,7 @@ export const CACHE_TAGS = {
     all: "events:all",
     admin: "events:admin",
     public: "events:public",
+    details: "events:details",
     registrations: "events:registrations",
     checkIns: "events:check-ins",
   },
@@ -23,6 +24,10 @@ export const CACHE_TAGS = {
     stats: "registrations:stats",
     event: "registrations:event",
   },
+  sponsoredRegistrations: {
+    all: "sponsored-registrations:all",
+    admin: "sponsored-registrations:admin",
+  },
   checkIns: {
     all: "check-ins:all",
     list: "check-ins:list",
@@ -35,5 +40,22 @@ export const CACHE_TAGS = {
   },
   sectors: {
     all: "sectors:all",
+  },
+  networks: {
+    all: "networks:all",
+    admin: "networks:admin",
+    public: "networks:public",
+  },
+  websiteContent: {
+    all: "website-content:all",
+    public: "website-content:public",
+    section: {
+      visionMission: "website-content:section:vision_mission",
+      goals: "website-content:section:goals",
+      companyThrusts: "website-content:section:company_thrusts",
+      boardOfTrustees: "website-content:section:board_of_trustees",
+      secretariat: "website-content:section:secretariat",
+      landingPageBenefits: "website-content:section:landing_page_benefits",
+    },
   },
 } as const;

@@ -1,75 +1,37 @@
-import type { Route } from "next";
-import Link from "next/link";
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
-import BackButton from "@/app/admin/events/[eventId]/_components/BackButton";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import BackButton from "@/app/admin/_components/BackButton";
 import { TabsContent } from "@/components/ui/tabs";
+import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationListPageProps } from "@/lib/types/route";
-import { StatsSkeleton, TableSkeleton } from "./_components/page-skeletons";
+import { getEventById } from "@/server/events/queries/getEventById";
+import { getRegistrationListStats } from "@/server/registration/queries/getRegistrationListStats";
 import ParticipantList from "./_components/participants/ParticipantList";
 import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";
 import RegistrationListStats from "./_components/RegistrationListStats";
 import RegistrationTabs from "./_components/RegistrationsTabs";
 import RegistrationList from "./_components/registrations/RegistrationList";
 import RegistrationsSearchAndFilter from "./_components/registrations/RegistrationsSearchAndFilter";
+import RegistrationListPageLoading, {
+  RegistrationFiltersSkeleton,
+  RegistrationStatsSkeleton,
+  RegistrationTableSkeleton,
+} from "./loading";
+
+export const metadata: Metadata = {
+  title: "Registration List | Admin",
+  description: "View and manage event registrations and participants.",
+};
 
 export default function RegistrationPageWrapper({
   params,
   searchParams,
 }: RegistrationListPageProps) {
   return (
-    <main className="flex flex-col gap-4 p-5 md:p-10">
-      <Suspense
-        fallback={
-          <Link href={`/admin/events` as Route}>
-            <Button variant="outline">Back to Event Page</Button>
-          </Link>
-        }
-      >
-        <BackButtonWrapper params={params} />
-      </Suspense>
-      <RegistrationTabs>
-        {/*Registration and Participant Stats*/}
-        <div className="py-3">
-          <Suspense fallback={<StatsSkeleton />}>
-            <RegistrationListStats params={params} />
-          </Suspense>
-        </div>
-
-        {/* Registration List */}
-        <TabsContent className="flex flex-col gap-4" value="registrations">
-          {/* Stats */}
-
-          {/* Search and Filter */}
-          <Suspense
-            fallback={<Skeleton className="h-32 rounded-xl bg-neutral-200" />}
-          >
-            <RegistrationsSearchAndFilter />
-          </Suspense>
-
-          {/* Table */}
-          <Suspense fallback={<TableSkeleton columns={5} />}>
-            <RegistrationList params={params} searchParams={searchParams} />
-          </Suspense>
-        </TabsContent>
-
-        {/* Participants List */}
-        <TabsContent className="flex flex-col gap-4" value="participants">
-          {/* Search and Filter*/}
-          <Suspense
-            fallback={<Skeleton className="h-32 rounded-xl bg-neutral-200" />}
-          >
-            <ParticipantsSearchAndFilter />
-          </Suspense>
-
-          {/* Table and export */}
-          <Suspense fallback={<TableSkeleton columns={5} />}>
-            <ParticipantList params={params} searchParams={searchParams} />
-          </Suspense>
-        </TabsContent>
-      </RegistrationTabs>
-    </main>
+    <Suspense fallback={<RegistrationListPageLoading />}>
+      <RegistrationPage params={params} searchParams={searchParams} />
+    </Suspense>
   );
 }
 
@@ -80,4 +42,80 @@ async function BackButtonWrapper({
 }) {
   const { eventId } = await params;
   return <BackButton eventId={eventId} />;
+}
+
+async function RegistrationPage({
+  params,
+  searchParams,
+}: RegistrationListPageProps) {
+  const { eventId } = await params;
+  const cookieStore = await cookies();
+
+  const [eventDetails, registrationStats] = await Promise.all([
+    tryCatch(getEventById(cookieStore.getAll(), { id: eventId })),
+    tryCatch(getRegistrationListStats(cookieStore.getAll(), { eventId })),
+  ]);
+
+  return (
+    <div className="space-y-6">
+      <BackButtonWrapper params={params} />
+
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-bold text-3xl text-foreground">
+            {eventDetails.success
+              ? `${eventDetails.data.eventTitle} Registration List`
+              : "Registration List"}
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Review registrations and participants for this event
+          </p>
+        </div>
+      </div>
+
+      <RegistrationTabs>
+        <div className="mt-4">
+          <Suspense fallback={<RegistrationStatsSkeleton />}>
+            <RegistrationListStats statsResult={registrationStats} />
+          </Suspense>
+        </div>
+
+        <TabsContent className="mt-4 flex flex-col gap-4" value="registrations">
+          <Suspense fallback={<RegistrationFiltersSkeleton />}>
+            <RegistrationsSearchAndFilter />
+          </Suspense>
+
+          <Suspense
+            fallback={<RegistrationTableSkeleton variant="registrations" />}
+          >
+            <RegistrationList
+              eventTitle={
+                eventDetails.success ? eventDetails.data.eventTitle : "Event"
+              }
+              params={params}
+              searchParams={searchParams}
+            />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent className="mt-4 flex flex-col gap-4" value="participants">
+          <Suspense fallback={<RegistrationFiltersSkeleton />}>
+            <ParticipantsSearchAndFilter />
+          </Suspense>
+
+          <Suspense
+            fallback={<RegistrationTableSkeleton variant="participants" />}
+          >
+            <ParticipantList
+              eventTitle={
+                eventDetails.success ? eventDetails.data.eventTitle : "Event"
+              }
+              params={params}
+              searchParams={searchParams}
+            />
+          </Suspense>
+        </TabsContent>
+      </RegistrationTabs>
+    </div>
+  );
 }

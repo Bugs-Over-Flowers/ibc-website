@@ -15,7 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { featureMember } from "@/server/members/actions/featureMember";
+import {
+  FeatureMemberSchema,
+  getManilaDateKey,
+} from "@/lib/validation/members/feature";
+import { featureMember } from "@/server/members/mutations/featureMember";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
 export type FeatureableMember = Awaited<ReturnType<typeof getMembers>>[number];
@@ -31,7 +35,7 @@ export function FeatureMemberDialog({
   open,
   onOpenChange,
 }: FeatureMemberDialogProps) {
-  const todayDate = new Date().toISOString().slice(0, 10);
+  const todayDate = getManilaDateKey();
   const normalizedFeaturedExpirationDate =
     member.featuredExpirationDate && member.featuredExpirationDate >= todayDate
       ? member.featuredExpirationDate
@@ -76,15 +80,17 @@ export function FeatureMemberDialog({
       return;
     }
 
-    if (expirationDate < todayDate) {
-      toast.error("Feature expiration date cannot be earlier than today.");
+    const parsed = FeatureMemberSchema.safeParse({
+      memberId: member.businessMemberId,
+      featuredExpirationDate: expirationDate,
+    });
+
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Invalid form data");
       return;
     }
 
-    await execute({
-      memberId: member.businessMemberId,
-      featuredExpirationDate: expirationDate, // Send YYYY-MM-DD string directly
-    });
+    await execute(parsed.data);
   };
 
   return (

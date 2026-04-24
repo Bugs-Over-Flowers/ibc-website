@@ -6,28 +6,36 @@ import type { ApplicationWithMembers } from "@/lib/types/application";
 export function createMockApplication(
   overrides: Partial<ApplicationWithMembers> = {},
 ): ApplicationWithMembers {
-  return {
+  const application: ApplicationWithMembers = {
     applicationId: "app-001",
-    companyName: "Acme Technologies",
-    emailAddress: "admin@acme.example.com",
-    mobileNumber: "+639171234567",
     applicationDate: "2025-06-01T10:00:00Z",
+    applicationMemberType: "corporate",
     applicationStatus: "new",
     applicationType: "newMember",
-    sectorId: 1,
-    Sector: { sectorId: 1, sectorName: "Technology" },
+    businessMemberId: null,
+    companyAddress: "123 Tech St, Iloilo City",
+    companyName: "Acme Technologies",
+    emailAddress: "admin@acme.example.com",
+    identifier: "IBC-2025-001",
+    interviewId: null,
+    landline: "(033) 123-4567",
+    logoImageURL: "https://example.com/logo.png",
+    mobileNumber: "+639171234567",
+    paymentMethod: "ONSITE",
+    paymentProofStatus: "pending",
+    sectorName: "Technology",
+    websiteURL: "https://acme.example.com",
     ApplicationMember: [
       {
         applicationId: "app-001",
         applicationMemberId: "am-001",
-        firstName: "John",
-        lastName: "Doe",
-        emailAddress: "john@acme.example.com",
         birthdate: "1990-01-01",
         companyDesignation: "CEO",
         companyMemberType: "principal",
-        faxNumber: null,
-        landline: null,
+        emailAddress: "john@acme.example.com",
+        firstName: "John",
+        landline: "",
+        lastName: "Doe",
         mailingAddress: "123 Tech St, Iloilo City",
         mobileNumber: "+639171234567",
         nationality: "Filipino",
@@ -36,28 +44,11 @@ export function createMockApplication(
     ],
     BusinessMember: null,
     ProofImage: [],
-    logoImageURL: null,
-
-    // Fields from the Application table that may be present
-    businessAddress: "123 Tech St, Iloilo City",
-    businessAddressCity: "Iloilo City",
-    businessAddressProvince: "Iloilo",
-    businessAddressStreet: "123 Tech St",
-    businessAddressZipCode: "5000",
-    businessMemberId: null,
-    landline: null,
-    memberType: "regular",
-    paymentMethod: "ONSITE",
-    paymentProofStatus: null,
-    websiteURL: "https://acme.example.com",
-    yearEstablished: "2020",
-    faxNumber: null,
-    logoPath: null,
-    interviewId: null,
     Interview: null,
-    updatedAt: "2025-06-01T10:00:00Z",
     ...overrides,
-  } as unknown as ApplicationWithMembers;
+  };
+
+  return application;
 }
 
 export const mockApplications: ApplicationWithMembers[] = [
@@ -70,8 +61,7 @@ export const mockApplications: ApplicationWithMembers[] = [
     applicationType: "renewal",
     paymentMethod: "BPI",
     paymentProofStatus: "pending",
-    sectorId: 2,
-    Sector: { sectorId: 2, sectorName: "Finance" },
+    sectorName: "Finance",
     applicationDate: "2025-06-02T10:00:00Z",
   }),
   createMockApplication({
@@ -80,8 +70,7 @@ export const mockApplications: ApplicationWithMembers[] = [
     emailAddress: "contact@gamma.example.com",
     applicationStatus: "pending",
     applicationType: "newMember",
-    sectorId: 3,
-    Sector: { sectorId: 3, sectorName: "Healthcare" },
+    sectorName: "Healthcare",
     applicationDate: "2025-05-20T10:00:00Z",
   }),
   createMockApplication({
@@ -90,8 +79,7 @@ export const mockApplications: ApplicationWithMembers[] = [
     emailAddress: "admin@delta.example.com",
     applicationStatus: "approved",
     applicationType: "updating",
-    sectorId: 4,
-    Sector: { sectorId: 4, sectorName: "Manufacturing" },
+    sectorName: "Manufacturing",
     applicationDate: "2025-04-15T10:00:00Z",
   }),
   createMockApplication({
@@ -100,8 +88,7 @@ export const mockApplications: ApplicationWithMembers[] = [
     emailAddress: "info@epsilon.example.com",
     applicationStatus: "rejected",
     applicationType: "newMember",
-    sectorId: 1,
-    Sector: { sectorId: 1, sectorName: "Technology" },
+    sectorName: "Technology",
     applicationDate: "2025-04-10T10:00:00Z",
   }),
 ];
