@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "bun run --bun next dev --turbopack",
     "build": "bun run --bun next build --turbopack",
+    "build:test": "dotenvx run -f .env.testing -- bun run build",
     "docker:dev": "docker compose up ibc-dev",
     "docker:devb": "docker compose up ibc-dev --build",
     "docker:prod": "docker compose up ibc-prod",
@@ -45,6 +46,7 @@
   "dependencies": {
     "@base-ui/react": "^1.4.1",
     "@dnd-kit/react": "^0.4.0",
+    "@dotenvx/dotenvx": "^1.62.0",
     "@react-pdf/renderer": "^4.5.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.0",

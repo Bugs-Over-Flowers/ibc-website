@@ -4,7 +4,8 @@ import { type NextRequest, NextResponse } from "next/server";
 export async function updateSession(request: NextRequest) {
   const supabase_url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabase_key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const skipAdminMfaInTests = process.env.SKIP_ADMIN_MFA_IN_TESTS === "true";
+  const skipAdminMfaInTests =
+    process.env.NEXT_PUBLIC_SKIP_ADMIN_MFA_IN_TESTS === "true";
 
   if (!supabase_url || !supabase_key) {
     throw new Error("Missing Supabase environment variables");

@@ -51,7 +51,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "bun run build && bun run dev",
+    command: "bun run start",
     url: "http://localhost:3000",
     reuseExistingServer: true,
     timeout: 120000,
