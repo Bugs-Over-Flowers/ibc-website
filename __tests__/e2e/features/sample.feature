@@ -1,3 +1,4 @@
+@smoke
 Feature: Sample feature for testing
 
   Scenario: Visiting the homepage

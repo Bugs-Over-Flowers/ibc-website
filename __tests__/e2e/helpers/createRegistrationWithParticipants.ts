@@ -1,3 +1,4 @@
+import type { Database } from "@/lib/supabase/db.types";
 import { createRegistrationIdentifier } from "@/lib/validation/utils";
 import { ONE_PIXEL_PNG } from "./image";
 import type { createE2EAdminClient } from "./supabase";
@@ -7,7 +8,12 @@ const createRegistrationWithParticipants = async (
   event: { eventId: string },
   paymentProofStatus: "pending" | "rejected" | "accepted",
   participantCount = 1,
+  paymentMethod: Database["public"]["Enums"]["PaymentMethod"] = "BPI",
+  note: string | null = null,
 ) => {
+  // Enforce max 10 participants per registration
+  const actualParticipantCount = Math.min(participantCount, 10);
+
   const timestamp = Date.now();
   const suffix = `${paymentProofStatus}-${timestamp}`;
   const affiliation = `${paymentProofStatus} affiliation ${timestamp}`;
@@ -20,10 +26,11 @@ const createRegistrationWithParticipants = async (
       identifier: createRegistrationIdentifier(),
       businessMemberId: null,
       nonMemberName: affiliation,
-      paymentMethod: "BPI",
+      paymentMethod,
       paymentProofStatus,
       registrationDate: new Date().toISOString(),
-      numberOfParticipants: participantCount,
+      numberOfParticipants: actualParticipantCount,
+      note,
     })
     .select("registrationId, identifier")
     .single();
@@ -36,7 +43,7 @@ const createRegistrationWithParticipants = async (
 
   // fill up the registration with participants, then get the participant Ids to be used later.
   const participantIds = await Promise.all(
-    Array.from({ length: participantCount }).map(async (_, index) => {
+    Array.from({ length: actualParticipantCount }).map(async (_, index) => {
       // For each, insert a participant
       const { data: participant, error: participantError } = await supabase
         .from("Participant")
@@ -57,8 +64,9 @@ const createRegistrationWithParticipants = async (
         );
       }
 
-      // if the payment proof status is pending, seed a proof image
-      if (paymentProofStatus === "pending") {
+      // if the payment proof status is pending AND payment method is BPI, seed a proof image
+      // Onsite payments don't require proof images
+      if (paymentProofStatus === "pending" && paymentMethod === "BPI") {
         const proofPath = `reg-${crypto.randomUUID()}`;
 
         // Insert into the storage

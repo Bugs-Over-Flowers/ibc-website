@@ -1,5 +1,7 @@
+@smoke
 Feature: Registration list
 
+  @smoke
   Scenario: Show all registrations on the registrations tab
     Given I am an admin on the registration list page for an event
     When I open the registrations tab
@@ -7,6 +9,7 @@ Feature: Registration list
     And I should see registrations with rejected payment proof status
     And I should see registrations with accepted payment proof status
 
+  @smoke
   Scenario: Accept payment proof from the registration details page
     Given I am on a registration details page for a pending registration
     When I accept the payment proof
@@ -14,6 +17,7 @@ Feature: Registration list
     And I should see the updated status on the registrations tab
     And I should see the updated stats at the top
 
+  @smoke
   Scenario: Accept payment proof from the registrations tab
     Given I am an admin on the registration list page for an event
     When I open the row actions menu for a pending registration
@@ -23,6 +27,7 @@ Feature: Registration list
     And I should see the updated status on the registrations tab
     And I should see the updated stats at the top
 
+  @smoke
   Scenario: Stats stay consistent across tabs
     Given I am on the registration list page for an event
     When I switch between the registrations and participants tabs

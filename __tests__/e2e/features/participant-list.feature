@@ -1,11 +1,14 @@
+@smoke
 Feature: Participant list
 
+  @smoke
   Scenario: Hide pending and rejected registrations
     Given I am an admin on the registration list page for an event
     When I open the participants tab
     Then I should not see participants from pending registrations
     And I should not see participants from rejected registrations
 
+  @smoke
   Scenario: Show participants from accepted registrations
     Given I am an admin on the registration list page for an event
     When I open the participants tab

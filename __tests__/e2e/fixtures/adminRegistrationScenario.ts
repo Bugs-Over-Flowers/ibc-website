@@ -1,3 +1,4 @@
+import type { Database } from "@/lib/supabase/db.types";
 import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
 import { createE2EAdminClient } from "../helpers/supabase";
 
@@ -24,17 +25,27 @@ export type SeededAdminRegistrationScenario = {
     registrationId: string;
     identifier: string;
     affiliation: string;
-    participantIds: [string, string];
+    participantIds: string[];
     firstParticipantId: string;
     secondParticipantId: string;
   };
 };
 
-export async function seedAdminRegistrationScenario(): Promise<SeededAdminRegistrationScenario> {
+export interface SeedOptions {
+  participantCount?: number;
+  paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
+  note?: string | null;
+}
+
+export async function seedAdminRegistrationScenario(
+  options: SeedOptions = {},
+): Promise<SeededAdminRegistrationScenario> {
   const supabase = createE2EAdminClient();
 
   // Save a snapshot of the current time
   const timestamp = Date.now();
+  const participantCount = options.participantCount ?? 2;
+  const paymentMethod = options.paymentMethod ?? "BPI";
 
   const { data: event, error: eventError } = await supabase
     .from("Event")
@@ -104,21 +115,34 @@ export async function seedAdminRegistrationScenario(): Promise<SeededAdminRegist
     throw new Error("Failed to seed event day: no event day returned");
   }
 
+  const note = options.note ?? null;
+
+  const pendingRegistrationNote = note ?? "Test note for pending registration";
+  const acceptedRegistrationNote = note ?? null;
+
   const pendingRegistration = await createRegistrationWithParticipants(
     supabase,
     { eventId: event.eventId },
     "pending",
+    participantCount,
+    paymentMethod,
+    pendingRegistrationNote,
   );
   const rejectedRegistration = await createRegistrationWithParticipants(
     supabase,
     { eventId: event.eventId },
     "rejected",
+    participantCount,
+    paymentMethod,
+    note,
   );
   const acceptedRegistration = await createRegistrationWithParticipants(
     supabase,
     { eventId: event.eventId },
     "accepted",
-    2,
+    participantCount,
+    paymentMethod,
+    acceptedRegistrationNote,
   );
 
   return {
@@ -130,10 +154,7 @@ export async function seedAdminRegistrationScenario(): Promise<SeededAdminRegist
       registrationId: acceptedRegistration.registrationId,
       identifier: acceptedRegistration.identifier,
       affiliation: acceptedRegistration.affiliation,
-      participantIds: [
-        acceptedRegistration.participantIds[0],
-        acceptedRegistration.participantIds[1],
-      ],
+      participantIds: acceptedRegistration.participantIds,
       firstParticipantId: acceptedRegistration.participantIds[0],
       secondParticipantId: acceptedRegistration.participantIds[1],
     },
