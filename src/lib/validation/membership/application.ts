@@ -40,31 +40,32 @@ export type MembershipApplicationStep1Schema = z.infer<
   typeof MembershipApplicationStep1Schema
 >;
 
-export const ApplicationMemberSchema = z
-  .object({
-    companyMemberType: CompanyMemberTypeEnum,
-    firstName: z
-      .string({ message: "First name is required" })
-      .min(1, "First name is required"),
-    lastName: z
-      .string({ message: "Last name is required" })
-      .min(1, "Last name is required"),
-    emailAddress: z.email("Email is required"),
-    companyDesignation: z
-      .string({ message: "Company designation is required" })
-      .min(1, "Company designation is required"),
-    birthdate: z.date({ message: "Birthdate is required" }),
-    sex: SexEnum,
-    nationality: z
-      .string({ message: "Nationality is required" })
-      .min(1, "Nationality is required"),
-    mailingAddress: z
-      .string({ message: "Mailing address is required" })
-      .min(1, "Mailing address is required"),
-    mobileNumber: phoneSchema,
-    landline: z.string().min(1, "Landline is required"),
-  })
-  .transform((data) => {
+export const ApplicationMemberBaseSchema = z.object({
+  companyMemberType: CompanyMemberTypeEnum,
+  firstName: z
+    .string({ message: "First name is required" })
+    .min(1, "First name is required"),
+  lastName: z
+    .string({ message: "Last name is required" })
+    .min(1, "Last name is required"),
+  emailAddress: z.email("Email is required"),
+  companyDesignation: z
+    .string({ message: "Company designation is required" })
+    .min(1, "Company designation is required"),
+  birthdate: z.date({ message: "Birthdate is required" }),
+  sex: SexEnum,
+  nationality: z
+    .string({ message: "Nationality is required" })
+    .min(1, "Nationality is required"),
+  mailingAddress: z
+    .string({ message: "Mailing address is required" })
+    .min(1, "Mailing address is required"),
+  mobileNumber: phoneSchema,
+  landline: z.string().min(1, "Landline is required"),
+});
+
+export const ApplicationMemberSchema = ApplicationMemberBaseSchema.transform(
+  (data) => {
     // Only apply titleCase to companyDesignation if all letters are lowercase
     const isAllLowercase =
       data.companyDesignation === data.companyDesignation.toLowerCase();
@@ -77,7 +78,8 @@ export const ApplicationMemberSchema = z
         : data.companyDesignation.trim(),
       nationality: titleCase(data.nationality).trim(),
     };
-  });
+  },
+);
 
 export const MembershipApplicationStep2Schema = z
   .object({
