@@ -11,28 +11,17 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useAction } from "@/hooks/useAction";
-import tryCatch from "@/lib/server/tryCatch";
 import { cn } from "@/lib/utils";
-import { removeFeaturedMember } from "@/server/members/mutations/removeFeaturedMember";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
 interface MembersTableRowProps {
   member: Awaited<ReturnType<typeof getMembers>>[number];
   isSelected: boolean;
   onFeatureClick: (
+    member: Awaited<ReturnType<typeof getMembers>>[number],
+  ) => void;
+  onRemoveFeatureClick: (
     member: Awaited<ReturnType<typeof getMembers>>[number],
   ) => void;
   onSelectedChange: (selected: boolean) => void;
@@ -49,24 +38,13 @@ export function MembersTableRow({
   member,
   isSelected,
   onFeatureClick,
+  onRemoveFeatureClick,
   onSelectedChange,
   showCheckbox = false,
 }: MembersTableRowProps) {
   const [imageError, setImageError] = useState(false);
-  const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const showImage = member.logoImageURL && !imageError;
   const router = useRouter();
-  const { execute: executeRemoveFeatured, isPending: isRemovingFeatured } =
-    useAction(tryCatch(removeFeaturedMember), {
-      onSuccess: () => {
-        toast.success(`${member.businessName} was removed from featured.`);
-        setIsRemoveDialogOpen(false);
-        router.refresh();
-      },
-      onError: (error) => {
-        toast.error(error);
-      },
-    });
 
   const todayDate = new Date().toISOString().slice(0, 10);
   const normalizedFeaturedDate =
@@ -107,17 +85,6 @@ export function MembersTableRow({
       return;
     }
     router.push(`/admin/members/${member.businessMemberId}`);
-  };
-
-  const handleOpenRemoveFeatured = (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    event.stopPropagation();
-    setIsRemoveDialogOpen(true);
-  };
-
-  const handleRemoveFeatured = async () => {
-    await executeRemoveFeatured({ memberId: member.businessMemberId });
   };
 
   return (
@@ -260,12 +227,14 @@ export function MembersTableRow({
         {isCurrentlyFeatured ? (
           <button
             className="mt-auto inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 font-medium text-red-700 text-xs transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-900/40"
-            disabled={isRemovingFeatured}
-            onClick={handleOpenRemoveFeatured}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemoveFeatureClick(member);
+            }}
             type="button"
           >
             <StarOff className="size-3" />
-            {isRemovingFeatured ? "Removing..." : "Remove Featured Member"}
+            Remove Featured Member
           </button>
         ) : (
           <button
@@ -281,38 +250,6 @@ export function MembersTableRow({
           </button>
         )}
       </div>
-
-      <AlertDialog
-        onOpenChange={setIsRemoveDialogOpen}
-        open={isRemoveDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove featured member?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will remove the featured status for{" "}
-              <span className="font-medium text-foreground">
-                {member.businessName}
-              </span>
-              .
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isRemovingFeatured}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={isRemovingFeatured}
-              onClick={() => {
-                void handleRemoveFeatured();
-              }}
-            >
-              {isRemovingFeatured ? "Removing..." : "Remove"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </article>
   );
 }
