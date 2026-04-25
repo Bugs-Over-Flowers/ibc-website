@@ -77,6 +77,38 @@ export async function updateMember(input: UpdateMemberInput) {
   }
 
   // 3. Upsert Application Members (latest application representatives)
+  const providedMemberIds = representatives
+    .map((r) => r.applicationMemberId)
+    .filter((id): id is NonNullable<typeof id> => id != null);
+
+  if (providedMemberIds.length > 0) {
+    const { data: existingMembers, error: existingMembersError } =
+      await supabase
+        .from("ApplicationMember")
+        .select("applicationMemberId")
+        .eq("applicationId", applicationId)
+        .in("applicationMemberId", providedMemberIds);
+
+    if (existingMembersError) {
+      throw new Error(
+        `Failed to verify representatives: ${JSON.stringify(existingMembersError)}`,
+      );
+    }
+
+    const validMemberIds = new Set(
+      existingMembers?.map((m) => m.applicationMemberId) || [],
+    );
+    const invalidIds = providedMemberIds.filter(
+      (id) => !validMemberIds.has(id),
+    );
+
+    if (invalidIds.length > 0) {
+      throw new Error(
+        `Invalid representative IDs provided: ${invalidIds.join(", ")}`,
+      );
+    }
+  }
+
   const representativePayload = representatives.map((representative) => ({
     ...(representative.applicationMemberId
       ? { applicationMemberId: representative.applicationMemberId }

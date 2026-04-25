@@ -59,6 +59,21 @@ export const UpdateMemberSchema = z.object({
     .length(
       2,
       "Exactly two representatives are required: one principal and one alternate",
+    )
+    .refine(
+      (representatives) => {
+        const principalCount = representatives.filter(
+          (representative) => representative.companyMemberType === "principal",
+        ).length;
+        const alternateCount = representatives.filter(
+          (representative) => representative.companyMemberType === "alternate",
+        ).length;
+        return principalCount === 1 && alternateCount === 1;
+      },
+      {
+        message:
+          "Exactly two representatives are required: one principal and one alternate",
+      },
     ),
 });
 

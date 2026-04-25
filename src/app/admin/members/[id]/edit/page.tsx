@@ -54,10 +54,23 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
     // Contact Information
     emailAddress: latestApplication.emailAddress || "",
     landline: latestApplication.landline || "",
-    mobileNumber: latestApplication.mobileNumber || "",
+    mobileNumber: latestApplication.mobileNumber || undefined,
 
     // Applicant Representatives
-    representatives: [principalRepresentative, alternateRepresentative],
+    representatives: [
+      {
+        ...principalRepresentative,
+        companyMemberType: "principal" as const,
+        sex: principalRepresentative.sex as "male" | "female",
+        mobileNumber: principalRepresentative.mobileNumber || undefined,
+      },
+      {
+        ...alternateRepresentative,
+        companyMemberType: "alternate" as const,
+        sex: alternateRepresentative.sex as "male" | "female",
+        mobileNumber: alternateRepresentative.mobileNumber || undefined,
+      },
+    ],
 
     // Membership Details
     membershipStatus: memberDetails.membershipStatus as
