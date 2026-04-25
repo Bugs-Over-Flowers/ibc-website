@@ -40,31 +40,32 @@ export type MembershipApplicationStep1Schema = z.infer<
   typeof MembershipApplicationStep1Schema
 >;
 
-export const ApplicationMemberSchema = z
-  .object({
-    companyMemberType: CompanyMemberTypeEnum,
-    firstName: z
-      .string({ message: "First name is required" })
-      .min(1, "First name is required"),
-    lastName: z
-      .string({ message: "Last name is required" })
-      .min(1, "Last name is required"),
-    emailAddress: z.email("Email is required"),
-    companyDesignation: z
-      .string({ message: "Company designation is required" })
-      .min(1, "Company designation is required"),
-    birthdate: z.date({ message: "Birthdate is required" }),
-    sex: SexEnum,
-    nationality: z
-      .string({ message: "Nationality is required" })
-      .min(1, "Nationality is required"),
-    mailingAddress: z
-      .string({ message: "Mailing address is required" })
-      .min(1, "Mailing address is required"),
-    mobileNumber: phoneSchema,
-    landline: z.string().min(1, "Landline is required"),
-  })
-  .transform((data) => {
+export const ApplicationMemberBaseSchema = z.object({
+  companyMemberType: CompanyMemberTypeEnum,
+  firstName: z
+    .string({ message: "First name is required" })
+    .min(1, "First name is required"),
+  lastName: z
+    .string({ message: "Last name is required" })
+    .min(1, "Last name is required"),
+  emailAddress: z.email("Email is required"),
+  companyDesignation: z
+    .string({ message: "Company designation is required" })
+    .min(1, "Company designation is required"),
+  birthdate: z.date({ message: "Birthdate is required" }),
+  sex: SexEnum,
+  nationality: z
+    .string({ message: "Nationality is required" })
+    .min(1, "Nationality is required"),
+  mailingAddress: z
+    .string({ message: "Mailing address is required" })
+    .min(1, "Mailing address is required"),
+  mobileNumber: phoneSchema,
+  landline: z.string().min(1, "Landline is required"),
+});
+
+export const ApplicationMemberSchema = ApplicationMemberBaseSchema.transform(
+  (data) => {
     // Only apply titleCase to companyDesignation if all letters are lowercase
     const isAllLowercase =
       data.companyDesignation === data.companyDesignation.toLowerCase();
@@ -77,7 +78,8 @@ export const ApplicationMemberSchema = z
         : data.companyDesignation.trim(),
       nationality: titleCase(data.nationality).trim(),
     };
-  });
+  },
+);
 
 export const MembershipApplicationStep2Schema = z
   .object({
@@ -106,7 +108,7 @@ export const MembershipApplicationStep2Schema = z
       .max(1024 * 1024 * 5, "File size must be less than 5MB")
       .refine(
         (file) => validateFileTypeMime(file),
-        "Only JPEG, PNG, and PDF files are allowed",
+        "Only JPEG and PNG files are allowed",
       )
       .optional(),
   })
@@ -151,7 +153,7 @@ export const MembershipApplicationStep4Schema = z
       .max(1024 * 1024 * 5, "File size must be less than 5MB")
       .refine(
         (file) => validateFileTypeMime(file),
-        "Only JPEG, PNG, and PDF files are allowed",
+        "Only JPEG and PNG files are allowed",
       )
       .optional(),
   })
@@ -179,7 +181,9 @@ export const MembershipApplicationSchema = z
     applicationMemberType: ApplicationMemberTypeEnum,
     businessMemberId: z.string().optional(),
     companyName: z.string().min(1, "Company name is required"),
-    sectorId: z.number({ message: "Industry/Sector is required" }),
+    sectorName: z
+      .string({ message: "Industry/Sector is required" })
+      .min(1, "Industry/Sector is required"),
     companyAddress: z.string().min(1, "Company address is required"),
     websiteURL: z.string().min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),

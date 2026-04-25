@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export function getManilaDateKey(): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
+  const parts = new Intl.DateTimeFormat("en-PH", {
     timeZone: "Asia/Manila",
     year: "numeric",
     month: "2-digit",
@@ -27,3 +27,11 @@ export const FeatureMemberSchema = z.object({
 });
 
 export type FeatureMemberInput = z.infer<typeof FeatureMemberSchema>;
+
+export const RemoveFeaturedMemberSchema = z.object({
+  memberId: z.uuid(),
+});
+
+export type RemoveFeaturedMemberInput = z.infer<
+  typeof RemoveFeaturedMemberSchema
+>;

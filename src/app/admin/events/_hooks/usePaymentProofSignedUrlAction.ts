@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { getPaymentProofSignedUrl } from "@/server/registration/mutations/getPaymentProofSignedUrl";
+import { getPaymentProofSignedUrl } from "@/server/registration/queries/getPaymentProofSignedUrl";
 
 interface UsePaymentProofSignedUrlActionProps {
   open: boolean;

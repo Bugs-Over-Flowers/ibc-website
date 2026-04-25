@@ -32,7 +32,7 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId: number | null;
+          sectorName: string | null;
           websiteURL: string;
         };
         Insert: {
@@ -52,7 +52,7 @@ export type Database = {
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId?: number | null;
+          sectorName?: string | null;
           websiteURL: string;
         };
         Update: {
@@ -72,7 +72,7 @@ export type Database = {
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
-          sectorId?: number | null;
+          sectorName?: string | null;
           websiteURL?: string;
         };
         Relationships: [
@@ -89,13 +89,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "Interview";
             referencedColumns: ["interviewId"];
-          },
-          {
-            foreignKeyName: "Application_sectorId_fkey";
-            columns: ["sectorId"];
-            isOneToOne: false;
-            referencedRelation: "Sector";
-            referencedColumns: ["sectorId"];
           },
         ];
       };
@@ -168,7 +161,7 @@ export type Database = {
           membershipStatus:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -184,7 +177,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId: string;
           sectorId: number;
           websiteURL: string;
         };
@@ -200,7 +193,7 @@ export type Database = {
           membershipStatus?:
             | Database["public"]["Enums"]["MembershipStatus"]
             | null;
-          primaryApplicationId?: string | null;
+          primaryApplicationId?: string;
           sectorId?: number;
           websiteURL?: string;
         };
@@ -424,6 +417,42 @@ export type Database = {
           },
         ];
       };
+      Networks: {
+        Row: {
+          about: string;
+          created_at: string;
+          id: string;
+          location_type: string;
+          logo_url: string | null;
+          organization: string;
+          representative_name: string;
+          representative_position: string;
+          updated_at: string;
+        };
+        Insert: {
+          about: string;
+          created_at?: string;
+          id?: string;
+          location_type: string;
+          logo_url?: string | null;
+          organization: string;
+          representative_name: string;
+          representative_position: string;
+          updated_at?: string;
+        };
+        Update: {
+          about?: string;
+          created_at?: string;
+          id?: string;
+          location_type?: string;
+          logo_url?: string | null;
+          organization?: string;
+          representative_name?: string;
+          representative_position?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       Participant: {
         Row: {
           contactNumber: string;
@@ -504,6 +533,7 @@ export type Database = {
           eventId: string;
           identifier: string;
           nonMemberName: string | null;
+          note: string | null;
           numberOfParticipants: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
@@ -516,6 +546,7 @@ export type Database = {
           eventId: string;
           identifier: string;
           nonMemberName?: string | null;
+          note?: string | null;
           numberOfParticipants?: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
@@ -528,6 +559,7 @@ export type Database = {
           eventId?: string;
           identifier?: string;
           nonMemberName?: string | null;
+          note?: string | null;
           numberOfParticipants?: number | null;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
@@ -626,6 +658,7 @@ export type Database = {
           cardPlacement: number | null;
           createdAt: string;
           entryKey: string;
+          group: string | null;
           icon: string | null;
           id: string;
           imageUrl: string | null;
@@ -639,6 +672,7 @@ export type Database = {
           cardPlacement?: number | null;
           createdAt?: string;
           entryKey: string;
+          group?: string | null;
           icon?: string | null;
           id?: string;
           imageUrl?: string | null;
@@ -652,6 +686,7 @@ export type Database = {
           cardPlacement?: number | null;
           createdAt?: string;
           entryKey?: string;
+          group?: string | null;
           icon?: string | null;
           id?: string;
           imageUrl?: string | null;
@@ -862,16 +897,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_registration_list_checkin: {
-        Args: { p_identifier: string; p_today?: string };
-        Returns: Database["public"]["CompositeTypes"]["registration_details_result"];
-        SetofOptions: {
-          from: "*";
-          to: "registration_details_result";
-          isOneToOne: true;
-          isSetofReturn: false;
-        };
-      };
       get_registration_list_stats: {
         Args: { p_event_id: string };
         Returns: Database["public"]["CompositeTypes"]["registration_stats"];
@@ -919,19 +944,21 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_sponsored_registration_by_uuid:
-        | {
-            Args: { p_uuid: string };
-            Returns: {
-              error: true;
-            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
-          }
-        | {
-            Args: { p_uuid: string };
-            Returns: {
-              error: true;
-            } & "Could not choose the best candidate function between: public.get_sponsored_registration_by_uuid(p_uuid => text), public.get_sponsored_registration_by_uuid(p_uuid => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"[];
-          };
+      get_sponsored_registration_by_uuid: {
+        Args: { p_uuid: string };
+        Returns: {
+          createdAt: string;
+          eventId: string;
+          feeDeduction: number;
+          maxSponsoredGuests: number;
+          sponsoredBy: string;
+          sponsoredRegistrationId: string;
+          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
+          updatedAt: string;
+          usedCount: number;
+          uuid: string;
+        }[];
+      };
       get_sponsored_registrations_with_details: {
         Args: { p_event_id: string };
         Returns: {
@@ -967,6 +994,7 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      is_admin_user: { Args: never; Returns: boolean };
       january_first_reset: { Args: never; Returns: undefined };
       process_membership_statuses: {
         Args: { p_reference_time?: string };
@@ -1016,21 +1044,7 @@ export type Database = {
           p_identifier: string;
           p_member_type: string;
           p_non_member_name?: string;
-          p_other_participants?: Json;
-          p_payment_method?: string;
-          p_payment_path?: string;
-          p_registrant?: Json;
-          p_sponsored_registration_id?: string;
-        };
-        Returns: Json;
-      };
-      submit_event_registration_standard: {
-        Args: {
-          p_business_member_id?: string;
-          p_event_id: string;
-          p_identifier: string;
-          p_member_type: string;
-          p_non_member_name?: string;
+          p_note?: string;
           p_other_participants?: Json;
           p_payment_method?: string;
           p_payment_path?: string;
@@ -1073,6 +1087,7 @@ export type Database = {
         Args: {
           p_card_placement?: number;
           p_entry_key: string;
+          p_group?: string;
           p_icon?: string;
           p_image_url?: string;
           p_is_active?: boolean;
@@ -1084,6 +1099,7 @@ export type Database = {
           cardPlacement: number | null;
           createdAt: string;
           entryKey: string;
+          group: string | null;
           icon: string | null;
           id: string;
           imageUrl: string | null;
@@ -1119,7 +1135,8 @@ export type Database = {
         | "company_thrusts"
         | "board_of_trustees"
         | "secretariat"
-        | "landing_page_benefits";
+        | "landing_page_benefits"
+        | "hero_section";
       WebsiteContentTextType: "Paragraph" | "Title" | "Subtitle";
     };
     CompositeTypes: {
@@ -1307,6 +1324,7 @@ export const Constants = {
         "board_of_trustees",
         "secretariat",
         "landing_page_benefits",
+        "hero_section",
       ],
       WebsiteContentTextType: ["Paragraph", "Title", "Subtitle"],
     },

@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 // import CenterSpinner from "@/components/CenterSpinner";
 import type { RegistrationRouteProps } from "@/lib/types/route";
 import { RegistrationPageContent } from "./_components/RegistrationPageContent";
 import Loading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Event Registration",
+  description: "Complete your registration for the event.",
+};
 
 export default function Page({ params, searchParams }: RegistrationRouteProps) {
   return (

@@ -1,4 +1,4 @@
-import { DetailRow } from "./DetailRow";
+import { DetailRow } from "@/components/detail-row";
 
 interface CompanyInfoCardProps {
   companyName: string;

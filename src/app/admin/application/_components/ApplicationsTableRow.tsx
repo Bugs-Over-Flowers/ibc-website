@@ -29,7 +29,7 @@ function formatAppliedDate(dateValue: string): string {
     return `${isoDate.slice(8, 10)}/${isoDate.slice(5, 7)}/${isoDate.slice(0, 4)}`;
   }
 
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat("en-PH", {
     day: "2-digit",
     month: "2-digit",
     timeZone: "UTC",
@@ -83,13 +83,16 @@ export function ApplicationsTableRow({
   const toggleSelection = useSelectedApplicationsStore(
     (state) => state.toggleSelection,
   );
+  const isSelectionLocked = useSelectedApplicationsStore(
+    (state) => state.isSelectionLocked,
+  );
   const { borderColor, textColor } = getApplicationTypeColor(
     application.applicationType,
   );
   const paymentProofStatus = application.paymentProofStatus ?? "pending";
   const isPaymentProofPending =
     application.paymentMethod === "BPI" && paymentProofStatus === "pending";
-  const isSelectionDisabled = isPaymentProofPending;
+  const isSelectionDisabled = isPaymentProofPending || isSelectionLocked;
   const formattedAppliedDate = formatAppliedDate(application.applicationDate);
 
   const proofImage = application.ProofImage?.[0];
@@ -177,7 +180,7 @@ export function ApplicationsTableRow({
         className={showContact ? "w-[24%] max-w-56" : "w-[34%] max-w-64"}
       >
         <div className="line-clamp-2 truncate text-sm">
-          {application.Sector?.sectorName}
+          {application.sectorName || "N/A"}
         </div>
       </TableCell>
       <TableCell className={showContact ? "w-[14%]" : "w-[16%]"}>

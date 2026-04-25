@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { Database } from "@/lib/supabase/db.types";
+import { ApplicationMemberBaseSchema } from "../membership/application";
 import { phoneSchema } from "../utils";
 
 type MembershipStatusEnum = Database["public"]["Enums"]["MembershipStatus"];
@@ -44,6 +45,36 @@ export const UpdateMemberSchema = z.object({
   membershipStatus: z.enum(MEMBERSHIP_STATUS_VALUES).optional(),
   joinDate: z.coerce.date().optional(),
   membershipExpiryDate: z.coerce.date().optional().nullable(),
+
+  // Representatives (latest application)
+  representatives: z
+    .array(
+      ApplicationMemberBaseSchema.extend({
+        applicationMemberId: z.preprocess(
+          (value) => (value === "" ? undefined : value),
+          z.uuid().optional(),
+        ),
+      }),
+    )
+    .length(
+      2,
+      "Exactly two representatives are required: one principal and one alternate",
+    )
+    .refine(
+      (representatives) => {
+        const principalCount = representatives.filter(
+          (representative) => representative.companyMemberType === "principal",
+        ).length;
+        const alternateCount = representatives.filter(
+          (representative) => representative.companyMemberType === "alternate",
+        ).length;
+        return principalCount === 1 && alternateCount === 1;
+      },
+      {
+        message:
+          "Exactly two representatives are required: one principal and one alternate",
+      },
+    ),
 });
 
 export type UpdateMemberInput = z.infer<typeof UpdateMemberSchema>;

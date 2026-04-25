@@ -1,9 +1,6 @@
 import "server-only";
 
-import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { applyPublicHoursCache } from "@/lib/cache/profiles";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 import { getEventStatus } from "../mutations/helpers";
 
@@ -17,11 +14,6 @@ export async function getPublicEvents(
   requestCookies: RequestCookie[],
   { search, sort, status }: GetPublicEventsArgs,
 ) {
-  "use cache";
-  applyPublicHoursCache();
-  cacheTag(CACHE_TAGS.events.all);
-  cacheTag(CACHE_TAGS.events.public);
-
   const supabase = await createClient(requestCookies);
 
   let query = supabase.from("Event").select("*").not("publishedAt", "is", null);

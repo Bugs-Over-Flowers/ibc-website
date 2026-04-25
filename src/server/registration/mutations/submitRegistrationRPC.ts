@@ -8,6 +8,7 @@ import {
   SubmitRegistrationResponseSchema,
 } from "@/lib/validation/registration/standard";
 import { createRegistrationIdentifier } from "@/lib/validation/utils";
+import { invalidateRegistrationCaches } from "@/server/actions.utils";
 
 /**
  * Server action to submit event registration to database via RPC call.
@@ -42,7 +43,8 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
 
   const registrationIdentifier = createRegistrationIdentifier();
 
-  const { step1, step3, eventId, step2, sponsoredRegistrationId } = parsedData;
+  const { step1, step3, eventId, step2, sponsoredRegistrationId, step4 } =
+    parsedData;
 
   // Call database RPC function with transformed data
   const { data: rpcResults, error } = await supabase.rpc(
@@ -50,6 +52,9 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
     {
       p_event_id: eventId,
       // Member: send businessMemberId, Non-member: undefined
+      p_non_member_name:
+        step1.member === "nonmember" ? step1.nonMemberName : undefined,
+      p_member_type: step1.member,
       p_business_member_id:
         step1.member === "member" ? step1.businessMemberId : undefined,
       p_registrant: step2.registrant,
@@ -58,9 +63,7 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
       p_payment_method: step3.paymentMethod,
       p_other_participants: step2.otherParticipants,
       // Non-member: send name, Member: undefined
-      p_non_member_name:
-        step1.member === "nonmember" ? step1.nonMemberName : undefined,
-      p_member_type: step1.member,
+      p_note: step4.note,
       p_identifier: registrationIdentifier,
       // Sponsored registration: send ID if exists, otherwise undefined
       p_sponsored_registration_id: sponsoredRegistrationId || undefined,
@@ -97,12 +100,7 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
 
   const validatedResponse = SubmitRegistrationResponseSchema.parse(rpcResults);
 
-  updateTag(CACHE_TAGS.registrations.all);
-  updateTag(CACHE_TAGS.registrations.list);
-  updateTag(CACHE_TAGS.registrations.details);
-  updateTag(CACHE_TAGS.registrations.stats);
-  updateTag(CACHE_TAGS.registrations.event);
-  updateTag(CACHE_TAGS.events.registrations);
+  invalidateRegistrationCaches();
   updateTag(CACHE_TAGS.checkIns.stats);
 
   if (sponsoredRegistrationId) {
