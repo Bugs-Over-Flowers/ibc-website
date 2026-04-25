@@ -9,16 +9,16 @@ Feature: Registration flow
     Then I should be redirected to the registration form
 
   Scenario: Register as a member
-    Given I am on the registration form
+    Given I am on the member registration form
     When I submit a valid member registration
-    Then I should see a success result
-    And I should be redirected back to the event details page
+    Then I should see the member registration success result
+    And I should be redirected back after member registration
 
   Scenario: Register as a non-member for a public event
     Given I am on the registration form for a public event
     When I submit a valid non-member registration
-    Then I should see a success result
-    And I should be redirected back to the event details page
+    Then I should see the public non-member registration success result
+    And I should be redirected back after public registration
 
   Scenario: Block non-member registration for a private event
     Given I am on the registration form for a private event
@@ -26,7 +26,7 @@ Feature: Registration flow
     Then I should see a message that the event is private
 
   Scenario: Register multiple participants
-    Given I am on the registration form
+    Given I am on the multi-participant registration form
     When I submit a registration with multiple participants
-    Then I should see a success result
+    Then I should see the multiple participant registration success result
     And the registration should include all participants

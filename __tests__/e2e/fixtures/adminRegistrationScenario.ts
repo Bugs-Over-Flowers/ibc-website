@@ -1,10 +1,5 @@
-import { createRegistrationIdentifier } from "@/lib/validation/utils";
+import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
 import { createE2EAdminClient } from "../helpers/supabase";
-
-const ONE_PIXEL_PNG = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9pY9lQAAAABJRU5ErkJggg==",
-  "base64",
-);
 
 export type SeededAdminRegistrationScenario = {
   event: {
@@ -37,6 +32,8 @@ export type SeededAdminRegistrationScenario = {
 
 export async function seedAdminRegistrationScenario(): Promise<SeededAdminRegistrationScenario> {
   const supabase = createE2EAdminClient();
+
+  // Save a snapshot of the current time
   const timestamp = Date.now();
 
   const { data: event, error: eventError } = await supabase
@@ -62,110 +59,67 @@ export async function seedAdminRegistrationScenario(): Promise<SeededAdminRegist
     );
   }
 
-  const { data: eventDay, error: eventDayError } = await supabase
-    .from("EventDay")
-    .insert({
-      eventId: event.eventId,
-      label: "Day 1",
-      eventDate: new Date().toISOString().split("T")[0],
-    })
-    .select("eventDayId, label")
-    .single();
+  // Usually with an event already placed, there should also be event days automatically created
+  // If there is none, fallback to creating the event day manually
+  let eventDay: { eventDayId: string; label: string } | undefined;
 
-  if (eventDayError || !eventDay) {
+  const { data: existingEventDay, error: existingEventDayError } =
+    await supabase
+      .from("EventDay")
+      .select("eventDayId, label")
+      .eq("eventId", event.eventId)
+      .order("eventDate", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+  if (existingEventDayError) {
     throw new Error(
-      `Failed to seed event day: ${eventDayError?.message ?? "unknown"}`,
+      `Failed to seed event day: ${existingEventDayError?.message ?? "unknown"}`,
     );
   }
 
-  const createRegistration = async (
-    paymentProofStatus: "pending" | "rejected" | "accepted",
-    participantCount = 1,
-  ) => {
-    const suffix = `${paymentProofStatus}-${timestamp}`;
-    const affiliation = `${paymentProofStatus} affiliation ${timestamp}`;
-    const { data: registration, error: registrationError } = await supabase
-      .from("Registration")
+  if (existingEventDay) {
+    eventDay = existingEventDay;
+  } else {
+    const { data: newEventDay, error: newEventDayError } = await supabase
+      .from("EventDay")
       .insert({
         eventId: event.eventId,
-        identifier: createRegistrationIdentifier(),
-        businessMemberId: null,
-        nonMemberName: affiliation,
-        paymentMethod: "BPI",
-        paymentProofStatus,
-        registrationDate: new Date().toISOString(),
-        numberOfParticipants: participantCount,
+        label: "Day 1",
+        eventDate: new Date().toISOString().split("T")[0],
       })
-      .select("registrationId, identifier")
+      .select("eventDayId, label")
       .single();
 
-    if (registrationError || !registration) {
+    if (newEventDayError || !newEventDay) {
       throw new Error(
-        `Failed to seed registration: ${registrationError?.message ?? "unknown"}`,
+        `Failed to seed event day: ${newEventDayError?.message ?? "unknown"}`,
       );
     }
 
-    const participantIds: string[] = [];
+    eventDay = newEventDay;
+  }
 
-    for (let index = 0; index < participantCount; index += 1) {
-      const { data: participant, error: participantError } = await supabase
-        .from("Participant")
-        .insert({
-          registrationId: registration.registrationId,
-          firstName: `${paymentProofStatus}-${index + 1}`,
-          lastName: "Tester",
-          email: `${suffix}-${index + 1}@example.com`,
-          contactNumber: "09170000000",
-          isPrincipal: index === 0,
-        })
-        .select("participantId")
-        .single();
+  if (!eventDay) {
+    throw new Error("Failed to seed event day: no event day returned");
+  }
 
-      if (participantError || !participant) {
-        throw new Error(
-          `Failed to seed participant: ${participantError?.message ?? "unknown"}`,
-        );
-      }
-
-      participantIds.push(participant.participantId);
-    }
-
-    if (paymentProofStatus === "pending") {
-      const proofPath = `reg-${crypto.randomUUID()}`;
-      const { error: storageError } = await supabase.storage
-        .from("paymentproofs")
-        .upload(proofPath, ONE_PIXEL_PNG, {
-          contentType: "image/png",
-          upsert: true,
-        });
-
-      if (storageError) {
-        throw new Error(
-          `Failed to upload proof image: ${storageError.message}`,
-        );
-      }
-
-      const { error: proofError } = await supabase.from("ProofImage").insert({
-        registrationId: registration.registrationId,
-        path: proofPath,
-      });
-
-      if (proofError) {
-        throw new Error(`Failed to seed proof image: ${proofError.message}`);
-      }
-    }
-
-    return {
-      registrationId: registration.registrationId,
-      identifier: registration.identifier,
-      affiliation,
-      participantIds,
-    };
-  };
-
-  const pendingRegistration = await createRegistration("pending");
-  const rejectedRegistration = await createRegistration("rejected");
-  const acceptedRegistration = await createRegistration("accepted", 2);
+  const pendingRegistration = await createRegistrationWithParticipants(
+    supabase,
+    { eventId: event.eventId },
+    "pending",
+  );
+  const rejectedRegistration = await createRegistrationWithParticipants(
+    supabase,
+    { eventId: event.eventId },
+    "rejected",
+  );
+  const acceptedRegistration = await createRegistrationWithParticipants(
+    supabase,
+    { eventId: event.eventId },
+    "accepted",
+    2,
+  );
 
   return {
     event,
@@ -197,6 +151,7 @@ export async function cleanupAdminRegistrationScenario(
     data.acceptedRegistration.registrationId,
   ];
 
+  // Cleanup participants first
   const { data: participantRows, error: participantError } = await supabase
     .from("Participant")
     .select("participantId")
@@ -212,6 +167,7 @@ export async function cleanupAdminRegistrationScenario(
     (row) => row.participantId,
   );
 
+  // if there are participants, cleanup check-ins first
   if (participantIds.length > 0) {
     const { error: checkInError } = await supabase
       .from("CheckIn")
@@ -223,6 +179,7 @@ export async function cleanupAdminRegistrationScenario(
     }
   }
 
+  // then cleanup participants after cleaning check-ins
   const { error: participantDeleteError } = await supabase
     .from("Participant")
     .delete()
@@ -234,6 +191,7 @@ export async function cleanupAdminRegistrationScenario(
     );
   }
 
+  // finally, cleanup payment proofs
   const { data: proofRows, error: proofSelectError } = await supabase
     .from("ProofImage")
     .select("path")
@@ -249,6 +207,7 @@ export async function cleanupAdminRegistrationScenario(
     .map((row) => row.path)
     .filter((path): path is string => Boolean(path));
 
+  // if there are proof paths, cleanup storage first
   if (proofPaths.length > 0) {
     const { error: storageCleanupError } = await supabase.storage
       .from("paymentproofs")
@@ -261,6 +220,7 @@ export async function cleanupAdminRegistrationScenario(
     }
   }
 
+  // then cleanup proof images
   const { error: proofDeleteError } = await supabase
     .from("ProofImage")
     .delete()
@@ -272,6 +232,7 @@ export async function cleanupAdminRegistrationScenario(
     );
   }
 
+  // finally, cleanup registrations and event days
   const { error: registrationDeleteError } = await supabase
     .from("Registration")
     .delete()

@@ -48,35 +48,11 @@ async function fillPrimaryParticipant(page: PublicRegistrationWorld["page"]) {
   await page.locator('[id="registrant.contactNumber"]').fill("09170000000");
 }
 
+// Scenario: Open registration from event details
 Given(
   "I am on an event details page",
   async function (this: PublicRegistrationWorld) {
     await this.page.goto(`/events/${this.publicUpcoming.event.eventId}`);
-  },
-);
-
-// Scenario: Open registration from event details
-Given(
-  "I am on the registration form",
-  async function (this: PublicRegistrationWorld) {
-    await this.page.goto(
-      `/registration/${this.publicUpcoming.event.eventId}/info`,
-    );
-    await this.page.getByRole("button", { name: "Begin Registration" }).click();
-  },
-);
-
-Given(
-  "I am on the registration form for a public event",
-  async function (this: PublicRegistrationWorld) {
-    await this.page.goto(`/registration/${this.publicUpcoming.event.eventId}`);
-  },
-);
-
-Given(
-  "I am on the registration form for a private event",
-  async function (this: PublicRegistrationWorld) {
-    await this.page.goto(`/registration/${this.privateUpcoming.event.eventId}`);
   },
 );
 
@@ -87,7 +63,26 @@ When(
   },
 );
 
+Then(
+  "I should be redirected to the registration form",
+  async function (this: PublicRegistrationWorld) {
+    await expect(this.page).toHaveURL(
+      new RegExp(`/registration/${this.publicUpcoming.event.eventId}`),
+    );
+  },
+);
+
 // Scenario: Register as a member
+Given(
+  "I am on the member registration form",
+  async function (this: PublicRegistrationWorld) {
+    await this.page.goto(
+      `/registration/${this.publicUpcoming.event.eventId}/info`,
+    );
+    await this.page.getByRole("button", { name: "Begin Registration" }).click();
+  },
+);
+
 When(
   "I submit a valid member registration",
   async function (this: PublicRegistrationWorld) {
@@ -113,7 +108,28 @@ When(
   },
 );
 
+Then(
+  "I should see the member registration success result",
+  async function (this: PublicRegistrationWorld) {
+    await expect(this.page.getByText("Registration Confirmed")).toBeVisible();
+  },
+);
+
+Then(
+  "I should be redirected back after member registration",
+  async function (this: PublicRegistrationWorld) {
+    await expect(this.page).toHaveURL(/\/registration\/success/);
+  },
+);
+
 // Scenario: Register as a non-member for a public event
+Given(
+  "I am on the registration form for a public event",
+  async function (this: PublicRegistrationWorld) {
+    await this.page.goto(`/registration/${this.publicUpcoming.event.eventId}`);
+  },
+);
+
 When(
   "I submit a valid non-member registration",
   async function (this: PublicRegistrationWorld) {
@@ -141,7 +157,28 @@ When(
   },
 );
 
+Then(
+  "I should see the public non-member registration success result",
+  async function (this: PublicRegistrationWorld) {
+    await expect(this.page.getByText("Registration Confirmed")).toBeVisible();
+  },
+);
+
+Then(
+  "I should be redirected back after public registration",
+  async function (this: PublicRegistrationWorld) {
+    await expect(this.page).toHaveURL(/\/registration\/success/);
+  },
+);
+
 // Scenario: Block non-member registration for a private event
+Given(
+  "I am on the registration form for a private event",
+  async function (this: PublicRegistrationWorld) {
+    await this.page.goto(`/registration/${this.privateUpcoming.event.eventId}`);
+  },
+);
+
 When(
   "I try to continue the registration",
   async function (this: PublicRegistrationWorld) {
@@ -151,7 +188,29 @@ When(
   },
 );
 
+Then(
+  "I should see a message that the event is private",
+  async function (this: PublicRegistrationWorld) {
+    await expect(
+      this.page.getByText("private", { exact: true }).first(),
+    ).toBeVisible();
+    await expect(
+      this.page.getByRole("radio", { name: /Non-member/ }),
+    ).toHaveCount(0);
+  },
+);
+
 // Scenario: Register multiple participants
+Given(
+  "I am on the multi-participant registration form",
+  async function (this: PublicRegistrationWorld) {
+    await this.page.goto(
+      `/registration/${this.publicUpcoming.event.eventId}/info`,
+    );
+    await this.page.getByRole("button", { name: "Begin Registration" }).click();
+  },
+);
+
 When(
   "I submit a registration with multiple participants",
   async function (this: PublicRegistrationWorld) {
@@ -193,25 +252,9 @@ When(
 );
 
 Then(
-  "I should be redirected to the registration form",
-  async function (this: PublicRegistrationWorld) {
-    await expect(this.page).toHaveURL(
-      new RegExp(`/registration/${this.publicUpcoming.event.eventId}`),
-    );
-  },
-);
-
-Then(
-  "I should see a success result",
+  "I should see the multiple participant registration success result",
   async function (this: PublicRegistrationWorld) {
     await expect(this.page.getByText("Registration Confirmed")).toBeVisible();
-  },
-);
-
-Then(
-  "I should be redirected back to the event details page",
-  async function (this: PublicRegistrationWorld) {
-    await expect(this.page).toHaveURL(/\/registration\/success/);
   },
 );
 
@@ -239,17 +282,5 @@ Then(
 
     expect(participantError).toBeNull();
     expect(count).toBe(2);
-  },
-);
-
-Then(
-  "I should see a message that the event is private",
-  async function (this: PublicRegistrationWorld) {
-    await expect(
-      this.page.getByText("private", { exact: true }).first(),
-    ).toBeVisible();
-    await expect(
-      this.page.getByRole("radio", { name: /Non-member/ }),
-    ).toHaveCount(0);
   },
 );
