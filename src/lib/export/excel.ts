@@ -3,6 +3,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import writeXlsxFile from "write-excel-file/browser";
 
+type ExcelCell = string | number | boolean | Date | null | undefined;
+
 export interface ExportToExcelOptions<TData> {
   /**
    * The data to export
@@ -71,74 +73,78 @@ export async function exportToExcel<TData extends Record<string, unknown>>(
   } = options;
 
   try {
-    // Filter out excluded columns and ensure they have accessor keys
-    const exportableColumns = columns.filter((col) => {
-      if (!("accessorKey" in col)) return false;
-      const key = col.accessorKey as string;
-      return !excludeColumns.includes(key);
-    });
+    const exportableColumns = columns.flatMap((col) => {
+      if (!("accessorKey" in col) || col.accessorKey == null) {
+        return [];
+      }
 
-    // Create schema for write-excel-file
-    const schema = exportableColumns.map((col, index) => {
-      const key = (col as { accessorKey: string }).accessorKey as keyof TData;
-      const header =
-        typeof col.header === "string" ? col.header : (key as string);
+      const key = String(col.accessorKey);
+      if (excludeColumns.includes(key)) {
+        return [];
+      }
 
-      return {
-        column: header,
-        width: columnWidths?.[index] ?? 20,
-        type: String,
-        value: (row: TData) => {
-          const value = row[key];
-
-          // Use custom formatter if available
-          const keyString = String(key);
-          if (keyString in formatters) {
-            const formatter = (
-              formatters as Record<
-                string,
-                (value: unknown, row: TData) => string | number
-              >
-            )[keyString];
-            if (formatter) {
-              return String(formatter(value, row));
-            }
-          }
-
-          // Default formatting
-          if (value === null || value === undefined) {
-            return "";
-          }
-
-          // Handle dates
-          if (value instanceof Date) {
-            return value.toLocaleDateString();
-          }
-
-          // Handle date strings (ISO format)
-          if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
-            const date = new Date(value);
-            if (!Number.isNaN(date.getTime())) {
-              return date.toLocaleDateString();
-            }
-          }
-
-          // Return as-is for other types
-          return String(value);
+      return [
+        {
+          key,
+          header: typeof col.header === "string" ? col.header : key,
         },
-      };
+      ];
     });
 
-    // Generate filename
-    const finalFilename =
-      filename ?? `export_${new Date().toISOString().split("T")[0]}.xlsx`;
+    const formattersByKey = formatters as Record<
+      string,
+      (value: unknown, row: TData) => string | number
+    >;
 
-    // Write file
-    await writeXlsxFile(data, {
-      schema,
-      fileName: finalFilename,
+    const getCellValue = (row: TData, key: string): ExcelCell => {
+      const value = row[key as keyof TData];
+
+      const formatter = formattersByKey[key];
+      if (formatter) {
+        return formatter(value, row);
+      }
+
+      if (value === null || value === undefined) {
+        return "";
+      }
+
+      if (value instanceof Date) {
+        return value.toLocaleDateString();
+      }
+
+      if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+        const date = new Date(value);
+        if (!Number.isNaN(date.getTime())) {
+          return date.toLocaleDateString();
+        }
+      }
+
+      return value as ExcelCell;
+    };
+
+    const sheetData: ExcelCell[][] = [
+      exportableColumns.map((column) => column.header),
+      ...data.map((row) =>
+        exportableColumns.map((column) => getCellValue(row, column.key)),
+      ),
+    ];
+
+    const sheetColumns = exportableColumns.map((_, index) => ({
+      width: columnWidths?.[index] ?? 20,
+    }));
+
+    const finalFilename = filename
+      ? filename.endsWith(".xlsx")
+        ? filename
+        : `${filename}.xlsx`
+      : `export_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+    const workbook = writeXlsxFile(sheetData, {
       sheet: sheetName,
+      columns: sheetColumns,
     });
+
+    await workbook.toFile(finalFilename);
   } catch (error) {
     console.error("Failed to export to Excel:", error);
     throw error;
