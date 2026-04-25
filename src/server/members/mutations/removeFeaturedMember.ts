@@ -37,6 +37,7 @@ export async function removeFeaturedMember(
   updateTag(CACHE_TAGS.members.all);
   updateTag(CACHE_TAGS.members.public);
   updateTag(CACHE_TAGS.members.featured);
+  updateTag(CACHE_TAGS.members.admin);
   revalidatePath("/admin/members");
 
   return {
