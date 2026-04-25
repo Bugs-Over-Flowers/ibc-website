@@ -164,6 +164,7 @@ export const StandardRegistrationStep4Schema = z.object({
   termsAndConditions: z.boolean().refine((val) => val, {
     error: "You must agree to the Terms and Conditions.",
   }),
+  note: z.string().optional(),
 });
 
 export type StandardRegistrationStep4Schema = z.infer<
@@ -185,8 +186,6 @@ export const ServerRegistrationSchema = z.object({
   eventId: z.uuid(),
   step1: StandardRegistrationStep1Schema,
   step2: StandardRegistrationStep2Schema,
-  step4: StandardRegistrationStep4Schema,
-  sponsoredRegistrationId: z.uuid().optional().nullable(),
   step3: z.discriminatedUnion("paymentMethod", [
     z.object({
       paymentMethod: z.literal("online"),
@@ -196,6 +195,8 @@ export const ServerRegistrationSchema = z.object({
       paymentMethod: z.literal("onsite"),
     }),
   ]),
+  step4: StandardRegistrationStep4Schema,
+  sponsoredRegistrationId: z.uuid().optional().nullable(),
 });
 
 export type ServerRegistrationSchema = z.infer<typeof ServerRegistrationSchema>;
