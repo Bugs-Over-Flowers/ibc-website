@@ -170,7 +170,8 @@ CREATE TYPE "public"."WebsiteContentSection" AS ENUM (
     'company_thrusts',
     'board_of_trustees',
     'secretariat',
-    'landing_page_benefits'
+    'landing_page_benefits',
+    'hero_section'
 );
 
 
@@ -1515,7 +1516,7 @@ BEGIN
   ELSE
     WITH accepted_checkins AS (
       SELECT
-        ci."date"::date AS day_date,
+        ci."checkInTime"::date AS day_date,
         ci."participantId"
       FROM "CheckIn" ci
       JOIN "Participant" p ON p."participantId" = ci."participantId"
@@ -1679,134 +1680,6 @@ $$;
 ALTER FUNCTION "public"."get_registration_list"("p_event_id" "uuid", "p_search_text" "text", "p_payment_proof_status" "public"."PaymentProofStatus") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."get_registration_list_checkin"("p_identifier" "text", "p_today" "date" DEFAULT CURRENT_DATE) RETURNS "public"."registration_details_result"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-DECLARE
-  v_result registration_details_result;
-BEGIN
-
-  WITH
-  -- registration and event details
-  base_data AS (
-    SELECT
-      r."registrationId",
-      r."nonMemberName",
-      r."businessMemberId",
-      e.*
-    FROM "Registration" r
-    JOIN "Event" e on r."eventId" = e."eventId"
-    WHERE r.identifier = p_identifier
-    LIMIT 1
-  ),
-
-  -- Current Event Day
-  current_event_day AS (
-    SELECT ed.*
-    FROM "EventDay" ed
-    JOIN base_data bd ON ed."eventId" = bd."eventId"
-    -- FOR DEBUGGING COMMENT THIS OUT
-    WHERE ed."eventDate" = p_today
-    limit 1
-  ),
-
-  check_in_list AS (
-    SELECT
-      p.*,
-      ci.remarks,
-      ci.date,
-      -- Check if a CheckIn exists for this participant on the current event day(s)
-      EXISTS (
-        SELECT 1
-        FROM "CheckIn" ci
-        JOIN current_event_day ced ON ci."eventDayId" = ced."eventDayId"
-        WHERE ci."participantId" = p."participantId"
-      ) AS is_checked_in
-    FROM "Participant" p
-    JOIN base_data bd ON p."registrationId" = bd."registrationId"
-    LEFT JOIN "CheckIn" ci on ci."participantId" = p."participantId"
-  )
-
-  select
-    -- Registration details
-    json_build_object(
-      'registrationId', bd."registrationId",
-      'affiliation', COALESCE(bm."businessName", bd."nonMemberName")
-    ),
-    -- Event details except the createdAt and the updatedAt
-    to_jsonb(bd) - 'createdAt' - 'updatedAt' - 'registrationId' - 'nonMemberName' - 'businessMemberId',
-    -- participant list, and check if checkedin today
-    (
-      SELECT json_agg(
-        to_jsonb(cil.*) || jsonb_build_object(
-          'checkedIn', cil.is_checked_in
-        )
-        ORDER BY
-          "lastName" ASC,
-          "firstName" ASC
-      )
-      FROM check_in_list cil
-
-    ),
-    -- event day(s) details today
-    (
-      SELECT COALESCE(jsonb_agg(ced.*), '[]'::jsonb)
-      FROM current_event_day ced
-    ),
-    (
-      -- Check if every participant has a check-in for today
-      SELECT COALESCE(BOOL_AND(cil.is_checked_in), FALSE)
-      FROM check_in_list cil
-    ),
-    (
-      -- Check if today is within the event date range
-      (p_today >= bd."eventStartDate" AND p_today <= bd."eventEndDate")
-    )
-  INTO
-    v_result.registration_details,
-    v_result.event_details,
-    v_result.check_in_list,
-    v_result.event_days,
-    v_result.all_is_checked_in,
-    v_result.is_event_day
-
-  FROM base_data bd
-  LEFT JOIN "BusinessMember" bm ON bd."businessMemberId" = bm."businessMemberId";
-
-  -- Check if registration exists
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Registration Not Found';
-  END IF;
-
-  -- Validate Affiliation
-  IF v_result.registration_details->>'affiliation' IS NULL THEN
-    RAISE EXCEPTION 'Affiliation not found';
-  END IF;
-
-  -- Validate that we have required data
-  IF v_result.event_details IS NULL THEN
-    RAISE EXCEPTION 'Event details not found';
-  END IF;
-
-  -- Validate if not event dat
-  -- IF NOT v_result.is_event_day THEN
-  --   RAISE EXCEPTION 'Today is not within the event date range for event: %', v_result.event_details->>'eventTitle';
-  -- END IF;
-
-  -- Validate if Event Day Exists
-  IF v_result.event_days = '[]'::jsonb THEN
-    RAISE EXCEPTION 'Event days not found for today';
-  END IF;
-
-  RETURN v_result;
-
-END;
-$$;
-
-
-ALTER FUNCTION "public"."get_registration_list_checkin"("p_identifier" "text", "p_today" "date") OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") RETURNS "public"."registration_stats"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     AS $$
@@ -1907,31 +1780,6 @@ $$;
 
 
 ALTER FUNCTION "public"."get_sponsored_registration_by_id"("registration_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "text") RETURNS TABLE("sponsoredRegistrationId" "uuid", "uuid" "text", "eventId" "uuid", "sponsoredBy" "text", "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, "status" "public"."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
-    LANGUAGE "plpgsql" STABLE
-    AS $$
-BEGIN
-  RETURN QUERY
-  SELECT
-    sr."sponsoredRegistrationId",
-    sr."uuid",
-    sr."eventId",
-    sr."sponsoredBy",
-    sr."feeDeduction",
-    sr."maxSponsoredGuests",
-    sr."usedCount",
-    sr."status",
-    sr."createdAt",
-    sr."updatedAt"
-  FROM public."SponsoredRegistration" sr
-  WHERE sr."uuid" = p_uuid;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "text") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_sponsored_registration_by_uuid"("p_uuid" "uuid") RETURNS TABLE("sponsoredRegistrationId" "uuid", "uuid" "uuid", "eventId" "uuid", "sponsoredBy" "text", "feeDeduction" numeric, "maxSponsoredGuests" bigint, "usedCount" bigint, "status" "public"."SponsoredRegistrationStatus", "createdAt" timestamp with time zone, "updatedAt" timestamp with time zone)
@@ -2054,6 +1902,21 @@ $$;
 
 
 ALTER FUNCTION "public"."handle_event_days"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."is_admin_user"() RETURNS boolean
+    LANGUAGE "sql" STABLE
+    AS $$
+  select coalesce(
+    auth.jwt() ->> 'role' = 'admin'
+    or auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+    or auth.jwt() -> 'user_metadata' ->> 'role' = 'admin',
+    false
+  );
+$$;
+
+
+ALTER FUNCTION "public"."is_admin_user"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."january_first_reset"() RETURNS "void"
@@ -2374,7 +2237,7 @@ $$;
 ALTER FUNCTION "public"."submit_evaluation_form"("p_event_id" "uuid", "p_name" "text", "p_q1_rating" "public"."ratingScale", "p_q2_rating" "public"."ratingScale", "p_q3_rating" "public"."ratingScale", "p_q4_rating" "public"."ratingScale", "p_q5_rating" "public"."ratingScale", "p_q6_rating" "public"."ratingScale", "p_additional_comments" "text", "p_feedback" "text") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid" DEFAULT NULL::"uuid", "p_non_member_name" "text" DEFAULT NULL::"text", "p_payment_method" "text" DEFAULT 'onsite'::"text", "p_payment_path" "text" DEFAULT NULL::"text", "p_registrant" "jsonb" DEFAULT '{}'::"jsonb", "p_other_participants" "jsonb" DEFAULT '[]'::"jsonb", "p_sponsored_registration_id" "uuid" DEFAULT NULL::"uuid") RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid" DEFAULT NULL::"uuid", "p_non_member_name" "text" DEFAULT NULL::"text", "p_payment_method" "text" DEFAULT 'onsite'::"text", "p_payment_path" "text" DEFAULT NULL::"text", "p_registrant" "jsonb" DEFAULT '{}'::"jsonb", "p_note" "text" DEFAULT NULL::"text", "p_other_participants" "jsonb" DEFAULT '[]'::"jsonb") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
 DECLARE
@@ -2403,100 +2266,7 @@ BEGIN
     "businessMemberId",
     "nonMemberName",
     "identifier",
-    "registrationDate",
-    "sponsoredRegistrationId"
-  ) VALUES (
-    p_event_id,
-    v_payment_method_enum,
-    v_payment_proof_status,
-    CASE WHEN p_member_type = 'member' THEN p_business_member_id ELSE NULL END,
-    CASE WHEN p_member_type = 'nonmember' THEN p_non_member_name ELSE NULL END,
-    p_identifier,
-    NOW(),
-    p_sponsored_registration_id
-  )
-  RETURNING "registrationId" INTO v_registration_id;
-
-  IF p_payment_method = 'online' THEN
-    INSERT INTO "ProofImage" (path, "registrationId")
-    VALUES (p_payment_path, v_registration_id);
-  END IF;
-
-  INSERT INTO "Participant" (
-    "registrationId",
-    "isPrincipal",
-    "firstName",
-    "lastName",
-    "contactNumber",
-    email
-  ) VALUES (
-    v_registration_id,
-    TRUE,
-    p_registrant->>'firstName',
-    p_registrant->>'lastName',
-    p_registrant->>'contactNumber',
-    p_registrant->>'email'
-  );
-
-  IF jsonb_array_length(p_other_participants) > 0 THEN
-    INSERT INTO "Participant" (
-      "registrationId",
-      "isPrincipal",
-      "firstName",
-      "lastName",
-      "contactNumber",
-      email
-    )
-    SELECT
-      v_registration_id,
-      FALSE,
-      registrant->>'firstName',
-      registrant->>'lastName',
-      registrant->>'contactNumber',
-      registrant->>'email'
-    FROM jsonb_array_elements(p_other_participants) AS registrant;
-  END IF;
-
-  RETURN jsonb_build_object(
-    'registrationId', v_registration_id,
-    'message', 'Registration created successfully'
-  );
-END;
-$$;
-
-
-ALTER FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid" DEFAULT NULL::"uuid", "p_non_member_name" "text" DEFAULT NULL::"text", "p_payment_method" "text" DEFAULT 'onsite'::"text", "p_payment_path" "text" DEFAULT NULL::"text", "p_registrant" "jsonb" DEFAULT '{}'::"jsonb", "p_other_participants" "jsonb" DEFAULT '[]'::"jsonb") RETURNS "jsonb"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-DECLARE
-  v_registration_id UUID;
-  v_payment_proof_status "PaymentProofStatus";
-  v_payment_method_enum "PaymentMethod";
-BEGIN
-  v_payment_method_enum := (
-    CASE
-      WHEN p_payment_method = 'online' THEN 'BPI'
-      ELSE 'ONSITE'
-    END
-  )::"PaymentMethod";
-
-  v_payment_proof_status := (
-    CASE
-      WHEN p_payment_method = 'online' THEN 'pending'
-      ELSE 'accepted'
-    END
-  )::"PaymentProofStatus";
-
-  INSERT INTO "Registration" (
-    "eventId",
-    "paymentMethod",
-    "paymentProofStatus",
-    "businessMemberId",
-    "nonMemberName",
-    "identifier",
+    "note",
     "registrationDate"
   ) VALUES (
     p_event_id,
@@ -2505,6 +2275,7 @@ BEGIN
     CASE WHEN p_member_type = 'member' THEN p_business_member_id ELSE NULL END,
     CASE WHEN p_member_type = 'nonmember' THEN p_non_member_name ELSE NULL END,
     p_identifier,
+    p_note,
     NOW()
   )
   RETURNING "registrationId" INTO v_registration_id;
@@ -2553,15 +2324,22 @@ BEGIN
     'registrationId', v_registration_id,
     'message', 'Registration created successfully'
   );
+
+
+EXCEPTION
+  WHEN OTHERS THEN
+    -- If anything fails, the transaction auto-rolls back
+    RAISE EXCEPTION 'Registration failed: %', SQLERRM;
 END;
 $$;
 
 
-ALTER FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb") OWNER TO "postgres";
+ALTER FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text" DEFAULT NULL::"text") RETURNS "jsonb"
-    LANGUAGE "plpgsql"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_application_id uuid;
@@ -2969,9 +2747,9 @@ CREATE OR REPLACE FUNCTION "public"."update_event_published_at"() RETURNS "trigg
     AS $$
 BEGIN
     IF new."eventType" IS NULL then
-        new."publishedAt" = now();
-    else
         new."publishedAt" = null;
+    else
+        new."publishedAt" = now();
     end if;
 
     return NEW;
@@ -3230,10 +3008,10 @@ COMMENT ON FUNCTION "public"."update_sponsored_registration_used_count_from_regi
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
+begin
+  new.updated_at = now();
+  return new;
+end;
 $$;
 
 
@@ -3272,71 +3050,6 @@ CREATE TABLE IF NOT EXISTS "public"."WebsiteContent" (
 
 
 ALTER TABLE "public"."WebsiteContent" OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text" DEFAULT NULL::"text", "p_icon" "text" DEFAULT NULL::"text", "p_image_url" "text" DEFAULT NULL::"text", "p_card_placement" integer DEFAULT NULL::integer, "p_is_active" boolean DEFAULT true) RETURNS "public"."WebsiteContent"
-    LANGUAGE "plpgsql"
-    AS $$
-DECLARE
-  v_card_placement integer;
-  v_row "public"."WebsiteContent";
-BEGIN
-  IF p_card_placement IS NULL
-    AND p_section IN (
-      'goals',
-      'company_thrusts',
-      'board_of_trustees',
-      'secretariat',
-      'landing_page_benefits'
-    ) THEN
-    PERFORM pg_advisory_xact_lock(
-      hashtextextended(p_section::text || ':' || p_text_type::text, 0)
-    );
-
-    SELECT COALESCE(MAX(wc."cardPlacement"), 0) + 1
-    INTO v_card_placement
-    FROM "public"."WebsiteContent" wc
-    WHERE wc."section" = p_section
-      AND wc."textType" = p_text_type;
-  ELSE
-    v_card_placement := p_card_placement;
-  END IF;
-
-  INSERT INTO "public"."WebsiteContent" (
-    "section",
-    "entryKey",
-    "textType",
-    "textValue",
-    "icon",
-    "imageUrl",
-    "cardPlacement",
-    "isActive"
-  ) VALUES (
-    p_section,
-    p_entry_key,
-    p_text_type,
-    p_text_value,
-    p_icon,
-    p_image_url,
-    v_card_placement,
-    p_is_active
-  )
-  ON CONFLICT ("section", "entryKey", "textType") DO UPDATE
-  SET
-    "textValue" = EXCLUDED."textValue",
-    "icon" = EXCLUDED."icon",
-    "imageUrl" = EXCLUDED."imageUrl",
-    "cardPlacement" = EXCLUDED."cardPlacement",
-    "isActive" = EXCLUDED."isActive"
-  RETURNING *
-  INTO v_row;
-
-  RETURN v_row;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text", "p_icon" "text", "p_image_url" "text", "p_card_placement" integer, "p_is_active" boolean) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text" DEFAULT NULL::"text", "p_icon" "text" DEFAULT NULL::"text", "p_image_url" "text" DEFAULT NULL::"text", "p_group" "text" DEFAULT NULL::"text", "p_card_placement" integer DEFAULT NULL::integer, "p_is_active" boolean DEFAULT true) RETURNS "public"."WebsiteContent"
@@ -3552,6 +3265,22 @@ CREATE TABLE IF NOT EXISTS "public"."Interview" (
 ALTER TABLE "public"."Interview" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."Networks" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "organization" "text" NOT NULL,
+    "about" "text" NOT NULL,
+    "location_type" "text" NOT NULL,
+    "representative_name" "text" NOT NULL,
+    "representative_position" "text" NOT NULL,
+    "logo_url" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."Networks" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."Participant" (
     "participantId" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "registrationId" "uuid" NOT NULL,
@@ -3587,7 +3316,8 @@ CREATE TABLE IF NOT EXISTS "public"."Registration" (
     "identifier" "text" NOT NULL,
     "numberOfParticipants" bigint,
     "sponsoredRegistrationId" "uuid",
-    "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL
+    "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL,
+    "note" "text"
 );
 
 
@@ -3723,6 +3453,11 @@ ALTER TABLE ONLY "public"."EvaluationForm"
 
 
 
+ALTER TABLE ONLY "public"."Networks"
+    ADD CONSTRAINT "networks_pkey" PRIMARY KEY ("id");
+
+
+
 CREATE INDEX "BusinessMember_primaryApplicationId_idx" ON "public"."BusinessMember" USING "btree" ("primaryApplicationId");
 
 
@@ -3768,6 +3503,10 @@ CREATE OR REPLACE TRIGGER "on_event_publish" AFTER INSERT OR UPDATE ON "public".
 
 
 CREATE OR REPLACE TRIGGER "set_member_identifier" BEFORE INSERT ON "public"."BusinessMember" FOR EACH ROW EXECUTE FUNCTION "public"."generate_member_identifier"();
+
+
+
+CREATE OR REPLACE TRIGGER "set_networks_updated_at" BEFORE UPDATE ON "public"."Networks" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
 
@@ -3933,6 +3672,18 @@ ALTER TABLE "public"."Application" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."ApplicationMember" ENABLE ROW LEVEL SECURITY;
 
 
+CREATE POLICY "Authenticated delete Networks" ON "public"."Networks" FOR DELETE TO "authenticated" USING (true);
+
+
+
+CREATE POLICY "Authenticated insert Networks" ON "public"."Networks" FOR INSERT TO "authenticated" WITH CHECK (true);
+
+
+
+CREATE POLICY "Authenticated update Networks" ON "public"."Networks" FOR UPDATE TO "authenticated" USING (true) WITH CHECK (true);
+
+
+
 ALTER TABLE "public"."BusinessMember" ENABLE ROW LEVEL SECURITY;
 
 
@@ -4057,10 +3808,17 @@ ALTER TABLE "public"."EventDay" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."Interview" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."Networks" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."Participant" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."ProofImage" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "Public read Networks" ON "public"."Networks" FOR SELECT USING (true);
+
 
 
 ALTER TABLE "public"."Registration" ENABLE ROW LEVEL SECURITY;
@@ -4511,12 +4269,6 @@ GRANT ALL ON FUNCTION "public"."get_registration_list"("p_event_id" "uuid", "p_s
 
 
 
-GRANT ALL ON FUNCTION "public"."get_registration_list_checkin"("p_identifier" "text", "p_today" "date") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_registration_list_checkin"("p_identifier" "text", "p_today" "date") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_registration_list_checkin"("p_identifier" "text", "p_today" "date") TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") TO "service_role";
@@ -4565,6 +4317,12 @@ GRANT ALL ON FUNCTION "public"."handle_event_days"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."is_admin_user"() TO "anon";
+GRANT ALL ON FUNCTION "public"."is_admin_user"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."is_admin_user"() TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."january_first_reset"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."january_first_reset"() TO "anon";
 GRANT ALL ON FUNCTION "public"."january_first_reset"() TO "authenticated";
@@ -4609,15 +4367,9 @@ GRANT ALL ON FUNCTION "public"."submit_evaluation_form"("p_event_id" "uuid", "p_
 
 
 
-GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb") TO "anon";
-GRANT ALL ON FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."submit_event_registration_standard"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_other_participants" "jsonb") TO "service_role";
+GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb") TO "anon";
+GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb") TO "service_role";
 
 
 
@@ -4699,13 +4451,6 @@ GRANT ALL ON TABLE "public"."WebsiteContent" TO "service_role";
 
 
 
-REVOKE ALL ON FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text", "p_icon" "text", "p_image_url" "text", "p_card_placement" integer, "p_is_active" boolean) FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text", "p_icon" "text", "p_image_url" "text", "p_card_placement" integer, "p_is_active" boolean) TO "anon";
-GRANT ALL ON FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text", "p_icon" "text", "p_image_url" "text", "p_card_placement" integer, "p_is_active" boolean) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text", "p_icon" "text", "p_image_url" "text", "p_card_placement" integer, "p_is_active" boolean) TO "service_role";
-
-
-
 REVOKE ALL ON FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text", "p_icon" "text", "p_image_url" "text", "p_group" "text", "p_card_placement" integer, "p_is_active" boolean) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text", "p_icon" "text", "p_image_url" "text", "p_group" "text", "p_card_placement" integer, "p_is_active" boolean) TO "anon";
 GRANT ALL ON FUNCTION "public"."upsert_website_content"("p_section" "public"."WebsiteContentSection", "p_entry_key" "text", "p_text_type" "public"."WebsiteContentTextType", "p_text_value" "text", "p_icon" "text", "p_image_url" "text", "p_group" "text", "p_card_placement" integer, "p_is_active" boolean) TO "authenticated";
@@ -4782,6 +4527,12 @@ GRANT ALL ON TABLE "public"."Interview" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."Networks" TO "anon";
+GRANT ALL ON TABLE "public"."Networks" TO "authenticated";
+GRANT ALL ON TABLE "public"."Networks" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."Participant" TO "anon";
 GRANT ALL ON TABLE "public"."Participant" TO "authenticated";
 GRANT ALL ON TABLE "public"."Participant" TO "service_role";
@@ -4842,3 +4593,34 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
