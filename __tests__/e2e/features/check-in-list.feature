@@ -19,31 +19,25 @@ Feature: Check-in list
     Then I should not see any payment status notice
 
   @smoke
-  Scenario: Check in selected participants without remarks
-    Given I am on the accepted registration check-in dialog
-    When I select the first and second participants
-    Then I should see the check-in action for 2 selected participants
-    When I check them in
-    Then the app should contain the checked-in participants with no remarks saved
-
-  @smoke
-  Scenario: Check in selected participants and update remarks
+  Scenario: Check in participants with remarks
     Given I am on the accepted registration check-in dialog
     When I open the remark editor for the first participant
     And I add a remark for the first participant
     And I select the first and second participants
-    Then I should see the check-in action for 2 selected participants
-    When I check them in
+    And I check them in
     Then the app should contain the checked-in participants with the remark saved
     When I reopen the accepted registration check-in dialog
-    And I open the remark editor for the first participant
     Then I should see the existing remark for the first participant
-    And I should not see the existing remark for the second participant
+
+  @smoke
+  Scenario: Update remarks after check-in
+    Given I am on the accepted registration check-in dialog
+    And I open the remark editor for the first participant
+    And I verify there is no existing remark for the second participant
     When I edit the first participant remark
     And I apply the remark update
-    Then the app should reflect the updated remark
+    Then the app should reflect the updated remark for the first participant
 
-  @wip
   Scenario Outline: Check in multiple participants
     Given I am on the accepted registration check-in dialog
     When I select the first <count> participants

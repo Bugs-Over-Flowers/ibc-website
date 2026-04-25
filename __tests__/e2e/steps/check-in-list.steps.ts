@@ -29,10 +29,6 @@ Given("I am on the seeded check-in page", async ({ page, scenario }) => {
   await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
 });
 
-Given("I am on the check-in page", async ({ page, scenario }) => {
-  await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
-});
-
 Given(
   "I am an admin on the check-in page for an event day",
   async ({ page, scenario }) => {
@@ -40,7 +36,7 @@ Given(
   },
 );
 
-Then("I should see the event day details", async ({ page }) => {
+Then("I should see the event day details card", async ({ page }) => {
   await expect(
     page
       .getByText("Event details for this check-in session", { exact: true })
@@ -167,12 +163,19 @@ Then("I should not see any payment status notice", async ({ page }) => {
 });
 
 // Scenario: Check in selected participants and update remarks
-When("I open the remark editor for the first participant", async ({ page }) => {
-  await page
-    .getByRole("button", { name: /^(Add|Edit)$/ })
-    .first()
-    .click();
-});
+When(
+  /I open the remark editor for the (first|second) participant/,
+  async ({ page }, nth: "first" | "second") => {
+    // for the second participant, cancel the dialog first
+    if (nth === "second") {
+      await page.getByRole("button", { name: "Cancel" }).click();
+    }
+    await page
+      .getByRole("button", { name: /^(Add|Edit)$/ })
+      .nth(nth === "first" ? 0 : 1)
+      .click();
+  },
+);
 
 When("I add a remark for the first participant", async ({ page }) => {
   const remarkField = page.locator("#remark");
@@ -187,7 +190,7 @@ When("I add a remark for the first participant", async ({ page }) => {
   await page.waitForTimeout(500);
 });
 
-When("I select the first and second participants", async ({ page }) => {
+Then("I select the first and second participants", async ({ page }) => {
   const checkboxes = page.getByRole("checkbox");
   await checkboxes.nth(1).click();
   await checkboxes.nth(2).click();
@@ -199,7 +202,7 @@ When("I check them in", async ({ page }) => {
 });
 
 Then(
-  "the database should contain the checked-in participants with the remark saved",
+  "the app should contain the checked-in participants with the remark saved",
   async ({ page }) => {
     await expect(page.getByRole("button", { name: /Processing/ })).toHaveCount(
       0,
@@ -214,7 +217,7 @@ Then(
   },
 );
 
-Given(
+When(
   "I reopen the accepted registration check-in dialog",
   async ({ page, scenario }) => {
     await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
@@ -228,14 +231,21 @@ Given(
   },
 );
 
+Then(
+  "I should see the existing remark for the first participant",
+  async ({ page }) => {
+    await expect(page.getByText("Front row")).toBeVisible();
+  },
+);
+
 When("I edit the first participant remark", async ({ page }) => {
-  await page
-    .getByPlaceholder("Enter remarks here...")
-    .fill("Updated front row");
+  const remarkField = page.locator("#remark");
+  await remarkField.fill("Updated Front row");
+  await remarkField.blur();
+  await page.getByRole("button", { name: "Save" }).click();
 });
 
 When("I apply the remark update", async ({ page }) => {
-  await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByPlaceholder("Enter remarks here...")).toHaveCount(0);
   await page.getByRole("button", { name: "Update remarks" }).click();
   await expect(page.getByRole("button", { name: /Processing/ })).toHaveCount(0);
@@ -260,19 +270,6 @@ Then(
   },
 );
 
-Then(
-  "the app should contain the checked-in participants with the remark saved",
-  async ({ page }) => {
-    await expect(page.getByRole("button", { name: /Processing/ })).toHaveCount(
-      0,
-    );
-    await page.waitForTimeout(2000);
-    await expect(
-      page.getByRole("button", { name: "Edit" }).first(),
-    ).toBeVisible();
-  },
-);
-
 Then("the app should reflect the updated remark", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Edit" }).first(),
@@ -280,35 +277,50 @@ Then("the app should reflect the updated remark", async ({ page }) => {
 });
 
 Then(
-  "I should see the existing remark for the first participant",
-  async ({ page }) => {
-    await expect(page.getByText("Front row")).toBeVisible();
+  "the app should reflect the updated remark for the first participant",
+  async ({ page, scenario }) => {
+    // renavigate to the same page to simulate a reload
+    await page.goto(page.url());
+    await page.waitForLoadState("networkidle");
+
+    // open the check in modal
+    await page
+      .getByRole("row")
+      .filter({ hasText: scenario.acceptedRegistration.affiliation })
+      .getByRole("button", { name: "Check in" })
+      .click();
+
+    // open the remark modal for the first participant
+    await page
+      .getByRole("button", { name: /^(Add|Edit)$/ })
+      .nth(0)
+      .click();
+
+    // verify the updated remark is reflected
+    const remarksCells = page
+      .locator("td")
+      .filter({ hasText: "Updated Front row" });
+    await expect(remarksCells).toHaveCount(1);
   },
 );
 
 Then(
   "I should not see the existing remark for the second participant",
   async ({ page }) => {
-    const remarksCells = page.locator("td").filter({ hasText: "Front row" });
+    const remarksCells = page
+      .locator("#remark")
+      .filter({ hasText: "Front row" });
     await expect(remarksCells).toHaveCount(0);
+    await page.getByRole("button", { name: "Cancel" }).click();
   },
 );
 
-Then("I should see the event day details card", async ({ page }) => {
-  await expect(
-    page.getByText("Event details for this check-in session"),
-  ).toBeVisible();
-});
-
-// ============================================
-// WIP: SCENARIO OUTLINES - MULTIPLE PARTICIPANT CHECK-IN
-// ============================================
-
+// Scenario: Check in multiple participants
 When(
   "I select the first {int} participants",
   async ({ page }, count: number) => {
     const checkboxes = page.getByRole("checkbox");
-    for (let i = 1; i <= count; i++) {
+    for (let i = 0; i < count; i++) {
       await checkboxes.nth(i).click({ timeout: 10000 });
     }
   },
