@@ -4,7 +4,8 @@ export type WebsiteContentSection =
   | "company_thrusts"
   | "board_of_trustees"
   | "secretariat"
-  | "landing_page_benefits";
+  | "landing_page_benefits"
+  | "hero_section";
 
 export interface WebsiteContentFormState {
   title: string;

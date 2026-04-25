@@ -4,6 +4,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import {
   Building2,
   Compass,
+  Images,
   Landmark,
   Sparkles,
   Target,
@@ -17,6 +18,7 @@ import { useWebsiteContentEditor } from "../_hooks/useWebsiteContentEditor";
 import { BoardOfTrusteesSection } from "./sections/BoardOfTrusteesSection";
 import { CompanyThrustsSection } from "./sections/CompanyThrustsSection";
 import { GoalsSection } from "./sections/GoalsSection";
+import { HeroSectionCarouselSection } from "./sections/HeroSectionCarouselSection";
 import { LandingBenefitsSection } from "./sections/LandingBenefitsSection";
 import { SecretariatSection } from "./sections/SecretariatSection";
 import { VisionMissionSection } from "./sections/VisionMissionSection";
@@ -27,7 +29,8 @@ type SectionKey =
   | "company_thrusts"
   | "board_of_trustees"
   | "secretariat"
-  | "landing_page_benefits";
+  | "landing_page_benefits"
+  | "hero_section";
 
 const sectionCards = [
   {
@@ -83,6 +86,16 @@ const sectionCards = [
     iconClass: "bg-indigo-50 text-indigo-600",
     icon: Sparkles,
     fields: "3 fields",
+  },
+  {
+    key: "hero_section" as const,
+    title: "Hero Section Carousel",
+    description:
+      "Manage 5 background carousel images each for About, Events, Members, Networks, and Contact pages.",
+    accentClass: "bg-violet-500",
+    iconClass: "bg-violet-50 text-violet-600",
+    icon: Images,
+    fields: "25 image slots",
   },
 ];
 
@@ -186,6 +199,15 @@ export function WebsiteContentManagementPage() {
             onAddCard={() => addCard()}
             onCardFieldChange={setCardField}
             placeholders={placeholders}
+          />
+        );
+
+      case "hero_section":
+        return (
+          <HeroSectionCarouselSection
+            cards={cards}
+            onCardFieldChange={setCardField}
+            onCardsReorder={replaceCards}
           />
         );
 
