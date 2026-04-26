@@ -11,7 +11,7 @@ Feature: Check-in list
     And I should see payment status badges for pending, rejected, and accepted registrations
 
   Scenario: Show payment proof status displays
-    Given I am on the pending registration check-in dialog
+    Given I open the pending registration check-in dialog
     Then I should see the pending payment notice
     When I open the rejected registration check-in dialog
     Then I should see the rejected payment notice
@@ -32,9 +32,13 @@ Feature: Check-in list
   @smoke
   Scenario: Update remarks after check-in
     Given I am on the accepted registration check-in dialog
+    When I select the first and second participants
+    And I check them in
+    Then the app should contain the checked-in participants with the remark saved
+    When I reopen the accepted registration check-in dialog
     And I open the remark editor for the first participant
-    And I verify there is no existing remark for the second participant
-    When I edit the first participant remark
+    And I verify the second participant has no remark
+    And I edit the first participant remark
     And I apply the remark update
     Then the app should reflect the updated remark for the first participant
 

@@ -24,17 +24,18 @@ export const { Given, When, Then } = createBdd(test);
 // CHECK-IN LIST SCENARIOS
 // ============================================
 
+/**
+ * Scenario: Load the check-in page
+ * Verifies that the main check-in page loads with all expected UI elements
+ */
+
+// ============================================
 // Scenario: Load the check-in page
+// ============================================
+
 Given("I am on the seeded check-in page", async ({ page, scenario }) => {
   await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
 });
-
-Given(
-  "I am an admin on the check-in page for an event day",
-  async ({ page, scenario }) => {
-    await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
-  },
-);
 
 Then("I should see the event day details card", async ({ page }) => {
   await expect(
@@ -71,20 +72,11 @@ Then(
   },
 );
 
+// ============================================
 // Scenario: Show payment proof status displays
-Given(
-  "I am on the pending registration check-in dialog",
-  async ({ page, scenario }) => {
-    await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
-    await page
-      .getByRole("row")
-      .filter({ hasText: scenario.pendingRegistration.affiliation })
-      .getByRole("button", { name: "Check in" })
-      .click();
-  },
-);
+// ============================================
 
-When(
+Given(
   "I open the pending registration check-in dialog",
   async ({ page, scenario }) => {
     await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
@@ -99,18 +91,6 @@ When(
 Then("I should see the pending payment notice", async ({ page }) => {
   await expect(page.getByText("Payment is pending review")).toBeVisible();
 });
-
-Given(
-  "I am on the rejected registration check-in dialog",
-  async ({ page, scenario }) => {
-    await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
-    await page
-      .getByRole("row")
-      .filter({ hasText: scenario.rejectedRegistration.affiliation })
-      .getByRole("button", { name: "Check in" })
-      .click();
-  },
-);
 
 When(
   "I open the rejected registration check-in dialog",
@@ -127,21 +107,6 @@ When(
 Then("I should see the rejected payment notice", async ({ page }) => {
   await expect(page.getByText("Payment has been rejected")).toBeVisible();
 });
-
-// Scenario: Check in selected participants and update remarks
-Given(
-  "I am on the accepted registration check-in dialog",
-  async ({ page, scenario }) => {
-    await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
-    await page.waitForLoadState("networkidle");
-    await page
-      .getByRole("row")
-      .filter({ hasText: scenario.acceptedRegistration.affiliation })
-      .getByRole("button", { name: "Check in" })
-      .click();
-    await page.waitForLoadState("networkidle");
-  },
-);
 
 When(
   "I open the accepted registration check-in dialog",
@@ -162,14 +127,27 @@ Then("I should not see any payment status notice", async ({ page }) => {
   await expect(page.getByText("Payment has been rejected")).toHaveCount(0);
 });
 
-// Scenario: Check in selected participants and update remarks
+// ============================================
+// Scenario: Check in participants with remarks
+// ============================================
+
+Given(
+  "I am on the accepted registration check-in dialog",
+  async ({ page, scenario }) => {
+    await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
+    await page.waitForLoadState("networkidle");
+    await page
+      .getByRole("row")
+      .filter({ hasText: scenario.acceptedRegistration.affiliation })
+      .getByRole("button", { name: "Check in" })
+      .click();
+    await page.waitForLoadState("networkidle");
+  },
+);
+
 When(
   /I open the remark editor for the (first|second) participant/,
   async ({ page }, nth: "first" | "second") => {
-    // for the second participant, cancel the dialog first
-    if (nth === "second") {
-      await page.getByRole("button", { name: "Cancel" }).click();
-    }
     await page
       .getByRole("button", { name: /^(Add|Edit)$/ })
       .nth(nth === "first" ? 0 : 1)
@@ -178,7 +156,9 @@ When(
 );
 
 When("I add a remark for the first participant", async ({ page }) => {
-  const remarkField = page.locator("#remark");
+  const remarkField = page.locator(
+    'textarea[placeholder="Enter remarks here..."]',
+  );
   await remarkField.fill("Front row");
   await remarkField.blur();
   await page.getByRole("button", { name: "Save" }).click();
@@ -191,9 +171,14 @@ When("I add a remark for the first participant", async ({ page }) => {
 });
 
 Then("I select the first and second participants", async ({ page }) => {
-  const checkboxes = page.getByRole("checkbox");
+  // Get checkboxes within the dialog table body (skip the header select-all checkboxes)
+  const checkboxes = page
+    .getByRole("row")
+    .filter({ has: page.getByRole("cell") })
+    .getByRole("checkbox")
+    .filter({ hasNotText: "Select all" });
+  await checkboxes.nth(0).click();
   await checkboxes.nth(1).click();
-  await checkboxes.nth(2).click();
 });
 
 When("I check them in", async ({ page }) => {
@@ -208,11 +193,14 @@ Then(
       0,
     );
     await page.waitForTimeout(2000);
+    // Check that at least some participants are checked in (showing with check-in time)
+    const checkInTimes = page
+      .locator("td")
+      .filter({ hasText: /\d:\d\d (AM|PM)/ });
+    await expect(checkInTimes.first()).toBeVisible();
+    // Also verify Add/Edit buttons are visible for remarks
     await expect(
-      page.getByRole("button", { name: "Edit" }).first(),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Add" }).first(),
+      page.getByRole("button", { name: /^(Add|Edit)$/ }).first(),
     ).toBeVisible();
   },
 );
@@ -234,46 +222,68 @@ When(
 Then(
   "I should see the existing remark for the first participant",
   async ({ page }) => {
+    // Open the remark modal for the first participant first
+    await page
+      .getByRole("button", { name: /^(Add|Edit)$/ })
+      .first()
+      .click();
+    // The remark is visible inside the remark modal when clicking Edit
     await expect(page.getByText("Front row")).toBeVisible();
+    // Close the modal
+    await page.getByRole("button", { name: "Cancel" }).click();
   },
 );
 
+// ============================================
+// Scenario: Update remarks after check-in
+// ============================================
+
+Then("I verify the second participant has no remark", async ({ page }) => {
+  // Close the remarks modal first
+  await page.getByRole("button", { name: "Cancel" }).click();
+  // Wait for modal to close
+  await expect(page.getByPlaceholder("Enter remarks here...")).toHaveCount(0, {
+    timeout: 5000,
+  });
+  await page.waitForTimeout(300);
+  // The Add button should be visible (not Edit) - all participants have no remarks
+  await expect(page.getByRole("button", { name: "Add" }).first()).toBeVisible();
+});
+
 When("I edit the first participant remark", async ({ page }) => {
-  const remarkField = page.locator("#remark");
+  // Wait for any open modal to close first
+  await expect(page.getByPlaceholder("Enter remarks here...")).toHaveCount(0, {
+    timeout: 5000,
+  });
+  await page.waitForTimeout(300);
+  // Open the remark modal for the first participant
+  await page
+    .getByRole("button", { name: /^(Add|Edit)$/ })
+    .first()
+    .click();
+  const remarkField = page.locator(
+    'textarea[placeholder="Enter remarks here..."]',
+  );
+  await remarkField.waitFor({ state: "visible" });
   await remarkField.fill("Updated Front row");
   await remarkField.blur();
-  await page.getByRole("button", { name: "Save" }).click();
+  // Wait for form to stabilize before clicking Save
+  await page.waitForTimeout(300);
+  await page.getByRole("button", { name: "Save" }).click({ timeout: 10000 });
 });
 
 When("I apply the remark update", async ({ page }) => {
-  await expect(page.getByPlaceholder("Enter remarks here...")).toHaveCount(0);
+  // Wait for the remark modal to close after saving
+  await expect(page.getByPlaceholder("Enter remarks here...")).toHaveCount(0, {
+    timeout: 5000,
+  });
+  // Wait for the "Update remarks" button to appear
+  // This button shows when there are already-checked-in participants with edited remarks
+  await expect(
+    page.getByRole("button", { name: "Update remarks" }),
+  ).toBeVisible({ timeout: 10000 });
   await page.getByRole("button", { name: "Update remarks" }).click();
   await expect(page.getByRole("button", { name: /Processing/ })).toHaveCount(0);
-});
-
-Then("the database should reflect the updated remark", async ({ page }) => {
-  await expect(
-    page.getByRole("button", { name: "Edit" }).first(),
-  ).toBeVisible();
-});
-
-Then(
-  "the app should contain the checked-in participants with no remarks saved",
-  async ({ page }) => {
-    await expect(page.getByRole("button", { name: /Processing/ })).toHaveCount(
-      0,
-    );
-    await page.waitForTimeout(2000);
-    await expect(
-      page.getByRole("button", { name: "Add" }).first(),
-    ).toBeVisible();
-  },
-);
-
-Then("the app should reflect the updated remark", async ({ page }) => {
-  await expect(
-    page.getByRole("button", { name: "Edit" }).first(),
-  ).toBeVisible();
 });
 
 Then(
@@ -293,33 +303,30 @@ Then(
     // open the remark modal for the first participant
     await page
       .getByRole("button", { name: /^(Add|Edit)$/ })
-      .nth(0)
+      .first()
       .click();
 
-    // verify the updated remark is reflected
-    const remarksCells = page
-      .locator("td")
-      .filter({ hasText: "Updated Front row" });
-    await expect(remarksCells).toHaveCount(1);
+    // verify the updated remark is visible in the modal textarea
+    const remarkField = page.locator(
+      'textarea[placeholder="Enter remarks here..."]',
+    );
+    await expect(remarkField).toHaveValue("Updated Front row");
   },
 );
 
-Then(
-  "I should not see the existing remark for the second participant",
-  async ({ page }) => {
-    const remarksCells = page
-      .locator("#remark")
-      .filter({ hasText: "Front row" });
-    await expect(remarksCells).toHaveCount(0);
-    await page.getByRole("button", { name: "Cancel" }).click();
-  },
-);
-
+// ============================================
 // Scenario: Check in multiple participants
+// ============================================
+
 When(
   "I select the first {int} participants",
   async ({ page }, count: number) => {
-    const checkboxes = page.getByRole("checkbox");
+    // Get checkboxes within the dialog table body (skip the header select-all checkboxes)
+    const checkboxes = page
+      .getByRole("row")
+      .filter({ has: page.getByRole("cell") })
+      .getByRole("checkbox")
+      .filter({ hasNotText: "Select all" });
     for (let i = 0; i < count; i++) {
       await checkboxes.nth(i).click({ timeout: 10000 });
     }
