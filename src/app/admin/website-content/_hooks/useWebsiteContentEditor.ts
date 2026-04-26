@@ -5,6 +5,10 @@ import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import { getWebsiteContentSection } from "@/server/website-content/mutations/getWebsiteContentSection";
+import {
+  getWebsiteContentSectionsSummary,
+  type WebsiteContentSectionsSummary,
+} from "@/server/website-content/mutations/getWebsiteContentSectionsSummary";
 import { saveWebsiteContentSection } from "@/server/website-content/mutations/saveWebsiteContentSection";
 import type {
   WebsiteContentCardState,
@@ -29,6 +33,10 @@ export function useWebsiteContentEditor(
 ) {
   const [form, setForm] = useState<WebsiteContentFormState>(emptyForm);
   const [cards, setCards] = useState<WebsiteContentCardState[]>([]);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedCardEntryKeys, setSelectedCardEntryKeys] = useState<
+    Set<string>
+  >(() => new Set());
   const [cachedSectionContentBySection, setCachedSectionContentBySection] =
     useState<
       Partial<
@@ -47,6 +55,41 @@ export function useWebsiteContentEditor(
   const [updatedAtBySection, setUpdatedAtBySection] = useState<
     Partial<Record<WebsiteContentSection, string>>
   >({});
+  const [cardCountBySection, setCardCountBySection] = useState<
+    Partial<Record<WebsiteContentSection, number>>
+  >({});
+  const [hasLoadedSectionSummaries, setHasLoadedSectionSummaries] =
+    useState(false);
+
+  const { execute: loadSectionSummaries } = useAction(
+    tryCatch(getWebsiteContentSectionsSummary),
+    {
+      onSuccess: (summary: WebsiteContentSectionsSummary) => {
+        const nextUpdatedAtBySection: Partial<
+          Record<WebsiteContentSection, string>
+        > = {};
+        const nextCardCountBySection: Partial<
+          Record<WebsiteContentSection, number>
+        > = {};
+
+        for (const [section, sectionSummary] of Object.entries(summary)) {
+          const typedSection = section as WebsiteContentSection;
+          if (sectionSummary.updatedAt) {
+            nextUpdatedAtBySection[typedSection] = sectionSummary.updatedAt;
+          }
+          nextCardCountBySection[typedSection] = sectionSummary.cardCount;
+        }
+
+        setUpdatedAtBySection(nextUpdatedAtBySection);
+        setCardCountBySection(nextCardCountBySection);
+        setHasLoadedSectionSummaries(true);
+      },
+      onError: (error) => {
+        toast.error(error);
+        setHasLoadedSectionSummaries(true);
+      },
+    },
+  );
 
   const { execute: loadSection, isPending: isLoadingSection } = useAction(
     tryCatch(getWebsiteContentSection),
@@ -73,6 +116,12 @@ export function useWebsiteContentEditor(
             [activeSection]: data.updatedAt,
           }));
         }
+        if (activeSection) {
+          setCardCountBySection((prev) => ({
+            ...prev,
+            [activeSection]: data.cards.length,
+          }));
+        }
       },
       onError: (error) => {
         toast.error(error);
@@ -91,6 +140,7 @@ export function useWebsiteContentEditor(
           }));
           await loadSection(activeSection);
         }
+        await loadSectionSummaries();
         toast.success("Website content saved");
       },
       onError: (error) => {
@@ -100,6 +150,13 @@ export function useWebsiteContentEditor(
   );
 
   useEffect(() => {
+    void loadSectionSummaries();
+  }, [loadSectionSummaries]);
+
+  useEffect(() => {
+    setIsDeleteMode(false);
+    setSelectedCardEntryKeys(new Set());
+
     if (!activeSection) {
       return;
     }
@@ -234,6 +291,68 @@ export function useWebsiteContentEditor(
     });
   };
 
+  const enterDeleteMode = () => {
+    setIsDeleteMode(true);
+  };
+
+  const cancelDeleteMode = () => {
+    setIsDeleteMode(false);
+    setSelectedCardEntryKeys(new Set());
+  };
+
+  const clearCardSelection = () => {
+    setSelectedCardEntryKeys(new Set());
+  };
+
+  const selectAllCards = () => {
+    setSelectedCardEntryKeys(new Set(cards.map((card) => card.entryKey)));
+  };
+
+  const unselectAllCards = () => {
+    setSelectedCardEntryKeys(new Set());
+  };
+
+  const toggleCardSelected = (entryKey: string, checked: boolean) => {
+    setSelectedCardEntryKeys((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(entryKey);
+      } else {
+        next.delete(entryKey);
+      }
+      return next;
+    });
+  };
+
+  const deleteSelectedCards = () => {
+    if (!activeSection || selectedCardEntryKeys.size === 0) {
+      return;
+    }
+
+    setCards((prev) => {
+      const filtered = prev.filter(
+        (card) => !selectedCardEntryKeys.has(card.entryKey),
+      );
+      const nextCards = filtered.map((card, index) => ({
+        ...card,
+        cardPlacement: String(index + 1),
+      }));
+
+      setCachedSectionContentBySection((cachePrev) => ({
+        ...cachePrev,
+        [activeSection]: {
+          form: cachePrev[activeSection]?.form ?? form,
+          cards: nextCards,
+        },
+      }));
+
+      return nextCards;
+    });
+
+    setSelectedCardEntryKeys(new Set());
+    setIsDeleteMode(false);
+  };
+
   const save = async () => {
     if (!activeSection) {
       return;
@@ -253,6 +372,15 @@ export function useWebsiteContentEditor(
     setCardField,
     replaceCards,
     addCard,
+    isDeleteMode,
+    selectedCardEntryKeys,
+    enterDeleteMode,
+    cancelDeleteMode,
+    clearCardSelection,
+    selectAllCards,
+    unselectAllCards,
+    toggleCardSelected,
+    deleteSelectedCards,
     save,
     isSavingSection,
     isLoadingSection,
@@ -260,5 +388,7 @@ export function useWebsiteContentEditor(
     sectionUpdatedAt,
     placeholdersBySection,
     updatedAtBySection,
+    cardCountBySection,
+    hasLoadedSectionSummaries,
   };
 }
