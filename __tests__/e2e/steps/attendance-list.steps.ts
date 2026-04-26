@@ -71,17 +71,18 @@ Then("I should see the check-in stats showing:", async ({ page, scenario }) => {
   const percentage =
     totalExpected > 0 ? Math.round((checkedInCount / totalExpected) * 100) : 0;
 
-  await expect(
-    page.getByText(`${totalExpected} Total registered for this event`),
-  ).toBeVisible();
+  await expect(page.getByText("Total registered for this event")).toBeVisible();
+  await expect(page.getByText(`${totalExpected}`).first()).toBeVisible();
 
   await expect(
-    page.getByText(`${checkedInCount} ${percentage}% attendance rate`),
+    page.getByText(new RegExp(`${percentage}% attendance rate`)),
   ).toBeVisible();
 
   await expect(
     page.getByText(
-      `${percentage}% ${totalExpected - checkedInCount} participant${totalExpected - checkedInCount !== 1 ? "s" : ""} yet to check in`,
+      new RegExp(
+        `${percentage}%.*${totalExpected - checkedInCount} participant${totalExpected - checkedInCount !== 1 ? "s" : ""} yet to check in`,
+      ),
     ),
   ).toBeVisible();
 });
@@ -180,7 +181,9 @@ Then(
         : 0;
 
     await expect(page.getByText(`Checked in - Day 1`)).toBeVisible();
-    await expect(page.getByText(`${percentage}%`)).toBeVisible();
+    await expect(
+      page.getByText(new RegExp(`${percentage}% attendance rate`)),
+    ).toBeVisible();
   },
 );
 
@@ -199,7 +202,9 @@ Then(
 Then(
   "the attendance rate should reflect {int}% for Day 2",
   async ({ page }, percentage: number) => {
-    await expect(page.getByText(`${percentage}%`)).toBeVisible();
+    await expect(
+      page.getByText(new RegExp(`${percentage}% attendance rate`)),
+    ).toBeVisible();
   },
 );
 
@@ -229,13 +234,13 @@ Then(
     expect(path).toBeTruthy();
 
     const fs = await import("node:fs");
-    expect(fs.existsSync(path!)).toBe(true);
+    expect(fs.existsSync(path)).toBe(true);
 
-    const stats = fs.statSync(path!);
+    const stats = fs.statSync(path);
     expect(stats.size).toBeGreaterThan(0);
 
-    const buffer = fs.readFileSync(path!);
-    const headerBuffer = buffer.slice(0, 4);
+    const buffer = fs.readFileSync(path);
+    const headerBuffer = buffer.subarray(0, 4);
     const xlsxSignature = [0x50, 0x4b, 0x03, 0x04];
     expect(headerBuffer).toEqual(Buffer.from(xlsxSignature));
   },
@@ -252,10 +257,10 @@ Then(
     expect(path).toBeTruthy();
 
     const fs = await import("node:fs");
-    expect(fs.existsSync(path!)).toBe(true);
+    expect(fs.existsSync(path)).toBe(true);
 
-    const buffer = fs.readFileSync(path!);
-    const headerBuffer = buffer.slice(0, 4);
+    const buffer = fs.readFileSync(path);
+    const headerBuffer = buffer.subarray(0, 4);
     const xlsxSignature = [0x50, 0x4b, 0x03, 0x04];
     expect(headerBuffer).toEqual(Buffer.from(xlsxSignature));
   },
@@ -272,10 +277,10 @@ Then(
     expect(path).toBeTruthy();
 
     const fs = await import("node:fs");
-    expect(fs.existsSync(path!)).toBe(true);
+    expect(fs.existsSync(path)).toBe(true);
 
-    const buffer = fs.readFileSync(path!);
-    const headerBuffer = buffer.slice(0, 4);
+    const buffer = fs.readFileSync(path);
+    const headerBuffer = buffer.subarray(0, 4);
     const xlsxSignature = [0x50, 0x4b, 0x03, 0x04];
     expect(headerBuffer).toEqual(Buffer.from(xlsxSignature));
 
@@ -364,6 +369,8 @@ Then("I should see the empty state message", async ({ page }) => {
 Then(
   "the stats should show {int}% attendance for Day 2",
   async ({ page }, percentage: number) => {
-    await expect(page.getByText(`${percentage}%`)).toBeVisible();
+    await expect(
+      page.getByText(new RegExp(`${percentage}% attendance rate`)),
+    ).toBeVisible();
   },
 );

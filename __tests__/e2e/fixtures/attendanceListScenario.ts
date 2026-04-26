@@ -1,6 +1,6 @@
 import type { Database } from "@/lib/supabase/db.types";
+import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
 import { createE2EAdminClient } from "../helpers/supabase";
-import { seedAdminRegistrationScenario } from "./adminRegistrationScenario";
 
 export interface CheckInRecord {
   checkInId: string;
@@ -63,16 +63,18 @@ export async function seedAttendanceListScenario(
   const timestamp = Date.now();
   const participantCount = options.participantCount ?? 10;
   const eventDayCount = options.eventDayCount ?? 2;
+  const paymentMethod = options.paymentMethod ?? "BPI";
+
+  const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const endDate = new Date(Date.now() + eventDayCount * 24 * 60 * 60 * 1000);
 
   const { data: event, error: eventError } = await supabase
     .from("Event")
     .insert({
       eventTitle: `E2E Attendance List Event ${timestamp}`,
       description: "Attendance list E2E test event",
-      eventStartDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      eventEndDate: new Date(
-        Date.now() + eventDayCount * 24 * 60 * 60 * 1000,
-      ).toISOString(),
+      eventStartDate: startDate.toISOString(),
+      eventEndDate: endDate.toISOString(),
       venue: "E2E Test Venue",
       eventType: "public",
       registrationFee: 500,
@@ -93,35 +95,58 @@ export async function seedAttendanceListScenario(
     eventDate: string;
   }> = [];
 
-  for (let i = 0; i < eventDayCount; i++) {
-    const eventDate = new Date(
-      Date.now() + i * 24 * 60 * 60 * 1000,
-    ).toISOString();
-    const { data: eventDay, error: eventDayError } = await supabase
-      .from("EventDay")
-      .insert({
-        eventId: event.eventId,
-        label: `Day ${i + 1}`,
-        eventDate: eventDate.split("T")[0],
-      })
-      .select("eventDayId, label, eventDate")
-      .single();
+  const { data: existingEventDays, error: fetchEventDaysError } = await supabase
+    .from("EventDay")
+    .select("eventDayId, label, eventDate")
+    .eq("eventId", event.eventId)
+    .order("eventDate", { ascending: true });
 
-    if (eventDayError || !eventDay) {
-      throw new Error(
-        `Failed to seed event day: ${eventDayError?.message ?? "unknown"}`,
-      );
-    }
-
-    eventDays.push(eventDay);
+  if (fetchEventDaysError) {
+    throw new Error(
+      `Failed to fetch event days: ${fetchEventDaysError.message}`,
+    );
   }
 
-  const registration = await seedAdminRegistrationScenario({
-    participantCount,
-    paymentMethod: options.paymentMethod ?? "BPI",
-  });
+  if (existingEventDays && existingEventDays.length > 0) {
+    eventDays.push(...existingEventDays);
+  }
 
-  const participantIds = registration.acceptedRegistration.participantIds;
+  if (eventDays.length < eventDayCount) {
+    for (let i = eventDays.length; i < eventDayCount; i++) {
+      const eventDate = new Date(
+        Date.now() + i * 24 * 60 * 60 * 1000,
+      ).toISOString();
+
+      const { data: eventDay, error: eventDayError } = await supabase
+        .from("EventDay")
+        .insert({
+          eventId: event.eventId,
+          label: `Day ${i + 1}`,
+          eventDate: eventDate.split("T")[0],
+        })
+        .select("eventDayId, label, eventDate")
+        .single();
+
+      if (eventDayError || !eventDay) {
+        throw new Error(
+          `Failed to seed event day: ${eventDayError?.message ?? "unknown"}`,
+        );
+      }
+
+      eventDays.push(eventDay);
+    }
+  }
+
+  const acceptedRegistration = await createRegistrationWithParticipants(
+    supabase,
+    { eventId: event.eventId },
+    "accepted",
+    participantCount,
+    paymentMethod,
+    null,
+  );
+
+  const participantIds = acceptedRegistration.participantIds;
   const checkInDistribution = options.checkInDistribution ?? {
     0: participantCount,
     1: 0,
@@ -134,7 +159,12 @@ export async function seedAttendanceListScenario(
     const eventDayIndex = Number.parseInt(eventDayIndexStr, 10);
     const eventDay = eventDays[eventDayIndex];
 
-    if (!eventDay) continue;
+    if (!eventDay) {
+      console.warn(
+        `Event day at index ${eventDayIndex} not found, skipping check-ins`,
+      );
+      continue;
+    }
 
     checkInCounts[eventDay.eventDayId] = count;
 
@@ -211,9 +241,9 @@ export async function seedAttendanceListScenario(
     eventDays,
     registrations: [
       {
-        registrationId: registration.acceptedRegistration.registrationId,
-        identifier: registration.acceptedRegistration.identifier,
-        affiliation: registration.acceptedRegistration.affiliation,
+        registrationId: acceptedRegistration.registrationId,
+        identifier: acceptedRegistration.identifier,
+        affiliation: acceptedRegistration.affiliation,
         paymentProofStatus: "accepted" as const,
         participantIds,
       },
