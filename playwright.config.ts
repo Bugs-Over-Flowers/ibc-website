@@ -23,6 +23,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "html",
+  globalTimeout: 10000,
+  timeout: 10000,
 
   use: {
     baseURL: "http://localhost:3000",
@@ -51,9 +53,9 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "bun run dev",
+    command: "bun run start",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120000,
   },
 

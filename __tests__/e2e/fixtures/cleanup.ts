@@ -3,11 +3,14 @@ import { createE2EAdminClient } from "../helpers/supabase";
 /**
  * Clean up E2E test data created with a specific timestamp.
  */
-export async function cleanupE2EData(timestamp: number): Promise<void> {
+export async function cleanupE2EDataWithTimestamp(
+  timestamp: number,
+): Promise<void> {
   const supabase = createE2EAdminClient();
   const eventId = `e2e-event-${timestamp}`;
   const businessMemberId = `e2e-member-${timestamp}`;
 
+  // Get the registration ids of all registrations
   const { data: registrationRows, error: registrationSelectError } =
     await supabase
       .from("Registration")
@@ -23,6 +26,7 @@ export async function cleanupE2EData(timestamp: number): Promise<void> {
   const registrationIds = registrationRows.map((row) => row.registrationId);
 
   if (registrationIds.length > 0) {
+    // if there are any registrations, remove the participants
     const { data: participantRows, error: participantSelectError } =
       await supabase
         .from("Participant")
@@ -38,6 +42,7 @@ export async function cleanupE2EData(timestamp: number): Promise<void> {
     const participantIds = participantRows.map((row) => row.participantId);
 
     if (participantIds.length > 0) {
+      // if there are any participants, remove the check-ins
       const { error: checkInDeleteError } = await supabase
         .from("CheckIn")
         .delete()
@@ -50,6 +55,7 @@ export async function cleanupE2EData(timestamp: number): Promise<void> {
       }
     }
 
+    // then remove the participants
     const { error: participantDeleteError } = await supabase
       .from("Participant")
       .delete()

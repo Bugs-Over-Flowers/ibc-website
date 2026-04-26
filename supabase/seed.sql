@@ -295,7 +295,7 @@ INSERT INTO auth.users (
   gen_random_uuid(),
   '00000000-0000-0000-0000-000000000000',
   'admin@test.local',
-  extensions.crypt('Test123!@#', extensions.gen_salt('bf')),
+  extensions.crypt('Test123!@#', extensions.gen_salt('bf', 10)),
   NOW(),
   NOW(),
   NOW(),

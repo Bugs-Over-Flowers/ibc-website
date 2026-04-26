@@ -24,6 +24,7 @@ export default function ParticipantRowActions({
       <DropdownMenuTrigger
         render={
           <Button
+            aria-label="Open participant actions"
             className="size-7 p-0"
             onClick={(e) => {
               e.stopPropagation();
