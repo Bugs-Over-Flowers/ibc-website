@@ -34,6 +34,7 @@ interface DataTableProps<TData, TValue> {
   tableContainerClassName?: string;
   tableHeaderClassName?: string;
   children?: (table: TableType<TData>) => React.ReactNode;
+  enablePagination?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -45,6 +46,7 @@ export function DataTable<TData, TValue>({
   tableContainerClassName,
   tableHeaderClassName,
   children,
+  enablePagination = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -52,7 +54,9 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(enablePagination
+      ? { getPaginationRowModel: getPaginationRowModel() }
+      : {}),
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,

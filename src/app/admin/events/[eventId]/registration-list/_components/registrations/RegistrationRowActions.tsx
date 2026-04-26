@@ -48,6 +48,7 @@ export default function RegistrationRowActions({
       {isDetailsPage ? (
         <div className="flex flex-wrap items-center gap-2">
           <Button
+            aria-label="Open QR code dialog"
             onClick={() => setQrcodeDialog(true)}
             size="sm"
             variant="outline"
@@ -58,6 +59,7 @@ export default function RegistrationRowActions({
 
           {shouldShowPaymentProofAction && (
             <Button
+              aria-label="Open payment proof review dialog"
               onClick={() => setPaymentProofDialog(true)}
               size="sm"
               variant="outline"
@@ -72,6 +74,7 @@ export default function RegistrationRowActions({
           <DropdownMenuTrigger
             render={
               <Button
+                aria-label="Open registration actions"
                 className="size-7 p-0"
                 onClick={(e) => {
                   e.stopPropagation();
