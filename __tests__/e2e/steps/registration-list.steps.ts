@@ -75,7 +75,7 @@ Then(
 );
 
 // ============================================
-// Scenario: Accept payment proof from the registration details page
+// Scenario: Handle payment proof status changes
 // ============================================
 
 Given(
@@ -91,52 +91,52 @@ Given(
   },
 );
 
+When("I open the payment proof review dialog", async ({ page }) => {
+  await page
+    .getByRole("button", { name: "Open payment proof review dialog" })
+    .click();
+});
+
 When(
-  "I accept the payment proof from the registration details page",
-  async ({ page }) => {
-    await page
-      .getByRole("button", { name: "Open payment proof review dialog" })
-      .click();
-    await page.getByRole("button", { name: "Accept" }).click();
+  /I (Accept|Reject) the payment proof on the payment proof review dialog/,
+  async ({ page }, action: "Accept" | "Reject") => {
+    await page.getByRole("button", { name: action }).click();
+    await page.waitForTimeout(2000);
   },
 );
 
 Then(
-  'the registration status should change to "accepted"',
-  async ({ page }) => {
-    await expect(page.getByText("accepted").first()).toBeVisible();
+  /the registration status should change to (Accepted|Rejected)/,
+  async ({ page }, result: "accepted" | "rejected") => {
+    await expect(page.getByText(result).first()).toBeVisible();
   },
 );
 
 Then(
-  "I should see the updated status on the registrations tab",
-  async ({ page, scenario }) => {
+  /I should see the (Accepted|Rejected) status on the registrations tab/,
+  async ({ page, scenario }, result: "Accepted" | "Rejected") => {
     await page.goto(
       `/admin/events/${scenario.event.eventId}/registration-list`,
     );
 
-    // expect the row to be accepted already
     const pendingRow = page.getByRole("row", {
       name: scenario.pendingRegistration.identifier,
     });
     await expect(pendingRow).toBeVisible();
-    await expect(
-      pendingRow.getByRole("cell", { name: "accepted" }),
-    ).toBeVisible();
-
-    // expect that there are 2 accepted registrations already
-
-    expect(
-      page
-        .getByTestId("registration-stats-verified-registrations")
-        .getByText("2", { exact: true }),
-    ).toBeVisible();
+    await expect(pendingRow.getByRole("cell", { name: result })).toBeVisible();
   },
 );
 
-Then("I should see the updated stats at the top", async ({ page }) => {
-  await expect(page.getByText("Verified registrations")).toBeVisible();
-});
+Then(
+  "I should see the verified registration count update to {int}",
+  async ({ page }, count: number) => {
+    expect(
+      page
+        .getByTestId("registration-stats-verified-registrations")
+        .getByText(count.toString(), { exact: true }),
+    ).toBeVisible();
+  },
+);
 
 // ============================================
 // Scenario: Accept payment proof from the registrations tab
@@ -157,63 +157,6 @@ When("I open the Review Payment Proof Modal", async ({ page }) => {
   // Dropdown should already be open from previous step, just click the menu item
   await page.getByText("Review Payment Proof", { exact: true }).first().click();
 });
-
-When("I accept the payment proof", async ({ page }) => {
-  await page.getByRole("button", { name: "Accept" }).click();
-});
-
-// ============================================
-// Scenario: Stats stay consistent across tabs
-// ============================================
-
-When(
-  "I switch between the registrations and participants tabs",
-  async ({ page, scenario }) => {
-    await openTab(page, scenario.event.eventId, "participants");
-    await openTab(page, scenario.event.eventId, "registrations");
-  },
-);
-
-Then("the stats at the top should remain the same", async ({ page }) => {
-  await expect(page.getByText("Total registrations")).toBeVisible();
-  await expect(page.getByText("Verified registrations")).toBeVisible();
-  await expect(page.getByText("Pending registrations")).toBeVisible();
-  await expect(page.getByText("Total participants")).toBeVisible();
-});
-
-// ============================================
-// Scenario: Filter registrations by payment status
-// ============================================
-//
-When(
-  "I filter by {string} payment status",
-  async ({ page }, paymentStatus: string) => {
-    await page.getByRole("combobox").click();
-    await page.getByRole("option", { name: paymentStatus }).click();
-  },
-);
-
-Then(
-  "I should see only registrations with {string} payment status",
-  async ({ page }, paymentStatus: string) => {
-    const statusText =
-      paymentStatus === "accepted" ? "verified" : paymentStatus;
-
-    // Get all rows and verify each has the expected status
-    const rows = page.locator('[role="row"]');
-    const rowCount = await rows.count();
-
-    for (let i = 0; i < rowCount; i++) {
-      const row = rows.nth(i);
-      const hasStatus = await row
-        .getByText(statusText, { exact: false })
-        .count();
-      if (hasStatus > 0) {
-        await expect(row).toBeVisible();
-      }
-    }
-  },
-);
 
 // ============================================
 // Scenario: Search registrations by affiliation
@@ -256,6 +199,34 @@ Then(
       await expect(
         page.getByText(pendingAffiliation).first(),
       ).not.toBeVisible();
+    }
+  },
+);
+
+// ============================================
+// Scenario: Filter registrations by payment status
+// ============================================
+
+When(
+  /I filter by (Accepted|Rejected|Pending) payment status/,
+  async ({ page }, paymentStatus: "Accepted" | "Rejected" | "Pending") => {
+    await page.getByRole("combobox").click();
+    await page.getByRole("option", { name: paymentStatus }).click();
+    await page.waitForTimeout(1000);
+  },
+);
+
+Then(
+  /I should see only registrations with (accepted|rejected|pending) payment status/,
+  async ({ page }, paymentStatus: "accepted" | "rejected" | "pending") => {
+    const badges = page
+      .getByTestId("payment-status-badge")
+      .getByText(paymentStatus, { exact: true });
+
+    // do a for each
+    for (const badge of await badges.all()) {
+      await expect(badge).toBeVisible();
+      await expect(badge).toHaveText(paymentStatus);
     }
   },
 );
@@ -320,24 +291,28 @@ Then("I should see all registrations", async ({ page, scenario }) => {
 });
 
 // ============================================
-// Scenario: Reject payment proof from the registration details page
+// Scenario: Stats stay consistent across tabs
 // ============================================
 
-When("I reject the payment proof", async ({ page }) => {
-  await page
-    .getByRole("button", { name: "Open payment proof review dialog" })
-    .click();
-  await page.getByRole("button", { name: "Reject" }).click();
-});
-
-Then(
-  'the registration status should change to "rejected"',
-  async ({ page }) => {
-    await expect(page.getByText("rejected").first()).toBeVisible();
+When(
+  "I switch between the registrations and participants tabs",
+  async ({ page, scenario }) => {
+    await openTab(page, scenario.event.eventId, "participants");
+    await openTab(page, scenario.event.eventId, "registrations");
   },
 );
 
+Then("the stats at the top should remain the same", async ({ page }) => {
+  await expect(page.getByText("Total registrations")).toBeVisible();
+  await expect(page.getByText("Verified registrations")).toBeVisible();
+  await expect(page.getByText("Pending registrations")).toBeVisible();
+  await expect(page.getByText("Total participants")).toBeVisible();
+});
+
+// ============================================
 // Scenario: Search with no matching results shows empty state
+// ============================================
+
 When("I search for {string}", async ({ page }, searchTerm: string) => {
   await page
     .getByRole("textbox", { name: "Identifier, affiliation," })
