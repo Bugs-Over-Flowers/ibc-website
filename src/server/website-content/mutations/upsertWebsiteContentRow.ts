@@ -1,7 +1,10 @@
 "use server";
 
 import { createActionClient } from "@/lib/supabase/server";
-import type { UpsertWebsiteContentRowInput } from "../types";
+import type {
+  UpsertWebsiteContentRowInput,
+  WebsiteContentSection,
+} from "../types";
 
 type WebsiteContentSupabaseClient = Awaited<
   ReturnType<typeof createActionClient>
@@ -49,4 +52,45 @@ export async function upsertWebsiteContentRows(
   await Promise.all(
     inputs.map((input) => executeUpsertWebsiteContentRow(supabase, input)),
   );
+}
+
+export async function deactivateWebsiteContentEntriesBySection(
+  section: WebsiteContentSection,
+  retainedEntryKeys: string[],
+) {
+  const supabase = await createActionClient();
+
+  const { data, error } = await supabase
+    .from("WebsiteContent")
+    .select("entryKey")
+    .eq("section", section)
+    .eq("isActive", true);
+
+  if (error) {
+    throw new Error(
+      `Failed to check existing website content rows: ${error.message}`,
+    );
+  }
+
+  const retained = new Set(retainedEntryKeys);
+  const entryKeysToDeactivate = Array.from(
+    new Set((data ?? []).map((row) => row.entryKey).filter(Boolean)),
+  ).filter((entryKey) => !retained.has(entryKey));
+
+  if (entryKeysToDeactivate.length === 0) {
+    return;
+  }
+
+  const { error: deactivateError } = await supabase
+    .from("WebsiteContent")
+    .update({ isActive: false })
+    .eq("section", section)
+    .eq("isActive", true)
+    .in("entryKey", entryKeysToDeactivate);
+
+  if (deactivateError) {
+    throw new Error(
+      `Failed to deactivate removed website content rows: ${deactivateError.message}`,
+    );
+  }
 }
