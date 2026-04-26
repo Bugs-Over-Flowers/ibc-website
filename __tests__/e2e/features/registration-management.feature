@@ -46,7 +46,7 @@ Feature: Registration Management
       | 1                 | 1                |
       | 10                | 1                |
 
-  @wip @happy
+  @happy
   Scenario Outline: Payment proof section visibility for different payment methods
     Given I am on the Registration Details page with <payment_method> payment
     Then I should <action> the payment proof section
@@ -57,7 +57,7 @@ Feature: Registration Management
       | BPI            | see     |
       | Onsite         | not see |
 
-  @wip @happy
+  @happy
   Scenario Outline: Display note field based on registration
     Given I am on the Registration Details page with a registration <note_status> note
     Then I should <visibility> the note field with the message: <message>
