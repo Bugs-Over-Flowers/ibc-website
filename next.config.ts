@@ -1,5 +1,36 @@
 import type { NextConfig } from "next";
 
+const securityHeaders = [
+  {
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "img-src 'self' data: https:",
+      "font-src 'self' data: https:",
+      "style-src 'self' 'unsafe-inline' https:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+      "connect-src 'self' https: wss:",
+      "upgrade-insecure-requests",
+    ].join("; "),
+  },
+  {
+    key: "X-Frame-Options",
+    value: "DENY",
+  },
+  {
+    key: "X-Content-Type-Options",
+    value: "nosniff",
+  },
+  {
+    key: "Referrer-Policy",
+    value: "strict-origin-when-cross-origin",
+  },
+];
+
 const nextConfig: NextConfig = {
   /* config options here */
   output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
@@ -75,6 +106,14 @@ const nextConfig: NextConfig = {
     dangerouslyAllowLocalIP: true,
   },
   serverExternalPackages: ["react-email", "@react-email/render"],
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
