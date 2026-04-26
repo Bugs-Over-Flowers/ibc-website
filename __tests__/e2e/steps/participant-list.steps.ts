@@ -2,7 +2,6 @@ import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test as registrationListTest } from "./registration-list.steps";
 
-// Reuse test fixture from registration-list.steps.ts for shared scenario
 export const test = registrationListTest;
 
 export const { Given, When, Then } = createBdd(test);
@@ -19,8 +18,10 @@ async function openTab(
 // PARTICIPANT LIST SCENARIOS
 // ============================================
 
+// ============================================
 // Scenario: Hide pending and rejected registrations
-// (Reuses shared step: "I am an admin on the registration list page for an event" from registration-list.steps.ts)
+// ============================================
+
 When("I open the participants tab", async ({ page, scenario }) => {
   await openTab(page, scenario.event.eventId, "participants");
 });
@@ -43,7 +44,10 @@ Then(
   },
 );
 
+// ============================================
 // Scenario: Show participants from accepted registrations
+// ============================================
+
 Given(
   "I am on the registration list page for an event",
   async ({ page, scenario }) => {
@@ -62,7 +66,10 @@ Then(
   },
 );
 
-// Scenario: Accepted payment proof makes participant visible
+// ============================================
+// Scenario: Payment proof status changes affect participant visibility
+// ============================================
+
 Given(
   "I have a pending registration with participants",
   async ({ page, scenario }) => {
@@ -71,10 +78,6 @@ Given(
     );
   },
 );
-
-// Reuses from registration-list.steps.ts:
-// - "I accept the payment proof from the registration details page"
-// - "I open the participants tab"
 
 Then(
   "the registration's participants should appear in the participant list",
@@ -86,10 +89,22 @@ Then(
   },
 );
 
+Then(
+  "the registration's participants should not appear in the participant list",
+  async ({ page, scenario }) => {
+    await openTab(page, scenario.event.eventId, "participants");
+    await expect(
+      page.getByText(scenario.pendingRegistration.affiliation),
+    ).toHaveCount(0);
+  },
+);
+
+// ============================================
+// Scenario: Stats stay consistent across tabs
+// ============================================
+
 Given("I am on the participants tab", async ({ page, scenario }) => {
-  await page.goto(
-    `/admin/events/${scenario.event.eventId}/registration-list?tab=participants`,
-  );
+  await openTab(page, scenario.event.eventId, "participants");
 });
 
 When("I switch to the registrations tab", async ({ page, scenario }) => {
