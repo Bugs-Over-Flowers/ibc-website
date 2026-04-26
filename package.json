@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --bun next dev --turbopack",
+    "dev:test": "dotenvx run -f .env.testing -- bun run dev",
     "build": "bun run --bun next build --turbopack",
     "build:test": "dotenvx run -f .env.testing -- bun run build",
     "docker:dev": "docker compose up ibc-dev",
