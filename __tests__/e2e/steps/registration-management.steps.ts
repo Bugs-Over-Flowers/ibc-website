@@ -188,12 +188,8 @@ Given(
 Then(
   "I should see {int} participant cards",
   async ({ page }, count: number) => {
-    const participantCountBadge = page
-      .locator('[class*="bg-secondary"], [class*="bg-muted"]')
-      .filter({ hasText: /^\d+$/ })
-      .first();
-    const actualCount = await participantCountBadge.textContent();
-    expect(parseInt(actualCount ?? "0", 10)).toBe(count);
+    const participantCards = await page.getByTestId("participant-card").all();
+    expect(participantCards.length).toBe(count);
   },
 );
 
