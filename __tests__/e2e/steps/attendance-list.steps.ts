@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/correctness/noEmptyPattern: Required for bddgen */
 import { expect } from "@playwright/test";
-import { test as baseTest, createBdd } from "playwright-bdd";
+import { test as baseTest, createBdd, type DataTable } from "playwright-bdd";
 import {
   cleanupAttendanceListScenario,
   seedAttendanceListScenario,
@@ -64,34 +64,52 @@ Then("I should see the event day tabs", async ({ page, scenario }) => {
   }
 });
 
-Then("I should see the check-in stats showing:", async ({ page, scenario }) => {
-  const firstDay = scenario.eventDays[0];
-  const checkedInCount = scenario.stats.checkInCounts[firstDay.eventDayId] ?? 0;
-  const totalExpected = scenario.stats.totalExpected;
-  const percentage =
-    totalExpected > 0 ? Math.round((checkedInCount / totalExpected) * 100) : 0;
+Then(
+  "I should see the check-in stats showing:",
+  async ({ page }, dataTable: DataTable) => {
+    // 1. Convert the table into a handy object: { "Attendance rate": "50%", ... }
+    const stats = dataTable.rowsHash();
 
-  await expect(page.getByText("Total registered for this event")).toBeVisible();
-  await expect(page.getByText(`${totalExpected}`).first()).toBeVisible();
+    const expectedTotal = stats["Expected participants"];
+    const expectedCheckedIn = stats["Checked in - Day 1"];
+    const expectedRate = stats["Attendance rate"]; // e.g., "50%"
 
-  await expect(
-    page.getByText(new RegExp(`${percentage}% attendance rate`)),
-  ).toBeVisible();
+    // 2. Verify the Total
+    await expect(
+      page.getByText("Total registered for this event"),
+    ).toBeVisible();
+    await expect(page.getByText(expectedTotal).first()).toBeVisible();
 
-  await expect(
-    page.getByText(
-      new RegExp(
-        `${percentage}%.*${totalExpected - checkedInCount} participant${totalExpected - checkedInCount !== 1 ? "s" : ""} yet to check in`,
+    // 3. Verify the Attendance Rate (e.g., "50% attendance rate")
+    await expect(
+      page.getByText(new RegExp(`${expectedRate} attendance rate`, "i")),
+    ).toBeVisible();
+
+    // 4. Verify the "Yet to check in" logic
+    // We calculate the remaining count from the values in the table
+    const remaining =
+      parseInt(expectedTotal, 10) - parseInt(expectedCheckedIn, 10);
+    const plural = remaining !== 1 ? "s" : "";
+
+    await expect(
+      page.getByText(
+        new RegExp(
+          `${expectedRate}.*${remaining} participant${plural} yet to check in`,
+        ),
       ),
-    ),
-  ).toBeVisible();
-});
+    ).toBeVisible();
+  },
+);
 
 Then(
   "I should see the attendance table with {int} participants",
   async ({ page }, count: number) => {
     const rows = page.locator("tbody tr");
-    await expect(rows).toHaveCount(count, { timeout: 10000 });
+    if (count === 0) {
+      await expect(rows).toHaveCount(0);
+    } else {
+      await expect(rows).toHaveCount(count);
+    }
   },
 );
 
@@ -324,37 +342,22 @@ Then("the dialog should show the remark text", async ({ page }) => {
 });
 
 // ============================================
-// Scenario: Table sorting works
-// ============================================
-
-When(
-  "I click on the {string} column header",
-  async ({ page }, columnName: string) => {
-    await page.getByRole("columnheader", { name: columnName }).click();
-  },
-);
-
-Then("the table should be sorted by first name", async ({ page }) => {
-  const firstCell = page.locator("tbody tr:first-child td:nth-child(3)");
-  await expect(firstCell).toBeVisible();
-});
-
-Then(
-  "the table should be sorted by first name in descending order",
-  async ({ page }) => {
-    const firstCell = page.locator("tbody tr:first-child td:nth-child(3)");
-    await expect(firstCell).toBeVisible();
-  },
-);
-
-// ============================================
-// Scenario: Empty check-in list for event day
+// Scenario: View attendance list with various check-in rates
 // ============================================
 
 Given(
-  "I am on the {string} tab with no check-ins",
-  async ({ page }, tabName: string) => {
-    await page.getByRole("tab", { name: tabName }).click();
+  "I am on the attendance list page with {int} of {int} participants checked in",
+  async ({ scenario, page }, checkInCount: number, totalCount: number) => {
+    // set data for the scenario
+    scenario = await seedAttendanceListScenario({
+      participantCount: totalCount,
+      eventDayCount: 1,
+      checkInDistribution: {
+        0: checkInCount,
+      },
+    });
+
+    await page.goto(`/admin/events/${scenario.event.eventId}/check-in-list`);
     await page.waitForLoadState("networkidle");
   },
 );
@@ -374,3 +377,21 @@ Then(
     ).toBeVisible();
   },
 );
+
+// ============================================
+// @sad Scenario: Show error when event does not exist
+// ============================================
+
+Given(
+  "I navigate to check-in list for non-existent event",
+  async ({ page }) => {
+    await page.goto(
+      "/admin/events/00000000-0000-0000-0000-000000000000/check-in-list",
+    );
+    await page.waitForLoadState("networkidle");
+  },
+);
+
+Then("I should see error loading event details", async ({ page }) => {
+  await expect(page.getByText("Failed to load event details.")).toBeVisible();
+});

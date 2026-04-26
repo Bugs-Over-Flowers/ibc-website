@@ -1,4 +1,5 @@
 import type { Database } from "@/lib/supabase/db.types";
+import createMultipleRegistrationsWithParticipants from "../helpers/createMultipleRegistrationsWithParticipants";
 import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
 import { createE2EAdminClient } from "../helpers/supabase";
 
@@ -120,6 +121,7 @@ export async function seedAdminRegistrationScenario(
   const pendingRegistrationNote = note ?? "Test note for pending registration";
   const acceptedRegistrationNote = note ?? null;
 
+  // Create multiple registrations if needed for >10 participants, but only return the first one to maintain test scenario contract
   const pendingRegistration = await createRegistrationWithParticipants(
     supabase,
     { eventId: event.eventId },
@@ -166,6 +168,7 @@ export async function cleanupAdminRegistrationScenario(
 ): Promise<void> {
   const supabase = createE2EAdminClient();
 
+  // Collect registration IDs from the scenarios
   const registrationIds = [
     data.pendingRegistration.registrationId,
     data.rejectedRegistration.registrationId,

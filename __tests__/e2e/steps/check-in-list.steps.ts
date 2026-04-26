@@ -283,6 +283,9 @@ When("I apply the remark update", async ({ page }) => {
     page.getByRole("button", { name: "Update remarks" }),
   ).toBeVisible({ timeout: 10000 });
   await page.getByRole("button", { name: "Update remarks" }).click();
+
+  // Wait for Processing to appear, then disappear
+  await expect(page.getByRole("button", { name: /Processing/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Processing/ })).toHaveCount(0);
 });
 
@@ -341,3 +344,32 @@ Then(
     ).toBeVisible();
   },
 );
+
+// ============================================
+// @sad Scenario: Show empty registration list
+// ============================================
+
+Given(
+  "I am on the check-in page with no registrations",
+  async ({ page, scenario }) => {
+    scenario = await seedAdminRegistrationScenario({
+      participantCount: 0,
+    });
+
+    await page.goto(`/admin/events/check-in/${scenario.eventDay.eventDayId}`);
+    await page.waitForLoadState("networkidle");
+  },
+);
+
+Then(
+  "I should see the registration list showing {int} registrations",
+  async ({ page }, count: number) => {
+    const badge = page.locator("h2", { hasText: "Registration List" }).first();
+    await expect(badge).toBeVisible();
+    await expect(badge.getByText(`(${count})`)).toBeVisible();
+  },
+);
+
+Then("I should see empty state message in the table", async ({ page }) => {
+  await expect(page.getByText("No results.")).toBeVisible();
+});

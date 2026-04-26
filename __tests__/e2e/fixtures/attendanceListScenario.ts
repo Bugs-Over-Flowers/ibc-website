@@ -1,5 +1,5 @@
 import type { Database } from "@/lib/supabase/db.types";
-import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
+import createMultipleRegistrationsWithParticipants from "../helpers/createMultipleRegistrationsWithParticipants";
 import { createE2EAdminClient } from "../helpers/supabase";
 
 export interface CheckInRecord {
@@ -39,6 +39,8 @@ export interface SeededAttendanceListScenario {
     totalExpected: number;
     checkInCounts: Record<string, number>;
   };
+  // Track ALL registration IDs for cleanup (for scenarios with >10 participants)
+  allRegistrationIds?: string[];
 }
 
 export interface AttendanceListSeedOptions {
@@ -137,7 +139,8 @@ export async function seedAttendanceListScenario(
     }
   }
 
-  const acceptedRegistration = await createRegistrationWithParticipants(
+  // Create multiple registrations if needed for >10 participants, but only return the first one to maintain test scenario contract
+  const multiRegData = await createMultipleRegistrationsWithParticipants(
     supabase,
     { eventId: event.eventId },
     "accepted",
@@ -146,7 +149,12 @@ export async function seedAttendanceListScenario(
     null,
   );
 
-  const participantIds = acceptedRegistration.participantIds;
+  // For backward compatibility, store ALL registrations in a separate property
+  // but return only the first one in the main registrations array
+  const allRegistrations = multiRegData.registrations;
+  const acceptedRegistration = allRegistrations[0];
+  const participantIds = multiRegData.participantIds;
+  const allRegistrationIds = allRegistrations.map((r) => r.registrationId);
   const checkInDistribution = options.checkInDistribution ?? {
     0: participantCount,
     1: 0,
@@ -168,8 +176,11 @@ export async function seedAttendanceListScenario(
 
     checkInCounts[eventDay.eventDayId] = count;
 
+    // Flatten all participant IDs from all registrations for check-in creation
+    const allParticipantIds = multiRegData.participantIds;
+
     for (let i = 0; i < count; i++) {
-      const participantId = participantIds[i];
+      const participantId = allParticipantIds[i];
       if (!participantId) continue;
 
       const remarkOption = options.remarks?.find(
@@ -253,6 +264,8 @@ export async function seedAttendanceListScenario(
       totalExpected,
       checkInCounts,
     },
+    // Include ALL registration IDs for cleanup
+    allRegistrationIds,
   };
 }
 
@@ -274,7 +287,8 @@ export async function cleanupAttendanceListScenario(
     }
   }
 
-  const registrationIds = data.registrations.map((r) => r.registrationId);
+  const registrationIds =
+    data.allRegistrationIds ?? data.registrations.map((r) => r.registrationId);
   if (registrationIds.length > 0) {
     const { data: participantRows, error: participantError } = await supabase
       .from("Participant")
