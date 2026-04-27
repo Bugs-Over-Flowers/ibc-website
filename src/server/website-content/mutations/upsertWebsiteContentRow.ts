@@ -54,7 +54,7 @@ export async function upsertWebsiteContentRows(
   );
 }
 
-export async function deactivateWebsiteContentEntriesBySection(
+export async function deleteWebsiteContentEntriesBySection(
   section: WebsiteContentSection,
   retainedEntryKeys: string[],
 ) {
@@ -73,24 +73,24 @@ export async function deactivateWebsiteContentEntriesBySection(
   }
 
   const retained = new Set(retainedEntryKeys);
-  const entryKeysToDeactivate = Array.from(
+  const entryKeysToDelete = Array.from(
     new Set((data ?? []).map((row) => row.entryKey).filter(Boolean)),
   ).filter((entryKey) => !retained.has(entryKey));
 
-  if (entryKeysToDeactivate.length === 0) {
+  if (entryKeysToDelete.length === 0) {
     return;
   }
 
-  const { error: deactivateError } = await supabase
+  const { error: deleteError } = await supabase
     .from("WebsiteContent")
     .update({ isActive: false })
     .eq("section", section)
     .eq("isActive", true)
-    .in("entryKey", entryKeysToDeactivate);
+    .in("entryKey", entryKeysToDelete);
 
-  if (deactivateError) {
+  if (deleteError) {
     throw new Error(
-      `Failed to deactivate removed website content rows: ${deactivateError.message}`,
+      `Failed to delete removed website content rows: ${deleteError.message}`,
     );
   }
 }

@@ -8,7 +8,7 @@ import type {
   UpsertWebsiteContentRowInput,
 } from "../types";
 import {
-  deactivateWebsiteContentEntriesBySection,
+  deleteWebsiteContentEntriesBySection,
   upsertWebsiteContentRows,
 } from "./upsertWebsiteContentRow";
 
@@ -93,12 +93,9 @@ export async function saveWebsiteContentSection(
     }
   }
 
-  await deactivateWebsiteContentEntriesBySection(
-    parsed.section,
-    retainedEntryKeys,
-  );
-
   await upsertWebsiteContentRows(rowsToUpsert);
+
+  await deleteWebsiteContentEntriesBySection(parsed.section, retainedEntryKeys);
 
   revalidatePath("/", "page");
   revalidatePath("/about", "page");
