@@ -1,6 +1,7 @@
 "use server";
 
-import { createActionClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 import type { WebsiteContentSection } from "../types";
 
 type WebsiteContentSectionSummary = {
@@ -40,7 +41,8 @@ function createEmptySummary(): WebsiteContentSectionsSummary {
 }
 
 export async function getWebsiteContentSectionsSummary(): Promise<WebsiteContentSectionsSummary> {
-  const supabase = await createActionClient();
+  const cookieStore = await cookies();
+  const supabase = await createClient(cookieStore.getAll());
 
   const { data, error } = await supabase
     .from("WebsiteContent")

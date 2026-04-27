@@ -3,14 +3,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockEq = vi.fn();
 const mockSelect = vi.fn(() => ({ eq: mockEq }));
 const mockFrom = vi.fn(() => ({ select: mockSelect }));
-const mockCreateActionClient = vi.fn(async () => ({ from: mockFrom }));
+const mockCreateClient = vi.fn(async () => ({ from: mockFrom }));
+const mockCookies = vi.fn(async () => ({
+  getAll: () => [{ name: "sb-access-token", value: "token" }],
+}));
+
+vi.mock("next/headers", () => ({
+  cookies: mockCookies,
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createActionClient: mockCreateActionClient,
+  createClient: mockCreateClient,
 }));
 
 const { getWebsiteContentSectionsSummary } = await import(
-  "@/server/website-content/mutations/getWebsiteContentSectionsSummary"
+  "@/server/website-content/queries/getWebsiteContentSectionsSummary"
 );
 
 describe("getWebsiteContentSectionsSummary", () => {
@@ -34,6 +41,9 @@ describe("getWebsiteContentSectionsSummary", () => {
       landing_page_benefits: { updatedAt: null, cardCount: 0 },
     });
     expect(mockFrom).toHaveBeenCalledWith("WebsiteContent");
+    expect(mockCreateClient).toHaveBeenCalledWith([
+      { name: "sb-access-token", value: "token" },
+    ]);
     expect(mockEq).toHaveBeenCalledWith("isActive", true);
   });
 
