@@ -907,22 +907,6 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      get_registrations_by_sponsored_id: {
-        Args: { p_sponsored_registration_id: string };
-        Returns: {
-          businessMemberId: string;
-          eventId: string;
-          identifier: string;
-          nonMemberName: string;
-          numberOfParticipants: number;
-          participants: Json;
-          paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
-          paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
-          registrationDate: string;
-          registrationId: string;
-          sponsoredRegistrationId: string;
-        }[];
-      };
       get_sponsored_registration_by_id: {
         Args: { registration_id: string };
         Returns: {
@@ -1080,6 +1064,24 @@ export type Database = {
           p_start_date?: string;
           p_title?: string;
           p_venue?: string;
+        };
+        Returns: Json;
+      };
+      update_member_with_representatives: {
+        Args: {
+          p_application_id: string;
+          p_business_name: string;
+          p_company_address: string;
+          p_email_address: string;
+          p_join_date?: string;
+          p_landline: string;
+          p_member_id: string;
+          p_membership_expiry_date?: string;
+          p_membership_status?: Database["public"]["Enums"]["MembershipStatus"];
+          p_mobile_number: string;
+          p_representatives?: Json;
+          p_sector_id: number;
+          p_website_url?: string;
         };
         Returns: Json;
       };

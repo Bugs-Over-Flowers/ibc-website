@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { IMAGE_UPLOAD_ACCEPT_ATTR } from "@/lib/fileUpload";
 import { reorderInList } from "../../_hooks/reorderInList";
 import { useBoardCardGroups } from "../../_hooks/useBoardCardGroups";
 import { usePersonalImageUpload } from "../../_hooks/usePersonalImageUpload";
@@ -164,7 +165,7 @@ export function BoardOfTrusteesSection({
                 Insert Image Here
               </label>
               <input
-                accept="image/*"
+                accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                 className="hidden"
                 id={`board-image-${card.entryKey}`}
                 onChange={createImageSelectHandler(card.entryKey)}
