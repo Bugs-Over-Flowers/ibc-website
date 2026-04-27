@@ -23,7 +23,10 @@ import {
 } from "@/components/ui/dialog";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import { useAction } from "@/hooks/useAction";
-import { isValidImageUploadFile } from "@/lib/fileUpload";
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  isValidImageUploadFile,
+} from "@/lib/fileUpload";
 import tryCatch from "@/lib/server/tryCatch";
 import { uploadPaymentProof } from "@/lib/storage/uploadPaymentProof";
 import type { Enums } from "@/lib/supabase/db.types";
@@ -343,7 +346,7 @@ export function PaymentProofModal({
             {canReplaceProof ? (
               <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                 <input
-                  accept="image/png,image/jpeg,image/jpg"
+                  accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                   className="hidden"
                   onChange={(event) => {
                     const file = event.target.files?.[0] ?? null;

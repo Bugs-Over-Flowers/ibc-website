@@ -20,7 +20,10 @@ import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import type { MembershipApplicationData } from "@/hooks/membershipApplication.store";
-import { isValidImageUploadFile } from "@/lib/fileUpload";
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  isValidImageUploadFile,
+} from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 
 interface StepProps {
@@ -390,7 +393,7 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                             type="button"
                           >
                             <input
-                              accept="image/png,image/jpeg,image/jpg"
+                              accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                               className="absolute inset-0 cursor-pointer opacity-0"
                               onBlur={field.handleBlur}
                               onChange={(e) => {
@@ -430,7 +433,7 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                                   Click to upload or drag and drop
                                 </span>
                                 <span className="mt-1 text-muted-foreground text-xs">
-                                  PNG, JPG up to 5MB
+                                  PNG, JPG, JPEG up to 5MB
                                 </span>
                               </>
                             )}

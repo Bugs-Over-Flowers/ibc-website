@@ -271,7 +271,7 @@ export function Step2Company({ form, sectors }: StepProps) {
                                         Click to upload or drag and drop
                                       </span>
                                       <span className="mt-1 text-muted-foreground text-xs">
-                                        PNG, JPG up to 5MB
+                                        PNG, JPG, JPEG up to 5MB
                                       </span>
                                     </>
                                   )}

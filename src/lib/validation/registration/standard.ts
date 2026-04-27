@@ -1,4 +1,5 @@
 import z from "zod";
+import { ImageUploadFileSchema } from "@/lib/fileUpload";
 import { titleCase } from "@/lib/utils";
 import {
   landlineSchema,
@@ -141,10 +142,7 @@ export const StandardRegistrationStep3Schema = z.discriminatedUnion(
     z
       .object({
         paymentMethod: z.literal(PaymentMethodEnum.enum.online),
-        paymentProof: z
-          .file()
-          .max(1024 * 1024 * 5)
-          .optional(),
+        paymentProof: z.union([ImageUploadFileSchema, z.undefined()]),
       })
       .refine((data) => data.paymentProof !== undefined, {
         message: "Payment proof is required for online payment.",
