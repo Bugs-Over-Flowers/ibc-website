@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { getWebsiteContentSection } from "@/server/website-content/mutations/getWebsiteContentSection";
+import { saveWebsiteContentSection } from "@/server/website-content/mutations/saveWebsiteContentSection";
+import { getWebsiteContentSection } from "@/server/website-content/queries/getWebsiteContentSection";
 import {
   getWebsiteContentSectionsSummary,
   type WebsiteContentSectionsSummary,
-} from "@/server/website-content/mutations/getWebsiteContentSectionsSummary";
-import { saveWebsiteContentSection } from "@/server/website-content/mutations/saveWebsiteContentSection";
+} from "@/server/website-content/queries/getWebsiteContentSectionsSummary";
 import type {
   WebsiteContentCardState,
   WebsiteContentFormState,
@@ -61,8 +61,21 @@ export function useWebsiteContentEditor(
   const [hasLoadedSectionSummaries, setHasLoadedSectionSummaries] =
     useState(false);
 
+  const getWebsiteContentSectionsSummaryAction = useMemo(
+    () => tryCatch(getWebsiteContentSectionsSummary),
+    [],
+  );
+  const getWebsiteContentSectionAction = useMemo(
+    () => tryCatch(getWebsiteContentSection),
+    [],
+  );
+  const saveWebsiteContentSectionAction = useMemo(
+    () => tryCatch(saveWebsiteContentSection),
+    [],
+  );
+
   const { execute: loadSectionSummaries } = useAction(
-    tryCatch(getWebsiteContentSectionsSummary),
+    getWebsiteContentSectionsSummaryAction,
     {
       onSuccess: (summary: WebsiteContentSectionsSummary) => {
         const nextUpdatedAtBySection: Partial<
@@ -92,7 +105,7 @@ export function useWebsiteContentEditor(
   );
 
   const { execute: loadSection, isPending: isLoadingSection } = useAction(
-    tryCatch(getWebsiteContentSection),
+    getWebsiteContentSectionAction,
     {
       onSuccess: (data: WebsiteContentSectionData) => {
         setForm(data.form);
@@ -130,7 +143,7 @@ export function useWebsiteContentEditor(
   );
 
   const { execute: saveSection, isPending: isSavingSection } = useAction(
-    tryCatch(saveWebsiteContentSection),
+    saveWebsiteContentSectionAction,
     {
       onSuccess: async (result: { updatedAt: string }) => {
         if (activeSection) {
