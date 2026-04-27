@@ -1,6 +1,13 @@
 "use client";
 
-import { Building2, CalendarDays, ExternalLink, Eye, Star } from "lucide-react";
+import {
+  Building2,
+  CalendarDays,
+  ExternalLink,
+  Eye,
+  Star,
+  StarOff,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,6 +19,9 @@ interface MembersTableRowProps {
   member: Awaited<ReturnType<typeof getMembers>>[number];
   isSelected: boolean;
   onFeatureClick: (
+    member: Awaited<ReturnType<typeof getMembers>>[number],
+  ) => void;
+  onRemoveFeatureClick: (
     member: Awaited<ReturnType<typeof getMembers>>[number],
   ) => void;
   onSelectedChange: (selected: boolean) => void;
@@ -28,6 +38,7 @@ export function MembersTableRow({
   member,
   isSelected,
   onFeatureClick,
+  onRemoveFeatureClick,
   onSelectedChange,
   showCheckbox = false,
 }: MembersTableRowProps) {
@@ -215,12 +226,15 @@ export function MembersTableRow({
         {/* Feature button */}
         {isCurrentlyFeatured ? (
           <button
-            className="mt-auto inline-flex h-8 w-full cursor-default items-center justify-center gap-1.5 rounded-lg border border-[#EF9F27] bg-[#FAEEDA] font-medium text-[#633806] text-xs dark:border-[#854F0B] dark:bg-[#412402] dark:text-[#FAC775]"
-            disabled
+            className="mt-auto inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 font-medium text-red-700 text-xs transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-900/40"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemoveFeatureClick(member);
+            }}
             type="button"
           >
-            <Star className="size-3 fill-current" />
-            Already Featured
+            <StarOff className="size-3" />
+            Remove Featured Member
           </button>
         ) : (
           <button

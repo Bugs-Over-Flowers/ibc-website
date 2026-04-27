@@ -27,3 +27,11 @@ export const FeatureMemberSchema = z.object({
 });
 
 export type FeatureMemberInput = z.infer<typeof FeatureMemberSchema>;
+
+export const RemoveFeaturedMemberSchema = z.object({
+  memberId: z.uuid(),
+});
+
+export type RemoveFeaturedMemberInput = z.infer<
+  typeof RemoveFeaturedMemberSchema
+>;
