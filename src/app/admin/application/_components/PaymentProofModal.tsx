@@ -27,6 +27,7 @@ import {
   IMAGE_UPLOAD_ACCEPT_ATTR,
   isValidImageUploadFile,
 } from "@/lib/fileUpload";
+import { MEMBERSHIP_FEES } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import { uploadPaymentProof } from "@/lib/storage/uploadPaymentProof";
 import type { Enums } from "@/lib/supabase/db.types";
