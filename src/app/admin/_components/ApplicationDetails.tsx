@@ -90,7 +90,6 @@ function MemberReviewDetails({
     applicationType: application.applicationType,
     previousApplicationMemberType: application.previousApplicationMemberType,
   });
-  const isPaymentNotRequired = !paymentRequirement.requiresPayment;
 
   return (
     <div className="space-y-8">
@@ -390,36 +389,30 @@ function MemberReviewDetails({
         </CardContent>
       </Card>
 
-      <Card className="rounded-2xl border border-border/50 bg-background">
-        <CardContent className="space-y-6 px-7 py-0">
-          <div className="flex items-center gap-2 font-bold text-primary">
-            <CreditCard className="h-5 w-5" />
-            <span className="text-base uppercase tracking-wide">
-              Payment Information
-            </span>
-          </div>
+      {paymentRequirement.requiresPayment && (
+        <Card className="rounded-2xl border border-border/50 bg-background">
+          <CardContent className="space-y-6 px-7 py-0">
+            <div className="flex items-center gap-2 font-bold text-primary">
+              <CreditCard className="h-5 w-5" />
+              <span className="text-base uppercase tracking-wide">
+                Payment Information
+              </span>
+            </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <DetailRow
-              label="Payment Requirement"
-              value={paymentRequirement.statusLabel}
-            />
-            <DetailRow
-              label="Payment Method"
-              value={
-                isPaymentNotRequired
-                  ? "Not required"
-                  : toPascalCaseWithSpaces(application.paymentMethod || "N/A")
-              }
-            />
-            <DetailRow
-              label="Payment Status"
-              value={
-                isPaymentNotRequired ? (
-                  <Badge className="bg-status-green" variant="secondary">
-                    Not Required
-                  </Badge>
-                ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <DetailRow
+                label="Payment Requirement"
+                value={paymentRequirement.statusLabel}
+              />
+              <DetailRow
+                label="Payment Method"
+                value={toPascalCaseWithSpaces(
+                  application.paymentMethod || "N/A",
+                )}
+              />
+              <DetailRow
+                label="Payment Status"
+                value={
                   <Badge
                     className={getPaymentStatusClasses(
                       application.paymentProofStatus,
@@ -430,22 +423,22 @@ function MemberReviewDetails({
                       application.paymentProofStatus || "Pending",
                     )}
                   </Badge>
-                )
-              }
-            />
-            {paymentRequirement.requiresPayment && (
+                }
+              />
               <DetailRow
                 label="Expected Amount"
                 value={`P${paymentRequirement.expectedAmount.toLocaleString()}`}
               />
-            )}
-            <DetailRow
-              label="Application Date"
-              value={new Date(application.applicationDate).toLocaleDateString()}
-            />
-          </div>
-        </CardContent>
-      </Card>
+              <DetailRow
+                label="Application Date"
+                value={new Date(
+                  application.applicationDate,
+                ).toLocaleDateString()}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
