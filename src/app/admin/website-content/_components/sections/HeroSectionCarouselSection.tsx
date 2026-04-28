@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import type { HeroSectionCarouselProps } from "../../_types/section-props";
+import type { HeroSectionCarouselProps } from "../../_types/sectionProps";
 
 const HERO_PAGES = [
   { key: "about", label: "About" },
