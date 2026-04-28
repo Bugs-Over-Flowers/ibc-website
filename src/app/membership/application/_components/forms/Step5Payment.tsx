@@ -1,6 +1,6 @@
 import { useStore } from "@tanstack/react-form";
 import {
-  AlertCircle,
+  ArrowUpCircle,
   Building2,
   CheckCircle2,
   CreditCard,
@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MembershipGuidelines } from "@/app/membership/application/_components/MembershipGuidelines";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
@@ -45,10 +45,32 @@ export function Step5Payment({ form, applicationData }: StepProps) {
     form.store,
     (state) => state.values.paymentProof,
   );
+  const applicationMemberType = useStore(
+    form.store,
+    (state) => state.values.applicationMemberType,
+  );
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const hasInitializedUpdatePayment = useRef(false);
 
   const isUpdateInfo = applicationData.step1.applicationType === "updating";
+  const existingApplicationMemberType =
+    applicationData.step1.existingApplicationMemberType;
+  const canUpgradeToCorporate =
+    isUpdateInfo && existingApplicationMemberType === "personal";
+  const isCorporateUpgrade =
+    canUpgradeToCorporate && applicationMemberType === "corporate";
+  const requiresPayment = !isUpdateInfo || isCorporateUpgrade;
+
+  const resetToFreeUpdate = () => {
+    form.setFieldValue(
+      "applicationMemberType",
+      existingApplicationMemberType ?? applicationMemberType,
+    );
+    form.setFieldValue("paymentMethod", "ONSITE");
+    form.setFieldValue("paymentProof", undefined);
+    form.resetField("paymentProof");
+  };
 
   const handleDrag = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -68,6 +90,22 @@ export function Step5Payment({ form, applicationData }: StepProps) {
 
   useEffect(() => {
     if (
+      !isUpdateInfo ||
+      hasInitializedUpdatePayment.current ||
+      !existingApplicationMemberType
+    ) {
+      return;
+    }
+
+    hasInitializedUpdatePayment.current = true;
+    form.setFieldValue("applicationMemberType", existingApplicationMemberType);
+    form.setFieldValue("paymentMethod", "ONSITE");
+    form.setFieldValue("paymentProof", undefined);
+    form.resetField("paymentProof");
+  }, [form, existingApplicationMemberType, isUpdateInfo]);
+
+  useEffect(() => {
+    if (
       paymentProof instanceof File &&
       paymentProof.type.startsWith("image/")
     ) {
@@ -82,17 +120,91 @@ export function Step5Payment({ form, applicationData }: StepProps) {
   return (
     <div className="space-y-8">
       {isUpdateInfo && (
-        <Alert className="rounded-xl border-amber-500/40 bg-amber-50 dark:border-amber-400/50 dark:bg-amber-500/15">
-          <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-300" />
-          <AlertTitle className="text-amber-800 dark:text-amber-200">
-            Information Update Fee
+        <Alert className="rounded-xl border-emerald-500/40 bg-emerald-50 dark:border-emerald-400/50 dark:bg-emerald-500/15">
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+          <AlertTitle className="text-emerald-800 dark:text-emerald-200">
+            Information updates are free
           </AlertTitle>
-          <AlertDescription className="text-amber-700 dark:text-amber-100/90">
-            Updating your membership information requires a processing fee of{" "}
-            <span className="font-semibold">P2,000.00</span>. Please complete
-            the payment using one of the methods below.
+          <AlertDescription className="text-emerald-700 dark:text-emerald-100/90">
+            Updating member information does not require payment unless you are
+            upgrading a personal membership to corporate. Corporate upgrades
+            cost <span className="font-semibold">P5,000.00</span>.
           </AlertDescription>
         </Alert>
+      )}
+
+      {isUpdateInfo && (
+        <div className="space-y-4 rounded-xl bg-transparent p-0">
+          <div className="font-semibold text-foreground text-lg">
+            Corporate Upgrade
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <button
+              className={cn(
+                "flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
+                !isCorporateUpgrade && "border-primary bg-primary/5",
+              )}
+              onClick={resetToFreeUpdate}
+              type="button"
+            >
+              <span className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                <CheckCircle2 className="h-5 w-5" />
+              </span>
+              <span className="font-semibold text-foreground text-lg">
+                Keep as update only
+              </span>
+              <span className="mt-2 font-bold text-emerald-700 text-xl dark:text-emerald-300">
+                Free
+              </span>
+              <span className="mt-1 text-muted-foreground text-xs">
+                No payment method or proof needed
+              </span>
+            </button>
+
+            {canUpgradeToCorporate ? (
+              <button
+                className={cn(
+                  "flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
+                  isCorporateUpgrade && "border-primary bg-primary/5",
+                )}
+                onClick={() =>
+                  form.setFieldValue("applicationMemberType", "corporate")
+                }
+                type="button"
+              >
+                <span
+                  className={cn(
+                    "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/40 text-muted-foreground",
+                    isCorporateUpgrade &&
+                      "border-primary/30 bg-primary/10 text-primary",
+                  )}
+                >
+                  <ArrowUpCircle className="h-5 w-5" />
+                </span>
+                <span className="font-semibold text-foreground text-lg">
+                  Upgrade to Corporate
+                </span>
+                <span className="mt-2 font-bold text-primary text-xl">
+                  P5,000
+                </span>
+                <span className="mt-1 text-muted-foreground text-xs">
+                  Payment method unlocks after selection
+                </span>
+              </button>
+            ) : (
+              <div className="flex min-h-36 flex-col items-center justify-center rounded-xl border-2 border-border border-dashed bg-muted/20 p-4 text-center">
+                <Building2 className="mb-2 h-8 w-8 text-muted-foreground" />
+                <span className="font-semibold text-foreground text-lg">
+                  Corporate upgrade unavailable
+                </span>
+                <span className="mt-1 text-muted-foreground text-xs">
+                  This member is already corporate or the current member type
+                  was not found.
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {!isUpdateInfo && (
@@ -173,300 +285,306 @@ export function Step5Payment({ form, applicationData }: StepProps) {
         </div>
       )}
 
-      <div className="space-y-4 rounded-xl bg-transparent p-0">
-        <div className="font-semibold text-foreground text-lg">
-          Select Payment Method
-        </div>
+      {requiresPayment ? (
+        <div className="space-y-4 rounded-xl bg-transparent p-0">
+          <div className="font-semibold text-foreground text-lg">
+            Select Payment Method
+          </div>
 
-        <form.AppField
-          listeners={{
-            onChange: ({ value }) => {
-              if (value === "ONSITE") {
-                form.setFieldValue("paymentProof", undefined);
-                form.resetField("paymentProof");
-              }
-            },
-          }}
-          name="paymentMethod"
-        >
-          {(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && field.state.meta.errors.length > 0;
-
-            const options = [
-              {
-                value: "ONSITE" as const,
-                label: "Onsite Payment",
-                description: "Pay in person at IBC office",
-                icon: MapPin,
+          <form.AppField
+            listeners={{
+              onChange: ({ value }) => {
+                if (value === "ONSITE") {
+                  form.setFieldValue("paymentProof", undefined);
+                  form.resetField("paymentProof");
+                }
               },
-              {
-                value: "BPI" as const,
-                label: "Bank Transfer",
-                description: "Secure bank transfer via BPI",
-                icon: CreditCard,
-              },
-            ];
+            }}
+            name="paymentMethod"
+          >
+            {(field) => {
+              const isInvalid =
+                field.state.meta.isTouched &&
+                field.state.meta.errors.length > 0;
 
-            return (
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {options.map((option) => {
-                    const Icon = option.icon;
+              const options = [
+                {
+                  value: "ONSITE" as const,
+                  label: "Onsite Payment",
+                  description: "Pay in person at IBC office",
+                  icon: MapPin,
+                },
+                {
+                  value: "BPI" as const,
+                  label: "Bank Transfer",
+                  description: "Secure bank transfer via BPI",
+                  icon: CreditCard,
+                },
+              ];
 
-                    return (
-                      <button
-                        className={cn(
-                          "flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
-                          field.state.value === option.value &&
-                            "border-primary bg-primary/5",
-                          isInvalid && "border-destructive/70 bg-destructive/5",
-                        )}
-                        data-invalid={isInvalid}
-                        key={option.value}
-                        onClick={() => field.handleChange(option.value)}
-                        type="button"
-                      >
-                        <span
+              return (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {options.map((option) => {
+                      const Icon = option.icon;
+
+                      return (
+                        <button
                           className={cn(
-                            "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/40 text-muted-foreground",
+                            "flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border bg-transparent p-4 text-center transition-all",
                             field.state.value === option.value &&
-                              "border-primary/30 bg-primary/10 text-primary",
+                              "border-primary bg-primary/5",
+                            isInvalid &&
+                              "border-destructive/70 bg-destructive/5",
                           )}
+                          data-invalid={isInvalid}
+                          key={option.value}
+                          onClick={() => field.handleChange(option.value)}
+                          type="button"
                         >
-                          <Icon className="h-5 w-5" />
-                        </span>
-                        <span className="font-semibold text-foreground text-lg">
-                          {option.label}
-                        </span>
-                        <span className="mt-1 text-muted-foreground text-sm">
-                          {option.description}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                <FieldError errors={field.state.meta.errors} reserveSpace />
-              </div>
-            );
-          }}
-        </form.AppField>
-
-        <form.Subscribe selector={(state) => state.values.paymentMethod}>
-          {(paymentMethod) =>
-            paymentMethod === "ONSITE" && (
-              <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-linear-to-br from-primary/5 to-primary/2 p-6">
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <MapPin className="h-5 w-5 text-primary" />
+                          <span
+                            className={cn(
+                              "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/40 text-muted-foreground",
+                              field.state.value === option.value &&
+                                "border-primary/30 bg-primary/10 text-primary",
+                            )}
+                          >
+                            <Icon className="h-5 w-5" />
+                          </span>
+                          <span className="font-semibold text-foreground text-lg">
+                            {option.label}
+                          </span>
+                          <span className="mt-1 text-muted-foreground text-sm">
+                            {option.description}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-foreground">
-                      IBC Office Location
-                    </h4>
-                    <p className="mt-1 text-muted-foreground text-xs">
-                      Visit us during business hours
-                    </p>
-                  </div>
+                  <FieldError errors={field.state.meta.errors} reserveSpace />
                 </div>
+              );
+            }}
+          </form.AppField>
 
-                <div className="space-y-2 rounded-lg border border-border/40 bg-background/50 p-4">
-                  <div className="flex flex-col gap-2 text-sm">
-                    <span className="text-muted-foreground">Address</span>
-                    <span className="font-medium text-foreground leading-relaxed">
-                      Rm 105-B, G/F Maryville Bldg.,
-                      <br />
-                      Marymart Mall, Delgado Street,
-                      <br />
-                      Iloilo City, Philippines
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )
-          }
-        </form.Subscribe>
-
-        <form.Subscribe selector={(state) => state.values.paymentMethod}>
-          {(paymentMethod) =>
-            paymentMethod === "BPI" && (
-              <div className="space-y-4">
+          <form.Subscribe selector={(state) => state.values.paymentMethod}>
+            {(paymentMethod) =>
+              paymentMethod === "ONSITE" && (
                 <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-linear-to-br from-primary/5 to-primary/2 p-6">
                   <div className="flex items-start gap-3">
                     <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <CreditCard className="h-5 w-5 text-primary" />
+                      <MapPin className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-foreground">
-                        Bank Transfer Details
+                        IBC Office Location
                       </h4>
                       <p className="mt-1 text-muted-foreground text-xs">
-                        Use your registration ID as payment reference
+                        Visit us during business hours
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="mx-auto flex w-full max-w-[220px] flex-col items-center gap-2 rounded-lg border border-border/40 bg-background/50 p-3">
-                      <Image
-                        alt="IBC bank transfer QR code"
-                        className="h-auto w-full rounded-md border border-border/40 bg-white object-contain"
-                        height={200}
-                        src="/info/sampleqr.jpeg"
-                        width={200}
-                      />
-                      <p className="text-center text-muted-foreground text-xs">
-                        Scan to transfer via BPI
-                      </p>
-                    </div>
-
-                    <div className="space-y-2 rounded-lg border border-border/40 bg-background/50 p-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Bank</span>
-                        <span className="font-medium text-foreground">
-                          (BPI) Bank of the Philippine Islands
-                        </span>
-                      </div>
-                      <div className="border-border/20 border-t" />
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Account Number
-                        </span>
-                        <span className="font-medium font-mono text-foreground">
-                          000XXXXXXXX
-                        </span>
-                      </div>
-                      <div className="border-border/20 border-t" />
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Account Name
-                        </span>
-                        <span className="font-medium text-foreground">
-                          Iloilo Business Club
-                        </span>
-                      </div>
+                  <div className="space-y-2 rounded-lg border border-border/40 bg-background/50 p-4">
+                    <div className="flex flex-col gap-2 text-sm">
+                      <span className="text-muted-foreground">Address</span>
+                      <span className="font-medium text-foreground leading-relaxed">
+                        Rm 105-B, G/F Maryville Bldg.,
+                        <br />
+                        Marymart Mall, Delgado Street,
+                        <br />
+                        Iloilo City, Philippines
+                      </span>
                     </div>
                   </div>
                 </div>
+              )
+            }
+          </form.Subscribe>
 
-                <form.AppField name="paymentProof">
-                  {(field) => {
-                    const selectedFile = field.state.value as File | undefined;
-                    const isInvalid =
-                      field.state.meta.isTouched &&
-                      field.state.meta.errors.length > 0;
+          <form.Subscribe selector={(state) => state.values.paymentMethod}>
+            {(paymentMethod) =>
+              paymentMethod === "BPI" && (
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-linear-to-br from-primary/5 to-primary/2 p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <CreditCard className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground">
+                          Bank Transfer Details
+                        </h4>
+                        <p className="mt-1 text-muted-foreground text-xs">
+                          Use your registration ID as payment reference
+                        </p>
+                      </div>
+                    </div>
 
-                    return (
-                      <div className="space-y-2">
-                        <Label className="font-semibold text-foreground text-sm">
-                          Upload Proof of Payment *
-                        </Label>
-                        <div className="space-y-2 rounded-xl bg-background p-0">
-                          <button
-                            aria-invalid={isInvalid}
-                            className={cn(
-                              "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all",
-                              selectedFile &&
-                                "border-emerald-500 bg-emerald-50/60 dark:border-emerald-400/70 dark:bg-emerald-500/15",
-                              !selectedFile &&
-                                "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
-                              dragActive &&
+                    <div className="space-y-4">
+                      <div className="mx-auto flex w-full max-w-[220px] flex-col items-center gap-2 rounded-lg border border-border/40 bg-background/50 p-3">
+                        <Image
+                          alt="IBC bank transfer QR code"
+                          className="h-auto w-full rounded-md border border-border/40 bg-white object-contain"
+                          height={200}
+                          src="/info/sampleqr.jpeg"
+                          width={200}
+                        />
+                        <p className="text-center text-muted-foreground text-xs">
+                          Scan to transfer via BPI
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 rounded-lg border border-border/40 bg-background/50 p-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Bank</span>
+                          <span className="font-medium text-foreground">
+                            (BPI) Bank of the Philippine Islands
+                          </span>
+                        </div>
+                        <div className="border-border/20 border-t" />
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Account Number
+                          </span>
+                          <span className="font-medium font-mono text-foreground">
+                            000XXXXXXXX
+                          </span>
+                        </div>
+                        <div className="border-border/20 border-t" />
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Account Name
+                          </span>
+                          <span className="font-medium text-foreground">
+                            Iloilo Business Club
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <form.AppField name="paymentProof">
+                    {(field) => {
+                      const selectedFile = field.state.value as
+                        | File
+                        | undefined;
+                      const isInvalid =
+                        field.state.meta.isTouched &&
+                        field.state.meta.errors.length > 0;
+
+                      return (
+                        <div className="space-y-2">
+                          <Label className="font-semibold text-foreground text-sm">
+                            Upload Proof of Payment *
+                          </Label>
+                          <div className="space-y-2 rounded-xl bg-background p-0">
+                            <button
+                              aria-invalid={isInvalid}
+                              className={cn(
+                                "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all",
+                                selectedFile &&
+                                  "border-emerald-500 bg-emerald-50/60 dark:border-emerald-400/70 dark:bg-emerald-500/15",
                                 !selectedFile &&
-                                "border-primary bg-primary/5",
-                              isInvalid &&
-                                "border-destructive bg-destructive/5 hover:border-destructive",
-                            )}
-                            onDragEnter={handleDrag}
-                            onDragLeave={handleDrag}
-                            onDragOver={handleDrag}
-                            onDrop={(e) => {
-                              handleDrop(e);
-                              if (e.dataTransfer.files?.[0]) {
-                                const droppedFile = e.dataTransfer.files[0];
-                                if (!isValidPaymentProof(droppedFile)) {
-                                  return;
-                                }
+                                  "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
+                                dragActive &&
+                                  !selectedFile &&
+                                  "border-primary bg-primary/5",
+                                isInvalid &&
+                                  "border-destructive bg-destructive/5 hover:border-destructive",
+                              )}
+                              onDragEnter={handleDrag}
+                              onDragLeave={handleDrag}
+                              onDragOver={handleDrag}
+                              onDrop={(e) => {
+                                handleDrop(e);
+                                if (e.dataTransfer.files?.[0]) {
+                                  const droppedFile = e.dataTransfer.files[0];
+                                  if (!isValidPaymentProof(droppedFile)) {
+                                    return;
+                                  }
 
-                                field.handleChange(droppedFile);
-                              }
-                            }}
-                            type="button"
-                          >
-                            <input
-                              accept={IMAGE_UPLOAD_ACCEPT_ATTR}
-                              className="absolute inset-0 cursor-pointer opacity-0"
-                              onBlur={field.handleBlur}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (!file || !isValidPaymentProof(file)) {
-                                  return;
+                                  field.handleChange(droppedFile);
                                 }
-
-                                field.handleChange(file);
                               }}
-                              tabIndex={-1}
-                              type="file"
-                            />
+                              type="button"
+                            >
+                              <input
+                                accept="image/png,image/jpeg,image/jpg"
+                                className="absolute inset-0 cursor-pointer opacity-0"
+                                onBlur={field.handleBlur}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file || !isValidPaymentProof(file)) {
+                                    return;
+                                  }
+
+                                  field.handleChange(file);
+                                }}
+                                tabIndex={-1}
+                                type="file"
+                              />
+
+                              {selectedFile ? (
+                                <>
+                                  {proofPreview ? (
+                                    <Image
+                                      alt="Payment proof preview"
+                                      className="mt-3 h-12 w-12 rounded-md object-contain"
+                                      height={48}
+                                      src={proofPreview}
+                                      width={48}
+                                    />
+                                  ) : null}
+                                  <span className="font-medium text-emerald-700 dark:text-emerald-300">
+                                    Proof Uploaded Successfully
+                                  </span>
+                                  <Badge className="mt-2" variant="outline">
+                                    {selectedFile.name}
+                                  </Badge>
+                                </>
+                              ) : (
+                                <>
+                                  <UploadCloud className="mb-2 h-8 w-8 text-muted-foreground" />
+                                  <span className="font-medium text-muted-foreground">
+                                    Click to upload or drag and drop
+                                  </span>
+                                  <span className="mt-1 text-muted-foreground text-xs">
+                                    PNG, JPG up to 5MB
+                                  </span>
+                                </>
+                              )}
+                            </button>
 
                             {selectedFile ? (
-                              <>
-                                {proofPreview ? (
-                                  <Image
-                                    alt="Payment proof preview"
-                                    className="mt-3 h-12 w-12 rounded-md object-contain"
-                                    height={48}
-                                    src={proofPreview}
-                                    width={48}
-                                  />
-                                ) : null}
-                                <span className="font-medium text-emerald-700 dark:text-emerald-300">
-                                  Proof Uploaded Successfully
-                                </span>
-                                <Badge className="mt-2" variant="outline">
-                                  {selectedFile.name}
-                                </Badge>
-                              </>
-                            ) : (
-                              <>
-                                <UploadCloud className="mb-2 h-8 w-8 text-muted-foreground" />
-                                <span className="font-medium text-muted-foreground">
-                                  Click to upload or drag and drop
-                                </span>
-                                <span className="mt-1 text-muted-foreground text-xs">
-                                  PNG, JPG, JPEG up to 5MB
-                                </span>
-                              </>
-                            )}
-                          </button>
-
-                          {selectedFile ? (
-                            <div className="mt-3 flex justify-center">
-                              <Button
-                                className="h-9 rounded-lg border-destructive/30 px-4 font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                onClick={() => field.handleChange(undefined)}
-                                size="sm"
-                                type="button"
-                                variant="outline"
-                              >
-                                <X className="mr-1 h-4 w-4" />
-                                Remove payment proof
-                              </Button>
-                            </div>
-                          ) : null}
+                              <div className="mt-3 flex justify-center">
+                                <Button
+                                  className="h-9 rounded-lg border-destructive/30 px-4 font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                  onClick={() => field.handleChange(undefined)}
+                                  size="sm"
+                                  type="button"
+                                  variant="outline"
+                                >
+                                  <X className="mr-1 h-4 w-4" />
+                                  Remove payment proof
+                                </Button>
+                              </div>
+                            ) : null}
+                          </div>
+                          <FieldError
+                            errors={field.state.meta.errors}
+                            reserveSpace
+                          />
                         </div>
-                        <FieldError
-                          errors={field.state.meta.errors}
-                          reserveSpace
-                        />
-                      </div>
-                    );
-                  }}
-                </form.AppField>
-              </div>
-            )
-          }
-        </form.Subscribe>
-      </div>
+                      );
+                    }}
+                  </form.AppField>
+                </div>
+              )
+            }
+          </form.Subscribe>
+        </div>
+      ) : null}
 
       <div className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center sm:p-8">
         <CheckCircle2 className="mx-auto h-12 w-12 text-primary/60" />

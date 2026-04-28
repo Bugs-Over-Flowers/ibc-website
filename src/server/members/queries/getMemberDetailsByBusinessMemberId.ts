@@ -63,6 +63,7 @@ export async function getMemberDetailsByBusinessMemberId(
       businessMemberId,
       businessName,
       identifier,
+      primaryApplicationId,
       sectorId,
       websiteURL,
       logoImageURL,
@@ -113,9 +114,7 @@ export async function getMemberDetailsByBusinessMemberId(
         )
       `,
       )
-      .eq("businessMemberId", businessMemberId)
-      .order("applicationDate", { ascending: false })
-      .limit(1)
+      .eq("applicationId", member.primaryApplicationId)
       .maybeSingle();
 
   if (latestApplicationError) {

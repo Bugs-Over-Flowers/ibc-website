@@ -2,6 +2,7 @@
 
 import { FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import type { ApplicationWithMembers } from "@/lib/types/application";
 
 interface ExportPDFButtonProps {
@@ -10,6 +11,12 @@ interface ExportPDFButtonProps {
 
 export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
   const handleExport = () => {
+    const paymentRequirement = getMembershipPaymentRequirement({
+      applicationMemberType: application.applicationMemberType,
+      applicationType: application.applicationType,
+      previousApplicationMemberType: application.previousApplicationMemberType,
+    });
+
     // Create a printable version of the application
     const printWindow = window.open("", "_blank");
 
@@ -151,6 +158,9 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
           `,
           ).join("")}
 
+          ${
+            paymentRequirement.requiresPayment
+              ? `
           <h2>Payment Information</h2>
           <div class="info-grid">
             <div class="label">Payment Method:</div>
@@ -158,7 +168,13 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
 
             <div class="label">Payment Status:</div>
             <div class="value">${application.paymentProofStatus}</div>
+
+            <div class="label">Expected Amount:</div>
+            <div class="value">P${paymentRequirement.expectedAmount.toLocaleString()}</div>
           </div>
+          `
+              : ""
+          }
 
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666;">
             <p>Iloilo Business Club - Membership Application</p>

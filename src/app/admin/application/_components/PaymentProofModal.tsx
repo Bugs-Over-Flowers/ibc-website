@@ -49,9 +49,6 @@ interface PaymentProofModalProps {
   trigger?: React.ReactElement;
 }
 
-const PERSONAL_FEE = 5000;
-const CORPORATE_FEE = 10000;
-
 const STATUS_CONFIG = {
   accepted: {
     chip: "bg-[#EAF3DE] text-[#27500A] border-[#97C459] dark:bg-[#27500A] dark:text-[#C0DD97] dark:border-[#3B6D11]",
@@ -101,7 +98,11 @@ export function PaymentProofModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const status = STATUS_CONFIG[paymentProofStatus] ?? STATUS_CONFIG.pending;
   const { Icon } = status;
-  const isPersonal = expectedRegistrationFee === PERSONAL_FEE;
+  const isCorporateUpgrade =
+    expectedRegistrationFee === MEMBERSHIP_FEES.corporateUpgrade &&
+    membershipTypeLabel.toLowerCase().includes("upgrade");
+  const isPersonal =
+    !isCorporateUpgrade && expectedRegistrationFee === MEMBERSHIP_FEES.personal;
   const canReplaceProof =
     paymentProofStatus === "rejected" || paymentProofStatus === "accepted";
 
@@ -231,7 +232,9 @@ export function PaymentProofModal({
                 ₱{expectedRegistrationFee.toLocaleString()}
               </span>
               <span className="text-muted-foreground text-xs">
-                Required for {membershipTypeLabel.toLowerCase()} membership
+                {isCorporateUpgrade
+                  ? "Required for personal to corporate upgrade"
+                  : `Required for ${membershipTypeLabel.toLowerCase()} membership`}
               </span>
             </div>
 
@@ -262,7 +265,7 @@ export function PaymentProofModal({
                       isPersonal && "text-[#185FA5] dark:text-[#85B7EB]",
                     )}
                   >
-                    ₱{PERSONAL_FEE.toLocaleString()}
+                    ₱{MEMBERSHIP_FEES.personal.toLocaleString()}
                   </span>
                 </div>
                 <div
@@ -278,7 +281,7 @@ export function PaymentProofModal({
                         "font-medium text-[#0C447C] dark:text-[#B5D4F4]",
                     )}
                   >
-                    Corporate
+                    {isCorporateUpgrade ? "Corporate Upgrade" : "Corporate"}
                   </span>
                   <span
                     className={cn(
@@ -286,7 +289,11 @@ export function PaymentProofModal({
                       !isPersonal && "text-[#185FA5] dark:text-[#85B7EB]",
                     )}
                   >
-                    ₱{CORPORATE_FEE.toLocaleString()}
+                    ₱
+                    {(isCorporateUpgrade
+                      ? MEMBERSHIP_FEES.corporateUpgrade
+                      : MEMBERSHIP_FEES.corporate
+                    ).toLocaleString()}
                   </span>
                 </div>
               </div>

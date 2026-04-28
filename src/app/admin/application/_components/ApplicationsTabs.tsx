@@ -86,7 +86,7 @@ export default function ApplicationsTabs({
   const showMeetingScheduler =
     activeGroup === "interview" && activeTab === "new";
 
-  const showSidebar = activeTab !== "finished" || activeGroup === "updating";
+  const showSidebar = activeTab !== "finished";
 
   const interviewBreakdownByTab =
     activeGroup === "interview" ? counts.interview.typeBreakdown : null;

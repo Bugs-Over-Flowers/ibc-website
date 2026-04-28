@@ -54,7 +54,7 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
     // Contact Information
     emailAddress: latestApplication.emailAddress || "",
     landline: latestApplication.landline || "",
-    mobileNumber: latestApplication.mobileNumber || "",
+    mobileNumber: latestApplication.mobileNumber,
 
     // Applicant Representatives
     representatives: [

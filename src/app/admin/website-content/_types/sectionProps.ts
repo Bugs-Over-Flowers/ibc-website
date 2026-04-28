@@ -128,3 +128,13 @@ export interface LandingBenefitsSectionProps {
     value: string,
   ) => void;
 }
+
+export interface HeroSectionCarouselProps {
+  cards: WebsiteContentCardState[];
+  onCardFieldChange: (
+    entryKey: string,
+    field: keyof WebsiteContentCardState,
+    value: string,
+  ) => void;
+  onCardsReorder: (nextCards: WebsiteContentCardState[]) => void;
+}
