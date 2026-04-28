@@ -157,34 +157,42 @@ export function GoalsSection({
   const PreviewCard = ({ card }: { card: (typeof cards)[number] }) => {
     return (
       <button
-        className="relative overflow-hidden rounded-lg border border-border p-4 text-left text-sm transition-colors hover:bg-accent/50"
+        className="text-left"
         onClick={() => setEditingCardKey(card.entryKey)}
         type="button"
       >
-        <div className="flex flex-col gap-3">
-          <div className="flex items-start gap-3">
-            {card.icon && (
-              <div className="shrink-0">
-                {typeof card.icon === "string" && ICON_MAP[card.icon] ? (
-                  (() => {
-                    const IconComponent = ICON_MAP[card.icon];
-                    return <IconComponent className="h-5 w-5 text-primary" />;
-                  })()
-                ) : (
-                  <span className="text-base">{card.icon}</span>
-                )}
+        <Card className="relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300">
+          <div className="absolute top-0 right-0 left-0 h-1 bg-linear-to-r from-transparent via-primary to-transparent" />
+          <CardContent className="flex flex-col items-center p-8 text-center">
+            <div className="mb-6 flex items-center justify-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20 backdrop-blur-sm">
+                {card.icon ? (
+                  typeof card.icon === "string" && ICON_MAP[card.icon] ? (
+                    (() => {
+                      const IconComponent = ICON_MAP[card.icon];
+                      return <IconComponent className="h-7 w-7 text-primary" />;
+                    })()
+                  ) : (
+                    <span className="text-lg">{card.icon}</span>
+                  )
+                ) : null}
               </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold">{card.title}</p>
             </div>
-          </div>
-          <div className="line-clamp-3 text-muted-foreground">
+            <h3 className="mb-3 font-bold text-foreground text-xl">
+              {card.title || "Goal Title"}
+            </h3>
             {card.paragraph ? (
-              <RichTextDisplay content={card.paragraph} />
-            ) : null}
-          </div>
-        </div>
+              <RichTextDisplay
+                className="mb-4 text-foreground/80 leading-relaxed"
+                content={card.paragraph}
+              />
+            ) : (
+              <p className="mb-4 text-foreground/80 leading-relaxed">
+                Goal description will appear here...
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </button>
     );
   };
