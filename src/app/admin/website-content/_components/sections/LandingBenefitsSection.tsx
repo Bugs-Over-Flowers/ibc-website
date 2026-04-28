@@ -3,15 +3,26 @@
 import { useForm } from "@tanstack/react-form";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import type { LandingBenefitsSectionProps } from "../../_types/section-props";
+import type { LandingBenefitsSectionProps } from "../../_types/sectionProps";
 import { LucideIconPicker } from "../LucideIconPicker";
 import { MarkdownTextarea } from "../RichTextEditorField";
 
 export function LandingBenefitsSection({
   cards,
   placeholders,
+  isSectionActionDisabled,
+  isDeleteMode,
+  hasSelectedCards,
+  selectedCount,
+  selectedCardEntryKeys,
   onAddCard,
+  onDeleteCardsClick,
+  onCancelDeleteMode,
+  onSelectAllCards,
+  onUnselectAllCards,
+  onToggleCardSelected,
   onCardFieldChange,
 }: LandingBenefitsSectionProps) {
   const BenefitCardForm = ({
@@ -35,17 +46,41 @@ export function LandingBenefitsSection({
       form.setFieldValue("icon", card.icon);
     }, [card.icon, card.paragraph, card.title, form]);
 
-    return (
-      <div className="rounded-lg border border-border p-4">
-        <p className="mb-3 font-semibold text-sm">Benefit Card {index + 1}</p>
+    const isSelected = selectedCardEntryKeys.has(card.entryKey);
 
-        <div className="flex flex-col gap-4">
+    return (
+      <div className="relative overflow-hidden rounded-lg border border-border p-4">
+        {isDeleteMode ? (
+          <>
+            <button
+              aria-label={`Toggle benefit card ${index + 1} selection`}
+              className="absolute inset-0 z-10 bg-white/50"
+              onClick={() => onToggleCardSelected(card.entryKey, !isSelected)}
+              type="button"
+            />
+            <div className="absolute top-3 right-3 z-20">
+              <Checkbox
+                aria-label={`Select benefit card ${index + 1}`}
+                checked={isSelected}
+                onCheckedChange={(checked) =>
+                  onToggleCardSelected(card.entryKey, checked === true)
+                }
+              />
+            </div>
+          </>
+        ) : null}
+
+        <div
+          className={`flex flex-col gap-4 ${isDeleteMode ? "pointer-events-none select-none" : ""}`}
+        >
+          <p className="font-semibold text-sm">Benefit Card {index + 1}</p>
           <div className="space-y-4">
             <div className="flex flex-row gap-4">
               <div className="pr-1">
                 <form.Field name="icon">
                   {(field) => (
                     <LucideIconPicker
+                      disabled={isDeleteMode}
                       onSelect={(value) => {
                         field.handleChange(value);
                         onCardFieldChange(card.entryKey, "icon", value);
@@ -62,6 +97,7 @@ export function LandingBenefitsSection({
                   {(field) => (
                     <Input
                       className="truncate"
+                      disabled={isDeleteMode}
                       onChange={(event) => {
                         const value = event.target.value;
                         field.handleChange(value);
@@ -80,6 +116,7 @@ export function LandingBenefitsSection({
               <form.Field name="paragraph">
                 {(field) => (
                   <MarkdownTextarea
+                    disabled={isDeleteMode}
                     onChange={(value) => {
                       field.handleChange(value);
                       onCardFieldChange(card.entryKey, "paragraph", value);
@@ -101,9 +138,52 @@ export function LandingBenefitsSection({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={onAddCard} type="button" variant="outline">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {isDeleteMode ? (
+          <>
+            <Button
+              disabled={isSectionActionDisabled || cards.length === 0}
+              onClick={onSelectAllCards}
+              type="button"
+              variant="ghost"
+            >
+              Select All
+            </Button>
+            <Button
+              disabled={isSectionActionDisabled || selectedCount === 0}
+              onClick={onUnselectAllCards}
+              type="button"
+              variant="ghost"
+            >
+              Unselect All
+            </Button>
+            <Button
+              disabled={isSectionActionDisabled}
+              onClick={onCancelDeleteMode}
+              type="button"
+              variant="ghost"
+            >
+              Cancel
+            </Button>
+          </>
+        ) : null}
+        <Button
+          disabled={isSectionActionDisabled || isDeleteMode}
+          onClick={onAddCard}
+          type="button"
+          variant="outline"
+        >
           Add Card
+        </Button>
+        <Button
+          disabled={
+            isSectionActionDisabled || (isDeleteMode && !hasSelectedCards)
+          }
+          onClick={onDeleteCardsClick}
+          type="button"
+          variant={isDeleteMode ? "destructive" : "outline"}
+        >
+          {isDeleteMode ? "Confirm Delete" : "Delete Cards"}
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
