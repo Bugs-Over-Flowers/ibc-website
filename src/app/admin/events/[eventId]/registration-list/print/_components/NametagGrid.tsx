@@ -18,7 +18,7 @@ export default function NametagGrid({
   }
 
   return (
-    <div>
+    <div className="flex flex-col items-center">
       {pages.map((pageParticipants) => (
         <div
           className="grid h-[297mm] w-[210mm] break-after-page grid-cols-2 grid-rows-3 gap-[4mm] bg-white p-[10mm] last:break-after-auto"
