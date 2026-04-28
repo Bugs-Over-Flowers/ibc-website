@@ -7,7 +7,10 @@ import type {
   SaveWebsiteContentSectionInput,
   UpsertWebsiteContentRowInput,
 } from "../types";
-import { upsertWebsiteContentRows } from "./upsertWebsiteContentRow";
+import {
+  deleteWebsiteContentEntriesBySection,
+  upsertWebsiteContentRows,
+} from "./upsertWebsiteContentRow";
 
 const WEBSITE_CONTENT_SECTION_TAG_BY_SECTION = {
   vision_mission: CACHE_TAGS.websiteContent.section.visionMission,
@@ -23,8 +26,11 @@ export async function saveWebsiteContentSection(
 ): Promise<{ updatedAt: string }> {
   const parsed = saveWebsiteContentSectionSchema.parse(input);
   const rowsToUpsert: UpsertWebsiteContentRowInput[] = [];
+  const retainedEntryKeys: string[] = [];
 
   if (parsed.section === "vision_mission") {
+    retainedEntryKeys.push("vision", "mission");
+
     rowsToUpsert.push({
       section: parsed.section,
       entryKey: "vision",
@@ -40,6 +46,8 @@ export async function saveWebsiteContentSection(
     });
   } else {
     for (const card of parsed.cards) {
+      retainedEntryKeys.push(card.entryKey);
+
       const placementValue = card.cardPlacement
         ? Number(card.cardPlacement)
         : null;
@@ -86,6 +94,8 @@ export async function saveWebsiteContentSection(
   }
 
   await upsertWebsiteContentRows(rowsToUpsert);
+
+  await deleteWebsiteContentEntriesBySection(parsed.section, retainedEntryKeys);
 
   revalidatePath("/", "page");
   revalidatePath("/about", "page");

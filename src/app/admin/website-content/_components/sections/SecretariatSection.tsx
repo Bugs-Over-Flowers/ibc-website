@@ -7,16 +7,27 @@ import { GripVertical } from "lucide-react";
 import Image from "next/image";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { IMAGE_UPLOAD_ACCEPT_ATTR } from "@/lib/fileUpload";
 import { reorderInList } from "../../_hooks/reorderInList";
 import { usePersonalImageUpload } from "../../_hooks/usePersonalImageUpload";
-import type { SecretariatSectionProps } from "../../_types/section-props";
+import type { SecretariatSectionProps } from "../../_types/sectionProps";
 
 export function SecretariatSection({
   cards,
   placeholders,
+  isSectionActionDisabled,
+  isDeleteMode,
+  hasSelectedCards,
+  selectedCount,
+  selectedCardEntryKeys,
   onAddCard,
+  onDeleteCardsClick,
+  onCancelDeleteMode,
+  onSelectAllCards,
+  onUnselectAllCards,
+  onToggleCardSelected,
   onCardFieldChange,
   onCardsReorder,
 }: SecretariatSectionProps) {
@@ -52,30 +63,59 @@ export function SecretariatSection({
       form.setFieldValue("subtitle", card.subtitle);
     }, [card.subtitle, card.title, form]);
 
+    const isSelected = selectedCardEntryKeys.has(card.entryKey);
+
     return (
       <div
-        className="aspect-[1/1.05] rounded-lg border border-border p-4"
+        className="relative aspect-[1/1.05] overflow-hidden rounded-lg border border-border p-4"
         ref={ref}
         style={{ opacity: isDragSource ? 0.65 : 1 }}
       >
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="font-semibold text-sm">Secretariat Card {index + 1}</p>
-          <button
-            aria-label="Drag card"
-            className="cursor-grab rounded-md border border-border p-1 text-muted-foreground active:cursor-grabbing"
-            ref={handleRef}
-            type="button"
-          >
-            <GripVertical className="h-4 w-4" />
-          </button>
-        </div>
+        {isDeleteMode ? (
+          <>
+            <button
+              aria-label={`Toggle secretariat card ${index + 1} selection`}
+              className="absolute inset-0 z-10 bg-white/50"
+              onClick={() => onToggleCardSelected(card.entryKey, !isSelected)}
+              type="button"
+            />
+            <div className="absolute top-3 right-3 z-20">
+              <Checkbox
+                aria-label={`Select secretariat card ${index + 1}`}
+                checked={isSelected}
+                onCheckedChange={(checked) =>
+                  onToggleCardSelected(card.entryKey, checked === true)
+                }
+              />
+            </div>
+          </>
+        ) : null}
 
-        <div className="flex flex-col gap-3">
+        <div
+          className={`flex flex-col gap-3 ${isDeleteMode ? "pointer-events-none select-none" : ""}`}
+        >
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="font-semibold text-sm">
+              Secretariat Card {index + 1}
+            </p>
+            {!isDeleteMode ? (
+              <button
+                aria-label="Drag card"
+                className="cursor-grab rounded-md border border-border p-1 text-muted-foreground active:cursor-grabbing"
+                ref={handleRef}
+                type="button"
+              >
+                <GripVertical className="h-4 w-4" />
+              </button>
+            ) : null}
+          </div>
+
           <div className="space-y-2">
             <p className="font-medium text-sm">Card Title</p>
             <form.Field name="title">
               {(field) => (
                 <Input
+                  disabled={isDeleteMode}
                   onChange={(event) => {
                     const value = event.target.value;
                     field.handleChange(value);
@@ -92,6 +132,7 @@ export function SecretariatSection({
             <form.Field name="subtitle">
               {(field) => (
                 <Input
+                  disabled={isDeleteMode}
                   onChange={(event) => {
                     const value = event.target.value;
                     field.handleChange(value);
@@ -118,6 +159,7 @@ export function SecretariatSection({
               <input
                 accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                 className="hidden"
+                disabled={isDeleteMode}
                 id={`secretariat-image-${card.entryKey}`}
                 onChange={createImageSelectHandler(card.entryKey)}
                 type="file"
@@ -141,13 +183,60 @@ export function SecretariatSection({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={onAddCard} type="button" variant="outline">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {isDeleteMode ? (
+          <>
+            <Button
+              disabled={isSectionActionDisabled || cards.length === 0}
+              onClick={onSelectAllCards}
+              type="button"
+              variant="ghost"
+            >
+              Select All
+            </Button>
+            <Button
+              disabled={isSectionActionDisabled || selectedCount === 0}
+              onClick={onUnselectAllCards}
+              type="button"
+              variant="ghost"
+            >
+              Unselect All
+            </Button>
+            <Button
+              disabled={isSectionActionDisabled}
+              onClick={onCancelDeleteMode}
+              type="button"
+              variant="ghost"
+            >
+              Cancel
+            </Button>
+          </>
+        ) : null}
+        <Button
+          disabled={isSectionActionDisabled || isDeleteMode}
+          onClick={onAddCard}
+          type="button"
+          variant="outline"
+        >
           Add Card
+        </Button>
+        <Button
+          disabled={
+            isSectionActionDisabled || (isDeleteMode && !hasSelectedCards)
+          }
+          onClick={onDeleteCardsClick}
+          type="button"
+          variant={isDeleteMode ? "destructive" : "outline"}
+        >
+          {isDeleteMode ? "Confirm Delete" : "Delete Cards"}
         </Button>
       </div>
       <DragDropProvider
         onDragEnd={(event) => {
+          if (isDeleteMode) {
+            return;
+          }
+
           if (event.canceled || !isSortableOperation(event.operation)) {
             return;
           }

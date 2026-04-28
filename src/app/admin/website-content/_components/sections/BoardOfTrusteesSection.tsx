@@ -7,19 +7,30 @@ import { GripVertical } from "lucide-react";
 import Image from "next/image";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { IMAGE_UPLOAD_ACCEPT_ATTR } from "@/lib/fileUpload";
 import { reorderInList } from "../../_hooks/reorderInList";
 import { useBoardCardGroups } from "../../_hooks/useBoardCardGroups";
 import { usePersonalImageUpload } from "../../_hooks/usePersonalImageUpload";
-import type { BoardOfTrusteesSectionProps } from "../../_types/section-props";
+import type { BoardOfTrusteesSectionProps } from "../../_types/sectionProps";
 
 type BoardGroup = "featured" | "officers" | "trustees" | "other";
 
 export function BoardOfTrusteesSection({
   cards,
   placeholders,
+  isSectionActionDisabled,
+  isDeleteMode,
+  hasSelectedCards,
+  selectedCount,
+  selectedCardEntryKeys,
   onAddCard,
+  onDeleteCardsClick,
+  onCancelDeleteMode,
+  onSelectAllCards,
+  onUnselectAllCards,
+  onToggleCardSelected,
   onCardFieldChange,
   onCardsReorder,
 }: BoardOfTrusteesSectionProps) {
@@ -94,39 +105,66 @@ export function BoardOfTrusteesSection({
       form.setFieldValue("subtitle", card.subtitle);
     }, [card.subtitle, card.title, form]);
 
+    const isSelected = selectedCardEntryKeys.has(card.entryKey);
+
     return (
       <div
-        className="aspect-[1/1.05] w-full rounded-lg border border-border p-4 sm:max-w-[calc((100%-2rem)/3)] sm:basis-[calc((100%-2rem)/3)]"
+        className="relative aspect-[1/1.05] w-full overflow-hidden rounded-lg border border-border p-4 sm:max-w-[calc((100%-2rem)/3)] sm:basis-[calc((100%-2rem)/3)]"
         ref={ref}
         style={{ opacity: isDragSource ? 0.65 : 1 }}
       >
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="font-semibold text-sm">
-            {label} {index + 1}
-          </p>
-          <div className="flex items-center gap-2">
-            {card.group ? (
-              <span className="rounded-full border border-border px-2 py-0.5 text-xs uppercase">
-                {card.group}
-              </span>
-            ) : null}
+        {isDeleteMode ? (
+          <>
             <button
-              aria-label="Drag card"
-              className="cursor-grab rounded-md border border-border p-1 text-muted-foreground active:cursor-grabbing"
-              ref={handleRef}
+              aria-label={`Toggle ${label.toLowerCase()} card ${index + 1} selection`}
+              className="absolute inset-0 z-10 bg-white/50"
+              onClick={() => onToggleCardSelected(card.entryKey, !isSelected)}
               type="button"
-            >
-              <GripVertical className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+            />
+            <div className="absolute top-3 right-3 z-20">
+              <Checkbox
+                aria-label={`Select ${label.toLowerCase()} card ${index + 1}`}
+                checked={isSelected}
+                onCheckedChange={(checked) =>
+                  onToggleCardSelected(card.entryKey, checked === true)
+                }
+              />
+            </div>
+          </>
+        ) : null}
 
-        <div className="flex flex-col gap-3">
+        <div
+          className={`flex flex-col gap-3 ${isDeleteMode ? "pointer-events-none select-none" : ""}`}
+        >
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="font-semibold text-sm">
+              {label} {index + 1}
+            </p>
+            <div className="flex items-center gap-2">
+              {card.group ? (
+                <span className="rounded-full border border-border px-2 py-0.5 text-xs uppercase">
+                  {card.group}
+                </span>
+              ) : null}
+              {!isDeleteMode ? (
+                <button
+                  aria-label="Drag card"
+                  className="cursor-grab rounded-md border border-border p-1 text-muted-foreground active:cursor-grabbing"
+                  ref={handleRef}
+                  type="button"
+                >
+                  <GripVertical className="h-4 w-4" />
+                </button>
+              ) : null}
+            </div>
+          </div>
+
           <div className="space-y-2">
             <p className="font-medium text-sm">Card Title</p>
             <form.Field name="title">
               {(field) => (
                 <Input
+                  disabled={isDeleteMode}
                   onChange={(event) => {
                     const value = event.target.value;
                     field.handleChange(value);
@@ -143,6 +181,7 @@ export function BoardOfTrusteesSection({
             <form.Field name="subtitle">
               {(field) => (
                 <Input
+                  disabled={isDeleteMode}
                   onChange={(event) => {
                     const value = event.target.value;
                     field.handleChange(value);
@@ -167,6 +206,7 @@ export function BoardOfTrusteesSection({
               <input
                 accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                 className="hidden"
+                disabled={isDeleteMode}
                 id={`board-image-${card.entryKey}`}
                 onChange={createImageSelectHandler(card.entryKey)}
                 type="file"
@@ -193,23 +233,75 @@ export function BoardOfTrusteesSection({
     title: string,
     cardLabel: string,
     groupCards: (typeof cards)[number][],
+    showDeleteActions = false,
   ) => (
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <p className="font-semibold text-muted-foreground text-sm uppercase tracking-wide">
           {title}
         </p>
-        <Button
-          onClick={() => onAddCard(group)}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          Add Card
-        </Button>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {showDeleteActions && isDeleteMode ? (
+            <>
+              <Button
+                disabled={isSectionActionDisabled || cards.length === 0}
+                onClick={onSelectAllCards}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                Select All
+              </Button>
+              <Button
+                disabled={isSectionActionDisabled || selectedCount === 0}
+                onClick={onUnselectAllCards}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                Unselect All
+              </Button>
+              <Button
+                disabled={isSectionActionDisabled}
+                onClick={onCancelDeleteMode}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                Cancel
+              </Button>
+            </>
+          ) : null}
+          <Button
+            disabled={isSectionActionDisabled || isDeleteMode}
+            onClick={() => onAddCard(group)}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            Add Card
+          </Button>
+          {showDeleteActions ? (
+            <Button
+              disabled={
+                isSectionActionDisabled || (isDeleteMode && !hasSelectedCards)
+              }
+              onClick={onDeleteCardsClick}
+              size="sm"
+              type="button"
+              variant={isDeleteMode ? "destructive" : "outline"}
+            >
+              {isDeleteMode ? "Confirm Delete" : "Delete Cards"}
+            </Button>
+          ) : null}
+        </div>
       </div>
       <DragDropProvider
         onDragEnd={(event) => {
+          if (isDeleteMode) {
+            return;
+          }
+
           if (event.canceled || !isSortableOperation(event.operation)) {
             return;
           }
@@ -249,7 +341,7 @@ export function BoardOfTrusteesSection({
 
   return (
     <div className="space-y-6">
-      {renderSection("featured", "Featured", "Featured", featuredCards)}
+      {renderSection("featured", "Featured", "Featured", featuredCards, true)}
       {renderSection("officers", "Officers", "Officer", officerCards)}
       {renderSection("trustees", "Trustees", "Trustee", trusteeCards)}
       {renderSection("other", "Others", "Board Card", otherCards)}
