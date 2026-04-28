@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useAction } from "@/hooks/useAction";
+import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import { updatePaymentProofStatus } from "@/server/applications/mutations/updatePaymentProofStatus";
 import type { getApplications } from "@/server/applications/queries/getApplications";
@@ -89,9 +90,16 @@ export function ApplicationsTableRow({
   const { borderColor, textColor } = getApplicationTypeColor(
     application.applicationType,
   );
+  const paymentRequirement = getMembershipPaymentRequirement({
+    applicationMemberType: application.applicationMemberType,
+    applicationType: application.applicationType,
+    previousApplicationMemberType: application.previousApplicationMemberType,
+  });
   const paymentProofStatus = application.paymentProofStatus ?? "pending";
   const isPaymentProofPending =
-    application.paymentMethod === "BPI" && paymentProofStatus === "pending";
+    paymentRequirement.requiresPayment &&
+    application.paymentMethod === "BPI" &&
+    paymentProofStatus === "pending";
   const isSelectionDisabled = isPaymentProofPending || isSelectionLocked;
   const formattedAppliedDate = formatAppliedDate(application.applicationDate);
 
@@ -117,17 +125,6 @@ export function ApplicationsTableRow({
     });
   };
 
-  const PERSONAL_REGISTRATION_FEE = 5000;
-  const CORPORATE_REGISTRATION_FEE = 10000;
-  const membershipTypeLabel =
-    application.applicationMemberType === "personal"
-      ? "Personal Membership"
-      : "Corporate Membership";
-  const expectedRegistrationFee =
-    application.applicationMemberType === "corporate"
-      ? CORPORATE_REGISTRATION_FEE
-      : PERSONAL_REGISTRATION_FEE;
-
   return (
     <TableRow
       className={isHydrated && isSelected ? "bg-primary/5" : ""}
@@ -151,10 +148,10 @@ export function ApplicationsTableRow({
           {isPaymentProofPending && hasProofImage && (
             <PaymentProofModal
               applicationId={application.applicationId}
-              expectedRegistrationFee={expectedRegistrationFee}
+              expectedRegistrationFee={paymentRequirement.expectedAmount}
               isDecisionLocked={paymentProofStatus !== "pending"}
               isUpdatingStatus={isUpdatingStatus}
-              membershipTypeLabel={membershipTypeLabel}
+              membershipTypeLabel={paymentRequirement.membershipTypeLabel}
               onDecision={handleDecision}
               onProofReplaced={() => {
                 router.refresh();
