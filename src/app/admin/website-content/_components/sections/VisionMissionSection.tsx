@@ -2,7 +2,7 @@
 
 import { useForm } from "@tanstack/react-form";
 import { useEffect } from "react";
-import type { VisionMissionSectionProps } from "../../_types/section-props";
+import type { VisionMissionSectionProps } from "../../_types/sectionProps";
 import { MarkdownTextarea } from "../RichTextEditorField";
 
 export function VisionMissionSection({

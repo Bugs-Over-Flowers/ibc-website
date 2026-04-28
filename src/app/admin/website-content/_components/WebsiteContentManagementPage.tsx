@@ -11,6 +11,16 @@ import {
   XIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useWebsiteContentEditor } from "../_hooks/useWebsiteContentEditor";
@@ -37,7 +47,6 @@ const sectionCards = [
     accentClass: "bg-sky-500",
     iconClass: "bg-sky-50 text-sky-600",
     icon: Compass,
-    fields: "2 fields",
   },
   {
     key: "goals" as const,
@@ -46,7 +55,6 @@ const sectionCards = [
     accentClass: "bg-emerald-500",
     iconClass: "bg-emerald-50 text-emerald-600",
     icon: Target,
-    fields: "3 fields",
   },
   {
     key: "company_thrusts" as const,
@@ -55,7 +63,6 @@ const sectionCards = [
     accentClass: "bg-amber-500",
     iconClass: "bg-amber-50 text-amber-600",
     icon: Building2,
-    fields: "3 fields",
   },
   {
     key: "board_of_trustees" as const,
@@ -64,7 +71,6 @@ const sectionCards = [
     accentClass: "bg-rose-500",
     iconClass: "bg-rose-50 text-rose-600",
     icon: Landmark,
-    fields: "4 fields",
   },
   {
     key: "secretariat" as const,
@@ -73,7 +79,6 @@ const sectionCards = [
     accentClass: "bg-cyan-500",
     iconClass: "bg-cyan-50 text-cyan-600",
     icon: Users,
-    fields: "3 fields",
   },
   {
     key: "landing_page_benefits" as const,
@@ -82,12 +87,12 @@ const sectionCards = [
     accentClass: "bg-indigo-500",
     iconClass: "bg-indigo-50 text-indigo-600",
     icon: Sparkles,
-    fields: "3 fields",
   },
 ];
 
 export function WebsiteContentManagementPage() {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const {
     form,
     cards,
@@ -96,11 +101,38 @@ export function WebsiteContentManagementPage() {
     setCardField,
     replaceCards,
     addCard,
+    isDeleteMode,
+    selectedCardEntryKeys,
+    enterDeleteMode,
+    cancelDeleteMode,
+    selectAllCards,
+    unselectAllCards,
+    toggleCardSelected,
+    deleteSelectedCards,
     save,
     isSavingSection,
     isLoadingSection,
     updatedAtBySection,
+    cardCountBySection,
+    hasLoadedSectionSummaries,
   } = useWebsiteContentEditor(activeSection);
+
+  const hasSelectedCards = selectedCardEntryKeys.size > 0;
+  const selectedCount = selectedCardEntryKeys.size;
+  const isSectionActionDisabled = isSavingSection || isLoadingSection;
+
+  const handleDeleteCardsClick = () => {
+    if (!isDeleteMode) {
+      enterDeleteMode();
+      return;
+    }
+
+    if (!hasSelectedCards) {
+      return;
+    }
+
+    setIsDeleteConfirmOpen(true);
+  };
 
   const selectedCard = useMemo(
     () => sectionCards.find((section) => section.key === activeSection) ?? null,
@@ -108,12 +140,24 @@ export function WebsiteContentManagementPage() {
   );
 
   const updatedAtDisplay = (section: SectionKey) => {
+    if (!hasLoadedSectionSummaries) {
+      return "Loading...";
+    }
+
     const updatedAt = updatedAtBySection[section];
     if (!updatedAt) {
       return "Not updated yet";
     }
 
     return new Date(updatedAt).toLocaleString();
+  };
+
+  const savedCardsDisplay = (section: SectionKey) => {
+    if (!hasLoadedSectionSummaries) {
+      return "Loading...";
+    }
+
+    return String(cardCountBySection[section] ?? 0);
   };
 
   const renderActiveForm = () => {
@@ -141,9 +185,19 @@ export function WebsiteContentManagementPage() {
         return (
           <GoalsSection
             cards={cards}
+            hasSelectedCards={hasSelectedCards}
+            isDeleteMode={isDeleteMode}
+            isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={() => addCard()}
+            onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
+            onDeleteCardsClick={handleDeleteCardsClick}
+            onSelectAllCards={selectAllCards}
+            onToggleCardSelected={toggleCardSelected}
+            onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            selectedCardEntryKeys={selectedCardEntryKeys}
+            selectedCount={selectedCount}
           />
         );
 
@@ -151,9 +205,19 @@ export function WebsiteContentManagementPage() {
         return (
           <CompanyThrustsSection
             cards={cards}
+            hasSelectedCards={hasSelectedCards}
+            isDeleteMode={isDeleteMode}
+            isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={() => addCard()}
+            onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
+            onDeleteCardsClick={handleDeleteCardsClick}
+            onSelectAllCards={selectAllCards}
+            onToggleCardSelected={toggleCardSelected}
+            onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            selectedCardEntryKeys={selectedCardEntryKeys}
+            selectedCount={selectedCount}
           />
         );
 
@@ -161,10 +225,20 @@ export function WebsiteContentManagementPage() {
         return (
           <BoardOfTrusteesSection
             cards={cards}
+            hasSelectedCards={hasSelectedCards}
+            isDeleteMode={isDeleteMode}
+            isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={(group) => addCard(group)}
+            onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
+            onDeleteCardsClick={handleDeleteCardsClick}
+            onSelectAllCards={selectAllCards}
+            onToggleCardSelected={toggleCardSelected}
+            onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            selectedCardEntryKeys={selectedCardEntryKeys}
+            selectedCount={selectedCount}
           />
         );
 
@@ -172,10 +246,20 @@ export function WebsiteContentManagementPage() {
         return (
           <SecretariatSection
             cards={cards}
+            hasSelectedCards={hasSelectedCards}
+            isDeleteMode={isDeleteMode}
+            isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={() => addCard()}
+            onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
+            onDeleteCardsClick={handleDeleteCardsClick}
+            onSelectAllCards={selectAllCards}
+            onToggleCardSelected={toggleCardSelected}
+            onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            selectedCardEntryKeys={selectedCardEntryKeys}
+            selectedCount={selectedCount}
           />
         );
 
@@ -183,9 +267,19 @@ export function WebsiteContentManagementPage() {
         return (
           <LandingBenefitsSection
             cards={cards}
+            hasSelectedCards={hasSelectedCards}
+            isDeleteMode={isDeleteMode}
+            isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={() => addCard()}
+            onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
+            onDeleteCardsClick={handleDeleteCardsClick}
+            onSelectAllCards={selectAllCards}
+            onToggleCardSelected={toggleCardSelected}
+            onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            selectedCardEntryKeys={selectedCardEntryKeys}
+            selectedCount={selectedCount}
           />
         );
 
@@ -234,7 +328,7 @@ export function WebsiteContentManagementPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2 text-muted-foreground text-sm">
-                  <p>Fields: {section.fields}</p>
+                  <p>Saved cards: {savedCardsDisplay(section.key)}</p>
                   <p>Updated: {updatedAtDisplay(section.key)}</p>
                 </CardContent>
               </Card>
@@ -246,6 +340,7 @@ export function WebsiteContentManagementPage() {
       <DialogPrimitive.Root
         onOpenChange={(open) => {
           if (!open) {
+            cancelDeleteMode();
             setActiveSection(null);
           }
         }}
@@ -286,9 +381,11 @@ export function WebsiteContentManagementPage() {
                 </div>
 
                 <div className="border-border border-t bg-background px-6 py-4 sm:px-7">
-                  <div className="flex flex-wrap justify-end gap-2">
+                  <div className="flex flex-wrap items-center justify-end gap-2">
                     <Button
-                      disabled={isSavingSection || isLoadingSection}
+                      disabled={
+                        isSavingSection || isLoadingSection || isDeleteMode
+                      }
                       onClick={save}
                     >
                       {isSavingSection ? "Saving..." : "Save Changes"}
@@ -300,6 +397,35 @@ export function WebsiteContentManagementPage() {
           </DialogPrimitive.Viewport>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
+
+      <AlertDialog
+        onOpenChange={setIsDeleteConfirmOpen}
+        open={isDeleteConfirmOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete selected cards?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove {selectedCardEntryKeys.size} selected card
+              {selectedCardEntryKeys.size === 1 ? "" : "s"} from the editor.
+              Click Save Changes to persist this deletion.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={!hasSelectedCards}
+              onClick={() => {
+                deleteSelectedCards();
+                setIsDeleteConfirmOpen(false);
+              }}
+            >
+              Confirm Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
