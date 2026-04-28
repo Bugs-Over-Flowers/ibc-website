@@ -73,6 +73,7 @@ import { cn } from "@/lib/utils";
 interface LucideIconPickerProps {
   selectedIcon: string;
   onSelect: (iconName: string) => void;
+  disabled?: boolean;
 }
 
 interface IconOption {
@@ -144,6 +145,7 @@ const ICON_OPTIONS: IconOption[] = [
 export function LucideIconPicker({
   selectedIcon,
   onSelect,
+  disabled = false,
 }: LucideIconPickerProps) {
   const [open, setOpen] = useState(false);
 
@@ -164,6 +166,7 @@ export function LucideIconPicker({
             buttonVariants({ variant: "outline", size: "sm" }),
             "h-9 w-36 justify-between overflow-hidden px-3",
           )}
+          disabled={disabled}
         >
           <span className="flex min-w-0 items-center gap-2">
             {SelectedIcon ? (
@@ -190,6 +193,7 @@ export function LucideIconPicker({
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border hover:bg-muted",
                     )}
+                    disabled={disabled}
                     key={name}
                     onClick={() => {
                       onSelect(name);
