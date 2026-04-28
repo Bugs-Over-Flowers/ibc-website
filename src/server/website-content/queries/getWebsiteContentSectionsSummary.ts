@@ -27,6 +27,7 @@ const SECTION_KEYS: WebsiteContentSection[] = [
   "board_of_trustees",
   "secretariat",
   "landing_page_benefits",
+  "hero_section",
 ];
 
 function createEmptySummary(): WebsiteContentSectionsSummary {
@@ -37,6 +38,7 @@ function createEmptySummary(): WebsiteContentSectionsSummary {
     board_of_trustees: { updatedAt: null, cardCount: 0 },
     secretariat: { updatedAt: null, cardCount: 0 },
     landing_page_benefits: { updatedAt: null, cardCount: 0 },
+    hero_section: { updatedAt: null, cardCount: 0 },
   };
 }
 
