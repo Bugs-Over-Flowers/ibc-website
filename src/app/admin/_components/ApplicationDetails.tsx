@@ -8,6 +8,7 @@ import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import { toPascalCaseWithSpaces } from "../application/_utils/formatters";
@@ -84,6 +85,12 @@ function MemberReviewDetails({
   const alternateRepresentatives = applicationMembers.filter(
     (member) => member.companyMemberType === "alternate",
   );
+  const paymentRequirement = getMembershipPaymentRequirement({
+    applicationMemberType: application.applicationMemberType,
+    applicationType: application.applicationType,
+    previousApplicationMemberType: application.previousApplicationMemberType,
+  });
+  const isPaymentNotRequired = !paymentRequirement.requiresPayment;
 
   return (
     <div className="space-y-8">
@@ -136,6 +143,18 @@ function MemberReviewDetails({
                   application.applicationMemberType,
                 )}
               />
+              {application.applicationType === "updating" && (
+                <DetailRow
+                  label="Previous Member Type"
+                  value={
+                    application.previousApplicationMemberType
+                      ? toPascalCaseWithSpaces(
+                          application.previousApplicationMemberType,
+                        )
+                      : "N/A"
+                  }
+                />
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -382,24 +401,44 @@ function MemberReviewDetails({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <DetailRow
+              label="Payment Requirement"
+              value={paymentRequirement.statusLabel}
+            />
+            <DetailRow
               label="Payment Method"
-              value={toPascalCaseWithSpaces(application.paymentMethod || "N/A")}
+              value={
+                isPaymentNotRequired
+                  ? "Not required"
+                  : toPascalCaseWithSpaces(application.paymentMethod || "N/A")
+              }
             />
             <DetailRow
               label="Payment Status"
               value={
-                <Badge
-                  className={getPaymentStatusClasses(
-                    application.paymentProofStatus,
-                  )}
-                  variant="secondary"
-                >
-                  {toPascalCaseWithSpaces(
-                    application.paymentProofStatus || "Pending",
-                  )}
-                </Badge>
+                isPaymentNotRequired ? (
+                  <Badge className="bg-status-green" variant="secondary">
+                    Not Required
+                  </Badge>
+                ) : (
+                  <Badge
+                    className={getPaymentStatusClasses(
+                      application.paymentProofStatus,
+                    )}
+                    variant="secondary"
+                  >
+                    {toPascalCaseWithSpaces(
+                      application.paymentProofStatus || "Pending",
+                    )}
+                  </Badge>
+                )
               }
             />
+            {paymentRequirement.requiresPayment && (
+              <DetailRow
+                label="Expected Amount"
+                value={`P${paymentRequirement.expectedAmount.toLocaleString()}`}
+              />
+            )}
             <DetailRow
               label="Application Date"
               value={new Date(application.applicationDate).toLocaleDateString()}

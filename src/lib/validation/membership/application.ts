@@ -13,6 +13,7 @@ export const MembershipApplicationStep1Schema = z
   .object({
     applicationType: ApplicationTypeEnum,
     businessMemberIdentifier: z.string().optional(),
+    existingApplicationMemberType: ApplicationMemberTypeEnum.optional(),
     businessMemberId: z
       .preprocess(
         (value) => (value === "" ? undefined : value),

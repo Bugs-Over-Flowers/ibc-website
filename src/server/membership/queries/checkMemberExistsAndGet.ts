@@ -11,6 +11,7 @@ type CheckMemberOutput = {
   exists: boolean;
   companyName?: string;
   membershipStatus?: string;
+  applicationMemberType?: "corporate" | "personal";
   businessMemberIdentifier?: string;
   businessMemberId?: string;
   companyAddress?: string;

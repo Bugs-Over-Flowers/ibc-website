@@ -1,4 +1,4 @@
-import type { Tables } from "@/lib/supabase/db.types";
+import type { Enums, Tables } from "@/lib/supabase/db.types";
 
 export type Application = Tables<"Application">;
 export type ApplicationMember = Tables<"ApplicationMember">;
@@ -35,6 +35,7 @@ export interface ApplicationWithMembers
     status: "scheduled" | "completed" | "cancelled" | "rescheduled" | null;
   } | null;
   logoImageURL: string | null;
+  previousApplicationMemberType?: Enums<"ApplicationMemberType"> | null;
 }
 
 export interface ApplicationListItem {
