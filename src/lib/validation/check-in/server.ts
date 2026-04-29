@@ -57,3 +57,26 @@ export type UpdateCheckInTimeInput = z.infer<typeof UpdateCheckInTimeInput>;
 export type UpdateCheckInTimeOutput = {
   success: boolean;
 };
+
+// Single remark update validation schema
+export const UpdateCheckInRemarkInput = z.object({
+  checkInId: z.string().uuid("Invalid check-in ID"),
+  remarks: z.string().max(500, "Remark cannot exceed 500 characters"),
+});
+
+export type UpdateCheckInRemarkInput = z.infer<typeof UpdateCheckInRemarkInput>;
+
+export type UpdateCheckInRemarkOutput = {
+  success: boolean;
+};
+
+// Delete remark validation schema
+export const DeleteCheckInRemarkInput = z.object({
+  checkInId: z.string().uuid("Invalid check-in ID"),
+});
+
+export type DeleteCheckInRemarkInput = z.infer<typeof DeleteCheckInRemarkInput>;
+
+export type DeleteCheckInRemarkOutput = {
+  success: boolean;
+};

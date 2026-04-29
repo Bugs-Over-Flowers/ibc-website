@@ -59,6 +59,20 @@ const OPTIONAL_HEADERS = [
   "source_submitted_at",
 ] as const;
 
+const GOOGLE_SHEETS_TEMPLATE_FORMULA = `={
+"Questions","Desc","Image","Type","Required","option start","option 2","option 3","option end","Other","Points","Correct Answer","correct feedback","correct url","incorrect feedback","incorrect url";
+"Registration Import Form","","","TITLE","","","","","","","","","","","","";
+"Participant Information","One participant per registration. This form is for CSV import to IBC admin.","","SECTION_HEADER","","","","","","","","","","","","";
+"first_name","Required. Participant first name.","","TEXT","TRUE","","","","","","","","","","","";
+"last_name","Required. Participant last name.","","TEXT","TRUE","","","","","","","","","","","";
+"email","Required. Valid email address.","","TEXT","TRUE","","","","","","","","","","","";
+"contact_number","Required. Mobile or landline.","","TEXT","TRUE","","","","","","","","","","","";
+"affiliation","Required. Company/organization/affiliation.","","TEXT","TRUE","","","","","","","","","","","";
+"note","Optional admin note.","","PARAGRAPH","FALSE","","","","","","","","","","","";
+"source_submission_id","Optional unique external response ID (for dedupe).","","TEXT","FALSE","","","","","","","","","","","";
+"source_submitted_at","Optional ISO timestamp (example: 2026-05-01T09:00:00+08:00).","","TEXT","FALSE","","","","","","","","","","",""
+}`;
+
 type ParsedCsv = {
   rows: ImportRegistrationRowPayload[];
   totalRows: number;
@@ -309,8 +323,8 @@ export default function ImportRegistrationsDialog({
                     className="h-7 gap-1.5 px-2 text-xs"
                     onClick={() => {
                       void copyToClipboard(
-                        `=SPLIT("${EXPECTED_HEADERS.join(",")}", ",")`,
-                        "Headers",
+                        GOOGLE_SHEETS_TEMPLATE_FORMULA,
+                        "Google Sheets template",
                       );
                     }}
                     size="sm"
