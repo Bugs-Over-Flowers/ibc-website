@@ -1,16 +1,34 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import { stripRichText } from "@/lib/utils/stripRichText";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { EventDetailsContent } from "../_components/EventDetailsContent";
 import { EventDetailsHero } from "../_components/EventDetailsHero";
 import EventPageDetailsLoading from "./loading";
 import NotFound from "./not-found";
 
-export const metadata: Metadata = {
-  title: "Event Details",
-  description: "View event details, schedule, and registration information.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ eventId: string }>;
+}): Promise<Metadata> {
+  const { eventId } = await params;
+  const cookieStore = await cookies();
+
+  const event = await getEventById(cookieStore.getAll(), { id: eventId }).catch(
+    () => null,
+  );
+
+  if (!event) {
+    return { title: "Event Not Found" };
+  }
+
+  return {
+    title: event.eventTitle,
+    description: stripRichText(event.description).slice(0, 160),
+  };
+}
 
 export default async function EventDetailsPage({
   params,
