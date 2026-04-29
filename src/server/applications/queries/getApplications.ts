@@ -10,6 +10,44 @@ import type { ApplicationWithMembers } from "@/lib/types/application";
 
 type GetApplicationsResult = ApplicationWithMembers[];
 
+type ApplicationMemberTypeHistory = {
+  applicationId: string;
+  applicationDate: string;
+  applicationMemberType: ApplicationWithMembers["applicationMemberType"];
+  businessMemberId: string | null;
+};
+
+function getPreviousApplicationMemberType(
+  application: ApplicationWithMembers,
+  history: ApplicationMemberTypeHistory[],
+): ApplicationWithMembers["previousApplicationMemberType"] {
+  if (
+    application.applicationType !== "updating" ||
+    !application.businessMemberId
+  ) {
+    return null;
+  }
+
+  const currentApplicationDate = new Date(
+    application.applicationDate,
+  ).getTime();
+  const previousApplication = history.find((entry) => {
+    if (
+      entry.businessMemberId !== application.businessMemberId ||
+      entry.applicationId === application.applicationId
+    ) {
+      return false;
+    }
+
+    const entryDate = new Date(entry.applicationDate).getTime();
+    return (
+      Number.isNaN(currentApplicationDate) || entryDate < currentApplicationDate
+    );
+  });
+
+  return previousApplication?.applicationMemberType ?? null;
+}
+
 export async function getApplications(
   requestCookies: RequestCookie[],
 ): Promise<GetApplicationsResult> {
@@ -36,8 +74,41 @@ export async function getApplications(
     throw new Error(`Failed to fetch applications: ${error.message}`);
   }
 
+  const applications = data as ApplicationWithMembers[];
+  const updatingBusinessMemberIds = Array.from(
+    new Set(
+      applications
+        .filter(
+          (application) =>
+            application.applicationType === "updating" &&
+            application.businessMemberId,
+        )
+        .map((application) => application.businessMemberId as string),
+    ),
+  );
+
+  const { data: memberTypeHistory, error: memberTypeHistoryError } =
+    updatingBusinessMemberIds.length > 0
+      ? await supabase
+          .from("Application")
+          .select(
+            "applicationId,businessMemberId,applicationDate,applicationMemberType",
+          )
+          .in("businessMemberId", updatingBusinessMemberIds)
+          .order("applicationDate", { ascending: false })
+      : { data: [], error: null };
+
+  if (memberTypeHistoryError) {
+    throw new Error(
+      `Failed to fetch application member type history: ${memberTypeHistoryError.message}`,
+    );
+  }
+
+  const applicationMemberTypeHistory = (memberTypeHistory ??
+    []) as ApplicationMemberTypeHistory[];
+
   const applicationsWithSignedLogos = await Promise.all(
-    (data as ApplicationWithMembers[]).map(async (application) => {
+    applications.map(async (application) => {
       const proofImage = application.ProofImage?.[0];
       const signedProofImage = proofImage
         ? {
@@ -51,6 +122,10 @@ export async function getApplications(
       return {
         ...application,
         logoImageURL: await signLogoUrl(supabase, application.logoImageURL),
+        previousApplicationMemberType: getPreviousApplicationMemberType(
+          application,
+          applicationMemberTypeHistory,
+        ),
         ProofImage: signedProofImage ? [signedProofImage] : [],
       };
     }),

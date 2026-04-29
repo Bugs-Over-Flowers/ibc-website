@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { getPublicHeroSectionImages } from "@/server/website-content/queries/getPublicWebsiteContentSection";
 import NetworksBenefits from "./_components/NetworksBenefits";
 import NetworksCTA from "./_components/NetworksCTA";
 import { NetworksHero } from "./_components/NetworksHero";
@@ -12,11 +13,13 @@ export const metadata: Metadata = {
     "Join the IBC network of business leaders and organizations driving progress in Western Visayas.",
 };
 
-export default function Page() {
+export default async function Page() {
+  const networkHeroImages = await getPublicHeroSectionImages("networks");
+
   return (
     <main className="min-h-screen bg-background">
       <Suspense fallback={<NetworksLoading />}>
-        <NetworksHero />
+        <NetworksHero backgroundImages={networkHeroImages} />
         <NetworksListSection />
         <NetworksBenefits />
         <NetworksCTA />

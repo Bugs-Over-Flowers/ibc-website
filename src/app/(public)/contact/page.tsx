@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { getPublicHeroSectionImages } from "@/server/website-content/queries/getPublicWebsiteContentSection";
 import { ContactInfoCards } from "./_components/ContactCards";
 import { ContactFAQ } from "./_components/ContactFAQ";
 import { ContactForm } from "./_components/ContactForm";
@@ -12,11 +13,13 @@ export const metadata: Metadata = {
   description: "Get in touch with IBC for inquiries and support.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const contactHeroImages = await getPublicHeroSectionImages("contact");
+
   return (
     <main className="min-h-screen bg-background">
       <Suspense fallback={<Loading />}>
-        <ContactHero />
+        <ContactHero backgroundImages={contactHeroImages} />
         <ContactInfoCards />
         <section className="bg-card py-16 md:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

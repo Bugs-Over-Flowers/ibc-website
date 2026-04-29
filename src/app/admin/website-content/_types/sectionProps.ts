@@ -25,7 +25,17 @@ export interface VisionMissionSectionProps {
 export interface GoalsSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
+  isSectionActionDisabled: boolean;
   onAddCard: () => void;
+  isDeleteMode: boolean;
+  hasSelectedCards: boolean;
+  selectedCount: number;
+  selectedCardEntryKeys: Set<string>;
+  onDeleteCardsClick: () => void;
+  onCancelDeleteMode: () => void;
+  onSelectAllCards: () => void;
+  onUnselectAllCards: () => void;
+  onToggleCardSelected: (entryKey: string, checked: boolean) => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
@@ -36,7 +46,17 @@ export interface GoalsSectionProps {
 export interface CompanyThrustsSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
+  isSectionActionDisabled: boolean;
   onAddCard: () => void;
+  isDeleteMode: boolean;
+  hasSelectedCards: boolean;
+  selectedCount: number;
+  selectedCardEntryKeys: Set<string>;
+  onDeleteCardsClick: () => void;
+  onCancelDeleteMode: () => void;
+  onSelectAllCards: () => void;
+  onUnselectAllCards: () => void;
+  onToggleCardSelected: (entryKey: string, checked: boolean) => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
@@ -47,7 +67,17 @@ export interface CompanyThrustsSectionProps {
 export interface BoardOfTrusteesSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
+  isSectionActionDisabled: boolean;
   onAddCard: (group: "featured" | "officers" | "trustees" | "other") => void;
+  isDeleteMode: boolean;
+  hasSelectedCards: boolean;
+  selectedCount: number;
+  selectedCardEntryKeys: Set<string>;
+  onDeleteCardsClick: () => void;
+  onCancelDeleteMode: () => void;
+  onSelectAllCards: () => void;
+  onUnselectAllCards: () => void;
+  onToggleCardSelected: (entryKey: string, checked: boolean) => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
@@ -59,7 +89,17 @@ export interface BoardOfTrusteesSectionProps {
 export interface SecretariatSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
+  isSectionActionDisabled: boolean;
   onAddCard: () => void;
+  isDeleteMode: boolean;
+  hasSelectedCards: boolean;
+  selectedCount: number;
+  selectedCardEntryKeys: Set<string>;
+  onDeleteCardsClick: () => void;
+  onCancelDeleteMode: () => void;
+  onSelectAllCards: () => void;
+  onUnselectAllCards: () => void;
+  onToggleCardSelected: (entryKey: string, checked: boolean) => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
@@ -71,10 +111,30 @@ export interface SecretariatSectionProps {
 export interface LandingBenefitsSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
+  isSectionActionDisabled: boolean;
   onAddCard: () => void;
+  isDeleteMode: boolean;
+  hasSelectedCards: boolean;
+  selectedCount: number;
+  selectedCardEntryKeys: Set<string>;
+  onDeleteCardsClick: () => void;
+  onCancelDeleteMode: () => void;
+  onSelectAllCards: () => void;
+  onUnselectAllCards: () => void;
+  onToggleCardSelected: (entryKey: string, checked: boolean) => void;
   onCardFieldChange: (
     entryKey: string,
     field: keyof WebsiteContentCardState,
     value: string,
   ) => void;
+}
+
+export interface HeroSectionCarouselProps {
+  cards: WebsiteContentCardState[];
+  onCardFieldChange: (
+    entryKey: string,
+    field: keyof WebsiteContentCardState,
+    value: string,
+  ) => void;
+  onCardsReorder: (nextCards: WebsiteContentCardState[]) => void;
 }

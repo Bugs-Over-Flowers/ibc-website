@@ -98,6 +98,7 @@ interface MembershipApplicationStore {
       membershipStatus?: string;
       businessMemberIdentifier?: string;
       businessMemberId?: string;
+      applicationMemberType?: "corporate" | "personal";
     };
   };
 }
@@ -118,6 +119,7 @@ interface MembershipApplicationStoreActions {
       membershipStatus?: string;
       businessMemberIdentifier?: string;
       businessMemberId?: string;
+      applicationMemberType?: "corporate" | "personal";
     },
     memberIdentifier?: string | null,
     applicationType?: "renewal" | "updating" | null,

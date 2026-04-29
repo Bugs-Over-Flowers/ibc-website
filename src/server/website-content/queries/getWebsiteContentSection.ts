@@ -1,6 +1,7 @@
 "use server";
 
-import { createActionClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 import { websiteContentSectionSchema } from "../schemas";
 import {
   emptyWebsiteContentCard,
@@ -15,7 +16,8 @@ export async function getWebsiteContentSection(
   section: WebsiteContentSection,
 ): Promise<WebsiteContentSectionData> {
   const parsedSection = websiteContentSectionSchema.parse(section);
-  const supabase = await createActionClient();
+  const cookieStore = await cookies();
+  const supabase = await createClient(cookieStore.getAll());
 
   const { data, error } = await supabase
     .from("WebsiteContent")
