@@ -8,7 +8,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventParticipantsForPrint } from "@/server/registration/queries/getEventParticipantsForPrint";
 import NametagPrintPage from "./_components/NametagPrintPage";
-import PrintNametagsLoading from "./PrintNametagsLoading";
+import PrintNametagsLoading from "./_components/PrintNametagsLoading";
 
 interface PrintPageProps {
   params: Promise<{ eventId: string }>;
