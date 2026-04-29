@@ -8,19 +8,23 @@ interface MarkdownTextareaProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  className?: string;
 }
 
 export function MarkdownTextarea({
   placeholder,
-  rows,
+  rows = 4,
   value,
   onChange,
   disabled = false,
+  className,
 }: MarkdownTextareaProps) {
   return (
     <div
-      className={`space-y-2 ${disabled ? "pointer-events-none opacity-60" : ""}`}
-      style={{ minHeight: rows ? `${Math.max(rows, 8) * 24}px` : undefined }}
+      className={`space-y-2 ${className ?? ""} ${
+        disabled ? "pointer-events-none opacity-60" : ""
+      }`}
+      style={{ minHeight: `${rows * 24}px` }}
     >
       <StandaloneRichTextEditor
         onChange={onChange}
