@@ -280,13 +280,8 @@ export default function ImportRegistrationsDialog({
 
   return (
     <>
-      <Button
-        className="gap-2"
-        onClick={() => setOpen(true)}
-        size="sm"
-        variant="outline"
-      >
-        <Upload className="size-3.5" />
+      <Button className="gap-2" onClick={() => setOpen(true)} variant="outline">
+        <Upload className="size-4" />
         Import CSV
       </Button>
 
