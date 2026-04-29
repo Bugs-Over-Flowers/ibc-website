@@ -66,7 +66,28 @@ export const useMembershipStep4 = ({
             throw new Error("Invalid application data");
           }
 
-          const refinedValue = parsed.data;
+          let refinedValue = parsed.data;
+
+          const existingApplicationMemberType =
+            applicationData.step1.existingApplicationMemberType;
+          const isUpdateInfo =
+            applicationData.step1.applicationType === "updating";
+          const isCorporateUpgrade =
+            isUpdateInfo &&
+            existingApplicationMemberType === "personal" &&
+            refinedValue.applicationMemberType === "corporate";
+
+          if (isUpdateInfo && !isCorporateUpgrade) {
+            refinedValue = {
+              ...refinedValue,
+              applicationMemberType:
+                existingApplicationMemberType ??
+                refinedValue.applicationMemberType,
+              paymentMethod: "ONSITE",
+              paymentProof: undefined,
+              paymentProofUrl: "",
+            };
+          }
 
           setApplicationData({
             step4: refinedValue,

@@ -8,6 +8,7 @@ import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import { toPascalCaseWithSpaces } from "../application/_utils/formatters";
@@ -84,6 +85,11 @@ function MemberReviewDetails({
   const alternateRepresentatives = applicationMembers.filter(
     (member) => member.companyMemberType === "alternate",
   );
+  const paymentRequirement = getMembershipPaymentRequirement({
+    applicationMemberType: application.applicationMemberType,
+    applicationType: application.applicationType,
+    previousApplicationMemberType: application.previousApplicationMemberType,
+  });
 
   return (
     <div className="space-y-8">
@@ -136,6 +142,18 @@ function MemberReviewDetails({
                   application.applicationMemberType,
                 )}
               />
+              {application.applicationType === "updating" && (
+                <DetailRow
+                  label="Previous Member Type"
+                  value={
+                    application.previousApplicationMemberType
+                      ? toPascalCaseWithSpaces(
+                          application.previousApplicationMemberType,
+                        )
+                      : "N/A"
+                  }
+                />
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -371,42 +389,52 @@ function MemberReviewDetails({
         </CardContent>
       </Card>
 
-      <Card className="rounded-2xl border border-border/50 bg-background">
-        <CardContent className="space-y-6 px-7 py-0">
-          <div className="flex items-center gap-2 font-bold text-primary">
-            <CreditCard className="h-5 w-5" />
-            <span className="text-base uppercase tracking-wide">
-              Payment Information
-            </span>
-          </div>
+      {paymentRequirement.requiresPayment && (
+        <Card className="rounded-2xl border border-border/50 bg-background">
+          <CardContent className="space-y-6 px-7 py-0">
+            <div className="flex items-center gap-2 font-bold text-primary">
+              <CreditCard className="h-5 w-5" />
+              <span className="text-base uppercase tracking-wide">
+                Payment Information
+              </span>
+            </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <DetailRow
-              label="Payment Method"
-              value={toPascalCaseWithSpaces(application.paymentMethod || "N/A")}
-            />
-            <DetailRow
-              label="Payment Status"
-              value={
-                <Badge
-                  className={getPaymentStatusClasses(
-                    application.paymentProofStatus,
-                  )}
-                  variant="secondary"
-                >
-                  {toPascalCaseWithSpaces(
-                    application.paymentProofStatus || "Pending",
-                  )}
-                </Badge>
-              }
-            />
-            <DetailRow
-              label="Application Date"
-              value={new Date(application.applicationDate).toLocaleDateString()}
-            />
-          </div>
-        </CardContent>
-      </Card>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <DetailRow
+                label="Payment Method"
+                value={toPascalCaseWithSpaces(
+                  application.paymentMethod || "N/A",
+                )}
+              />
+              <DetailRow
+                label="Payment Status"
+                value={
+                  <Badge
+                    className={getPaymentStatusClasses(
+                      application.paymentProofStatus,
+                    )}
+                    variant="secondary"
+                  >
+                    {toPascalCaseWithSpaces(
+                      application.paymentProofStatus || "Pending",
+                    )}
+                  </Badge>
+                }
+              />
+              <DetailRow
+                label="Expected Amount"
+                value={`P${paymentRequirement.expectedAmount.toLocaleString()}`}
+              />
+              <DetailRow
+                label="Application Date"
+                value={new Date(
+                  application.applicationDate,
+                ).toLocaleDateString()}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

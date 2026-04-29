@@ -19,6 +19,7 @@ const WEBSITE_CONTENT_SECTION_TAG_BY_SECTION = {
   board_of_trustees: CACHE_TAGS.websiteContent.section.boardOfTrustees,
   secretariat: CACHE_TAGS.websiteContent.section.secretariat,
   landing_page_benefits: CACHE_TAGS.websiteContent.section.landingPageBenefits,
+  hero_section: CACHE_TAGS.websiteContent.section.heroSection,
 } as const;
 
 export async function saveWebsiteContentSection(
@@ -44,6 +45,23 @@ export async function saveWebsiteContentSection(
       textType: "Paragraph",
       textValue: parsed.form.missionParagraph,
     });
+  } else if (parsed.section === "hero_section") {
+    for (const card of parsed.cards) {
+      const placementValue = card.cardPlacement
+        ? Number(card.cardPlacement)
+        : null;
+
+      rowsToUpsert.push({
+        section: parsed.section,
+        entryKey: card.entryKey,
+        textType: "Title",
+        textValue: card.title,
+        icon: card.icon || null,
+        imageUrl: card.imageUrl || null,
+        cardPlacement: placementValue,
+        group: card.group,
+      });
+    }
   } else {
     for (const card of parsed.cards) {
       retainedEntryKeys.push(card.entryKey);
@@ -99,6 +117,10 @@ export async function saveWebsiteContentSection(
 
   revalidatePath("/", "page");
   revalidatePath("/about", "page");
+  revalidatePath("/events", "page");
+  revalidatePath("/members", "page");
+  revalidatePath("/networks", "page");
+  revalidatePath("/contact", "page");
   revalidatePath("/admin/website-content", "page");
   updateTag(CACHE_TAGS.websiteContent.all);
   updateTag(CACHE_TAGS.websiteContent.public);

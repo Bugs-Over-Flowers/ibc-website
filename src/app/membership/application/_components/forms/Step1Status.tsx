@@ -213,6 +213,8 @@ export function Step1Status({
                           Verified: {memberValidation.memberInfo.companyName}
                           {memberValidation.memberInfo.membershipStatus &&
                             ` (${memberValidation.memberInfo.membershipStatus})`}
+                          {memberValidation.memberInfo.applicationMemberType &&
+                            ` - ${memberValidation.memberInfo.applicationMemberType} membership`}
                         </span>
                       </div>
                     )}

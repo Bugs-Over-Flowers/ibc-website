@@ -28,6 +28,54 @@ export type PublicWebsiteContentSectionData = {
   cards: PublicWebsiteContentCard[];
 };
 
+export type HeroSectionPage =
+  | "about"
+  | "events"
+  | "members"
+  | "networks"
+  | "contact";
+
+export function getHeroSectionImages(
+  sectionData: PublicWebsiteContentSectionData,
+  page: HeroSectionPage,
+  limit = 5,
+): string[] {
+  if (sectionData.section !== "hero_section") {
+    return [];
+  }
+
+  return sectionData.cards
+    .filter((card) => card.group === page && card.imageUrl.trim().length > 0)
+    .sort((a, b) => {
+      const aPlacement = a.cardPlacement
+        ? Number(a.cardPlacement)
+        : Number.MAX_SAFE_INTEGER;
+      const bPlacement = b.cardPlacement
+        ? Number(b.cardPlacement)
+        : Number.MAX_SAFE_INTEGER;
+
+      if (aPlacement === bPlacement) {
+        return a.entryKey.localeCompare(b.entryKey);
+      }
+
+      return aPlacement - bPlacement;
+    })
+    .slice(0, limit)
+    .map((card) => card.imageUrl);
+}
+
+export async function getPublicHeroSectionImages(
+  page: HeroSectionPage,
+  limit = 5,
+): Promise<string[]> {
+  try {
+    const heroSection = await getPublicWebsiteContentSection("hero_section");
+    return getHeroSectionImages(heroSection, page, limit);
+  } catch {
+    return [];
+  }
+}
+
 const WEBSITE_CONTENT_SECTION_TAG_BY_SECTION: Record<
   WebsiteContentSection,
   string
@@ -38,6 +86,7 @@ const WEBSITE_CONTENT_SECTION_TAG_BY_SECTION: Record<
   board_of_trustees: CACHE_TAGS.websiteContent.section.boardOfTrustees,
   secretariat: CACHE_TAGS.websiteContent.section.secretariat,
   landing_page_benefits: CACHE_TAGS.websiteContent.section.landingPageBenefits,
+  hero_section: CACHE_TAGS.websiteContent.section.heroSection,
 };
 
 type WebsiteContentRow = {

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { getPublicWebsiteContentSection } from "@/server/website-content/queries/getPublicWebsiteContentSection";
+import {
+  getPublicHeroSectionImages,
+  getPublicWebsiteContentSection,
+} from "@/server/website-content/queries/getPublicWebsiteContentSection";
 import { AboutBoard } from "./_components/AboutBoard";
 import { AboutGoals } from "./_components/AboutGoals";
 import { AboutHero } from "./_components/AboutHero";
@@ -28,6 +31,8 @@ export default async function AboutPage() {
     getPublicWebsiteContentSection("board_of_trustees"),
     getPublicWebsiteContentSection("secretariat"),
   ]);
+
+  const aboutHeroImages = await getPublicHeroSectionImages("about");
 
   const goalsData = goalsSection.hasRows
     ? goalsSection.cards.map((card) => ({
@@ -66,7 +71,7 @@ export default async function AboutPage() {
   return (
     <main className="min-h-screen bg-background">
       <Suspense>
-        <AboutHero />
+        <AboutHero backgroundImages={aboutHeroImages} />
         <AboutStory />
         <AboutVisionMission
           missionParagraph={
