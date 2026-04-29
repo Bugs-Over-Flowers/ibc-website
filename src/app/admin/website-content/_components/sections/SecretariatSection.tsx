@@ -2,7 +2,7 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation, useSortable } from "@dnd-kit/react/sortable";
-import { Trash2, User } from "lucide-react";
+import { ArrowLeft, GripVertical, Trash2, User } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,7 @@ export function SecretariatSection({
 
     return (
       <div
-        className="group relative overflow-hidden rounded-lg border border-border bg-background"
+        className="group relative overflow-hidden rounded-md border border-border bg-background"
         ref={ref}
         style={{
           opacity: isDragSource ? 0.6 : 1,
@@ -58,21 +58,17 @@ export function SecretariatSection({
         {/* DRAG HANDLE */}
         <button
           className="absolute top-2 right-2 z-10 cursor-grab rounded-md border border-border bg-background/80 p-1 text-muted-foreground active:cursor-grabbing"
+          onClick={(e) => e.stopPropagation()}
           ref={handleRef}
           type="button"
         >
-          <User className="h-4 w-4" />
+          <GripVertical className="h-4 w-4" />
         </button>
 
-        {/* IMAGE (FIXED ACCESSIBILITY ISSUE) */}
+        {/* IMAGE */}
         <button
           className="relative aspect-square w-full overflow-hidden"
           onClick={() => setEditingCardKey(card.entryKey)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              setEditingCardKey(card.entryKey);
-            }
-          }}
           type="button"
         >
           {card.imageUrl ? (
@@ -91,11 +87,13 @@ export function SecretariatSection({
         </button>
 
         {/* TEXT */}
-        <div className="p-3 text-center">
-          <h3 className="font-semibold text-sm">
+        <div className="p-2 text-center">
+          <h3 className="font-semibold text-xs">
             {card.title || "Secretariat member"}
           </h3>
-          <p className="text-primary text-xs">{card.subtitle || "Subtitle"}</p>
+          <p className="text-[10px] text-primary">
+            {card.subtitle || "Subtitle"}
+          </p>
         </div>
       </div>
     );
@@ -123,60 +121,89 @@ export function SecretariatSection({
   return (
     <>
       {editingCard ? (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* FORM */}
-          <div className="rounded-lg border p-4">
-            <div className="flex items-center justify-between">
-              <p className="font-semibold text-sm">
-                Card {editingCardIndex + 1}
-              </p>
-
-              <Button
-                onClick={() => handleDeleteCard(editingCard.entryKey)}
-                size="sm"
-                variant="ghost"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <Form card={editingCard} />
+        <div className="space-y-4">
+          {/* BACK BUTTON (ADDED) */}
+          <div className="flex items-center justify-start">
+            <Button
+              className="gap-2"
+              disabled={isSectionActionDisabled}
+              onClick={() => setEditingCardKey(null)}
+              type="button"
+              variant="outline"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Secretariats
+            </Button>
           </div>
 
-          {/* PREVIEW */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="mx-auto max-w-[180px] overflow-hidden rounded-lg border">
-                <div className="relative aspect-square">
-                  {editingCard.imageUrl ? (
-                    <Image
-                      alt="preview"
-                      className="object-cover"
-                      fill
-                      src={editingCard.imageUrl}
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center bg-primary/5">
-                      <User className="h-8 w-8 text-primary/30" />
-                    </div>
-                  )}
-                </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* FORM */}
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-sm">
+                  Card {editingCardIndex + 1}
+                </p>
 
-                <div className="p-3 text-center">
-                  <p className="font-semibold text-sm">
-                    {editingCard.title || "Secretariat member"}
-                  </p>
-                  <p className="text-primary text-xs">
-                    {editingCard.subtitle || "Subtitle"}
-                  </p>
-                </div>
+                <Button
+                  onClick={() => handleDeleteCard(editingCard.entryKey)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+
+              <Form card={editingCard} />
+            </div>
+
+            {/* PREVIEW */}
+            <Card className="flex items-center justify-center">
+              <CardContent className="p-4">
+                <div className="w-[180px] overflow-hidden rounded-md border">
+                  <div className="relative aspect-square">
+                    {editingCard.imageUrl ? (
+                      <Image
+                        alt="preview"
+                        className="object-cover"
+                        fill
+                        src={editingCard.imageUrl}
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-primary/5">
+                        <User className="h-8 w-8 text-primary/30" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-2 text-center">
+                    <p className="font-semibold text-xs">
+                      {editingCard.title || "Secretariat member"}
+                    </p>
+                    <p className="text-[10px] text-primary">
+                      {editingCard.subtitle || "Subtitle"}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       ) : (
-        <div className="grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="space-y-3">
+          {/* ADD BUTTON */}
+          <div className="flex justify-end">
+            <Button
+              disabled={isSectionActionDisabled}
+              onClick={onAddCard}
+              size="sm"
+              variant="outline"
+            >
+              Add Card
+            </Button>
+          </div>
+
+          {/* GRID + DRAG */}
           <DragDropProvider
             onDragEnd={(event) => {
               if (event.canceled || !isSortableOperation(event.operation))
@@ -197,9 +224,11 @@ export function SecretariatSection({
               onCardsReorder(next);
             }}
           >
-            {cards.map((card, index) => (
-              <SortableCard card={card} index={index} key={card.entryKey} />
-            ))}
+            <div className="grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3">
+              {cards.map((card, index) => (
+                <SortableCard card={card} index={index} key={card.entryKey} />
+              ))}
+            </div>
           </DragDropProvider>
         </div>
       )}
