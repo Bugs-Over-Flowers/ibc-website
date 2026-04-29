@@ -9,6 +9,15 @@ import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 import type { MemberFilterInput } from "@/lib/validation/application/application";
 
+type MemberWithSector =
+  Database["public"]["Tables"]["BusinessMember"]["Row"] & {
+    Sector: Database["public"]["Tables"]["Sector"]["Row"];
+    Application: {
+      applicationId: string;
+      applicationStatus: string;
+    } | null;
+  };
+
 export async function getMembers(
   requestCookies: RequestCookie[],
   filters?: MemberFilterInput,
@@ -50,17 +59,8 @@ export async function getMembers(
     throw new Error(`Failed to fetch members: ${error.message}`);
   }
 
-  type MemberWithSector =
-    Database["public"]["Tables"]["BusinessMember"]["Row"] & {
-      Sector: Database["public"]["Tables"]["Sector"]["Row"];
-      Application: Array<{
-        applicationId: string;
-        applicationStatus: string;
-      }> | null;
-    };
-
-  const membersWithSignedLogos = await Promise.all(
-    (data as MemberWithSector[]).map(async (member: MemberWithSector) => {
+  const membersWithSignedLogos: MemberWithSector[] = await Promise.all(
+    data.map(async (member) => {
       const { Application, ...memberWithoutApplication } = member;
       const todayDate = new Date().toISOString().slice(0, 10);
       const normalizedFeaturedExpirationDate =
@@ -74,6 +74,7 @@ export async function getMembers(
         featuredExpirationDate: normalizedFeaturedExpirationDate,
         logoImageURL: await signLogoUrl(supabase, member.logoImageURL),
         primaryApplicationId: member.primaryApplicationId,
+        Application: Application ?? null,
       };
     }),
   );
