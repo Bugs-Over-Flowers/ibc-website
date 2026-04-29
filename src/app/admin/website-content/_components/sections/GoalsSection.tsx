@@ -1,198 +1,344 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
-import { useEffect } from "react";
+import type { LucideIcon } from "lucide-react";
+import {
+  Activity,
+  Anchor,
+  ArrowLeft,
+  Award,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Briefcase,
+  Building,
+  Building2,
+  Calendar,
+  CalendarDays,
+  Camera,
+  CheckCircle2,
+  CheckSquare2,
+  CircleDollarSign,
+  ClipboardCheck,
+  Clock3,
+  Cloud,
+  Cog,
+  Compass,
+  Cpu,
+  CreditCard,
+  DollarSign,
+  FileCheck2,
+  FileText,
+  Flag,
+  Gem,
+  Gift,
+  Globe,
+  GraduationCap,
+  Handshake,
+  Heart,
+  Home,
+  IdCard,
+  Landmark,
+  Lightbulb,
+  Mail,
+  MapPin,
+  Megaphone,
+  Palette,
+  Phone,
+  QrCode,
+  Rocket,
+  Search,
+  Shield,
+  Sparkles,
+  Star,
+  Tag,
+  Target,
+  Trash2,
+  TrendingUp,
+  Trophy,
+  UploadCloud,
+  UserCircle,
+  UserPlus,
+  Users,
+  Wallet,
+  Wrench,
+  Zap,
+} from "lucide-react";
+import { useState } from "react";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { GoalsSectionProps } from "../../_types/sectionProps";
 import { LucideIconPicker } from "../LucideIconPicker";
 import { MarkdownTextarea } from "../RichTextEditorField";
 
+const ICON_MAP: Record<string, LucideIcon> = {
+  Activity,
+  Anchor,
+  Award,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Briefcase,
+  Building,
+  Building2,
+  Calendar,
+  CalendarDays,
+  Camera,
+  CheckCircle2,
+  CheckSquare2,
+  CircleDollarSign,
+  ClipboardCheck,
+  Clock3,
+  Cloud,
+  Cog,
+  Compass,
+  Cpu,
+  CreditCard,
+  DollarSign,
+  FileCheck2,
+  FileText,
+  Flag,
+  Gem,
+  Gift,
+  Globe,
+  GraduationCap,
+  Handshake,
+  Heart,
+  Home,
+  IdCard,
+  Landmark,
+  Lightbulb,
+  Mail,
+  MapPin,
+  Megaphone,
+  Palette,
+  Phone,
+  QrCode,
+  Rocket,
+  Search,
+  Shield,
+  Sparkles,
+  Star,
+  Tag,
+  Target,
+  TrendingUp,
+  Trophy,
+  UploadCloud,
+  UserCircle,
+  UserPlus,
+  Users,
+  Wallet,
+  Wrench,
+  Zap,
+};
+
 export function GoalsSection({
   cards,
   placeholders,
   isSectionActionDisabled,
-  isDeleteMode,
-  hasSelectedCards,
-  selectedCount,
-  selectedCardEntryKeys,
   onAddCard,
   onDeleteCardsClick,
-  onCancelDeleteMode,
-  onSelectAllCards,
-  onUnselectAllCards,
   onToggleCardSelected,
   onCardFieldChange,
 }: GoalsSectionProps) {
-  const GoalCardForm = ({
-    card,
-    index,
-  }: {
-    card: (typeof cards)[number];
-    index: number;
-  }) => {
-    const form = useForm({
-      defaultValues: {
-        title: card.title,
-        paragraph: card.paragraph,
-        icon: card.icon,
-      },
-    });
+  const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
 
-    useEffect(() => {
-      form.setFieldValue("title", card.title);
-      form.setFieldValue("paragraph", card.paragraph);
-      form.setFieldValue("icon", card.icon);
-    }, [card.icon, card.paragraph, card.title, form]);
+  const handleDeleteCard = (entryKey: string) => {
+    onToggleCardSelected(entryKey, true); // select it
+    onDeleteCardsClick(); // let parent handle dialog
+  };
 
-    const isSelected = selectedCardEntryKeys.has(card.entryKey);
+  const editingCard = cards.find((card) => card.entryKey === editingCardKey);
+  const editingCardIndex = cards.findIndex(
+    (card) => card.entryKey === editingCardKey,
+  );
 
+  const PreviewCard = ({ card }: { card: (typeof cards)[number] }) => {
     return (
-      <div className="relative overflow-hidden rounded-lg border border-border p-4">
-        {isDeleteMode ? (
-          <>
-            <button
-              aria-label={`Toggle goal card ${index + 1} selection`}
-              className="absolute inset-0 z-10 bg-white/50"
-              onClick={() => onToggleCardSelected(card.entryKey, !isSelected)}
-              type="button"
-            />
-            <div className="absolute top-3 right-3 z-20">
-              <Checkbox
-                aria-label={`Select goal card ${index + 1}`}
-                checked={isSelected}
-                onCheckedChange={(checked) =>
-                  onToggleCardSelected(card.entryKey, checked === true)
-                }
+      <button
+        className="text-left"
+        onClick={() => setEditingCardKey(card.entryKey)}
+        type="button"
+      >
+        <Card className="relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300">
+          <div className="absolute top-0 right-0 left-0 h-1 bg-linear-to-r from-transparent via-primary to-transparent" />
+          <CardContent className="flex flex-col items-center p-8 text-center">
+            <div className="mb-6 flex items-center justify-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20 backdrop-blur-sm">
+                {card.icon ? (
+                  typeof card.icon === "string" && ICON_MAP[card.icon] ? (
+                    (() => {
+                      const IconComponent = ICON_MAP[card.icon];
+                      return <IconComponent className="h-7 w-7 text-primary" />;
+                    })()
+                  ) : (
+                    <span className="text-lg">{card.icon}</span>
+                  )
+                ) : null}
+              </div>
+            </div>
+            <h3 className="mb-3 font-bold text-foreground text-xl">
+              {card.title || "Goal Title"}
+            </h3>
+            {card.paragraph ? (
+              <RichTextDisplay
+                className="mb-4 text-foreground/80 leading-relaxed"
+                content={card.paragraph}
               />
-            </div>
-          </>
-        ) : null}
+            ) : (
+              <p className="mb-4 text-foreground/80 leading-relaxed">
+                Goal description will appear here...
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </button>
+    );
+  };
 
-        <div
-          className={`flex flex-col gap-4 ${isDeleteMode ? "pointer-events-none select-none" : ""}`}
-        >
-          <p className="font-semibold text-sm">Goal Card {index + 1}</p>
-          <div className="space-y-4">
-            <div className="flex flex-row gap-4">
-              <div className="pr-1">
-                <form.Field name="icon">
-                  {(field) => (
-                    <LucideIconPicker
-                      disabled={isDeleteMode}
-                      onSelect={(value) => {
-                        field.handleChange(value);
-                        onCardFieldChange(card.entryKey, "icon", value);
-                      }}
-                      selectedIcon={field.state.value}
-                    />
-                  )}
-                </form.Field>
-              </div>
-
-              <div className="w-full space-y-2">
-                <p className="font-medium text-sm">Goal Title</p>
-                <form.Field name="title">
-                  {(field) => (
-                    <Input
-                      className="truncate"
-                      disabled={isDeleteMode}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        field.handleChange(value);
-                        onCardFieldChange(card.entryKey, "title", value);
-                      }}
-                      placeholder={
-                        placeholders.title || "Increase Trailblazer Companies"
-                      }
-                      value={field.state.value}
-                    />
-                  )}
-                </form.Field>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="font-medium text-sm">Goal Paragraph</p>
-              <form.Field name="paragraph">
-                {(field) => (
-                  <MarkdownTextarea
-                    disabled={isDeleteMode}
-                    onChange={(value) => {
-                      field.handleChange(value);
-                      onCardFieldChange(card.entryKey, "paragraph", value);
-                    }}
-                    placeholder={
-                      placeholders.paragraph || "Enter goal description"
-                    }
-                    rows={10}
-                    value={field.state.value}
-                  />
-                )}
-              </form.Field>
-            </div>
+  const GoalCardForm = ({ card }: { card: (typeof cards)[number] }) => {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-row gap-4">
+          <div className="pr-1">
+            <LucideIconPicker
+              onSelect={(value) => {
+                onCardFieldChange(card.entryKey, "icon", value);
+              }}
+              selectedIcon={card.icon}
+            />
           </div>
+
+          <div className="w-full space-y-2">
+            <p className="font-medium text-sm">Goal Title</p>
+            <Input
+              className="truncate"
+              onChange={(e) => {
+                onCardFieldChange(card.entryKey, "title", e.target.value);
+              }}
+              placeholder={
+                placeholders.title || "Increase Trailblazer Companies"
+              }
+              value={card.title}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="font-medium text-sm">Goal Paragraph</p>
+          <MarkdownTextarea
+            className="max-h-[150px] overflow-y-auto"
+            onChange={(value) => {
+              onCardFieldChange(card.entryKey, "paragraph", value);
+            }}
+            placeholder={placeholders.paragraph || "Enter goal description"}
+            rows={4}
+            value={card.paragraph}
+          />
         </div>
       </div>
     );
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        {isDeleteMode ? (
-          <>
+    <>
+      {editingCard ? (
+        <div className="space-y-4">
+          <div className="flex items-center justify-start">
             <Button
-              disabled={isSectionActionDisabled || cards.length === 0}
-              onClick={onSelectAllCards}
+              className="gap-2"
+              disabled={isSectionActionDisabled}
+              onClick={() => setEditingCardKey(null)}
               type="button"
-              variant="ghost"
+              variant="outline"
             >
-              Select All
+              <ArrowLeft className="h-4 w-4" />
+              Back to Goals
             </Button>
-            <Button
-              disabled={isSectionActionDisabled || selectedCount === 0}
-              onClick={onUnselectAllCards}
-              type="button"
-              variant="ghost"
-            >
-              Unselect All
-            </Button>
+          </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Left side - Edit form */}
+            <div className="rounded-lg border border-border p-4">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <p className="font-semibold text-sm">
+                    Goal Card {editingCardIndex + 1}
+                  </p>
+                  <Button
+                    aria-label="Delete card"
+                    disabled={isSectionActionDisabled}
+                    onClick={() => handleDeleteCard(editingCard.entryKey)}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <GoalCardForm card={editingCard} />
+              </div>
+            </div>
+
+            {/* Right side - Preview */}
+            <div className="flex flex-col gap-4">
+              <p className="font-semibold text-sm">Preview</p>
+              <Card className="group relative max-h-96 overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300">
+                <div className="absolute top-0 right-0 left-0 h-1 bg-linear-to-r from-transparent via-primary to-transparent" />
+                <CardContent className="flex max-h-96 flex-col items-center overflow-y-auto p-6 text-center">
+                  <div className="mb-6 flex items-center justify-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20 backdrop-blur-sm transition-transform duration-300">
+                      {editingCard.icon &&
+                        (typeof editingCard.icon === "string" &&
+                        ICON_MAP[editingCard.icon] ? (
+                          (() => {
+                            const IconComponent = ICON_MAP[editingCard.icon];
+                            return (
+                              <IconComponent className="h-7 w-7 text-primary" />
+                            );
+                          })()
+                        ) : (
+                          <span className="text-lg">{editingCard.icon}</span>
+                        ))}
+                    </div>
+                  </div>
+                  <h3 className="mb-3 font-bold text-foreground text-xl">
+                    {editingCard.title || "Goal Title"}
+                  </h3>
+                  {editingCard.paragraph ? (
+                    <RichTextDisplay
+                      className="mb-4 text-foreground/80 leading-relaxed"
+                      content={editingCard.paragraph}
+                    />
+                  ) : (
+                    <p className="mb-4 text-foreground/80 leading-relaxed">
+                      Goal description will appear here...
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex justify-end">
             <Button
               disabled={isSectionActionDisabled}
-              onClick={onCancelDeleteMode}
+              onClick={onAddCard}
               type="button"
-              variant="ghost"
+              variant="outline"
             >
-              Cancel
+              Add Card
             </Button>
-          </>
-        ) : null}
-        <Button
-          disabled={isSectionActionDisabled || isDeleteMode}
-          onClick={onAddCard}
-          type="button"
-          variant="outline"
-        >
-          Add Card
-        </Button>
-        <Button
-          disabled={
-            isSectionActionDisabled || (isDeleteMode && !hasSelectedCards)
-          }
-          onClick={onDeleteCardsClick}
-          type="button"
-          variant={isDeleteMode ? "destructive" : "outline"}
-        >
-          {isDeleteMode ? "Confirm Delete" : "Delete Cards"}
-        </Button>
-      </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {cards.map((card, index) => (
-          <GoalCardForm card={card} index={index} key={card.entryKey} />
-        ))}
-      </div>
-    </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {cards.map((card) => (
+              <PreviewCard card={card} key={card.entryKey} />
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
