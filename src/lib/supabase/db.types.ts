@@ -199,6 +199,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "BusinessMember_primaryApplicationId_fkey";
+            columns: ["primaryApplicationId"];
+            isOneToOne: false;
+            referencedRelation: "Application";
+            referencedColumns: ["applicationId"];
+          },
+          {
             foreignKeyName: "BusinessMember_sectorId_fkey";
             columns: ["sectorId"];
             isOneToOne: false;
@@ -539,6 +546,7 @@ export type Database = {
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate: string;
           registrationId: string;
+          sourceSubmissionId: string | null;
           sponsoredRegistrationId: string | null;
         };
         Insert: {
@@ -552,6 +560,7 @@ export type Database = {
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate?: string;
           registrationId?: string;
+          sourceSubmissionId?: string | null;
           sponsoredRegistrationId?: string | null;
         };
         Update: {
@@ -565,6 +574,7 @@ export type Database = {
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate?: string;
           registrationId?: string;
+          sourceSubmissionId?: string | null;
           sponsoredRegistrationId?: string | null;
         };
         Relationships: [
@@ -978,6 +988,10 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      import_event_registrations: {
+        Args: { p_dry_run?: boolean; p_event_id: string; p_rows: Json };
+        Returns: Json;
+      };
       is_admin_user: { Args: never; Returns: boolean };
       january_first_reset: { Args: never; Returns: undefined };
       process_membership_statuses: {
@@ -1127,7 +1141,7 @@ export type Database = {
       EventType: "public" | "private";
       InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
       MembershipStatus: "paid" | "unpaid" | "cancelled";
-      PaymentMethod: "BPI" | "ONSITE";
+      PaymentMethod: "BPI" | "ONSITE" | "IMPORTED";
       PaymentProofStatus: "pending" | "accepted" | "rejected";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
       SponsoredRegistrationStatus: "active" | "full" | "disabled";
@@ -1315,7 +1329,7 @@ export const Constants = {
       EventType: ["public", "private"],
       InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
       MembershipStatus: ["paid", "unpaid", "cancelled"],
-      PaymentMethod: ["BPI", "ONSITE"],
+      PaymentMethod: ["BPI", "ONSITE", "IMPORTED"],
       PaymentProofStatus: ["pending", "accepted", "rejected"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
       SponsoredRegistrationStatus: ["active", "full", "disabled"],
