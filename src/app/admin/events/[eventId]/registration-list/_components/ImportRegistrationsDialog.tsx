@@ -120,7 +120,9 @@ export default function ImportRegistrationsDialog({
   const copyToClipboard = async (value: string, label: string) => {
     try {
       await navigator.clipboard.writeText(value);
-      toast.success(`${label} copied.`);
+      toast.success(
+        `${label} copied. Paste on the first cell of your Google Sheet.`,
+      );
     } catch {
       toast.error(`Failed to copy ${label.toLowerCase()}.`);
     }
@@ -307,7 +309,7 @@ export default function ImportRegistrationsDialog({
                     className="h-7 gap-1.5 px-2 text-xs"
                     onClick={() => {
                       void copyToClipboard(
-                        EXPECTED_HEADERS.join(","),
+                        `=SPLIT("${EXPECTED_HEADERS.join(",")}", ",")`,
                         "Headers",
                       );
                     }}
