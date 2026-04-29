@@ -8,6 +8,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventParticipantsForPrint } from "@/server/registration/queries/getEventParticipantsForPrint";
 import NametagPrintPage from "./_components/NametagPrintPage";
+import PrintNametagsLoading from "./PrintNametagsLoading";
 
 interface PrintPageProps {
   params: Promise<{ eventId: string }>;
@@ -23,23 +24,6 @@ export default function PrintNametagsPageWrapper({ params }: PrintPageProps) {
     <Suspense fallback={<PrintNametagsLoading />}>
       <PrintNametagsPage params={params} />
     </Suspense>
-  );
-}
-
-function PrintNametagsLoading() {
-  return (
-    <div className="space-y-6">
-      <div className="h-9 w-32 animate-pulse rounded-md bg-muted" />
-      <div className="h-8 w-64 animate-pulse rounded-md bg-muted" />
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        {[1, 2, 3, 4, 5, 6].map((n) => (
-          <div
-            className="aspect-3/4 animate-pulse rounded-xl bg-muted"
-            key={n}
-          />
-        ))}
-      </div>
-    </div>
   );
 }
 

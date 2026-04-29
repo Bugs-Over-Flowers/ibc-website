@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 interface NametagPrintToolbarProps {
   allSelected: boolean;
   handleToggleAll: () => void;
+  handlePrint: () => void;
+  noneSelected: boolean;
   selectedCount: number;
   totalCount: number;
 }
@@ -13,11 +15,13 @@ interface NametagPrintToolbarProps {
 export default function NametagPrintToolbar({
   allSelected,
   handleToggleAll,
+  handlePrint,
+  noneSelected,
   selectedCount,
   totalCount,
 }: NametagPrintToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3">
       <div className="flex items-center gap-3">
         <Button
           className="gap-2"
@@ -37,18 +41,20 @@ export default function NametagPrintToolbar({
             </>
           )}
         </Button>
-        <span className="text-muted-foreground text-sm">
+        <span className="text-muted-foreground text-sm tabular-nums">
           {selectedCount} / {totalCount} selected
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
-        <p className="hidden text-muted-foreground text-sm sm:block">
-          Use your browser&apos;s print dialog (Ctrl+P / Cmd+P) or click Print
-          Nametags
-        </p>
-        <Printer className="size-4 text-muted-foreground" />
-      </div>
+      <Button
+        className="gap-2"
+        disabled={noneSelected}
+        onClick={handlePrint}
+        size="sm"
+      >
+        <Printer className="size-4" />
+        Print Nametags
+      </Button>
     </div>
   );
 }
