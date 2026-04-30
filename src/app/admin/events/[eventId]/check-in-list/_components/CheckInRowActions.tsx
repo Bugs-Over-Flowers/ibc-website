@@ -1,6 +1,11 @@
 "use client";
 
-import { ChevronRight, Clock, MoreHorizontal } from "lucide-react";
+import {
+  ChevronRight,
+  Clock,
+  MessageSquare,
+  MoreHorizontal,
+} from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -15,12 +20,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import EditCheckInTimeDialog from "./EditCheckInTimeDialog";
+import ViewRemarkDialog from "./ViewRemarkDialog";
 
 interface CheckInRowActionsProps {
   checkInId: string;
   registrationId: string;
   checkInTime: string;
   eventDayId: string;
+  remarks: string | null;
+  participantName: string;
 }
 
 export default function CheckInRowActions({
@@ -28,10 +36,15 @@ export default function CheckInRowActions({
   registrationId,
   checkInTime,
   eventDayId,
+  remarks,
+  participantName,
 }: CheckInRowActionsProps) {
   const { eventId } = useParams<{ eventId: string }>();
 
   const [isEditOpen, setEditOpen] = useState(false);
+  const [isRemarkEditOpen, setRemarkEditOpen] = useState(false);
+
+  const hasRemark = remarks !== null && remarks.length > 0;
 
   return (
     <>
@@ -49,6 +62,14 @@ export default function CheckInRowActions({
             >
               <Clock />
               Edit Check-In Time
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setRemarkEditOpen(true);
+              }}
+            >
+              <MessageSquare />
+              {hasRemark ? "Edit Remark" : "Add Remark"}
             </DropdownMenuItem>
             <DropdownMenuItem
               nativeButton={false}
@@ -72,6 +93,14 @@ export default function CheckInRowActions({
         eventDayId={eventDayId}
         isOpen={isEditOpen}
         onOpenChange={setEditOpen}
+      />
+      <ViewRemarkDialog
+        checkInId={checkInId}
+        editOnOpen
+        onOpenChange={setRemarkEditOpen}
+        open={isRemarkEditOpen}
+        participantName={participantName}
+        remarks={remarks}
       />
     </>
   );

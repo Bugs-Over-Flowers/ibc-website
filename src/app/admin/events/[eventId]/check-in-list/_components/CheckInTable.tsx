@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { exportToExcel } from "@/lib/export/excel";
 import type { CheckInListItem } from "@/lib/validation/check-in/check-in-list";
 import CheckInRowActions from "./CheckInRowActions";
-import RemarksDialog from "./RemarksDialog";
+import ViewRemarkDialog from "./ViewRemarkDialog";
 
 type CheckInListRow = CheckInListItem & { name: string };
 
@@ -108,12 +108,10 @@ const getCheckInListColumns = (
     accessorKey: "remarks",
     header: "Remarks",
     cell: ({ row }) => {
-      const { remarks, firstName, lastName } = row.original;
-      if (!remarks) {
-        return <span className="text-muted-foreground/40">-</span>;
-      }
+      const { checkInId, remarks, firstName, lastName } = row.original;
       return (
-        <RemarksDialog
+        <ViewRemarkDialog
+          checkInId={checkInId}
           participantName={`${firstName} ${lastName}`}
           remarks={remarks}
         />
@@ -129,7 +127,9 @@ const getCheckInListColumns = (
         checkInId={row.original.checkInId}
         checkInTime={row.original.checkInTime}
         eventDayId={eventDayId}
+        participantName={`${row.original.firstName} ${row.original.lastName}`}
         registrationId={row.original.registrationId}
+        remarks={row.original.remarks}
       />
     ),
   },

@@ -24,13 +24,6 @@ COMMENT ON SCHEMA "public" IS 'standard public schema';
 
 
 
-CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
 
 
@@ -137,7 +130,8 @@ ALTER TYPE "public"."MembershipStatus" OWNER TO "postgres";
 
 CREATE TYPE "public"."PaymentMethod" AS ENUM (
     'BPI',
-    'ONSITE'
+    'ONSITE',
+    'IMPORTED'
 );
 
 
@@ -473,7 +467,8 @@ ALTER FUNCTION "public"."approve_membership_renewal_application"("p_application_
 
 CREATE OR REPLACE FUNCTION "public"."approve_membership_update_application"("p_application_id" "uuid") RETURNS TABLE("business_member_id" "uuid", "message" "text")
     LANGUAGE "plpgsql"
-    AS $$DECLARE
+    AS $$
+DECLARE
   v_application_business_member_id uuid;
   v_application_type text;
   v_application_status text;
@@ -481,7 +476,13 @@ CREATE OR REPLACE FUNCTION "public"."approve_membership_update_application"("p_a
   v_application_sector_name text;
   v_application_website_url text;
   v_application_logo_image_url text;
+  v_application_member_type "ApplicationMemberType";
+  v_application_payment_method "PaymentMethod";
+  v_application_payment_proof_status "PaymentProofStatus";
+  v_application_date timestamp with time zone;
 
+  v_previous_member_type "ApplicationMemberType";
+  v_requires_payment boolean := false;
   v_member_membership_status text;
   v_member_id uuid;
   v_sector_id bigint;
@@ -493,7 +494,11 @@ BEGIN
     a."companyName",
     a."sectorName",
     a."websiteURL",
-    a."logoImageURL"
+    a."logoImageURL",
+    a."applicationMemberType",
+    a."paymentMethod",
+    a."paymentProofStatus",
+    a."applicationDate"
   INTO
     v_application_business_member_id,
     v_application_type,
@@ -501,7 +506,11 @@ BEGIN
     v_application_company_name,
     v_application_sector_name,
     v_application_website_url,
-    v_application_logo_image_url
+    v_application_logo_image_url,
+    v_application_member_type,
+    v_application_payment_method,
+    v_application_payment_proof_status,
+    v_application_date
   FROM public."Application" a
   WHERE a."applicationId" = p_application_id
   FOR UPDATE;
@@ -540,6 +549,40 @@ BEGIN
     RAISE EXCEPTION 'Cancelled memberships must renew first before updating information';
   END IF;
 
+  SELECT a."applicationMemberType"
+  INTO v_previous_member_type
+  FROM public."Application" a
+  WHERE a."businessMemberId" = v_application_business_member_id
+    AND a."applicationId" <> p_application_id
+    AND a."applicationDate" < v_application_date
+  ORDER BY a."applicationDate" DESC
+  LIMIT 1;
+
+  IF v_previous_member_type IS NULL THEN
+    SELECT a."applicationMemberType"
+    INTO v_previous_member_type
+    FROM public."Application" a
+    WHERE a."businessMemberId" = v_application_business_member_id
+      AND a."applicationId" <> p_application_id
+    ORDER BY a."applicationDate" DESC
+    LIMIT 1;
+  END IF;
+
+  IF v_previous_member_type = 'corporate'::"ApplicationMemberType"
+     AND v_application_member_type = 'personal'::"ApplicationMemberType" THEN
+    RAISE EXCEPTION 'Corporate memberships cannot be downgraded to personal through update-info applications.';
+  END IF;
+
+  v_requires_payment :=
+    v_previous_member_type = 'personal'::"ApplicationMemberType"
+    AND v_application_member_type = 'corporate'::"ApplicationMemberType";
+
+  IF v_requires_payment
+     AND v_application_payment_method = 'BPI'::"PaymentMethod"
+     AND v_application_payment_proof_status <> 'accepted'::"PaymentProofStatus" THEN
+    RAISE EXCEPTION 'Corporate upgrade payment proof must be accepted before approval.';
+  END IF;
+
   IF v_application_sector_name IS NOT NULL AND btrim(v_application_sector_name) <> '' THEN
     SELECT s."sectorId"
     INTO v_sector_id
@@ -574,8 +617,12 @@ BEGIN
   RETURN QUERY
   SELECT
     v_member_id,
-    'Update-info application approved successfully. Member information updated.'::text;
-END;$$;
+    CASE
+      WHEN v_requires_payment THEN 'Corporate upgrade application approved successfully. Member information updated.'::text
+      ELSE 'Update-info application approved successfully. Member information updated.'::text
+    END;
+END;
+$$;
 
 
 ALTER FUNCTION "public"."approve_membership_update_application"("p_application_id" "uuid") OWNER TO "postgres";
@@ -723,8 +770,8 @@ ALTER FUNCTION "public"."check_member_exists"("p_identifier" "text", "p_applicat
 CREATE OR REPLACE FUNCTION "public"."check_member_exists_and_get"("p_identifier" "text", "p_application_type" "text" DEFAULT 'renewal'::"text") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $$DECLARE
-  -- Member
+    AS $$
+DECLARE
   v_member_business_member_id uuid;
   v_member_identifier text;
   v_member_business_name text;
@@ -733,18 +780,16 @@ CREATE OR REPLACE FUNCTION "public"."check_member_exists_and_get"("p_identifier"
   v_member_website_url text;
   v_member_logo_image_url text;
 
-  -- Latest application
   v_latest_application_id uuid;
+  v_latest_application_member_type text;
   v_latest_company_address text;
   v_latest_email_address text;
   v_latest_landline text;
   v_latest_mobile_number text;
   v_latest_sector_name text;
 
-  -- Resolved sector
   v_resolved_sector_id bigint;
 
-  -- Principal representative
   v_principal_first_name text;
   v_principal_last_name text;
   v_principal_email text;
@@ -756,7 +801,6 @@ CREATE OR REPLACE FUNCTION "public"."check_member_exists_and_get"("p_identifier"
   v_principal_nationality text;
   v_principal_sex text;
 
-  -- Alternate representative
   v_alternate_first_name text;
   v_alternate_last_name text;
   v_alternate_email text;
@@ -841,6 +885,7 @@ BEGIN
 
   SELECT
     a."applicationId",
+    a."applicationMemberType"::text,
     a."companyAddress",
     a."emailAddress",
     a."landline",
@@ -848,6 +893,7 @@ BEGIN
     a."sectorName"
   INTO
     v_latest_application_id,
+    v_latest_application_member_type,
     v_latest_company_address,
     v_latest_email_address,
     v_latest_landline,
@@ -933,6 +979,7 @@ BEGIN
     'exists', true,
     'companyName', v_member_business_name,
     'membershipStatus', v_member_membership_status,
+    'applicationMemberType', v_latest_application_member_type,
     'businessMemberIdentifier', v_member_identifier,
     'businessMemberId', v_member_business_member_id,
     'companyAddress', COALESCE(v_latest_company_address, ''),
@@ -982,7 +1029,8 @@ EXCEPTION
       'exists', false,
       'message', 'Unable to validate Business Member Identifier at this time'
     );
-END;$$;
+END;
+$$;
 
 
 ALTER FUNCTION "public"."check_member_exists_and_get"("p_identifier" "text", "p_application_type" "text") OWNER TO "postgres";
@@ -1703,47 +1751,6 @@ $$;
 
 ALTER FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") OWNER TO "postgres";
 
-
-CREATE OR REPLACE FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") RETURNS TABLE("registrationId" "uuid", "eventId" "uuid", "businessMemberId" "uuid", "sponsoredRegistrationId" "uuid", "nonMemberName" "text", "numberOfParticipants" integer, "paymentProofStatus" "public"."PaymentProofStatus", "paymentMethod" "public"."PaymentMethod", "registrationDate" timestamp with time zone, "identifier" "text", "participants" "jsonb")
-    LANGUAGE "sql" STABLE SECURITY DEFINER
-    AS $$
-  SELECT
-    r."registrationId",
-    r."eventId",
-    r."businessMemberId",
-    r."sponsoredRegistrationId",
-    r."nonMemberName",
-    r."numberOfParticipants",
-    r."paymentProofStatus",
-    r."paymentMethod",
-    r."registrationDate",
-    r."identifier",
-    COALESCE(
-      (
-        SELECT jsonb_agg(
-          jsonb_build_object(
-            'participantId', p."participantId",
-            'firstName', p."firstName",
-            'lastName', p."lastName",
-            'email', p."email",
-            'contactNumber', p."contactNumber",
-            'isPrincipal', p."isPrincipal",
-            'registrationId', p."registrationId"
-          )
-        )
-        FROM "Participant" p
-        WHERE p."registrationId" = r."registrationId"
-      ),
-      '[]'::jsonb
-    ) AS participants
-  FROM "Registration" r
-  WHERE r."sponsoredRegistrationId" = p_sponsored_registration_id
-  ORDER BY r."registrationDate" DESC;
-$$;
-
-
-ALTER FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") OWNER TO "postgres";
-
 SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
@@ -1902,6 +1909,239 @@ $$;
 
 
 ALTER FUNCTION "public"."handle_event_days"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."import_event_registrations"("p_event_id" "uuid", "p_rows" "jsonb", "p_dry_run" boolean DEFAULT false) RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $_$
+DECLARE
+  v_total integer := 0;
+  v_valid integer := 0;
+  v_invalid integer := 0;
+  v_would_insert integer := 0;
+  v_inserted integer := 0;
+  v_skipped_duplicate integer := 0;
+  v_failed integer := 0;
+  v_results jsonb := '[]'::jsonb;
+  v_row jsonb;
+  v_row_number integer := 0;
+  v_first_name text;
+  v_last_name text;
+  v_email text;
+  v_contact_number text;
+  v_affiliation text;
+  v_note text;
+  v_source_submission_id text;
+  v_source_submitted_at_raw text;
+  v_registration_date timestamp with time zone;
+  v_registration_id uuid;
+  v_identifier text;
+  v_errors text[];
+  v_warnings text[];
+BEGIN
+  IF p_event_id IS NULL THEN
+    RAISE EXCEPTION 'Event ID is required.';
+  END IF;
+
+  IF p_rows IS NULL OR jsonb_typeof(p_rows) <> 'array' THEN
+    RAISE EXCEPTION 'Rows payload must be a JSON array.';
+  END IF;
+
+  v_total := jsonb_array_length(p_rows);
+
+  IF v_total > 300 THEN
+    RAISE EXCEPTION 'Maximum of 300 rows per import. Received % rows.', v_total;
+  END IF;
+
+  FOR v_row IN SELECT value FROM jsonb_array_elements(p_rows)
+  LOOP
+    v_row_number := v_row_number + 1;
+    v_errors := ARRAY[]::text[];
+    v_warnings := ARRAY[]::text[];
+
+    v_first_name := NULLIF(btrim(v_row->>'first_name'), '');
+    v_last_name := NULLIF(btrim(v_row->>'last_name'), '');
+    v_email := NULLIF(lower(btrim(v_row->>'email')), '');
+    v_contact_number := NULLIF(btrim(v_row->>'contact_number'), '');
+    v_affiliation := NULLIF(btrim(v_row->>'affiliation'), '');
+    v_note := NULLIF(btrim(v_row->>'note'), '');
+    v_source_submission_id := NULLIF(btrim(v_row->>'source_submission_id'), '');
+    v_source_submitted_at_raw := NULLIF(btrim(v_row->>'source_submitted_at'), '');
+    v_registration_date := NOW();
+
+    IF v_first_name IS NULL THEN
+      v_errors := array_append(v_errors, 'first_name is required');
+    END IF;
+    IF v_last_name IS NULL THEN
+      v_errors := array_append(v_errors, 'last_name is required');
+    END IF;
+    IF v_email IS NULL THEN
+      v_errors := array_append(v_errors, 'email is required');
+    ELSIF v_email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' THEN
+      v_errors := array_append(v_errors, 'email format is invalid');
+    END IF;
+    IF v_contact_number IS NULL THEN
+      v_errors := array_append(v_errors, 'contact_number is required');
+    END IF;
+    IF v_affiliation IS NULL THEN
+      v_errors := array_append(v_errors, 'affiliation is required');
+    END IF;
+
+    IF v_source_submitted_at_raw IS NOT NULL THEN
+      BEGIN
+        v_registration_date := v_source_submitted_at_raw::timestamp with time zone;
+      EXCEPTION
+        WHEN OTHERS THEN
+          v_registration_date := NOW();
+          v_warnings := array_append(
+            v_warnings,
+            'source_submitted_at is invalid and was replaced with current timestamp'
+          );
+      END;
+    END IF;
+
+    IF v_source_submission_id IS NOT NULL
+       AND EXISTS (
+         SELECT 1
+         FROM "Registration"
+         WHERE "eventId" = p_event_id
+           AND "sourceSubmissionId" = v_source_submission_id
+       ) THEN
+      v_skipped_duplicate := v_skipped_duplicate + 1;
+      v_results := v_results || jsonb_build_array(
+        jsonb_build_object(
+          'rowNumber', v_row_number,
+          'status', 'skipped_duplicate',
+          'sourceSubmissionId', v_source_submission_id
+        )
+      );
+      CONTINUE;
+    END IF;
+
+    IF coalesce(array_length(v_errors, 1), 0) > 0 THEN
+      v_invalid := v_invalid + 1;
+      v_failed := v_failed + 1;
+      v_results := v_results || jsonb_build_array(
+        jsonb_build_object(
+          'rowNumber', v_row_number,
+          'status', 'invalid',
+          'errors', to_jsonb(v_errors)
+        )
+      );
+      CONTINUE;
+    END IF;
+
+    v_valid := v_valid + 1;
+
+    IF p_dry_run THEN
+      v_would_insert := v_would_insert + 1;
+      v_results := v_results || jsonb_build_array(
+        jsonb_build_object(
+          'rowNumber', v_row_number,
+          'status', 'would_insert',
+          'sourceSubmissionId', v_source_submission_id,
+          'warnings', CASE
+            WHEN coalesce(array_length(v_warnings, 1), 0) > 0 THEN to_jsonb(v_warnings)
+            ELSE '[]'::jsonb
+          END
+        )
+      );
+      CONTINUE;
+    END IF;
+
+    BEGIN
+      v_identifier := 'ibc-reg-' || left(replace(gen_random_uuid()::text, '-', ''), 8);
+
+      INSERT INTO "Registration" (
+        "eventId",
+        "businessMemberId",
+        "nonMemberName",
+        "paymentMethod",
+        "paymentProofStatus",
+        "identifier",
+        "note",
+        "registrationDate",
+        "sourceSubmissionId"
+      ) VALUES (
+        p_event_id,
+        NULL,
+        v_affiliation,
+        'IMPORTED'::"PaymentMethod",
+        'accepted'::"PaymentProofStatus",
+        v_identifier,
+        v_note,
+        v_registration_date,
+        v_source_submission_id
+      )
+      RETURNING "registrationId" INTO v_registration_id;
+
+      INSERT INTO "Participant" (
+        "registrationId",
+        "isPrincipal",
+        "firstName",
+        "lastName",
+        "contactNumber",
+        "email"
+      ) VALUES (
+        v_registration_id,
+        TRUE,
+        v_first_name,
+        v_last_name,
+        v_contact_number,
+        v_email
+      );
+
+      v_inserted := v_inserted + 1;
+      v_results := v_results || jsonb_build_array(
+        jsonb_build_object(
+          'rowNumber', v_row_number,
+          'status', 'inserted',
+          'registrationId', v_registration_id,
+          'sourceSubmissionId', v_source_submission_id,
+          'warnings', CASE
+            WHEN coalesce(array_length(v_warnings, 1), 0) > 0 THEN to_jsonb(v_warnings)
+            ELSE '[]'::jsonb
+          END
+        )
+      );
+    EXCEPTION
+      WHEN unique_violation THEN
+        v_skipped_duplicate := v_skipped_duplicate + 1;
+        v_results := v_results || jsonb_build_array(
+          jsonb_build_object(
+            'rowNumber', v_row_number,
+            'status', 'skipped_duplicate',
+            'sourceSubmissionId', v_source_submission_id
+          )
+        );
+      WHEN OTHERS THEN
+        v_failed := v_failed + 1;
+        v_results := v_results || jsonb_build_array(
+          jsonb_build_object(
+            'rowNumber', v_row_number,
+            'status', 'failed',
+            'errors', to_jsonb(ARRAY[SQLERRM])
+          )
+        );
+    END;
+  END LOOP;
+
+  RETURN jsonb_build_object(
+    'total', v_total,
+    'valid', v_valid,
+    'invalid', v_invalid,
+    'wouldInsert', CASE WHEN p_dry_run THEN v_would_insert ELSE 0 END,
+    'inserted', CASE WHEN p_dry_run THEN 0 ELSE v_inserted END,
+    'skippedDuplicate', v_skipped_duplicate,
+    'failed', v_failed,
+    'results', v_results
+  );
+END;
+$_$;
+
+
+ALTER FUNCTION "public"."import_event_registrations"("p_event_id" "uuid", "p_rows" "jsonb", "p_dry_run" boolean) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."is_admin_user"() RETURNS boolean
@@ -2347,6 +2587,9 @@ DECLARE
   v_app_type_enum "ApplicationType";
   v_pay_method_enum "PaymentMethod";
   v_pay_status_enum "PaymentProofStatus";
+  v_requested_member_type "ApplicationMemberType";
+  v_existing_member_type "ApplicationMemberType";
+  v_requires_payment boolean := true;
   v_sector_name text;
   v_business_member_id uuid;
   representative jsonb;
@@ -2356,13 +2599,7 @@ BEGIN
   v_identifier := 'ibc-app-' || left(replace(v_application_id::text, '-', ''), 8);
 
   v_app_type_enum := p_application_type::"ApplicationType";
-  v_pay_method_enum := p_payment_method::"PaymentMethod";
-  v_pay_status_enum := 'pending'::"PaymentProofStatus";
-
-  IF v_pay_method_enum = 'BPI'
-     AND (p_payment_proof_url IS NULL OR btrim(p_payment_proof_url) = '') THEN
-    RAISE EXCEPTION 'Proof of payment is required for online transactions.';
-  END IF;
+  v_requested_member_type := p_application_member_type::"ApplicationMemberType";
 
   v_sector_name := NULLIF(btrim(p_company_details->>'sectorName'), '');
   IF v_sector_name IS NULL THEN
@@ -2390,6 +2627,46 @@ BEGIN
         'Member ID % does not exist. Please provide a valid IBC Member ID.',
         v_business_member_id;
     END IF;
+  END IF;
+
+  IF v_app_type_enum = 'updating' THEN
+    SELECT a."applicationMemberType"
+    INTO v_existing_member_type
+    FROM public."Application" a
+    WHERE a."businessMemberId" = v_business_member_id
+    ORDER BY a."applicationDate" DESC
+    LIMIT 1;
+
+    IF v_existing_member_type = 'corporate'::"ApplicationMemberType"
+       AND v_requested_member_type = 'personal'::"ApplicationMemberType" THEN
+      RAISE EXCEPTION 'Corporate memberships cannot be downgraded to personal through update-info applications.';
+    END IF;
+
+    v_requires_payment :=
+      v_existing_member_type = 'personal'::"ApplicationMemberType"
+      AND v_requested_member_type = 'corporate'::"ApplicationMemberType";
+  ELSE
+    v_requires_payment := true;
+  END IF;
+
+  v_pay_method_enum := (
+    CASE
+      WHEN v_app_type_enum = 'updating' AND NOT v_requires_payment THEN 'ONSITE'
+      ELSE p_payment_method
+    END
+  )::"PaymentMethod";
+
+  v_pay_status_enum := (
+    CASE
+      WHEN v_pay_method_enum = 'BPI' THEN 'pending'
+      ELSE 'accepted'
+    END
+  )::"PaymentProofStatus";
+
+  IF v_requires_payment
+     AND v_pay_method_enum = 'BPI'
+     AND (p_payment_proof_url IS NULL OR btrim(p_payment_proof_url) = '') THEN
+    RAISE EXCEPTION 'Proof of payment is required for online transactions.';
   END IF;
 
   INSERT INTO "Application" (
@@ -2426,10 +2703,10 @@ BEGIN
     v_pay_status_enum,
     v_pay_method_enum,
     p_company_details->>'websiteURL',
-    p_application_member_type::"ApplicationMemberType"
+    v_requested_member_type
   );
 
-  IF v_pay_method_enum = 'BPI' THEN
+  IF v_requires_payment AND v_pay_method_enum = 'BPI' THEN
     INSERT INTO "ProofImage" ("applicationId", "path")
     VALUES (v_application_id, p_payment_proof_url);
   END IF;
@@ -2476,11 +2753,13 @@ BEGIN
     'identifier', v_identifier,
     'applicationType', p_application_type,
     'businessMemberId', v_business_member_id,
+    'requiresPayment', v_requires_payment,
     'status', 'success',
-    'message', CASE v_app_type_enum
-      WHEN 'newMember' THEN 'New membership application submitted successfully.'
-      WHEN 'renewal' THEN 'Membership renewal application submitted successfully.'
-      WHEN 'updating' THEN 'Information update request submitted successfully. Processing fee: ₱2,000.00'
+    'message', CASE
+      WHEN v_app_type_enum = 'newMember' THEN 'New membership application submitted successfully.'
+      WHEN v_app_type_enum = 'renewal' THEN 'Membership renewal application submitted successfully.'
+      WHEN v_app_type_enum = 'updating' AND v_requires_payment THEN 'Corporate upgrade request submitted successfully. Upgrade fee: ₱5,000.00'
+      WHEN v_app_type_enum = 'updating' THEN 'Information update request submitted successfully. No payment is required.'
       ELSE 'Application submitted successfully.'
     END
   );
@@ -2760,6 +3039,244 @@ $$;
 ALTER FUNCTION "public"."update_event_published_at"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."update_member_with_representatives"("p_member_id" "uuid", "p_application_id" "uuid", "p_business_name" "text", "p_sector_id" integer, "p_company_address" "text", "p_email_address" "text", "p_landline" "text", "p_mobile_number" "text", "p_website_url" "text" DEFAULT NULL::"text", "p_membership_status" "public"."MembershipStatus" DEFAULT NULL::"public"."MembershipStatus", "p_join_date" "date" DEFAULT NULL::"date", "p_membership_expiry_date" "date" DEFAULT NULL::"date", "p_representatives" "jsonb" DEFAULT '[]'::"jsonb") RETURNS "jsonb"
+    LANGUAGE "plpgsql"
+    AS $$
+declare
+  v_sector_name text;
+  v_rep_count integer;
+  v_principal_count integer;
+  v_alternate_count integer;
+  v_updated_reps integer;
+begin
+  -- Validate base identifiers
+  if p_member_id is null then
+    raise exception 'p_member_id is required';
+  end if;
+
+  if p_application_id is null then
+    raise exception 'p_application_id is required';
+  end if;
+
+  -- Ensure application belongs to member
+  if not exists (
+    select 1
+    from public."Application" a
+    where a."applicationId" = p_application_id
+      and a."businessMemberId" = p_member_id
+  ) then
+    raise exception 'Application % does not belong to member %', p_application_id, p_member_id;
+  end if;
+
+  -- Resolve sector name
+  select s."sectorName"
+    into v_sector_name
+  from public."Sector" s
+  where s."sectorId" = p_sector_id;
+
+  if v_sector_name is null then
+    raise exception 'Invalid sectorId: %', p_sector_id;
+  end if;
+
+  -- Validate representatives payload shape
+  if jsonb_typeof(p_representatives) <> 'array' then
+    raise exception 'p_representatives must be a JSON array';
+  end if;
+
+  v_rep_count := jsonb_array_length(p_representatives);
+  if v_rep_count <> 2 then
+    raise exception 'Exactly two representatives are required';
+  end if;
+
+  -- Validate one principal + one alternate
+  with reps as (
+    select
+      r.companyMemberType
+    from jsonb_to_recordset(p_representatives) as r(
+      applicationMemberId uuid,
+      firstName text,
+      lastName text,
+      emailAddress text,
+      mobileNumber text,
+      landline text,
+      mailingAddress text,
+      companyDesignation text,
+      companyMemberType text,
+      birthdate date,
+      nationality text,
+      sex text
+    )
+  )
+  select
+    count(*) filter (where companyMemberType = 'principal'),
+    count(*) filter (where companyMemberType = 'alternate')
+  into v_principal_count, v_alternate_count
+  from reps;
+
+  if v_principal_count <> 1 or v_alternate_count <> 1 then
+    raise exception 'Representatives must contain exactly one principal and one alternate';
+  end if;
+
+  -- Validate provided representative IDs belong to this application
+  if exists (
+    with reps as (
+      select
+        r.applicationMemberId
+      from jsonb_to_recordset(p_representatives) as r(
+        applicationMemberId uuid,
+        firstName text,
+        lastName text,
+        emailAddress text,
+        mobileNumber text,
+        landline text,
+        mailingAddress text,
+        companyDesignation text,
+        companyMemberType text,
+        birthdate date,
+        nationality text,
+        sex text
+      )
+    )
+    select 1
+    from reps
+    where applicationMemberId is not null
+      and not exists (
+        select 1
+        from public."ApplicationMember" am
+        where am."applicationMemberId" = reps.applicationMemberId
+          and am."applicationId" = p_application_id
+      )
+  ) then
+    raise exception 'One or more representative IDs are invalid for this application';
+  end if;
+
+  -- 1) Update BusinessMember
+  update public."BusinessMember"
+  set
+    "businessName" = p_business_name,
+    "websiteURL" = p_website_url,
+    "sectorId" = p_sector_id,
+    "membershipStatus" = p_membership_status,
+    "joinDate" = p_join_date,
+    "membershipExpiryDate" = p_membership_expiry_date
+  where "businessMemberId" = p_member_id;
+
+  if not found then
+    raise exception 'Member not found: %', p_member_id;
+  end if;
+
+  -- 2) Update Application snapshot
+  update public."Application"
+  set
+    "companyName" = p_business_name,
+    "companyAddress" = p_company_address,
+    "emailAddress" = p_email_address,
+    "landline" = p_landline,
+    "mobileNumber" = p_mobile_number,
+    "websiteURL" = p_website_url,
+    "sectorName" = v_sector_name
+  where "applicationId" = p_application_id;
+
+  if not found then
+    raise exception 'Application not found: %', p_application_id;
+  end if;
+
+  -- 3) Upsert representatives
+  with reps as (
+    select
+      coalesce(r.applicationMemberId, gen_random_uuid()) as "applicationMemberId",
+      p_application_id as "applicationId",
+      r.firstName as "firstName",
+      r.lastName as "lastName",
+      r.emailAddress as "emailAddress",
+      r.mobileNumber as "mobileNumber",
+      r.landline as "landline",
+      r.mailingAddress as "mailingAddress",
+      r.companyDesignation as "companyDesignation",
+      r.companyMemberType::public."CompanyMemberType" as "companyMemberType",
+      r.birthdate as "birthdate",
+      r.nationality as "nationality",
+      r.sex as "sex"
+    from jsonb_to_recordset(p_representatives) as r(
+      applicationMemberId uuid,
+      firstName text,
+      lastName text,
+      emailAddress text,
+      mobileNumber text,
+      landline text,
+      mailingAddress text,
+      companyDesignation text,
+      companyMemberType text,
+      birthdate date,
+      nationality text,
+      sex text
+    )
+  ),
+  upserted as (
+    insert into public."ApplicationMember" (
+      "applicationMemberId",
+      "applicationId",
+      "firstName",
+      "lastName",
+      "emailAddress",
+      "mobileNumber",
+      "landline",
+      "mailingAddress",
+      "companyDesignation",
+      "companyMemberType",
+      "birthdate",
+      "nationality",
+      "sex"
+    )
+    select
+      "applicationMemberId",
+      "applicationId",
+      "firstName",
+      "lastName",
+      "emailAddress",
+      "mobileNumber",
+      "landline",
+      "mailingAddress",
+      "companyDesignation",
+      "companyMemberType",
+      "birthdate",
+      "nationality",
+      "sex"
+    from reps
+    on conflict ("applicationMemberId")
+    do update set
+      "firstName" = excluded."firstName",
+      "lastName" = excluded."lastName",
+      "emailAddress" = excluded."emailAddress",
+      "mobileNumber" = excluded."mobileNumber",
+      "landline" = excluded."landline",
+      "mailingAddress" = excluded."mailingAddress",
+      "companyDesignation" = excluded."companyDesignation",
+      "companyMemberType" = excluded."companyMemberType",
+      "birthdate" = excluded."birthdate",
+      "nationality" = excluded."nationality",
+      "sex" = excluded."sex"
+    returning 1
+  )
+  select count(*) into v_updated_reps from upserted;
+
+  if v_updated_reps <> 2 then
+    raise exception 'Expected to upsert exactly 2 representatives, got %', v_updated_reps;
+  end if;
+
+  return jsonb_build_object(
+    'success', true,
+    'memberId', p_member_id,
+    'applicationId', p_application_id,
+    'representativesUpdated', v_updated_reps
+  );
+end;
+$$;
+
+
+ALTER FUNCTION "public"."update_member_with_representatives"("p_member_id" "uuid", "p_application_id" "uuid", "p_business_name" "text", "p_sector_id" integer, "p_company_address" "text", "p_email_address" "text", "p_landline" "text", "p_mobile_number" "text", "p_website_url" "text", "p_membership_status" "public"."MembershipStatus", "p_join_date" "date", "p_membership_expiry_date" "date", "p_representatives" "jsonb") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."update_participant_count_trigger"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
@@ -2793,21 +3310,33 @@ CREATE OR REPLACE FUNCTION "public"."update_primary_application_for_member"() RE
 DECLARE
   affected_member uuid;
 BEGIN
-  affected_member := COALESCE(NEW."businessMemberId", OLD."businessMemberId");
-
-  IF affected_member IS NOT NULL THEN
-    UPDATE "BusinessMember"
-    SET "primaryApplicationId" = (
-      SELECT "applicationId"
-      FROM "Application"
-      WHERE "businessMemberId" = affected_member
-      ORDER BY "applicationDate" DESC
-      LIMIT 1
-    )
-    WHERE "businessMemberId" = affected_member;
+  IF TG_OP <> 'UPDATE' THEN
+    RETURN COALESCE(NEW, OLD);
   END IF;
 
-  RETURN COALESCE(NEW, OLD);
+  IF NEW."applicationType" <> 'updating'::"ApplicationType" THEN
+    RETURN NEW;
+  END IF;
+
+  IF NEW."applicationStatus" <> 'approved'::"ApplicationStatus" THEN
+    RETURN NEW;
+  END IF;
+
+  IF OLD."applicationStatus" = NEW."applicationStatus" THEN
+    RETURN NEW;
+  END IF;
+
+  affected_member := NEW."businessMemberId";
+
+  IF affected_member IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  UPDATE public."BusinessMember"
+  SET "primaryApplicationId" = NEW."applicationId"
+  WHERE "businessMemberId" = affected_member;
+
+  RETURN NEW;
 END;
 $$;
 
@@ -3309,7 +3838,7 @@ ALTER TABLE "public"."ProofImage" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."Registration" (
     "registrationId" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "eventId" "uuid" NOT NULL,
-    "businessMemberId" "uuid" DEFAULT "gen_random_uuid"(),
+    "businessMemberId" "uuid",
     "nonMemberName" "text",
     "registrationDate" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL,
     "paymentMethod" "public"."PaymentMethod" NOT NULL,
@@ -3317,7 +3846,8 @@ CREATE TABLE IF NOT EXISTS "public"."Registration" (
     "numberOfParticipants" bigint,
     "sponsoredRegistrationId" "uuid",
     "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL,
-    "note" "text"
+    "note" "text",
+    "sourceSubmissionId" "text"
 );
 
 
@@ -3462,6 +3992,10 @@ CREATE INDEX "BusinessMember_primaryApplicationId_idx" ON "public"."BusinessMemb
 
 
 
+CREATE UNIQUE INDEX "Registration_event_sourceSubmissionId_unique" ON "public"."Registration" USING "btree" ("eventId", "sourceSubmissionId") WHERE ("sourceSubmissionId" IS NOT NULL);
+
+
+
 CREATE INDEX "WebsiteContent_is_active_idx" ON "public"."WebsiteContent" USING "btree" ("isActive");
 
 
@@ -3490,7 +4024,7 @@ CREATE INDEX "idx_registration_sponsored_registration_id" ON "public"."Registrat
 
 
 
-CREATE OR REPLACE TRIGGER "on_application_sync_primary" AFTER INSERT OR DELETE OR UPDATE ON "public"."Application" FOR EACH ROW EXECUTE FUNCTION "public"."update_primary_application_for_member"();
+CREATE OR REPLACE TRIGGER "on_application_sync_primary" AFTER UPDATE OF "applicationStatus", "businessMemberId" ON "public"."Application" FOR EACH ROW EXECUTE FUNCTION "public"."update_primary_application_for_member"();
 
 
 
@@ -3542,6 +4076,11 @@ ALTER TABLE ONLY "public"."Application"
 
 ALTER TABLE ONLY "public"."Application"
     ADD CONSTRAINT "Application_interviewId_fkey" FOREIGN KEY ("interviewId") REFERENCES "public"."Interview"("interviewId") ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."BusinessMember"
+    ADD CONSTRAINT "BusinessMember_primaryApplicationId_fkey" FOREIGN KEY ("primaryApplicationId") REFERENCES "public"."Application"("applicationId") ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 
@@ -3782,6 +4321,10 @@ CREATE POLICY "Enable update for admins" ON "public"."Registration" FOR UPDATE T
 
 
 
+CREATE POLICY "Enable update for authenticated users" ON "public"."ApplicationMember" FOR UPDATE TO "authenticated" USING (true) WITH CHECK (true);
+
+
+
 ALTER TABLE "public"."EvaluationForm" ENABLE ROW LEVEL SECURITY;
 
 
@@ -3861,9 +4404,6 @@ GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
-
-
-
 
 
 
@@ -4275,12 +4815,6 @@ GRANT ALL ON FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid"
 
 
 
-GRANT ALL ON FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_registrations_by_sponsored_id"("p_sponsored_registration_id" "uuid") TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "anon";
 GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "authenticated";
 GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "service_role";
@@ -4314,6 +4848,12 @@ GRANT ALL ON FUNCTION "public"."get_sr_by_event_id"("p_event_id" "uuid") TO "ser
 GRANT ALL ON FUNCTION "public"."handle_event_days"() TO "anon";
 GRANT ALL ON FUNCTION "public"."handle_event_days"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_event_days"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."import_event_registrations"("p_event_id" "uuid", "p_rows" "jsonb", "p_dry_run" boolean) TO "anon";
+GRANT ALL ON FUNCTION "public"."import_event_registrations"("p_event_id" "uuid", "p_rows" "jsonb", "p_dry_run" boolean) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."import_event_registrations"("p_event_id" "uuid", "p_rows" "jsonb", "p_dry_run" boolean) TO "service_role";
 
 
 
@@ -4400,6 +4940,12 @@ GRANT ALL ON FUNCTION "public"."update_event_details"("p_event_id" "uuid", "p_ti
 GRANT ALL ON FUNCTION "public"."update_event_published_at"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_event_published_at"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_event_published_at"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."update_member_with_representatives"("p_member_id" "uuid", "p_application_id" "uuid", "p_business_name" "text", "p_sector_id" integer, "p_company_address" "text", "p_email_address" "text", "p_landline" "text", "p_mobile_number" "text", "p_website_url" "text", "p_membership_status" "public"."MembershipStatus", "p_join_date" "date", "p_membership_expiry_date" "date", "p_representatives" "jsonb") TO "anon";
+GRANT ALL ON FUNCTION "public"."update_member_with_representatives"("p_member_id" "uuid", "p_application_id" "uuid", "p_business_name" "text", "p_sector_id" integer, "p_company_address" "text", "p_email_address" "text", "p_landline" "text", "p_mobile_number" "text", "p_website_url" "text", "p_membership_status" "public"."MembershipStatus", "p_join_date" "date", "p_membership_expiry_date" "date", "p_representatives" "jsonb") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_member_with_representatives"("p_member_id" "uuid", "p_application_id" "uuid", "p_business_name" "text", "p_sector_id" integer, "p_company_address" "text", "p_email_address" "text", "p_landline" "text", "p_mobile_number" "text", "p_website_url" "text", "p_membership_status" "public"."MembershipStatus", "p_join_date" "date", "p_membership_expiry_date" "date", "p_representatives" "jsonb") TO "service_role";
 
 
 

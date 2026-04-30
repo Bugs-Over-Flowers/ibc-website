@@ -2,41 +2,36 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation, useSortable } from "@dnd-kit/react/sortable";
-import { useForm } from "@tanstack/react-form";
-import { GripVertical } from "lucide-react";
+import { ArrowLeft, GripVertical, Trash2, User } from "lucide-react";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { IMAGE_UPLOAD_ACCEPT_ATTR } from "@/lib/fileUpload";
 import { reorderInList } from "../../_hooks/reorderInList";
-import { usePersonalImageUpload } from "../../_hooks/usePersonalImageUpload";
 import type { SecretariatSectionProps } from "../../_types/sectionProps";
 
 export function SecretariatSection({
   cards,
   placeholders,
   isSectionActionDisabled,
-  isDeleteMode,
-  hasSelectedCards,
-  selectedCount,
-  selectedCardEntryKeys,
   onAddCard,
   onDeleteCardsClick,
-  onCancelDeleteMode,
-  onSelectAllCards,
-  onUnselectAllCards,
   onToggleCardSelected,
   onCardFieldChange,
   onCardsReorder,
 }: SecretariatSectionProps) {
-  const { createImageSelectHandler } = usePersonalImageUpload({
-    basePath: "website-content/secretariat",
-    onUploaded: (entryKey, publicUrl) => {
-      onCardFieldChange(entryKey, "imageUrl", publicUrl);
-    },
-  });
+  const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
+
+  const handleDeleteCard = (entryKey: string) => {
+    onToggleCardSelected(entryKey, true);
+    onDeleteCardsClick();
+  };
+
+  const editingCard = cards.find((c) => c.entryKey === editingCardKey);
+  const editingCardIndex = cards.findIndex(
+    (c) => c.entryKey === editingCardKey,
+  );
 
   const SortableCard = ({
     card,
@@ -51,226 +46,186 @@ export function SecretariatSection({
       group: "secretariat",
     });
 
-    const form = useForm({
-      defaultValues: {
-        title: card.title,
-        subtitle: card.subtitle,
-      },
-    });
-
-    useEffect(() => {
-      form.setFieldValue("title", card.title);
-      form.setFieldValue("subtitle", card.subtitle);
-    }, [card.subtitle, card.title, form]);
-
-    const isSelected = selectedCardEntryKeys.has(card.entryKey);
-
     return (
       <div
-        className="relative aspect-[1/1.05] overflow-hidden rounded-lg border border-border p-4"
+        className="group relative overflow-hidden rounded-md border border-border bg-background"
         ref={ref}
-        style={{ opacity: isDragSource ? 0.65 : 1 }}
+        style={{
+          opacity: isDragSource ? 0.6 : 1,
+          touchAction: "none",
+        }}
       >
-        {isDeleteMode ? (
-          <>
-            <button
-              aria-label={`Toggle secretariat card ${index + 1} selection`}
-              className="absolute inset-0 z-10 bg-white/50"
-              onClick={() => onToggleCardSelected(card.entryKey, !isSelected)}
-              type="button"
-            />
-            <div className="absolute top-3 right-3 z-20">
-              <Checkbox
-                aria-label={`Select secretariat card ${index + 1}`}
-                checked={isSelected}
-                onCheckedChange={(checked) =>
-                  onToggleCardSelected(card.entryKey, checked === true)
-                }
-              />
-            </div>
-          </>
-        ) : null}
-
-        <div
-          className={`flex flex-col gap-3 ${isDeleteMode ? "pointer-events-none select-none" : ""}`}
+        {/* DRAG HANDLE */}
+        <button
+          className="absolute top-2 right-2 z-10 cursor-grab rounded-md border border-border bg-background/80 p-1 text-muted-foreground active:cursor-grabbing"
+          onClick={(e) => e.stopPropagation()}
+          ref={handleRef}
+          type="button"
         >
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="font-semibold text-sm">
-              Secretariat Card {index + 1}
-            </p>
-            {!isDeleteMode ? (
-              <button
-                aria-label="Drag card"
-                className="cursor-grab rounded-md border border-border p-1 text-muted-foreground active:cursor-grabbing"
-                ref={handleRef}
-                type="button"
-              >
-                <GripVertical className="h-4 w-4" />
-              </button>
-            ) : null}
-          </div>
+          <GripVertical className="h-4 w-4" />
+        </button>
 
-          <div className="space-y-2">
-            <p className="font-medium text-sm">Card Title</p>
-            <form.Field name="title">
-              {(field) => (
-                <Input
-                  disabled={isDeleteMode}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    field.handleChange(value);
-                    onCardFieldChange(card.entryKey, "title", value);
-                  }}
-                  placeholder={placeholders.title || "Herminia Ore"}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </div>
-          <div className="space-y-2">
-            <p className="font-medium text-sm">Card Subtitle</p>
-            <form.Field name="subtitle">
-              {(field) => (
-                <Input
-                  disabled={isDeleteMode}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    field.handleChange(value);
-                    onCardFieldChange(card.entryKey, "subtitle", value);
-                  }}
-                  placeholder={
-                    placeholders.subtitle || "Finance, Marketing, and Promotion"
-                  }
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-medium text-sm">Image</p>
-            <div className="flex flex-col gap-2">
-              <label
-                className="flex h-24 w-full cursor-pointer items-center justify-center rounded-md border border-border border-dashed bg-muted/30 px-4 py-2 text-center font-medium text-muted-foreground text-sm transition-colors hover:border-primary hover:bg-muted"
-                htmlFor={`secretariat-image-${card.entryKey}`}
-              >
-                Insert Image Here
-              </label>
-              <input
-                accept={IMAGE_UPLOAD_ACCEPT_ATTR}
-                className="hidden"
-                disabled={isDeleteMode}
-                id={`secretariat-image-${card.entryKey}`}
-                onChange={createImageSelectHandler(card.entryKey)}
-                type="file"
+        {/* IMAGE + TEXT */}
+        <div className="flex flex-col items-center p-4">
+          <div className="relative mb-3 flex aspect-square w-full items-center justify-center rounded-md bg-primary/5">
+            {card.imageUrl ? (
+              <Image
+                alt={`${card.title || "Secretariat member"} preview`}
+                className="h-20 w-20 rounded-md border border-border object-cover"
+                height={80}
+                src={card.imageUrl}
+                unoptimized
+                width={80}
               />
-              {card.imageUrl ? (
-                <Image
-                  alt={`${card.title || "Secretariat member"} preview`}
-                  className="h-20 w-20 rounded-md border border-border object-cover"
-                  height={80}
-                  src={card.imageUrl}
-                  unoptimized
-                  width={80}
-                />
-              ) : null}
-            </div>
+            ) : (
+              <User className="h-8 w-8 text-primary/30" />
+            )}
           </div>
+
+          <h3 className="font-semibold text-xs">
+            {card.title || "Secretariat member"}
+          </h3>
+          <p className="text-[10px] text-primary">
+            {card.subtitle || "Subtitle"}
+          </p>
         </div>
       </div>
     );
   };
 
+  const Form = ({ card }: { card: (typeof cards)[number] }) => (
+    <div className="space-y-3">
+      <Input
+        onChange={(e) =>
+          onCardFieldChange(card.entryKey, "title", e.target.value)
+        }
+        placeholder={placeholders.title}
+        value={card.title}
+      />
+      <Input
+        onChange={(e) =>
+          onCardFieldChange(card.entryKey, "subtitle", e.target.value)
+        }
+        placeholder={placeholders.subtitle}
+        value={card.subtitle}
+      />
+    </div>
+  );
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        {isDeleteMode ? (
-          <>
+    <>
+      {editingCard ? (
+        <div className="space-y-4">
+          {/* BACK BUTTON (ADDED) */}
+          <div className="flex items-center justify-start">
             <Button
-              disabled={isSectionActionDisabled || cards.length === 0}
-              onClick={onSelectAllCards}
+              className="gap-2"
+              disabled={isSectionActionDisabled}
+              onClick={() => setEditingCardKey(null)}
               type="button"
-              variant="ghost"
+              variant="outline"
             >
-              Select All
+              <ArrowLeft className="h-4 w-4" />
+              Back to Secretariats
             </Button>
-            <Button
-              disabled={isSectionActionDisabled || selectedCount === 0}
-              onClick={onUnselectAllCards}
-              type="button"
-              variant="ghost"
-            >
-              Unselect All
-            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* FORM */}
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-sm">
+                  Card {editingCardIndex + 1}
+                </p>
+
+                <Button
+                  onClick={() => handleDeleteCard(editingCard.entryKey)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <Form card={editingCard} />
+            </div>
+
+            {/* PREVIEW */}
+            <Card className="flex items-center justify-center">
+              <CardContent className="p-4">
+                <div className="w-[180px] overflow-hidden rounded-md border">
+                  <div className="relative aspect-square">
+                    {editingCard.imageUrl ? (
+                      <Image
+                        alt="preview"
+                        className="object-cover"
+                        fill
+                        src={editingCard.imageUrl}
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-primary/5">
+                        <User className="h-8 w-8 text-primary/30" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-2 text-center">
+                    <p className="font-semibold text-xs">
+                      {editingCard.title || "Secretariat member"}
+                    </p>
+                    <p className="text-[10px] text-primary">
+                      {editingCard.subtitle || "Subtitle"}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {/* ADD BUTTON */}
+          <div className="flex justify-end">
             <Button
               disabled={isSectionActionDisabled}
-              onClick={onCancelDeleteMode}
-              type="button"
-              variant="ghost"
+              onClick={onAddCard}
+              size="sm"
+              variant="outline"
             >
-              Cancel
+              Add Card
             </Button>
-          </>
-        ) : null}
-        <Button
-          disabled={isSectionActionDisabled || isDeleteMode}
-          onClick={onAddCard}
-          type="button"
-          variant="outline"
-        >
-          Add Card
-        </Button>
-        <Button
-          disabled={
-            isSectionActionDisabled || (isDeleteMode && !hasSelectedCards)
-          }
-          onClick={onDeleteCardsClick}
-          type="button"
-          variant={isDeleteMode ? "destructive" : "outline"}
-        >
-          {isDeleteMode ? "Confirm Delete" : "Delete Cards"}
-        </Button>
-      </div>
-      <DragDropProvider
-        onDragEnd={(event) => {
-          if (isDeleteMode) {
-            return;
-          }
+          </div>
 
-          if (event.canceled || !isSortableOperation(event.operation)) {
-            return;
-          }
+          {/* GRID + DRAG */}
+          <DragDropProvider
+            onDragEnd={(event) => {
+              if (event.canceled || !isSortableOperation(event.operation))
+                return;
 
-          if (!event.operation.source) {
-            return;
-          }
+              const active = String(event.operation.source?.id);
+              const over = String(event.operation.target?.id);
 
-          const activeEntryKey = String(event.operation.source.id);
-          const overEntryKey = String(event.operation.target?.id ?? "");
+              if (!active || !over || active === over) return;
 
-          if (
-            !activeEntryKey ||
-            !overEntryKey ||
-            activeEntryKey === overEntryKey
-          ) {
-            return;
-          }
+              const reordered = reorderInList(cards, active, over);
 
-          const reordered = reorderInList(cards, activeEntryKey, overEntryKey);
-          const nextCards = reordered.map((card, index) => ({
-            ...card,
-            cardPlacement: String(index + 1),
-          }));
+              const next = reordered.map((c, i) => ({
+                ...c,
+                cardPlacement: String(i + 1),
+              }));
 
-          onCardsReorder(nextCards);
-        }}
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {cards.map((card, index) => (
-            <SortableCard card={card} index={index} key={card.entryKey} />
-          ))}
+              onCardsReorder(next);
+            }}
+          >
+            <div className="grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3">
+              {cards.map((card, index) => (
+                <SortableCard card={card} index={index} key={card.entryKey} />
+              ))}
+            </div>
+          </DragDropProvider>
         </div>
-      </DragDropProvider>
-    </div>
+      )}
+    </>
   );
 }
