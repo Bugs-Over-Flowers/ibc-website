@@ -11,9 +11,10 @@ const securityHeaders = [
       "form-action 'self'",
       "frame-ancestors 'none'",
       "object-src 'none'",
-      "img-src 'self' data: https:",
+      "img-src 'self' data: https: rpdourwztdpwdebggkkc.supabase.co",
       "font-src 'self' data: https:",
       "style-src 'self' 'unsafe-inline' https:",
+      "frame-src 'self' https://www.google.com",
       isProduction
         ? "script-src 'self' 'unsafe-inline' https://unpkg.com"
         : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
