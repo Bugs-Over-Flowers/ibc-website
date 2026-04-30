@@ -682,12 +682,13 @@ END $$;
 -- =============================================================================
 -- A5: 3 applications with status "new", varying payment methods
 -- A6: 2 applications with status "pending", paymentProofStatus "accepted"
--- A7: 2 applications with type "updating", status "pending", linked to BM
+-- A7: 3 applications with type "updating", status "pending", linked to BM
 
 DO $$
 DECLARE
   v_logo_url text := 'http://127.0.0.1:54321/storage/v1/object/public/logoimage/';
   v_bm1_id uuid := '22222222-2222-4222-8222-222222222201';
+  v_bm3_id uuid := '22222222-2222-4222-8222-222222222203';
   v_bm4_id uuid := '22222222-2222-4222-8222-222222222204';
 BEGIN
   RAISE NOTICE '📋 Seeding Standalone Applications for A5, A6, A7...';
@@ -882,6 +883,33 @@ BEGIN
   VALUES
     ('33333333-3333-4333-8333-444444444429', '33333333-3333-4333-8333-333333333315', 'Juan', 'Dela Cruz', 'juan.delacruz@acmecorp.test', '+639111111111', '033-111-0101', '1 Acme Tower, Iloilo Business Park (Updated Suite 2A), Mandurriao, Iloilo City', '1980-03-15', 'Male', 'Filipino', 'President & CEO', 'principal'),
     ('33333333-3333-4333-8333-444444444430', '33333333-3333-4333-8333-333333333316', 'Robert', 'Chua', 'robert.chua@globalventures.test', '+639144444441', '033-444-0404', '44 Global Plaza (Updated Wing B), Molo, Iloilo City', '1978-06-25', 'Male', 'Filipino', 'CEO', 'principal');
+
+  ---------------------------------------------------------------------------
+  -- A7c: Update application — personal → corporate (for G9)
+  ---------------------------------------------------------------------------
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  VALUES (
+    '33333333-3333-4333-8333-333333333317',
+    'ibc-app-testa703',
+    v_bm3_id,
+    'Technology',
+    v_logo_url || 'test-app-logo-1.jpg',
+    'updating',
+    'InnovateTech Solutions Inc.',
+    '3 Innovation Lane, La Paz, Iloilo City',
+    '033-333-0303',
+    '+639133333333',
+    'hello@innovatetech.test',
+    'ONSITE',
+    'https://innovatetech.test',
+    'corporate',
+    'pending',
+    'pending'
+  );
+
+  INSERT INTO "public"."ApplicationMember" ("applicationMemberId", "applicationId", "firstName", "lastName", "emailAddress", "mobileNumber", "landline", "mailingAddress", "birthdate", "sex", "nationality", "companyDesignation", "companyMemberType")
+  VALUES
+    ('33333333-3333-4333-8333-444444444431', '33333333-3333-4333-8333-333333333317', 'Angelo', 'Mendoza', 'angelo.mendoza@innovatetech.test', '+639133333331', '033-333-0303', '3 Innovation Lane, La Paz, Iloilo City', '1988-09-30', 'Male', 'Filipino', 'Founder & CEO', 'principal');
 
   -- Interview for A6 (linked to one pending application)
   INSERT INTO "public"."Interview" ("interviewId", "interviewDate", "interviewVenue", "status", "notes", "applicationId")
