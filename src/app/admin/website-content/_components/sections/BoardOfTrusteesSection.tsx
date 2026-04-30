@@ -26,7 +26,7 @@ export function BoardOfTrusteesSection({
 }: BoardOfTrusteesSectionProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
 
-  const { createImageSelectHandler } = usePersonalImageUpload({
+  usePersonalImageUpload({
     basePath: "website-content/board",
     onUploaded: (entryKey, publicUrl) => {
       onCardFieldChange(entryKey, "imageUrl", publicUrl);
@@ -176,9 +176,7 @@ export function BoardOfTrusteesSection({
             {card.imageUrl ? (
               <Image
                 alt={card.title || "Board member"}
-                className={`${
-                  isFeatured ? "h-24 w-24" : "h-20 w-20"
-                } rounded-full object-cover`}
+                className="rounded-full object-cover"
                 height={isFeatured ? 96 : 80}
                 src={card.imageUrl}
                 unoptimized

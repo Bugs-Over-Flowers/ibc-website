@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  isValidImageUploadFile,
+} from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 import type { NetworkFormState } from "./networkForm";
 
@@ -46,18 +50,8 @@ export function NetworkFormFields({
   }, []);
 
   const validateFile = (file: File): boolean => {
-    const isValidType =
-      file.type === "image/png" ||
-      file.type === "image/jpeg" ||
-      file.type === "image/jpg";
-
-    if (!isValidType) {
-      toast.error("Invalid logo type. Use PNG or JPG/JPEG.");
-      return false;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Logo is too large. Maximum size is 5MB.");
+    if (!isValidImageUploadFile(file)) {
+      toast.error("Invalid logo. Use PNG, JPG, or JPEG up to 5MB.");
       return false;
     }
 
@@ -204,7 +198,7 @@ export function NetworkFormFields({
             type="button"
           >
             <input
-              accept="image/png,image/jpeg,image/jpg"
+              accept={IMAGE_UPLOAD_ACCEPT_ATTR}
               className="absolute inset-0 cursor-pointer opacity-0"
               id="network-logo"
               onChange={(event) => {
@@ -246,7 +240,7 @@ export function NetworkFormFields({
                     : "Click to upload or drag and drop"}
                 </span>
                 <span className="mt-1 text-muted-foreground text-xs">
-                  PNG, JPG up to 5MB
+                  PNG, JPG, JPEG up to 5MB
                 </span>
               </>
             )}

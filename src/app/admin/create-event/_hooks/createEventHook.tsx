@@ -4,6 +4,7 @@ import { revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
+import { isValidImageUploadFile } from "@/lib/fileUpload";
 import { createClient } from "@/lib/supabase/client";
 import { zodErrorToFieldErrors } from "@/lib/utils";
 import {
@@ -53,7 +54,6 @@ export const useCreateEventForm = () => {
     },
 
     onSubmit: async ({ value, meta }) => {
-      const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
       let headerUrl: string | null | undefined = null;
       let posterUrl: string | null | undefined = null;
       let supabaseClient: Awaited<ReturnType<typeof createClient>> | null =
@@ -67,22 +67,12 @@ export const useCreateEventForm = () => {
       };
 
       const validateFile = (file: File) => {
-        const fileExt = file.name.split(".").pop()?.toLowerCase();
-        const allowedExtensions = ["jpg", "jpeg", "png"];
-
-        if (!fileExt || !allowedExtensions.includes(fileExt)) {
-          toast.error(
-            "Invalid file type. Only jpg, jpeg, and png are allowed.",
-          );
+        if (!isValidImageUploadFile(file)) {
+          toast.error("Invalid file. Use PNG, JPG, or JPEG up to 5MB.");
           return null;
         }
 
-        if (file.size > MAX_FILE_SIZE_BYTES) {
-          toast.error("File too large. Maximum size is 5MB.");
-          return null;
-        }
-
-        return fileExt;
+        return file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       };
 
       if (value.eventImage && value.eventImage.length > 0) {

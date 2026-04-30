@@ -129,7 +129,7 @@ export function PaymentProofDropzone({
   onChange,
   errorMessages,
   label = "Upload Proof of Payment *",
-  description = "PNG, JPG up to 5MB",
+  description = "PNG, JPG, JPEG up to 5MB",
 }: PaymentProofDropzoneProps) {
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
