@@ -1,50 +1,91 @@
-@smoke
 Feature: Registration flow
 
   Background:
-    Email sending is mocked
+    Email sending is mocked, Online payments are out of scope here.
 
-  @smoke
+  @happy
   Scenario: Open registration from event details
     Given I am on an event details page
     When I click the "Register for This Event" button
     Then I should be redirected to the registration form
 
-  @smoke
+  @sad
   Scenario: Block non-member registration for a private event
     Given I am on the registration form for a private event
     When I try to continue the registration
     Then I should see a message that the event is private
 
-  @smoke
+  @happy
   Scenario Outline: Register as a member
     Given I am on the member registration form
     When I submit a valid member registration <note>
     Then I should see the member registration success result
     And I should be redirected back after member registration
 
-	# title-format: <note>
+    # title-format: <note>
     Examples:
       | note         |
       | with note    |
       | without note |
 
-  @smoke
+  @happy
   Scenario Outline: Register as a non-member for a public event
     Given I am on the registration form for a public event
     When I submit a valid non-member registration <note>
     Then I should see the public non-member registration success result
     And I should be redirected back after public registration
 
-	# title-format: <note>
+    # title-format: <note>
     Examples:
       | note         |
       | with note    |
       | without note |
 
-  @smoke
-  Scenario: Register multiple participants
+  @happy
+  Scenario Outline: Register with varying participant counts
     Given I am on the multi-participant registration form
-    When I submit a registration with multiple participants
-    Then I should see the multiple participant registration success result
-    And the registration should include all participants
+    When I submit a registration with <count> participants
+    Then I should see the registration success result
+    And the registration should include <count> participants
+
+    # title-format: Register with <count> participants
+    Examples:
+      | count |
+      | 1     |
+      | 3     |
+      | 8     |
+      | 10    |
+
+  @sad
+  Scenario: Missing required fields shows errors
+    Given I am on the registration form for a public event
+    When I submit without filling required fields
+    Then I should see the validation error "First name must be at least 2 characters"
+    And I should see the validation error "Last name must be at least 2 characters"
+    And I should see the validation error "Invalid email address"
+    And I should see the validation error "Contact number must be a valid Philippine phone or landline number"
+
+  @critical @sad
+  Scenario: Submit without accepting terms and conditions
+    Given I am on the review registration page
+    When I submit without accepting terms and conditions
+    Then I should see "You must agree to the Terms and Conditions"
+
+  @critical @sad
+  Scenario: Organization selection failure
+    Given I am on the member registration form
+    When I try to select a non-existent organization
+    Then I should see an error message about organization
+
+# @sad
+# Scenario Outline: Register with online payment fails due to proof issues
+#   Given I am on the registration form for a public event
+#   When I submit a registration with online payment and <proof_type> proof
+#   Then I should see the <error_message>
+
+#   # title-format: Register with <proof_type> proof
+#   Examples:
+#     | proof_type | error_message                               |
+#     | invalid    | Payment proof must be a valid image or PDF  |
+#     | too large  | Payment proof must be less than 5MB         |
+#     | missing    | Payment proof is required                   |
