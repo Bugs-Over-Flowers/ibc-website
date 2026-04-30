@@ -42,6 +42,7 @@ export default function CheckInItemActions({
         <DropdownMenuTrigger
           render={
             <Button
+              aria-label="Open check-in participant actions"
               className="size-7 p-0"
               onClick={(e) => {
                 e.stopPropagation();
