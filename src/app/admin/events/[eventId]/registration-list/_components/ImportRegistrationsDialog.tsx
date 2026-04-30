@@ -34,43 +34,32 @@ type ImportRegistrationsDialogProps = {
   eventId: string;
 };
 
-const EXPECTED_HEADERS = [
-  "first_name",
-  "last_name",
-  "email",
-  "contact_number",
-  "affiliation",
-  "note",
-  "source_submission_id",
-  "source_submitted_at",
-] as const;
-
 const REQUIRED_HEADERS = [
-  "first_name",
-  "last_name",
-  "email",
-  "contact_number",
-  "affiliation",
-] as const;
+  "Company/Organization",
+  "First Name",
+  "Last Name",
+  "Email",
+  "Contact Number",
+];
 
 const OPTIONAL_HEADERS = [
-  "note",
-  "source_submission_id",
-  "source_submitted_at",
-] as const;
+  "Note",
+  "Source Submission ID",
+  "Source Submitted At",
+];
 
 const GOOGLE_SHEETS_TEMPLATE_FORMULA = `={
 "Questions","Desc","Image","Type","Required","option start","option 2","option 3","option end","Other","Points","Correct Answer","correct feedback","correct url","incorrect feedback","incorrect url";
 "Registration Import Form","","","TITLE","","","","","","","","","","","","";
 "Participant Information","One participant per registration. This form is for CSV import to IBC admin.","","SECTION_HEADER","","","","","","","","","","","","";
-"first_name","Required. Participant first name.","","TEXT","TRUE","","","","","","","","","","","";
-"last_name","Required. Participant last name.","","TEXT","TRUE","","","","","","","","","","","";
-"email","Required. Valid email address.","","TEXT","TRUE","","","","","","","","","","","";
-"contact_number","Required. Mobile or landline.","","TEXT","TRUE","","","","","","","","","","","";
-"affiliation","Required. Company/organization/affiliation.","","TEXT","TRUE","","","","","","","","","","","";
-"note","Optional admin note.","","PARAGRAPH","FALSE","","","","","","","","","","","";
-"source_submission_id","Optional unique external response ID (for dedupe).","","TEXT","FALSE","","","","","","","","","","","";
-"source_submitted_at","Optional ISO timestamp (example: 2026-05-01T09:00:00+08:00).","","TEXT","FALSE","","","","","","","","","","",""
+"Company/Organization","Required. Company/organization/affiliation.","","TEXT","TRUE","","","","","","","","","","","";
+"First Name","Required. Participant first name.","","TEXT","TRUE","","","","","","","","","","","";
+"Last Name","Required. Participant last name.","","TEXT","TRUE","","","","","","","","","","","";
+"Email","Required. Valid email address.","","TEXT","TRUE","","","","","","","","","","","";
+"Contact Number","Required. Mobile or landline.","","TEXT","TRUE","","","","","","","","","","","";
+"Note","Optional admin note.","","PARAGRAPH","FALSE","","","","","","","","","","","";
+"Source Submission ID","Optional unique external response ID (for dedupe).","","TEXT","FALSE","","","","","","","","","","","";
+"Source Submitted At","Optional ISO timestamp (example: 2026-05-01T09:00:00+08:00).","","TEXT","FALSE","","","","","","","","","","",""
 }`;
 
 type ParsedCsv = {
@@ -157,8 +146,8 @@ export default function ImportRegistrationsDialog({
       value.toLowerCase(),
     );
 
-    const missingHeaders = EXPECTED_HEADERS.filter(
-      (header) => !headers.includes(header),
+    const missingHeaders = REQUIRED_HEADERS.filter(
+      (header) => !headers.includes(header.toLowerCase()),
     );
 
     if (missingHeaders.length > 0) {
@@ -173,8 +162,8 @@ export default function ImportRegistrationsDialog({
 
     const rows = dataLines.map((line) => {
       const values = splitCsvLine(line);
-      const getValue = (key: (typeof EXPECTED_HEADERS)[number]) => {
-        const idx = headers.indexOf(key);
+      const getValue = (header: string) => {
+        const idx = headers.indexOf(header.toLowerCase());
         if (idx < 0 || idx >= values.length) {
           return undefined;
         }
@@ -184,14 +173,14 @@ export default function ImportRegistrationsDialog({
       };
 
       return {
-        first_name: getValue("first_name"),
-        last_name: getValue("last_name"),
-        email: getValue("email"),
-        contact_number: getValue("contact_number"),
-        affiliation: getValue("affiliation"),
-        note: getValue("note"),
-        source_submission_id: getValue("source_submission_id"),
-        source_submitted_at: getValue("source_submitted_at"),
+        first_name: getValue("First Name"),
+        last_name: getValue("Last Name"),
+        email: getValue("Email"),
+        contact_number: getValue("Contact Number"),
+        affiliation: getValue("Company/Organization"),
+        note: getValue("Note"),
+        source_submission_id: getValue("Source Submission ID"),
+        source_submitted_at: getValue("Source Submitted At"),
       } satisfies ImportRegistrationRowPayload;
     });
 
@@ -309,8 +298,8 @@ export default function ImportRegistrationsDialog({
                 <div className="min-w-0">
                   <p className="font-medium">CSV schema</p>
                   <p className="mt-1 text-muted-foreground text-xs">
-                    Include all headers exactly as shown. Optional columns may
-                    be left blank.
+                    Required headers must be present. Optional columns can be
+                    included or omitted.
                   </p>
                 </div>
                 <div className="flex min-w-0 flex-wrap gap-2 max-sm:w-full max-sm:*:flex-1">
@@ -351,7 +340,7 @@ export default function ImportRegistrationsDialog({
 
                 <div className="rounded-md border bg-background/70 p-3">
                   <p className="font-medium text-xs uppercase tracking-wide">
-                    Optional values
+                    Optional
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {OPTIONAL_HEADERS.map((header) => (
@@ -375,7 +364,7 @@ export default function ImportRegistrationsDialog({
                     email: name@domain.com
                   </span>
                   <span className="max-w-full break-all rounded-full border bg-muted/50 px-2 py-0.5">
-                    source_submitted_at: 2026-05-01T09:00:00+08:00
+                    Source Submitted At: 2026-05-01T09:00:00+08:00
                   </span>
                   <span className="rounded-full border bg-muted/50 px-2 py-0.5">
                     Max {IMPORT_REGISTRATIONS_MAX_ROWS} rows
