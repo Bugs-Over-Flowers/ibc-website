@@ -65,29 +65,23 @@ export function SecretariatSection({
           <GripVertical className="h-4 w-4" />
         </button>
 
-        {/* IMAGE */}
-        <button
-          className="relative aspect-square w-full overflow-hidden"
-          onClick={() => setEditingCardKey(card.entryKey)}
-          type="button"
-        >
-          {card.imageUrl ? (
-            <Image
-              alt={card.title || "Secretariat member"}
-              className="object-cover"
-              fill
-              src={card.imageUrl}
-              unoptimized
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-primary/5">
+        {/* IMAGE + TEXT */}
+        <div className="flex flex-col items-center p-4">
+          <div className="relative mb-3 flex aspect-square w-full items-center justify-center rounded-md bg-primary/5">
+            {card.imageUrl ? (
+              <Image
+                alt={`${card.title || "Secretariat member"} preview`}
+                className="h-20 w-20 rounded-md border border-border object-cover"
+                height={80}
+                src={card.imageUrl}
+                unoptimized
+                width={80}
+              />
+            ) : (
               <User className="h-8 w-8 text-primary/30" />
-            </div>
-          )}
-        </button>
+            )}
+          </div>
 
-        {/* TEXT */}
-        <div className="p-2 text-center">
           <h3 className="font-semibold text-xs">
             {card.title || "Secretariat member"}
           </h3>

@@ -3,6 +3,7 @@
 import type { ChangeEvent } from "react";
 import { useCallback } from "react";
 import { toast } from "sonner";
+import { ImageUploadFileSchema } from "@/lib/fileUpload";
 import { createClient } from "@/lib/supabase/client";
 
 type UsePersonalImageUploadOptions = {
@@ -10,8 +11,6 @@ type UsePersonalImageUploadOptions = {
   onUploaded: (entryKey: string, publicUrl: string) => void;
   bucketName?: string;
 };
-
-const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 export function usePersonalImageUpload({
   basePath,
@@ -25,14 +24,12 @@ export function usePersonalImageUpload({
         return;
       }
 
-      if (!file.type.startsWith("image/")) {
-        toast.error("Invalid file type. Please select an image.");
-        event.target.value = "";
-        return;
-      }
-
-      if (file.size > MAX_IMAGE_SIZE_BYTES) {
-        toast.error("Image too large. Maximum size is 5MB.");
+      const validationResult = ImageUploadFileSchema.safeParse(file);
+      if (!validationResult.success) {
+        toast.error(
+          validationResult.error.issues[0]?.message ??
+            "Invalid file. Please select a PNG, JPG, or JPEG image up to 5MB.",
+        );
         event.target.value = "";
         return;
       }

@@ -43,11 +43,12 @@ async function RegistrationDetailsPage({
   );
 
   if (!success) {
-    return <div>{error}</div>;
+    throw new Error(error);
   }
+
   if (registration.event.eventType === null) {
-    return (
-      <div>This event is still not available. Please come back later.</div>
+    throw new Error(
+      "This event is still not available. Please come back later.",
     );
   }
 

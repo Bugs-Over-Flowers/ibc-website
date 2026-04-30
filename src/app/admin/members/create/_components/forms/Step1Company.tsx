@@ -8,6 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  IMAGE_UPLOAD_MAX_SIZE,
+  isValidImageUploadFile,
+} from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 
 interface Step1CompanyProps {
@@ -235,18 +240,14 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
                         }
 
                         const droppedFile = e.dataTransfer.files[0];
-                        const isValidType = [
-                          "image/png",
-                          "image/jpeg",
-                          "image/jpg",
-                        ].includes(droppedFile.type);
-
-                        if (!isValidType) {
-                          toast.error("Invalid file");
+                        if (!isValidImageUploadFile(droppedFile)) {
+                          toast.error(
+                            "Invalid file. Use PNG, JPG, or JPEG up to 5MB.",
+                          );
                           return;
                         }
 
-                        if (droppedFile.size > 5 * 1024 * 1024) {
+                        if (droppedFile.size > IMAGE_UPLOAD_MAX_SIZE) {
                           toast.error("File size must be less than 5MB");
                           return;
                         }
@@ -256,7 +257,7 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
                       type="button"
                     >
                       <input
-                        accept="image/png,image/jpeg,image/jpg"
+                        accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                         className="absolute inset-0 cursor-pointer opacity-0"
                         onBlur={field.handleBlur}
                         onChange={(e) => {
@@ -265,18 +266,14 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
                             return;
                           }
 
-                          const isValidType = [
-                            "image/png",
-                            "image/jpeg",
-                            "image/jpg",
-                          ].includes(file.type);
-
-                          if (!isValidType) {
-                            toast.error("Invalid file");
+                          if (!isValidImageUploadFile(file)) {
+                            toast.error(
+                              "Invalid file. Use PNG, JPG, or JPEG up to 5MB.",
+                            );
                             return;
                           }
 
-                          if (file.size > 5 * 1024 * 1024) {
+                          if (file.size > IMAGE_UPLOAD_MAX_SIZE) {
                             toast.error("File size must be less than 5MB");
                             return;
                           }
@@ -317,7 +314,7 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
                             Click to upload or drag and drop
                           </span>
                           <span className="mt-1 text-muted-foreground text-xs">
-                            PNG, JPG up to 5MB
+                            PNG, JPG, JPEG up to 5MB
                           </span>
                         </>
                       )}
