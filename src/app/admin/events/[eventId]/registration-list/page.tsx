@@ -10,6 +10,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationListPageProps } from "@/lib/types/route";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getRegistrationListStats } from "@/server/registration/queries/getRegistrationListStats";
+import ImportRegistrationsDialog from "./_components/ImportRegistrationsDialog";
 import ParticipantList from "./_components/participants/ParticipantList";
 import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";
 import RegistrationListStats from "./_components/RegistrationListStats";
@@ -74,12 +75,15 @@ async function RegistrationPage({
             Review registrations and participants for this event
           </p>
         </div>
-        <Link href={`/admin/events/${eventId}/registration-list/print`}>
-          <Button className="gap-2" variant="outline">
-            <Printer className="size-4" />
-            Print Nametags
-          </Button>
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportRegistrationsDialog eventId={eventId} />
+          <Link href={`/admin/events/${eventId}/registration-list/print`}>
+            <Button className="gap-2" variant="outline">
+              <Printer className="size-4" />
+              Print Nametags
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <RegistrationTabs>
