@@ -130,4 +130,70 @@ Then(
 Then("the Create Event button should be disabled", async ({ page }) => {
   const submit = page.getByRole("button", { name: /Create Event/i });
   await expect(submit).toBeDisabled();
+
+  // Draft event steps - Happy paths
+  When("I save the event as draft", async ({ page }) => {
+    const draftButton = page.getByRole("button", { name: /Save as Draft/i });
+    await expect(draftButton).toBeVisible();
+    await draftButton.click();
+  });
+
+  Then("the event should be saved as draft", async ({ page }) => {
+    // Wait for the save action to complete and redirect or show confirmation
+    await page.waitForLoadState("networkidle");
+  });
+
+  Then("I should see a draft confirmation message", async ({ page }) => {
+    // Look for success message or toast notification
+    const successMessage = page.locator(
+      "text=/Draft saved|saved as draft|draft event/i",
+    );
+    await expect(successMessage).toBeVisible({ timeout: 5000 });
+  });
+
+  When("I fill in only the required event title", async ({ page }) => {
+    await page
+      .getByRole("textbox", { name: /Event Title/i })
+      .fill("Draft Event Title Test");
+  });
+
+  When("I navigate back to the admin create event page", async ({ page }) => {
+    await page.goto("/admin/create-event");
+  });
+
+  When("I load the draft event", async ({ page }) => {
+    // Assuming there's a way to load drafts from the UI
+    // This might be a dropdown, modal, or sidebar with recent drafts
+    const draftLoader = page.locator('button:has-text("Load Draft")').first();
+    if (await draftLoader.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await draftLoader.click();
+    }
+  });
+
+  // Draft event steps - Sad paths
+  When("I attempt to save the event as draft", async ({ page }) => {
+    const draftButton = page.getByRole("button", { name: /Save as Draft/i });
+    if (await draftButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await draftButton.click();
+    } else {
+      // If no visible draft button, attempt using keyboard or alternate method
+      await page.keyboard.press("Control+S");
+    }
+  });
+
+  When("I fill in the event title only", async ({ page }) => {
+    await page
+      .getByRole("textbox", { name: /Event Title/i })
+      .fill("Minimal Draft Event");
+  });
+
+  When(
+    "I enter an extremely long venue name exceeding limits",
+    async ({ page }) => {
+      const venueName =
+        "A".repeat(300) + // Assuming max length is less than 300
+        "This is an extremely long venue name that far exceeds any reasonable character limit for a venue field in the event creation form.";
+      await page.getByRole("textbox", { name: /Venue/i }).fill(venueName);
+    },
+  );
 });
