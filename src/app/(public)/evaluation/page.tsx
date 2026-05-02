@@ -6,13 +6,37 @@ import { EvaluationForm } from "./_components/EvaluationForm";
 import { Header } from "./_components/Header";
 import EvaluationLoading from "./loading";
 
-export const metadata: Metadata = {
-  title: "Event Evaluation",
-  description: "Provide feedback on your event experience.",
-};
-
 interface EvaluationPageProps {
   searchParams: Promise<{ eventId?: string }>;
+}
+
+export async function generateMetadata({
+  searchParams,
+}: EvaluationPageProps): Promise<Metadata> {
+  const { eventId } = await searchParams;
+
+  if (!eventId) {
+    return {
+      title: "Event Evaluation",
+      description: "Provide feedback on your event experience.",
+    };
+  }
+
+  const event = await getEventById((await cookies()).getAll(), {
+    id: eventId,
+  }).catch(() => null);
+
+  if (!event) {
+    return {
+      title: "Event Evaluation",
+      description: "Provide feedback on your event experience.",
+    };
+  }
+
+  return {
+    title: `${event.eventTitle} - Evaluation`,
+    description: `Share your feedback on ${event.eventTitle}. Your input helps us improve future events.`,
+  };
 }
 
 export default async function EvaluationPage({

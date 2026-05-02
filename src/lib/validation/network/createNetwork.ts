@@ -1,14 +1,8 @@
 import { z } from "zod";
+import { ImageUploadFileSchema } from "@/lib/fileUpload";
 
 const REQUIRED_TEXT_MAX = 255;
 const ABOUT_MAX = 2000;
-const LOGO_IMAGE_MIME_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "image/jpg",
-  "image/webp",
-  "image/svg+xml",
-];
 
 const requiredText = (label: string, max = REQUIRED_TEXT_MAX) =>
   z
@@ -24,13 +18,7 @@ export const CreateNetworkStep1Schema = z.object({
   representativeName: requiredText("Representative name"),
   representativePosition: requiredText("Representative position"),
   logoUrl: z.union([
-    z
-      .file("Logo file is invalid")
-      .max(1024 * 1024 * 5, "File size must be less than 5MB")
-      .refine(
-        (file) => LOGO_IMAGE_MIME_TYPES.includes(file.type),
-        "Only PNG, JPG, WEBP, and SVG files are allowed",
-      ),
+    ImageUploadFileSchema,
     z
       .string()
       .trim()

@@ -1,6 +1,6 @@
 import type { Database } from "@/lib/supabase/db.types";
+import createMultipleRegistrationsWithParticipants from "../helpers/createMultipleRegistrationsWithParticipants";
 import { createE2EAdminClient } from "../helpers/supabase";
-import { seedAdminRegistrationScenario } from "./adminRegistrationScenario";
 
 export interface CheckInRecord {
   checkInId: string;
@@ -39,6 +39,8 @@ export interface SeededAttendanceListScenario {
     totalExpected: number;
     checkInCounts: Record<string, number>;
   };
+  // Track ALL registration IDs for cleanup (for scenarios with >10 participants)
+  allRegistrationIds?: string[];
 }
 
 export interface AttendanceListSeedOptions {
@@ -63,16 +65,18 @@ export async function seedAttendanceListScenario(
   const timestamp = Date.now();
   const participantCount = options.participantCount ?? 10;
   const eventDayCount = options.eventDayCount ?? 2;
+  const paymentMethod = options.paymentMethod ?? "BPI";
+
+  const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const endDate = new Date(Date.now() + eventDayCount * 24 * 60 * 60 * 1000);
 
   const { data: event, error: eventError } = await supabase
     .from("Event")
     .insert({
       eventTitle: `E2E Attendance List Event ${timestamp}`,
       description: "Attendance list E2E test event",
-      eventStartDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      eventEndDate: new Date(
-        Date.now() + eventDayCount * 24 * 60 * 60 * 1000,
-      ).toISOString(),
+      eventStartDate: startDate.toISOString(),
+      eventEndDate: endDate.toISOString(),
       venue: "E2E Test Venue",
       eventType: "public",
       registrationFee: 500,
@@ -93,35 +97,64 @@ export async function seedAttendanceListScenario(
     eventDate: string;
   }> = [];
 
-  for (let i = 0; i < eventDayCount; i++) {
-    const eventDate = new Date(
-      Date.now() + i * 24 * 60 * 60 * 1000,
-    ).toISOString();
-    const { data: eventDay, error: eventDayError } = await supabase
-      .from("EventDay")
-      .insert({
-        eventId: event.eventId,
-        label: `Day ${i + 1}`,
-        eventDate: eventDate.split("T")[0],
-      })
-      .select("eventDayId, label, eventDate")
-      .single();
+  const { data: existingEventDays, error: fetchEventDaysError } = await supabase
+    .from("EventDay")
+    .select("eventDayId, label, eventDate")
+    .eq("eventId", event.eventId)
+    .order("eventDate", { ascending: true });
 
-    if (eventDayError || !eventDay) {
-      throw new Error(
-        `Failed to seed event day: ${eventDayError?.message ?? "unknown"}`,
-      );
-    }
-
-    eventDays.push(eventDay);
+  if (fetchEventDaysError) {
+    throw new Error(
+      `Failed to fetch event days: ${fetchEventDaysError.message}`,
+    );
   }
 
-  const registration = await seedAdminRegistrationScenario({
-    participantCount,
-    paymentMethod: options.paymentMethod ?? "BPI",
-  });
+  if (existingEventDays && existingEventDays.length > 0) {
+    eventDays.push(...existingEventDays);
+  }
 
-  const participantIds = registration.acceptedRegistration.participantIds;
+  if (eventDays.length < eventDayCount) {
+    for (let i = eventDays.length; i < eventDayCount; i++) {
+      const eventDate = new Date(
+        Date.now() + i * 24 * 60 * 60 * 1000,
+      ).toISOString();
+
+      const { data: eventDay, error: eventDayError } = await supabase
+        .from("EventDay")
+        .insert({
+          eventId: event.eventId,
+          label: `Day ${i + 1}`,
+          eventDate: eventDate.split("T")[0],
+        })
+        .select("eventDayId, label, eventDate")
+        .single();
+
+      if (eventDayError || !eventDay) {
+        throw new Error(
+          `Failed to seed event day: ${eventDayError?.message ?? "unknown"}`,
+        );
+      }
+
+      eventDays.push(eventDay);
+    }
+  }
+
+  // Create multiple registrations if needed for >10 participants, but only return the first one to maintain test scenario contract
+  const multiRegData = await createMultipleRegistrationsWithParticipants(
+    supabase,
+    { eventId: event.eventId },
+    "accepted",
+    participantCount,
+    paymentMethod,
+    null,
+  );
+
+  // For backward compatibility, store ALL registrations in a separate property
+  // but return only the first one in the main registrations array
+  const allRegistrations = multiRegData.registrations;
+  const acceptedRegistration = allRegistrations[0];
+  const participantIds = multiRegData.participantIds;
+  const allRegistrationIds = allRegistrations.map((r) => r.registrationId);
   const checkInDistribution = options.checkInDistribution ?? {
     0: participantCount,
     1: 0,
@@ -134,12 +167,20 @@ export async function seedAttendanceListScenario(
     const eventDayIndex = Number.parseInt(eventDayIndexStr, 10);
     const eventDay = eventDays[eventDayIndex];
 
-    if (!eventDay) continue;
+    if (!eventDay) {
+      console.warn(
+        `Event day at index ${eventDayIndex} not found, skipping check-ins`,
+      );
+      continue;
+    }
 
     checkInCounts[eventDay.eventDayId] = count;
 
+    // Flatten all participant IDs from all registrations for check-in creation
+    const allParticipantIds = multiRegData.participantIds;
+
     for (let i = 0; i < count; i++) {
-      const participantId = participantIds[i];
+      const participantId = allParticipantIds[i];
       if (!participantId) continue;
 
       const remarkOption = options.remarks?.find(
@@ -211,9 +252,9 @@ export async function seedAttendanceListScenario(
     eventDays,
     registrations: [
       {
-        registrationId: registration.acceptedRegistration.registrationId,
-        identifier: registration.acceptedRegistration.identifier,
-        affiliation: registration.acceptedRegistration.affiliation,
+        registrationId: acceptedRegistration.registrationId,
+        identifier: acceptedRegistration.identifier,
+        affiliation: acceptedRegistration.affiliation,
         paymentProofStatus: "accepted" as const,
         participantIds,
       },
@@ -223,6 +264,8 @@ export async function seedAttendanceListScenario(
       totalExpected,
       checkInCounts,
     },
+    // Include ALL registration IDs for cleanup
+    allRegistrationIds,
   };
 }
 
@@ -244,7 +287,8 @@ export async function cleanupAttendanceListScenario(
     }
   }
 
-  const registrationIds = data.registrations.map((r) => r.registrationId);
+  const registrationIds =
+    data.allRegistrationIds ?? data.registrations.map((r) => r.registrationId);
   if (registrationIds.length > 0) {
     const { data: participantRows, error: participantError } = await supabase
       .from("Participant")

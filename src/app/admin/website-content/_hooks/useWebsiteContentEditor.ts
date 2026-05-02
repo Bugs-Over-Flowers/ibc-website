@@ -4,8 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { getWebsiteContentSection } from "@/server/website-content/mutations/getWebsiteContentSection";
 import { saveWebsiteContentSection } from "@/server/website-content/mutations/saveWebsiteContentSection";
+import { getWebsiteContentSection } from "@/server/website-content/queries/getWebsiteContentSection";
+import {
+  getWebsiteContentSectionsSummary,
+  type WebsiteContentSectionsSummary,
+} from "@/server/website-content/queries/getWebsiteContentSectionsSummary";
 import type {
   WebsiteContentCardState,
   WebsiteContentFormState,
@@ -24,11 +28,47 @@ const emptyForm: WebsiteContentFormState = {
   cardPlacement: "",
 };
 
+const defaultCardsBySection: Record<
+  string,
+  Partial<WebsiteContentCardState>
+> = {
+  goals: {
+    title: "Define a new organizational goal",
+    paragraph:
+      "Describe what this goal is about, why it matters, and how it will be achieved.",
+    icon: "Target",
+  },
+  company_thrusts: {
+    title: "Enter thrust title",
+    paragraph: "Describe the company thrust and its strategic importance.",
+    icon: "Rocket",
+  },
+  landing_page_benefits: {
+    title: "Enter benefit title",
+    paragraph: "Explain the benefit and its value proposition.",
+    icon: "Sparkles",
+  },
+  board_of_trustees: {
+    title: "Board member name",
+    subtitle: "Position/Title",
+    imageUrl: "",
+  },
+  secretariat: {
+    title: "Staff member name",
+    subtitle: "Position/Title",
+    imageUrl: "",
+  },
+};
+
 export function useWebsiteContentEditor(
   activeSection: WebsiteContentSection | null,
 ) {
   const [form, setForm] = useState<WebsiteContentFormState>(emptyForm);
   const [cards, setCards] = useState<WebsiteContentCardState[]>([]);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedCardEntryKeys, setSelectedCardEntryKeys] = useState<
+    Set<string>
+  >(() => new Set());
   const [cachedSectionContentBySection, setCachedSectionContentBySection] =
     useState<
       Partial<
@@ -47,9 +87,57 @@ export function useWebsiteContentEditor(
   const [updatedAtBySection, setUpdatedAtBySection] = useState<
     Partial<Record<WebsiteContentSection, string>>
   >({});
+  const [cardCountBySection, setCardCountBySection] = useState<
+    Partial<Record<WebsiteContentSection, number>>
+  >({});
+  const [hasLoadedSectionSummaries, setHasLoadedSectionSummaries] =
+    useState(false);
+
+  const getWebsiteContentSectionsSummaryAction = useMemo(
+    () => tryCatch(getWebsiteContentSectionsSummary),
+    [],
+  );
+  const getWebsiteContentSectionAction = useMemo(
+    () => tryCatch(getWebsiteContentSection),
+    [],
+  );
+  const saveWebsiteContentSectionAction = useMemo(
+    () => tryCatch(saveWebsiteContentSection),
+    [],
+  );
+
+  const { execute: loadSectionSummaries } = useAction(
+    getWebsiteContentSectionsSummaryAction,
+    {
+      onSuccess: (summary: WebsiteContentSectionsSummary) => {
+        const nextUpdatedAtBySection: Partial<
+          Record<WebsiteContentSection, string>
+        > = {};
+        const nextCardCountBySection: Partial<
+          Record<WebsiteContentSection, number>
+        > = {};
+
+        for (const [section, sectionSummary] of Object.entries(summary)) {
+          const typedSection = section as WebsiteContentSection;
+          if (sectionSummary.updatedAt) {
+            nextUpdatedAtBySection[typedSection] = sectionSummary.updatedAt;
+          }
+          nextCardCountBySection[typedSection] = sectionSummary.cardCount;
+        }
+
+        setUpdatedAtBySection(nextUpdatedAtBySection);
+        setCardCountBySection(nextCardCountBySection);
+        setHasLoadedSectionSummaries(true);
+      },
+      onError: (error) => {
+        toast.error(error);
+        setHasLoadedSectionSummaries(true);
+      },
+    },
+  );
 
   const { execute: loadSection, isPending: isLoadingSection } = useAction(
-    tryCatch(getWebsiteContentSection),
+    getWebsiteContentSectionAction,
     {
       onSuccess: (data: WebsiteContentSectionData) => {
         setForm(data.form);
@@ -73,6 +161,12 @@ export function useWebsiteContentEditor(
             [activeSection]: data.updatedAt,
           }));
         }
+        if (activeSection) {
+          setCardCountBySection((prev) => ({
+            ...prev,
+            [activeSection]: data.cards.length,
+          }));
+        }
       },
       onError: (error) => {
         toast.error(error);
@@ -81,7 +175,7 @@ export function useWebsiteContentEditor(
   );
 
   const { execute: saveSection, isPending: isSavingSection } = useAction(
-    tryCatch(saveWebsiteContentSection),
+    saveWebsiteContentSectionAction,
     {
       onSuccess: async (result: { updatedAt: string }) => {
         if (activeSection) {
@@ -91,6 +185,7 @@ export function useWebsiteContentEditor(
           }));
           await loadSection(activeSection);
         }
+        await loadSectionSummaries();
         toast.success("Website content saved");
       },
       onError: (error) => {
@@ -100,6 +195,13 @@ export function useWebsiteContentEditor(
   );
 
   useEffect(() => {
+    void loadSectionSummaries();
+  }, [loadSectionSummaries]);
+
+  useEffect(() => {
+    setIsDeleteMode(false);
+    setSelectedCardEntryKeys(new Set());
+
     if (!activeSection) {
       return;
     }
@@ -208,15 +310,17 @@ export function useWebsiteContentEditor(
         .toString(36)
         .slice(2, 8)}`;
 
+      const defaults = defaultCardsBySection[activeSection] || {};
+
       const next = [
         ...prev,
         {
           entryKey,
-          title: "",
-          subtitle: "",
-          paragraph: "",
-          icon: "",
-          imageUrl: "",
+          title: defaults.title || "",
+          subtitle: defaults.subtitle || "",
+          paragraph: defaults.paragraph || "",
+          icon: defaults.icon || "",
+          imageUrl: defaults.imageUrl || "",
           cardPlacement: nextPlacement,
           group,
         },
@@ -232,6 +336,68 @@ export function useWebsiteContentEditor(
 
       return next;
     });
+  };
+
+  const enterDeleteMode = () => {
+    setIsDeleteMode(true);
+  };
+
+  const cancelDeleteMode = () => {
+    setIsDeleteMode(false);
+    setSelectedCardEntryKeys(new Set());
+  };
+
+  const clearCardSelection = () => {
+    setSelectedCardEntryKeys(new Set());
+  };
+
+  const selectAllCards = () => {
+    setSelectedCardEntryKeys(new Set(cards.map((card) => card.entryKey)));
+  };
+
+  const unselectAllCards = () => {
+    setSelectedCardEntryKeys(new Set());
+  };
+
+  const toggleCardSelected = (entryKey: string, checked: boolean) => {
+    setSelectedCardEntryKeys((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(entryKey);
+      } else {
+        next.delete(entryKey);
+      }
+      return next;
+    });
+  };
+
+  const deleteSelectedCards = () => {
+    if (!activeSection || selectedCardEntryKeys.size === 0) {
+      return;
+    }
+
+    setCards((prev) => {
+      const filtered = prev.filter(
+        (card) => !selectedCardEntryKeys.has(card.entryKey),
+      );
+      const nextCards = filtered.map((card, index) => ({
+        ...card,
+        cardPlacement: String(index + 1),
+      }));
+
+      setCachedSectionContentBySection((cachePrev) => ({
+        ...cachePrev,
+        [activeSection]: {
+          form: cachePrev[activeSection]?.form ?? form,
+          cards: nextCards,
+        },
+      }));
+
+      return nextCards;
+    });
+
+    setSelectedCardEntryKeys(new Set());
+    setIsDeleteMode(false);
   };
 
   const save = async () => {
@@ -253,6 +419,15 @@ export function useWebsiteContentEditor(
     setCardField,
     replaceCards,
     addCard,
+    isDeleteMode,
+    selectedCardEntryKeys,
+    enterDeleteMode,
+    cancelDeleteMode,
+    clearCardSelection,
+    selectAllCards,
+    unselectAllCards,
+    toggleCardSelected,
+    deleteSelectedCards,
     save,
     isSavingSection,
     isLoadingSection,
@@ -260,5 +435,7 @@ export function useWebsiteContentEditor(
     sectionUpdatedAt,
     placeholdersBySection,
     updatedAtBySection,
+    cardCountBySection,
+    hasLoadedSectionSummaries,
   };
 }

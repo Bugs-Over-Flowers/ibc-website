@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { IMAGE_UPLOAD_ACCEPT_ATTR } from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 import type { EditEventFormInstance, EventRow } from "./types";
 
@@ -222,7 +223,7 @@ export default function EditEventMainSections({
                     type="button"
                   >
                     <input
-                      accept=".jpg,.jpeg,.png,.gif,.webp"
+                      accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                       className="absolute inset-0 cursor-pointer opacity-0"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -256,7 +257,7 @@ export default function EditEventMainSections({
                           Click to upload or drag and drop
                         </span>
                         <span className="mt-1 text-muted-foreground text-xs">
-                          PNG, JPG, GIF, WebP up to 5MB (16:4)
+                          PNG, JPG, JPEG up to 5MB (16:4)
                         </span>
                       </>
                     )}
@@ -332,7 +333,7 @@ export default function EditEventMainSections({
                     type="button"
                   >
                     <input
-                      accept=".jpg,.jpeg,.png,.gif,.webp"
+                      accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                       className="absolute inset-0 cursor-pointer opacity-0"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -366,7 +367,7 @@ export default function EditEventMainSections({
                           Click to upload or drag and drop
                         </span>
                         <span className="mt-1 text-muted-foreground text-xs">
-                          PNG, JPG, GIF, WebP up to 5MB (1:1)
+                          PNG, JPG, JPEG up to 5MB (1:1)
                         </span>
                       </>
                     )}

@@ -22,7 +22,10 @@ import type { SaveWebsiteContentSectionInput } from "@/server/website-content/ty
 // --- Module Mocks ---
 
 const mockUpsertWebsiteContentRows = vi.fn();
+const mockDeactivateWebsiteContentEntriesBySection = vi.fn();
 vi.mock("@/server/website-content/mutations/upsertWebsiteContentRow", () => ({
+  deactivateWebsiteContentEntriesBySection:
+    mockDeactivateWebsiteContentEntriesBySection,
   upsertWebsiteContentRows: mockUpsertWebsiteContentRows,
 }));
 
@@ -45,6 +48,7 @@ describe("saveWebsiteContentSection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default mock: successful response
+    mockDeactivateWebsiteContentEntriesBySection.mockResolvedValue(undefined);
     mockUpsertWebsiteContentRows.mockResolvedValue(undefined);
   });
 
@@ -68,6 +72,10 @@ describe("saveWebsiteContentSection", () => {
     const result = await saveWebsiteContentSection(input);
 
     expect(result.updatedAt).toBeDefined();
+    expect(mockDeactivateWebsiteContentEntriesBySection).toHaveBeenCalledWith(
+      "vision_mission",
+      ["vision", "mission"],
+    );
     expect(mockUpsertWebsiteContentRows).toHaveBeenCalledWith([
       {
         section: "vision_mission",
@@ -114,6 +122,10 @@ describe("saveWebsiteContentSection", () => {
 
     await saveWebsiteContentSection(input);
 
+    expect(mockDeactivateWebsiteContentEntriesBySection).toHaveBeenCalledWith(
+      "goals",
+      ["goal-1"],
+    );
     expect(mockUpsertWebsiteContentRows).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
@@ -243,6 +255,11 @@ describe("saveWebsiteContentSection", () => {
     };
 
     await saveWebsiteContentSection(input);
+
+    expect(mockDeactivateWebsiteContentEntriesBySection).toHaveBeenCalledWith(
+      "goals",
+      [],
+    );
 
     expect(revalidatePath).toHaveBeenCalledWith("/", "page");
     expect(revalidatePath).toHaveBeenCalledWith("/about", "page");
@@ -413,6 +430,43 @@ describe("saveWebsiteContentSection", () => {
     await expect(saveWebsiteContentSection(input)).rejects.toThrow(
       "Supabase RPC failed: duplicate key violation",
     );
+  });
+
+  it("should propagate error when deactivating removed entries fails", async () => {
+    mockDeactivateWebsiteContentEntriesBySection.mockRejectedValue(
+      new Error("Failed to deactivate removed website content rows"),
+    );
+
+    const input: SaveWebsiteContentSectionInput = {
+      section: "goals",
+      form: {
+        title: "unused",
+        subtitle: "unused",
+        paragraph: "unused",
+        visionParagraph: "unused",
+        missionParagraph: "unused",
+        icon: "unused",
+        imageUrl: "unused",
+        cardPlacement: "unused",
+      },
+      cards: [
+        {
+          entryKey: "goal-1",
+          title: "Goal",
+          subtitle: "",
+          paragraph: "Body",
+          icon: "Target",
+          imageUrl: "",
+          cardPlacement: "1",
+          group: null,
+        },
+      ],
+    };
+
+    await expect(saveWebsiteContentSection(input)).rejects.toThrow(
+      "Failed to deactivate removed website content rows",
+    );
+    expect(mockUpsertWebsiteContentRows).not.toHaveBeenCalled();
   });
 
   // ✅ EDGE CASE: Empty cards array for non-vision_mission section

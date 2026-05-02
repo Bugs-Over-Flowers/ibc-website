@@ -7,6 +7,7 @@ export const websiteContentSectionSchema = z.enum([
   "board_of_trustees",
   "secretariat",
   "landing_page_benefits",
+  "hero_section",
 ]);
 
 export const websiteContentFormSchema = z.object({

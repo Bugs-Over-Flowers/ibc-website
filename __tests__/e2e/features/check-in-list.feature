@@ -1,7 +1,6 @@
-@smoke
 Feature: Check-in list
 
-  @smoke
+  @happy
   Scenario: Load the check-in page
     Given I am on the seeded check-in page
     Then I should see the event day details card
@@ -10,6 +9,7 @@ Feature: Check-in list
     And I should see the registration list
     And I should see payment status badges for pending, rejected, and accepted registrations
 
+  @happy
   Scenario: Show payment proof status displays
     Given I open the pending registration check-in dialog
     Then I should see the pending payment notice
@@ -18,7 +18,7 @@ Feature: Check-in list
     When I open the accepted registration check-in dialog
     Then I should not see any payment status notice
 
-  @smoke
+  @happy
   Scenario: Check in participants with remarks
     Given I am on the accepted registration check-in dialog
     When I open the remark editor for the first participant
@@ -29,7 +29,7 @@ Feature: Check-in list
     When I reopen the accepted registration check-in dialog
     Then I should see the existing remark for the first participant
 
-  @smoke
+  @happy
   Scenario: Update remarks after check-in
     Given I am on the accepted registration check-in dialog
     When I select the first and second participants
@@ -42,6 +42,7 @@ Feature: Check-in list
     And I apply the remark update
     Then the app should reflect the updated remark for the first participant
 
+  @happy
   Scenario Outline: Check in multiple participants
     Given I am on the accepted registration check-in dialog
     When I select the first <count> participants
@@ -54,3 +55,13 @@ Feature: Check-in list
       |     2 |
       |     5 |
       |    10 |
+
+  @sad
+  Scenario: Show error when event does not exist
+    Given I navigate to check-in list for non-existent event
+    Then I should see the event not found error state
+
+  @sad
+  Scenario: Show draft event state
+    Given I am on the check-in page for a draft event
+    Then I should see the draft event message

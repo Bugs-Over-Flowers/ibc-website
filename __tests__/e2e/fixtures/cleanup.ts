@@ -110,3 +110,19 @@ export async function cleanupE2EDataWithTimestamp(
     );
   }
 }
+
+/**
+ * Cleanup all e2e events
+ */
+export async function cleanup() {
+  const supabase = createE2EAdminClient();
+
+  const { error: eventDeleteError } = await supabase
+    .from("Event")
+    .delete()
+    .gte("eventTitle", "E2E");
+
+  if (eventDeleteError) {
+    throw new Error(`Failed to cleanup events: ${eventDeleteError.message}`);
+  }
+}

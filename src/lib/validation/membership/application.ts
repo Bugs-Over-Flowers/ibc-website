@@ -1,6 +1,6 @@
 import { z } from "zod";
+import { ImageUploadFileSchema } from "@/lib/fileUpload";
 import { titleCase } from "@/lib/utils";
-import { validateFileTypeMime } from "../fileTypes";
 import { phoneSchema } from "../utils";
 
 export const ApplicationTypeEnum = z.enum(["newMember", "updating", "renewal"]);
@@ -13,6 +13,7 @@ export const MembershipApplicationStep1Schema = z
   .object({
     applicationType: ApplicationTypeEnum,
     businessMemberIdentifier: z.string().optional(),
+    existingApplicationMemberType: ApplicationMemberTypeEnum.optional(),
     businessMemberId: z
       .preprocess(
         (value) => (value === "" ? undefined : value),
@@ -40,31 +41,32 @@ export type MembershipApplicationStep1Schema = z.infer<
   typeof MembershipApplicationStep1Schema
 >;
 
-export const ApplicationMemberSchema = z
-  .object({
-    companyMemberType: CompanyMemberTypeEnum,
-    firstName: z
-      .string({ message: "First name is required" })
-      .min(1, "First name is required"),
-    lastName: z
-      .string({ message: "Last name is required" })
-      .min(1, "Last name is required"),
-    emailAddress: z.email("Email is required"),
-    companyDesignation: z
-      .string({ message: "Company designation is required" })
-      .min(1, "Company designation is required"),
-    birthdate: z.date({ message: "Birthdate is required" }),
-    sex: SexEnum,
-    nationality: z
-      .string({ message: "Nationality is required" })
-      .min(1, "Nationality is required"),
-    mailingAddress: z
-      .string({ message: "Mailing address is required" })
-      .min(1, "Mailing address is required"),
-    mobileNumber: phoneSchema,
-    landline: z.string().min(1, "Landline is required"),
-  })
-  .transform((data) => {
+export const ApplicationMemberBaseSchema = z.object({
+  companyMemberType: CompanyMemberTypeEnum,
+  firstName: z
+    .string({ message: "First name is required" })
+    .min(1, "First name is required"),
+  lastName: z
+    .string({ message: "Last name is required" })
+    .min(1, "Last name is required"),
+  emailAddress: z.email("Email is required"),
+  companyDesignation: z
+    .string({ message: "Company designation is required" })
+    .min(1, "Company designation is required"),
+  birthdate: z.date({ message: "Birthdate is required" }),
+  sex: SexEnum,
+  nationality: z
+    .string({ message: "Nationality is required" })
+    .min(1, "Nationality is required"),
+  mailingAddress: z
+    .string({ message: "Mailing address is required" })
+    .min(1, "Mailing address is required"),
+  mobileNumber: phoneSchema,
+  landline: z.string().min(1, "Landline is required"),
+});
+
+export const ApplicationMemberSchema = ApplicationMemberBaseSchema.transform(
+  (data) => {
     // Only apply titleCase to companyDesignation if all letters are lowercase
     const isAllLowercase =
       data.companyDesignation === data.companyDesignation.toLowerCase();
@@ -77,7 +79,8 @@ export const ApplicationMemberSchema = z
         : data.companyDesignation.trim(),
       nationality: titleCase(data.nationality).trim(),
     };
-  });
+  },
+);
 
 export const MembershipApplicationStep2Schema = z
   .object({
@@ -101,14 +104,7 @@ export const MembershipApplicationStep2Schema = z
     landline: z.string().min(1, "Landline is required"),
     mobileNumber: phoneSchema,
     logoImageURL: z.string().optional(),
-    logoImage: z
-      .file("Company logo is required")
-      .max(1024 * 1024 * 5, "File size must be less than 5MB")
-      .refine(
-        (file) => validateFileTypeMime(file),
-        "Only JPEG and PNG files are allowed",
-      )
-      .optional(),
+    logoImage: ImageUploadFileSchema.optional(),
   })
   .refine(
     (data) => {
@@ -146,14 +142,7 @@ export const MembershipApplicationStep4Schema = z
     applicationMemberType: ApplicationMemberTypeEnum,
     paymentMethod: MembershipPaymentMethodEnum,
     paymentProofUrl: z.string().optional(),
-    paymentProof: z
-      .file()
-      .max(1024 * 1024 * 5, "File size must be less than 5MB")
-      .refine(
-        (file) => validateFileTypeMime(file),
-        "Only JPEG and PNG files are allowed",
-      )
-      .optional(),
+    paymentProof: ImageUploadFileSchema.optional(),
   })
   .superRefine((data, ctx) => {
     if (

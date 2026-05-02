@@ -1,12 +1,16 @@
+import { Printer } from "lucide-react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { Suspense } from "react";
 import BackButton from "@/app/admin/_components/BackButton";
+import { Button } from "@/components/ui/button";
 import { TabsContent } from "@/components/ui/tabs";
 import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationListPageProps } from "@/lib/types/route";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getRegistrationListStats } from "@/server/registration/queries/getRegistrationListStats";
+import ImportRegistrationsDialog from "./_components/ImportRegistrationsDialog";
 import ParticipantList from "./_components/participants/ParticipantList";
 import ParticipantsSearchAndFilter from "./_components/participants/ParticipantsSearchAndFilter";
 import RegistrationListStats from "./_components/RegistrationListStats";
@@ -60,7 +64,7 @@ async function RegistrationPage({
     <div className="space-y-6">
       <BackButtonWrapper params={params} />
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="font-bold text-3xl text-foreground">
             {eventDetails.success
@@ -70,6 +74,15 @@ async function RegistrationPage({
           <p className="mt-2 text-muted-foreground">
             Review registrations and participants for this event
           </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportRegistrationsDialog eventId={eventId} />
+          <Link href={`/admin/events/${eventId}/registration-list/print`}>
+            <Button className="gap-2" variant="outline">
+              <Printer className="size-4" />
+              Print Nametags
+            </Button>
+          </Link>
         </div>
       </div>
 

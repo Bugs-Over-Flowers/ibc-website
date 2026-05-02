@@ -5,16 +5,29 @@ import {
   cleanupAdminRegistrationScenario,
   seedAdminRegistrationScenario,
 } from "../fixtures/adminRegistrationScenario";
+import { createE2EAdminClient } from "../helpers/supabase";
 
 type TestScenario = Awaited<ReturnType<typeof seedAdminRegistrationScenario>>;
 
-export const test = baseTest.extend<{ scenario: TestScenario }>({
+export const test = baseTest.extend<{
+  scenario: TestScenario;
+  draftEventIds: string[];
+}>({
   scenario: async ({}, use) => {
     const scenario = await seedAdminRegistrationScenario({
       participantCount: 10,
     });
     await use(scenario);
     await cleanupAdminRegistrationScenario(scenario);
+  },
+  draftEventIds: async ({}, use) => {
+    const ids: string[] = [];
+    await use(ids);
+    if (ids.length > 0) {
+      const supabase = createE2EAdminClient();
+      await supabase.from("EventDay").delete().in("eventId", ids);
+      await supabase.from("Event").delete().in("eventId", ids);
+    }
   },
 });
 
@@ -283,6 +296,9 @@ When("I apply the remark update", async ({ page }) => {
     page.getByRole("button", { name: "Update remarks" }),
   ).toBeVisible({ timeout: 10000 });
   await page.getByRole("button", { name: "Update remarks" }).click();
+
+  // Wait for Processing to appear, then disappear
+  await expect(page.getByRole("button", { name: /Processing/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Processing/ })).toHaveCount(0);
 });
 
@@ -341,3 +357,76 @@ Then(
     ).toBeVisible();
   },
 );
+
+// ============================================
+// @sad Scenario: Show error when event does not exist
+// ============================================
+
+Given(
+  "I navigate to check-in list for non-existent event",
+  async ({ page }) => {
+    await page.goto(
+      "/admin/events/00000000-0000-0000-0000-000000000000/check-in-list",
+    );
+    await page.waitForLoadState("networkidle");
+  },
+);
+
+Then("I should see the event not found error state", async ({ page }) => {
+  await expect(page.getByText("Event not found")).toBeVisible();
+  await expect(
+    page.getByText("The event you are looking for could not be found"),
+  ).toBeVisible();
+});
+
+// ============================================
+// @sad Scenario: Show draft event state
+// ============================================
+
+Given(
+  "I am on the check-in page for a draft event",
+  async ({ page, draftEventIds }) => {
+    const supabase = createE2EAdminClient();
+    const timestamp = Date.now();
+
+    const { data: event, error } = await supabase
+      .from("Event")
+      .insert({
+        eventTitle: `E2E Draft Check-in Event ${timestamp}`,
+        description: "Draft event without event days for E2E testing",
+        eventStartDate: new Date(
+          Date.now() + 24 * 60 * 60 * 1000,
+        ).toISOString(),
+        eventEndDate: new Date(
+          Date.now() + 2 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
+        venue: "E2E Test Venue",
+        eventType: "public",
+        registrationFee: 500,
+        publishedAt: null,
+      })
+      .select("eventId")
+      .single();
+
+    if (error || !event) {
+      throw new Error(
+        `Failed to seed draft event: ${error?.message ?? "unknown"}`,
+      );
+    }
+
+    draftEventIds.push(event.eventId);
+
+    // Remove auto-created event days so the page renders the draft state
+    await supabase.from("EventDay").delete().eq("eventId", event.eventId);
+
+    await page.goto(`/admin/events/${event.eventId}/check-in-list`);
+    await page.waitForLoadState("networkidle");
+  },
+);
+
+Then("I should see the draft event message", async ({ page }) => {
+  await expect(page.getByText("This event may be a draft")).toBeVisible();
+  await expect(
+    page.getByText("The check in list is not yet available for this event."),
+  ).toBeVisible();
+});

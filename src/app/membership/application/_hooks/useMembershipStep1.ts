@@ -116,6 +116,12 @@ export const useMembershipStep1 = () => {
     onSubmitMeta: defaultMeta,
     onSubmit: async ({ value, meta }) => {
       const refinedValue = MembershipApplicationStep1Schema.parse(value);
+      let verifiedApplicationMemberType =
+        refinedValue.existingApplicationMemberType ??
+        memberValidation.memberInfo.applicationMemberType;
+      let verifiedBusinessMemberId =
+        refinedValue.businessMemberId ??
+        memberValidation.memberInfo.businessMemberId;
 
       // If proceeding to next step and member identifier is required, validate it first
       if (
@@ -232,6 +238,9 @@ export const useMembershipStep1 = () => {
               return;
             }
 
+            verifiedApplicationMemberType = data.applicationMemberType;
+            verifiedBusinessMemberId = data.businessMemberId;
+
             // Member validated successfully - keep identifier for checks and UUID for submission
             setMemberValidationStatus(
               "valid",
@@ -241,6 +250,7 @@ export const useMembershipStep1 = () => {
                 businessMemberIdentifier:
                   data.businessMemberIdentifier ?? currentMemberIdentifier,
                 businessMemberId: data.businessMemberId,
+                applicationMemberType: data.applicationMemberType,
               },
               currentMemberIdentifier,
               currentAppType,
@@ -250,6 +260,7 @@ export const useMembershipStep1 = () => {
               step1: {
                 ...refinedValue,
                 businessMemberId: data.businessMemberId ?? "",
+                existingApplicationMemberType: data.applicationMemberType,
               },
               step2: {
                 companyName: data.companyName ?? "",
@@ -305,6 +316,7 @@ export const useMembershipStep1 = () => {
           step1: {
             ...refinedValue,
             businessMemberId: "",
+            existingApplicationMemberType: undefined,
           },
         });
       }
@@ -319,9 +331,11 @@ export const useMembershipStep1 = () => {
           businessMemberId:
             refinedValue.applicationType === "newMember"
               ? ""
-              : (refinedValue.businessMemberId ??
-                memberValidation.memberInfo.businessMemberId ??
-                ""),
+              : (verifiedBusinessMemberId ?? ""),
+          existingApplicationMemberType:
+            refinedValue.applicationType === "newMember"
+              ? undefined
+              : verifiedApplicationMemberType,
         },
       });
     },

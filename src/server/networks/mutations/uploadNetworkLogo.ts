@@ -32,7 +32,6 @@ export async function uploadNetworkLogo(formData: FormData): Promise<string> {
   const extensionByMimeType: Record<string, string> = {
     "image/png": "png",
     "image/jpeg": "jpg",
-    "image/jpg": "jpg",
   };
   const extension = extensionByMimeType[fileValue.type] ?? "png";
   const filePath = `network-${crypto.randomUUID()}.${extension}`;

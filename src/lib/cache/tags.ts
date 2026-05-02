@@ -56,6 +56,7 @@ export const CACHE_TAGS = {
       boardOfTrustees: "website-content:section:board_of_trustees",
       secretariat: "website-content:section:secretariat",
       landingPageBenefits: "website-content:section:landing_page_benefits",
+      heroSection: "website-content:section:hero_section",
     },
   },
 } as const;
