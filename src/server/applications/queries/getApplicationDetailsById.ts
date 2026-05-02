@@ -29,6 +29,31 @@ export async function getApplicationDetailsById(
   }
 
   const proofImage = data.ProofImage?.[0];
+  let previousApplicationMemberType: ApplicationWithMembers["previousApplicationMemberType"] =
+    null;
+
+  if (data.applicationType === "updating" && data.businessMemberId) {
+    const { data: previousApplication, error: previousApplicationError } =
+      await supabase
+        .from("Application")
+        .select("applicationMemberType")
+        .eq("businessMemberId", data.businessMemberId)
+        .neq("applicationId", data.applicationId)
+        .lt("applicationDate", data.applicationDate)
+        .order("applicationDate", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (previousApplicationError) {
+      throw new Error(
+        `Failed to fetch previous application member type: ${previousApplicationError.message}`,
+      );
+    }
+
+    previousApplicationMemberType =
+      previousApplication?.applicationMemberType ?? null;
+  }
+
   const signedProofImage = proofImage
     ? {
         ...proofImage,
@@ -41,6 +66,7 @@ export async function getApplicationDetailsById(
   const applicationWithSignedLogo = {
     ...data,
     logoImageURL: await signLogoUrl(supabase, data.logoImageURL),
+    previousApplicationMemberType,
     ProofImage: signedProofImage ? [signedProofImage] : [],
   };
 

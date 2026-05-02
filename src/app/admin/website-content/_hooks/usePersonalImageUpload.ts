@@ -3,18 +3,19 @@
 import type { ChangeEvent } from "react";
 import { useCallback } from "react";
 import { toast } from "sonner";
+import { ImageUploadFileSchema } from "@/lib/fileUpload";
 import { createClient } from "@/lib/supabase/client";
 
 type UsePersonalImageUploadOptions = {
   basePath: string;
   onUploaded: (entryKey: string, publicUrl: string) => void;
+  bucketName?: string;
 };
-
-const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 export function usePersonalImageUpload({
   basePath,
   onUploaded,
+  bucketName = "personalimage",
 }: UsePersonalImageUploadOptions) {
   const createImageSelectHandler = useCallback(
     (entryKey: string) => async (event: ChangeEvent<HTMLInputElement>) => {
@@ -23,14 +24,12 @@ export function usePersonalImageUpload({
         return;
       }
 
-      if (!file.type.startsWith("image/")) {
-        toast.error("Invalid file type. Please select an image.");
-        event.target.value = "";
-        return;
-      }
-
-      if (file.size > MAX_IMAGE_SIZE_BYTES) {
-        toast.error("Image too large. Maximum size is 5MB.");
+      const validationResult = ImageUploadFileSchema.safeParse(file);
+      if (!validationResult.success) {
+        toast.error(
+          validationResult.error.issues[0]?.message ??
+            "Invalid file. Please select a PNG, JPG, or JPEG image up to 5MB.",
+        );
         event.target.value = "";
         return;
       }
@@ -40,7 +39,7 @@ export function usePersonalImageUpload({
       const filePath = `${basePath}/${entryKey}-${crypto.randomUUID()}.${extension}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("personalimage")
+        .from(bucketName)
         .upload(filePath, file, {
           contentType: file.type,
           upsert: false,
@@ -54,12 +53,12 @@ export function usePersonalImageUpload({
 
       const {
         data: { publicUrl },
-      } = supabase.storage.from("personalimage").getPublicUrl(filePath);
+      } = supabase.storage.from(bucketName).getPublicUrl(filePath);
 
       onUploaded(entryKey, publicUrl);
       event.target.value = "";
     },
-    [basePath, onUploaded],
+    [basePath, bucketName, onUploaded],
   );
 
   return { createImageSelectHandler };

@@ -199,6 +199,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "BusinessMember_primaryApplicationId_fkey";
+            columns: ["primaryApplicationId"];
+            isOneToOne: false;
+            referencedRelation: "Application";
+            referencedColumns: ["applicationId"];
+          },
+          {
             foreignKeyName: "BusinessMember_sectorId_fkey";
             columns: ["sectorId"];
             isOneToOne: false;
@@ -539,6 +546,7 @@ export type Database = {
           paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate: string;
           registrationId: string;
+          sourceSubmissionId: string | null;
           sponsoredRegistrationId: string | null;
         };
         Insert: {
@@ -552,6 +560,7 @@ export type Database = {
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate?: string;
           registrationId?: string;
+          sourceSubmissionId?: string | null;
           sponsoredRegistrationId?: string | null;
         };
         Update: {
@@ -565,6 +574,7 @@ export type Database = {
           paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
           registrationDate?: string;
           registrationId?: string;
+          sourceSubmissionId?: string | null;
           sponsoredRegistrationId?: string | null;
         };
         Relationships: [
@@ -907,22 +917,6 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      get_registrations_by_sponsored_id: {
-        Args: { p_sponsored_registration_id: string };
-        Returns: {
-          businessMemberId: string;
-          eventId: string;
-          identifier: string;
-          nonMemberName: string;
-          numberOfParticipants: number;
-          participants: Json;
-          paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
-          paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
-          registrationDate: string;
-          registrationId: string;
-          sponsoredRegistrationId: string;
-        }[];
-      };
       get_sponsored_registration_by_id: {
         Args: { registration_id: string };
         Returns: {
@@ -993,6 +987,10 @@ export type Database = {
           isOneToOne: false;
           isSetofReturn: true;
         };
+      };
+      import_event_registrations: {
+        Args: { p_dry_run?: boolean; p_event_id: string; p_rows: Json };
+        Returns: Json;
       };
       is_admin_user: { Args: never; Returns: boolean };
       january_first_reset: { Args: never; Returns: undefined };
@@ -1083,6 +1081,24 @@ export type Database = {
         };
         Returns: Json;
       };
+      update_member_with_representatives: {
+        Args: {
+          p_application_id: string;
+          p_business_name: string;
+          p_company_address: string;
+          p_email_address: string;
+          p_join_date?: string;
+          p_landline: string;
+          p_member_id: string;
+          p_membership_expiry_date?: string;
+          p_membership_status?: Database["public"]["Enums"]["MembershipStatus"];
+          p_mobile_number: string;
+          p_representatives?: Json;
+          p_sector_id: number;
+          p_website_url?: string;
+        };
+        Returns: Json;
+      };
       upsert_website_content: {
         Args: {
           p_card_placement?: number;
@@ -1125,7 +1141,7 @@ export type Database = {
       EventType: "public" | "private";
       InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
       MembershipStatus: "paid" | "unpaid" | "cancelled";
-      PaymentMethod: "BPI" | "ONSITE";
+      PaymentMethod: "BPI" | "ONSITE" | "IMPORTED";
       PaymentProofStatus: "pending" | "accepted" | "rejected";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
       SponsoredRegistrationStatus: "active" | "full" | "disabled";
@@ -1313,7 +1329,7 @@ export const Constants = {
       EventType: ["public", "private"],
       InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
       MembershipStatus: ["paid", "unpaid", "cancelled"],
-      PaymentMethod: ["BPI", "ONSITE"],
+      PaymentMethod: ["BPI", "ONSITE", "IMPORTED"],
       PaymentProofStatus: ["pending", "accepted", "rejected"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
       SponsoredRegistrationStatus: ["active", "full", "disabled"],

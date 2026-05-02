@@ -1,6 +1,6 @@
 import { z } from "zod";
+import { ImageUploadFileSchema } from "@/lib/fileUpload";
 import { titleCase } from "@/lib/utils";
-import { validateFileTypeMime } from "../fileTypes";
 import { phoneSchema } from "../utils";
 
 export const ApplicationTypeEnum = z.enum(["newMember", "updating", "renewal"]);
@@ -13,6 +13,7 @@ export const MembershipApplicationStep1Schema = z
   .object({
     applicationType: ApplicationTypeEnum,
     businessMemberIdentifier: z.string().optional(),
+    existingApplicationMemberType: ApplicationMemberTypeEnum.optional(),
     businessMemberId: z
       .preprocess(
         (value) => (value === "" ? undefined : value),
@@ -103,14 +104,7 @@ export const MembershipApplicationStep2Schema = z
     landline: z.string().min(1, "Landline is required"),
     mobileNumber: phoneSchema,
     logoImageURL: z.string().optional(),
-    logoImage: z
-      .file("Company logo is required")
-      .max(1024 * 1024 * 5, "File size must be less than 5MB")
-      .refine(
-        (file) => validateFileTypeMime(file),
-        "Only JPEG and PNG files are allowed",
-      )
-      .optional(),
+    logoImage: ImageUploadFileSchema.optional(),
   })
   .refine(
     (data) => {
@@ -148,14 +142,7 @@ export const MembershipApplicationStep4Schema = z
     applicationMemberType: ApplicationMemberTypeEnum,
     paymentMethod: MembershipPaymentMethodEnum,
     paymentProofUrl: z.string().optional(),
-    paymentProof: z
-      .file()
-      .max(1024 * 1024 * 5, "File size must be less than 5MB")
-      .refine(
-        (file) => validateFileTypeMime(file),
-        "Only JPEG and PNG files are allowed",
-      )
-      .optional(),
+    paymentProof: ImageUploadFileSchema.optional(),
   })
   .superRefine((data, ctx) => {
     if (

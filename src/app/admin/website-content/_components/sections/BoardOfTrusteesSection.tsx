@@ -2,12 +2,10 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation, useSortable } from "@dnd-kit/react/sortable";
-import { useForm } from "@tanstack/react-form";
-import { GripVertical } from "lucide-react";
+import { ArrowLeft, GripVertical, Trash2, User } from "lucide-react";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { reorderInList } from "../../_hooks/reorderInList";
 import { useBoardCardGroups } from "../../_hooks/useBoardCardGroups";
@@ -20,28 +18,81 @@ export function BoardOfTrusteesSection({
   cards,
   placeholders,
   isSectionActionDisabled,
-  isDeleteMode,
-  hasSelectedCards,
-  selectedCount,
-  selectedCardEntryKeys,
   onAddCard,
   onDeleteCardsClick,
-  onCancelDeleteMode,
-  onSelectAllCards,
-  onUnselectAllCards,
   onToggleCardSelected,
   onCardFieldChange,
   onCardsReorder,
 }: BoardOfTrusteesSectionProps) {
-  const { createImageSelectHandler } = usePersonalImageUpload({
+  const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
+
+  usePersonalImageUpload({
     basePath: "website-content/board",
     onUploaded: (entryKey, publicUrl) => {
       onCardFieldChange(entryKey, "imageUrl", publicUrl);
     },
   });
+
   const { featuredCards, officerCards, trusteeCards, otherCards } =
     useBoardCardGroups(cards);
 
+  const handleDeleteCard = (entryKey: string) => {
+    onToggleCardSelected(entryKey, true);
+    onDeleteCardsClick();
+  };
+
+  const editingCard = cards.find((c) => c.entryKey === editingCardKey);
+  const editingCardIndex = cards.findIndex(
+    (c) => c.entryKey === editingCardKey,
+  );
+  const renderSection = (
+    group: BoardGroup,
+    title: string,
+    groupCards: (typeof cards)[number][],
+    containerClassName: string,
+  ) => (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="font-semibold text-muted-foreground text-sm uppercase">
+          {title}
+        </p>
+
+        <Button
+          disabled={isSectionActionDisabled}
+          onClick={() => onAddCard(group)}
+          size="sm"
+          variant="outline"
+        >
+          Add Card
+        </Button>
+      </div>
+
+      <DragDropProvider
+        onDragEnd={(event) => {
+          if (event.canceled || !isSortableOperation(event.operation)) return;
+
+          const activeEntryKey = String(event.operation.source?.id);
+          const overEntryKey = String(event.operation.target?.id ?? "");
+
+          if (!activeEntryKey || !overEntryKey) return;
+          if (activeEntryKey === overEntryKey) return;
+
+          handleGroupReorder(group, activeEntryKey, overEntryKey);
+        }}
+      >
+        <div className={containerClassName}>
+          {groupCards.map((card, index) => (
+            <SortablePreviewCard
+              card={card}
+              group={group}
+              index={index}
+              key={card.entryKey}
+            />
+          ))}
+        </div>
+      </DragDropProvider>
+    </section>
+  );
   const handleGroupReorder = (
     group: BoardGroup,
     activeEntryKey: string,
@@ -53,6 +104,7 @@ export function BoardOfTrusteesSection({
       "trustees",
       "other",
     ];
+
     const grouped = {
       featured: [...featuredCards],
       officers: [...officerCards],
@@ -66,7 +118,8 @@ export function BoardOfTrusteesSection({
       overEntryKey,
     );
 
-    const merged = groupOrder.flatMap((groupKey) => grouped[groupKey]);
+    const merged = groupOrder.flatMap((g) => grouped[g]);
+
     const nextCards = merged.map((card, index) => ({
       ...card,
       cardPlacement: String(index + 1),
@@ -75,15 +128,13 @@ export function BoardOfTrusteesSection({
     onCardsReorder(nextCards);
   };
 
-  const SortableCard = ({
+  const SortablePreviewCard = ({
     card,
     group,
-    label,
     index,
   }: {
     card: (typeof cards)[number];
     group: BoardGroup;
-    label: string;
     index: number;
   }) => {
     const { ref, handleRef, isDragSource } = useSortable({
@@ -92,258 +143,208 @@ export function BoardOfTrusteesSection({
       group,
     });
 
-    const form = useForm({
-      defaultValues: {
-        title: card.title,
-        subtitle: card.subtitle,
-      },
-    });
-
-    useEffect(() => {
-      form.setFieldValue("title", card.title);
-      form.setFieldValue("subtitle", card.subtitle);
-    }, [card.subtitle, card.title, form]);
-
-    const isSelected = selectedCardEntryKeys.has(card.entryKey);
+    const isFeatured = group === "featured";
 
     return (
-      <div
-        className="relative aspect-[1/1.05] w-full overflow-hidden rounded-lg border border-border p-4 sm:max-w-[calc((100%-2rem)/3)] sm:basis-[calc((100%-2rem)/3)]"
+      <button
+        className={`relative w-full ${
+          isFeatured
+            ? "flex h-[340px] w-[260px] flex-col items-center justify-center rounded-3xl bg-card/95 p-8 text-center shadow-xl ring-1 ring-border/50 backdrop-blur-xl"
+            : "mx-auto flex h-[300px] w-[220px] flex-col items-center justify-center overflow-hidden rounded-xl border border-border bg-card"
+        }`}
+        onClick={() => setEditingCardKey(card.entryKey)}
         ref={ref}
         style={{ opacity: isDragSource ? 0.65 : 1 }}
+        type="button"
       >
-        {isDeleteMode ? (
-          <>
-            <button
-              aria-label={`Toggle ${label.toLowerCase()} card ${index + 1} selection`}
-              className="absolute inset-0 z-10 bg-white/50"
-              onClick={() => onToggleCardSelected(card.entryKey, !isSelected)}
-              type="button"
-            />
-            <div className="absolute top-3 right-3 z-20">
-              <Checkbox
-                aria-label={`Select ${label.toLowerCase()} card ${index + 1}`}
-                checked={isSelected}
-                onCheckedChange={(checked) =>
-                  onToggleCardSelected(card.entryKey, checked === true)
-                }
-              />
-            </div>
-          </>
-        ) : null}
-
-        <div
-          className={`flex flex-col gap-3 ${isDeleteMode ? "pointer-events-none select-none" : ""}`}
+        <button
+          aria-label="Drag card"
+          className="absolute top-3 right-3 cursor-grab rounded-md border border-border bg-background/80 p-1 text-muted-foreground active:cursor-grabbing"
+          onClick={(e) => e.stopPropagation()}
+          ref={handleRef}
+          type="button"
         >
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="font-semibold text-sm">
-              {label} {index + 1}
-            </p>
-            <div className="flex items-center gap-2">
-              {card.group ? (
-                <span className="rounded-full border border-border px-2 py-0.5 text-xs uppercase">
-                  {card.group}
-                </span>
-              ) : null}
-              {!isDeleteMode ? (
-                <button
-                  aria-label="Drag card"
-                  className="cursor-grab rounded-md border border-border p-1 text-muted-foreground active:cursor-grabbing"
-                  ref={handleRef}
-                  type="button"
-                >
-                  <GripVertical className="h-4 w-4" />
-                </button>
-              ) : null}
-            </div>
-          </div>
+          <GripVertical className="h-4 w-4" />
+        </button>
 
-          <div className="space-y-2">
-            <p className="font-medium text-sm">Card Title</p>
-            <form.Field name="title">
-              {(field) => (
-                <Input
-                  disabled={isDeleteMode}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    field.handleChange(value);
-                    onCardFieldChange(card.entryKey, "title", value);
-                  }}
-                  placeholder={placeholders.title || "Juan Jose Jamora III"}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </div>
-          <div className="space-y-2">
-            <p className="font-medium text-sm">Card Subtitle</p>
-            <form.Field name="subtitle">
-              {(field) => (
-                <Input
-                  disabled={isDeleteMode}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    field.handleChange(value);
-                    onCardFieldChange(card.entryKey, "subtitle", value);
-                  }}
-                  placeholder={placeholders.subtitle || "Chairman Emeritus"}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-medium text-sm">Image</p>
-            <div className="flex flex-col gap-2">
-              <label
-                className="flex h-24 w-full cursor-pointer items-center justify-center rounded-md border border-border border-dashed bg-muted/30 px-4 py-2 text-center font-medium text-muted-foreground text-sm transition-colors hover:border-primary hover:bg-muted"
-                htmlFor={`board-image-${card.entryKey}`}
-              >
-                Insert Image Here
-              </label>
-              <input
-                accept="image/*"
-                className="hidden"
-                disabled={isDeleteMode}
-                id={`board-image-${card.entryKey}`}
-                onChange={createImageSelectHandler(card.entryKey)}
-                type="file"
+        <div className="flex flex-col items-center">
+          <div
+            className={`relative mb-4 flex items-center justify-center rounded-full bg-primary/10 ${
+              isFeatured ? "h-24 w-24" : "h-20 w-20"
+            }`}
+          >
+            {card.imageUrl ? (
+              <Image
+                alt={card.title || "Board member"}
+                className="rounded-full object-cover"
+                height={isFeatured ? 96 : 80}
+                src={card.imageUrl}
+                unoptimized
+                width={isFeatured ? 96 : 80}
               />
+            ) : (
+              <User
+                className={`${
+                  isFeatured
+                    ? "h-16 w-16 text-primary/40"
+                    : "h-12 w-12 text-primary/30"
+                }`}
+              />
+            )}
+          </div>
+
+          <h3 className="mb-2 font-semibold text-base">
+            {card.title || "Board member"}
+          </h3>
+
+          <p className="text-primary text-xs">{card.subtitle || "Subtitle"}</p>
+        </div>
+      </button>
+    );
+  };
+
+  const BoardCardForm = ({ card }: { card: (typeof cards)[number] }) => {
+    return (
+      <div className="space-y-3">
+        <div>
+          <p className="font-medium text-sm">Card Title</p>
+          <Input
+            onChange={(e) =>
+              onCardFieldChange(card.entryKey, "title", e.target.value)
+            }
+            placeholder={placeholders.title}
+            value={card.title}
+          />
+        </div>
+
+        <div>
+          <p className="font-medium text-sm">Card Subtitle</p>
+          <Input
+            onChange={(e) =>
+              onCardFieldChange(card.entryKey, "subtitle", e.target.value)
+            }
+            placeholder={placeholders.subtitle}
+            value={card.subtitle}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const PreviewCard = ({ card }: { card: (typeof cards)[number] }) => {
+    const isFeatured = card.group === "featured";
+
+    return (
+      <div className="flex justify-center">
+        <div
+          className={`relative ${
+            isFeatured
+              ? "flex h-[340px] w-[260px] flex-col items-center justify-center rounded-3xl bg-card/95 p-8 text-center shadow-xl ring-1 ring-border/50"
+              : "flex h-[300px] w-[220px] flex-col items-center justify-center rounded-xl border border-border bg-card"
+          }`}
+        >
+          <div className="flex flex-col items-center">
+            <div
+              className={`relative mb-4 flex items-center justify-center rounded-full bg-primary/10 ${
+                isFeatured ? "h-24 w-24" : "h-20 w-20"
+              }`}
+            >
               {card.imageUrl ? (
                 <Image
-                  alt={`${card.title || "Board member"} preview`}
-                  className="h-20 w-20 rounded-md border border-border object-cover"
-                  height={80}
+                  alt={card.title || "Board member"}
+                  className="rounded-full object-cover"
+                  height={isFeatured ? 96 : 80}
                   src={card.imageUrl}
                   unoptimized
-                  width={80}
+                  width={isFeatured ? 96 : 80}
                 />
-              ) : null}
+              ) : (
+                <User className="h-12 w-12 text-primary/30" />
+              )}
             </div>
+
+            <h3 className="mb-2 font-semibold text-base">
+              {card.title || "Board member"}
+            </h3>
+
+            <p className="text-primary text-xs">
+              {card.subtitle || "Subtitle"}
+            </p>
           </div>
         </div>
       </div>
     );
   };
 
-  const renderSection = (
-    group: BoardGroup,
-    title: string,
-    cardLabel: string,
-    groupCards: (typeof cards)[number][],
-    showDeleteActions = false,
-  ) => (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <p className="font-semibold text-muted-foreground text-sm uppercase tracking-wide">
-          {title}
-        </p>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          {showDeleteActions && isDeleteMode ? (
-            <>
-              <Button
-                disabled={isSectionActionDisabled || cards.length === 0}
-                onClick={onSelectAllCards}
-                size="sm"
-                type="button"
-                variant="ghost"
-              >
-                Select All
-              </Button>
-              <Button
-                disabled={isSectionActionDisabled || selectedCount === 0}
-                onClick={onUnselectAllCards}
-                size="sm"
-                type="button"
-                variant="ghost"
-              >
-                Unselect All
-              </Button>
-              <Button
-                disabled={isSectionActionDisabled}
-                onClick={onCancelDeleteMode}
-                size="sm"
-                type="button"
-                variant="ghost"
-              >
-                Cancel
-              </Button>
-            </>
-          ) : null}
+  return (
+    <>
+      {editingCard ? (
+        <div className="space-y-4">
           <Button
-            disabled={isSectionActionDisabled || isDeleteMode}
-            onClick={() => onAddCard(group)}
-            size="sm"
-            type="button"
+            className="gap-2"
+            onClick={() => setEditingCardKey(null)}
             variant="outline"
           >
-            Add Card
+            <ArrowLeft className="h-4 w-4" />
+            Back to Board
           </Button>
-          {showDeleteActions ? (
-            <Button
-              disabled={
-                isSectionActionDisabled || (isDeleteMode && !hasSelectedCards)
-              }
-              onClick={onDeleteCardsClick}
-              size="sm"
-              type="button"
-              variant={isDeleteMode ? "destructive" : "outline"}
-            >
-              {isDeleteMode ? "Confirm Delete" : "Delete Cards"}
-            </Button>
-          ) : null}
+
+          {/* ✅ FIXED: LEFT FORM / RIGHT PREVIEW */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* LEFT */}
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-sm">
+                  Board Card {editingCardIndex + 1}
+                </p>
+
+                <Button
+                  onClick={() => handleDeleteCard(editingCard.entryKey)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <BoardCardForm card={editingCard} />
+            </div>
+
+            {/* RIGHT PREVIEW */}
+            <div className="flex flex-col gap-3">
+              <p className="font-semibold text-sm">Preview</p>
+              {editingCard && <PreviewCard card={editingCard} />}
+            </div>
+          </div>
         </div>
-      </div>
-      <DragDropProvider
-        onDragEnd={(event) => {
-          if (isDeleteMode) {
-            return;
-          }
-
-          if (event.canceled || !isSortableOperation(event.operation)) {
-            return;
-          }
-
-          if (!event.operation.source) {
-            return;
-          }
-
-          const activeEntryKey = String(event.operation.source.id);
-          const overEntryKey = String(event.operation.target?.id ?? "");
-
-          if (
-            !activeEntryKey ||
-            !overEntryKey ||
-            activeEntryKey === overEntryKey
-          ) {
-            return;
-          }
-
-          handleGroupReorder(group, activeEntryKey, overEntryKey);
-        }}
-      >
-        <div className="flex flex-wrap justify-center gap-4">
-          {groupCards.map((card, index) => (
-            <SortableCard
-              card={card}
-              group={group}
-              index={index}
-              key={card.entryKey}
-              label={cardLabel}
-            />
-          ))}
+      ) : (
+        <div className="space-y-6">
+          {renderSection(
+            "featured",
+            "Featured",
+            featuredCards,
+            "grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4",
+          )}
+          {renderSection(
+            "officers",
+            "Officers",
+            officerCards,
+            "grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
+          )}
+          {renderSection(
+            "trustees",
+            "Trustees",
+            trusteeCards,
+            "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4",
+          )}
+          {renderSection(
+            "other",
+            "Others",
+            otherCards,
+            "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4",
+          )}
         </div>
-      </DragDropProvider>
-    </section>
-  );
-
-  return (
-    <div className="space-y-6">
-      {renderSection("featured", "Featured", "Featured", featuredCards, true)}
-      {renderSection("officers", "Officers", "Officer", officerCards)}
-      {renderSection("trustees", "Trustees", "Trustee", trusteeCards)}
-      {renderSection("other", "Others", "Board Card", otherCards)}
-    </div>
+      )}
+    </>
   );
 }

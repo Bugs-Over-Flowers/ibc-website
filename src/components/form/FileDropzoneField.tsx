@@ -2,6 +2,7 @@ import { UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 import { useFieldContext } from "@/hooks/_formHooks";
+import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_SIZE } from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
@@ -97,9 +98,9 @@ function FileDropzoneField({
   className,
   dropzoneClassName,
   multiple = false,
-  accept = { "image/*": [] },
+  accept = IMAGE_UPLOAD_ACCEPT,
   maxFiles,
-  maxSize,
+  maxSize = IMAGE_UPLOAD_MAX_SIZE,
   layout = "grid",
   previewGridClassName,
   previewItemClassName,

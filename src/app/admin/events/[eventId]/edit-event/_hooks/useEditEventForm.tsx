@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
+import { isValidImageUploadFile } from "@/lib/fileUpload";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/db.types";
 import { updateEvent } from "@/server/events/mutations/updateEvent";
@@ -50,8 +51,6 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
     onSubmit: async ({ value }) => {
       console.log("Submitting edit form...", value);
 
-      const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
-      const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
       let headerUrl = value.eventHeaderUrl;
       let posterUrl = value.eventPosterUrl;
       let supabaseClient: Awaited<ReturnType<typeof createClient>> | null =
@@ -65,21 +64,12 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
       };
 
       const validateFile = (file: File) => {
-        const fileExt = file.name.split(".").pop()?.toLowerCase();
-
-        if (!fileExt || !allowedExtensions.includes(fileExt)) {
-          toast.error(
-            "Invalid file type. Only jpg, jpeg, png, gif, and webp are allowed.",
-          );
+        if (!isValidImageUploadFile(file)) {
+          toast.error("Invalid file. Use PNG, JPG, or JPEG up to 5MB.");
           return null;
         }
 
-        if (file.size > MAX_FILE_SIZE_BYTES) {
-          toast.error("File size exceeds 5MB limit.");
-          return null;
-        }
-
-        return fileExt;
+        return file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       };
 
       const deleteOldFile = async (publicUrl?: string | null) => {

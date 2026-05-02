@@ -28,6 +28,38 @@ const emptyForm: WebsiteContentFormState = {
   cardPlacement: "",
 };
 
+const defaultCardsBySection: Record<
+  string,
+  Partial<WebsiteContentCardState>
+> = {
+  goals: {
+    title: "Define a new organizational goal",
+    paragraph:
+      "Describe what this goal is about, why it matters, and how it will be achieved.",
+    icon: "Target",
+  },
+  company_thrusts: {
+    title: "Enter thrust title",
+    paragraph: "Describe the company thrust and its strategic importance.",
+    icon: "Rocket",
+  },
+  landing_page_benefits: {
+    title: "Enter benefit title",
+    paragraph: "Explain the benefit and its value proposition.",
+    icon: "Sparkles",
+  },
+  board_of_trustees: {
+    title: "Board member name",
+    subtitle: "Position/Title",
+    imageUrl: "",
+  },
+  secretariat: {
+    title: "Staff member name",
+    subtitle: "Position/Title",
+    imageUrl: "",
+  },
+};
+
 export function useWebsiteContentEditor(
   activeSection: WebsiteContentSection | null,
 ) {
@@ -278,15 +310,17 @@ export function useWebsiteContentEditor(
         .toString(36)
         .slice(2, 8)}`;
 
+      const defaults = defaultCardsBySection[activeSection] || {};
+
       const next = [
         ...prev,
         {
           entryKey,
-          title: "",
-          subtitle: "",
-          paragraph: "",
-          icon: "",
-          imageUrl: "",
+          title: defaults.title || "",
+          subtitle: defaults.subtitle || "",
+          paragraph: defaults.paragraph || "",
+          icon: defaults.icon || "",
+          imageUrl: defaults.imageUrl || "",
           cardPlacement: nextPlacement,
           group,
         },
