@@ -47,6 +47,7 @@
   "dependencies": {
     "@base-ui/react": "^1.4.1",
     "@dnd-kit/react": "^0.4.0",
+    "@dotenvx/dotenvx": "^1.63.0",
     "@react-pdf/renderer": "^4.5.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.1",
@@ -99,7 +100,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.13",
-    "@dotenvx/dotenvx": "^1.63.0",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4.2.4",
     "@testing-library/jest-dom": "^6.9.1",

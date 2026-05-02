@@ -49,7 +49,15 @@ export default function CheckInRowActions({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger render={<Button size="icon-sm" variant="ghost" />}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              aria-label="Open check-in row actions"
+              size="icon-sm"
+              variant="ghost"
+            />
+          }
+        >
           <MoreHorizontal />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-52">
