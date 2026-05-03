@@ -1,4 +1,5 @@
 import z from "zod";
+import { ImageUploadFileSchema } from "@/lib/fileUpload";
 import { titleCase } from "@/lib/utils";
 import {
   landlineSchema,
@@ -141,10 +142,7 @@ export const StandardRegistrationStep3Schema = z.discriminatedUnion(
     z
       .object({
         paymentMethod: z.literal(PaymentMethodEnum.enum.online),
-        paymentProof: z
-          .file()
-          .max(1024 * 1024 * 5)
-          .optional(),
+        paymentProof: z.union([ImageUploadFileSchema, z.undefined()]),
       })
       .refine((data) => data.paymentProof !== undefined, {
         message: "Payment proof is required for online payment.",
@@ -164,6 +162,7 @@ export const StandardRegistrationStep4Schema = z.object({
   termsAndConditions: z.boolean().refine((val) => val, {
     error: "You must agree to the Terms and Conditions.",
   }),
+  note: z.string().optional(),
 });
 
 export type StandardRegistrationStep4Schema = z.infer<
@@ -185,8 +184,6 @@ export const ServerRegistrationSchema = z.object({
   eventId: z.uuid(),
   step1: StandardRegistrationStep1Schema,
   step2: StandardRegistrationStep2Schema,
-  step4: StandardRegistrationStep4Schema,
-  sponsoredRegistrationId: z.uuid().optional().nullable(),
   step3: z.discriminatedUnion("paymentMethod", [
     z.object({
       paymentMethod: z.literal("online"),
@@ -196,6 +193,8 @@ export const ServerRegistrationSchema = z.object({
       paymentMethod: z.literal("onsite"),
     }),
   ]),
+  step4: StandardRegistrationStep4Schema,
+  sponsoredRegistrationId: z.uuid().optional().nullable(),
 });
 
 export type ServerRegistrationSchema = z.infer<typeof ServerRegistrationSchema>;

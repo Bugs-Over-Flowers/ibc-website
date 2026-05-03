@@ -23,7 +23,7 @@ export const LoginForm = () => {
 
   return (
     <Card className="w-full max-w-[400px]">
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form className="space-y-4" method="post" onSubmit={handleSubmit}>
         <CardHeader>Login</CardHeader>
         <CardContent>
           <FieldGroup>

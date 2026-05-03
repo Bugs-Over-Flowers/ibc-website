@@ -1,11 +1,10 @@
 import { z } from "zod";
+import { ImageUploadFileSchema } from "@/lib/fileUpload";
 import {
   ApplicationMemberSchema,
   MembershipApplicationStep3Schema,
 } from "@/lib/validation/membership/application";
 import { phoneSchema } from "@/lib/validation/utils";
-
-const LOGO_IMAGE_MIME_TYPES = ["image/png", "image/jpeg", "image/jpg"];
 
 export const CreateManualMemberStep1Schema = z.object({
   companyName: z
@@ -24,13 +23,7 @@ export const CreateManualMemberStep1Schema = z.object({
   landline: z.string().min(1, "Landline is required"),
   mobileNumber: phoneSchema,
   logoImageURL: z.union([
-    z
-      .file("Company logo is required")
-      .max(1024 * 1024 * 5, "File size must be less than 5MB")
-      .refine(
-        (file) => LOGO_IMAGE_MIME_TYPES.includes(file.type),
-        "Only PNG and JPG files are allowed",
-      ),
+    ImageUploadFileSchema,
     z.string().min(1, "Company logo is required"),
   ]),
   applicationMemberType: z.enum(["corporate", "personal"]),

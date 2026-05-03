@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useAction } from "@/hooks/useAction";
+import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import { updatePaymentProofStatus } from "@/server/applications/mutations/updatePaymentProofStatus";
 import type { getApplications } from "@/server/applications/queries/getApplications";
@@ -29,7 +30,7 @@ function formatAppliedDate(dateValue: string): string {
     return `${isoDate.slice(8, 10)}/${isoDate.slice(5, 7)}/${isoDate.slice(0, 4)}`;
   }
 
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat("en-PH", {
     day: "2-digit",
     month: "2-digit",
     timeZone: "UTC",
@@ -83,13 +84,23 @@ export function ApplicationsTableRow({
   const toggleSelection = useSelectedApplicationsStore(
     (state) => state.toggleSelection,
   );
+  const isSelectionLocked = useSelectedApplicationsStore(
+    (state) => state.isSelectionLocked,
+  );
   const { borderColor, textColor } = getApplicationTypeColor(
     application.applicationType,
   );
+  const paymentRequirement = getMembershipPaymentRequirement({
+    applicationMemberType: application.applicationMemberType,
+    applicationType: application.applicationType,
+    previousApplicationMemberType: application.previousApplicationMemberType,
+  });
   const paymentProofStatus = application.paymentProofStatus ?? "pending";
   const isPaymentProofPending =
-    application.paymentMethod === "BPI" && paymentProofStatus === "pending";
-  const isSelectionDisabled = isPaymentProofPending;
+    paymentRequirement.requiresPayment &&
+    application.paymentMethod === "BPI" &&
+    paymentProofStatus === "pending";
+  const isSelectionDisabled = isPaymentProofPending || isSelectionLocked;
   const formattedAppliedDate = formatAppliedDate(application.applicationDate);
 
   const proofImage = application.ProofImage?.[0];
@@ -114,17 +125,6 @@ export function ApplicationsTableRow({
     });
   };
 
-  const PERSONAL_REGISTRATION_FEE = 5000;
-  const CORPORATE_REGISTRATION_FEE = 10000;
-  const membershipTypeLabel =
-    application.applicationMemberType === "personal"
-      ? "Personal Membership"
-      : "Corporate Membership";
-  const expectedRegistrationFee =
-    application.applicationMemberType === "corporate"
-      ? CORPORATE_REGISTRATION_FEE
-      : PERSONAL_REGISTRATION_FEE;
-
   return (
     <TableRow
       className={isHydrated && isSelected ? "bg-primary/5" : ""}
@@ -148,10 +148,10 @@ export function ApplicationsTableRow({
           {isPaymentProofPending && hasProofImage && (
             <PaymentProofModal
               applicationId={application.applicationId}
-              expectedRegistrationFee={expectedRegistrationFee}
+              expectedRegistrationFee={paymentRequirement.expectedAmount}
               isDecisionLocked={paymentProofStatus !== "pending"}
               isUpdatingStatus={isUpdatingStatus}
-              membershipTypeLabel={membershipTypeLabel}
+              membershipTypeLabel={paymentRequirement.membershipTypeLabel}
               onDecision={handleDecision}
               onProofReplaced={() => {
                 router.refresh();
@@ -177,7 +177,7 @@ export function ApplicationsTableRow({
         className={showContact ? "w-[24%] max-w-56" : "w-[34%] max-w-64"}
       >
         <div className="line-clamp-2 truncate text-sm">
-          {application.Sector?.sectorName}
+          {application.sectorName || "N/A"}
         </div>
       </TableCell>
       <TableCell className={showContact ? "w-[14%]" : "w-[16%]"}>

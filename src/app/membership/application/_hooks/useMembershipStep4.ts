@@ -11,10 +11,15 @@ import { MembershipApplicationStep4Schema } from "@/lib/validation/membership/ap
 import { submitMembershipApplication } from "@/server/membership/mutations/submitApplication";
 
 interface UseMembershipStep4Props {
+  sectors?: Array<{
+    sectorId: number;
+    sectorName: string;
+  }>;
   onSuccess?: () => void;
 }
 
 export const useMembershipStep4 = ({
+  sectors = [],
   onSuccess,
 }: UseMembershipStep4Props = {}) => {
   const router = useRouter();
@@ -61,7 +66,28 @@ export const useMembershipStep4 = ({
             throw new Error("Invalid application data");
           }
 
-          const refinedValue = parsed.data;
+          let refinedValue = parsed.data;
+
+          const existingApplicationMemberType =
+            applicationData.step1.existingApplicationMemberType;
+          const isUpdateInfo =
+            applicationData.step1.applicationType === "updating";
+          const isCorporateUpgrade =
+            isUpdateInfo &&
+            existingApplicationMemberType === "personal" &&
+            refinedValue.applicationMemberType === "corporate";
+
+          if (isUpdateInfo && !isCorporateUpgrade) {
+            refinedValue = {
+              ...refinedValue,
+              applicationMemberType:
+                existingApplicationMemberType ??
+                refinedValue.applicationMemberType,
+              paymentMethod: "ONSITE",
+              paymentProof: undefined,
+              paymentProofUrl: "",
+            };
+          }
 
           setApplicationData({
             step4: refinedValue,
@@ -79,7 +105,7 @@ export const useMembershipStep4 = ({
             );
             if (!isValidLogoType) {
               throw new Error(
-                "Invalid logo file type. Only JPEG, PNG, and PDF files are allowed.",
+                "Invalid logo file type. Only JPEG and PNG files are allowed.",
               );
             }
 
@@ -110,7 +136,7 @@ export const useMembershipStep4 = ({
             );
             if (!isValidProofType) {
               throw new Error(
-                "Invalid payment proof file type. Only JPEG, PNG, and PDF files are allowed.",
+                "Invalid payment proof file type. Only JPEG and PNG files are allowed.",
               );
             }
 
@@ -145,13 +171,24 @@ export const useMembershipStep4 = ({
               ? undefined
               : storedBusinessMemberId || verifiedBusinessMemberId;
 
+          const selectedSectorName =
+            sectors.find(
+              (sector) =>
+                String(sector.sectorId) ===
+                String(applicationData.step2.sectorId),
+            )?.sectorName ?? "";
+
+          if (!selectedSectorName) {
+            throw new Error("Industry/Sector is required");
+          }
+
           const res = await submitMembershipApplication({
             applicationType: applicationData.step1.applicationType,
             applicationMemberType: refinedValue.applicationMemberType,
             businessMemberId,
             companyName: applicationData.step2.companyName,
             companyAddress: applicationData.step2.companyAddress,
-            sectorId: Number(applicationData.step2.sectorId),
+            sectorName: selectedSectorName,
             websiteURL: applicationData.step2.websiteURL,
             emailAddress: applicationData.step2.emailAddress,
             landline: applicationData.step2.landline,

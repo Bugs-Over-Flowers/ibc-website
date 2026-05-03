@@ -1,8 +1,10 @@
 import "server-only";
 
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyAdmin5mCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { signLogoUrl } from "@/lib/storage/signedUrls";
 import { createClient } from "@/lib/supabase/server";
 
 export type MemberDetailsByBusinessMemberId = {
@@ -18,7 +20,7 @@ export type MemberDetailsByBusinessMemberId = {
   sectorName: string | null;
   latestApplication: {
     applicationId: string;
-    sectorId: number | null;
+    sectorName: string | null;
     companyAddress: string | null;
     emailAddress: string | null;
     landline: string | null;
@@ -48,7 +50,7 @@ export async function getMemberDetailsByBusinessMemberId(
   requestCookies: RequestCookie[],
 ): Promise<MemberDetailsByBusinessMemberId> {
   "use cache";
-  cacheLife("admin5m");
+  applyAdmin5mCache();
   cacheTag(CACHE_TAGS.members.all);
   cacheTag(CACHE_TAGS.members.admin);
 
@@ -61,6 +63,7 @@ export async function getMemberDetailsByBusinessMemberId(
       businessMemberId,
       businessName,
       identifier,
+      primaryApplicationId,
       sectorId,
       websiteURL,
       logoImageURL,
@@ -87,7 +90,7 @@ export async function getMemberDetailsByBusinessMemberId(
       .select(
         `
         applicationId,
-        sectorId,
+        sectorName,
         companyAddress,
         emailAddress,
         landline,
@@ -111,9 +114,7 @@ export async function getMemberDetailsByBusinessMemberId(
         )
       `,
       )
-      .eq("businessMemberId", businessMemberId)
-      .order("applicationDate", { ascending: false })
-      .limit(1)
+      .eq("applicationId", member.primaryApplicationId)
       .maybeSingle();
 
   if (latestApplicationError) {
@@ -121,26 +122,6 @@ export async function getMemberDetailsByBusinessMemberId(
       `Failed to fetch latest member application: ${latestApplicationError.message}`,
     );
   }
-
-  const signLogoUrl = async (path: string | null) => {
-    if (!path) {
-      return null;
-    }
-
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      return path;
-    }
-
-    const { data: signed, error: signedError } = await supabase.storage
-      .from("logoimage")
-      .createSignedUrl(path, 60 * 60 * 24 * 30);
-
-    if (!signedError && signed?.signedUrl) {
-      return signed.signedUrl;
-    }
-
-    return null;
-  };
 
   const sectorName =
     member.Sector && "sectorName" in member.Sector
@@ -153,7 +134,7 @@ export async function getMemberDetailsByBusinessMemberId(
     identifier: member.identifier,
     sectorId: member.sectorId,
     websiteURL: member.websiteURL,
-    logoImageURL: await signLogoUrl(member.logoImageURL),
+    logoImageURL: await signLogoUrl(supabase, member.logoImageURL),
     joinDate: member.joinDate,
     membershipStatus: member.membershipStatus,
     membershipExpiryDate: member.membershipExpiryDate,
@@ -161,7 +142,7 @@ export async function getMemberDetailsByBusinessMemberId(
     latestApplication: latestApplication
       ? {
           applicationId: latestApplication.applicationId,
-          sectorId: latestApplication.sectorId,
+          sectorName: latestApplication.sectorName,
           companyAddress: latestApplication.companyAddress,
           emailAddress: latestApplication.emailAddress,
           landline: latestApplication.landline,

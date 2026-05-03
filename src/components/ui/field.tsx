@@ -208,7 +208,7 @@ function FieldError({
       role="alert"
       data-slot="field-error"
       className={cn(
-        "text-destructive min-h-5 text-sm font-normal",
+        "text-destructive text-sm font-normal",
         !content && "invisible",
         className
       )}

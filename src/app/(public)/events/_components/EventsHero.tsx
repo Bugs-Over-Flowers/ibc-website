@@ -1,28 +1,35 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { HeroBackgroundCarousel } from "@/components/website/HeroBackgroundCarousel";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
 
-export function EventsHero() {
+interface EventsHeroProps {
+  backgroundImages?: string[];
+}
+
+const EVENTS_HERO_FALLBACK_IMAGES = [
+  "/images/backgrounds/bg-1.jpg",
+  "/images/backgrounds/bg-2.jpg",
+  "/images/backgrounds/bg-3.jpg",
+  "/images/backgrounds/bg-4.jpg",
+  "/images/backgrounds/bg-about.jpg",
+];
+
+export function EventsHero({ backgroundImages }: EventsHeroProps) {
+  const images =
+    backgroundImages && backgroundImages.length > 0
+      ? backgroundImages
+      : EVENTS_HERO_FALLBACK_IMAGES;
+
   return (
     <section className="relative flex min-h-[60vh] items-center overflow-hidden pt-32 pb-16">
-      {/* Static Background Image */}
-      <motion.div
-        animate={{ opacity: 1, scale: 1 }}
-        className="absolute inset-0"
-        initial={{ opacity: 0, scale: 1.1 }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
-      >
-        <Image
-          alt="Events background"
-          className="object-cover opacity-20"
-          fill
-          priority
-          src="https://picsum.photos/seed/picsum/200/300"
-        />
-      </motion.div>
+      <HeroBackgroundCarousel
+        alt="Events background"
+        images={images}
+        opacityClass="opacity-20"
+      />
 
       {/* Animated Blur Orbs */}
       <motion.div

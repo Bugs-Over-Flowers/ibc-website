@@ -111,16 +111,26 @@ public = true
 file_size_limit = "5MiB"
 allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
 objects_path = "./headerimage"
+[storage.buckets.personalimage]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
+objects_path = "./personalimage"
 [storage.buckets.paymentproofs]
 public = false
 file_size_limit = "10MiB"
-allowed_mime_types = ["image/*"]
+allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
 objects_path = "./paymentproofs"
 [storage.buckets.logoimage]
 public = false
 file_size_limit = "5MiB"
-allowed_mime_types = ["image/*"]
+allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
 objects_path = "./logoimage"
+[storage.buckets.network-logos]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
+objects_path = "./network-logos"
 
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
