@@ -5,6 +5,8 @@ import {
   cleanupAdminRegistrationScenario,
   seedAdminRegistrationScenario,
 } from "../fixtures/adminRegistrationScenario";
+import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
+import { createE2EAdminClient } from "../helpers/supabase";
 
 type TestScenario = Awaited<ReturnType<typeof seedAdminRegistrationScenario>>;
 
@@ -17,6 +19,12 @@ export const test = baseTest.extend<{ scenario: TestScenario }>({
 });
 
 export const { Given, When, Then } = createBdd(test);
+
+const STATUSES: Array<"pending" | "rejected" | "accepted"> = [
+  "pending",
+  "rejected",
+  "accepted",
+];
 
 async function openTab(
   page: Page,
@@ -43,34 +51,51 @@ Given(
   },
 );
 
+Given(
+  "I am an admin on the registration list page for an event with {int} registrations",
+  async ({ page, scenario }, count: number) => {
+    const supabase = createE2EAdminClient();
+    const remaining = count - 3;
+
+    for (let i = 0; i < remaining; i++) {
+      await createRegistrationWithParticipants(
+        supabase,
+        { eventId: scenario.event.eventId },
+        STATUSES[i % 3],
+      );
+    }
+
+    await page.goto(
+      `/admin/events/${scenario.event.eventId}/registration-list`,
+    );
+  },
+);
+
 When("I open the registrations tab", async ({ page, scenario }) => {
   await openTab(page, scenario.event.eventId, "registrations");
 });
 
 Then(
-  "I should see registrations with pending payment proof status",
+  "I should see all payment proof status types",
   async ({ page, scenario }) => {
     await expect(
       page.getByText(scenario.pendingRegistration.affiliation),
     ).toBeVisible();
-  },
-);
-
-Then(
-  "I should see registrations with rejected payment proof status",
-  async ({ page, scenario }) => {
     await expect(
       page.getByText(scenario.rejectedRegistration.affiliation),
     ).toBeVisible();
+    await expect(
+      page.getByText(scenario.acceptedRegistration.affiliation),
+    ).toBeVisible();
   },
 );
 
 Then(
-  "I should see registrations with accepted payment proof status",
-  async ({ page, scenario }) => {
+  "the registration list should show {int} total registrations",
+  async ({ page }, count: number) => {
     await expect(
-      page.getByText(scenario.acceptedRegistration.affiliation),
-    ).toBeVisible();
+      page.getByTestId("registration-stats-total-registrations"),
+    ).toContainText(count.toString());
   },
 );
 
