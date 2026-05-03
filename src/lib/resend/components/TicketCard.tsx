@@ -1,4 +1,4 @@
-import { Img, Section, Text } from "react-email";
+import { Section, Text } from "react-email";
 
 interface TicketCardProps {
   title: string;
