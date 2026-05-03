@@ -29,7 +29,8 @@ export const getCheckInForDate = async (
         ),
         proofImage:ProofImage(
           path,
-          proofImageId
+          proofImageId,
+          orderIndex
         ),
         participants:Participant (
           email,
@@ -38,6 +39,7 @@ export const getCheckInForDate = async (
           participantId,
           isPrincipal,
           contactNumber,
+          participantIdentifier,
           checkIn:CheckIn(
            remarks,
            checkInId,

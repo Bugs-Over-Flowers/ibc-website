@@ -1,7 +1,7 @@
 "use client";
 
 import { revalidateLogic } from "@tanstack/react-form";
-import { useEffect, useEffectEvent } from "react";
+import { useEffect } from "react";
 import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,19 +47,13 @@ export default function RemarksModal() {
     },
   });
 
-  const handleSetInitialState = useEffectEvent(
-    (selectedRemarkParticipantId: string | null) => {
-      if (selectedRemarkParticipantId !== "") {
-        form.reset();
-      }
-    },
-  );
-
   useEffect(() => {
-    if (selectedRemarkParticipantId !== "") {
-      handleSetInitialState(selectedRemarkParticipantId);
-    }
-  }, [selectedRemarkParticipantId]);
+    if (!selectedRemarkParticipantId) return;
+
+    form.reset({
+      remark: getEditingParticipantRemark(selectedRemarkParticipantId),
+    });
+  }, [getEditingParticipantRemark, form, selectedRemarkParticipantId]);
 
   return (
     <Dialog open={!!selectedRemarkParticipantId}>

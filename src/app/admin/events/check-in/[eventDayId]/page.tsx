@@ -10,6 +10,7 @@ import { getEventRegistrationList } from "@/server/registration/queries/getEvent
 import CheckInDataDialog from "./_components/CheckInDataDialog";
 import CheckInPageLoading from "./_components/CheckInPageLoading";
 import EventDayDetails from "./_components/EventDayDetails";
+import ParticipantCheckInDialog from "./_components/ParticipantCheckInDialog";
 import QRCodeScanner from "./_components/qr-scanning/QRCodeScanner";
 import CheckInRegistrationPanel from "./_components/registration-list/CheckInRegistrationPanel";
 
@@ -121,6 +122,10 @@ async function CheckInPage({
         />
       </div>
       <CheckInDataDialog
+        eventId={eventDayData.event.eventId}
+        eventTitle={eventDayData.event.eventTitle}
+      />
+      <ParticipantCheckInDialog
         eventId={eventDayData.event.eventId}
         eventTitle={eventDayData.event.eventTitle}
       />
