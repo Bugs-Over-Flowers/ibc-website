@@ -16,7 +16,7 @@ export async function getSectors(
 
   const supabase = await createClient(requestCookies);
 
-  let query = supabase.from("Sector").select("*");
+  let query = supabase.from("Sector").select("sectorId, sectorName");
 
   if (search) {
     query = query.ilike("sectorName", `%${search}%`);
@@ -24,11 +24,35 @@ export async function getSectors(
 
   query = query.order("sectorName", { ascending: true });
 
-  const { data, error } = await query;
+  const { data: sectors, error } = await query;
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return data;
+  if (!sectors || sectors.length === 0) {
+    return [];
+  }
+
+  const sectorIds = sectors.map((sector) => sector.sectorId);
+  const { data: members, error: membersError } = await supabase
+    .from("BusinessMember")
+    .select("sectorId")
+    .in("sectorId", sectorIds)
+    .neq("membershipStatus", "cancelled");
+
+  if (membersError) {
+    throw new Error(membersError.message);
+  }
+
+  const memberCountBySector = new Map<number, number>();
+  for (const member of members ?? []) {
+    const currentCount = memberCountBySector.get(member.sectorId) ?? 0;
+    memberCountBySector.set(member.sectorId, currentCount + 1);
+  }
+
+  return sectors.map((sector) => ({
+    ...sector,
+    memberCount: memberCountBySector.get(sector.sectorId) ?? 0,
+  }));
 }
