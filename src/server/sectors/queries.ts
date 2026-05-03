@@ -42,13 +42,17 @@ export async function getSectors(
     .neq("membershipStatus", "cancelled");
 
   if (membersError) {
-    throw new Error(membersError.message);
+    throw new Error(
+      `Failed to load member counts for sectors: ${membersError.message}`,
+    );
   }
 
   const memberCountBySector = new Map<number, number>();
   for (const member of members ?? []) {
-    const currentCount = memberCountBySector.get(member.sectorId) ?? 0;
-    memberCountBySector.set(member.sectorId, currentCount + 1);
+    memberCountBySector.set(
+      member.sectorId,
+      (memberCountBySector.get(member.sectorId) ?? 0) + 1,
+    );
   }
 
   return sectors.map((sector) => ({
