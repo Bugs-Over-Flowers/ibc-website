@@ -6,7 +6,7 @@ import { Clock, Download } from "lucide-react";
 import { AdminTableSortHeader } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
-import { exportToExcel } from "@/lib/export/excel";
+import { type ExportEventDetails, exportToExcel } from "@/lib/export/excel";
 import type { CheckInListItem } from "@/lib/validation/check-in/check-in-list";
 import CheckInRowActions from "./CheckInRowActions";
 import ViewRemarkDialog from "./ViewRemarkDialog";
@@ -14,10 +14,10 @@ import ViewRemarkDialog from "./ViewRemarkDialog";
 type CheckInListRow = CheckInListItem & { name: string };
 
 interface CheckInTableProps {
-  eventTitle: string;
   checkIns: CheckInListItem[];
   eventDayId: string;
   eventDayLabel: string;
+  eventDetails: ExportEventDetails;
 }
 
 const getCheckInListColumns = (
@@ -147,10 +147,10 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
 ];
 
 export default function CheckInTable({
-  eventTitle,
   checkIns,
   eventDayId,
   eventDayLabel,
+  eventDetails,
 }: CheckInTableProps) {
   const tableData: CheckInListRow[] = checkIns.map((c) => ({
     ...c,
@@ -161,7 +161,8 @@ export default function CheckInTable({
     await exportToExcel({
       data: tableData,
       columns: getExcelColumns(),
-      filename: `${eventTitle}-${eventDayLabel}-CheckIns-${new Date().toISOString().split("T")[0]}.xlsx`,
+      event: eventDetails,
+      filename: `${eventDetails.title}-${eventDayLabel}-CheckIns-${new Date().toISOString().split("T")[0]}.xlsx`,
       sheetName: "Check-In List",
       excludeColumns: ["actions"],
       formatters: {

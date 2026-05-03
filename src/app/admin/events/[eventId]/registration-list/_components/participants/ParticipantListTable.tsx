@@ -9,13 +9,13 @@ import {
 } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
-import { exportToExcel } from "@/lib/export/excel";
+import { type ExportEventDetails, exportToExcel } from "@/lib/export/excel";
 import type { ParticipantListItem } from "@/lib/validation/registration-management";
 import ParticipantRowActions from "./ParticipantRowActions";
 
 interface ParticipantListProps {
-  eventTitle: string;
   participantList: ParticipantListItem[];
+  eventDetails: ExportEventDetails;
 }
 
 export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
@@ -144,14 +144,15 @@ const getExcelColumns = (): ColumnDef<ParticipantListItem>[] => [
 ];
 
 export default function ParticipantListTable({
-  eventTitle,
   participantList,
+  eventDetails,
 }: ParticipantListProps) {
   const handleExport = async (data: ParticipantListItem[]) => {
     await exportToExcel({
       data,
       columns: getExcelColumns(),
-      filename: `${eventTitle}-Participants-${new Date().toISOString().split("T")[0]}.xlsx`,
+      event: eventDetails,
+      filename: `${eventDetails.title}-Participants-${new Date().toISOString().split("T")[0]}.xlsx`,
       sheetName: "Participants",
       excludeColumns: ["actions"],
     });

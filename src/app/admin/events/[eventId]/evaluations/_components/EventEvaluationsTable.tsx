@@ -8,13 +8,13 @@ import { EvaluationFilter } from "@/app/admin/evaluation/_components/EvaluationF
 import { EvaluationList } from "@/app/admin/evaluation/_components/EvaluationList";
 import { Button } from "@/components/ui/button";
 import { EVALUATION_QUESTIONS } from "@/lib/evaluation/evaluationQuestions";
-import { exportToExcel } from "@/lib/export/excel";
+import { type ExportEventDetails, exportToExcel } from "@/lib/export/excel";
 import type { EvaluationWithEventRpc } from "@/server/evaluation/queries/getAllEvaluations";
 
 interface EventEvaluationsTableProps {
   evaluations: EvaluationWithEventRpc[];
-  eventTitle: string;
   eventId: string;
+  eventDetails: ExportEventDetails;
 }
 
 type RatingScale = NonNullable<EvaluationWithEventRpc["q1_rating"]>;
@@ -54,8 +54,8 @@ const getExcelColumns = (): ColumnDef<EventEvaluationExportRow>[] => [
 
 export default function EventEvaluationsTable({
   evaluations,
-  eventTitle,
   eventId,
+  eventDetails,
 }: EventEvaluationsTableProps) {
   const [filteredEvaluations, setFilteredEvaluations] = useState(evaluations);
 
@@ -70,7 +70,8 @@ export default function EventEvaluationsTable({
     await exportToExcel({
       data: exportRows,
       columns: getExcelColumns(),
-      filename: `${eventTitle}-Evaluations-${new Date().toISOString().split("T")[0]}.xlsx`,
+      event: eventDetails,
+      filename: `${eventDetails.title}-Evaluations-${new Date().toISOString().split("T")[0]}.xlsx`,
       formatters: {
         created_at: (value) =>
           format(new Date(String(value)), "MMM d, yyyy h:mm a"),
