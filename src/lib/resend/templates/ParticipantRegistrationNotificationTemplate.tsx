@@ -10,46 +10,39 @@ import {
   Section,
   Text,
 } from "react-email";
-import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import TermsAndConditions from "../components/TermsAndConditions";
 import TicketCard from "../components/TicketCard";
 
-interface StandardRegistrationConfirmationTemplateProps {
-  eventDetails: Pick<
-    RegistrationStoreEventDetails,
-    "eventTitle" | "eventHeaderUrl"
-  >;
+interface ParticipantRegistrationNotificationTemplateProps {
+  participants: {
+    participantName: string;
+    participantIdentifier: string;
+    affiliation: string;
+    email: string;
+  }[];
+  registrantName: string;
+  eventDetails: {
+    eventTitle: string;
+    eventHeaderUrl: string | null;
+  };
   eventDateRange: string;
   eventVenue: string;
   registrationIdentifier: string;
-  participantIdentifier: string;
-  self: {
-    fullName: string;
-    email: string;
-    affiliation: string;
-  };
-  participants?: {
-    fullName: string;
-    email: string;
-    affiliation: string;
-    participantIdentifier: string;
-  }[];
 }
 
-export default function StandardRegistrationConfirmationTemplate({
+export default function ParticipantRegistrationNotificationTemplate({
+  participants,
+  registrantName,
   eventDetails,
   eventDateRange,
   eventVenue,
   registrationIdentifier,
-  participantIdentifier,
-  participants,
-  self,
-}: StandardRegistrationConfirmationTemplateProps) {
+}: ParticipantRegistrationNotificationTemplateProps) {
   if (!eventDetails.eventHeaderUrl) {
     throw new Error("Event header URL is required");
   }
 
-  const previewString = `Registration Confirmation: ${eventDetails.eventTitle}`;
+  const previewString = `You're registered for ${eventDetails.eventTitle}`;
 
   return (
     <Html>
@@ -63,10 +56,14 @@ export default function StandardRegistrationConfirmationTemplate({
             style={{ maxWidth: "600px", margin: "0 auto", width: "100%" }}
           />
 
-          <Heading style={h1}>Registration Successful</Heading>
+          <Heading style={h1}>You've Been Registered!</Heading>
 
           <Text style={text}>
-            You have successfully registered for{" "}
+            Hello <strong>{participants[0]?.participantName}</strong>,
+          </Text>
+
+          <Text style={text}>
+            <strong>{registrantName}</strong> has registered you for{" "}
             <strong>{eventDetails.eventTitle}</strong>!
           </Text>
 
@@ -80,47 +77,27 @@ export default function StandardRegistrationConfirmationTemplate({
           </Section>
 
           <Text style={text}>
-            Here are the check-in QR codes for everyone under this registration.
-            Please present the appropriate QR code at the event entrance.
+            Here are your check-in QR code/s. Present these at the event to
+            check-in.
           </Text>
 
           <Hr style={hr} />
 
-          <Text style={text}>Registration QR Code</Text>
-          <Text style={subtext}>
-            Use this code to check in multiple people during the event.
-          </Text>
-          <TicketCard
-            cid="qrCodeCID"
-            email={self.email}
-            identifier={registrationIdentifier}
-            subtitle={self.fullName}
-            title={self.affiliation}
-          />
+          <Section style={contextSection}>
+            <Text style={contextText}>
+              Registered by <strong>{registrantName}</strong> (Registration ID:{" "}
+              <code style={detailValueMono}>{registrationIdentifier}</code>)
+            </Text>
+          </Section>
 
-          <Hr style={hr} />
-
-          <Heading style={h2}>Individual Passes</Heading>
-          <Text style={subtext}>
-            Use these to check in individual participants.
-          </Text>
-
-          <TicketCard
-            cid="participantQrCodeCID"
-            email={self.email}
-            identifier={participantIdentifier}
-            subtitle={self.affiliation}
-            title={self.fullName}
-          />
-
-          {participants?.map((participant) => (
+          {participants.map((participant) => (
             <TicketCard
               cid={`participantQrCodeCID-${participant.participantIdentifier}`}
               email={participant.email}
               identifier={participant.participantIdentifier}
               key={participant.participantIdentifier}
               subtitle={participant.affiliation}
-              title={participant.fullName}
+              title={participant.participantName}
             />
           ))}
 
@@ -143,34 +120,30 @@ export default function StandardRegistrationConfirmationTemplate({
   );
 }
 
-StandardRegistrationConfirmationTemplate.PreviewProps = {
+ParticipantRegistrationNotificationTemplate.PreviewProps = {
+  participants: [
+    {
+      participantName: "John Doe",
+      participantIdentifier: "ibc-par-abc12345",
+      affiliation: "Acme Corp",
+      email: "john.doe@acme.com",
+    },
+    {
+      participantName: "Jane Smith",
+      participantIdentifier: "ibc-par-def67890",
+      affiliation: "Acme Corp",
+      email: "jane.smith@acme.com",
+    },
+  ],
+  registrantName: "Alice Johnson",
   eventDetails: {
+    eventId: "1010",
     eventTitle: "Awarding Ceremony 2024",
     eventHeaderUrl: "https://placehold.co/600x400",
   },
   eventDateRange: "January 20, 2024, 12:00 PM to January 25, 2024, 8:00 PM",
   eventVenue: "Grand Ballroom, Iloilo Convention Center",
-  registrationIdentifier: "ibc-reg-a1b2c3d4",
-  participantIdentifier: "ibc-par-a1b2c3d4",
-  participants: [
-    {
-      fullName: "John Doe",
-      email: "john.doe@example.com",
-      affiliation: "Acme Corp",
-      participantIdentifier: "ibc-par-e5f6g7h8",
-    },
-    {
-      fullName: "Jane Smith",
-      email: "jane.smith@example.com",
-      affiliation: "Acme Corp",
-      participantIdentifier: "ibc-par-i9j0k1l2",
-    },
-  ],
-  self: {
-    fullName: "Alice Johnson",
-    email: "alice.johnson@example.com",
-    affiliation: "Acme Corp",
-  },
+  registrationIdentifier: "ibc-reg-abc12345",
 };
 
 const main = {
@@ -195,14 +168,6 @@ const h1 = {
   padding: "0 40px",
 };
 
-const h2 = {
-  color: "#333",
-  fontSize: "20px",
-  fontWeight: "bold",
-  margin: "32px 0 16px 0",
-  padding: "0 40px",
-};
-
 const text = {
   color: "#333",
   fontSize: "16px",
@@ -210,12 +175,15 @@ const text = {
   padding: "0 40px",
 };
 
-const subtext = {
+const contextSection = {
+  padding: "0 40px",
+  marginBottom: "24px",
+};
+
+const contextText = {
   color: "#71717a",
   fontSize: "14px",
-  lineHeight: "24px",
-  padding: "0 40px",
-  marginTop: "4px",
+  margin: "0",
 };
 
 const hr = {
@@ -253,4 +221,9 @@ const detailValue = {
   fontSize: "16px",
   fontWeight: "500",
   margin: "0 0 8px 0",
+};
+
+const detailValueMono = {
+  fontFamily:
+    'ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace',
 };
