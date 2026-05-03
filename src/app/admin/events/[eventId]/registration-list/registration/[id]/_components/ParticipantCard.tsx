@@ -28,6 +28,7 @@ export default function ParticipantCard({
         "h-full rounded-xl border border-border/50 bg-background shadow-none",
         registrant && "border-primary/40 bg-primary/5",
       )}
+      data-testid="participant-card"
     >
       <CardContent className="space-y-4 px-4">
         <div className="flex items-start justify-between gap-3">

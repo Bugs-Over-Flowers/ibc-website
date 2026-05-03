@@ -5,6 +5,8 @@ import {
   cleanupAdminRegistrationScenario,
   seedAdminRegistrationScenario,
 } from "../fixtures/adminRegistrationScenario";
+import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
+import { createE2EAdminClient } from "../helpers/supabase";
 
 type TestScenario = Awaited<ReturnType<typeof seedAdminRegistrationScenario>>;
 
@@ -22,7 +24,10 @@ export const { Given, When, Then } = createBdd(test);
 // REGISTRATION MANAGEMENT SCENARIOS
 // ============================================
 
+// ============================================
 // Scenario: Registration Details Navigation
+// ============================================
+
 Given(
   "I am seeing a row under the Registration List or the Participant List",
   async ({ page, scenario }) => {
@@ -52,12 +57,18 @@ Then(
   },
 );
 
+// ============================================
 // Scenario: View Registration Details Content
-Given("I am on the Registration Details page", async ({ page, scenario }) => {
-  await page.goto(
-    `/admin/events/${scenario.event.eventId}/registration-list/registration/${scenario.pendingRegistration.registrationId}`,
-  );
-});
+// ============================================
+
+Given(
+  "I am on the Registration Details page of a Pending registration",
+  async ({ page, scenario }) => {
+    await page.goto(
+      `/admin/events/${scenario.event.eventId}/registration-list/registration/${scenario.pendingRegistration.registrationId}`,
+    );
+  },
+);
 
 Then(
   /I should see the General Information section \(Event Name, Affiliation, Registration Identifier, Payment Method, and Note if there is one\)/,
@@ -114,7 +125,10 @@ Then(
   },
 );
 
+// ============================================
 // Scenario: View Registration Proof of Payment
+// ============================================
+
 Then(
   /I should see the Proof of Payment section \(Payment Method, Status, Image \(for online\), Actions\)/,
   async ({ page }) => {
@@ -127,35 +141,53 @@ Then(
   },
 );
 
-// Scenario: Accept Proof of Payment
-When("I click on the Accept button", async ({ page }) => {
+// ============================================
+// Scenario: Handle Proof of Payment on the Payment Proof Dialog
+// ============================================
+
+When("I click on the Payment Proof Dialog", async ({ page }) => {
   await page
     .getByRole("button", { name: "Open payment proof review dialog" })
     .click();
-  await page.getByRole("button", { name: "Accept" }).click();
+  await page.waitForTimeout(500);
 });
 
-Then('the payment status should change to "Paid"', async ({ page }) => {
-  await expect(
-    page.getByText("Accepted", { exact: true }).first(),
-  ).toBeVisible();
-});
+When(
+  /I click on the (Accept|Reject) button/,
+  async ({ page }, match: "Accept" | "Reject") => {
+    await page.getByRole("button", { name: match }).click();
+  },
+);
 
-Then("I should see a confirmation message", async ({ page }) => {
-  await expect(page.getByText("Updated successfully")).toBeVisible();
+Then(
+  /the payment status should change to (Accepted|Rejected)/,
+  async ({ page }, match: "Accepted" | "Rejected") => {
+    await expect(page.getByText(match, { exact: true }).first()).toBeVisible({
+      timeout: 10000,
+    });
+  },
+);
+
+Then("I should see a message: {string}", async ({ page }, message: string) => {
+  await expect(page.getByText(message)).toBeVisible();
 });
 
 // ============================================
-// WIP: SCENARIO OUTLINES - PARTICIPANT COUNT
+// Scenario: Display correct number of participant cards
 // ============================================
 
 Given(
   "I am on the Registration Details page with {int} participants",
-  async ({ page, scenario }) => {
-    // TODO: Seed registration with specific participant count when fixture supports it
-    // For now, use existing accepted registration
+  async ({ page, scenario }, count: number) => {
+    const supabase = createE2EAdminClient();
+    const registration = await createRegistrationWithParticipants(
+      supabase,
+      { eventId: scenario.event.eventId },
+      "pending",
+      count,
+    );
     await page.goto(
-      `/admin/events/${scenario.event.eventId}/registration-list/registration/${scenario.acceptedRegistration.registrationId}`,
+      `/admin/events/${scenario.event.eventId}/registration-list/registration/${registration.registrationId}`,
     );
   },
 );
@@ -163,22 +195,19 @@ Given(
 Then(
   "I should see {int} participant cards",
   async ({ page }, count: number) => {
-    const participantCountBadge = page
-      .locator('[class*="bg-secondary"], [class*="bg-muted"]')
-      .filter({ hasText: /^\d+$/ })
-      .first();
-    const actualCount = await participantCountBadge.textContent();
-    expect(parseInt(actualCount ?? "0", 10)).toBe(count);
+    const participantCards = await page.getByTestId("participant-card").all();
+    expect(participantCards.length).toBe(count);
   },
 );
 
-Then("I should see {int} registrant badge", async ({}, count: number) => {
-  // TODO: Implement with actual UI check for registrant/principal badge
-  console.log(`WIP: Checking for ${count} registrant badge`);
+Then("I should see {int} registrant badge", async ({ page }, count: number) => {
+  await expect(page.getByText("Registrant", { exact: true })).toHaveCount(
+    count,
+  );
 });
 
 // ============================================
-// WIP: SCENARIO OUTLINES - PAYMENT METHOD
+// Scenario: Payment proof section visibility for different payment methods
 // ============================================
 
 Given(
@@ -200,7 +229,7 @@ Given(
 );
 
 Then(
-  /I should (see|not see) the payment proof acceptance option/,
+  /I should (see|not see) the payment proof section/,
   async ({ page }, action: "see" | "not see") => {
     const acceptButton = page.getByRole("button", { name: "Accept" });
     if (action === "see") {
@@ -212,7 +241,7 @@ Then(
 );
 
 // ============================================
-// WIP: SCENARIO OUTLINES - NOTE FIELD
+// Scenario: Display note field based on registration
 // ============================================
 
 Given(
@@ -233,13 +262,108 @@ Given(
 );
 
 Then(
-  /I should (see|not see) the note field/,
-  async ({ page }, visibility: "see" | "not see") => {
-    const noteField = page.getByText("Note", { exact: true });
+  /I should (see|not see) the note field with the message: (.*)/,
+  async ({ page }, visibility: "see" | "not see", message: string) => {
     if (visibility === "see") {
+      const noteField = page.getByText(message, { exact: true });
       await expect(noteField).toBeVisible();
     } else {
-      await expect(noteField).toHaveCount(0);
+      await expect(page.getByText("Note", { exact: true })).toHaveCount(0);
     }
+  },
+);
+
+// ============================================
+// REGISTRATION MANAGEMENT SAD PATHS
+// ============================================
+
+// ============================================
+// Scenario: Access non-existent registration details
+// ============================================
+
+Given(
+  "I try to view registration details with invalid ID",
+  async ({ page, scenario }) => {
+    const invalidId = "00000000-0000-0000-0000-000000000000";
+    await page.goto(
+      `/admin/events/${scenario.event.eventId}/registration-list/registration/${invalidId}`,
+    );
+  },
+);
+
+Then(
+  "I should be redirected to an error page or see {string}",
+  async ({ page }, errorMessage: string) => {
+    // Check if we're on an error page or see the error message
+    const isErrorPage =
+      page.url().includes("error") || page.url().includes("404");
+    if (isErrorPage) {
+      await expect(
+        page.getByText(errorMessage).or(page.getByText("Not Found")).first(),
+      ).toBeVisible();
+    } else {
+      await expect(page.getByText(errorMessage).first()).toBeVisible();
+    }
+  },
+);
+
+// ============================================
+// Scenario: Unauthorized access to registration management
+// ============================================
+
+Given("I am not logged in as admin", async ({ page }) => {
+  // Note: The registration list page does not have auth middleware protection
+  // The test navigates but expects either login redirect or page load
+  await page.goto("/admin");
+  await page.getByRole("button", { name: "Logout" }).click();
+  await expect(
+    page.getByRole("alertdialog", { name: "Confirm Logout" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Logout" }).click();
+  await expect(page).toHaveURL(/\/auth/);
+});
+
+When(
+  "I try to access the registration list page",
+  async ({ page, scenario }) => {
+    await page.goto(
+      `/admin/events/${scenario.event.eventId}/registration-list`,
+    );
+  },
+);
+
+Then("I should be redirected back to the login page", async ({ page }) => {
+  await expect(page).toHaveURL(/\/auth/);
+});
+
+// ============================================
+// Scenario: Filter with invalid parameters
+// ============================================
+
+Given("I am on the registration list page", async ({ page, scenario }) => {
+  await page.goto(`/admin/events/${scenario.event.eventId}/registration-list`);
+});
+
+When("I apply an invalid filter parameter", async ({ page, scenario }) => {
+  // Navigate with invalid filter parameter - app ignores invalid values
+  await page.goto(
+    `/admin/events/${scenario.event.eventId}/registration-list?filter=invalid_status`,
+  );
+});
+
+Then(
+  "the filter should default to showing all registrations",
+  async ({ page }) => {
+    // Verify that the filter defaults to "all" when an invalid value is provided
+    // Check that registrations are still visible (not filtered out)
+    await expect(
+      page.getByRole("row").filter({ hasText: "pending" }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("row").filter({ hasText: "rejected" }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("row").filter({ hasText: "accepted" }).first(),
+    ).toBeVisible();
   },
 );
