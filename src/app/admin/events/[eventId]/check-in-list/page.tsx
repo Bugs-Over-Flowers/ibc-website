@@ -1,7 +1,15 @@
+import { TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import BackButton from "@/app/admin/_components/BackButton";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { TabsContent } from "@/components/ui/tabs";
 import tryCatch from "@/lib/server/tryCatch";
 import { createClient } from "@/lib/supabase/server";
@@ -55,7 +63,18 @@ async function CheckInPage({
   const result = await tryCatch(getEventDays({ eventId }));
   if (!result.success) {
     return (
-      <p className="text-destructive text-sm">Failed to load event days.</p>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <TriangleAlert />
+          </EmptyMedia>
+          <EmptyTitle>Unable to load event days</EmptyTitle>
+          <EmptyDescription>
+            Something went wrong while fetching event days. Please refresh the
+            page and try again.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
   const eventDays = result.data;
@@ -71,7 +90,18 @@ async function CheckInPage({
 
   if (!event) {
     return (
-      <p className="text-destructive text-sm">Failed to load event details.</p>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <TriangleAlert />
+          </EmptyMedia>
+          <EmptyTitle>Event not found</EmptyTitle>
+          <EmptyDescription>
+            The event you are looking for could not be found. It may have been
+            removed or you may not have access.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
@@ -86,7 +116,18 @@ async function CheckInPage({
 
   if (!statsResult.success) {
     return (
-      <p className="text-destructive text-sm">Failed to load check-in stats.</p>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <TriangleAlert />
+          </EmptyMedia>
+          <EmptyTitle>Unable to load check-in stats</EmptyTitle>
+          <EmptyDescription>
+            Something went wrong while loading check-in statistics. Please
+            refresh the page and try again.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 

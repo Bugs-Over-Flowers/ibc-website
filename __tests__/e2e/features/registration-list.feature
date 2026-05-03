@@ -1,12 +1,19 @@
 Feature: Registration list
 
   @happy
-  Scenario: Show all registrations on the registrations tab
-    Given I am an admin on the registration list page for an event
+  Scenario Outline: Show all registrations on the registrations tab
+    Given I am an admin on the registration list page for an event with <count> registrations
     When I open the registrations tab
-    Then I should see registrations with pending payment proof status
-    And I should see registrations with rejected payment proof status
-    And I should see registrations with accepted payment proof status
+    Then I should see all payment proof status types
+    And the registration list should show <count> total registrations
+
+    # title-format: <count> registrations
+    Examples:
+      | count |
+      |     5 |
+      |    10 |
+      |    15 |
+      |    20 |
 
   @happy
   Scenario Outline: Handle payment proof status changes in the registration details

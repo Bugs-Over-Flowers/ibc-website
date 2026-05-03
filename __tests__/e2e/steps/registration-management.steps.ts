@@ -5,6 +5,8 @@ import {
   cleanupAdminRegistrationScenario,
   seedAdminRegistrationScenario,
 } from "../fixtures/adminRegistrationScenario";
+import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
+import { createE2EAdminClient } from "../helpers/supabase";
 
 type TestScenario = Awaited<ReturnType<typeof seedAdminRegistrationScenario>>;
 
@@ -171,16 +173,21 @@ Then("I should see a message: {string}", async ({ page }, message: string) => {
 });
 
 // ============================================
-// WIP: SCENARIO OUTLINES - PARTICIPANT COUNT
+// Scenario: Display correct number of participant cards
 // ============================================
 
 Given(
   "I am on the Registration Details page with {int} participants",
-  async ({ page, scenario }) => {
-    // TODO: Seed registration with specific participant count when fixture supports it
-    // For now, use existing accepted registration
+  async ({ page, scenario }, count: number) => {
+    const supabase = createE2EAdminClient();
+    const registration = await createRegistrationWithParticipants(
+      supabase,
+      { eventId: scenario.event.eventId },
+      "pending",
+      count,
+    );
     await page.goto(
-      `/admin/events/${scenario.event.eventId}/registration-list/registration/${scenario.acceptedRegistration.registrationId}`,
+      `/admin/events/${scenario.event.eventId}/registration-list/registration/${registration.registrationId}`,
     );
   },
 );
@@ -193,9 +200,10 @@ Then(
   },
 );
 
-Then("I should see {int} registrant badge", async ({}, count: number) => {
-  // TODO: Implement with actual UI check for registrant/principal badge
-  console.log(`WIP: Checking for ${count} registrant badge`);
+Then("I should see {int} registrant badge", async ({ page }, count: number) => {
+  await expect(page.getByText("Registrant", { exact: true })).toHaveCount(
+    count,
+  );
 });
 
 // ============================================

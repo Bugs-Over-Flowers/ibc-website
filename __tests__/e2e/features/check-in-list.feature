@@ -55,3 +55,13 @@ Feature: Check-in list
       |     2 |
       |     5 |
       |    10 |
+
+  @sad
+  Scenario: Show error when event does not exist
+    Given I navigate to check-in list for non-existent event
+    Then I should see the event not found error state
+
+  @sad
+  Scenario: Show draft event state
+    Given I am on the check-in page for a draft event
+    Then I should see the draft event message
