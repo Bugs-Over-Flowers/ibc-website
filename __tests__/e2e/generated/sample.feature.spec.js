@@ -1,4 +1,4 @@
-// Generated from: __tests__/e2e/features/sample.feature
+// Generated from: __tests__\e2e\features\sample.feature
 import { test } from "playwright-bdd";
 
 test.describe('Sample feature for testing', () => {
@@ -15,7 +15,7 @@ test.describe('Sample feature for testing', () => {
 
 test.use({
   $test: [({}, use) => use(test), { scope: 'test', box: true }],
-  $uri: [({}, use) => use('__tests__/e2e/features/sample.feature'), { scope: 'test', box: true }],
+  $uri: [({}, use) => use('__tests__\\e2e\\features\\sample.feature'), { scope: 'test', box: true }],
   $bddFileData: [({}, use) => use(bddFileData), { scope: "test", box: true }],
 });
 
