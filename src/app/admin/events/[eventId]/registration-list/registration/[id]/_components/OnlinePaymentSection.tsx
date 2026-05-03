@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,6 +16,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
@@ -21,19 +30,18 @@ import type { Enums } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
 import { rejectPayment } from "@/server/registration/mutations/rejectPayment";
 import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
+import getStatusColor from "../../_utils/getStatusColor";
 
 type OnlinePaymentSectionProps = {
   paymentProofStatus: Enums<"PaymentProofStatus">;
-  getStatusColor: (status: string) => string;
-  proofImageURL?: string;
+  proofImageURLs?: Array<{ proofImageId: string; signedUrl: string }>;
   registrationId: string;
 };
 
 export default function OnlinePaymentSection({
   registrationId,
   paymentProofStatus,
-  getStatusColor,
-  proofImageURL,
+  proofImageURLs,
 }: OnlinePaymentSectionProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<
@@ -89,23 +97,39 @@ export default function OnlinePaymentSection({
         ? "Accepted"
         : "Rejected";
 
+  const urls = proofImageURLs ?? [];
+
   return (
     <div className="space-y-4">
-      {proofImageURL && (
+      {urls.length > 0 && (
         <div className="space-y-2">
-          <div className="overflow-hidden rounded-xl border border-border/50 bg-muted/20 p-2">
-            <ImageZoom className="relative h-80 w-full touch-none select-none rounded-lg bg-background">
-              <Image
-                alt="Proof of Payment Image"
-                className="object-contain"
-                fill
-                src={proofImageURL}
-              />
-            </ImageZoom>
-          </div>
-          <p className="text-muted-foreground text-xs">
-            Click image to zoom in.
-          </p>
+          <Carousel className="mx-auto w-full max-w-sm">
+            <CarouselContent>
+              {urls.map((item, index) => (
+                <CarouselItem key={item.proofImageId}>
+                  <div className="overflow-hidden rounded-xl border border-border/50 bg-muted/20 p-2">
+                    <ImageZoom className="relative h-80 w-full touch-none select-none rounded-lg bg-background">
+                      <Image
+                        alt={`Proof of Payment ${index + 1}`}
+                        className="object-contain"
+                        fill
+                        src={item.signedUrl}
+                      />
+                    </ImageZoom>
+                  </div>
+                  <p className="mt-1 text-center text-muted-foreground text-xs">
+                    {index + 1} of {urls.length} — Click image to zoom
+                  </p>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            {urls.length > 1 && (
+              <div className="mt-4 flex justify-center gap-2">
+                <CarouselPrevious className="static translate-x-0 translate-y-0" />
+                <CarouselNext className="static translate-x-0 translate-y-0" />
+              </div>
+            )}
+          </Carousel>
         </div>
       )}
 

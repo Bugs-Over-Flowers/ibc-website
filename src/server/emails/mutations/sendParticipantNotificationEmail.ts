@@ -5,10 +5,17 @@ import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import { sendEmail } from "@/lib/email";
 import { formatDate } from "@/lib/events/eventUtils";
 import { generateQRBuffer } from "@/lib/qr/generateQRCode";
-import StandardRegistrationConfirmationTemplate from "@/lib/resend/templates/StandardRegistrationConfirmationTemplate";
+import ParticipantRegistrationNotificationTemplate from "@/lib/resend/templates/ParticipantRegistrationNotificationTemplate";
 
-interface SendRegistrationConfirmationEmailProps {
+interface SendParticipantNotificationEmailProps {
   toEmail: string;
+  participants: {
+    participantName: string;
+    participantIdentifier: string;
+    affiliation: string;
+    email: string;
+  }[];
+  registrantName: string;
   eventDetails: Pick<
     RegistrationStoreEventDetails,
     | "eventTitle"
@@ -17,38 +24,25 @@ interface SendRegistrationConfirmationEmailProps {
     | "eventStartDate"
     | "venue"
   >;
-  identifier: string;
-  selfName: string;
-  selfAffiliation: string;
-  participantIdentifier: string;
-  participants: {
-    fullName: string;
-    email: string;
-    affiliation: string;
-    participantIdentifier: string;
-  }[];
+  registrationIdentifier: string;
 }
 
-export const sendRegistrationConfirmationEmail = async ({
+export const sendParticipantNotificationEmail = async ({
   toEmail,
-  eventDetails,
-  identifier,
-  selfName,
-  selfAffiliation,
-  participantIdentifier,
   participants,
-}: SendRegistrationConfirmationEmailProps) => {
-  const registrationQrBuffer = await generateQRBuffer(identifier);
-  const registrantParticipantQrBuffer = await generateQRBuffer(
-    participantIdentifier,
-  );
-  const participantQrBuffers = await Promise.all(
+  registrantName,
+  eventDetails,
+  registrationIdentifier,
+}: SendParticipantNotificationEmailProps) => {
+  const qrBuffers = await Promise.all(
     participants.map(async (participant) => ({
       cid: `participantQrCodeCID-${participant.participantIdentifier}`,
       filename: `${participant.participantIdentifier}.png`,
       content: await generateQRBuffer(participant.participantIdentifier),
+      participant,
     })),
   );
+
   const eventDateRange =
     eventDetails.eventStartDate && eventDetails.eventEndDate
       ? `${formatDate(
@@ -65,39 +59,27 @@ export const sendRegistrationConfirmationEmail = async ({
           "MMMM d, yyyy, h:mm a",
           "Asia/Manila",
         );
+
   const html = await render(
-    StandardRegistrationConfirmationTemplate({
+    ParticipantRegistrationNotificationTemplate({
+      participants,
+      registrantName,
       eventDetails,
       eventDateRange,
       eventVenue: eventDetails.venue ?? "TBA",
-      registrationIdentifier: identifier,
-      participantIdentifier,
-      self: {
-        email: toEmail,
-        fullName: selfName,
-        affiliation: selfAffiliation,
-      },
-      participants,
+      registrationIdentifier,
     }),
   );
 
   await sendEmail({
     to: toEmail,
-    subject: `Registration Confirmation: ${eventDetails.eventTitle}`,
+    subject: `You've been registered for ${eventDetails.eventTitle}`,
     html,
-    attachments: [
-      {
-        filename: `${identifier}.png`,
-        content: registrationQrBuffer,
-        cid: "qrCodeCID",
-      },
-      {
-        filename: `${participantIdentifier}.png`,
-        content: registrantParticipantQrBuffer,
-        cid: "participantQrCodeCID",
-      },
-      ...participantQrBuffers,
-    ],
+    attachments: qrBuffers.map(({ cid, filename, content }) => ({
+      filename,
+      content,
+      cid,
+    })),
   });
 
   return "success";
