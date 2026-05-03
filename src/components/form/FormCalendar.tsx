@@ -2,6 +2,7 @@
 
 import { format } from "date-fns";
 import { CalendarIcon, Clock } from "lucide-react";
+import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -57,7 +58,7 @@ export default function FormCalendar({
     field.handleChange(newDate);
   };
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const time = e.target.value;
     if (!time) return;
     const [hours, minutes] = time.split(":").map(Number);
