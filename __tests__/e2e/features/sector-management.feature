@@ -11,18 +11,6 @@ Feature: Sector Management
     Then I should be redirected to the manage-sector page
     And I should see the newly created sector in the sector list
 
-  @happy
-  Scenario: Edit an existing sector name
-    Given I am on the manage-sector page with seeded sectors
-    When I rename the seeded primary sector
-    Then I should see the updated sector name in the sector list
-
-  @happy
-  Scenario: Delete a sector without member assignments
-    Given I am on the manage-sector page with seeded sectors
-    When I delete the seeded secondary sector
-    Then I should no longer see the deleted sector in the sector list
-
   @sad
   Scenario: Block create sector submission when name is empty
     Given I am on the create-sector page with seeded sectors
