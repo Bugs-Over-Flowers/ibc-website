@@ -8,6 +8,7 @@ import {
   AdminTableSortHeader,
 } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
+import { IdentifierDisplay } from "@/components/IdentifierDisplay";
 import { Button } from "@/components/ui/button";
 import { exportToExcel } from "@/lib/export/excel";
 import type { ParticipantListItem } from "@/lib/validation/registration-management";
@@ -19,6 +20,14 @@ interface ParticipantListProps {
 }
 
 export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
+  {
+    accessorKey: "participantIdentifier",
+    header: "Identifier",
+    cell: ({ row }) => {
+      const id = row.original.participantIdentifier;
+      return id ? <IdentifierDisplay identifier={id} /> : null;
+    },
+  },
   {
     accessorKey: "affiliation",
     header: ({ column }) => (
@@ -109,9 +118,24 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
     header: "",
     enableHiding: false,
     cell: ({ row }) => {
-      const { registrationId } = row.original;
+      const {
+        registrationId,
+        participantIdentifier,
+        firstName,
+        lastName,
+        email,
+        affiliation,
+      } = row.original;
 
-      return <ParticipantRowActions registrationId={registrationId} />;
+      return (
+        <ParticipantRowActions
+          affiliation={affiliation}
+          email={email}
+          participantIdentifier={participantIdentifier}
+          participantName={`${firstName} ${lastName}`}
+          registrationId={registrationId}
+        />
+      );
     },
   },
 ];

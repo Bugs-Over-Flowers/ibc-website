@@ -8,9 +8,9 @@ import { invalidateRegistrationCaches } from "@/server/actions.utils";
 import { sendRejectProofOfPayment } from "@/server/emails/mutations/sendRejectProofOfPayment";
 
 const updateRegistrationPaymentProofStatusSchema = z.object({
-  page: z.enum(["check-in", "registration-details"]),
   registrationId: z.string().min(1),
   status: z.enum(["accepted", "rejected"]),
+  sendEmail: z.boolean().default(true),
   toEmail: z.email().trim(),
   registrantName: z.string().min(1),
   eventTitle: z.string().min(1),
@@ -27,8 +27,14 @@ export type PaymentProofDecision = z.infer<
 export async function updateRegistrationPaymentProofStatus(
   input: UpdateRegistrationPaymentProofStatusInput,
 ) {
-  const { page, registrationId, status, toEmail, registrantName, eventTitle } =
-    updateRegistrationPaymentProofStatusSchema.parse(input);
+  const {
+    registrationId,
+    status,
+    sendEmail,
+    toEmail,
+    registrantName,
+    eventTitle,
+  } = updateRegistrationPaymentProofStatusSchema.parse(input);
 
   const supabase = await createActionClient();
 
@@ -66,8 +72,7 @@ export async function updateRegistrationPaymentProofStatus(
   }
 
   let emailSent = false;
-  // send a rejection email if the status is rejected and is not on the check in page
-  if (status === "rejected" && page !== "check-in") {
+  if (status === "rejected" && sendEmail) {
     const { success } = await tryCatch(
       sendRejectProofOfPayment({
         toEmail,

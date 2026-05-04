@@ -2,7 +2,10 @@
 import { type IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { RegistrationIdentifier } from "@/lib/validation/utils";
+import {
+  ParticipantIdentifier,
+  RegistrationIdentifier,
+} from "@/lib/validation/utils";
 import useAttendanceStore from "../../_hooks/useAttendanceStore";
 import { useScanQR } from "../../_hooks/useScanQR";
 
@@ -17,17 +20,27 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
     eventId,
   });
 
+  const scanType = useAttendanceStore((state) => state.scanType);
   const scannedData = useAttendanceStore((state) => state.scannedData);
+  const participantScanData = useAttendanceStore(
+    (state) => state.participantScanData,
+  );
 
-  const isCameraPaused = scanPending || scannedData !== null;
+  const isCameraPaused =
+    scanPending || scannedData !== null || participantScanData !== null;
 
   const handleScan = async (detectedCodes: IDetectedBarcode[]) => {
     if (scanPending || detectedCodes.length === 0) return;
 
     const code = detectedCodes[0].rawValue;
-    const parsedIdentifier = RegistrationIdentifier.safeParse(code);
-    if (!parsedIdentifier.success) {
-      toast.error("Invalid QR code - not a valid registration identifier.");
+
+    const isReg = RegistrationIdentifier.safeParse(code).success;
+    const isPar = ParticipantIdentifier.safeParse(code).success;
+
+    if (!isReg && !isPar) {
+      toast.error(
+        "Invalid QR code — not a valid registration or participant identifier.",
+      );
       return;
     }
 
@@ -73,7 +86,9 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
           QR code scanner
         </span>
         <span className="text-muted-foreground text-xs">
-          Point camera at QR code
+          {scanType === "participant"
+            ? "Participant QR detected"
+            : "Point camera at QR code"}
         </span>
       </div>
     </div>

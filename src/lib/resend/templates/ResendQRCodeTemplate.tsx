@@ -3,7 +3,6 @@ import {
   Container,
   Head,
   Heading,
-  Hr,
   Html,
   Img,
   Preview,
@@ -115,8 +114,6 @@ export default function ResendQRCode({
 
           <TermsAndConditions />
 
-          <Hr style={hr} />
-
           <Text style={footer}>
             If you have questions, reply to this email and we will be happy to
             assist.
@@ -178,11 +175,6 @@ const text = {
   fontSize: "16px",
   lineHeight: "26px",
   padding: "0 40px",
-};
-
-const hr = {
-  borderColor: "#e6ebf1",
-  margin: "20px 40px",
 };
 
 const footer = {
