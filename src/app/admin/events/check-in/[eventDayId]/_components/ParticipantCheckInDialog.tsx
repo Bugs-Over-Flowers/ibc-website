@@ -13,6 +13,7 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,10 +23,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import { cn } from "@/lib/utils";
 import { checkInParticipants } from "@/server/events/mutations/checkInParticipants";
+import { updateCheckInRemarks } from "@/server/events/mutations/updateCheckInRemarks";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
 import RemarksModal from "./RemarksModal";
 
@@ -42,6 +45,7 @@ export default function ParticipantCheckInDialog({
 
   const scanType = useAttendanceStore((s) => s.scanType);
   const participantScanData = useAttendanceStore((s) => s.participantScanData);
+  const editedRemarks = useAttendanceStore((s) => s.editedRemarks);
   const setCheckInDialogOpen = useAttendanceStore(
     (s) => s.setCheckInDialogOpen,
   );
@@ -55,17 +59,27 @@ export default function ParticipantCheckInDialog({
   const { execute: doCheckIn, isPending: isCheckInPending } = useAction(
     tryCatch(async () => {
       if (!participantScanData) return;
-      await checkInParticipants({
-        eventDayId,
-        participants: [
-          {
-            participantId: participantScanData.participant.participantId,
-          },
-        ],
-      });
+
+      const participantId = participantScanData.participant.participantId;
+      const editedRemark = editedRemarks[participantId];
+
+      if (isCheckedIn) {
+        await updateCheckInRemarks({
+          eventDayId,
+          participants: [{ participantId, remarks: editedRemark ?? null }],
+        });
+      } else {
+        await checkInParticipants({
+          eventDayId,
+          participants: [{ participantId, remarks: editedRemark || undefined }],
+        });
+      }
     }),
     {
       onSuccess: () => {
+        toast.success(
+          `Check-in successful${participantScanData ? ` for ${participantScanData.participant.firstName} ${participantScanData.participant.lastName}` : ""}`,
+        );
         setCheckInDialogOpen(false);
       },
       onError: (error) => {
@@ -81,6 +95,15 @@ export default function ParticipantCheckInDialog({
 
   const isCheckedIn = checkIn && checkIn.length > 0;
   const checkInRecord = isCheckedIn ? checkIn[0] : null;
+
+  const hasPendingRemark = (() => {
+    if (!participantScanData) return false;
+    const editedRemark =
+      editedRemarks[participantScanData.participant.participantId];
+    if (editedRemark === undefined) return false;
+    const originalRemark = checkInRecord?.remarks || "";
+    return editedRemark !== originalRemark;
+  })();
 
   const statusColor = isCheckedIn
     ? "bg-green-500/15 text-green-700 border-green-200"
@@ -198,18 +221,25 @@ export default function ParticipantCheckInDialog({
 
             {/* Check-in Button */}
             <Button
-              className="w-full"
-              disabled={isCheckedIn || isCheckInPending}
+              className="w-full gap-1.5"
+              disabled={(isCheckedIn && !hasPendingRemark) || isCheckInPending}
               onClick={() => doCheckIn()}
               size="lg"
             >
               {isCheckInPending ? (
-                "Checking in..."
+                <>
+                  <Spinner className="size-4" />
+                  Processing...
+                </>
+              ) : isCheckedIn && hasPendingRemark ? (
+                "Update Check In Remark"
               ) : isCheckedIn ? (
                 <span className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4" />
                   Already Checked In
                 </span>
+              ) : hasPendingRemark ? (
+                "Save & Check In"
               ) : (
                 "Check In"
               )}
