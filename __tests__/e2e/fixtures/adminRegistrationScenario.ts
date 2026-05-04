@@ -15,6 +15,8 @@ export type SeededAdminRegistrationScenario = {
     registrationId: string;
     identifier: string;
     affiliation: string;
+    participantIdentifiers: string[];
+    firstParticipantIdentifier: string;
   };
   rejectedRegistration: {
     registrationId: string;
@@ -26,8 +28,10 @@ export type SeededAdminRegistrationScenario = {
     identifier: string;
     affiliation: string;
     participantIds: string[];
+    participantIdentifiers: string[];
     firstParticipantId: string;
     secondParticipantId: string;
+    firstParticipantIdentifier: string;
   };
   member?: {
     businessMemberId: string;
@@ -217,15 +221,21 @@ export async function seedAdminRegistrationScenario(
   return {
     event,
     eventDay,
-    pendingRegistration,
+    pendingRegistration: {
+      ...pendingRegistration,
+      firstParticipantIdentifier: pendingRegistration.participantIdentifiers[0],
+    },
     rejectedRegistration,
     acceptedRegistration: {
       registrationId: acceptedRegistration.registrationId,
       identifier: acceptedRegistration.identifier,
       affiliation: acceptedRegistration.affiliation,
       participantIds: acceptedRegistration.participantIds,
+      participantIdentifiers: acceptedRegistration.participantIdentifiers,
       firstParticipantId: acceptedRegistration.participantIds[0],
       secondParticipantId: acceptedRegistration.participantIds[1],
+      firstParticipantIdentifier:
+        acceptedRegistration.participantIdentifiers[0],
     },
     member,
   };

@@ -67,6 +67,7 @@ Given(
     await page.goto(
       `/admin/events/${scenario.event.eventId}/registration-list/registration/${scenario.pendingRegistration.registrationId}`,
     );
+    await page.waitForLoadState("networkidle");
   },
 );
 
@@ -121,6 +122,25 @@ Then(
     await expect(page.getByText("Payment Information")).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Open payment proof review dialog" }),
+    ).toBeVisible();
+  },
+);
+
+// ============================================
+// Scenario: Participant identifier shown in QR code dialog
+// ============================================
+
+When("I click the QR code button on a participant card", async ({ page }) => {
+  await page.getByRole("button", { name: "Show QR code" }).first().click();
+});
+
+Then(
+  "I should see the participant identifier in the QR code dialog",
+  async ({ page, scenario }) => {
+    await expect(
+      page.getByText(
+        `Participant Identifier: ${scenario.pendingRegistration.firstParticipantIdentifier}`,
+      ),
     ).toBeVisible();
   },
 );

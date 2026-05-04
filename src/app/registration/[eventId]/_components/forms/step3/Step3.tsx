@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, CreditCard } from "lucide-react";
+import IBCPaymentInfo from "@/components/IBCPaymentInfo";
 import { Button } from "@/components/ui/button";
 import useRegistrationStore from "@/hooks/registration.store";
 import { useRegistrationStep3 } from "../../../_hooks/useRegistrationStep3";
@@ -86,7 +87,10 @@ export default function Step3() {
         <form.Subscribe selector={(state) => state.values.paymentMethod}>
           {(paymentMethod) =>
             paymentMethod === "online" ? (
-              <Step3PaymentProofSection form={form} />
+              <div className="space-y-6">
+                <Step3PaymentProofSection form={form} />
+                <IBCPaymentInfo showHeader={false} />
+              </div>
             ) : null
           }
         </form.Subscribe>

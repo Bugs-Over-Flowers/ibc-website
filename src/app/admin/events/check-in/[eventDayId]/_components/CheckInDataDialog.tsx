@@ -1,6 +1,8 @@
 "use client";
 
-import { AlertTriangle, XCircle } from "lucide-react";
+import { AlertTriangle, ExternalLink, XCircle } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -42,6 +44,7 @@ export default function CheckInDataDialog({
 
   const selectedCount =
     Object.values(selectedParticipants).filter(Boolean).length;
+  const hasRemarkEdits = Object.keys(editedRemarks).length > 0;
 
   // Detect if there are any edited remarks for checked-in participants
   const hasCheckedInRemarkEdits = () => {
@@ -126,17 +129,28 @@ export default function CheckInDataDialog({
         </div>
 
         <div className="flex flex-col-reverse gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button
-            disabled={isPending}
-            onClick={() => setCheckInDialogOpen(false)}
-            size="sm"
-            variant="outline"
-          >
-            Close
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              disabled={isPending}
+              onClick={() => setCheckInDialogOpen(false)}
+              size="sm"
+              variant="outline"
+            >
+              Close
+            </Button>
+            <Link
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 font-medium text-foreground text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+              href={
+                `/admin/events/${eventId}/registration-list/registration/${scannedData.registrationId}` as Route
+              }
+            >
+              <ExternalLink className="size-3.5" />
+              View Details
+            </Link>
+          </div>
           <div className="flex gap-2">
             {scannedData.paymentMethod === "BPI" &&
-              scannedData.proofImage &&
+              scannedData.proofImage.length > 0 &&
               registrant && (
                 <ProofDialog
                   eventTitle={eventTitle}
@@ -148,11 +162,8 @@ export default function CheckInDataDialog({
               )}
             <Button
               className="gap-1.5"
-              disabled={
-                (selectedCount === 0 && !hasCheckedInRemarkEdits()) || isPending
-              }
+              disabled={(selectedCount === 0 && !hasRemarkEdits) || isPending}
               onClick={handleCheckIn}
-              size="sm"
             >
               {isPending && <Spinner className="size-3.5" />}
               {isPending
@@ -161,7 +172,9 @@ export default function CheckInDataDialog({
                   ? `Check in selected (${selectedCount})`
                   : hasCheckedInRemarkEdits()
                     ? "Update remarks"
-                    : "Check in selected (0)"}
+                    : hasRemarkEdits
+                      ? "Save remarks"
+                      : "Check in selected (0)"}
             </Button>
           </div>
         </div>

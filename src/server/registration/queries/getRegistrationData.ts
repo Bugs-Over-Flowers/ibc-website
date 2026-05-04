@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { signPaymentProofUrl } from "@/lib/storage/signedUrls";
+import { signPaymentProofUrl } from "@/lib/storage/paymentProof";
 import { createClient } from "@/lib/supabase/server";
 
 export const getRegistrationData = async (
@@ -24,7 +24,7 @@ export const getRegistrationData = async (
        businessMember:BusinessMember(businessMemberId, businessName),
        nonMemberName,
        identifier,
-       ProofImage(path),
+       ProofImage(path, proofImageId, orderIndex),
        note
        `,
     )
@@ -44,13 +44,21 @@ export const getRegistrationData = async (
     throw new Error("Cannot find affiliation");
   }
 
-  // Generate signed URL for payment proof if available
-  let signedUrl: string | null = null;
-  if (data.paymentMethod === "BPI") {
-    const rawProofPath = data.ProofImage?.[0]?.path;
-    if (rawProofPath) {
-      signedUrl = await signPaymentProofUrl(supabase, rawProofPath);
-    }
+  let signedUrls: Array<{ proofImageId: string; signedUrl: string }> = [];
+  if (data.paymentMethod === "BPI" && data.ProofImage) {
+    const sorted = [...data.ProofImage].sort(
+      (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0),
+    );
+    signedUrls = (
+      await Promise.all(
+        sorted.map(async (img) => {
+          const url = await signPaymentProofUrl(supabase, img.path);
+          return url
+            ? { proofImageId: img.proofImageId, signedUrl: url }
+            : null;
+        }),
+      )
+    ).filter(Boolean) as Array<{ proofImageId: string; signedUrl: string }>;
   }
 
   const mappedData = {
@@ -58,14 +66,13 @@ export const getRegistrationData = async (
     isMember: !!data.businessMember,
     affiliation,
     registrationIdentifier: data.identifier,
-    signedUrl,
+    signedUrls,
   };
 
   if (!affiliation) {
     throw new Error("Affiliation not found");
   }
 
-  // get people under the registration
   const { data: participants } = await supabase
     .from("Participant")
     .select(`
@@ -74,7 +81,8 @@ export const getRegistrationData = async (
       firstName,
       isPrincipal,
       lastName,
-      participantId
+      participantId,
+      participantIdentifier
     `)
     .eq("registrationId", registrationId)
     .throwOnError();

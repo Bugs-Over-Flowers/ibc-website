@@ -52,3 +52,14 @@ export const createRegistrationIdentifier = () => {
   const token = crypto.randomUUID();
   return RegistrationIdentifier.parse(`ibc-reg-${token.slice(0, 8)}`);
 };
+
+export const ParticipantIdentifier = z
+  .string()
+  .regex(/^ibc-par-[a-zA-Z0-9]{8}$/);
+
+export type ParticipantIdentifier = z.infer<typeof ParticipantIdentifier>;
+
+export const createParticipantIdentifier = () => {
+  const token = crypto.randomUUID();
+  return ParticipantIdentifier.parse(`ibc-par-${token.slice(0, 8)}`);
+};

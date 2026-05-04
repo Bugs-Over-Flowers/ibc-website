@@ -15,6 +15,32 @@ async function openTab(
 }
 
 // ============================================
+// Scenario: Show participant QR code through action button
+// ============================================
+
+When("I click the actions button for a participant", async ({ page }) => {
+  await page
+    .getByRole("button", { name: "Open participant actions" })
+    .first()
+    .click();
+});
+
+When('I select "Show QR Code"', async ({ page }) => {
+  await page.getByText("Show QR Code").click();
+});
+
+Then(
+  "the QR dialog should display the correct participant identifier",
+  async ({ page, scenario }) => {
+    await expect(
+      page.getByText(
+        `Participant Identifier: ${scenario.acceptedRegistration.firstParticipantIdentifier}`,
+      ),
+    ).toBeVisible();
+  },
+);
+
+// ============================================
 // PARTICIPANT LIST SCENARIOS
 // ============================================
 

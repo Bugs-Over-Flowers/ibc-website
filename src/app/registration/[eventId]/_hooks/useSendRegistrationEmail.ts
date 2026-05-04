@@ -4,6 +4,7 @@ import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 
 import { setCookieData } from "@/server/actions.utils";
+import { sendParticipantNotificationEmail } from "@/server/emails/mutations/sendParticipantNotificationEmail";
 import { sendRegistrationConfirmationEmail } from "@/server/emails/mutations/sendRegistrationConfirmationEmail";
 import { deleteRegistration } from "@/server/registration/mutations/deleteRegistration";
 
@@ -37,55 +38,131 @@ import { deleteRegistration } from "@/server/registration/mutations/deleteRegist
  *   // Registration has been deleted, user must retry
  * }
  */
+interface EmailParticipant {
+  fullName: string;
+  email: string;
+  affiliation: string;
+  participantIdentifier: string;
+  isPrincipal: boolean;
+}
+
+type EmailRecipientGroup = {
+  email: string;
+  participants: EmailParticipant[];
+  isRegistrant: boolean;
+};
+
 export const useSendRegistrationEmail = () => {
   const registrationData = useRegistrationStore(
     (state) => state.registrationData,
   );
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
   return useAction(
-    tryCatch(async (registrationId: string, identifier: string) => {
-      // check for eventId
-      if (!eventDetails?.eventId) {
-        throw new Error("Event ID is missing");
-      }
+    tryCatch(
+      async (
+        registrationId: string,
+        identifier: string,
+        participants: EmailParticipant[],
+        affiliation: string,
+      ) => {
+        if (!eventDetails?.eventId) {
+          throw new Error("Event ID is missing");
+        }
 
-      // ensure step2 exists
-      if (!registrationData.step2) {
-        throw new Error("Step 2 data is missing");
-      }
+        if (!registrationData.step2) {
+          throw new Error("Step 2 data is missing");
+        }
 
-      // check for registrationId
-      if (!registrationId) {
-        throw new Error("Registration ID is missing");
-      }
+        if (!registrationId) {
+          throw new Error("Registration ID is missing");
+        }
 
-      // set cookies for qrdata
-      await setCookieData("recentQRData", identifier);
+        await setCookieData("recentQRData", identifier);
 
-      const selfName = `${registrationData.step2.registrant.firstName} ${registrationData.step2.registrant.lastName}`;
+        const selfName = `${registrationData.step2.registrant.firstName} ${registrationData.step2.registrant.lastName}`;
+        const selfAffiliation = affiliation;
+        const registrantEmail = registrationData.step2.registrant.email;
 
-      const { error } = await tryCatch(
-        sendRegistrationConfirmationEmail({
-          selfName,
-          eventDetails,
-          toEmail: registrationData.step2.registrant.email,
-          identifier,
-          otherParticipants: registrationData.step2.otherParticipants
-            ? registrationData.step2.otherParticipants.map((participant) => ({
-                fullName: `${participant.firstName} ${participant.lastName}`,
+        const groupedRecipients = new Map<string, EmailRecipientGroup>();
+
+        for (const participant of participants) {
+          const current = groupedRecipients.get(participant.email);
+
+          if (current) {
+            current.participants.push(participant);
+          } else {
+            groupedRecipients.set(participant.email, {
+              email: participant.email,
+              participants: [participant],
+              isRegistrant: participant.email === registrantEmail,
+            });
+          }
+        }
+
+        const registrantGroup =
+          groupedRecipients.get(registrantEmail)?.participants ?? [];
+        const registrantParticipant =
+          registrantGroup.find((participant) => participant.isPrincipal) ??
+          registrantGroup[0];
+
+        // Send registrant confirmation email
+        const { error: registrantError } = await tryCatch(
+          sendRegistrationConfirmationEmail({
+            selfName,
+            selfAffiliation,
+            eventDetails,
+            toEmail: registrantEmail,
+            identifier,
+            participantIdentifier:
+              registrantParticipant?.participantIdentifier ?? identifier,
+            participants: participants
+              .filter(
+                (participant) =>
+                  participant.participantIdentifier !==
+                  registrantParticipant?.participantIdentifier,
+              )
+              .map((participant) => ({
+                fullName: participant.fullName,
                 email: participant.email,
-              }))
-            : [],
-        }),
-      );
+                affiliation: participant.affiliation,
+                participantIdentifier: participant.participantIdentifier,
+              })),
+          }),
+        );
 
-      if (error) {
-        // ROLLBACK: Delete the registration since email failed
-        // This maintains data consistency - registrations without emails are incomplete
-        await deleteRegistration(registrationId);
-        throw new Error(error);
-      }
-    }),
+        if (registrantError) {
+          await deleteRegistration(registrationId);
+          throw new Error(registrantError);
+        }
+
+        // Send individual participant notification emails
+        for (const group of Array.from(groupedRecipients.values()).filter(
+          (entry) => !entry.isRegistrant,
+        )) {
+          const { error: participantError } = await tryCatch(
+            sendParticipantNotificationEmail({
+              toEmail: group.email,
+              participants: group.participants.map((participant) => ({
+                participantName: participant.fullName,
+                participantIdentifier: participant.participantIdentifier,
+                affiliation: participant.affiliation,
+                email: participant.email,
+              })),
+              registrantName: selfName,
+              eventDetails,
+              registrationIdentifier: identifier,
+            }),
+          );
+
+          if (participantError) {
+            await deleteRegistration(registrationId);
+            throw new Error(
+              `Failed to send notification to ${group.email}: ${participantError}`,
+            );
+          }
+        }
+      },
+    ),
     {
       onSuccess: () => {
         toast.success("Email sent successfully!");
