@@ -1,5 +1,8 @@
 import type { Database } from "@/lib/supabase/db.types";
-import { createRegistrationIdentifier } from "@/lib/validation/utils";
+import {
+  createParticipantIdentifier,
+  createRegistrationIdentifier,
+} from "@/lib/validation/utils";
 import { ONE_PIXEL_PNG } from "./image";
 import type { createE2EAdminClient } from "./supabase";
 
@@ -41,68 +44,73 @@ const createRegistrationWithParticipants = async (
     );
   }
 
-  // fill up the registration with participants, then get the participant Ids to be used later.
-  const participantIds = await Promise.all(
-    Array.from({ length: actualParticipantCount }).map(async (_, index) => {
-      // For each, insert a participant
-      const { data: participant, error: participantError } = await supabase
-        .from("Participant")
-        .insert({
-          registrationId: registration.registrationId,
-          firstName: `${paymentProofStatus}-${index + 1}`,
-          lastName: "Tester",
-          email: `${suffix}-${index + 1}@example.com`,
-          contactNumber: "09170000000",
-          isPrincipal: index === 0,
-        })
-        .select("participantId")
-        .single();
+  // fill up the registration with participants, then get the participant Ids and identifiers to be used later.
+  const participantIds: string[] = [];
+  const participantIdentifiers: string[] = [];
 
-      if (participantError || !participant) {
+  for (let index = 0; index < actualParticipantCount; index++) {
+    const parIdentifier = createParticipantIdentifier();
+
+    const { data: participant, error: participantError } = await supabase
+      .from("Participant")
+      .insert({
+        registrationId: registration.registrationId,
+        firstName: `${paymentProofStatus}-${index + 1}`,
+        lastName: "Tester",
+        email: `${suffix}-${index + 1}@example.com`,
+        contactNumber: "09170000000",
+        isPrincipal: index === 0,
+        participantIdentifier: parIdentifier,
+      })
+      .select("participantId")
+      .single();
+
+    if (participantError || !participant) {
+      throw new Error(
+        `Failed to seed participant: ${participantError?.message ?? "unknown"}`,
+      );
+    }
+
+    participantIds.push(participant.participantId);
+    participantIdentifiers.push(parIdentifier);
+
+    // if the payment proof status is pending AND payment method is BPI, seed a proof image
+    // Onsite payments don't require proof images
+    if (paymentProofStatus === "pending" && paymentMethod === "BPI") {
+      const proofPath = `reg-${crypto.randomUUID()}`;
+
+      // Insert into the storage
+      const { error: storageError } = await supabase.storage
+        .from("paymentproofs")
+        .upload(proofPath, ONE_PIXEL_PNG, {
+          contentType: "image/png",
+          upsert: true,
+        });
+
+      if (storageError) {
         throw new Error(
-          `Failed to seed participant: ${participantError?.message ?? "unknown"}`,
+          `Failed to upload proof image: ${storageError.message}`,
         );
       }
 
-      // if the payment proof status is pending AND payment method is BPI, seed a proof image
-      // Onsite payments don't require proof images
-      if (paymentProofStatus === "pending" && paymentMethod === "BPI") {
-        const proofPath = `reg-${crypto.randomUUID()}`;
+      // Insert into the ProofImage table
+      const { error: proofError } = await supabase.from("ProofImage").insert({
+        registrationId: registration.registrationId,
+        path: proofPath,
+      });
 
-        // Insert into the storage
-        const { error: storageError } = await supabase.storage
-          .from("paymentproofs")
-          .upload(proofPath, ONE_PIXEL_PNG, {
-            contentType: "image/png",
-            upsert: true,
-          });
-
-        if (storageError) {
-          throw new Error(
-            `Failed to upload proof image: ${storageError.message}`,
-          );
-        }
-
-        // Insert into the ProofImage table
-        const { error: proofError } = await supabase.from("ProofImage").insert({
-          registrationId: registration.registrationId,
-          path: proofPath,
-        });
-
-        if (proofError) {
-          throw new Error(`Failed to seed proof image: ${proofError.message}`);
-        }
+      if (proofError) {
+        throw new Error(`Failed to seed proof image: ${proofError.message}`);
       }
-
-      return participant.participantId;
-    }),
-  );
+    }
+  }
 
   return {
     registrationId: registration.registrationId,
     identifier: registration.identifier,
     affiliation,
     participantIds,
+    participantIdentifiers,
   };
 };
 

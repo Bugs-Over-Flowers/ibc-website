@@ -10,13 +10,15 @@ import { cn } from "@/lib/utils";
 interface QRDownloaderProps {
   registrationIdentifier: string;
   children: React.ReactNode;
-  affiliation: string;
+  header: string;
+  subheader?: string;
   email: string;
 }
 
 export default function QRDownloader({
   registrationIdentifier,
-  affiliation,
+  header,
+  subheader,
   email,
   children,
 }: QRDownloaderProps) {
@@ -51,21 +53,23 @@ export default function QRDownloader({
     <div className="flex flex-col items-center gap-4">
       {/* ── Printable QR card ── */}
       <div
-        className="flex flex-col items-center gap-3 rounded-2xl border-2 border-border bg-white px-6 pt-5 pb-5 shadow-sm"
+        className="flex w-[240px] flex-col items-center gap-3 rounded-2xl border-2 border-border bg-white pt-5 pb-5 shadow-sm"
         ref={ref}
       >
         {/* QR code slot */}
-        <div className="overflow-hidden rounded-xl">{children}</div>
+        <div className="overflow-hidden">{children}</div>
 
         {/* Identity */}
-        <div className="flex flex-col items-center gap-0.5 text-center">
-          <p className="font-mono text-[9px] text-neutral-400 uppercase tracking-widest">
-            {registrationIdentifier}
+        <div className="flex w-full flex-col items-center gap-0.5 px-2 text-center">
+          <p className="wrap-break-word font-bold text-base text-neutral-900 capitalize leading-tight">
+            {header}
           </p>
-          <p className="mt-1 font-bold text-base text-neutral-900 capitalize leading-tight">
-            {affiliation}
-          </p>
-          <p className="text-neutral-500 text-xs">{email}</p>
+          {subheader && (
+            <p className="wrap-break-word font-bold text-neutral-500 text-xs">
+              {subheader}
+            </p>
+          )}
+          <p className="wrap-break-word text-neutral-500 text-xs">{email}</p>
         </div>
       </div>
 

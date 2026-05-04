@@ -178,14 +178,12 @@ export default function CheckInTable({ data }: CheckInTableProps) {
         const participant = row.original;
         return (
           <CheckInItemActions
-            eventId={row.original.eventId}
             participant={{
               contactNumber: participant.contactNumber,
               email: participant.email,
               firstName: participant.firstName,
               lastName: participant.lastName,
             }}
-            registrationId={row.original.registrationId}
           />
         );
       },

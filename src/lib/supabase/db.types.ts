@@ -7,10 +7,30 @@ export type Json =
   | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5";
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
   public: {
     Tables: {
@@ -198,13 +218,6 @@ export type Database = {
           websiteURL?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: "BusinessMember_primaryApplicationId_fkey";
-            columns: ["primaryApplicationId"];
-            isOneToOne: false;
-            referencedRelation: "Application";
-            referencedColumns: ["applicationId"];
-          },
           {
             foreignKeyName: "BusinessMember_sectorId_fkey";
             columns: ["sectorId"];
@@ -468,6 +481,7 @@ export type Database = {
           isPrincipal: boolean;
           lastName: string;
           participantId: string;
+          participantIdentifier: string;
           registrationId: string;
         };
         Insert: {
@@ -477,6 +491,7 @@ export type Database = {
           isPrincipal?: boolean;
           lastName: string;
           participantId?: string;
+          participantIdentifier: string;
           registrationId: string;
         };
         Update: {
@@ -486,6 +501,7 @@ export type Database = {
           isPrincipal?: boolean;
           lastName?: string;
           participantId?: string;
+          participantIdentifier?: string;
           registrationId?: string;
         };
         Relationships: [
@@ -501,18 +517,21 @@ export type Database = {
       ProofImage: {
         Row: {
           applicationId: string | null;
+          orderIndex: number | null;
           path: string;
           proofImageId: string;
           registrationId: string | null;
         };
         Insert: {
           applicationId?: string | null;
+          orderIndex?: number | null;
           path: string;
           proofImageId?: string;
           registrationId?: string | null;
         };
         Update: {
           applicationId?: string | null;
+          orderIndex?: number | null;
           path?: string;
           proofImageId?: string;
           registrationId?: string | null;
@@ -1045,8 +1064,9 @@ export type Database = {
           p_note?: string;
           p_other_participants?: Json;
           p_payment_method?: string;
-          p_payment_path?: string;
+          p_payment_paths?: Json;
           p_registrant?: Json;
+          p_sponsored_registration_id?: string;
         };
         Returns: Json;
       };
@@ -1165,6 +1185,7 @@ export type Database = {
         affiliation: string | null;
         registration_date: string | null;
         registration_id: string | null;
+        participant_identifier: string | null;
       };
       registration_details_result: {
         registration_details: Json | null;
@@ -1320,6 +1341,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],

@@ -25,22 +25,30 @@ CASCADE;
 -- =============================================================================
 -- Insert Test Sectors
 -- =============================================================================
-INSERT INTO "public"."Sector" ("sectorName") VALUES
-  ('Technology'),
-  ('Manufacturing'),
-  ('Services'),
-  ('Retail'),
-  ('Healthcare'),
-  ('Finance'),
-  ('Education'),
-  ('Real Estate'),
-  ('Transportation'),
-  ('Hospitality');
+INSERT INTO "public"."Sector" ("sectorId", "sectorName") VALUES
+  (1, 'Accounting'),
+  (2, 'Appraisal'),
+  (3, 'Automotive'),
+  (4, 'Educational Service'),
+  (5, 'Energy Production and Utilities'),
+  (6, 'Financial and Insurance Services'),
+  (7, 'Food Production, Processing and Supply Chain'),
+  (8, 'Healthcare Services and Equipment'),
+  (9, 'Hospitality and Accomodation'),
+  (10, 'Human Resources and Leasing Services'),
+  (11, 'Information, Technology, Creativity and Media'),
+  (12, 'Legal Professional'),
+  (13, 'Management and Business Consulting'),
+  (14, 'Manufacturing'),
+  (15, 'Pawnshop'),
+  (16, 'Real Estate Development and Construction'),
+  (17, 'Retail and Commercial Centers'),
+  (18, 'Shipping, Tourist Transport, Customs Brokerage, and Logistics');
 
 -- Keep identity sequence aligned after explicit sectorId inserts
 SELECT setval(
   pg_get_serial_sequence('"public"."Sector"', 'sectorId'),
-  COALESCE((SELECT MAX("sectorId") FROM "public"."Sector"), 0) + 1,
+  19,
   false
 );
 
@@ -69,7 +77,7 @@ INSERT INTO "public"."Application" (
     gen_random_uuid(),
     'ibc-app-test001',
     NULL,
-    'Technology',
+    'Information, Technology, Creativity and Media',
     'https://test-company.com/logo.png',
     'newMember',
     'Test Company Inc.',
@@ -218,6 +226,7 @@ INSERT INTO "public"."Event" (
   "eventType",
   "registrationFee",
   "eventHeaderUrl",
+  "eventPoster",
   "publishedAt"
 ) VALUES
   -- CHANGED: Published events now include publishedAt timestamp.
@@ -234,6 +243,7 @@ INSERT INTO "public"."Event" (
     'public',
     1500.00,
     'https://example.com/tech-summit.jpg',
+    'https://example.com/tech-summit-poster.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '1 day'
   ),
   -- CHANGED: Use local Supabase storage image for seeded published event.
@@ -247,7 +257,8 @@ INSERT INTO "public"."Event" (
     'Makati Business Club',
     'private',
     500.00,
-    'http://127.0.0.1:54321/storage/v1/object/public/headerimage/dinagyang.jpeg',
+    'http://127.0.0.1:54321/storage/v1/object/public/headerimage/event-headers/business-networking-night.jpg',
+    'http://127.0.0.1:54321/storage/v1/object/public/headerimage/event-posters/business-networking-night-poster.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '2 days'
   ),
   -- CHANGED: Draft event intentionally has no header image and no published timestamp.
@@ -261,6 +272,7 @@ INSERT INTO "public"."Event" (
     'SMX Convention Center',
     null,
     2000.00,
+    NULL,
     NULL,
     NULL
   );
@@ -336,7 +348,7 @@ WITH seeded_business_applications AS (
       gen_random_uuid(),
       'ibc-app-seed-bm001',
       NULL,
-      'Technology',
+      'Information, Technology, Creativity and Media',
       'https://example.com/business1.jpg',
       'renewal',
       'Business 1',
@@ -372,7 +384,7 @@ WITH seeded_business_applications AS (
       gen_random_uuid(),
       'ibc-app-seed-bm003',
       NULL,
-      'Services',
+      'Management and Business Consulting',
       'https://example.com/business3.jpg',
       'renewal',
       'Company Ltd.',
@@ -401,7 +413,7 @@ INSERT INTO "public"."BusinessMember" (
   "primaryApplicationId"
 ) VALUES
   (
-    1,
+    11,
     'https://example.com/business1.jpg',
     NOW(),
     'https://example.com/business1.com',
@@ -413,7 +425,7 @@ INSERT INTO "public"."BusinessMember" (
     (SELECT "applicationId" FROM seeded_business_applications WHERE "companyName" = 'Business 1')
   ),
   (
-    2,
+    14,
     'https://example.com/business2.jpg',
     NOW(),
     'https://example.com/business2.com',
@@ -425,7 +437,7 @@ INSERT INTO "public"."BusinessMember" (
     (SELECT "applicationId" FROM seeded_business_applications WHERE "companyName" = 'Business Corp.')
   ),
   (
-    3,
+    13,
     'https://example.com/business3.jpg',
     NOW(),
     'https://example.com/business3.com',

@@ -23,8 +23,9 @@ export default function ProofDialog({
   registrantName,
 }: ProofDialogProps) {
   const [open, setOpen] = useState(false);
-  const scannedData = useAttendanceStore((state) => state.scannedData);
-  const setScannedData = useAttendanceStore((state) => state.setScannedData);
+  const setPaymentProofStatus = useAttendanceStore(
+    (state) => state.setPaymentProofStatus,
+  );
 
   return (
     <PaymentProofReviewDialog
@@ -38,9 +39,7 @@ export default function ProofDialog({
       }}
       onOpenChange={setOpen}
       onStatusChange={(status) => {
-        if (scannedData) {
-          setScannedData({ ...scannedData, paymentProofStatus: status });
-        }
+        setPaymentProofStatus(status);
       }}
       open={open}
       page="check-in"
