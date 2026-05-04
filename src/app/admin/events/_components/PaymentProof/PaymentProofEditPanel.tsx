@@ -4,6 +4,7 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation } from "@dnd-kit/react/sortable";
 import { ArrowLeft, Camera, CheckCircle2, Save, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import CameraCapture from "@/app/admin/events/_components/PaymentProof/CameraCapture";
 import PaymentProofReviewItem from "@/app/admin/events/_components/PaymentProof/PaymentProofReviewItem";
 import { usePaymentProofEditor } from "@/app/admin/events/_hooks/usePaymentProofEditor";
@@ -72,6 +73,9 @@ export default function PaymentProofEditPanel({
     const files = Array.from(event.target.files ?? []);
     if (files.length > 0) {
       const validFiles = files.filter(isValidImageUploadFile);
+      if (validFiles.length !== files.length) {
+        toast.error("Only PNG, JPG, and JPEG files under 5MB are accepted.");
+      }
       if (validFiles.length > 0) {
         addFiles(validFiles, "file");
       }
