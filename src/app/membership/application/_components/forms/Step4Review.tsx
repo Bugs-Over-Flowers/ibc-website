@@ -2,12 +2,19 @@ import { Building2, MapPin, User } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { useMembershipStep4 } from "@/app/membership/application/_hooks/useMembershipStep4";
+import { CompanyProfileDisplay } from "@/components/CompanyProfileDisplay";
 import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { MembershipApplicationData } from "@/hooks/membershipApplication.store";
+import { SIGNED_URL_TTL_SECONDS } from "@/lib/constants";
+import {
+  COMPANY_PROFILE_BUCKET,
+  resolveCompanyProfileUrl,
+} from "@/lib/storage/companyProfile";
 import { resolveMemberLogoUrl } from "@/lib/storage/memberLogo";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Sector } from "@/server/membership/queries/getSectors";
 
@@ -162,22 +169,73 @@ function RepresentativeDetailsCard({
 
 export function Step4Review({ applicationData, sectors }: StepProps) {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
+  const [signedProfileUrl, setSignedProfileUrl] = useState<string | null>(null);
 
-  const sectorName =
-    sectors.find(
-      (sector) =>
-        String(sector.sectorId) === String(applicationData.step2.sectorId),
-    )?.sectorName ?? "N/A";
+  let sectorName: string;
 
+  if (applicationData.step2.sectorId === "others") {
+    const step2 = applicationData.step2 as { customSectorName?: string };
+    sectorName = step2.customSectorName ?? "N/A";
+  } else {
+    sectorName =
+      sectors.find(
+        (sector) =>
+          String(sector.sectorId) === String(applicationData.step2.sectorId),
+      )?.sectorName ?? applicationData.step2.sectorId;
+  }
+
+  // Generate object URLs for File instances
   useEffect(() => {
+    let logoUrl: string | null = null;
+    let profileUrl: string | null = null;
+
     if (applicationData.step2.logoImage instanceof File) {
-      const url = URL.createObjectURL(applicationData.step2.logoImage);
-      setLogoPreview(url);
-      return () => URL.revokeObjectURL(url);
+      logoUrl = URL.createObjectURL(applicationData.step2.logoImage);
+      setLogoPreview(logoUrl);
     }
 
-    setLogoPreview(null);
-  }, [applicationData.step2.logoImage]);
+    if (applicationData.step2.companyProfileFile instanceof File) {
+      profileUrl = URL.createObjectURL(
+        applicationData.step2.companyProfileFile,
+      );
+      setProfilePreview(profileUrl);
+    }
+
+    return () => {
+      if (logoUrl) URL.revokeObjectURL(logoUrl);
+      if (profileUrl) URL.revokeObjectURL(profileUrl);
+    };
+  }, [
+    applicationData.step2.logoImage,
+    applicationData.step2.companyProfileFile,
+  ]);
+
+  // Sign the existing company profile URL for private bucket access
+  useEffect(() => {
+    const profileFile = applicationData.step2.companyProfileFile;
+    const profileType = applicationData.step2.companyProfileType;
+    const websiteURL = applicationData.step2.websiteURL;
+
+    if (
+      !(profileFile instanceof File) &&
+      profileType === "file" &&
+      websiteURL?.trim()
+    ) {
+      createClient().then((supabase) => {
+        supabase.storage
+          .from(COMPANY_PROFILE_BUCKET)
+          .createSignedUrl(websiteURL, SIGNED_URL_TTL_SECONDS)
+          .then(({ data }) => setSignedProfileUrl(data?.signedUrl ?? null));
+      });
+    } else {
+      setSignedProfileUrl(null);
+    }
+  }, [
+    applicationData.step2.companyProfileFile,
+    applicationData.step2.companyProfileType,
+    applicationData.step2.websiteURL,
+  ]);
 
   const logoSrc =
     logoPreview || resolveMemberLogoUrl(applicationData.step2.logoImageURL);
@@ -259,15 +317,50 @@ export function Step4Review({ applicationData, sectors }: StepProps) {
                   value={applicationData.step2.mobileNumber}
                 />
                 <DetailRow
-                  label="Website"
-                  value={
-                    <span
-                      className="block max-w-[220px] truncate"
-                      title={applicationData.step2.websiteURL || "N/A"}
-                    >
-                      {applicationData.step2.websiteURL || "N/A"}
-                    </span>
-                  }
+                  label="Company Profile"
+                  value={(() => {
+                    const profileType =
+                      applicationData.step2.companyProfileType;
+                    const profileFile =
+                      applicationData.step2.companyProfileFile;
+                    const websiteURL = applicationData.step2.websiteURL;
+
+                    if (profileFile instanceof File) {
+                      const isPdf = profileFile.type === "application/pdf";
+                      return (
+                        <CompanyProfileDisplay
+                          companyProfileType={isPdf ? "document" : "image"}
+                          fileName={profileFile.name}
+                          websiteURL={profilePreview || undefined}
+                        />
+                      );
+                    }
+
+                    if (profileType === "file" && websiteURL?.trim()) {
+                      const isPdf = websiteURL.toLowerCase().endsWith(".pdf");
+                      const fileName = websiteURL
+                        .split("/")
+                        .pop()
+                        ?.split("?")[0];
+                      const resolvedUrl =
+                        signedProfileUrl ??
+                        resolveCompanyProfileUrl(websiteURL);
+                      return (
+                        <CompanyProfileDisplay
+                          companyProfileType={isPdf ? "document" : "image"}
+                          fileName={fileName || undefined}
+                          websiteURL={resolvedUrl}
+                        />
+                      );
+                    }
+
+                    return (
+                      <CompanyProfileDisplay
+                        companyProfileType="website"
+                        websiteURL={websiteURL || undefined}
+                      />
+                    );
+                  })()}
                 />
               </div>
             </div>

@@ -24,6 +24,7 @@ export type Database = {
           businessMemberId: string | null;
           companyAddress: string;
           companyName: string;
+          companyProfileType: Database["public"]["Enums"]["CompanyProfileType"];
           emailAddress: string;
           identifier: string;
           interviewId: string | null;
@@ -44,6 +45,7 @@ export type Database = {
           businessMemberId?: string | null;
           companyAddress: string;
           companyName: string;
+          companyProfileType?: Database["public"]["Enums"]["CompanyProfileType"];
           emailAddress: string;
           identifier: string;
           interviewId?: string | null;
@@ -64,6 +66,7 @@ export type Database = {
           businessMemberId?: string | null;
           companyAddress?: string;
           companyName?: string;
+          companyProfileType?: Database["public"]["Enums"]["CompanyProfileType"];
           emailAddress?: string;
           identifier?: string;
           interviewId?: string | null;
@@ -198,13 +201,6 @@ export type Database = {
           websiteURL?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: "BusinessMember_primaryApplicationId_fkey";
-            columns: ["primaryApplicationId"];
-            isOneToOne: false;
-            referencedRelation: "Application";
-            referencedColumns: ["applicationId"];
-          },
           {
             foreignKeyName: "BusinessMember_sectorId_fkey";
             columns: ["sectorId"];
@@ -468,6 +464,7 @@ export type Database = {
           isPrincipal: boolean;
           lastName: string;
           participantId: string;
+          participantIdentifier: string;
           registrationId: string;
         };
         Insert: {
@@ -477,6 +474,7 @@ export type Database = {
           isPrincipal?: boolean;
           lastName: string;
           participantId?: string;
+          participantIdentifier: string;
           registrationId: string;
         };
         Update: {
@@ -486,6 +484,7 @@ export type Database = {
           isPrincipal?: boolean;
           lastName?: string;
           participantId?: string;
+          participantIdentifier?: string;
           registrationId?: string;
         };
         Relationships: [
@@ -501,18 +500,21 @@ export type Database = {
       ProofImage: {
         Row: {
           applicationId: string | null;
+          orderIndex: number | null;
           path: string;
           proofImageId: string;
           registrationId: string | null;
         };
         Insert: {
           applicationId?: string | null;
+          orderIndex?: number | null;
           path: string;
           proofImageId?: string;
           registrationId?: string | null;
         };
         Update: {
           applicationId?: string | null;
+          orderIndex?: number | null;
           path?: string;
           proofImageId?: string;
           registrationId?: string | null;
@@ -917,6 +919,13 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      get_sector_member_counts: {
+        Args: { p_sector_ids: number[] };
+        Returns: {
+          memberCount: number;
+          sectorId: number;
+        }[];
+      };
       get_sponsored_registration_by_id: {
         Args: { registration_id: string };
         Returns: {
@@ -1045,22 +1054,36 @@ export type Database = {
           p_note?: string;
           p_other_participants?: Json;
           p_payment_method?: string;
-          p_payment_path?: string;
+          p_payment_paths?: Json;
           p_registrant?: Json;
+          p_sponsored_registration_id?: string;
         };
         Returns: Json;
       };
-      submit_membership_application: {
-        Args: {
-          p_application_member_type: string;
-          p_application_type: string;
-          p_company_details: Json;
-          p_payment_method: string;
-          p_payment_proof_url?: string;
-          p_representatives: Json;
-        };
-        Returns: Json;
-      };
+      submit_membership_application:
+        | {
+            Args: {
+              p_application_member_type: string;
+              p_application_type: string;
+              p_company_details: Json;
+              p_payment_method: string;
+              p_payment_proof_url?: string;
+              p_representatives: Json;
+            };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_application_member_type: string;
+              p_application_type: string;
+              p_company_details: Json;
+              p_company_profile_type?: string;
+              p_payment_method: string;
+              p_payment_proof_url?: string;
+              p_representatives: Json;
+            };
+            Returns: Json;
+          };
       toggle_sr_status: {
         Args: { p_sponsored_registration_id: string };
         Returns: Json;
@@ -1138,6 +1161,7 @@ export type Database = {
       ApplicationStatus: "new" | "pending" | "approved" | "rejected";
       ApplicationType: "newMember" | "updating" | "renewal";
       CompanyMemberType: "principal" | "alternate";
+      CompanyProfileType: "image" | "document" | "website";
       EventType: "public" | "private";
       InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
       MembershipStatus: "paid" | "unpaid" | "cancelled";
@@ -1165,6 +1189,7 @@ export type Database = {
         affiliation: string | null;
         registration_date: string | null;
         registration_id: string | null;
+        participant_identifier: string | null;
       };
       registration_details_result: {
         registration_details: Json | null;
@@ -1326,6 +1351,7 @@ export const Constants = {
       ApplicationStatus: ["new", "pending", "approved", "rejected"],
       ApplicationType: ["newMember", "updating", "renewal"],
       CompanyMemberType: ["principal", "alternate"],
+      CompanyProfileType: ["image", "document", "website"],
       EventType: ["public", "private"],
       InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
       MembershipStatus: ["paid", "unpaid", "cancelled"],

@@ -153,7 +153,7 @@ async function createBusinessMemberWithStatus(
     businessMemberId: member.businessMemberId,
     businessMemberIdentifier: identifier,
     businessName: member.businessName,
-    membershipStatus: member.membershipStatus,
+    membershipStatus: member.membershipStatus ?? "",
     applicationMemberType: options.applicationMemberType,
     applicationId: application.applicationId,
   };

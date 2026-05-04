@@ -170,9 +170,12 @@ export function PaymentProofDropzone({
             <span className="font-medium text-emerald-700 dark:text-emerald-300">
               Proof Uploaded Successfully
             </span>
-            <Badge className="max-w-full truncate" variant="outline">
-              {value.name}
+            <Badge variant="outline">
+              {value.type.split("/")[1].toUpperCase()}
             </Badge>
+            <span className="max-w-[200px] truncate text-muted-foreground text-xs">
+              {value.name}
+            </span>
           </div>
 
           <Dropzone

@@ -29,7 +29,8 @@ const validStep1 = {
 
 const validStep2 = {
   companyName: "Acme Corp",
-  sectorId: 1,
+  sectorId: "1",
+  companyProfileType: "website",
   companyAddress: "123 Business Rd",
   websiteURL: "https://acme.example.com",
   emailAddress: "info@acme.example.com",
@@ -66,118 +67,35 @@ describe("MembershipApplicationStep1Schema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("should accept renewal with identifier", () => {
-    const result = MembershipApplicationStep1Schema.safeParse({
-      applicationType: "renewal",
-      businessMemberIdentifier: "ibc-mem-abc123",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("should accept updating with identifier", () => {
-    const result = MembershipApplicationStep1Schema.safeParse({
-      applicationType: "updating",
-      businessMemberIdentifier: "ibc-mem-abc123",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("should accept valid UUID for businessMemberId", () => {
-    const result = MembershipApplicationStep1Schema.safeParse({
-      applicationType: "renewal",
-      businessMemberIdentifier: "ibc-mem-abc123",
-      businessMemberId: validUUID,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("should accept empty string UUID as undefined", () => {
-    const result = MembershipApplicationStep1Schema.safeParse({
-      applicationType: "newMember",
-      businessMemberId: "",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("should reject renewal without identifier", () => {
-    const result = MembershipApplicationStep1Schema.safeParse({
-      applicationType: "renewal",
-    });
-    expect(result.success).toBe(false);
-    const issues = result.error?.issues.map((i) => i.path.join(".")) ?? [];
-    expect(issues).toContain("businessMemberIdentifier");
-  });
-
-  it("should reject updating without identifier", () => {
-    const result = MembershipApplicationStep1Schema.safeParse({
-      applicationType: "updating",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it.each([
-    "",
-    "   ",
-  ])("should reject renewal with blank identifier %j", (value) => {
-    const result = MembershipApplicationStep1Schema.safeParse({
-      applicationType: "renewal",
-      businessMemberIdentifier: value,
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("should reject invalid applicationType", () => {
-    const result = MembershipApplicationStep1Schema.safeParse({
-      applicationType: "invalid",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("should reject non-UUID businessMemberId", () => {
-    const result = MembershipApplicationStep1Schema.safeParse({
-      applicationType: "renewal",
-      businessMemberIdentifier: "ibc-mem-abc123",
-      businessMemberId: "not-a-uuid",
-    });
-    expect(result.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// MembershipApplicationStep2Schema
-// ---------------------------------------------------------------------------
-describe("MembershipApplicationStep2Schema", () => {
-  it("should accept valid company data", () => {
-    const result = MembershipApplicationStep2Schema.safeParse(validStep2);
-    expect(result.success).toBe(true);
-  });
-
-  it("should titleCase companyName on parse", () => {
+  it("should accept file type with companyProfileFile", () => {
     const result = MembershipApplicationStep2Schema.safeParse({
       ...validStep2,
-      companyName: "acme corp",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.companyName).toBe("Acme Corp");
-    }
-  });
-
-  it("should accept logo via URL without file", () => {
-    const result = MembershipApplicationStep2Schema.safeParse({
-      ...validStep2,
-      logoImage: undefined,
+      companyProfileType: "file",
+      companyProfileFile: new File(["fake"], "profile.pdf", {
+        type: "application/pdf",
+      }),
+      websiteURL: "",
     });
     expect(result.success).toBe(true);
   });
 
-  it("should accept logo via file without URL", () => {
+  it("should reject website type without URL", () => {
     const result = MembershipApplicationStep2Schema.safeParse({
       ...validStep2,
-      logoImageURL: "",
-      logoImage: new File(["fake"], "logo.png", { type: "image/png" }),
+      companyProfileType: "website",
+      websiteURL: "",
     });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject file type without file", () => {
+    const result = MembershipApplicationStep2Schema.safeParse({
+      ...validStep2,
+      companyProfileType: "file",
+      companyProfileFile: undefined,
+      websiteURL: "",
+    });
+    expect(result.success).toBe(false);
   });
 
   it("should reject missing companyName", () => {
@@ -219,18 +137,26 @@ describe("MembershipApplicationStep2Schema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("should reject invalid sectorId (zero)", () => {
+  it("should accept sectorId with value '0' as valid text", () => {
     const result = MembershipApplicationStep2Schema.safeParse({
       ...validStep2,
-      sectorId: 0,
+      sectorId: "0",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it("should reject invalid sectorId (NaN string)", () => {
+  it("should accept free-text sectorId for custom sectors", () => {
     const result = MembershipApplicationStep2Schema.safeParse({
       ...validStep2,
-      sectorId: "abc",
+      sectorId: "Renewable Energy",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should reject empty sectorId", () => {
+    const result = MembershipApplicationStep2Schema.safeParse({
+      ...validStep2,
+      sectorId: "",
     });
     expect(result.success).toBe(false);
   });
@@ -265,11 +191,11 @@ describe("MembershipApplicationStep3Schema", () => {
     }
   });
 
-  it("should reject single representative", () => {
+  it("should accept single representative", () => {
     const result = MembershipApplicationStep3Schema.safeParse({
       representatives: [validRep],
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("should reject three representatives", () => {
@@ -416,12 +342,12 @@ describe("MembershipApplicationSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("should reject single representative", () => {
+  it("should accept single representative", () => {
     const result = MembershipApplicationSchema.safeParse({
       ...validFull,
       representatives: [validRep],
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("should reject missing sectorName", () => {

@@ -15,7 +15,7 @@ type MemberWithSector =
     Application: {
       applicationId: string;
       applicationStatus: string;
-    } | null;
+    }[];
   };
 
 export async function getMembers(

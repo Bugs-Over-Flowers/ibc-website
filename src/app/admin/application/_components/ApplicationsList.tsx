@@ -16,12 +16,12 @@ function filterApplicationsByStatus(
 ) {
   const groupFiltered = applications.filter((app) => {
     if (group === "interview") {
-      return (
-        app.applicationType === "newMember" || app.applicationType === "renewal"
-      );
+      return app.applicationType === "newMember";
     }
 
-    return app.applicationType === "updating";
+    return (
+      app.applicationType === "renewal" || app.applicationType === "updating"
+    );
   });
 
   return groupFiltered.filter((app) => {

@@ -49,6 +49,7 @@ const createRegistrationWithParticipants = async (
         .from("Participant")
         .insert({
           registrationId: registration.registrationId,
+          participantIdentifier: `P-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
           firstName: `${paymentProofStatus}-${index + 1}`,
           lastName: "Tester",
           email: `${suffix}-${index + 1}@example.com`,

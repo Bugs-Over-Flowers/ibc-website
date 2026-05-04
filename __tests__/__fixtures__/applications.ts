@@ -25,6 +25,7 @@ export function createMockApplication(
     paymentProofStatus: "pending",
     sectorName: "Technology",
     websiteURL: "https://acme.example.com",
+    companyProfileType: "website",
     ApplicationMember: [
       {
         applicationId: "app-001",

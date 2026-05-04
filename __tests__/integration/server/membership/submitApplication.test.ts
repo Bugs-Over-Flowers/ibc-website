@@ -6,6 +6,7 @@ const validInput = {
   applicationMemberType: "corporate" as const,
   companyName: "Integration Test Corp",
   sectorName: "Technology",
+  companyProfileType: "website" as const,
   companyAddress: "123 Test St",
   websiteURL: "https://test.example.com",
   emailAddress: "test@example.com",
@@ -99,13 +100,13 @@ describe("submitApplication - input validation", () => {
     expect(result.success).toBe(false);
   });
 
-  it("should reject single representative", () => {
+  it("should accept single representative", () => {
     const result = MembershipApplicationSchema.safeParse({
       ...validInput,
       representatives: [validInput.representatives[0]],
     });
 
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("should reject invalid mobile number", () => {

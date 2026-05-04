@@ -1,15 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Step4Review } from "@/app/membership/application/_components/forms/Step4Review";
+import type { MembershipApplicationData } from "@/hooks/membershipApplication.store";
 
 const mockRep = {
-  companyMemberType: "principal",
+  companyMemberType: "principal" as const,
   firstName: "Juan",
   lastName: "Dela Cruz",
   emailAddress: "juan@example.com",
   companyDesignation: "CEO",
   birthdate: new Date("1990-01-01"),
-  sex: "male",
+  sex: "male" as const,
   nationality: "Filipino",
   mailingAddress: "123 Rizal St, Manila",
   mobileNumber: "09171234567",
@@ -18,7 +19,7 @@ const mockRep = {
 
 const mockApplicationData = {
   step1: {
-    applicationType: "newMember",
+    applicationType: "newMember" as const,
     businessMemberIdentifier: "",
     businessMemberId: "",
   },
@@ -32,13 +33,14 @@ const mockApplicationData = {
     websiteURL: "https://acme.example.com",
     logoImageURL: "https://example.com/logo.png",
     logoImage: undefined,
+    companyProfileType: "website",
   },
   step3: {
     representatives: [
       mockRep,
       {
         ...mockRep,
-        companyMemberType: "alternate",
+        companyMemberType: "alternate" as const,
         firstName: "Maria",
         lastName: "Santos",
         mobileNumber: "09179876543",
@@ -46,18 +48,15 @@ const mockApplicationData = {
     ],
   },
   step4: {
-    applicationMemberType: "corporate",
-    paymentMethod: "ONSITE",
+    applicationMemberType: "corporate" as const,
+    paymentMethod: "ONSITE" as const,
     paymentProofUrl: "",
   },
-};
+} as MembershipApplicationData;
 
 const mockSectors = [{ sectorId: 1, sectorName: "Technology" }];
-
 const mockForm = {
-  state: {
-    values: { applicationMemberType: "corporate", paymentMethod: "ONSITE" },
-  },
+  state: { values: {} },
   fields: {},
   handleSubmit: () => {},
   reset: () => {},
@@ -73,8 +72,7 @@ describe("Step4Review", () => {
         sectors={mockSectors}
       />,
     );
-
-    expect(screen.getByText("Company Profile")).toBeInTheDocument();
+    expect(screen.getAllByText("Company Profile").length).toBeGreaterThan(0);
     expect(screen.getByText("Acme Corp")).toBeInTheDocument();
   });
 
@@ -86,7 +84,6 @@ describe("Step4Review", () => {
         sectors={mockSectors}
       />,
     );
-
     expect(screen.getByText("New Member")).toBeInTheDocument();
   });
 
@@ -98,7 +95,6 @@ describe("Step4Review", () => {
         sectors={mockSectors}
       />,
     );
-
     expect(screen.getByText("Technology")).toBeInTheDocument();
   });
 
@@ -110,7 +106,6 @@ describe("Step4Review", () => {
         sectors={mockSectors}
       />,
     );
-
     expect(screen.getByText("Contact Information")).toBeInTheDocument();
     expect(screen.getByText("info@acme.example.com")).toBeInTheDocument();
     expect(screen.getAllByText("09171234567").length).toBeGreaterThan(0);
@@ -124,7 +119,6 @@ describe("Step4Review", () => {
         sectors={mockSectors}
       />,
     );
-
     expect(screen.getByText("Representatives")).toBeInTheDocument();
     expect(screen.getByText("Juan Dela Cruz")).toBeInTheDocument();
     expect(screen.getByText("Maria Santos")).toBeInTheDocument();
@@ -140,30 +134,47 @@ describe("Step4Review", () => {
         sectors={mockSectors}
       />,
     );
-
     const image = screen.getByAltText("Company logo");
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute("src");
   });
 
   it("should show 'No logo' when no logo provided", () => {
-    const noLogoData = {
-      ...mockApplicationData,
-      step2: {
-        ...mockApplicationData.step2,
-        logoImageURL: "",
-        logoImage: undefined,
-      },
-    };
-
     render(
       <Step4Review
-        applicationData={noLogoData}
+        applicationData={
+          {
+            ...mockApplicationData,
+            step2: {
+              ...mockApplicationData.step2,
+              logoImageURL: "",
+              logoImage: undefined,
+            },
+          } as MembershipApplicationData
+        }
         form={mockForm}
         sectors={mockSectors}
       />,
     );
-
     expect(screen.getByText("No logo")).toBeInTheDocument();
+  });
+
+  it("should display custom sector name when sectorId is free text", () => {
+    render(
+      <Step4Review
+        applicationData={
+          {
+            ...mockApplicationData,
+            step2: {
+              ...mockApplicationData.step2,
+              sectorId: "Renewable Energy",
+            },
+          } as MembershipApplicationData
+        }
+        form={mockForm}
+        sectors={mockSectors}
+      />,
+    );
+    expect(screen.getByText("Renewable Energy")).toBeInTheDocument();
   });
 });

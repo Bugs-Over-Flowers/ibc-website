@@ -1,5 +1,5 @@
 import { endOfDay, format, startOfDay } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { useState } from "react";
 import { useFieldContext } from "@/hooks/_formHooks";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ interface FormDatePickerProps {
   disabled?: (date: Date) => boolean;
   startMonth?: Date;
   endMonth?: Date;
+  clearable?: boolean;
 }
 
 const FormDatePicker: React.FC<FormDatePickerProps> = ({
@@ -28,6 +29,7 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
   disabled,
   startMonth,
   endMonth,
+  clearable,
 }: FormDatePickerProps) => {
   const field = useFieldContext<Date | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -39,59 +41,74 @@ const FormDatePicker: React.FC<FormDatePickerProps> = ({
   return (
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel>{label}</FieldLabel>}
-      <Popover onOpenChange={setOpen} open={open}>
-        <PopoverTrigger
-          render={
-            <Button
-              aria-invalid={isInvalid}
-              className={cn(
-                "w-full justify-between text-left font-normal transition-colors",
-                !field.state.value && "text-muted-foreground",
-                isInvalid &&
-                  "border-destructive text-destructive focus-visible:border-destructive",
-              )}
-              variant={"outline"}
-            >
-              {field.state.value ? (
-                format(field.state.value, "MMMM dd, yyyy")
-              ) : (
-                <span>Pick a date</span>
-              )}
-              <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
-            </Button>
-          }
-        />
-
-        <PopoverContent
-          align="start"
-          className="w-auto p-0"
-          collisionPadding={16}
-        >
-          <Calendar
-            captionLayout="dropdown"
-            disabled={(date) => {
-              if (typeof disabled === "function") return disabled(date);
-              if (minDate && date < startOfDay(minDate)) return true;
-              if (maxDate && date > endOfDay(maxDate)) return true;
-              // If no explicit bounds are provided, default to disallowing
-              // future dates and very old dates (legacy behavior).
-              if (!minDate && !maxDate) {
-                return date > new Date() || date < new Date("1900-01-01");
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <Popover onOpenChange={setOpen} open={open}>
+            <PopoverTrigger
+              render={
+                <Button
+                  aria-invalid={isInvalid}
+                  className={cn(
+                    "w-full justify-between text-left font-normal transition-colors",
+                    !field.state.value && "text-muted-foreground",
+                    isInvalid &&
+                      "border-destructive text-destructive focus-visible:border-destructive",
+                  )}
+                  variant={"outline"}
+                >
+                  {field.state.value ? (
+                    format(field.state.value, "MMMM dd, yyyy")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                  <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+                </Button>
               }
-              // When bounds are provided, only keep the historical lower bound.
-              return date < new Date("1900-01-01");
-            }}
-            endMonth={computedEndMonth}
-            mode="single"
-            onSelect={(date) => {
-              field.handleChange(date);
-              setOpen(false);
-            }}
-            selected={field.state.value}
-            startMonth={computedStartMonth}
-          />
-        </PopoverContent>
-      </Popover>
+            />
+
+            <PopoverContent
+              align="start"
+              className="w-auto p-0"
+              collisionPadding={16}
+            >
+              <Calendar
+                captionLayout="dropdown"
+                disabled={(date) => {
+                  if (typeof disabled === "function") return disabled(date);
+                  if (minDate && date < startOfDay(minDate)) return true;
+                  if (maxDate && date > endOfDay(maxDate)) return true;
+                  // If no explicit bounds are provided, default to disallowing
+                  // future dates and very old dates (legacy behavior).
+                  if (!minDate && !maxDate) {
+                    return date > new Date() || date < new Date("1900-01-01");
+                  }
+                  // When bounds are provided, only keep the historical lower bound.
+                  return date < new Date("1900-01-01");
+                }}
+                endMonth={computedEndMonth}
+                mode="single"
+                onSelect={(date) => {
+                  field.handleChange(date);
+                  setOpen(false);
+                }}
+                selected={field.state.value}
+                startMonth={computedStartMonth}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        {clearable && field.state.value && (
+          <Button
+            className="h-10 w-10 shrink-0"
+            onClick={() => field.handleChange(undefined as unknown as Date)}
+            size="icon"
+            type="button"
+            variant="outline"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError errors={field.state.meta.errors} reserveSpace />
     </Field>
