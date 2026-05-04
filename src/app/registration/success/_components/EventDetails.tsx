@@ -11,11 +11,11 @@ import {
 } from "lucide-react";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import Image from "next/image";
-import { IdentifierDisplay } from "@/components/IdentifierDisplay";
 import { getSuccessPageData } from "@/server/registration/queries/getSuccessPageData";
 import { EventActions } from "./EventActions";
 import { EventHeader } from "./EventHeader";
 import { EventTitleBlock } from "./EventTitleBlock";
+import ParticipantRow from "./ParticipantRow";
 import { QRCodeSection } from "./QRCodeSection";
 import { RegistrationDetails } from "./RegistrationDetails";
 
@@ -144,28 +144,14 @@ export default async function EventDetails({
           </div>
           <div className="divide-y divide-border/50">
             {data.participants.map((p) => (
-              <div
-                className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between"
+              <ParticipantRow
+                affiliation={data.affiliation}
+                email={p.email}
+                isPrincipal={p.isPrincipal}
                 key={p.participantIdentifier}
-              >
-                <div>
-                  <span className="font-medium text-sm">{p.name}</span>
-                  {p.isPrincipal && (
-                    <span className="ml-2 text-[10px] text-muted-foreground uppercase tracking-wider">
-                      Registrant
-                    </span>
-                  )}
-                  <p className="mt-1 text-muted-foreground text-xs">
-                    {p.email}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <code className="text-muted-foreground text-xs">
-                    {p.participantIdentifier}
-                  </code>
-                  <IdentifierDisplay identifier={p.participantIdentifier} />
-                </div>
-              </div>
+                name={p.name}
+                participantIdentifier={p.participantIdentifier}
+              />
             ))}
           </div>
         </div>

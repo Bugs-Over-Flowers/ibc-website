@@ -98,6 +98,7 @@ async function CheckInPage({
               eventDayData={{
                 eventTitle: eventDayData.event.eventTitle,
                 eventDate: eventDayData.eventDate,
+                eventId: eventDayData.event.eventId,
                 label: eventDayData.label,
                 venue: eventDayData.event.venue,
               }}
