@@ -20,7 +20,6 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { useAppForm } from "@/hooks/_formHooks";
-import { SIGNED_URL_TTL_SECONDS } from "@/lib/constants";
 import {
   IMAGE_UPLOAD_ACCEPT_ATTR,
   IMAGE_UPLOAD_MAX_SIZE,
@@ -30,7 +29,6 @@ import {
 import tryCatch from "@/lib/server/tryCatch";
 import { COMPANY_PROFILE_BUCKET } from "@/lib/storage/companyProfile";
 import { uploadCompanyLogo } from "@/lib/storage/uploadCompanyLogo";
-import { createClient } from "@/lib/supabase/client";
 import { cn, zodValidator } from "@/lib/utils";
 import {
   type UpdateMemberInput,
@@ -129,7 +127,6 @@ export function EditMemberForm({ member, sectors }: EditMemberFormProps) {
   const [companyProfilePreview, setCompanyProfilePreview] = useState<
     string | null
   >(null);
-  const [signedProfileUrl, setSignedProfileUrl] = useState<string | null>(null);
   const [logoDragActive, setLogoDragActive] = useState(false);
 
   const handleLogoDrag = useCallback(
@@ -345,26 +342,6 @@ export function EditMemberForm({ member, sectors }: EditMemberFormProps) {
     }
   }, [form.store.state.values.companyProfileFile]);
 
-  // Sign the existing company profile URL for private bucket access
-  useEffect(() => {
-    const websiteURL = member.websiteURL;
-    if (
-      (member.companyProfileType === "image" ||
-        member.companyProfileType === "document") &&
-      typeof websiteURL === "string" &&
-      websiteURL.trim()
-    ) {
-      createClient().then((supabase) => {
-        supabase.storage
-          .from(COMPANY_PROFILE_BUCKET)
-          .createSignedUrl(websiteURL, SIGNED_URL_TTL_SECONDS)
-          .then(({ data }) => setSignedProfileUrl(data?.signedUrl ?? null));
-      });
-    } else {
-      setSignedProfileUrl(null);
-    }
-  }, [member.websiteURL, member.companyProfileType]);
-
   return (
     <div className="mx-auto max-w-3xl py-8">
       <div className="mb-8">
@@ -545,22 +522,38 @@ export function EditMemberForm({ member, sectors }: EditMemberFormProps) {
                                 member.companyProfileType === "document") &&
                               member.websiteURL ? (
                               <>
-                                {member.companyProfileType === "image" &&
-                                signedProfileUrl ? (
+                                {member.companyProfileType === "image" ? (
                                   <Image
                                     alt="Current company profile"
                                     className="h-16 w-16 rounded-md object-contain"
                                     height={64}
-                                    src={signedProfileUrl}
+                                    src={member.websiteURL}
                                     unoptimized
                                     width={64}
                                   />
-                                ) : null}
+                                ) : (
+                                  <>
+                                    <FileText className="h-10 w-10 text-muted-foreground" />
+                                    <span className="mt-1 max-w-[200px] truncate text-muted-foreground text-xs">
+                                      {(member.websiteURL
+                                        ?.split("/")
+                                        .pop()
+                                        ?.split("?")[0] ??
+                                        "") ||
+                                        "Current document"}
+                                    </span>
+                                  </>
+                                )}
+                                <Badge className="mb-1" variant="secondary">
+                                  {member.companyProfileType === "image"
+                                    ? "Image"
+                                    : "PDF"}
+                                </Badge>
                                 <span className="font-medium text-muted-foreground">
-                                  Current company profile
+                                  Existing company profile saved
                                 </span>
                                 <span className="text-muted-foreground text-xs">
-                                  Click to upload or drag and drop to replace
+                                  Upload a new file to replace
                                 </span>
                               </>
                             ) : (
@@ -630,30 +623,61 @@ export function EditMemberForm({ member, sectors }: EditMemberFormProps) {
                   </Label>
 
                   {hasLogoUrl && !hasFile ? (
-                    <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-2">
-                      <div className="flex items-center gap-2 overflow-hidden">
+                    <div className="space-y-2">
+                      <button
+                        aria-invalid={isInvalid}
+                        className={cn(
+                          "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all",
+                          "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
+                          isInvalid &&
+                            "border-destructive bg-destructive/5 hover:border-destructive",
+                        )}
+                        type="button"
+                      >
+                        <input
+                          accept={IMAGE_UPLOAD_ACCEPT_ATTR}
+                          className="absolute inset-0 cursor-pointer opacity-0"
+                          onBlur={field.handleBlur}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) {
+                              return;
+                            }
+
+                            if (!isValidImageUploadFile(file)) {
+                              toast.error(
+                                "Invalid file. Use PNG, JPG, or JPEG up to 5MB.",
+                              );
+                              return;
+                            }
+
+                            if (file.size > IMAGE_UPLOAD_MAX_SIZE) {
+                              toast.error("File size must be less than 5MB");
+                              return;
+                            }
+
+                            field.handleChange(file);
+                          }}
+                          tabIndex={-1}
+                          type="file"
+                        />
                         <Image
                           alt="Logo"
-                          className="h-8 w-8 object-contain"
-                          height={32}
+                          className="mt-3 h-16 w-16 rounded-md object-contain"
+                          height={64}
                           src={form.state.values.logoImageURL}
-                          width={32}
+                          width={64}
                         />
-                        <span className="max-w-[200px] truncate text-sm">
+                        <Badge className="mb-1" variant="secondary">
                           Current Logo
+                        </Badge>
+                        <span className="font-medium text-muted-foreground">
+                          Existing logo saved
                         </span>
-                      </div>
-                      <Button
-                        className="h-8 w-8"
-                        onClick={() => {
-                          form.setFieldValue("logoImageURL", "");
-                        }}
-                        size="icon"
-                        type="button"
-                        variant="ghost"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                        <span className="mt-1 text-muted-foreground text-xs">
+                          Upload a new logo to replace
+                        </span>
+                      </button>
                     </div>
                   ) : (
                     <div className="space-y-2">
