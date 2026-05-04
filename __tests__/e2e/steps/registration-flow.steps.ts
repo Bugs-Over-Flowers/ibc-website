@@ -335,13 +335,19 @@ Then(
     expect(registrationError).toBeNull();
     expect(registration?.registrationId).toBeTruthy();
 
-    const { count, error: participantError } = await supabase
+    const { data: participants, error: participantError } = await supabase
       .from("Participant")
-      .select("participantId", { count: "exact", head: true })
+      .select("participantId, participantIdentifier")
       .eq("registrationId", registration?.registrationId ?? "");
 
     expect(participantError).toBeNull();
-    expect(count).toBe(expectedCount);
+    expect(participants).toHaveLength(expectedCount);
+
+    for (const participant of participants ?? []) {
+      expect(participant.participantIdentifier).toMatch(
+        /^ibc-par-[a-zA-Z0-9]{8}$/,
+      );
+    }
   },
 );
 
