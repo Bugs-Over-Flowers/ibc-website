@@ -76,16 +76,3 @@ Feature: Registration flow
     Given I am on the member registration form
     When I try to select a non-existent organization
     Then I should see an error message about organization
-
-# @sad
-# Scenario Outline: Register with online payment fails due to proof issues
-#   Given I am on the registration form for a public event
-#   When I submit a registration with online payment and <proof_type> proof
-#   Then I should see the <error_message>
-
-#   # title-format: Register with <proof_type> proof
-#   Examples:
-#     | proof_type | error_message                               |
-#     | invalid    | Payment proof must be a valid image or PDF  |
-#     | too large  | Payment proof must be less than 5MB         |
-#     | missing    | Payment proof is required                   |

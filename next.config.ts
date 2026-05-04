@@ -17,7 +17,7 @@ const securityHeaders = [
       isProduction
         ? "script-src 'self' 'unsafe-inline' https://unpkg.com"
         : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
-      "connect-src 'self' https: wss:",
+      "connect-src 'self' https: wss: http://localhost:54321 http://127.0.0.1:54321",
       "upgrade-insecure-requests",
     ].join("; "),
   },

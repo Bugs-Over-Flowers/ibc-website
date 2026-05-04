@@ -382,16 +382,13 @@ Then(
 // @sad Scenario: Show error when event does not exist
 // ============================================
 
-Given(
-  "I navigate to check-in list for non-existent event",
-  async ({ page }) => {
-    await page.goto(
-      "/admin/events/00000000-0000-0000-0000-000000000000/check-in-list",
-    );
-    await page.waitForLoadState("networkidle");
-  },
-);
+Given("I navigate to non-existent event attendance page", async ({ page }) => {
+  await page.goto(
+    "/admin/events/00000000-0000-0000-0000-000000000000/check-in-list",
+  );
+  await page.waitForLoadState("networkidle");
+});
 
-Then("I should see error loading event details", async ({ page }) => {
-  await expect(page.getByText("Failed to load event details.")).toBeVisible();
+Then("I should see the attendance event not found error", async ({ page }) => {
+  await expect(page.getByText("Event not found")).toBeVisible();
 });
