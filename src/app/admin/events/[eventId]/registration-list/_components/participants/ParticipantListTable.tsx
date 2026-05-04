@@ -1,24 +1,33 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { formatDate } from "date-fns";
+import { format, formatDate } from "date-fns";
 import { Download } from "lucide-react";
 import {
   AdminTableDateSortHeader,
   AdminTableSortHeader,
 } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
+import { IdentifierDisplay } from "@/components/IdentifierDisplay";
 import { Button } from "@/components/ui/button";
-import { exportToExcel } from "@/lib/export/excel";
+import { type ExportEventDetails, exportToExcel } from "@/lib/export/excel";
 import type { ParticipantListItem } from "@/lib/validation/registration-management";
 import ParticipantRowActions from "./ParticipantRowActions";
 
 interface ParticipantListProps {
-  eventTitle: string;
   participantList: ParticipantListItem[];
+  eventDetails: ExportEventDetails;
 }
 
 export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
+  {
+    accessorKey: "participantIdentifier",
+    header: "Identifier",
+    cell: ({ row }) => {
+      const id = row.original.participantIdentifier;
+      return id ? <IdentifierDisplay identifier={id} /> : null;
+    },
+  },
   {
     accessorKey: "affiliation",
     header: ({ column }) => (
@@ -109,51 +118,72 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
     header: "",
     enableHiding: false,
     cell: ({ row }) => {
-      const { registrationId } = row.original;
+      const {
+        registrationId,
+        participantIdentifier,
+        firstName,
+        lastName,
+        email,
+        affiliation,
+      } = row.original;
 
-      return <ParticipantRowActions registrationId={registrationId} />;
+      return (
+        <ParticipantRowActions
+          affiliation={affiliation}
+          email={email}
+          participantIdentifier={participantIdentifier}
+          participantName={`${firstName} ${lastName}`}
+          registrationId={registrationId}
+        />
+      );
     },
   },
 ];
 
-const getExcelColumns = (): ColumnDef<ParticipantListItem>[] => [
-  {
-    accessorKey: "affiliation",
-    header: "Company/Organization", // Custom Excel header
-  },
-  {
-    accessorKey: "firstName",
-    header: "First Name",
-  },
-  {
-    accessorKey: "lastName",
-    header: "Last Name",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "contactNumber",
-    header: "Contact Number",
-  },
-  {
-    accessorKey: "registrationDate",
-    header: "Registration Date",
-  },
+const getExcelColumns = (): ColumnDef<Record<string, unknown>>[] => [
+  { accessorKey: "registrationDate", header: "Registration Date" },
+  { accessorKey: "registrationTime", header: "Time" },
+  { accessorKey: "affiliation", header: "Company/Organization" },
+  { accessorKey: "firstName", header: "First Name" },
+  { accessorKey: "lastName", header: "Last Name" },
+  { accessorKey: "email", header: "Email" },
+  { accessorKey: "contactNumber", header: "Contact Number" },
+  { accessorKey: "participantIdentifier", header: "Participant ID" },
 ];
 
 export default function ParticipantListTable({
-  eventTitle,
   participantList,
+  eventDetails,
 }: ParticipantListProps) {
   const handleExport = async (data: ParticipantListItem[]) => {
+    const sorted = [...data].sort(
+      (a, b) =>
+        new Date(a.registrationDate).getTime() -
+        new Date(b.registrationDate).getTime(),
+    );
+    const exportData = sorted.map((row) => ({
+      registrationDate: row.registrationDate,
+      registrationTime: format(new Date(row.registrationDate), "h:mm aaa"),
+      affiliation: row.affiliation,
+      firstName: row.firstName,
+      lastName: row.lastName,
+      email: row.email,
+      contactNumber: row.contactNumber,
+      participantIdentifier: row.participantIdentifier ?? "",
+    }));
+
     await exportToExcel({
-      data,
+      data: exportData,
       columns: getExcelColumns(),
-      filename: `${eventTitle}-Participants-${new Date().toISOString().split("T")[0]}.xlsx`,
+      event: eventDetails,
+      filename: `${eventDetails.title}-Participants-${new Date().toISOString().split("T")[0]}.xlsx`,
       sheetName: "Participants",
       excludeColumns: ["actions"],
+      formatters: {
+        registrationDate: (value) =>
+          format(new Date(String(value)), "MMM d, yyyy"),
+      },
+      columnWidths: [18, 12, 22, 16, 16, 28, 18, 22],
     });
   };
   return (

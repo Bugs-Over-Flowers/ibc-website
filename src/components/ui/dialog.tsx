@@ -75,7 +75,7 @@ function DialogContent({
         outsideScroll
           ? "relative z-10 my-8 max-w-[calc(100%-2rem)] sm:max-w-md"
           : "fixed top-1/2 left-1/2 z-50 max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 p-6 sm:max-w-md",
-        "data-nested-dialog-open:brightness-50 transition-all data-nested-dialog-open:-translate-y-[45%] data-nested-dialog-open:scale-95 data-nested-dialog-open:opacity-100 data-nested-dialog-open:blur-xs",
+        "data-nested-dialog-open:brightness-50 transition-all data-nested-dialog-open:scale-95 data-nested-dialog-open:opacity-100 data-nested-dialog-open:blur-xs",
         className,
       )}
       {...props}

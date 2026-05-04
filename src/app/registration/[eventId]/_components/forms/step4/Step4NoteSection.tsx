@@ -8,7 +8,7 @@ interface NoteSectionProps {
 export default function NoteSection({ form }: NoteSectionProps) {
   return (
     <Card className="rounded-2xl border border-border/50 bg-background">
-      <CardContent className="">
+      <CardContent>
         <form.AppField name="note">
           {(field) => (
             <field.TextareaField

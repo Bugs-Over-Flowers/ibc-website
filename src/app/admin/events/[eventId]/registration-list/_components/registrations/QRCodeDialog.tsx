@@ -2,7 +2,7 @@
 
 import { QrCode, RotateCcw } from "lucide-react";
 import Image from "next/image";
-import { type FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useResendEmail } from "@/app/admin/events/[eventId]/registration-list/_hooks/useResendEmail";
 import QRDownloader from "@/components/qr/QRDownloader";
 import { Button } from "@/components/ui/button";
@@ -54,7 +54,7 @@ export default function QRCodeDialog({
     generateURL();
   }, [registrationIdentifier]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     form.handleSubmit();
   };
@@ -86,18 +86,16 @@ export default function QRCodeDialog({
               ) : (
                 <>
                   <QRDownloader
-                    affiliation={affiliation}
                     email={email}
+                    header={affiliation}
                     registrationIdentifier={registrationIdentifier}
                   >
-                    <div className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border bg-muted/30 p-4 transition-colors hover:bg-muted/50">
-                      <div className="relative size-[120px]">
+                    <div className="flex w-[200px] flex-col items-center gap-2 rounded-lg border bg-white p-4">
+                      <div className="relative size-[160px]">
                         <Image alt="QR Code" fill sizes="120px" src={qrURL} />
                       </div>
-                      <span className="text-muted-foreground text-xs">
-                        Click to download
-                      </span>
-                      <span className="font-medium font-mono text-foreground text-xs">
+
+                      <span className="wrap-break-word text-center font-medium font-mono text-neutral-900 text-xs">
                         {registrationIdentifier}
                       </span>
                     </div>

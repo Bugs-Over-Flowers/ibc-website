@@ -160,12 +160,13 @@ DECLARE
   v_event_4_id uuid := '11111111-1111-4111-8111-111111111104';
   v_event_5_id uuid := '11111111-1111-4111-8111-111111111105';
   v_event_6_id uuid := '11111111-1111-4111-8111-111111111106';
-  v_base_url text := 'http://127.0.0.1:54321/storage/v1/object/public/headerimage/';
+  v_header_base_url text := 'http://127.0.0.1:54321/storage/v1/object/public/headerimage/event-headers/';
+  v_poster_base_url text := 'http://127.0.0.1:54321/storage/v1/object/public/headerimage/event-posters/';
 BEGIN
   RAISE NOTICE '📅 Seeding Events for G1, G4, G5, A1-A4, A15, G11, G14...';
 
   -- Event 1: Upcoming Public (14-15 days from now, 2 days) — G1, G4, A1-A4, G12
-  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "publishedAt")
+  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "eventPoster", "publishedAt")
   VALUES (
     v_event_1_id,
     'IBC Annual General Assembly 2026',
@@ -175,12 +176,13 @@ BEGIN
     'Iloilo Convention Center',
     'public',
     1500.00,
-    v_base_url || 'test-event-upcoming-1.jpg',
+    v_header_base_url || 'test-event-upcoming-1.jpg',
+    v_poster_base_url || 'test-poster-upcoming-1.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '3 days'
   );
 
   -- Event 2: Upcoming Public (21-22 days from now) — G1
-  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "publishedAt")
+  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "eventPoster", "publishedAt")
   VALUES (
     v_event_2_id,
     'Regional Business Innovation Summit',
@@ -190,12 +192,13 @@ BEGIN
     'Richmonde Hotel Iloilo',
     'public',
     2000.00,
-    v_base_url || 'test-event-upcoming-2.jpg',
+    v_header_base_url || 'test-event-upcoming-2.jpg',
+    v_poster_base_url || 'test-poster-upcoming-2.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '2 days'
   );
 
   -- Event 3: Upcoming Public (45-47 days from now) — G1
-  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "publishedAt")
+  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "eventPoster", "publishedAt")
   VALUES (
     v_event_3_id,
     'MSME Growth and Development Conference',
@@ -205,12 +208,13 @@ BEGIN
     'SMX Convention Center Iloilo',
     'public',
     800.00,
-    v_base_url || 'test-event-upcoming-3.jpg',
+    v_header_base_url || 'test-event-upcoming-3.jpg',
+    v_poster_base_url || 'test-poster-upcoming-3.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '5 days'
   );
 
   -- Event 4: Upcoming Private (10 days from now, 1 day) — G5
-  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "publishedAt")
+  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "eventPoster", "publishedAt")
   VALUES (
     v_event_4_id,
     'IBC Members-Only Quarterly Meeting',
@@ -220,12 +224,13 @@ BEGIN
     'IBC Office Conference Room, Marymart Iloilo',
     'private',
     500.00,
-    v_base_url || 'test-event-private.jpg',
+    v_header_base_url || 'test-event-private.jpg',
+    v_poster_base_url || 'test-poster-private.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '4 days'
   );
 
   -- Event 5: Past Public (10-8 days ago) — G1, A15 (facebook link)
-  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "publishedAt", "facebookLink")
+  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "eventPoster", "publishedAt", "facebookLink")
   VALUES (
     v_event_5_id,
     'Agri-Business Forum 2026',
@@ -235,13 +240,14 @@ BEGIN
     'Iloilo Business Park',
     'public',
     1000.00,
-    v_base_url || 'test-event-past-1.jpg',
+    v_header_base_url || 'test-event-past-1.jpg',
+    v_poster_base_url || 'test-poster-past-1.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '15 days',
     'https://www.facebook.com/IloiloBusinessClub/posts/pfbid0ExampleLink1'
   );
 
   -- Event 6: Past Public (20-18 days ago) — G1, G11 (evaluation), A19-A20 (evaluations), G14 (sponsored past)
-  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "publishedAt")
+  INSERT INTO "public"."Event" ("eventId", "eventTitle", "description", "eventStartDate", "eventEndDate", "venue", "eventType", "registrationFee", "eventHeaderUrl", "eventPoster", "publishedAt")
   VALUES (
     v_event_6_id,
     'IBC Networking Night 2026',
@@ -251,7 +257,8 @@ BEGIN
     'Seda Atria Hotel Iloilo',
     'public',
     1200.00,
-    v_base_url || 'test-event-past-2.jpg',
+    v_header_base_url || 'test-event-past-2.jpg',
+    v_poster_base_url || 'test-poster-past-2.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '25 days'
   );
 
@@ -304,7 +311,7 @@ BEGIN
     v_app_bm7_init,
     'ibc-app-testa1201',
     NULL, -- will be linked after BM7 insert
-    'Technology',
+    'Information, Technology, Creativity and Media',
     v_logo_url || 'test-bm-history.jpg',
     'newMember',
     'Heritage Builders',
@@ -325,7 +332,7 @@ BEGIN
     v_app_bm7_renewal,
     'ibc-app-testa1202',
     NULL,
-    'Technology',
+    'Information, Technology, Creativity and Media',
     v_logo_url || 'test-bm-history.jpg',
     'renewal',
     'Heritage Builders',
@@ -346,7 +353,7 @@ BEGIN
     v_app_bm7_update,
     'ibc-app-testa1203',
     NULL,
-    'Technology',
+    'Information, Technology, Creativity and Media',
     v_logo_url || 'test-bm-history.jpg',
     'updating',
     'Heritage Builders Inc.',
@@ -371,7 +378,7 @@ BEGIN
     v_app_bm1_id,
     'ibc-app-testbm01',
     NULL,
-    'Technology',
+    'Information, Technology, Creativity and Media',
     v_logo_url || 'test-bm-paid.jpg',
     'newMember',
     'Acme Corporation',
@@ -413,7 +420,7 @@ BEGIN
     v_app_bm3_id,
     'ibc-app-testbm03',
     NULL,
-    'Technology',
+    'Information, Technology, Creativity and Media',
     v_logo_url || 'test-bm-personal.jpg',
     'newMember',
     'InnovateTech Solutions',
@@ -455,7 +462,7 @@ BEGIN
     v_app_bm5_id,
     'ibc-app-testbm05',
     NULL,
-    'Services',
+    'Management and Business Consulting',
     v_logo_url || 'test-bm-unfeatured.jpg',
     'newMember',
     'Local Goods Co.',
@@ -476,7 +483,7 @@ BEGIN
     v_app_bm6_id,
     'ibc-app-testbm06',
     NULL,
-    'Services',
+    'Management and Business Consulting',
     v_logo_url || 'test-bm-unpaid.jpg',
     'newMember',
     'Prime Services Ltd.',
@@ -548,7 +555,7 @@ BEGIN
   -- BM1: Paid, corporate
   INSERT INTO "public"."BusinessMember" ("businessMemberId", "sectorId", "logoImageURL", "joinDate", "websiteURL", "businessName", "lastPaymentDate", "membershipExpiryDate", "membershipStatus", "primaryApplicationId", "identifier")
   VALUES (
-    v_bm1_id, 1, v_logo_url || 'test-bm-paid.jpg',
+    v_bm1_id, 11, v_logo_url || 'test-bm-paid.jpg',
     CURRENT_DATE,
     'https://acmecorp.test',
     'Acme Corporation',
@@ -565,7 +572,7 @@ BEGIN
   -- BM2: Cancelled, with known identifier for G8
   INSERT INTO "public"."BusinessMember" ("businessMemberId", "sectorId", "logoImageURL", "joinDate", "websiteURL", "businessName", "lastPaymentDate", "membershipExpiryDate", "membershipStatus", "primaryApplicationId", "identifier")
   VALUES (
-    v_bm2_id, 2, v_logo_url || 'test-bm-cancelled.jpg',
+    v_bm2_id, 14, v_logo_url || 'test-bm-cancelled.jpg',
     CURRENT_DATE - INTERVAL '2 years',
     'https://legacyindustries.test',
     'Legacy Industries',
@@ -587,7 +594,7 @@ BEGIN
   -- BM3: Paid, PERSONAL type (for G9)
   INSERT INTO "public"."BusinessMember" ("businessMemberId", "sectorId", "logoImageURL", "joinDate", "websiteURL", "businessName", "lastPaymentDate", "membershipExpiryDate", "membershipStatus", "primaryApplicationId", "identifier")
   VALUES (
-    v_bm3_id, 1, v_logo_url || 'test-bm-personal.jpg',
+    v_bm3_id, 11, v_logo_url || 'test-bm-personal.jpg',
     CURRENT_DATE,
     'https://innovatetech.test',
     'InnovateTech Solutions',
@@ -603,7 +610,7 @@ BEGIN
   -- BM4: Featured member (A10)
   INSERT INTO "public"."BusinessMember" ("businessMemberId", "sectorId", "logoImageURL", "joinDate", "websiteURL", "businessName", "lastPaymentDate", "membershipExpiryDate", "membershipStatus", "primaryApplicationId", "identifier", "featuredExpirationDate")
   VALUES (
-    v_bm4_id, 2, v_logo_url || 'test-bm-featured.jpg',
+    v_bm4_id, 14, v_logo_url || 'test-bm-featured.jpg',
     CURRENT_DATE - INTERVAL '6 months',
     'https://globalventures.test',
     'Global Ventures Inc.',
@@ -620,7 +627,7 @@ BEGIN
   -- BM5: Non-featured member (A10)
   INSERT INTO "public"."BusinessMember" ("businessMemberId", "sectorId", "logoImageURL", "joinDate", "websiteURL", "businessName", "lastPaymentDate", "membershipExpiryDate", "membershipStatus", "primaryApplicationId", "identifier")
   VALUES (
-    v_bm5_id, 3, v_logo_url || 'test-bm-unfeatured.jpg',
+    v_bm5_id, 13, v_logo_url || 'test-bm-unfeatured.jpg',
     CURRENT_DATE - INTERVAL '3 months',
     'https://localgoods.test',
     'Local Goods Co.',
@@ -636,7 +643,7 @@ BEGIN
   -- BM6: Unpaid member (A11)
   INSERT INTO "public"."BusinessMember" ("businessMemberId", "sectorId", "logoImageURL", "joinDate", "websiteURL", "businessName", "lastPaymentDate", "membershipExpiryDate", "membershipStatus", "primaryApplicationId", "identifier")
   VALUES (
-    v_bm6_id, 3, v_logo_url || 'test-bm-unpaid.jpg',
+    v_bm6_id, 13, v_logo_url || 'test-bm-unpaid.jpg',
     CURRENT_DATE - INTERVAL '1 year',
     'https://primeservices.test',
     'Prime Services Ltd.',
@@ -658,7 +665,7 @@ BEGIN
   -- BM7: Member with full application history (A12)
   INSERT INTO "public"."BusinessMember" ("businessMemberId", "sectorId", "logoImageURL", "joinDate", "websiteURL", "businessName", "lastPaymentDate", "membershipExpiryDate", "membershipStatus", "primaryApplicationId", "identifier")
   VALUES (
-    v_bm7_id, 1, v_logo_url || 'test-bm-history.jpg',
+    v_bm7_id, 11, v_logo_url || 'test-bm-history.jpg',
     CURRENT_DATE - INTERVAL '3 years',
     'https://heritagebuilders.test',
     'Heritage Builders',
@@ -703,7 +710,7 @@ BEGIN
     '33333333-3333-4333-8333-333333333310',
     'ibc-app-testa501',
     NULL,
-    'Healthcare',
+    'Healthcare Services and Equipment',
     v_logo_url || 'test-app-logo-1.jpg',
     'newMember',
     'MedCare Plus Corp.',
@@ -724,7 +731,7 @@ BEGIN
     '33333333-3333-4333-8333-333333333311',
     'ibc-app-testa502',
     NULL,
-    'Finance',
+    'Financial and Insurance Services',
     v_logo_url || 'test-app-logo-2.jpg',
     'newMember',
     'WealthWise Financial Advisors',
@@ -745,7 +752,7 @@ BEGIN
     '33333333-3333-4333-8333-333333333312',
     'ibc-app-testa503',
     NULL,
-    'Education',
+    'Educational Service',
     v_logo_url || 'test-app-logo-2.jpg',
     'renewal',
     'BrightFuture Learning Center',
@@ -785,7 +792,7 @@ BEGIN
     '33333333-3333-4333-8333-333333333313',
     'ibc-app-testa601',
     NULL,
-    'Real Estate',
+    'Real Estate Development and Construction',
     v_logo_url || 'test-app-logo-1.jpg',
     'newMember',
     'Prime Property Developers',
@@ -805,7 +812,7 @@ BEGIN
     '33333333-3333-4333-8333-333333333314',
     'ibc-app-testa602',
     NULL,
-    'Transportation',
+    'Shipping, Tourist Transport, Customs Brokerage, and Logistics',
     v_logo_url || 'test-app-logo-2.jpg',
     'newMember',
     'Island Logistics Corp.',
@@ -843,7 +850,7 @@ BEGIN
     '33333333-3333-4333-8333-333333333315',
     'ibc-app-testa701',
     v_bm1_id,
-    'Technology',
+    'Information, Technology, Creativity and Media',
     v_logo_url || 'test-app-logo-1.jpg',
     'updating',
     'Acme Corporation',
@@ -892,7 +899,7 @@ BEGIN
     '33333333-3333-4333-8333-333333333317',
     'ibc-app-testa703',
     v_bm3_id,
-    'Technology',
+    'Information, Technology, Creativity and Media',
     v_logo_url || 'test-app-logo-1.jpg',
     'updating',
     'InnovateTech Solutions Inc.',
@@ -978,8 +985,7 @@ BEGIN
 
   INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
   VALUES
-    ('55555555-5555-4555-8555-555555555501', v_reg_a101_id, 'Felipe', 'Dizon', '+639401111101', 'felipe.dizon@dti.gov.ph', true),
-    ('55555555-5555-4555-8555-555555555502', v_reg_a101_id, 'Lorna', 'Pascual', '+639401111102', 'lorna.pascual@dti.gov.ph', false);
+    ('55555555-5555-4555-8555-555555555501', v_reg_a101_id, 'Felipe', 'Dizon', '+639401111101', 'felipe.dizon@dti.gov.ph', true);
 
   INSERT INTO "public"."ProofImage" ("proofImageId", "registrationId", "path")
   VALUES ('77777777-7777-4777-8777-777777777711', v_reg_a101_id, 'reg-test-a101');
@@ -1009,8 +1015,7 @@ BEGIN
 
   INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
   VALUES
-    ('55555555-5555-4555-8555-555555555504', v_reg_a103_id, 'Gov. Arthur', 'Defensor', '+639403333301', 'gov.defensor@iloilo.gov.ph', true),
-    ('55555555-5555-4555-8555-555555555505', v_reg_a103_id, 'Atty. Susan', 'Javellana', '+639403333302', 'susan.javellana@iloilo.gov.ph', false);
+    ('55555555-5555-4555-8555-555555555504', v_reg_a103_id, 'Gov. Arthur', 'Defensor', '+639403333301', 'gov.defensor@iloilo.gov.ph', true);
 
   INSERT INTO "public"."ProofImage" ("proofImageId", "registrationId", "path")
   VALUES ('77777777-7777-4777-8777-777777777713', v_reg_a103_id, 'reg-test-a103');
@@ -1075,12 +1080,30 @@ BEGIN
   VALUES (
     v_reg_a205_id, v_event1_id, NULL, 'Startup Founder',
     TIMEZONE('UTC', NOW()) - INTERVAL '1 day',
-    'BPI', 'ibc-reg-testa205', 'pending'
+    'ONSITE', 'ibc-reg-testa205', 'pending'
   );
 
   INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
   VALUES
     ('55555555-5555-4555-8555-555555555510', v_reg_a205_id, 'Xavier', 'Castro', '+639506666601', 'xavier.castro@email.test', true);
+
+  ---------------------------------------------------------------------------
+  -- Multi-participant registration (group registration - testing 4 pax)
+  ---------------------------------------------------------------------------
+
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "note")
+  VALUES (
+    '44444444-4444-4444-8444-444444444418', v_event1_id, 'Fernandez Family Group',
+    TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
+    'ONSITE', 'ibc-reg-testgrp', 'accepted', 'Family group registration - 4 participants'
+  );
+
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  VALUES
+    ('55555555-5555-4555-8555-555555555519', '44444444-4444-4444-8444-444444444418', 'Ramon', 'Fernandez', '+639701234509', 'ramon.fernandez@email.test', true),
+    ('55555555-5555-4555-8555-555555555520', '44444444-4444-4444-8444-444444444418', 'Luz', 'Fernandez', '+639701234510', 'luz.fernandez@email.test', false),
+    ('55555555-5555-4555-8555-555555555521', '44444444-4444-4444-8444-444444444418', 'Carlos', 'Fernandez', '+639701234511', 'carlos.fernandez@email.test', false),
+    ('55555555-5555-4555-8555-555555555522', '44444444-4444-4444-8444-444444444418', 'Ana', 'Fernandez', '+639701234512', 'ana.fernandez@email.test', false);
 
   ---------------------------------------------------------------------------
   -- A3: Pre-seeded check-in records for Day 1 (Attendance Management)
@@ -1263,11 +1286,86 @@ BEGIN
     'University of San Agustin — Business Department',
     400.00,
     20,
-    8,
+    0,
     'active'
   );
 
   RAISE NOTICE '✅ 4 sponsored registrations + 3 linked event registrations seeded';
+END $$;
+
+-- =============================================================================
+-- SECTION: A22-Extra — Maxed-out sponsored registration (fully booked)
+-- =============================================================================
+-- A fully booked sponsored registration where all slots are taken.
+-- This tests the admin view when a sponsor's capacity is reached.
+
+DO $$
+DECLARE
+  v_event2_id uuid := '11111111-1111-4111-8111-111111111102';
+
+  v_sr5_id uuid := '99999999-9999-4999-8999-999999999905';
+  v_reg_max1_id uuid := '44444444-4444-4444-8444-444444444413';
+  v_reg_max2_id uuid := '44444444-4444-4444-8444-444444444414';
+  v_reg_max3_id uuid := '44444444-4444-4444-8444-444444444415';
+  v_reg_max4_id uuid := '44444444-4444-4444-8444-444444444416';
+  v_reg_max5_id uuid := '44444444-4444-4444-8444-444444444417';
+BEGIN
+  RAISE NOTICE '🎟️ Seeding maxed-out sponsored registration (fully booked)...';
+
+  INSERT INTO "public"."SponsoredRegistration" ("sponsoredRegistrationId", "uuid", "eventId", "sponsoredBy", "feeDeduction", "maxSponsoredGuests", "usedCount", "status")
+  VALUES (
+    v_sr5_id,
+    gen_random_uuid()::text,
+    v_event2_id,
+    'Iloilo City Chamber of Commerce and Industry Foundation',
+    600.00,
+    5,
+    5,
+    'active'
+  );
+
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "sponsoredRegistrationId")
+  VALUES
+    (
+      v_reg_max1_id,
+      v_event2_id, 'Andrea Villanueva',
+      TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
+      'ONSITE', 'ibc-reg-testmax0', 'accepted', v_sr5_id
+    ),
+    (
+      v_reg_max2_id,
+      v_event2_id, 'Benigno Santos',
+      TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
+      'ONSITE', 'ibc-reg-testmax1', 'accepted', v_sr5_id
+    ),
+    (
+      v_reg_max3_id,
+      v_event2_id, 'Catalina Reyes',
+      TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
+      'ONSITE', 'ibc-reg-testmax2', 'accepted', v_sr5_id
+    ),
+    (
+      v_reg_max4_id,
+      v_event2_id, 'Diego Fernandez',
+      TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
+      'ONSITE', 'ibc-reg-testmax3', 'accepted', v_sr5_id
+    ),
+    (
+      v_reg_max5_id,
+      v_event2_id, 'Elena Mendoza',
+      TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
+      'ONSITE', 'ibc-reg-testmax4', 'accepted', v_sr5_id
+    );
+
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  VALUES
+    ('55555555-5555-4555-8555-555555555514', v_reg_max1_id, 'Andrea', 'Villanueva', '+639701234504', 'andrea.villanueva@email.test', true),
+    ('55555555-5555-4555-8555-555555555515', v_reg_max2_id, 'Benigno', 'Santos', '+639701234505', 'benigno.santos@email.test', true),
+    ('55555555-5555-4555-8555-555555555516', v_reg_max3_id, 'Catalina', 'Reyes', '+639701234506', 'catalina.reyes@email.test', true),
+    ('55555555-5555-4555-8555-555555555517', v_reg_max4_id, 'Diego', 'Fernandez', '+639701234507', 'diego.fernandez@email.test', true),
+    ('55555555-5555-4555-8555-555555555518', v_reg_max5_id, 'Elena', 'Mendoza', '+639701234508', 'elena.mendoza@email.test', true);
+
+  RAISE NOTICE '✅ Maxed-out sponsored registration seeded (5/5 slots filled)';
 END $$;
 
 -- =============================================================================
