@@ -9,6 +9,10 @@ import PaymentProofReviewItem from "@/app/admin/events/_components/PaymentProof/
 import { usePaymentProofEditor } from "@/app/admin/events/_hooks/usePaymentProofEditor";
 import type { SignedProof } from "@/app/admin/events/_hooks/usePaymentProofSignedUrlAction";
 import { Button } from "@/components/ui/button";
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  isValidImageUploadFile,
+} from "@/lib/fileUpload";
 
 interface PaymentProofEditPanelProps {
   registrationId: string;
@@ -67,7 +71,10 @@ export default function PaymentProofEditPanel({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     if (files.length > 0) {
-      addFiles(files, "file");
+      const validFiles = files.filter(isValidImageUploadFile);
+      if (validFiles.length > 0) {
+        addFiles(validFiles, "file");
+      }
     }
     event.target.value = "";
   };
@@ -120,7 +127,7 @@ export default function PaymentProofEditPanel({
               Add with file
             </Button>
             <input
-              accept="image/*"
+              accept={IMAGE_UPLOAD_ACCEPT_ATTR}
               className="hidden"
               multiple
               onChange={handleFileChange}

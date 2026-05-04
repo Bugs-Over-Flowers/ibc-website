@@ -86,7 +86,7 @@ function PaymentProofsFieldInner({
   return (
     <div className="space-y-3">
       <Label className="font-semibold text-foreground text-sm">
-        Upload Proof of Payment *
+        Upload Payment Proofs *
       </Label>
 
       <Alert className="rounded-xl border-amber-500/30 bg-amber-50 dark:bg-amber-500/10">

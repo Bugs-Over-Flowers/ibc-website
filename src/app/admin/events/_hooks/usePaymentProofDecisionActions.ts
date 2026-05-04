@@ -50,7 +50,7 @@ export function usePaymentProofDecisionActions({
         const nextStatus = getNextStatus(result, "accepted");
         onStatusResolved(nextStatus);
         onStatusChange?.(nextStatus);
-        toast.success(getResultMessage(result, "Payment proof accepted"));
+        toast.success(getResultMessage(result, "Payment proofs accepted"));
       },
       onError: (error) => {
         toast.error(error);
@@ -76,7 +76,7 @@ export function usePaymentProofDecisionActions({
         const nextStatus = getNextStatus(result, "rejected");
         onStatusResolved(nextStatus);
         onStatusChange?.(nextStatus);
-        toast.success(getResultMessage(result, "Payment proof rejected"));
+        toast.success(getResultMessage(result, "Payment proofs rejected"));
       },
       onError: (error) => {
         toast.error(error);
