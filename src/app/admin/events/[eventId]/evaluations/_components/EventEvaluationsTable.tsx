@@ -40,8 +40,8 @@ const formatRating = (rating: RatingScale | null): string => {
 };
 
 const getExcelColumns = (): ColumnDef<EventEvaluationExportRow>[] => [
-  { accessorKey: "respondentName", header: "Respondent" },
   { accessorKey: "created_at", header: "Submitted At" },
+  { accessorKey: "respondentName", header: "Respondent" },
   { accessorKey: "q1_rating", header: EVALUATION_QUESTIONS[0].question },
   { accessorKey: "q2_rating", header: EVALUATION_QUESTIONS[1].question },
   { accessorKey: "q3_rating", header: EVALUATION_QUESTIONS[2].question },
@@ -60,12 +60,14 @@ export default function EventEvaluationsTable({
   const [filteredEvaluations, setFilteredEvaluations] = useState(evaluations);
 
   const handleExport = async () => {
-    const exportRows: EventEvaluationExportRow[] = evaluations.map(
-      (evaluation) => ({
-        ...evaluation,
-        respondentName: evaluation.name?.trim() || "Anonymous respondent",
-      }),
+    const sorted = [...evaluations].sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
+    const exportRows: EventEvaluationExportRow[] = sorted.map((evaluation) => ({
+      ...evaluation,
+      respondentName: evaluation.name?.trim() || "Anonymous respondent",
+    }));
 
     await exportToExcel({
       data: exportRows,
@@ -82,7 +84,7 @@ export default function EventEvaluationsTable({
         q5_rating: (value) => formatRating(value as RatingScale | null),
         q6_rating: (value) => formatRating(value as RatingScale | null),
       },
-      columnWidths: [20, 22, 42, 42, 42, 32, 36, 38, 32, 32],
+      columnWidths: [22, 20, 42, 42, 42, 32, 36, 38, 32, 32],
       sheetName: "Evaluations",
     });
   };

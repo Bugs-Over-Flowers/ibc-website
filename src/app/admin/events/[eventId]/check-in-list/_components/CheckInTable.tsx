@@ -158,8 +158,12 @@ export default function CheckInTable({
   }));
 
   const handleExport = async () => {
+    const sorted = [...tableData].sort(
+      (a, b) =>
+        new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime(),
+    );
     await exportToExcel({
-      data: tableData,
+      data: sorted,
       columns: getExcelColumns(),
       event: eventDetails,
       filename: `${eventDetails.title}-${eventDayLabel}-CheckIns-${new Date().toISOString().split("T")[0]}.xlsx`,

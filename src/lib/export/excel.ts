@@ -184,8 +184,12 @@ export async function exportToExcel<TData extends Record<string, unknown>>(
       ],
       // Row 6: Empty spacer
       new Array(totalColumns).fill(null),
-      // Column headers
-      exportableColumns.map((column) => column.header),
+      // Column headers (styled: dark blue + bold)
+      exportableColumns.map((column) => ({
+        value: column.header,
+        fontWeight: "bold",
+        backgroundColor: "#b8cbd9",
+      })),
       // Data rows
       ...data.map((row) =>
         exportableColumns.map((column) => getCellValue(row, column.key)),
