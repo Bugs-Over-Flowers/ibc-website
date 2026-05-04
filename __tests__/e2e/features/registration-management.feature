@@ -34,7 +34,7 @@ Feature: Registration Management
 	  | Reject  | Rejected | Payment proof rejected. Rejection email sent. |
 
 
-  @wip @happy
+  @happy
   Scenario Outline: Display correct number of participant cards
     Given I am on the Registration Details page with <participant_count> participants
     Then I should see <participant_count> participant cards

@@ -23,8 +23,12 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "html",
-  globalTimeout: 120000,
-  timeout: 30000,
+  globalTimeout: 20 * 1000, // 20 seconds
+  timeout: 10 * 1000, // 10 seconds
+
+  expect: {
+    timeout: 10 * 1000, // 10 seconds
+  },
 
   use: {
     baseURL: "http://localhost:3000",
