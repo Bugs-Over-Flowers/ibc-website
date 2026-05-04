@@ -68,6 +68,12 @@ Feature: Registration Management
       | a           | see        | Test note for pending registration |
       | no          | not see    |                                    |
 
+  @happy
+  Scenario: Participant identifier shown in QR code dialog
+    Given I am on the Registration Details page of a Pending registration
+    When I click the QR code button on a participant card
+    Then I should see the participant identifier in the QR code dialog
+
   @critical @sad
   Scenario: Non-existent registration shows not found
     Given I try to view registration details with invalid ID

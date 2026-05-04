@@ -1,11 +1,13 @@
-import { Calendar, MapPin, Tag } from "lucide-react";
+import { Calendar, ExternalLink, MapPin, Tag } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/events/eventUtils";
 import type { Database } from "@/lib/supabase/db.types";
 
 interface EventDayDetailsProps {
   eventDayData: Pick<
     Database["public"]["Tables"]["EventDay"]["Row"],
-    "label" | "eventDate"
+    "label" | "eventDate" | "eventId"
   > & {
     eventTitle: string;
     venue?: string | null;
@@ -29,11 +31,25 @@ export default function EventDayDetails({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border/70 bg-card">
-      <div className="border-b bg-muted/30 px-4 py-3">
-        <p className="font-medium text-sm">{eventDayData.eventTitle}</p>
-        <p className="mt-0.5 text-muted-foreground text-xs">
-          Event details for this check-in session
-        </p>
+      <div className="flex border-b bg-muted/30 px-4 py-3">
+        <div className="w-full">
+          <p className="font-medium text-sm">{eventDayData.eventTitle}</p>
+          <p className="mt-0.5 text-muted-foreground text-xs">
+            Event details for this check-in session
+          </p>
+        </div>
+        <div className="">
+          <Button
+            nativeButton={false}
+            render={
+              <Link href={`/admin/events/${eventDayData.eventId}`}>
+                <ExternalLink />
+              </Link>
+            }
+            size={"sm"}
+            variant={"outline"}
+          />
+        </div>
       </div>
       <div className="flex flex-col gap-0 divide-y divide-border/50">
         {rows.map(({ icon: Icon, label, value }) => (

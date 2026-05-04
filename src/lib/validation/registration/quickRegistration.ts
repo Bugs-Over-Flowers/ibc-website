@@ -4,7 +4,6 @@ import {
   StandardRegistrationStep1Schema,
   SubmitRegistrationResponseSchema,
 } from "@/lib/validation/registration/standard";
-import { landlineSchema, phoneSchema } from "@/lib/validation/utils";
 
 export const QuickOnsiteRegistrantSchema = z
   .object({
@@ -17,16 +16,7 @@ export const QuickOnsiteRegistrantSchema = z
       .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    contactNumber: z
-      .string("Please input your contact number")
-      .refine(
-        (data) =>
-          z.union([phoneSchema, landlineSchema]).safeParse(data).success,
-        {
-          error:
-            "Contact number must be a valid Philippine phone or landline number",
-        },
-      ),
+    contactNumber: z.string("Please input your contact number").trim(),
     email: z.email().trim(),
   })
   .transform((data) => ({
@@ -53,16 +43,7 @@ export const QuickOnsiteRegistrationFormSchema = z
       .min(2, "Last name must be at least 2 characters")
       .max(100),
     email: z.email(),
-    contactNumber: z
-      .string("Please input your contact number")
-      .refine(
-        (data) =>
-          z.union([phoneSchema, landlineSchema]).safeParse(data).success,
-        {
-          error:
-            "Contact number must be a valid Philippine phone or landline number",
-        },
-      ),
+    contactNumber: z.string("Please input your contact number").trim(),
     remark: z
       .string()
       .max(500, "Remark cannot exceed 500 characters")

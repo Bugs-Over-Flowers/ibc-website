@@ -29,6 +29,14 @@ Feature: Participant list
       | Reject | not appear | 1            |
 
   @happy
+  Scenario: Show participant QR code through action button
+    Given I am an admin on the registration list page for an event
+    When I open the participants tab
+    And I click the actions button for a participant
+    And I select "Show QR Code"
+    Then the QR dialog should display the correct participant identifier
+
+  @happy
   Scenario: Stats stay consistent across tabs
     Given I am on the participants tab
     When I switch to the registrations tab

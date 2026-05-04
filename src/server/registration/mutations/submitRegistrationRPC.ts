@@ -46,26 +46,25 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   const { step1, step3, eventId, step2, sponsoredRegistrationId, step4 } =
     parsedData;
 
-  // Call database RPC function with transformed data
+  const paymentPaths: string[] =
+    step3.paymentMethod === "online" ? step3.paths : [];
+
   const { data: rpcResults, error } = await supabase.rpc(
     "submit_event_registration",
     {
       p_event_id: eventId,
-      // Member: send businessMemberId, Non-member: undefined
       p_non_member_name:
         step1.member === "nonmember" ? step1.nonMemberName : undefined,
       p_member_type: step1.member,
       p_business_member_id:
         step1.member === "member" ? step1.businessMemberId : undefined,
       p_registrant: step2.registrant,
-      // Online payment: send storage path, Onsite: undefined
-      p_payment_path: step3.paymentMethod === "online" ? step3.path : undefined,
+      p_payment_paths:
+        paymentPaths.length > 0 ? paymentPaths.map((p) => ({ path: p })) : [],
       p_payment_method: step3.paymentMethod,
       p_other_participants: step2.otherParticipants,
-      // Non-member: send name, Member: undefined
       p_note: step4.note,
       p_identifier: registrationIdentifier,
-      // Sponsored registration: send ID if exists, otherwise undefined
       p_sponsored_registration_id: sponsoredRegistrationId || undefined,
     },
   );
@@ -111,5 +110,6 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
   return {
     rpcResults: validatedResponse,
     identifier: registrationIdentifier,
+    participants: validatedResponse.participants ?? [],
   };
 };
