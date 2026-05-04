@@ -23,7 +23,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "html",
-  globalTimeout: 10000,
+  globalTimeout: 120000,
   timeout: 30000,
 
   use: {

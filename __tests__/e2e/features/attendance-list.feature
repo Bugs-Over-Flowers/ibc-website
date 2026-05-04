@@ -78,7 +78,7 @@ Feature: Attendance List
       | 20           | 20         | 100                |
       | 23           | 30         | 77                 |
 
-  @sad @wip
+  @sad
   Scenario: Show error when event does not exist
-    Given I navigate to check-in list for non-existent event
-    Then I should see error loading event details
+    Given I navigate to non-existent event attendance page
+    Then I should see the attendance event not found error
