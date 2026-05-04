@@ -22,6 +22,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -84,9 +85,22 @@ export default function PaymentProofReviewDialog({
   onStatusChange,
 }: PaymentProofReviewDialogProps) {
   const [mode, setMode] = useState<"view" | "edit">("view");
+  const [sendEmailOnReject, setSendEmailOnReject] = useState(
+    page !== "check-in",
+  );
   const [paymentProofStatus, setPaymentProofStatus] = useState(
     initialPaymentProofStatus,
   );
+
+  const handleOpenChangeWrapper = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setMode("view");
+      setSendEmailOnReject(page !== "check-in");
+    } else {
+      setMode("view");
+    }
+    onOpenChange?.(nextOpen);
+  };
 
   const {
     proofs: signedProofs,
@@ -99,8 +113,8 @@ export default function PaymentProofReviewDialog({
 
   const { acceptProof, rejectProof, isAccepting, isRejecting } =
     usePaymentProofDecisionActions({
-      page,
       registrationData,
+      sendEmailOnReject,
       onAcceptAction,
       onRejectAction,
       onStatusChange,
@@ -110,13 +124,6 @@ export default function PaymentProofReviewDialog({
   const isAnyActionPending = isFetchingSignedUrl || isAccepting || isRejecting;
   const isDecisionLocked = paymentProofStatus !== "pending";
   const statusConfig = getStatusConfig(paymentProofStatus);
-
-  const handleOpenChangeWrapper = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      setMode("view");
-    }
-    onOpenChange?.(nextOpen);
-  };
 
   return (
     <Dialog onOpenChange={handleOpenChangeWrapper} open={open}>
@@ -203,6 +210,23 @@ export default function PaymentProofReviewDialog({
 
         {mode === "view" && (
           <DialogFooter className="mt-1 flex-wrap gap-2 border-t pt-4 max-sm:*:w-full">
+            {paymentProofStatus === "pending" && (
+              <div className="mr-auto flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
+                <Checkbox
+                  checked={sendEmailOnReject}
+                  id="send-rejection-email"
+                  onCheckedChange={(checked) =>
+                    setSendEmailOnReject(checked === true)
+                  }
+                />
+                <label
+                  className="cursor-pointer select-none text-muted-foreground"
+                  htmlFor="send-rejection-email"
+                >
+                  Send rejection email
+                </label>
+              </div>
+            )}
             <Button
               disabled={isAnyActionPending}
               onClick={() => handleOpenChangeWrapper(false)}
@@ -226,7 +250,11 @@ export default function PaymentProofReviewDialog({
               variant="outline"
             >
               <XCircle className="size-3.5" />
-              {isRejecting ? "Rejecting..." : "Reject"}
+              {isRejecting
+                ? "Rejecting..."
+                : sendEmailOnReject
+                  ? "Reject & Email"
+                  : "Reject Without Email"}
             </Button>
             <Button
               className="bg-green-700 hover:bg-green-800"
