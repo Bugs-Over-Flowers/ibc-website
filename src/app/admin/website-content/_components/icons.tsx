@@ -52,7 +52,6 @@ import {
   Tag,
   Target,
   TrendingUp,
-  Trophy,
   Trophy as Trophy2,
   UploadCloud,
   UserCircle,
@@ -133,7 +132,6 @@ export const ICON_OPTIONS: IconOption[] = Object.keys(ICON_MAP).map((name) => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   // ICON_MAP is typed as LucideIcon so indexing returns any-ish component
   name,
-  // @ts-expect-error
   Icon: ICON_MAP[name],
 }));
 
