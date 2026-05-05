@@ -52,8 +52,12 @@ export async function updateRegistrationPaymentProofStatus(
     throw new Error("Payment proof updates are only allowed for BPI payments");
   }
 
-  if (registration.paymentProofStatus !== "pending") {
-    throw new Error("Payment proof can only be reviewed while pending");
+  if (registration.paymentProofStatus === "accepted") {
+    throw new Error("Payment proof has already been accepted");
+  }
+
+  if (registration.paymentProofStatus === "rejected" && status === "rejected") {
+    throw new Error("Payment proof has already been rejected");
   }
 
   if (status === "accepted" && (registration.ProofImage?.length ?? 0) === 0) {

@@ -186,8 +186,8 @@ export default function OnlinePaymentSection({
             <AlertDialogHeader>
               <AlertDialogTitle>Reject Payment?</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to reject this payment proof? This action
-                cannot be undone.
+                Are you sure you want to reject these payment proofs? This
+                action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             {optimisticPaymentProofStatus === "pending" && (

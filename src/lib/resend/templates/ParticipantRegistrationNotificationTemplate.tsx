@@ -85,7 +85,8 @@ export default function ParticipantRegistrationNotificationTemplate({
 
           <Section style={contextSection}>
             <Text style={contextText}>
-              Registered by <strong>{registrantName}</strong> (Registration ID:{" "}
+              Registered by <strong>{registrantName}</strong> (Group
+              Registration Identifier:{" "}
               <code style={detailValueMono}>{registrationIdentifier}</code>)
             </Text>
           </Section>
