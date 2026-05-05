@@ -983,9 +983,9 @@ BEGIN
     'BPI', 'ibc-reg-testa101', 'pending', 'Attending Day 1 only'
   );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555501', v_reg_a101_id, 'Felipe', 'Dizon', '+639401111101', 'felipe.dizon@dti.gov.ph', true);
+    ('55555555-5555-4555-8555-555555555501', v_reg_a101_id, 'Felipe', 'Dizon', '+639401111101', 'felipe.dizon@dti.gov.ph', true, 'ibc-par-55555501');
 
   INSERT INTO "public"."ProofImage" ("proofImageId", "registrationId", "path")
   VALUES ('77777777-7777-4777-8777-777777777711', v_reg_a101_id, 'reg-test-a101');
@@ -998,9 +998,9 @@ BEGIN
     'BPI', 'ibc-reg-testa102', 'pending'
   );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555503', v_reg_a102_id, 'Marites', 'Sarmiento', '+639402222201', 'marites.sarmiento@ched.gov.ph', true);
+    ('55555555-5555-4555-8555-555555555503', v_reg_a102_id, 'Marites', 'Sarmiento', '+639402222201', 'marites.sarmiento@ched.gov.ph', true, 'ibc-par-55555503');
 
   INSERT INTO "public"."ProofImage" ("proofImageId", "registrationId", "path")
   VALUES ('77777777-7777-4777-8777-777777777712', v_reg_a102_id, 'reg-test-a102');
@@ -1013,9 +1013,9 @@ BEGIN
     'BPI', 'ibc-reg-testa103', 'pending'
   );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555504', v_reg_a103_id, 'Gov. Arthur', 'Defensor', '+639403333301', 'gov.defensor@iloilo.gov.ph', true);
+    ('55555555-5555-4555-8555-555555555504', v_reg_a103_id, 'Gov. Arthur', 'Defensor', '+639403333301', 'gov.defensor@iloilo.gov.ph', true, 'ibc-par-55555504');
 
   INSERT INTO "public"."ProofImage" ("proofImageId", "registrationId", "path")
   VALUES ('77777777-7777-4777-8777-777777777713', v_reg_a103_id, 'reg-test-a103');
@@ -1032,9 +1032,9 @@ BEGIN
     'ONSITE', 'ibc-reg-testa201', 'accepted', 'Attending both days'
   );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555506', v_reg_a201_id, 'Juan', 'Dela Cruz', '+639111111111', 'juan.delacruz@acmecorp.test', true);
+    ('55555555-5555-4555-8555-555555555506', v_reg_a201_id, 'Juan', 'Dela Cruz', '+639111111111', 'juan.delacruz@acmecorp.test', true, 'ibc-par-55555506');
 
   -- Registration A2-2: Proxy scenario (accepted, member, with proxy note)
   INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "note")
@@ -1044,9 +1044,9 @@ BEGIN
     'ONSITE', 'ibc-reg-testa202', 'accepted', 'Attending Day 1 only; will be represented by a proxy'
   );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555507', v_reg_a202_id, 'Sofia', 'Garcia', '+639111111112', 'sofia.garcia@acmecorp.test', true);
+    ('55555555-5555-4555-8555-555555555507', v_reg_a202_id, 'Sofia', 'Garcia', '+639111111112', 'sofia.garcia@acmecorp.test', true, 'ibc-par-55555507');
 
   -- Registration A2-3: Rejected-then-new-proof (was rejected, now has new proof)
   INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "note")
@@ -1056,9 +1056,9 @@ BEGIN
     'BPI', 'ibc-reg-testa203', 'accepted', 'Previously rejected — brought new proof on the day'
   );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555508', v_reg_a203_id, 'Tomas', 'Bautista', '+639504444401', 'tomas.bautista@email.test', true);
+    ('55555555-5555-4555-8555-555555555508', v_reg_a203_id, 'Tomas', 'Bautista', '+639504444401', 'tomas.bautista@email.test', true, 'ibc-par-55555508');
 
   INSERT INTO "public"."ProofImage" ("proofImageId", "registrationId", "path")
   VALUES ('77777777-7777-4777-8777-777777777714', v_reg_a203_id, 'reg-test-a101');
@@ -1071,9 +1071,9 @@ BEGIN
     'ONSITE', 'ibc-reg-testa204', 'accepted'
   );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555509', v_reg_a204_id, 'Nina', 'Reyes', '+639505555501', 'nina.reyes@email.test', true);
+    ('55555555-5555-4555-8555-555555555509', v_reg_a204_id, 'Nina', 'Reyes', '+639505555501', 'nina.reyes@email.test', true, 'ibc-par-55555509');
 
   -- Registration A2-5: Unhandled payment proof (pending)
   INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus")
@@ -1083,9 +1083,9 @@ BEGIN
     'ONSITE', 'ibc-reg-testa205', 'pending'
   );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555510', v_reg_a205_id, 'Xavier', 'Castro', '+639506666601', 'xavier.castro@email.test', true);
+    ('55555555-5555-4555-8555-555555555510', v_reg_a205_id, 'Xavier', 'Castro', '+639506666601', 'xavier.castro@email.test', true, 'ibc-par-55555510');
 
   ---------------------------------------------------------------------------
   -- Multi-participant registration (group registration - testing 4 pax)
@@ -1098,12 +1098,12 @@ BEGIN
     'ONSITE', 'ibc-reg-testgrp', 'accepted', 'Family group registration - 4 participants'
   );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555519', '44444444-4444-4444-8444-444444444418', 'Ramon', 'Fernandez', '+639701234509', 'ramon.fernandez@email.test', true),
-    ('55555555-5555-4555-8555-555555555520', '44444444-4444-4444-8444-444444444418', 'Luz', 'Fernandez', '+639701234510', 'luz.fernandez@email.test', false),
-    ('55555555-5555-4555-8555-555555555521', '44444444-4444-4444-8444-444444444418', 'Carlos', 'Fernandez', '+639701234511', 'carlos.fernandez@email.test', false),
-    ('55555555-5555-4555-8555-555555555522', '44444444-4444-4444-8444-444444444418', 'Ana', 'Fernandez', '+639701234512', 'ana.fernandez@email.test', false);
+    ('55555555-5555-4555-8555-555555555519', '44444444-4444-4444-8444-444444444418', 'Ramon', 'Fernandez', '+639701234509', 'ramon.fernandez@email.test', true, 'ibc-par-55555519'),
+    ('55555555-5555-4555-8555-555555555520', '44444444-4444-4444-8444-444444444418', 'Luz', 'Fernandez', '+639701234510', 'luz.fernandez@email.test', false, 'ibc-par-55555520'),
+    ('55555555-5555-4555-8555-555555555521', '44444444-4444-4444-8444-444444444418', 'Carlos', 'Fernandez', '+639701234511', 'carlos.fernandez@email.test', false, 'ibc-par-55555521'),
+    ('55555555-5555-4555-8555-555555555522', '44444444-4444-4444-8444-444444444418', 'Ana', 'Fernandez', '+639701234512', 'ana.fernandez@email.test', false, 'ibc-par-55555522');
 
   ---------------------------------------------------------------------------
   -- A3: Pre-seeded check-in records for Day 1 (Attendance Management)
@@ -1271,11 +1271,11 @@ BEGIN
       'ONSITE', 'ibc-reg-tests303', 'accepted', v_sr3_id
     );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555511', '44444444-4444-4444-8444-444444444410', 'Jose', 'Pascual', '+639701234501', 'jose.pascual@wit.test', true),
-    ('55555555-5555-4555-8555-555555555512', '44444444-4444-4444-8444-444444444411', 'Karen', 'Delos Santos', '+639701234502', 'karen.delossantos@wit.test', true),
-    ('55555555-5555-4555-8555-555555555513', '44444444-4444-4444-8444-444444444412', 'Mark', 'Valdez', '+639701234503', 'mark.valdez@wit.test', true);
+    ('55555555-5555-4555-8555-555555555511', '44444444-4444-4444-8444-444444444410', 'Jose', 'Pascual', '+639701234501', 'jose.pascual@wit.test', true, 'ibc-par-55555511'),
+    ('55555555-5555-4555-8555-555555555512', '44444444-4444-4444-8444-444444444411', 'Karen', 'Delos Santos', '+639701234502', 'karen.delossantos@wit.test', true, 'ibc-par-55555512'),
+    ('55555555-5555-4555-8555-555555555513', '44444444-4444-4444-8444-444444444412', 'Mark', 'Valdez', '+639701234503', 'mark.valdez@wit.test', true, 'ibc-par-55555513');
 
   -- SR4: Past event — for G14 (guest opens sponsored link for finished event)
   INSERT INTO "public"."SponsoredRegistration" ("sponsoredRegistrationId", "uuid", "eventId", "sponsoredBy", "feeDeduction", "maxSponsoredGuests", "usedCount", "status")
@@ -1357,13 +1357,13 @@ BEGIN
       'ONSITE', 'ibc-reg-testmax4', 'accepted', v_sr5_id
     );
 
-  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal")
+  INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
   VALUES
-    ('55555555-5555-4555-8555-555555555514', v_reg_max1_id, 'Andrea', 'Villanueva', '+639701234504', 'andrea.villanueva@email.test', true),
-    ('55555555-5555-4555-8555-555555555515', v_reg_max2_id, 'Benigno', 'Santos', '+639701234505', 'benigno.santos@email.test', true),
-    ('55555555-5555-4555-8555-555555555516', v_reg_max3_id, 'Catalina', 'Reyes', '+639701234506', 'catalina.reyes@email.test', true),
-    ('55555555-5555-4555-8555-555555555517', v_reg_max4_id, 'Diego', 'Fernandez', '+639701234507', 'diego.fernandez@email.test', true),
-    ('55555555-5555-4555-8555-555555555518', v_reg_max5_id, 'Elena', 'Mendoza', '+639701234508', 'elena.mendoza@email.test', true);
+    ('55555555-5555-4555-8555-555555555514', v_reg_max1_id, 'Andrea', 'Villanueva', '+639701234504', 'andrea.villanueva@email.test', true, 'ibc-par-55555514'),
+    ('55555555-5555-4555-8555-555555555515', v_reg_max2_id, 'Benigno', 'Santos', '+639701234505', 'benigno.santos@email.test', true, 'ibc-par-55555515'),
+    ('55555555-5555-4555-8555-555555555516', v_reg_max3_id, 'Catalina', 'Reyes', '+639701234506', 'catalina.reyes@email.test', true, 'ibc-par-55555516'),
+    ('55555555-5555-4555-8555-555555555517', v_reg_max4_id, 'Diego', 'Fernandez', '+639701234507', 'diego.fernandez@email.test', true, 'ibc-par-55555517'),
+    ('55555555-5555-4555-8555-555555555518', v_reg_max5_id, 'Elena', 'Mendoza', '+639701234508', 'elena.mendoza@email.test', true, 'ibc-par-55555518');
 
   RAISE NOTICE '✅ Maxed-out sponsored registration seeded (5/5 slots filled)';
 END $$;
