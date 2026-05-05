@@ -179,27 +179,33 @@ function WebsiteContentManagementPageContent() {
   );
 
   const handleSave = async () => {
-    const snapshotCards = cards;
     const snapshotForm = form;
+    const snapshotCards = cards;
+    let finalCards = snapshotCards;
 
     setIsUploadingImages(true);
     try {
-      await uploadAllPendingImages();
+      const uploadedImages = await uploadAllPendingImages();
+      finalCards = snapshotCards.map((card) => {
+        const publicUrl = uploadedImages[card.entryKey];
 
-      // Poll for state updates: wait until blob URLs are gone or timeout after 5 seconds
-      let hasBlobUrls = true;
-      let attempts = 0;
-      const maxAttempts = 50; // 50 * 100ms = 5000ms max wait
+        if (!publicUrl) {
+          return card;
+        }
 
-      while (hasBlobUrls && attempts < maxAttempts) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        hasBlobUrls = cards.some((card) => card.imageUrl.startsWith("blob:"));
-        attempts++;
-      }
+        return {
+          ...card,
+          imageUrl: publicUrl,
+        };
+      });
+
+      const hasBlobUrls = finalCards.some((card) =>
+        card.imageUrl.startsWith("blob:"),
+      );
 
       if (hasBlobUrls) {
         console.warn(
-          `Images still have preview URLs after timeout: ${cards
+          `Images still have preview URLs after upload: ${finalCards
             .filter((c) => c.imageUrl.startsWith("blob:"))
             .map((c) => c.entryKey)
             .join(", ")}`,
@@ -217,7 +223,7 @@ function WebsiteContentManagementPageContent() {
       setIsUploadingImages(false);
     }
 
-    save(snapshotCards, snapshotForm);
+    save(finalCards, snapshotForm);
   };
 
   const updatedAtDisplay = (section: SectionKey) => {

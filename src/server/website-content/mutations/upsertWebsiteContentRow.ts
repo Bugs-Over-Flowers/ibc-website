@@ -1,5 +1,6 @@
 "use server";
 
+import { removePersonalImages } from "@/lib/storage/personalImage";
 import { createActionClient } from "@/lib/supabase/server";
 import type {
   UpsertWebsiteContentRowInput,
@@ -67,7 +68,7 @@ export async function deleteWebsiteContentEntriesBySection(
 
   const { data, error } = await supabase
     .from("WebsiteContent")
-    .select("entryKey")
+    .select("entryKey, imageUrl")
     .eq("section", section)
     .eq("isActive", true);
 
@@ -78,12 +79,34 @@ export async function deleteWebsiteContentEntriesBySection(
   }
 
   const retained = new Set(retainedEntryKeys);
+  const rowsToDelete = (data ?? []).filter(
+    (row) => row.entryKey && !retained.has(row.entryKey),
+  );
+
   const entryKeysToDelete = Array.from(
-    new Set((data ?? []).map((row) => row.entryKey).filter(Boolean)),
-  ).filter((entryKey) => !retained.has(entryKey));
+    new Set(rowsToDelete.map((row) => row.entryKey).filter(Boolean)),
+  );
 
   if (entryKeysToDelete.length === 0) {
     return;
+  }
+
+  const imageUrls = rowsToDelete
+    .map((row) => row.imageUrl)
+    .filter((imageUrl): imageUrl is string => Boolean(imageUrl));
+
+  if (imageUrls.length > 0) {
+    const { error: storageError } = await removePersonalImages(
+      supabase,
+      imageUrls,
+    );
+
+    if (storageError) {
+      console.error(
+        "[deleteWebsiteContentEntriesBySection] Storage removal failed:",
+        storageError.message,
+      );
+    }
   }
 
   const { error: deleteError } = await supabase

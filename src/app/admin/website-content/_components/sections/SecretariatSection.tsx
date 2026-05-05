@@ -285,6 +285,7 @@ export function SecretariatSection({
         const card = cards.find((c) => c.entryKey === entryKey);
         return card?.imageUrl;
       },
+      deferred: true,
     });
 
   useEffect(() => {

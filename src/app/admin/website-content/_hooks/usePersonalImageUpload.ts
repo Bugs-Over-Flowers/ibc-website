@@ -4,6 +4,7 @@ import type { ChangeEvent } from "react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { ImageUploadFileSchema } from "@/lib/fileUpload";
+import { removePersonalImages } from "@/lib/storage/personalImage";
 import { createClient } from "@/lib/supabase/client";
 
 type UsePersonalImageUploadOptions = {
@@ -18,7 +19,10 @@ type PendingUpload = {
   entryKey: string;
   file: File;
   previewUrl: string;
+  oldImageUrl: string | null;
 };
+
+type UploadedImageMap = Record<string, string>;
 
 export function usePersonalImageUpload({
   basePath,
@@ -57,7 +61,11 @@ export function usePersonalImageUpload({
 
           setPendingUploads((prev) => {
             const next = new Map(prev);
-            next.set(entryKey, { entryKey, file, previewUrl });
+            const oldImageUrl =
+              next.get(entryKey)?.oldImageUrl ??
+              getOldImageUrl?.(entryKey) ??
+              null;
+            next.set(entryKey, { entryKey, file, previewUrl, oldImageUrl });
             return next;
           });
 
@@ -94,59 +102,21 @@ export function usePersonalImageUpload({
       onUploaded(entryKey, publicUrl);
       event.target.value = "";
     },
-    [basePath, bucketName, onUploaded, deferred],
+    [basePath, bucketName, onUploaded, deferred, getOldImageUrl],
   );
 
   const uploadPendingImages = useCallback(async () => {
     if (pendingUploads.size === 0) {
-      return;
+      return {} as UploadedImageMap;
     }
 
     const supabase = await createClient();
     const uploadPromises: Promise<void>[] = [];
+    const uploadedImages: UploadedImageMap = {};
 
-    // Helper to extract file path from public URL
-    const extractFilePathFromUrl = (publicUrl: string): string | null => {
-      try {
-        const url = new URL(publicUrl);
-        // URL format: https://....supabase.co/storage/v1/object/public/personalimage/path/to/file
-        const pathMatch = url.pathname.match(
-          /\/storage\/v1\/object\/public\/[^/]+\/(.*)/,
-        );
-        return pathMatch ? pathMatch[1] : null;
-      } catch {
-        return null;
-      }
-    };
-
-    for (const [entryKey, { file }] of pendingUploads) {
+    for (const [entryKey, { file, oldImageUrl }] of pendingUploads) {
       uploadPromises.push(
         (async () => {
-          // Delete old image if it exists
-          if (getOldImageUrl) {
-            const oldImageUrl = getOldImageUrl(entryKey);
-            if (
-              oldImageUrl &&
-              !oldImageUrl.startsWith("blob:") &&
-              oldImageUrl.trim().length > 0
-            ) {
-              const oldFilePath = extractFilePathFromUrl(oldImageUrl);
-              if (oldFilePath) {
-                const { error: deleteError } = await supabase.storage
-                  .from(bucketName)
-                  .remove([oldFilePath]);
-
-                if (deleteError) {
-                  console.warn(
-                    `Failed to delete old image for ${entryKey}:`,
-                    deleteError.message,
-                  );
-                  // Continue with upload even if delete fails
-                }
-              }
-            }
-          }
-
           const extension = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
           const filePath = `${basePath}/${entryKey}-${crypto.randomUUID()}.${extension}`;
 
@@ -170,6 +140,26 @@ export function usePersonalImageUpload({
 
           // Update with actual public URL (replaces preview URL)
           onUploaded(entryKey, publicUrl);
+          uploadedImages[entryKey] = publicUrl;
+
+          if (
+            oldImageUrl &&
+            !oldImageUrl.startsWith("blob:") &&
+            !oldImageUrl.startsWith("data:") &&
+            oldImageUrl.trim().length > 0
+          ) {
+            const { error: deleteError } = await removePersonalImages(
+              supabase,
+              [oldImageUrl],
+            );
+
+            if (deleteError) {
+              console.warn(
+                `Failed to delete old image for ${entryKey}:`,
+                deleteError.message,
+              );
+            }
+          }
         })(),
       );
     }
@@ -177,7 +167,8 @@ export function usePersonalImageUpload({
     await Promise.all(uploadPromises);
     // Clear pending uploads after successful upload
     setPendingUploads(new Map());
-  }, [pendingUploads, basePath, bucketName, onUploaded, getOldImageUrl]);
+    return uploadedImages;
+  }, [pendingUploads, basePath, bucketName, onUploaded]);
 
   return {
     createImageSelectHandler,

@@ -2,7 +2,8 @@
 
 import { useCallback, useRef } from "react";
 
-type UploadFunction = () => Promise<void>;
+type UploadedImageMap = Record<string, string>;
+type UploadFunction = () => Promise<UploadedImageMap>;
 
 export function usePendingImageUploads() {
   const uploadFunctionsRef = useRef<Map<string, UploadFunction>>(new Map());
@@ -22,7 +23,12 @@ export function usePendingImageUploads() {
     const uploadPromises = Array.from(uploadFunctionsRef.current.values()).map(
       (uploadFn) => uploadFn(),
     );
-    await Promise.all(uploadPromises);
+    const results = await Promise.all(uploadPromises);
+
+    return results.reduce<UploadedImageMap>((accumulator, uploadedImages) => {
+      Object.assign(accumulator, uploadedImages);
+      return accumulator;
+    }, {} as UploadedImageMap);
   }, []);
 
   const hasPendingUploads = useCallback(
