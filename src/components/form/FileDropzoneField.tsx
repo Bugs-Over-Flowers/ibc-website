@@ -92,6 +92,9 @@ const FilePreview = ({
   );
 };
 
+const getFileSignature = (file: File) =>
+  `${file.name}-${file.size}-${file.lastModified}-${file.type}`;
+
 function FileDropzoneField({
   label,
   description,
@@ -111,10 +114,22 @@ function FileDropzoneField({
   const files = field.state.value || [];
 
   const handleDrop = (acceptedFiles: File[]) => {
+    const seen = new Set(files.map(getFileSignature));
+    const uniqueAcceptedFiles: File[] = [];
+
+    for (const file of acceptedFiles) {
+      const signature = getFileSignature(file);
+      if (seen.has(signature)) continue;
+      seen.add(signature);
+      uniqueAcceptedFiles.push(file);
+    }
+
+    if (uniqueAcceptedFiles.length === 0) return;
+
     if (multiple) {
-      field.handleChange([...files, ...acceptedFiles]);
+      field.handleChange([...files, ...uniqueAcceptedFiles]);
     } else {
-      field.handleChange(acceptedFiles);
+      field.handleChange(uniqueAcceptedFiles);
     }
   };
 

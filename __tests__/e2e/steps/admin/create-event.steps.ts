@@ -190,6 +190,9 @@ When("I fill in only the required event title", async ({ page }) => {
 When("I navigate back to the admin create event page", async ({ page }) => {
   await page.goto("/admin/create-event");
 });
+When("I navigate back to the admin create event page", async ({ page }) => {
+  await page.goto("/admin/create-event");
+});
 
 When("I load the draft event", async ({ page }) => {
   const draftLoader = page.locator('button:has-text("Load Draft")').first();

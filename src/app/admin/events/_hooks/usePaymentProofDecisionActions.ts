@@ -11,13 +11,13 @@ import tryCatch from "@/lib/server/tryCatch";
 import { updateRegistrationPaymentProofStatus } from "@/server/registration/mutations/updateRegistrationPaymentProofStatus";
 
 interface UsePaymentProofDecisionActionsProps {
-  page: "check-in" | "registration-details";
   registrationData: {
     registrationId: string;
     eventTitle: string;
     registrantName: string;
     registrantEmail: string;
   };
+  sendEmailOnReject?: boolean;
   onAcceptAction?: (registrationId: string) => Promise<unknown>;
   onRejectAction?: (registrationId: string) => Promise<unknown>;
   onStatusChange?: (status: PaymentProofStatus) => void;
@@ -25,8 +25,8 @@ interface UsePaymentProofDecisionActionsProps {
 }
 
 export function usePaymentProofDecisionActions({
-  page,
   registrationData,
+  sendEmailOnReject,
   onAcceptAction,
   onRejectAction,
   onStatusChange,
@@ -37,10 +37,10 @@ export function usePaymentProofDecisionActions({
       onAcceptAction
         ? onAcceptAction(registrationData.registrationId)
         : updateRegistrationPaymentProofStatus({
-            page,
             eventTitle: registrationData.eventTitle,
             registrationId: registrationData.registrationId,
             status: "accepted",
+            sendEmail: sendEmailOnReject ?? true,
             toEmail: registrationData.registrantEmail,
             registrantName: registrationData.registrantName,
           }),
@@ -63,10 +63,10 @@ export function usePaymentProofDecisionActions({
       onRejectAction
         ? onRejectAction(registrationData.registrationId)
         : updateRegistrationPaymentProofStatus({
-            page,
             eventTitle: registrationData.eventTitle,
             registrationId: registrationData.registrationId,
             status: "rejected",
+            sendEmail: sendEmailOnReject ?? true,
             toEmail: registrationData.registrantEmail,
             registrantName: registrationData.registrantName,
           }),

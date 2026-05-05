@@ -56,9 +56,10 @@ const initialState: RegistrationStore = {
     },
     step3: {
       paymentMethod: "onsite",
-    },
+    } as StandardRegistrationSchema["step3"],
     step4: {
       termsAndConditions: false,
+      note: undefined,
     },
   },
   sponsorUuid: undefined,
@@ -123,6 +124,11 @@ const useRegistrationStore = create<
               step3: registrationData.step3
                 ? {
                     paymentMethod: registrationData.step3.paymentMethod,
+                  }
+                : undefined,
+              step4: registrationData.step4
+                ? {
+                    note: registrationData.step4.note,
                   }
                 : undefined,
             }

@@ -8,13 +8,13 @@ import { EvaluationFilter } from "@/app/admin/evaluation/_components/EvaluationF
 import { EvaluationList } from "@/app/admin/evaluation/_components/EvaluationList";
 import { Button } from "@/components/ui/button";
 import { EVALUATION_QUESTIONS } from "@/lib/evaluation/evaluationQuestions";
-import { exportToExcel } from "@/lib/export/excel";
+import { type ExportEventDetails, exportToExcel } from "@/lib/export/excel";
 import type { EvaluationWithEventRpc } from "@/server/evaluation/queries/getAllEvaluations";
 
 interface EventEvaluationsTableProps {
   evaluations: EvaluationWithEventRpc[];
-  eventTitle: string;
   eventId: string;
+  eventDetails: ExportEventDetails;
 }
 
 type RatingScale = NonNullable<EvaluationWithEventRpc["q1_rating"]>;
@@ -40,8 +40,8 @@ const formatRating = (rating: RatingScale | null): string => {
 };
 
 const getExcelColumns = (): ColumnDef<EventEvaluationExportRow>[] => [
-  { accessorKey: "respondentName", header: "Respondent" },
   { accessorKey: "created_at", header: "Submitted At" },
+  { accessorKey: "respondentName", header: "Respondent" },
   { accessorKey: "q1_rating", header: EVALUATION_QUESTIONS[0].question },
   { accessorKey: "q2_rating", header: EVALUATION_QUESTIONS[1].question },
   { accessorKey: "q3_rating", header: EVALUATION_QUESTIONS[2].question },
@@ -54,23 +54,26 @@ const getExcelColumns = (): ColumnDef<EventEvaluationExportRow>[] => [
 
 export default function EventEvaluationsTable({
   evaluations,
-  eventTitle,
   eventId,
+  eventDetails,
 }: EventEvaluationsTableProps) {
   const [filteredEvaluations, setFilteredEvaluations] = useState(evaluations);
 
   const handleExport = async () => {
-    const exportRows: EventEvaluationExportRow[] = evaluations.map(
-      (evaluation) => ({
-        ...evaluation,
-        respondentName: evaluation.name?.trim() || "Anonymous respondent",
-      }),
+    const sorted = [...evaluations].sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
+    const exportRows: EventEvaluationExportRow[] = sorted.map((evaluation) => ({
+      ...evaluation,
+      respondentName: evaluation.name?.trim() || "Anonymous respondent",
+    }));
 
     await exportToExcel({
       data: exportRows,
       columns: getExcelColumns(),
-      filename: `${eventTitle}-Evaluations-${new Date().toISOString().split("T")[0]}.xlsx`,
+      event: eventDetails,
+      filename: `${eventDetails.title}-Evaluations-${new Date().toISOString().split("T")[0]}.xlsx`,
       formatters: {
         created_at: (value) =>
           format(new Date(String(value)), "MMM d, yyyy h:mm a"),
@@ -81,7 +84,7 @@ export default function EventEvaluationsTable({
         q5_rating: (value) => formatRating(value as RatingScale | null),
         q6_rating: (value) => formatRating(value as RatingScale | null),
       },
-      columnWidths: [20, 22, 42, 42, 42, 32, 36, 38, 32, 32],
+      columnWidths: [22, 20, 42, 42, 42, 32, 36, 38, 32, 32],
       sheetName: "Evaluations",
     });
   };
