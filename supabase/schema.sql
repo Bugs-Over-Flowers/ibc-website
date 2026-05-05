@@ -1976,6 +1976,7 @@ DECLARE
   v_registration_date timestamp with time zone;
   v_registration_id uuid;
   v_identifier text;
+  v_participant_identifier text;
   v_errors text[];
   v_warnings text[];
 BEGIN
@@ -2091,6 +2092,7 @@ BEGIN
 
     BEGIN
       v_identifier := 'ibc-reg-' || left(replace(gen_random_uuid()::text, '-', ''), 8);
+      v_participant_identifier := 'ibc-par-' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 8);
 
       INSERT INTO "Registration" (
         "eventId",
@@ -2121,14 +2123,16 @@ BEGIN
         "firstName",
         "lastName",
         "contactNumber",
-        "email"
+        "email",
+        "participantIdentifier"
       ) VALUES (
         v_registration_id,
         TRUE,
         v_first_name,
         v_last_name,
         v_contact_number,
-        v_email
+        v_email,
+        v_participant_identifier
       );
 
       v_inserted := v_inserted + 1;

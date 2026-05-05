@@ -1095,7 +1095,7 @@ BEGIN
   VALUES (
     '44444444-4444-4444-8444-444444444418', v_event1_id, 'Fernandez Family Group',
     TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
-    'ONSITE', 'ibc-reg-testgrp', 'accepted', 'Family group registration - 4 participants'
+    'ONSITE', 'ibc-reg-testa108', 'accepted', 'Family group registration - 4 participants'
   );
 
   INSERT INTO "public"."Participant" ("participantId", "registrationId", "firstName", "lastName", "contactNumber", "email", "isPrincipal", "participantIdentifier")
