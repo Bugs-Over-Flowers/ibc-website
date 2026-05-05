@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   Calendar,
   CheckSquare,
   ClipboardList,
@@ -59,13 +58,7 @@ export default async function EventDetails({
               ? eventError
               : "This event could not be loaded. It may have been removed or you may not have access."}
           </p>
-          <Link
-            className="mt-4 flex items-center justify-center gap-1 text-primary transition-colors hover:text-primary/80"
-            href={"/admin/events" as Route}
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Back to Events
-          </Link>
+          <BackButton back label="Back" />
         </div>
       </div>
     );
@@ -230,7 +223,7 @@ export default async function EventDetails({
     <div className="space-y-6 pb-8">
       {/* Back Navigation */}
       <div className="flex w-full justify-start">
-        <BackButton href={"/admin/events" as Route} label="Back to Events" />
+        <BackButton back label="Back" />
       </div>
 
       {/* Hero Card */}
@@ -341,7 +334,7 @@ export default async function EventDetails({
                     </p>
                     {secondary && (
                       <p
-                        className={`${allowWrap ? "break-words leading-tight" : "truncate"} text-muted-foreground text-xs`}
+                        className={`${allowWrap ? "wrap-break-word leading-tight" : "truncate"} text-muted-foreground text-xs`}
                       >
                         {secondary}
                       </p>
