@@ -32,9 +32,16 @@ export default function SectorRowItem({
           <p className="truncate font-semibold text-foreground text-lg md:text-xl">
             {sectorName}
           </p>
-          <p className="text-muted-foreground text-xs">
-            {memberCount} {memberCount === 1 ? "member" : "members"}
-          </p>
+        </div>
+
+        {/* Member count badge on the right to give a table-like column look */}
+        <div className="flex items-center">
+          <span
+            aria-label={`${memberCount} ${memberCount === 1 ? "member" : "members"}`}
+            className="rounded-full bg-primary/10 px-3 py-0.5 font-medium text-primary text-sm"
+          >
+            {memberCount} {memberCount === 1 ? "Member" : "Members"}
+          </span>
         </div>
 
         <SectorActionsDropdown sectorId={sectorId} sectorName={sectorName} />
