@@ -12,6 +12,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +26,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  PendingUploadsProvider,
+  usePendingUploadsContext,
+} from "../_context/PendingUploadsContext";
 import { useWebsiteContentEditor } from "../_hooks/useWebsiteContentEditor";
 import { BoardOfTrusteesSection } from "./sections/BoardOfTrusteesSection";
 import { CompanyThrustsSection } from "./sections/CompanyThrustsSection";
@@ -105,7 +110,17 @@ const sectionCards = [
 ];
 
 export function WebsiteContentManagementPage() {
+  return (
+    <PendingUploadsProvider>
+      <WebsiteContentManagementPageContent />
+    </PendingUploadsProvider>
+  );
+}
+
+function WebsiteContentManagementPageContent() {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const { uploadAllPendingImages } = usePendingUploadsContext();
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const {
     form,
@@ -162,6 +177,45 @@ export function WebsiteContentManagementPage() {
     () => sectionCards.find((section) => section.key === activeSection) ?? null,
     [activeSection],
   );
+
+  const handleSave = async () => {
+    setIsUploadingImages(true);
+    try {
+      await uploadAllPendingImages();
+
+      // Poll for state updates: wait until blob URLs are gone or timeout after 5 seconds
+      let hasBlobUrls = true;
+      let attempts = 0;
+      const maxAttempts = 50; // 50 * 100ms = 5000ms max wait
+
+      while (hasBlobUrls && attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        hasBlobUrls = cards.some((card) => card.imageUrl.startsWith("blob:"));
+        attempts++;
+      }
+
+      if (hasBlobUrls) {
+        console.warn(
+          `Images still have preview URLs after timeout: ${cards
+            .filter((c) => c.imageUrl.startsWith("blob:"))
+            .map((c) => c.entryKey)
+            .join(", ")}`,
+        );
+        toast.error(
+          "Image upload is taking too long. Please check your connection and try again.",
+        );
+        return;
+      }
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      toast.error("Failed to upload images. Please try again.");
+      return;
+    } finally {
+      setIsUploadingImages(false);
+    }
+
+    save();
+  };
 
   const updatedAtDisplay = (section: SectionKey) => {
     if (!hasLoadedSectionSummaries) {
@@ -452,11 +506,18 @@ export function WebsiteContentManagementPage() {
                   <div className="flex flex-wrap items-center justify-end gap-2">
                     <Button
                       disabled={
-                        isSavingSection || isLoadingSection || isDeleteMode
+                        isSavingSection ||
+                        isLoadingSection ||
+                        isDeleteMode ||
+                        isUploadingImages
                       }
-                      onClick={save}
+                      onClick={handleSave}
                     >
-                      {isSavingSection ? "Saving..." : "Save Changes"}
+                      {isUploadingImages
+                        ? "Uploading images..."
+                        : isSavingSection
+                          ? "Saving..."
+                          : "Save Changes"}
                     </Button>
                   </div>
                 </div>
