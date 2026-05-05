@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
@@ -65,6 +65,10 @@ export function useWebsiteContentEditor(
 ) {
   const [form, setForm] = useState<WebsiteContentFormState>(emptyForm);
   const [cards, setCards] = useState<WebsiteContentCardState[]>([]);
+  const cardsRef = useRef(cards);
+  cardsRef.current = cards;
+  const formRef = useRef(form);
+  formRef.current = form;
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedCardEntryKeys, setSelectedCardEntryKeys] = useState<
     Set<string>
@@ -150,6 +154,8 @@ export function useWebsiteContentEditor(
               cards: data.cards,
             },
           }));
+        }
+        if (activeSection) {
           setPlaceholdersBySection((prev) => ({
             ...prev,
             [activeSection]: data.placeholders,
@@ -183,7 +189,6 @@ export function useWebsiteContentEditor(
             ...prev,
             [activeSection]: result.updatedAt,
           }));
-          await loadSection(activeSection);
         }
         await loadSectionSummaries();
         toast.success("Website content saved");
@@ -194,10 +199,17 @@ export function useWebsiteContentEditor(
     },
   );
 
-  useEffect(() => {
-    void loadSectionSummaries();
-  }, [loadSectionSummaries]);
+  const loadSectionSummariesRef = useRef(loadSectionSummaries);
+  loadSectionSummariesRef.current = loadSectionSummaries;
 
+  useEffect(() => {
+    void loadSectionSummariesRef.current();
+  }, []);
+
+  const loadSectionRef = useRef(loadSection);
+  loadSectionRef.current = loadSection;
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional - only run on section switch, not on every cache mutation
   useEffect(() => {
     setIsDeleteMode(false);
     setSelectedCardEntryKeys(new Set());
@@ -213,8 +225,8 @@ export function useWebsiteContentEditor(
       return;
     }
 
-    void loadSection(activeSection);
-  }, [activeSection, cachedSectionContentBySection, loadSection]);
+    void loadSectionRef.current(activeSection);
+  }, [activeSection]);
 
   const sectionUpdatedAt = useMemo(() => {
     if (!activeSection) {
@@ -234,24 +246,18 @@ export function useWebsiteContentEditor(
     field: K,
     value: WebsiteContentFormState[K],
   ) => {
-    setForm((prev: WebsiteContentFormState) => {
-      const next = {
-        ...prev,
-        [field]: value,
-      };
+    const next = { ...form, [field]: value };
+    setForm(next);
 
-      if (activeSection) {
-        setCachedSectionContentBySection((cachePrev) => ({
-          ...cachePrev,
-          [activeSection]: {
-            form: next,
-            cards: cachePrev[activeSection]?.cards ?? cards,
-          },
-        }));
-      }
-
-      return next;
-    });
+    if (activeSection) {
+      setCachedSectionContentBySection((cachePrev) => ({
+        ...cachePrev,
+        [activeSection]: {
+          form: next,
+          cards: cachePrev[activeSection]?.cards ?? cards,
+        },
+      }));
+    }
   };
 
   const setCardField = (
@@ -259,23 +265,20 @@ export function useWebsiteContentEditor(
     field: keyof WebsiteContentCardState,
     value: string,
   ) => {
-    setCards((prev) => {
-      const next = prev.map((card) =>
-        card.entryKey === entryKey ? { ...card, [field]: value } : card,
-      );
+    const next = cards.map((card) =>
+      card.entryKey === entryKey ? { ...card, [field]: value } : card,
+    );
+    setCards(next);
 
-      if (activeSection) {
-        setCachedSectionContentBySection((cachePrev) => ({
-          ...cachePrev,
-          [activeSection]: {
-            form: cachePrev[activeSection]?.form ?? form,
-            cards: next,
-          },
-        }));
-      }
-
-      return next;
-    });
+    if (activeSection) {
+      setCachedSectionContentBySection((cachePrev) => ({
+        ...cachePrev,
+        [activeSection]: {
+          form: cachePrev[activeSection]?.form ?? form,
+          cards: next,
+        },
+      }));
+    }
   };
 
   const replaceCards = (nextCards: WebsiteContentCardState[]) => {
@@ -296,36 +299,38 @@ export function useWebsiteContentEditor(
       return;
     }
 
-    setCards((prev) => {
-      const maxPlacement = prev.reduce((max, card) => {
-        const placement = Number(card.cardPlacement);
-        if (Number.isFinite(placement) && placement > max) {
-          return placement;
-        }
-        return max;
-      }, 0);
+    const maxPlacement = cards.reduce((max, card) => {
+      const placement = Number(card.cardPlacement);
+      if (Number.isFinite(placement) && placement > max) {
+        return placement;
+      }
+      return max;
+    }, 0);
 
-      const nextPlacement = String(maxPlacement + 1);
-      const entryKey = `${activeSection}_${Date.now()}_${Math.random()
-        .toString(36)
-        .slice(2, 8)}`;
+    const nextPlacement = String(maxPlacement + 1);
+    const entryKey = `${activeSection}_${Date.now()}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
 
-      const defaults = defaultCardsBySection[activeSection] || {};
+    const defaults = defaultCardsBySection[activeSection] || {};
 
-      const next = [
-        ...prev,
-        {
-          entryKey,
-          title: defaults.title || "",
-          subtitle: defaults.subtitle || "",
-          paragraph: defaults.paragraph || "",
-          icon: defaults.icon || "",
-          imageUrl: defaults.imageUrl || "",
-          cardPlacement: nextPlacement,
-          group,
-        },
-      ];
+    const next = [
+      ...cards,
+      {
+        entryKey,
+        title: defaults.title || "",
+        subtitle: defaults.subtitle || "",
+        paragraph: defaults.paragraph || "",
+        icon: defaults.icon || "",
+        imageUrl: defaults.imageUrl || "",
+        cardPlacement: nextPlacement,
+        group,
+      },
+    ];
 
+    setCards(next);
+
+    if (activeSection) {
       setCachedSectionContentBySection((cachePrev) => ({
         ...cachePrev,
         [activeSection]: {
@@ -333,9 +338,7 @@ export function useWebsiteContentEditor(
           cards: next,
         },
       }));
-
-      return next;
-    });
+    }
   };
 
   const enterDeleteMode = () => {
@@ -376,15 +379,17 @@ export function useWebsiteContentEditor(
       return;
     }
 
-    setCards((prev) => {
-      const filtered = prev.filter(
-        (card) => !selectedCardEntryKeys.has(card.entryKey),
-      );
-      const nextCards = filtered.map((card, index) => ({
-        ...card,
-        cardPlacement: String(index + 1),
-      }));
+    const filtered = cards.filter(
+      (card) => !selectedCardEntryKeys.has(card.entryKey),
+    );
+    const nextCards = filtered.map((card, index) => ({
+      ...card,
+      cardPlacement: String(index + 1),
+    }));
 
+    setCards(nextCards);
+
+    if (activeSection) {
       setCachedSectionContentBySection((cachePrev) => ({
         ...cachePrev,
         [activeSection]: {
@@ -392,23 +397,24 @@ export function useWebsiteContentEditor(
           cards: nextCards,
         },
       }));
-
-      return nextCards;
-    });
+    }
 
     setSelectedCardEntryKeys(new Set());
     setIsDeleteMode(false);
   };
 
-  const save = async () => {
+  const save = async (
+    snapshotCards?: WebsiteContentCardState[],
+    snapshotForm?: WebsiteContentFormState,
+  ) => {
     if (!activeSection) {
       return;
     }
 
     await saveSection({
       section: activeSection,
-      form,
-      cards,
+      form: snapshotForm ?? formRef.current,
+      cards: snapshotCards ?? cardsRef.current,
     });
   };
 

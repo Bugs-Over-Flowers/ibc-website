@@ -1,6 +1,9 @@
 "use server";
 
+import { cacheTag } from "next/cache";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 import type { WebsiteContentSection } from "../types";
 
@@ -42,9 +45,14 @@ function createEmptySummary(): WebsiteContentSectionsSummary {
   };
 }
 
-export async function getWebsiteContentSectionsSummary(): Promise<WebsiteContentSectionsSummary> {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
+async function getWebsiteContentSectionsSummaryCached(
+  requestCookies: RequestCookie[],
+): Promise<WebsiteContentSectionsSummary> {
+  "use cache";
+
+  cacheTag(CACHE_TAGS.websiteContent.all);
+
+  const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase
     .from("WebsiteContent")
@@ -84,4 +92,9 @@ export async function getWebsiteContentSectionsSummary(): Promise<WebsiteContent
   }
 
   return summary;
+}
+
+export async function getWebsiteContentSectionsSummary(): Promise<WebsiteContentSectionsSummary> {
+  const cookieStore = await cookies();
+  return getWebsiteContentSectionsSummaryCached(cookieStore.getAll());
 }

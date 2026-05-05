@@ -179,6 +179,9 @@ function WebsiteContentManagementPageContent() {
   );
 
   const handleSave = async () => {
+    const snapshotCards = cards;
+    const snapshotForm = form;
+
     setIsUploadingImages(true);
     try {
       await uploadAllPendingImages();
@@ -214,7 +217,7 @@ function WebsiteContentManagementPageContent() {
       setIsUploadingImages(false);
     }
 
-    save();
+    save(snapshotCards, snapshotForm);
   };
 
   const updatedAtDisplay = (section: SectionKey) => {
@@ -305,6 +308,7 @@ function WebsiteContentManagementPageContent() {
             cards={cards}
             hasSelectedCards={hasSelectedCards}
             isDeleteMode={isDeleteMode}
+            isSavingSection={isSavingSection}
             isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={(group) => addCard(group)}
             onCancelDeleteMode={cancelDeleteMode}
@@ -326,6 +330,7 @@ function WebsiteContentManagementPageContent() {
             cards={cards}
             hasSelectedCards={hasSelectedCards}
             isDeleteMode={isDeleteMode}
+            isSavingSection={isSavingSection}
             isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={() => addCard()}
             onCancelDeleteMode={cancelDeleteMode}

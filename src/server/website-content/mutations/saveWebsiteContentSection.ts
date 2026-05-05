@@ -111,23 +111,36 @@ export async function saveWebsiteContentSection(
         });
       }
 
-      rowsToUpsert.push({
-        section: parsed.section,
-        entryKey: card.entryKey,
-        textType: "Paragraph",
-        textValue: card.paragraph,
-        icon: card.icon || null,
-        imageUrl: card.imageUrl || null,
-        cardPlacement: placementValue,
-        group: card.group,
-      });
+      if (
+        parsed.section !== "board_of_trustees" &&
+        parsed.section !== "secretariat"
+      ) {
+        rowsToUpsert.push({
+          section: parsed.section,
+          entryKey: card.entryKey,
+          textType: "Paragraph",
+          textValue: card.paragraph,
+          icon: card.icon || null,
+          imageUrl: card.imageUrl || null,
+          cardPlacement: placementValue,
+          group: card.group,
+        });
+      }
     }
   }
 
+  // Upsert all rows with new card placement
   await upsertWebsiteContentRows(rowsToUpsert);
 
+  // Soft delete entries that are no longer retained
   await deleteWebsiteContentEntriesBySection(parsed.section, retainedEntryKeys);
 
+  // CRITICAL: Invalidate cache BEFORE returning to client, so next fetch gets fresh data
+  updateTag(CACHE_TAGS.websiteContent.all);
+  updateTag(CACHE_TAGS.websiteContent.public);
+  updateTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsed.section]);
+
+  // Revalidate paths after cache invalidation
   revalidatePath("/", "page");
   revalidatePath("/about", "page");
   revalidatePath("/events", "page");
@@ -135,9 +148,7 @@ export async function saveWebsiteContentSection(
   revalidatePath("/networks", "page");
   revalidatePath("/contact", "page");
   revalidatePath("/admin/website-content", "page");
-  updateTag(CACHE_TAGS.websiteContent.all);
-  updateTag(CACHE_TAGS.websiteContent.public);
-  updateTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsed.section]);
 
-  return { updatedAt: new Date().toISOString() };
+  const updatedAt = new Date().toISOString();
+  return { updatedAt };
 }
