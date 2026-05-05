@@ -11,11 +11,17 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  IMAGE_UPLOAD_ACCEPT,
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  IMAGE_UPLOAD_MAX_SIZE,
+} from "@/lib/fileUpload";
+import { usePendingUploadsContext } from "../../_context/PendingUploadsContext";
 import { reorderInList } from "../../_hooks/reorderInList";
 import { usePersonalImageUpload } from "../../_hooks/usePersonalImageUpload";
 import type { SecretariatSectionProps } from "../../_types/sectionProps";
@@ -33,12 +39,26 @@ export function SecretariatSection({
   selectedCardEntryKeys,
 }: SecretariatSectionProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
-  const { createImageSelectHandler } = usePersonalImageUpload({
-    basePath: "website-content/secretariat",
-    onUploaded: (entryKey, publicUrl) => {
-      onCardFieldChange(entryKey, "imageUrl", publicUrl);
-    },
-  });
+  const { registerUploadFunction, unregisterUploadFunction } =
+    usePendingUploadsContext();
+  const { createImageSelectHandler, uploadPendingImages } =
+    usePersonalImageUpload({
+      basePath: "website-content/secretariat",
+      onUploaded: (entryKey, publicUrl) => {
+        onCardFieldChange(entryKey, "imageUrl", publicUrl);
+      },
+      getOldImageUrl: (entryKey) => {
+        const card = cards.find((c) => c.entryKey === entryKey);
+        return card?.imageUrl;
+      },
+    });
+
+  useEffect(() => {
+    registerUploadFunction("secretariat", uploadPendingImages);
+    return () => {
+      unregisterUploadFunction("secretariat");
+    };
+  }, [registerUploadFunction, unregisterUploadFunction, uploadPendingImages]);
 
   const handleDeleteCard = (entryKey: string) => {
     onDeleteCardsClick(entryKey);
@@ -123,10 +143,16 @@ export function SecretariatSection({
 
   const Form = ({ card }: { card: (typeof cards)[number] }) => {
     const hasImage = card.imageUrl.trim().length > 0;
+    const allowedTypesText = Object.values(IMAGE_UPLOAD_ACCEPT)
+      .flat()
+      .map((ext) => ext.replace(".", "").toUpperCase())
+      .join(", ");
+    const maxSizeMB = IMAGE_UPLOAD_MAX_SIZE / (1024 * 1024);
 
     return (
       <div className="space-y-3">
         <Input
+          autoFocus
           onChange={(e) =>
             onCardFieldChange(card.entryKey, "title", e.target.value)
           }
@@ -134,6 +160,7 @@ export function SecretariatSection({
           value={card.title}
         />
         <Input
+          autoFocus
           onChange={(e) =>
             onCardFieldChange(card.entryKey, "subtitle", e.target.value)
           }
@@ -169,7 +196,7 @@ export function SecretariatSection({
 
               <label className="block">
                 <input
-                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                   className="hidden"
                   disabled={isSectionActionDisabled}
                   onChange={createImageSelectHandler(card.entryKey)}
@@ -205,7 +232,7 @@ export function SecretariatSection({
           ) : (
             <label className="block">
               <input
-                accept="image/png,image/jpeg,image/jpg,image/webp"
+                accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                 className="hidden"
                 disabled={isSectionActionDisabled}
                 onChange={createImageSelectHandler(card.entryKey)}
@@ -217,7 +244,7 @@ export function SecretariatSection({
                   Click to upload image
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  PNG, JPG, WEBP up to 5MB
+                  {allowedTypesText} up to {maxSizeMB}MB
                 </span>
               </div>
             </label>

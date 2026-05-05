@@ -11,10 +11,16 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  IMAGE_UPLOAD_ACCEPT,
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  IMAGE_UPLOAD_MAX_SIZE,
+} from "@/lib/fileUpload";
+import { usePendingUploadsContext } from "../../_context/PendingUploadsContext";
 import { reorderInList } from "../../_hooks/reorderInList";
 import { useBoardCardGroups } from "../../_hooks/useBoardCardGroups";
 import { usePersonalImageUpload } from "../../_hooks/usePersonalImageUpload";
@@ -35,12 +41,26 @@ export function BoardOfTrusteesSection({
   selectedCardEntryKeys,
 }: BoardOfTrusteesSectionProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
-  const { createImageSelectHandler } = usePersonalImageUpload({
-    basePath: "website-content/board",
-    onUploaded: (entryKey, publicUrl) => {
-      onCardFieldChange(entryKey, "imageUrl", publicUrl);
-    },
-  });
+  const { registerUploadFunction, unregisterUploadFunction } =
+    usePendingUploadsContext();
+  const { createImageSelectHandler, uploadPendingImages } =
+    usePersonalImageUpload({
+      basePath: "website-content/board",
+      onUploaded: (entryKey, publicUrl) => {
+        onCardFieldChange(entryKey, "imageUrl", publicUrl);
+      },
+      getOldImageUrl: (entryKey) => {
+        const card = cards.find((c) => c.entryKey === entryKey);
+        return card?.imageUrl;
+      },
+    });
+
+  useEffect(() => {
+    registerUploadFunction("board_of_trustees", uploadPendingImages);
+    return () => {
+      unregisterUploadFunction("board_of_trustees");
+    };
+  }, [registerUploadFunction, unregisterUploadFunction, uploadPendingImages]);
 
   const { featuredCards, officerCards, trusteeCards, otherCards } =
     useBoardCardGroups(cards);
@@ -223,12 +243,18 @@ export function BoardOfTrusteesSection({
 
   const BoardCardForm = ({ card }: { card: (typeof cards)[number] }) => {
     const hasImage = card.imageUrl.trim().length > 0;
+    const allowedTypesText = Object.values(IMAGE_UPLOAD_ACCEPT)
+      .flat()
+      .map((ext) => ext.replace(".", "").toUpperCase())
+      .join(", ");
+    const maxSizeMB = IMAGE_UPLOAD_MAX_SIZE / (1024 * 1024);
 
     return (
       <div className="space-y-3">
         <div>
           <p className="font-medium text-sm">Card Title</p>
           <Input
+            autoFocus
             onChange={(e) =>
               onCardFieldChange(card.entryKey, "title", e.target.value)
             }
@@ -240,6 +266,7 @@ export function BoardOfTrusteesSection({
         <div>
           <p className="font-medium text-sm">Card Subtitle</p>
           <Input
+            autoFocus
             onChange={(e) =>
               onCardFieldChange(card.entryKey, "subtitle", e.target.value)
             }
@@ -276,7 +303,7 @@ export function BoardOfTrusteesSection({
 
               <label className="block">
                 <input
-                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                   className="hidden"
                   disabled={isSectionActionDisabled}
                   onChange={createImageSelectHandler(card.entryKey)}
@@ -312,7 +339,7 @@ export function BoardOfTrusteesSection({
           ) : (
             <label className="block">
               <input
-                accept="image/png,image/jpeg,image/jpg,image/webp"
+                accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                 className="hidden"
                 disabled={isSectionActionDisabled}
                 onChange={createImageSelectHandler(card.entryKey)}
@@ -324,7 +351,7 @@ export function BoardOfTrusteesSection({
                   Click to upload image
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  PNG, JPG, WEBP up to 5MB
+                  {allowedTypesText} up to {maxSizeMB}MB
                 </span>
               </div>
             </label>
