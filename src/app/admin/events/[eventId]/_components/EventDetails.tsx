@@ -1,6 +1,7 @@
 import {
   Calendar,
   CheckSquare,
+  ChevronLeft,
   ClipboardList,
   Clock,
   Edit,
@@ -58,7 +59,16 @@ export default async function EventDetails({
               ? eventError
               : "This event could not be loaded. It may have been removed or you may not have access."}
           </p>
-          <BackButton back label="Back" />
+          <Button
+            nativeButton={false}
+            render={
+              <Link href={"/admin/events"}>
+                <ChevronLeft className="h-5 w-5" />
+                Back
+              </Link>
+            }
+            variant={"ghost"}
+          />
         </div>
       </div>
     );
@@ -223,7 +233,16 @@ export default async function EventDetails({
     <div className="space-y-6 pb-8">
       {/* Back Navigation */}
       <div className="flex w-full justify-start">
-        <BackButton back label="Back" />
+        <Button
+          nativeButton={false}
+          render={
+            <Link href={"/admin/events"}>
+              <ChevronLeft className="h-5 w-5" />
+              Back
+            </Link>
+          }
+          variant={"ghost"}
+        />
       </div>
 
       {/* Hero Card */}
