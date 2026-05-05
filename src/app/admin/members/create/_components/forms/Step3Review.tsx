@@ -2,6 +2,7 @@ import { Building2, MapPin, User } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { useCreateManualMemberStep3 } from "@/app/admin/members/create/_hooks/useCreateManualMemberStep3";
+import { CompanyProfileDisplay } from "@/components/CompanyProfileDisplay";
 import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -149,16 +150,31 @@ export function Step3Review({ memberData }: Step3ReviewProps) {
   const step1 = memberData.step1;
   const step2 = memberData.step2;
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
 
   useEffect(() => {
+    let logoUrl: string | null = null;
+    let profileUrl: string | null = null;
+
     if (step1?.logoImageURL instanceof File) {
-      const url = URL.createObjectURL(step1.logoImageURL);
-      setLogoPreview(url);
-      return () => URL.revokeObjectURL(url);
+      logoUrl = URL.createObjectURL(step1.logoImageURL);
+      setLogoPreview(logoUrl);
+    } else {
+      setLogoPreview(null);
     }
 
-    setLogoPreview(null);
-  }, [step1?.logoImageURL]);
+    if (step1?.companyProfileFile instanceof File) {
+      profileUrl = URL.createObjectURL(step1.companyProfileFile);
+      setProfilePreview(profileUrl);
+    } else {
+      setProfilePreview(null);
+    }
+
+    return () => {
+      if (logoUrl) URL.revokeObjectURL(logoUrl);
+      if (profileUrl) URL.revokeObjectURL(profileUrl);
+    };
+  }, [step1?.logoImageURL, step1?.companyProfileFile]);
 
   if (!step1 || !step2) {
     return (
@@ -252,7 +268,31 @@ export function Step3Review({ memberData }: Step3ReviewProps) {
                 <DetailRow label="Landline" value={step1.landline} />
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <DetailRow label="Website" value={step1.websiteURL || "N/A"} />
+                <DetailRow
+                  label="Company Profile"
+                  value={
+                    <CompanyProfileDisplay
+                      companyProfileType={
+                        step1.companyProfileType === "file" &&
+                        step1.companyProfileFile instanceof File
+                          ? step1.companyProfileFile.type === "application/pdf"
+                            ? "document"
+                            : "image"
+                          : "website"
+                      }
+                      fileName={
+                        step1.companyProfileFile instanceof File
+                          ? step1.companyProfileFile.name
+                          : undefined
+                      }
+                      websiteURL={
+                        step1.companyProfileType === "file"
+                          ? profilePreview || undefined
+                          : step1.websiteURL || undefined
+                      }
+                    />
+                  }
+                />
                 <DetailRow label="Address" value={step1.companyAddress} />
               </div>
             </div>

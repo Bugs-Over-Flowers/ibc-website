@@ -270,13 +270,25 @@ export const useMembershipStep1 = () => {
                 mobileNumber: data.mobileNumber ?? "",
                 emailAddress: data.emailAddress ?? "",
                 websiteURL: data.websiteURL ?? "",
+                companyProfileType: (data.companyProfileType === "image" ||
+                data.companyProfileType === "document"
+                  ? "file"
+                  : "website") as "file" | "website",
+                companyProfileFile: undefined,
                 logoImageURL: resolveMemberLogoUrl(data.logoImageURL) ?? "",
                 logoImage: undefined,
               },
               step3: {
                 representatives: [
                   toRepresentative(data.principalRepresentative, "principal"),
-                  toRepresentative(data.alternateRepresentative, "alternate"),
+                  ...(data.alternateRepresentative
+                    ? [
+                        toRepresentative(
+                          data.alternateRepresentative,
+                          "alternate",
+                        ),
+                      ]
+                    : []),
                 ],
               },
             });

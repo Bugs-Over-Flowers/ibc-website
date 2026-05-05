@@ -527,18 +527,23 @@ export function Step5Payment({ form, applicationData }: StepProps) {
                                   {proofPreview ? (
                                     <Image
                                       alt="Payment proof preview"
-                                      className="mt-3 h-12 w-12 rounded-md object-contain"
-                                      height={48}
+                                      className="mt-3 h-16 w-16 rounded-md object-contain"
+                                      height={64}
                                       src={proofPreview}
-                                      width={48}
+                                      width={64}
                                     />
                                   ) : null}
                                   <span className="font-medium text-emerald-700 dark:text-emerald-300">
                                     Proof Uploaded Successfully
                                   </span>
                                   <Badge className="mt-2" variant="outline">
-                                    {selectedFile.name}
+                                    {selectedFile.type
+                                      .split("/")[1]
+                                      .toUpperCase()}
                                   </Badge>
+                                  <span className="mt-1 max-w-[200px] truncate text-muted-foreground text-xs">
+                                    {selectedFile.name}
+                                  </span>
                                 </>
                               ) : (
                                 <>

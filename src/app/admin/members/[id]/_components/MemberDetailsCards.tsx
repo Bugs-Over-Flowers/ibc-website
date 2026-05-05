@@ -1,4 +1,5 @@
 import { Building2, MapPin, User } from "lucide-react";
+import { CompanyProfileDisplay } from "@/components/CompanyProfileDisplay";
 import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -91,14 +92,12 @@ export function MemberDetailsCards({ member }: MemberDetailsCardsProps) {
                 value={member.sectorName ?? "N/A"}
               />
               <DetailRow
-                label="Website"
+                label="Company Profile"
                 value={
-                  <span
-                    className="block max-w-[220px] truncate"
-                    title={member.websiteURL || "N/A"}
-                  >
-                    {member.websiteURL || "N/A"}
-                  </span>
+                  <CompanyProfileDisplay
+                    companyProfileType={latestApplication?.companyProfileType}
+                    websiteURL={member.websiteURL}
+                  />
                 }
               />
             </div>

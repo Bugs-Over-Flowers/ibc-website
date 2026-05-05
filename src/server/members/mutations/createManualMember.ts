@@ -73,6 +73,7 @@ export async function createManualMember(
       })),
       p_payment_method: "ONSITE",
       p_application_member_type: parsed.data.applicationMemberType,
+      p_company_profile_type: parsed.data.companyProfileType,
     },
   );
 
