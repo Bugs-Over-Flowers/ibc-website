@@ -1,5 +1,4 @@
-import { ChevronRight, MoreHorizontal, User } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { MoreHorizontal, User } from "lucide-react";
 import { useState } from "react";
 import { StopPropagationButton } from "@/components/StopPropagationButton";
 import { Button } from "@/components/ui/button";
@@ -24,17 +23,12 @@ interface CheckInItemActionsProps {
     ParticipantCheckInRow,
     "firstName" | "lastName" | "email" | "contactNumber"
   >;
-  eventId: string;
-  registrationId: string;
 }
 
 export default function CheckInItemActions({
   participant,
-  eventId,
-  registrationId,
 }: CheckInItemActionsProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const router = useRouter();
 
   return (
     <>
@@ -64,17 +58,6 @@ export default function CheckInItemActions({
             >
               <User className="size-3.5" />
               Participant details
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(
-                  `/admin/events/${eventId}/registration-list/registration/${registrationId}`,
-                );
-              }}
-            >
-              <ChevronRight className="size-3.5" />
-              View registration
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

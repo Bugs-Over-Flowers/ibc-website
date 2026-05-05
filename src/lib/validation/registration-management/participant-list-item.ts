@@ -66,6 +66,7 @@ export const ParticipantListItemSchema = ParticipantSchema.pick({
   affiliation: z.string(),
   registrationDate: z.iso.datetime({ offset: true }),
   registrationId: z.string(),
+  participantIdentifier: z.string().optional(),
 });
 
 export type ParticipantListItem = z.infer<typeof ParticipantListItemSchema>;
@@ -104,6 +105,7 @@ export const ParticipantListRPCSchema = z
     affiliation: z.string(),
     registration_date: z.iso.datetime({ offset: true }),
     registration_id: z.string(),
+    participant_identifier: z.string().optional(),
   })
   .pipe(
     z.transform((val) =>
@@ -116,6 +118,7 @@ export const ParticipantListRPCSchema = z
         affiliation: val.affiliation,
         registrationDate: val.registration_date,
         registrationId: val.registration_id,
+        participantIdentifier: val.participant_identifier,
       }),
     ),
   );

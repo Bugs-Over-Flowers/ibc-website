@@ -1,5 +1,4 @@
 import type { Database } from "@/lib/supabase/db.types";
-import createMultipleRegistrationsWithParticipants from "../helpers/createMultipleRegistrationsWithParticipants";
 import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
 import { createE2EAdminClient } from "../helpers/supabase";
 
@@ -16,6 +15,8 @@ export type SeededAdminRegistrationScenario = {
     registrationId: string;
     identifier: string;
     affiliation: string;
+    participantIdentifiers: string[];
+    firstParticipantIdentifier: string;
   };
   rejectedRegistration: {
     registrationId: string;
@@ -27,8 +28,15 @@ export type SeededAdminRegistrationScenario = {
     identifier: string;
     affiliation: string;
     participantIds: string[];
+    participantIdentifiers: string[];
     firstParticipantId: string;
     secondParticipantId: string;
+    firstParticipantIdentifier: string;
+  };
+  member?: {
+    businessMemberId: string;
+    businessName: string;
+    applicationId: string;
   };
 };
 
@@ -36,6 +44,7 @@ export interface SeedOptions {
   participantCount?: number;
   paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
   note?: string | null;
+  createBusinessMember?: boolean;
 }
 
 export async function seedAdminRegistrationScenario(
@@ -147,19 +156,88 @@ export async function seedAdminRegistrationScenario(
     acceptedRegistrationNote,
   );
 
+  let member: SeededAdminRegistrationScenario["member"];
+
+  if (options.createBusinessMember) {
+    const { data: application, error: applicationError } = await supabase
+      .from("Application")
+      .insert({
+        applicationType: "newMember",
+        applicationMemberType: "corporate",
+        companyName: `E2E Member Company ${timestamp}`,
+        companyAddress: "E2E Test Address",
+        landline: "(02) 0000-0000",
+        mobileNumber: "09170000000",
+        emailAddress: "member@example.com",
+        paymentMethod: "BPI",
+        websiteURL: "https://e2e-test.local",
+        logoImageURL: "https://picsum.photos/200/200",
+        identifier: `e2e-member-app-${timestamp}`,
+        paymentProofStatus: "accepted",
+        applicationStatus: "approved",
+      })
+      .select("applicationId")
+      .single();
+
+    if (applicationError || !application) {
+      throw new Error(
+        `Failed to seed application: ${applicationError?.message ?? "unknown"}`,
+      );
+    }
+
+    const { data: businessMember, error: memberError } = await supabase
+      .from("BusinessMember")
+      .insert({
+        businessName: `E2E Member Company ${timestamp}`,
+        identifier: `e2e-member-${timestamp}`,
+        sectorId: 1,
+        websiteURL: "https://e2e-test.local",
+        logoImageURL: "https://picsum.photos/200/200",
+        joinDate: new Date().toISOString().split("T")[0],
+        membershipStatus: "paid",
+        lastPaymentDate: new Date().toISOString(),
+        featuredExpirationDate: null,
+        membershipExpiryDate: new Date(
+          Date.now() + 365 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
+        primaryApplicationId: application.applicationId,
+      })
+      .select("businessMemberId, businessName")
+      .single();
+
+    if (memberError || !businessMember) {
+      throw new Error(
+        `Failed to seed business member: ${memberError?.message ?? "unknown"}`,
+      );
+    }
+
+    member = {
+      businessMemberId: businessMember.businessMemberId,
+      businessName: businessMember.businessName,
+      applicationId: application.applicationId,
+    };
+  }
+
   return {
     event,
     eventDay,
-    pendingRegistration,
+    pendingRegistration: {
+      ...pendingRegistration,
+      firstParticipantIdentifier: pendingRegistration.participantIdentifiers[0],
+    },
     rejectedRegistration,
     acceptedRegistration: {
       registrationId: acceptedRegistration.registrationId,
       identifier: acceptedRegistration.identifier,
       affiliation: acceptedRegistration.affiliation,
       participantIds: acceptedRegistration.participantIds,
+      participantIdentifiers: acceptedRegistration.participantIdentifiers,
       firstParticipantId: acceptedRegistration.participantIds[0],
       secondParticipantId: acceptedRegistration.participantIds[1],
+      firstParticipantIdentifier:
+        acceptedRegistration.participantIdentifiers[0],
     },
+    member,
   };
 }
 
@@ -168,12 +246,21 @@ export async function cleanupAdminRegistrationScenario(
 ): Promise<void> {
   const supabase = createE2EAdminClient();
 
-  // Collect registration IDs from the scenarios
-  const registrationIds = [
-    data.pendingRegistration.registrationId,
-    data.rejectedRegistration.registrationId,
-    data.acceptedRegistration.registrationId,
-  ];
+  // Collect ALL registration IDs for the event (includes any created during the test)
+  const { data: allRegistrations, error: fetchError } = await supabase
+    .from("Registration")
+    .select("registrationId")
+    .eq("eventId", data.event.eventId);
+
+  if (fetchError) {
+    throw new Error(
+      `Failed to fetch registrations for cleanup: ${fetchError.message}`,
+    );
+  }
+
+  const registrationIds = (allRegistrations ?? []).map(
+    (row) => row.registrationId,
+  );
 
   // Cleanup participants first
   const { data: participantRows, error: participantError } = await supabase
@@ -286,5 +373,29 @@ export async function cleanupAdminRegistrationScenario(
 
   if (eventDeleteError) {
     throw new Error(`Failed to cleanup event: ${eventDeleteError.message}`);
+  }
+
+  if (data.member) {
+    const { error: memberDeleteError } = await supabase
+      .from("BusinessMember")
+      .delete()
+      .eq("businessMemberId", data.member.businessMemberId);
+
+    if (memberDeleteError) {
+      throw new Error(
+        `Failed to cleanup business member: ${memberDeleteError.message}`,
+      );
+    }
+
+    const { error: appDeleteError } = await supabase
+      .from("Application")
+      .delete()
+      .eq("applicationId", data.member.applicationId);
+
+    if (appDeleteError) {
+      throw new Error(
+        `Failed to cleanup application: ${appDeleteError.message}`,
+      );
+    }
   }
 }

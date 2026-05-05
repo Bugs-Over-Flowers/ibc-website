@@ -20,10 +20,7 @@ import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import type { MembershipApplicationData } from "@/hooks/membershipApplication.store";
-import {
-  IMAGE_UPLOAD_ACCEPT_ATTR,
-  isValidImageUploadFile,
-} from "@/lib/fileUpload";
+import { isValidImageUploadFile } from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 
 interface StepProps {
