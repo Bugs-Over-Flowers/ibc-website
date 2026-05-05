@@ -20,9 +20,22 @@ export async function quickOnsiteRegistrationRPC(
 
   const supabase = await createActionClient();
 
-  const registrationIdentifier = createRegistrationIdentifier();
-
   const { memberDetails, registrant, eventId, eventDayId, remark } = parsedData;
+
+  const { data: eventData } = await supabase
+    .from("Event")
+    .select("eventEndDate")
+    .eq("eventId", eventId)
+    .single();
+
+  if (
+    eventData?.eventEndDate &&
+    new Date() > new Date(eventData.eventEndDate)
+  ) {
+    throw new Error("Registration is closed. This event has already ended.");
+  }
+
+  const registrationIdentifier = createRegistrationIdentifier();
 
   const { data: rpcResults, error } = await supabase.rpc(
     "quick_onsite_registration",

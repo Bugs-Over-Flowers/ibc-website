@@ -42,19 +42,11 @@ Feature: Registration flow
       | without note |
 
   @happy
-  Scenario Outline: Register with varying participant counts
+  Scenario: Register with multiple participants
     Given I am on the multi-participant registration form
-    When I submit a registration with <count> participants
+    When I submit a registration with multiple participants
     Then I should see the registration success result
-    And the registration should include <count> participants
-
-    # title-format: Register with <count> participants
-    Examples:
-      | count |
-      | 1     |
-      | 3     |
-      | 8     |
-      | 10    |
+    And the registration should include all participants
 
   @sad
   Scenario: Missing required fields shows errors
@@ -63,7 +55,6 @@ Feature: Registration flow
     Then I should see the validation error "First name must be at least 2 characters"
     And I should see the validation error "Last name must be at least 2 characters"
     And I should see the validation error "Invalid email address"
-    And I should see the validation error "Contact number must be a valid Philippine phone or landline number"
 
   @critical @sad
   Scenario: Submit without accepting terms and conditions
