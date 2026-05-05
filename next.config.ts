@@ -1,40 +1,41 @@
 import type { NextConfig } from "next";
 
-const isProduction = process.env.NODE_ENV === "production";
+// const isProduction = process.env.NODE_ENV === "production";
 
-const securityHeaders = [
-  {
-    key: "Content-Security-Policy",
-    value: [
-      "default-src 'self'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-      "object-src 'none'",
-      "img-src 'self' data: blob: https:",
-      "font-src 'self' data: https:",
-      "style-src 'self' 'unsafe-inline' https:",
-      "frame-src 'self' https://www.google.com",
-      isProduction
-        ? "script-src 'self' 'unsafe-inline' https://unpkg.com"
-        : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
-      "connect-src 'self' https: wss: http://localhost:54321 http://127.0.0.1:54321",
-      "upgrade-insecure-requests",
-    ].join("; "),
-  },
-  {
-    key: "X-Frame-Options",
-    value: "DENY",
-  },
-  {
-    key: "X-Content-Type-Options",
-    value: "nosniff",
-  },
-  {
-    key: "Referrer-Policy",
-    value: "strict-origin-when-cross-origin",
-  },
-];
+// const securityHeaders = [
+//   {
+//     key: "Content-Security-Policy",
+//     value: [
+//       "default-src 'self'",
+//       "base-uri 'self'",
+//       "form-action 'self'",
+//       "frame-ancestors 'none'",
+//       "object-src 'none'",
+//       "img-src 'self' data: blob: https: rpdourwztdpwdebggkkc.supabase.co",
+//       "font-src 'self' data: https:",
+//       "style-src 'self' 'unsafe-inline' https:",
+//       "frame-src 'self' https://www.google.com",
+//       isProduction
+//         ? "script-src 'self' 'unsafe-inline' https://unpkg.com"
+//         : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+//       "worker-src 'self' blob:",
+//       "connect-src 'self' https: wss: http://localhost:54321 http://127.0.0.1:54321",
+//       "upgrade-insecure-requests",
+//     ].join("; "),
+//   },
+//   {
+//     key: "X-Frame-Options",
+//     value: "DENY",
+//   },
+//   {
+//     key: "X-Content-Type-Options",
+//     value: "nosniff",
+//   },
+//   {
+//     key: "Referrer-Policy",
+//     value: "strict-origin-when-cross-origin",
+//   },
+// ];
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -111,14 +112,14 @@ const nextConfig: NextConfig = {
     dangerouslyAllowLocalIP: true,
   },
   serverExternalPackages: ["react-email", "@react-email/render"],
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: securityHeaders,
-      },
-    ];
-  },
+  // async headers() {
+  //   return [
+  //     {
+  //       source: "/:path*",
+  //       headers: securityHeaders,
+  //     },
+  //   ];
+  // },
 };
 
 export default nextConfig;
