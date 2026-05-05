@@ -4,12 +4,15 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation } from "@dnd-kit/react/sortable";
 import { ArrowLeft, Camera, CheckCircle2, Save, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+
 import { toast } from "sonner";
+
 import CameraCapture from "@/app/admin/events/_components/PaymentProof/CameraCapture";
 import PaymentProofReviewItem from "@/app/admin/events/_components/PaymentProof/PaymentProofReviewItem";
 import { usePaymentProofEditor } from "@/app/admin/events/_hooks/usePaymentProofEditor";
 import type { SignedProof } from "@/app/admin/events/_hooks/usePaymentProofSignedUrlAction";
 import { Button } from "@/components/ui/button";
+
 import {
   IMAGE_UPLOAD_ACCEPT_ATTR,
   isValidImageUploadFile,

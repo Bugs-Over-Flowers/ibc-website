@@ -1,12 +1,13 @@
 "use client";
 
-import { useAuthUser } from "@/app/admin/_hooks/useAuthUser";
 import { ModeToggle } from "@/components/NightModeToggle";
 import { SidebarHeader, SidebarMenuButton } from "@/components/ui/sidebar";
 
-export function AdminSidebarHeader() {
-  const { email } = useAuthUser();
+type AdminSidebarHeaderProps = {
+  email: string | null;
+};
 
+export function AdminSidebarHeader({ email }: AdminSidebarHeaderProps) {
   return (
     <SidebarHeader className="border-b px-5 py-4">
       <div className="flex items-center justify-between gap-3">
