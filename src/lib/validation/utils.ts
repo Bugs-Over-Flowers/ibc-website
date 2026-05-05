@@ -15,18 +15,16 @@ export const phoneOrLandlineSchema = z
     "Invalid phone or landline number",
   );
 
-// DEPRECATED — use phoneOrLandlineSchema instead
-// export const phoneSchema = z
-//   .string()
-//   .regex(
-//     /^(\+63|0)9\d{9}$/,
-//     "Invalid Philippine Phone Number (e.g. +639XXXXXXXXX or 09XXXXXXXXX)",
-//   );
+export const phoneSchema = z
+  .string()
+  .regex(
+    /^(\+63|0)9\d{9}$/,
+    "Invalid Philippine Phone Number (e.g. +639XXXXXXXXX or 09XXXXXXXXX)",
+  );
 
-// DEPRECATED — use phoneOrLandlineSchema instead
-// export const landlineSchema = z
-//   .string()
-//   .regex(/\d{5}-\d{4}$/, "Invalid Landline Number");
+export const landlineSchema = z
+  .string()
+  .regex(/\d{5}-\d{4}$/, "Invalid Landline Number");
 
 export const MemberTypeEnum = z.enum(["member", "nonmember"]);
 
