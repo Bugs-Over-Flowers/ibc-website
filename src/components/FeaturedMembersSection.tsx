@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import tryCatch from "@/lib/server/tryCatch";
+import { isStorageUrl } from "@/lib/storage/companyProfile";
 import { resolveMemberLogoUrl } from "@/lib/storage/memberLogo";
 import { getFeaturedMembers } from "@/server/members/queries/getFeaturedMembers";
 
@@ -93,7 +94,8 @@ export default async function FeaturedMembersSection() {
                 key={member.businessMemberId}
               >
                 <CardContent className="flex h-full flex-col items-center justify-center p-8 text-center">
-                  {normalizedWebsiteURL ? (
+                  {normalizedWebsiteURL &&
+                  !isStorageUrl(normalizedWebsiteURL) ? (
                     <a
                       aria-label={`Visit ${member.businessName} website`}
                       href={normalizedWebsiteURL}

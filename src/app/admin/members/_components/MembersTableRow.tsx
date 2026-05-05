@@ -12,6 +12,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { isStorageUrl } from "@/lib/storage/companyProfile";
 import { cn } from "@/lib/utils";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
@@ -185,7 +186,7 @@ export function MembersTableRow({
               <Eye className="size-3.5" />
             </button>
 
-            {member.websiteURL && (
+            {member.websiteURL && !isStorageUrl(member.websiteURL) && (
               <a
                 className="flex size-6 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-muted/50 hover:text-foreground"
                 href={member.websiteURL}

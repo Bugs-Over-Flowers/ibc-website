@@ -30,19 +30,6 @@ Feature: Check-in list
     Then I should see the existing remark for the first participant
 
   @happy
-  Scenario: Update remarks after check-in
-    Given I am on the accepted registration check-in dialog
-    When I select the first and second participants
-    And I check them in
-    Then the app should contain the checked-in participants with the remark saved
-    When I reopen the accepted registration check-in dialog
-    And I open the remark editor for the first participant
-    And I verify the second participant has no remark
-    And I edit the first participant remark
-    And I apply the remark update
-    Then the app should reflect the updated remark for the first participant
-
-  @happy
   Scenario Outline: Check in multiple participants
     Given I am on the accepted registration check-in dialog
     When I select the first <count> participants

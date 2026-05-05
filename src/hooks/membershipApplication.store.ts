@@ -48,6 +48,7 @@ function sanitizeApplicationDataForPersist(
     step2: {
       ...applicationData.step2,
       logoImage: undefined,
+      companyProfileFile: undefined,
     },
     step4: {
       ...applicationData.step4,
@@ -158,6 +159,8 @@ const initialState: MembershipApplicationStore = {
       mobileNumber: "",
       emailAddress: "",
       websiteURL: "",
+      companyProfileType: "website",
+      companyProfileFile: undefined,
       logoImageURL: "",
       logoImage: undefined,
     },
@@ -165,19 +168,6 @@ const initialState: MembershipApplicationStore = {
       representatives: [
         {
           companyMemberType: "principal",
-          firstName: "",
-          lastName: "",
-          mailingAddress: "",
-          sex: "male",
-          nationality: "",
-          birthdate: undefined as unknown as Date,
-          companyDesignation: "",
-          landline: "",
-          mobileNumber: "",
-          emailAddress: "",
-        },
-        {
-          companyMemberType: "alternate",
           firstName: "",
           lastName: "",
           mailingAddress: "",

@@ -131,6 +131,11 @@ public = true
 file_size_limit = "5MiB"
 allowed_mime_types = ["image/png", "image/jpeg", "image/jpg"]
 objects_path = "./network-logos"
+[storage.buckets.companyprofile]
+public = false
+file_size_limit = "10MiB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/jpg", "application/pdf"]
+objects_path = "./companyprofile"
 
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]

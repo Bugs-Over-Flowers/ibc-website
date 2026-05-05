@@ -93,7 +93,7 @@ export default function ResendQRCode({
           </Text>
 
           <Section style={detailsSection}>
-            <Text style={detailLabel}>Registration Identifier</Text>
+            <Text style={detailLabel}>Group Registration Identifier</Text>
             <Text style={detailValue}>
               <code style={detailValueMono}>{registrationIdentifier}</code>
             </Text>

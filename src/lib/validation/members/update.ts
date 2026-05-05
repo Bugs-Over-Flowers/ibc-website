@@ -23,6 +23,7 @@ export const UpdateMemberSchema = z.object({
   businessName: z.string().min(1, "Company name is required"),
   sectorId: z.coerce.number().min(1, "Sector is required"),
   companyAddress: z.string().min(1, "Company address is required"),
+  companyProfileType: z.enum(["image", "document", "website"]).optional(),
   websiteURL: z
     .string()
     .trim()
@@ -56,23 +57,20 @@ export const UpdateMemberSchema = z.object({
         ),
       }),
     )
-    .length(
+    .min(1, "At least one representative is required")
+    .max(
       2,
-      "Exactly two representatives are required: one principal and one alternate",
+      "Maximum of two representatives allowed: one principal and one alternate",
     )
     .refine(
       (representatives) => {
         const principalCount = representatives.filter(
           (representative) => representative.companyMemberType === "principal",
         ).length;
-        const alternateCount = representatives.filter(
-          (representative) => representative.companyMemberType === "alternate",
-        ).length;
-        return principalCount === 1 && alternateCount === 1;
+        return principalCount === 1;
       },
       {
-        message:
-          "Exactly two representatives are required: one principal and one alternate",
+        message: "Exactly one principal representative is required",
       },
     ),
 });

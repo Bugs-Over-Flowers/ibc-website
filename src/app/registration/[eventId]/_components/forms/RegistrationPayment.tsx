@@ -1,6 +1,7 @@
 import { UploadCloud } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -170,9 +171,12 @@ export function PaymentProofDropzone({
             <span className="font-medium text-emerald-700 dark:text-emerald-300">
               Proof Uploaded Successfully
             </span>
-            <Badge className="max-w-full truncate" variant="outline">
-              {value.name}
+            <Badge variant="outline">
+              {value.type.split("/")[1].toUpperCase()}
             </Badge>
+            <span className="max-w-[200px] truncate text-muted-foreground text-xs">
+              {value.name}
+            </span>
           </div>
 
           <Dropzone
@@ -191,11 +195,15 @@ export function PaymentProofDropzone({
               setDragActive(false);
               const nextFile = acceptedFiles[0];
               if (!nextFile || !isValidImageUploadFile(nextFile)) {
+                toast.error(
+                  "Only PNG, JPG, and JPEG files under 5MB are accepted.",
+                );
                 return;
               }
 
               onChange(nextFile);
             }}
+            onError={(error) => toast.error(error.message)}
             src={value ? [value] : undefined}
           >
             <div className="flex w-full flex-col items-center justify-center gap-1 text-center">
@@ -226,11 +234,15 @@ export function PaymentProofDropzone({
             setDragActive(false);
             const nextFile = acceptedFiles[0];
             if (!nextFile || !isValidImageUploadFile(nextFile)) {
+              toast.error(
+                "Only PNG, JPG, and JPEG files under 5MB are accepted.",
+              );
               return;
             }
 
             onChange(nextFile);
           }}
+          onError={(error) => toast.error(error.message)}
           src={undefined}
         >
           <div className="flex w-full flex-col items-center justify-center gap-2 text-center">
