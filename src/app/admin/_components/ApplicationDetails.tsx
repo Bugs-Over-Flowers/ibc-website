@@ -1,12 +1,15 @@
-import { Building2, ChevronLeft, CreditCard, MapPin, User } from "lucide-react";
+import { Building2, CreditCard, MapPin, User } from "lucide-react";
 import type { Route } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import BackButton from "@/app/admin/_components/BackButton";
+import { CompanyProfileDisplay } from "@/components/CompanyProfileDisplay";
+import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import { toPascalCaseWithSpaces } from "../application/_utils/formatters";
@@ -16,29 +19,6 @@ interface ApplicationDetailsProps {
   applicationId: string;
   source: "applications" | "members" | "history";
   memberId?: string;
-}
-
-function DetailRow({
-  label,
-  value,
-  valueClassName,
-}: {
-  label: string;
-  value: React.ReactNode;
-  valueClassName?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={`font-semibold text-base leading-tight ${valueClassName ?? ""}`}
-      >
-        {value}
-      </span>
-    </div>
-  );
 }
 
 function RepresentativeField({
@@ -51,16 +31,12 @@ function RepresentativeField({
   valueClassName?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {label}
-      </span>
-      <span
-        className={`font-semibold text-sm leading-tight ${valueClassName ?? ""}`}
-      >
-        {value}
-      </span>
-    </div>
+    <DetailRow
+      label={label}
+      size="sm"
+      value={value}
+      valueClassName={valueClassName}
+    />
   );
 }
 
@@ -110,6 +86,11 @@ function MemberReviewDetails({
   const alternateRepresentatives = applicationMembers.filter(
     (member) => member.companyMemberType === "alternate",
   );
+  const paymentRequirement = getMembershipPaymentRequirement({
+    applicationMemberType: application.applicationMemberType,
+    applicationType: application.applicationType,
+    previousApplicationMemberType: application.previousApplicationMemberType,
+  });
 
   return (
     <div className="space-y-8">
@@ -162,22 +143,32 @@ function MemberReviewDetails({
                   application.applicationMemberType,
                 )}
               />
+              {application.applicationType === "updating" && (
+                <DetailRow
+                  label="Previous Member Type"
+                  value={
+                    application.previousApplicationMemberType
+                      ? toPascalCaseWithSpaces(
+                          application.previousApplicationMemberType,
+                        )
+                      : "N/A"
+                  }
+                />
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <DetailRow
                 label="Industry Sector"
-                value={application.Sector?.sectorName || "N/A"}
+                value={application.sectorName || "N/A"}
               />
               <DetailRow
-                label="Website"
+                label="Company Profile"
                 value={
-                  <span
-                    className="block max-w-[220px] truncate"
-                    title={application.websiteURL || "N/A"}
-                  >
-                    {application.websiteURL || "N/A"}
-                  </span>
+                  <CompanyProfileDisplay
+                    companyProfileType={application.companyProfileType}
+                    websiteURL={application.websiteURL}
+                  />
                 }
               />
             </div>
@@ -397,42 +388,52 @@ function MemberReviewDetails({
         </CardContent>
       </Card>
 
-      <Card className="rounded-2xl border border-border/50 bg-background">
-        <CardContent className="space-y-6 px-7 py-0">
-          <div className="flex items-center gap-2 font-bold text-primary">
-            <CreditCard className="h-5 w-5" />
-            <span className="text-base uppercase tracking-wide">
-              Payment Information
-            </span>
-          </div>
+      {paymentRequirement.requiresPayment && (
+        <Card className="rounded-2xl border border-border/50 bg-background">
+          <CardContent className="space-y-6 px-7 py-0">
+            <div className="flex items-center gap-2 font-bold text-primary">
+              <CreditCard className="h-5 w-5" />
+              <span className="text-base uppercase tracking-wide">
+                Payment Information
+              </span>
+            </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <DetailRow
-              label="Payment Method"
-              value={toPascalCaseWithSpaces(application.paymentMethod || "N/A")}
-            />
-            <DetailRow
-              label="Payment Status"
-              value={
-                <Badge
-                  className={getPaymentStatusClasses(
-                    application.paymentProofStatus,
-                  )}
-                  variant="secondary"
-                >
-                  {toPascalCaseWithSpaces(
-                    application.paymentProofStatus || "Pending",
-                  )}
-                </Badge>
-              }
-            />
-            <DetailRow
-              label="Application Date"
-              value={new Date(application.applicationDate).toLocaleDateString()}
-            />
-          </div>
-        </CardContent>
-      </Card>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <DetailRow
+                label="Payment Method"
+                value={toPascalCaseWithSpaces(
+                  application.paymentMethod || "N/A",
+                )}
+              />
+              <DetailRow
+                label="Payment Status"
+                value={
+                  <Badge
+                    className={getPaymentStatusClasses(
+                      application.paymentProofStatus,
+                    )}
+                    variant="secondary"
+                  >
+                    {toPascalCaseWithSpaces(
+                      application.paymentProofStatus || "Pending",
+                    )}
+                  </Badge>
+                }
+              />
+              <DetailRow
+                label="Expected Amount"
+                value={`P${paymentRequirement.expectedAmount.toLocaleString()}`}
+              />
+              <DetailRow
+                label="Application Date"
+                value={new Date(
+                  application.applicationDate,
+                ).toLocaleDateString()}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
@@ -476,13 +477,7 @@ export async function ApplicationDetails({
 
   return (
     <>
-      <Link
-        className="mb-2 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/80"
-        href={backLink.href}
-      >
-        <ChevronLeft className="h-5 w-5" />
-        {backLink.label}
-      </Link>
+      <BackButton href={backLink.href} label={backLink.label} />
 
       <ApplicationHeader application={application} />
 

@@ -1,6 +1,9 @@
 import { z } from "zod";
+import {
+  ImageUploadFileSchema,
+  ProfileUploadFileSchema,
+} from "@/lib/fileUpload";
 import { titleCase } from "@/lib/utils";
-import { validateFileTypeMime } from "../fileTypes";
 import { phoneSchema } from "../utils";
 
 export const ApplicationTypeEnum = z.enum(["newMember", "updating", "renewal"]);
@@ -13,6 +16,7 @@ export const MembershipApplicationStep1Schema = z
   .object({
     applicationType: ApplicationTypeEnum,
     businessMemberIdentifier: z.string().optional(),
+    existingApplicationMemberType: ApplicationMemberTypeEnum.optional(),
     businessMemberId: z
       .preprocess(
         (value) => (value === "" ? undefined : value),
@@ -40,31 +44,32 @@ export type MembershipApplicationStep1Schema = z.infer<
   typeof MembershipApplicationStep1Schema
 >;
 
-export const ApplicationMemberSchema = z
-  .object({
-    companyMemberType: CompanyMemberTypeEnum,
-    firstName: z
-      .string({ message: "First name is required" })
-      .min(1, "First name is required"),
-    lastName: z
-      .string({ message: "Last name is required" })
-      .min(1, "Last name is required"),
-    emailAddress: z.email("Email is required"),
-    companyDesignation: z
-      .string({ message: "Company designation is required" })
-      .min(1, "Company designation is required"),
-    birthdate: z.date({ message: "Birthdate is required" }),
-    sex: SexEnum,
-    nationality: z
-      .string({ message: "Nationality is required" })
-      .min(1, "Nationality is required"),
-    mailingAddress: z
-      .string({ message: "Mailing address is required" })
-      .min(1, "Mailing address is required"),
-    mobileNumber: phoneSchema,
-    landline: z.string().min(1, "Landline is required"),
-  })
-  .transform((data) => {
+export const ApplicationMemberBaseSchema = z.object({
+  companyMemberType: CompanyMemberTypeEnum,
+  firstName: z
+    .string({ message: "First name is required" })
+    .min(1, "First name is required"),
+  lastName: z
+    .string({ message: "Last name is required" })
+    .min(1, "Last name is required"),
+  emailAddress: z.email("Email is required"),
+  companyDesignation: z
+    .string({ message: "Company designation is required" })
+    .min(1, "Company designation is required"),
+  birthdate: z.date({ message: "Birthdate is required" }),
+  sex: SexEnum,
+  nationality: z
+    .string({ message: "Nationality is required" })
+    .min(1, "Nationality is required"),
+  mailingAddress: z
+    .string({ message: "Mailing address is required" })
+    .min(1, "Mailing address is required"),
+  mobileNumber: phoneSchema,
+  landline: z.string().min(1, "Landline is required"),
+});
+
+export const ApplicationMemberSchema = ApplicationMemberBaseSchema.transform(
+  (data) => {
     // Only apply titleCase to companyDesignation if all letters are lowercase
     const isAllLowercase =
       data.companyDesignation === data.companyDesignation.toLowerCase();
@@ -77,38 +82,28 @@ export const ApplicationMemberSchema = z
         : data.companyDesignation.trim(),
       nationality: titleCase(data.nationality).trim(),
     };
-  });
+  },
+);
 
 export const MembershipApplicationStep2Schema = z
   .object({
     companyName: z
       .string({ message: "Company name is required" })
       .min(1, "Company name is required"),
-    sectorId: z.union([z.string(), z.number()]).refine(
-      (val) => {
-        const num = typeof val === "string" ? Number.parseInt(val, 10) : val;
-        return !Number.isNaN(num) && num > 0;
-      },
-      { message: "Industry/Sector is required" },
-    ),
+    sectorId: z
+      .string({ message: "Industry/Sector is required" })
+      .min(1, "Industry/Sector is required"),
+    companyProfileType: z.enum(["file", "website"]),
+    companyProfileFile: ProfileUploadFileSchema.optional(),
+    websiteURL: z.string().optional(),
     companyAddress: z
       .string({ message: "Company address is required" })
       .min(1, "Company address is required"),
-    websiteURL: z
-      .string({ message: "Company profile is required" })
-      .min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),
     landline: z.string().min(1, "Landline is required"),
     mobileNumber: phoneSchema,
     logoImageURL: z.string().optional(),
-    logoImage: z
-      .file("Company logo is required")
-      .max(1024 * 1024 * 5, "File size must be less than 5MB")
-      .refine(
-        (file) => validateFileTypeMime(file),
-        "Only JPEG, PNG, and PDF files are allowed",
-      )
-      .optional(),
+    logoImage: ImageUploadFileSchema.optional(),
   })
   .refine(
     (data) => {
@@ -119,6 +114,29 @@ export const MembershipApplicationStep2Schema = z
     },
     { message: "Company logo is required", path: ["logoImage"] },
   )
+  .superRefine((data, ctx) => {
+    if (
+      data.companyProfileType === "website" &&
+      (!data.websiteURL || !data.websiteURL.trim())
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Company profile is required",
+        path: ["websiteURL"],
+      });
+    }
+    if (
+      data.companyProfileType === "file" &&
+      (!data.websiteURL || data.websiteURL.trim().length === 0) &&
+      !data.companyProfileFile
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Company profile file is required",
+        path: ["companyProfileFile"],
+      });
+    }
+  })
   .transform((data) => ({
     ...data,
     companyName: titleCase(data.companyName).trim(),
@@ -131,9 +149,10 @@ export type MembershipApplicationStep2Schema = z.infer<
 export const MembershipApplicationStep3Schema = z.object({
   representatives: z
     .array(ApplicationMemberSchema)
-    .length(
+    .min(1, "At least one representative is required")
+    .max(
       2,
-      "Exactly two representatives are required: one principal and one alternate",
+      "Maximum of two representatives allowed: one principal and one alternate",
     ),
 });
 
@@ -146,14 +165,7 @@ export const MembershipApplicationStep4Schema = z
     applicationMemberType: ApplicationMemberTypeEnum,
     paymentMethod: MembershipPaymentMethodEnum,
     paymentProofUrl: z.string().optional(),
-    paymentProof: z
-      .file()
-      .max(1024 * 1024 * 5, "File size must be less than 5MB")
-      .refine(
-        (file) => validateFileTypeMime(file),
-        "Only JPEG, PNG, and PDF files are allowed",
-      )
-      .optional(),
+    paymentProof: ImageUploadFileSchema.optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -179,7 +191,10 @@ export const MembershipApplicationSchema = z
     applicationMemberType: ApplicationMemberTypeEnum,
     businessMemberId: z.string().optional(),
     companyName: z.string().min(1, "Company name is required"),
-    sectorId: z.number({ message: "Industry/Sector is required" }),
+    sectorName: z
+      .string({ message: "Industry/Sector is required" })
+      .min(1, "Industry/Sector is required"),
+    companyProfileType: z.enum(["image", "document", "website"]),
     companyAddress: z.string().min(1, "Company address is required"),
     websiteURL: z.string().min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),
@@ -190,9 +205,10 @@ export const MembershipApplicationSchema = z
       .min(1, "Company logo is required"),
     representatives: z
       .array(ApplicationMemberSchema)
-      .length(
+      .min(1, "At least one representative is required")
+      .max(
         2,
-        "Exactly two representatives are required: one principal and one alternate",
+        "Maximum of two representatives allowed: one principal and one alternate",
       ),
     paymentMethod: MembershipPaymentMethodEnum,
     paymentProofUrl: z.string().optional(),

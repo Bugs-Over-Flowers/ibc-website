@@ -1,10 +1,10 @@
 import z from "zod";
+import { ImageUploadFileSchema } from "@/lib/fileUpload";
 import { titleCase } from "@/lib/utils";
 import {
-  landlineSchema,
   MemberTypeEnum,
   PaymentMethodEnum,
-  phoneSchema,
+  phoneOrLandlineSchema,
 } from "../utils";
 
 export const StandardRegistrationStep1Schema = z.discriminatedUnion("member", [
@@ -41,16 +41,7 @@ export const RegistrantDetailsSchema = z
       .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    contactNumber: z
-      .string("Please input your contact number")
-      .refine(
-        (data) =>
-          z.union([phoneSchema, landlineSchema]).safeParse(data).success,
-        {
-          error:
-            "Contact number must be a valid Philippine phone or landline number",
-        },
-      ),
+    contactNumber: phoneOrLandlineSchema,
     email: z.email().trim(),
   })
   .transform((data) => ({
@@ -138,18 +129,13 @@ export type StandardRegistrationStep2Schema = z.infer<
 export const StandardRegistrationStep3Schema = z.discriminatedUnion(
   "paymentMethod",
   [
-    z
-      .object({
-        paymentMethod: z.literal(PaymentMethodEnum.enum.online),
-        paymentProof: z
-          .file()
-          .max(1024 * 1024 * 5)
-          .optional(),
-      })
-      .refine((data) => data.paymentProof !== undefined, {
-        message: "Payment proof is required for online payment.",
-        path: ["paymentProof"],
-      }),
+    z.object({
+      paymentMethod: z.literal(PaymentMethodEnum.enum.online),
+      paymentProofs: z
+        .array(ImageUploadFileSchema, "At least one payment proof is required.")
+        .min(1, "At least one payment proof is required.")
+        .max(10, "Maximum of 10 payment proofs allowed."),
+    }),
     z.object({
       paymentMethod: z.literal(PaymentMethodEnum.enum.onsite),
     }),
@@ -164,6 +150,7 @@ export const StandardRegistrationStep4Schema = z.object({
   termsAndConditions: z.boolean().refine((val) => val, {
     error: "You must agree to the Terms and Conditions.",
   }),
+  note: z.string().optional(),
 });
 
 export type StandardRegistrationStep4Schema = z.infer<
@@ -185,28 +172,32 @@ export const ServerRegistrationSchema = z.object({
   eventId: z.uuid(),
   step1: StandardRegistrationStep1Schema,
   step2: StandardRegistrationStep2Schema,
-  step4: StandardRegistrationStep4Schema,
-  sponsoredRegistrationId: z.uuid().optional().nullable(),
   step3: z.discriminatedUnion("paymentMethod", [
     z.object({
       paymentMethod: z.literal("online"),
-      path: z.string(),
+      paths: z.array(z.string()).min(1).max(10),
     }),
     z.object({
       paymentMethod: z.literal("onsite"),
     }),
   ]),
+  step4: StandardRegistrationStep4Schema,
+  sponsoredRegistrationId: z.uuid().optional().nullable(),
 });
 
 export type ServerRegistrationSchema = z.infer<typeof ServerRegistrationSchema>;
 
-/**
- * Zod schema for validating RPC response at runtime.
- * Ensures type safety for data returned from database.
- */
 export const SubmitRegistrationResponseSchema = z.object({
   registrationId: z.uuid(),
   message: z.string(),
+  participants: z
+    .array(
+      z.object({
+        participantId: z.string(),
+        participantIdentifier: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 export type SubmitRegistrationResponseSchema = z.infer<

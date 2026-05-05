@@ -4,6 +4,8 @@ import { type NextRequest, NextResponse } from "next/server";
 export async function updateSession(request: NextRequest) {
   const supabase_url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabase_key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const skipAdminMfaInTests =
+    process.env.NEXT_PUBLIC_SKIP_ADMIN_MFA_IN_TESTS === "true";
 
   if (!supabase_url || !supabase_key) {
     throw new Error("Missing Supabase environment variables");
@@ -70,17 +72,58 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user) {
+    const isAdminRoute = pathname.startsWith("/admin");
     const isAuthRoute =
       pathname === "/auth" || pathname.startsWith("/auth/mfa");
 
-    if (isAuthRoute) {
-      const { data: assuranceData, error: assuranceError } =
-        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (isAdminRoute || isAuthRoute) {
+      const [assuranceResult, factorsResult] = await Promise.all([
+        supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+        supabase.auth.mfa.listFactors(),
+      ]);
 
-      if (!assuranceError && assuranceData.currentLevel === "aal2") {
-        const url = request.nextUrl.clone();
-        url.pathname = "/admin";
-        return NextResponse.redirect(url);
+      const assuranceData = assuranceResult.data;
+      const assuranceError = assuranceResult.error;
+      const factors = factorsResult.data;
+      const factorsError = factorsResult.error;
+
+      const hasVerifiedFactor =
+        !factorsError &&
+        (factors?.all ?? []).some(
+          (factor) =>
+            factor.status === "verified" && factor.factor_type === "totp",
+        );
+
+      if (isAdminRoute) {
+        if (skipAdminMfaInTests) {
+          return supabaseResponse;
+        }
+
+        if (assuranceError || factorsError) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/auth";
+          return NextResponse.redirect(url);
+        }
+
+        if (!hasVerifiedFactor) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/auth/mfa-setup";
+          return NextResponse.redirect(url);
+        }
+
+        if (assuranceData?.currentLevel !== "aal2") {
+          const url = request.nextUrl.clone();
+          url.pathname = "/auth/mfa-verify";
+          return NextResponse.redirect(url);
+        }
+      }
+
+      if (isAuthRoute) {
+        if (!assuranceError && assuranceData?.currentLevel === "aal2") {
+          const url = request.nextUrl.clone();
+          url.pathname = "/admin";
+          return NextResponse.redirect(url);
+        }
       }
     }
   }

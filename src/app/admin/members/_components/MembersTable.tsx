@@ -1,7 +1,19 @@
 "use client";
 
 import { CheckSquare2, Square, Users, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,6 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAction } from "@/hooks/useAction";
+import tryCatch from "@/lib/server/tryCatch";
+import { removeFeaturedMember } from "@/server/members/mutations/removeFeaturedMember";
 import type { getMembers } from "@/server/members/queries/getMembers";
 import { useMemberSelection } from "../_hooks/useMemberSelection";
 import {
@@ -23,16 +38,55 @@ interface MembersTableProps {
 }
 
 export function MembersTable({ members }: MembersTableProps) {
+  const router = useRouter();
   const [featureMember, setFeatureMember] = useState<FeatureableMember | null>(
     null,
   );
   const [isFeatureDialogOpen, setIsFeatureDialogOpen] = useState(false);
+  const [memberToRemoveFeatured, setMemberToRemoveFeatured] =
+    useState<FeatureableMember | null>(null);
+  const [isRemoveFeaturedDialogOpen, setIsRemoveFeaturedDialogOpen] =
+    useState(false);
 
   const handleFeatureClick = (
     member: Awaited<ReturnType<typeof getMembers>>[number],
   ) => {
     setFeatureMember(member);
     setIsFeatureDialogOpen(true);
+  };
+
+  const handleOpenRemoveFeatured = (
+    member: Awaited<ReturnType<typeof getMembers>>[number],
+  ) => {
+    setMemberToRemoveFeatured(member);
+    setIsRemoveFeaturedDialogOpen(true);
+  };
+
+  const { execute: executeRemoveFeatured, isPending: isRemovingFeatured } =
+    useAction(tryCatch(removeFeaturedMember), {
+      onSuccess: () => {
+        if (memberToRemoveFeatured) {
+          toast.success(
+            `${memberToRemoveFeatured.businessName} was removed from featured.`,
+          );
+        }
+        setIsRemoveFeaturedDialogOpen(false);
+        setMemberToRemoveFeatured(null);
+        router.refresh();
+      },
+      onError: (error) => {
+        toast.error(error);
+      },
+    });
+
+  const handleConfirmRemoveFeatured = async () => {
+    if (!memberToRemoveFeatured) {
+      return;
+    }
+
+    await executeRemoveFeatured({
+      memberId: memberToRemoveFeatured.businessMemberId,
+    });
   };
 
   const {
@@ -146,6 +200,7 @@ export function MembersTable({ members }: MembersTableProps) {
             key={member.businessMemberId}
             member={member}
             onFeatureClick={handleFeatureClick}
+            onRemoveFeatureClick={handleOpenRemoveFeatured}
             onSelectedChange={(selected) =>
               handleSelectMember(member.businessMemberId, selected)
             }
@@ -161,6 +216,38 @@ export function MembersTable({ members }: MembersTableProps) {
           open={isFeatureDialogOpen}
         />
       ) : null}
+
+      <AlertDialog
+        onOpenChange={setIsRemoveFeaturedDialogOpen}
+        open={isRemoveFeaturedDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove featured member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the featured status for{" "}
+              <span className="font-medium text-foreground">
+                {memberToRemoveFeatured?.businessName}
+              </span>
+              .
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemovingFeatured}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isRemovingFeatured || !memberToRemoveFeatured}
+              onClick={() => {
+                void handleConfirmRemoveFeatured();
+              }}
+            >
+              {isRemovingFeatured ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

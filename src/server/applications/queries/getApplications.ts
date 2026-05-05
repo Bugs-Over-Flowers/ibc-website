@@ -4,10 +4,49 @@ import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { applyAdmin5mCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { signLogoUrl, signPaymentProofUrl } from "@/lib/storage/signedUrls";
 import { createClient } from "@/lib/supabase/server";
 import type { ApplicationWithMembers } from "@/lib/types/application";
 
 type GetApplicationsResult = ApplicationWithMembers[];
+
+type ApplicationMemberTypeHistory = {
+  applicationId: string;
+  applicationDate: string;
+  applicationMemberType: ApplicationWithMembers["applicationMemberType"];
+  businessMemberId: string | null;
+};
+
+function getPreviousApplicationMemberType(
+  application: ApplicationWithMembers,
+  history: ApplicationMemberTypeHistory[],
+): ApplicationWithMembers["previousApplicationMemberType"] {
+  if (
+    application.applicationType !== "updating" ||
+    !application.businessMemberId
+  ) {
+    return null;
+  }
+
+  const currentApplicationDate = new Date(
+    application.applicationDate,
+  ).getTime();
+  const previousApplication = history.find((entry) => {
+    if (
+      entry.businessMemberId !== application.businessMemberId ||
+      entry.applicationId === application.applicationId
+    ) {
+      return false;
+    }
+
+    const entryDate = new Date(entry.applicationDate).getTime();
+    return (
+      Number.isNaN(currentApplicationDate) || entryDate < currentApplicationDate
+    );
+  });
+
+  return previousApplication?.applicationMemberType ?? null;
+}
 
 export async function getApplications(
   requestCookies: RequestCookie[],
@@ -25,7 +64,6 @@ export async function getApplications(
       `
       *,
       ApplicationMember(*),
-      Sector(sectorId, sectorName),
       ProofImage(proofImageId, path),
       Interview!Application_interviewId_fkey(interviewId, interviewDate, interviewVenue, status)
     `,
@@ -36,78 +74,61 @@ export async function getApplications(
     throw new Error(`Failed to fetch applications: ${error.message}`);
   }
 
-  const signLogoUrl = async (path: string | null) => {
-    if (!path) return null;
+  const applications = data as ApplicationWithMembers[];
+  const updatingBusinessMemberIds = Array.from(
+    new Set(
+      applications
+        .filter(
+          (application) =>
+            application.applicationType === "updating" &&
+            application.businessMemberId,
+        )
+        .map((application) => application.businessMemberId as string),
+    ),
+  );
 
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      return path;
-    }
+  const { data: memberTypeHistory, error: memberTypeHistoryError } =
+    updatingBusinessMemberIds.length > 0
+      ? await supabase
+          .from("Application")
+          .select(
+            "applicationId,businessMemberId,applicationDate,applicationMemberType",
+          )
+          .in("businessMemberId", updatingBusinessMemberIds)
+          .order("applicationDate", { ascending: false })
+      : { data: [], error: null };
 
-    const { data: signed, error } = await supabase.storage
-      .from("logoimage")
-      .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
+  if (memberTypeHistoryError) {
+    throw new Error(
+      `Failed to fetch application member type history: ${memberTypeHistoryError.message}`,
+    );
+  }
 
-    if (!error && signed?.signedUrl) {
-      return signed.signedUrl;
-    }
-
-    return null;
-  };
-
-  const signPaymentProofUrl = async (path: string | null) => {
-    if (!path) return null;
-
-    // If it's already a full URL, extract the file path
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      // Extract path from: https://xxx.supabase.co/storage/v1/object/public/paymentproofs/filename
-      const urlPattern = /\/storage\/v1\/object\/public\/paymentproofs\/(.+)$/;
-      const match = path.match(urlPattern);
-
-      if (match?.[1]) {
-        const filename = match[1];
-        const { data: signed, error } = await supabase.storage
-          .from("paymentproofs")
-          .createSignedUrl(filename, 60 * 60 * 24 * 30); // 30 days
-
-        if (!error && signed?.signedUrl) {
-          return signed.signedUrl;
-        }
-      }
-
-      return null;
-    }
-
-    // Handle relative paths
-    const { data: signed, error } = await supabase.storage
-      .from("paymentproofs")
-      .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
-
-    if (!error && signed?.signedUrl) {
-      return signed.signedUrl;
-    }
-
-    return null;
-  };
+  const applicationMemberTypeHistory = (memberTypeHistory ??
+    []) as ApplicationMemberTypeHistory[];
 
   const applicationsWithSignedLogos = await Promise.all(
-    (data as ApplicationWithMembers[]).map(
-      async (application: ApplicationWithMembers) => {
-        const proofImage = application.ProofImage?.[0];
-        const signedProofImage = proofImage
-          ? {
-              ...proofImage,
-              path:
-                (await signPaymentProofUrl(proofImage.path)) ?? proofImage.path,
-            }
-          : undefined;
+    applications.map(async (application) => {
+      const proofImage = application.ProofImage?.[0];
+      const signedProofImage = proofImage
+        ? {
+            ...proofImage,
+            path:
+              (await signPaymentProofUrl(supabase, proofImage.path)) ??
+              proofImage.path,
+          }
+        : undefined;
 
-        return {
-          ...application,
-          logoImageURL: await signLogoUrl(application.logoImageURL),
-          ProofImage: signedProofImage ? [signedProofImage] : [],
-        };
-      },
-    ),
+      return {
+        ...application,
+        logoImageURL: await signLogoUrl(supabase, application.logoImageURL),
+        previousApplicationMemberType: getPreviousApplicationMemberType(
+          application,
+          applicationMemberTypeHistory,
+        ),
+        ProofImage: signedProofImage ? [signedProofImage] : [],
+      };
+    }),
   );
 
   return applicationsWithSignedLogos;

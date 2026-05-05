@@ -1,10 +1,16 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import BackButton from "@/app/admin/_components/BackButton";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
-import { BackButton } from "./_components/BackButton";
 import { SponsoredRegistrationsTableWrapper } from "./_components/SponsoredRegistrationsTableWrapper";
 import SponsoredRegistrationsLoading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Sponsored Registrations | Admin",
+  description: "Manage sponsored registration links and guest usage.",
+};
 
 type SponsoredRegistrationsPageProps =
   PageProps<"/admin/events/[eventId]/sponsored-registrations">;

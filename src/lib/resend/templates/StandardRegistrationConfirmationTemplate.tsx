@@ -12,6 +12,7 @@ import {
 } from "react-email";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import TermsAndConditions from "../components/TermsAndConditions";
+import TicketCard from "../components/TicketCard";
 
 interface StandardRegistrationConfirmationTemplateProps {
   eventDetails: Pick<
@@ -21,13 +22,17 @@ interface StandardRegistrationConfirmationTemplateProps {
   eventDateRange: string;
   eventVenue: string;
   registrationIdentifier: string;
+  participantIdentifier: string;
   self: {
     fullName: string;
     email: string;
+    affiliation: string;
   };
-  otherParticipants?: {
+  participants?: {
     fullName: string;
     email: string;
+    affiliation: string;
+    participantIdentifier: string;
   }[];
 }
 
@@ -36,7 +41,8 @@ export default function StandardRegistrationConfirmationTemplate({
   eventDateRange,
   eventVenue,
   registrationIdentifier,
-  otherParticipants,
+  participantIdentifier,
+  participants,
   self,
 }: StandardRegistrationConfirmationTemplateProps) {
   if (!eventDetails.eventHeaderUrl) {
@@ -44,10 +50,6 @@ export default function StandardRegistrationConfirmationTemplate({
   }
 
   const previewString = `Registration Confirmation: ${eventDetails.eventTitle}`;
-  const otherParticipantsString =
-    otherParticipants && otherParticipants.length > 0
-      ? ` and the following participants`
-      : "";
 
   return (
     <Html>
@@ -77,44 +79,50 @@ export default function StandardRegistrationConfirmationTemplate({
             <Text style={detailValue}>{eventVenue}</Text>
           </Section>
 
-          <Text style={text}>Here is your Check-in Registration Code:</Text>
-
-          <Section style={{ textAlign: "center", margin: "32px 0" }}>
-            {/** biome-ignore lint/performance/noImgElement: using react-email */}
-            <img
-              alt="Check-in QR Code"
-              height="300"
-              src="cid:qrCodeCID"
-              style={{ maxWidth: "300px", margin: "0 auto" }}
-              width="300"
-            />
-          </Section>
-
           <Text style={text}>
-            Please keep a copy of the QR code for you {otherParticipantsString}{" "}
-            to sign in to the event.
+            Here are the check-in QR codes for everyone under this registration.
+            Please present the appropriate QR code at the event entrance.
           </Text>
 
-          <Section style={detailsSection}>
-            <Text style={detailLabel}>Registration Identifier</Text>
-            <Text style={detailValue}>
-              <code style={detailValueMono}>{registrationIdentifier}</code>
-            </Text>
+          <Hr style={hr} />
 
-            <Text style={detailLabel}>
-              Participants under this registration
-            </Text>
-            <Text style={detailValue}>
-              • {self.fullName} ({self.email}) - <strong>Registrant</strong>
-            </Text>
-            {otherParticipants &&
-              otherParticipants.length > 0 &&
-              otherParticipants.map((participant) => (
-                <Text key={participant.email} style={detailValue}>
-                  • {participant.fullName} ({participant.email})
-                </Text>
-              ))}
-          </Section>
+          <Text style={text}>Registration QR Code</Text>
+          <Text style={subtext}>
+            Use this code to check in multiple people during the event.
+          </Text>
+          <TicketCard
+            cid="qrCodeCID"
+            email={self.email}
+            identifier={registrationIdentifier}
+            subtitle={self.fullName}
+            title={self.affiliation}
+          />
+
+          <Hr style={hr} />
+
+          <Heading style={h2}>Individual Passes</Heading>
+          <Text style={subtext}>
+            Use these to check in individual participants.
+          </Text>
+
+          <TicketCard
+            cid="participantQrCodeCID"
+            email={self.email}
+            identifier={participantIdentifier}
+            subtitle={self.affiliation}
+            title={self.fullName}
+          />
+
+          {participants?.map((participant) => (
+            <TicketCard
+              cid={`participantQrCodeCID-${participant.participantIdentifier}`}
+              email={participant.email}
+              identifier={participant.participantIdentifier}
+              key={participant.participantIdentifier}
+              subtitle={participant.affiliation}
+              title={participant.fullName}
+            />
+          ))}
 
           <TermsAndConditions />
 
@@ -137,20 +145,31 @@ export default function StandardRegistrationConfirmationTemplate({
 
 StandardRegistrationConfirmationTemplate.PreviewProps = {
   eventDetails: {
-    eventId: "1010",
     eventTitle: "Awarding Ceremony 2024",
     eventHeaderUrl: "https://placehold.co/600x400",
   },
   eventDateRange: "January 20, 2024, 12:00 PM to January 25, 2024, 8:00 PM",
   eventVenue: "Grand Ballroom, Iloilo Convention Center",
-  registrationIdentifier: "IBC-REG-2026-0001",
-  otherParticipants: [
-    { fullName: "John Doe", email: "john.doe@example.com" },
-    { fullName: "Jane Smith", email: "jane.smith@example.com" },
+  registrationIdentifier: "ibc-reg-a1b2c3d4",
+  participantIdentifier: "ibc-par-a1b2c3d4",
+  participants: [
+    {
+      fullName: "John Doe",
+      email: "john.doe@example.com",
+      affiliation: "Acme Corp",
+      participantIdentifier: "ibc-par-e5f6g7h8",
+    },
+    {
+      fullName: "Jane Smith",
+      email: "jane.smith@example.com",
+      affiliation: "Acme Corp",
+      participantIdentifier: "ibc-par-i9j0k1l2",
+    },
   ],
   self: {
     fullName: "Alice Johnson",
     email: "alice.johnson@example.com",
+    affiliation: "Acme Corp",
   },
 };
 
@@ -176,11 +195,27 @@ const h1 = {
   padding: "0 40px",
 };
 
+const h2 = {
+  color: "#333",
+  fontSize: "20px",
+  fontWeight: "bold",
+  margin: "32px 0 16px 0",
+  padding: "0 40px",
+};
+
 const text = {
   color: "#333",
   fontSize: "16px",
   lineHeight: "26px",
   padding: "0 40px",
+};
+
+const subtext = {
+  color: "#71717a",
+  fontSize: "14px",
+  lineHeight: "24px",
+  padding: "0 40px",
+  marginTop: "4px",
 };
 
 const hr = {
@@ -218,9 +253,4 @@ const detailValue = {
   fontSize: "16px",
   fontWeight: "500",
   margin: "0 0 8px 0",
-};
-
-const detailValueMono = {
-  fontFamily:
-    'ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace',
 };

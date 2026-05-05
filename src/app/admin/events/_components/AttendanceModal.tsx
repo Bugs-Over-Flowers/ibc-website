@@ -15,7 +15,7 @@ import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Database } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
-import { getEventDays } from "@/server/events/mutations/getEventDays";
+import { getEventDays } from "@/server/events/queries/getEventDays";
 
 type EventDay = Database["public"]["Tables"]["EventDay"]["Row"];
 

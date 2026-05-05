@@ -11,12 +11,14 @@ type CheckMemberOutput = {
   exists: boolean;
   companyName?: string;
   membershipStatus?: string;
+  applicationMemberType?: "corporate" | "personal";
   businessMemberIdentifier?: string;
   businessMemberId?: string;
   companyAddress?: string;
   sectorId?: number;
   websiteURL?: string;
   logoImageURL?: string;
+  companyProfileType?: string | null;
   emailAddress?: string;
   landline?: string;
   mobileNumber?: string;

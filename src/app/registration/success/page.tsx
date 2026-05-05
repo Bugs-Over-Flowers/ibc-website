@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -6,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import EventDetails from "./_components/EventDetails";
 import ResetRegistrationWrapper from "./_components/ResetRegistrationWrapper";
+
+export const metadata: Metadata = {
+  title: "Registration Successful",
+  description: "Your event registration has been confirmed.",
+};
 
 export default function SuccessPageWrapper() {
   return (
@@ -30,6 +36,11 @@ async function SuccessPage() {
         <p className="max-w-xl text-muted-foreground">
           You have not registered recently (for the past 14 days). Please
           register first.
+        </p>
+        <p className="max-w-xl text-muted-foreground text-sm">
+          Attendee QR codes are sent by email after a successful registration,
+          so this page only appears when we still have your recent registration
+          identifier saved.
         </p>
         <Link href={"/events"}>
           <Button>Go to Events</Button>

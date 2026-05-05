@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
+import { cn } from "@/lib/utils";
 import { useTabSelections } from "../_hooks/useTabSelections";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import BulkActions from "./ApplicationBulkActions";
@@ -11,9 +12,9 @@ export type ApplicationTab = "new" | "pending" | "finished";
 export type ApplicationGroup = "interview" | "updating";
 
 type InterviewTypeBreakdown = {
-  new: { newMember: number; renewal: number };
-  pending: { newMember: number; renewal: number };
-  finished: { newMember: number; renewal: number };
+  new: { newMember: number };
+  pending: { newMember: number };
+  finished: { newMember: number };
 };
 
 interface ApplicationsTabsProps {
@@ -36,6 +37,11 @@ interface ApplicationsTabsProps {
     updating: { new: number; finished: number };
   };
 }
+
+const GROUP_OPTIONS: { value: ApplicationGroup; label: string }[] = [
+  { value: "interview", label: "New Members" },
+  { value: "updating", label: "Renewal & Updates" },
+];
 
 export default function ApplicationsTabs({
   interviewApplications,
@@ -61,10 +67,7 @@ export default function ApplicationsTabs({
   };
 
   const handleGroupChange = (group: ApplicationGroup) => {
-    if (group === activeGroup) {
-      return;
-    }
-
+    if (group === activeGroup) return;
     clearSelection();
     setActiveGroup(group);
     setActiveTab("new");
@@ -83,6 +86,8 @@ export default function ApplicationsTabs({
   const showMeetingScheduler =
     activeGroup === "interview" && activeTab === "new";
 
+  const showSidebar = activeTab !== "finished";
+
   const interviewBreakdownByTab =
     activeGroup === "interview" ? counts.interview.typeBreakdown : null;
 
@@ -98,34 +103,28 @@ export default function ApplicationsTabs({
         : updateInfoApplications.finished;
 
   return (
-    <>
-      <div className="inline-flex items-center gap-1 rounded-full border border-border bg-muted p-1">
-        <button
-          aria-pressed={activeGroup === "interview"}
-          className={`rounded-full px-4 py-1.5 text-sm transition ${
-            activeGroup === "interview"
-              ? "bg-background font-medium text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-          onClick={() => handleGroupChange("interview")}
-          type="button"
-        >
-          New Member & Renewal
-        </button>
-        <button
-          aria-pressed={activeGroup === "updating"}
-          className={`rounded-full px-4 py-1.5 text-sm transition ${
-            activeGroup === "updating"
-              ? "bg-background font-medium text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-          onClick={() => handleGroupChange("updating")}
-          type="button"
-        >
-          Update Info
-        </button>
+    <div className="flex flex-col gap-5">
+      {/* Group switcher */}
+      <div className="inline-flex items-center gap-1 self-start rounded-full border border-border/70 bg-muted/50 p-1">
+        {GROUP_OPTIONS.map(({ value, label }) => (
+          <button
+            aria-pressed={activeGroup === value}
+            className={cn(
+              "rounded-full px-4 py-1.5 text-sm transition-colors",
+              activeGroup === value
+                ? "border border-border/70 bg-background font-medium text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+            key={value}
+            onClick={() => handleGroupChange(value)}
+            type="button"
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
+      {/* Stat cards — doubles as tab navigation */}
       <ApplicationsStats
         activeTab={activeTab}
         availableTabs={availableTabs}
@@ -135,18 +134,21 @@ export default function ApplicationsTabs({
         onTabChange={handleTabChange}
       />
 
-      <div className="mt-6 w-full">
-        {activeTab === "finished" ? (
-          <div className="flex flex-col gap-4">{activeContent}</div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
+      {/* Content area */}
+      <div className="w-full">
+        {showSidebar ? (
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+            {/* Sidebar: scheduler or bulk actions */}
             <div className="min-w-0">
               {showMeetingScheduler ? <MeetingScheduler /> : <BulkActions />}
             </div>
+            {/* Main content */}
             <div className="min-w-0">{activeContent}</div>
           </div>
+        ) : (
+          <div>{activeContent}</div>
         )}
       </div>
-    </>
+    </div>
   );
 }

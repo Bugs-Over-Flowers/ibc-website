@@ -1,13 +1,18 @@
 "use client";
 
-import { Building2, CalendarDays, ExternalLink, Eye } from "lucide-react";
+import {
+  Building2,
+  CalendarDays,
+  ExternalLink,
+  Eye,
+  Star,
+  StarOff,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
+import { isStorageUrl } from "@/lib/storage/companyProfile";
 import { cn } from "@/lib/utils";
 import type { getMembers } from "@/server/members/queries/getMembers";
 
@@ -17,44 +22,63 @@ interface MembersTableRowProps {
   onFeatureClick: (
     member: Awaited<ReturnType<typeof getMembers>>[number],
   ) => void;
+  onRemoveFeatureClick: (
+    member: Awaited<ReturnType<typeof getMembers>>[number],
+  ) => void;
   onSelectedChange: (selected: boolean) => void;
   showCheckbox?: boolean;
 }
+
+const STATUS_STYLES = {
+  paid: "bg-emerald-500/80 text-white border-white/20",
+  unpaid: "bg-orange-500/80 text-white border-white/20",
+  cancelled: "bg-red-500/80 text-white border-white/20",
+} as const;
 
 export function MembersTableRow({
   member,
   isSelected,
   onFeatureClick,
+  onRemoveFeatureClick,
   onSelectedChange,
   showCheckbox = false,
 }: MembersTableRowProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = member.logoImageURL && !imageError;
   const router = useRouter();
+
   const todayDate = new Date().toISOString().slice(0, 10);
-  const normalizedFeaturedExpirationDate =
+  const normalizedFeaturedDate =
     member.featuredExpirationDate && member.featuredExpirationDate >= todayDate
       ? member.featuredExpirationDate
       : null;
-  const isCurrentlyFeatured = !!normalizedFeaturedExpirationDate;
+  const isCurrentlyFeatured = !!normalizedFeaturedDate;
 
-  const joinedDate = new Date(member.joinDate);
-  const formattedJoinDate = Number.isNaN(joinedDate.getTime())
-    ? "N/A"
-    : joinedDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-  const formattedFeaturedUntil = normalizedFeaturedExpirationDate
-    ? new Date(
-        `${normalizedFeaturedExpirationDate}T00:00:00`,
-      ).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+  const formattedJoinDate = (() => {
+    const d = new Date(member.joinDate);
+    return Number.isNaN(d.getTime())
+      ? "N/A"
+      : d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+  })();
+
+  const formattedFeaturedUntil = normalizedFeaturedDate
+    ? new Date(`${normalizedFeaturedDate}T00:00:00`).toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        },
+      )
     : null;
+
+  const statusStyle =
+    STATUS_STYLES[member.membershipStatus as keyof typeof STATUS_STYLES] ??
+    STATUS_STYLES.unpaid;
 
   const handleCardClick = () => {
     if (showCheckbox) {
@@ -67,20 +91,15 @@ export function MembersTableRow({
   return (
     <article
       className={cn(
-        "group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground",
-        "transition-all duration-300 ease-out",
-        "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-xl",
-        showCheckbox && isSelected && "border-primary/50 bg-primary/5",
+        "group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all duration-200",
+        "hover:-translate-y-0.5 hover:border-border/80",
+        showCheckbox && isSelected
+          ? "border-[#378ADD] border-[1.5px]"
+          : "border-border/70",
       )}
     >
-      {/* Image — strictly 1:1 */}
-      <div
-        className="relative w-full overflow-hidden bg-muted/20"
-        style={{ aspectRatio: "1 / 1" }}
-      >
-        {/* Gradient scrim */}
-        <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-b from-black/35 via-transparent to-transparent" />
-
+      {/* Image zone */}
+      <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-muted/20">
         {showImage ? (
           <Image
             alt={member.businessName}
@@ -88,46 +107,58 @@ export function MembersTableRow({
             fill
             onError={() => setImageError(true)}
             priority={false}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             src={member.logoImageURL as string}
             unoptimized
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-blue-500 to-indigo-700 font-extrabold text-5xl text-white/90 dark:from-blue-600 dark:to-indigo-900">
+          <div className="flex h-full w-full items-center justify-center bg-[#185FA5] font-bold text-5xl text-white/90">
             {member.businessName.charAt(0).toUpperCase() || "?"}
           </div>
         )}
 
-        {/* Checkbox — top left */}
-        {showCheckbox && (
-          <div className="absolute top-3 left-3 z-20 rounded-md border border-foreground/20 bg-card/90 p-1 shadow-md backdrop-blur-sm">
-            <Checkbox
-              checked={isSelected}
-              className="size-4"
-              onCheckedChange={(checked) => onSelectedChange(checked === true)}
+        {/* Top overlay row */}
+        <div className="absolute top-2.5 right-2.5 left-2.5 z-20 flex items-start justify-between">
+          {/* Status badge */}
+          <span
+            className={cn(
+              "inline-flex items-center rounded-full border px-2 py-0.5 font-medium text-[10px] capitalize tracking-wide backdrop-blur-sm",
+              statusStyle,
+            )}
+          >
+            {member.membershipStatus}
+          </span>
+
+          {/* Checkbox */}
+          {showCheckbox && (
+            <button
+              className="rounded-md border border-white/20 bg-white/90 p-1 shadow-sm backdrop-blur-sm dark:bg-black/60"
               onClick={(e) => e.stopPropagation()}
-            />
+              type="button"
+            >
+              <Checkbox
+                checked={isSelected}
+                className="size-3.5"
+                onCheckedChange={(v) => onSelectedChange(v === true)}
+              />
+            </button>
+          )}
+        </div>
+
+        {isCurrentlyFeatured && formattedFeaturedUntil && (
+          <div className="pointer-events-none absolute right-0 bottom-0 left-0 z-20 px-3 py-2">
+            <div className="inline-flex items-center gap-1.5 rounded-md border border-amber-300/40 bg-white/65 px-2 py-1 backdrop-blur-sm dark:border-amber-400/25 dark:bg-black/35">
+              <Star className="size-2.5 fill-current text-amber-800 dark:text-amber-300" />
+              <span className="font-medium text-[11px] text-amber-900 dark:text-amber-200">
+                Featured until {formattedFeaturedUntil}
+              </span>
+            </div>
           </div>
         )}
 
-        {/* Status badge — top right */}
-        <div className="absolute top-3 right-3 z-20">
-          <Badge
-            className={cn(
-              "border border-white/20 font-semibold text-[10px] text-white capitalize tracking-widest shadow-sm backdrop-blur-md",
-              member.membershipStatus === "cancelled" && "bg-status-red/90",
-              member.membershipStatus === "paid" && "bg-status-green/90",
-              member.membershipStatus === "unpaid" && "bg-status-orange/90",
-            )}
-            variant="default"
-          >
-            {member.membershipStatus}
-          </Badge>
-        </div>
-
         {/* Invisible click overlay */}
         <button
-          aria-label={`Open ${member.businessName} member details`}
+          aria-label={`Open ${member.businessName}`}
           className="absolute inset-0 z-10"
           onClick={handleCardClick}
           type="button"
@@ -136,84 +167,89 @@ export function MembersTableRow({
 
       {/* Body */}
       <div className="flex flex-1 flex-col gap-3 p-4">
-        {/* Name row */}
+        {/* Name + quick actions */}
         <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-1 flex-1 font-semibold text-[14.5px] text-foreground leading-snug tracking-tight">
+          <h3 className="flex-1 overflow-hidden font-medium text-foreground text-sm leading-snug [-webkit-box-orient:vertical] [-webkit-line-clamp:1] [display:-webkit-box]">
             {member.businessName}
           </h3>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-0.5">
             <button
-              className="rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-muted/40 hover:text-primary"
+              className="flex size-6 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-muted/50 hover:text-foreground"
               onClick={(e) => {
                 e.stopPropagation();
                 router.push(`/admin/members/${member.businessMemberId}`);
               }}
-              title="View member details"
+              title="View member"
               type="button"
             >
-              <Eye className="size-4" />
+              <Eye className="size-3.5" />
             </button>
 
-            {member.websiteURL && (
+            {member.websiteURL && !isStorageUrl(member.websiteURL) && (
               <a
-                className="rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-muted/40 hover:text-primary"
+                className="flex size-6 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-muted/50 hover:text-foreground"
                 href={member.websiteURL}
                 onClick={(e) => e.stopPropagation()}
                 rel="noopener noreferrer"
                 target="_blank"
-                title={member.websiteURL}
+                title="Visit website"
               >
-                <ExternalLink className="size-4" />
+                <ExternalLink className="size-3.5" />
               </a>
             )}
           </div>
         </div>
 
         {/* Sector */}
-        <p className="line-clamp-2 min-h-[2.5em] text-[12.5px] text-muted-foreground/70 leading-snug">
+        <p className="min-h-[2.5em] overflow-hidden text-muted-foreground text-xs [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]">
           {member.Sector?.sectorName || "—"}
         </p>
 
-        {formattedFeaturedUntil ? (
-          <Badge
-            className="w-fit bg-primary/10 text-[10px] text-primary"
-            variant="secondary"
-          >
-            Featured until {formattedFeaturedUntil}
-          </Badge>
-        ) : null}
-
-        <Separator className="opacity-50" />
+        {/* Divider */}
+        <div className="h-px bg-border/50" />
 
         {/* Meta */}
-        <div className="grid gap-1.5 text-[12px] text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-3.5 w-3.5 shrink-0 text-primary/50" />
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Building2 className="size-3 shrink-0 text-muted-foreground/50" />
             <span className="truncate font-mono">
               {member.identifier || member.businessMemberId}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary/50" />
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <CalendarDays className="size-3 shrink-0 text-muted-foreground/50" />
             <span>Joined {formattedJoinDate}</span>
           </div>
         </div>
 
-        <Button
-          className="mt-1 h-9 w-full rounded-lg"
-          disabled={isCurrentlyFeatured}
-          onClick={(e) => {
-            e.stopPropagation();
-            onFeatureClick(member);
-          }}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          {isCurrentlyFeatured ? "Already Featured" : "Feature Member"}
-        </Button>
+        {/* Feature button */}
+        {isCurrentlyFeatured ? (
+          <button
+            className="mt-auto inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 font-medium text-red-700 text-xs transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-900/40"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemoveFeatureClick(member);
+            }}
+            type="button"
+          >
+            <StarOff className="size-3" />
+            Remove Featured Member
+          </button>
+        ) : (
+          <button
+            className="mt-auto inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-transparent text-foreground text-xs transition-colors hover:bg-muted/40"
+            onClick={(e) => {
+              e.stopPropagation();
+              onFeatureClick(member);
+            }}
+            type="button"
+          >
+            <Star className="size-3" />
+            Feature Member
+          </button>
+        )}
       </div>
     </article>
   );

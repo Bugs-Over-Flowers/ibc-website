@@ -1,5 +1,5 @@
 import { useStore } from "@tanstack/react-form";
-import { UploadCloud, X } from "lucide-react";
+import { FileText, Globe, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -8,6 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  IMAGE_UPLOAD_MAX_SIZE,
+  isValidImageUploadFile,
+  PROFILE_UPLOAD_ACCEPT_ATTR,
+} from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 
 interface Step1CompanyProps {
@@ -23,6 +29,9 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
 
   const logoImage = useStore(form.store, (state) => state.values.logoImageURL);
   const [preview, setPreview] = useState<string | null>(null);
+  const [companyProfilePreview, setCompanyProfilePreview] = useState<
+    string | null
+  >(null);
   const [dragActive, setDragActive] = useState(false);
 
   const handleDrag = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
@@ -50,6 +59,17 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
     setPreview(null);
   }, [logoImage]);
 
+  useEffect(() => {
+    const fileField = form.store.state.values.companyProfileFile;
+    if (fileField instanceof File && fileField.type.startsWith("image/")) {
+      const url = URL.createObjectURL(fileField);
+      setCompanyProfilePreview(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setCompanyProfilePreview(null);
+    }
+  }, [form.store.state.values.companyProfileFile]);
+
   return (
     <div className="space-y-8">
       <FieldGroup>
@@ -65,10 +85,11 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
 
           <form.AppField name="sectorId">
             {(field) => (
-              <field.SelectField
+              <field.SingleComboBoxField
+                allowCustom
                 label="Industry/Sector"
                 options={sectorOptions}
-                placeholder="Select industry"
+                placeholder="Search or type your industry"
               />
             )}
           </form.AppField>
@@ -83,27 +104,175 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
           )}
         </form.AppField>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <form.AppField name="websiteURL">
-            {(field) => (
-              <field.TextField
-                description="Enter your company's website or profile URL"
-                label="Company Profile / Website"
-                placeholder="https://www.example.com"
-              />
-            )}
-          </form.AppField>
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <form.AppField name="companyProfileType">
+              {(field) => (
+                <div className="space-y-3">
+                  <Label className="font-semibold text-foreground text-sm">
+                    Company Profile *
+                  </Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      className={cn(
+                        "flex cursor-pointer flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all",
+                        field.state.value === "file"
+                          ? "border-primary bg-primary/5"
+                          : "border-border bg-transparent hover:border-primary/50",
+                      )}
+                      onClick={() => field.handleChange("file")}
+                      type="button"
+                    >
+                      <FileText className="h-5 w-5 text-primary" />
+                      <span className="font-medium text-foreground text-xs">
+                        Upload File
+                      </span>
+                    </button>
+                    <button
+                      className={cn(
+                        "flex cursor-pointer flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all",
+                        field.state.value === "website"
+                          ? "border-primary bg-primary/5"
+                          : "border-border bg-transparent hover:border-primary/50",
+                      )}
+                      onClick={() => field.handleChange("website")}
+                      type="button"
+                    >
+                      <Globe className="h-5 w-5 text-primary" />
+                      <span className="font-medium text-foreground text-xs">
+                        Website URL
+                      </span>
+                    </button>
+                  </div>
+                  <FieldError errors={field.state.meta.errors} reserveSpace />
+                </div>
+              )}
+            </form.AppField>
 
-          <form.AppField name="emailAddress">
-            {(field) => (
-              <field.TextField
-                description="We'll send confirmation to this email"
-                label="Email Address"
-                placeholder="company@example.com"
-                type="email"
-              />
-            )}
-          </form.AppField>
+            <form.AppField name="emailAddress">
+              {(field) => (
+                <field.TextField
+                  description="We'll send confirmation to this email"
+                  label="Email Address"
+                  placeholder="company@example.com"
+                  type="email"
+                />
+              )}
+            </form.AppField>
+          </div>
+
+          <form.Subscribe selector={(state) => state.values.companyProfileType}>
+            {(companyProfileType) =>
+              companyProfileType === "website" ? (
+                <form.AppField name="websiteURL">
+                  {(field) => (
+                    <field.TextField
+                      label="Website URL"
+                      placeholder="https://www.example.com"
+                    />
+                  )}
+                </form.AppField>
+              ) : (
+                <form.AppField name="companyProfileFile">
+                  {(field) => {
+                    const selectedFile = field.state.value as File | undefined;
+                    const isInvalid =
+                      field.state.meta.isTouched &&
+                      field.state.meta.errors.length > 0;
+                    const isPdf = selectedFile?.type === "application/pdf";
+
+                    return (
+                      <Field className="grid gap-2" data-invalid={isInvalid}>
+                        <Label className="font-semibold text-foreground text-sm">
+                          Upload Company Profile
+                        </Label>
+                        <button
+                          aria-invalid={isInvalid}
+                          className={cn(
+                            "relative flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all",
+                            selectedFile &&
+                              "border-emerald-500 bg-emerald-50/60 dark:border-emerald-400/70 dark:bg-emerald-500/15",
+                            !selectedFile &&
+                              "border-muted-foreground/25 hover:border-primary hover:bg-primary/5",
+                            isInvalid &&
+                              "border-destructive bg-destructive/5 hover:border-destructive",
+                          )}
+                          type="button"
+                        >
+                          <input
+                            accept={PROFILE_UPLOAD_ACCEPT_ATTR}
+                            className="absolute inset-0 cursor-pointer opacity-0"
+                            onBlur={field.handleBlur}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              field.handleChange(file);
+                            }}
+                            tabIndex={-1}
+                            type="file"
+                          />
+                          {selectedFile ? (
+                            <>
+                              {!isPdf && companyProfilePreview ? (
+                                <Image
+                                  alt="Company profile preview"
+                                  className="mt-3 h-16 w-16 rounded-md object-contain"
+                                  height={64}
+                                  src={companyProfilePreview}
+                                  width={64}
+                                />
+                              ) : null}
+                              <span className="font-medium text-emerald-700 dark:text-emerald-300">
+                                File Uploaded Successfully
+                              </span>
+                              <Badge className="mt-2" variant="outline">
+                                {isPdf
+                                  ? "PDF"
+                                  : selectedFile.type
+                                      .split("/")[1]
+                                      .toUpperCase()}
+                              </Badge>
+                              <span className="mt-1 max-w-[200px] truncate text-muted-foreground text-xs">
+                                {selectedFile.name}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <UploadCloud className="mb-2 h-8 w-8 text-muted-foreground" />
+                              <span className="font-medium text-muted-foreground">
+                                Click to upload or drag and drop
+                              </span>
+                              <span className="mt-1 text-muted-foreground text-xs">
+                                PNG, JPG, JPEG, PDF up to 5MB
+                              </span>
+                            </>
+                          )}
+                        </button>
+                        {selectedFile ? (
+                          <div className="flex justify-center">
+                            <Button
+                              className="h-9 rounded-lg border-destructive/30 px-4 font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => field.handleChange(undefined)}
+                              size="sm"
+                              type="button"
+                              variant="outline"
+                            >
+                              <X className="mr-1 h-4 w-4" />
+                              Remove file
+                            </Button>
+                          </div>
+                        ) : null}
+                        <FieldError
+                          errors={field.state.meta.errors}
+                          reserveSpace
+                        />
+                      </Field>
+                    );
+                  }}
+                </form.AppField>
+              )
+            }
+          </form.Subscribe>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -235,18 +404,14 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
                         }
 
                         const droppedFile = e.dataTransfer.files[0];
-                        const isValidType = [
-                          "image/png",
-                          "image/jpeg",
-                          "image/jpg",
-                        ].includes(droppedFile.type);
-
-                        if (!isValidType) {
-                          toast.error("Invalid file");
+                        if (!isValidImageUploadFile(droppedFile)) {
+                          toast.error(
+                            "Invalid file. Use PNG, JPG, or JPEG up to 5MB.",
+                          );
                           return;
                         }
 
-                        if (droppedFile.size > 5 * 1024 * 1024) {
+                        if (droppedFile.size > IMAGE_UPLOAD_MAX_SIZE) {
                           toast.error("File size must be less than 5MB");
                           return;
                         }
@@ -256,7 +421,7 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
                       type="button"
                     >
                       <input
-                        accept="image/png,image/jpeg,image/jpg"
+                        accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                         className="absolute inset-0 cursor-pointer opacity-0"
                         onBlur={field.handleBlur}
                         onChange={(e) => {
@@ -265,18 +430,14 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
                             return;
                           }
 
-                          const isValidType = [
-                            "image/png",
-                            "image/jpeg",
-                            "image/jpg",
-                          ].includes(file.type);
-
-                          if (!isValidType) {
-                            toast.error("Invalid file");
+                          if (!isValidImageUploadFile(file)) {
+                            toast.error(
+                              "Invalid file. Use PNG, JPG, or JPEG up to 5MB.",
+                            );
                             return;
                           }
 
-                          if (file.size > 5 * 1024 * 1024) {
+                          if (file.size > IMAGE_UPLOAD_MAX_SIZE) {
                             toast.error("File size must be less than 5MB");
                             return;
                           }
@@ -292,23 +453,21 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
                           {preview ? (
                             <Image
                               alt="Logo preview"
-                              className="mt-3 h-12 w-12 rounded-md object-contain"
-                              height={48}
+                              className="mt-3 h-16 w-16 rounded-md object-contain"
+                              height={64}
                               src={preview}
-                              width={48}
+                              width={64}
                             />
                           ) : null}
                           <span className="font-medium text-emerald-700 dark:text-emerald-300">
                             Logo Uploaded Successfully
                           </span>
-                          <Badge
-                            className="mt-2 max-w-full overflow-hidden"
-                            variant="outline"
-                          >
-                            <span className="block max-w-[260px] truncate sm:max-w-[360px]">
-                              {fieldValue.name}
-                            </span>
+                          <Badge className="mt-2" variant="outline">
+                            {fieldValue.type.split("/")[1].toUpperCase()}
                           </Badge>
+                          <span className="mt-1 max-w-[200px] truncate text-muted-foreground text-xs">
+                            {fieldValue.name}
+                          </span>
                         </>
                       ) : (
                         <>
@@ -317,7 +476,7 @@ export function Step1Company({ form, sectors }: Step1CompanyProps) {
                             Click to upload or drag and drop
                           </span>
                           <span className="mt-1 text-muted-foreground text-xs">
-                            PNG, JPG up to 5MB
+                            PNG, JPG, JPEG up to 5MB
                           </span>
                         </>
                       )}

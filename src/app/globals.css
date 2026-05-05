@@ -459,3 +459,121 @@
     @apply bg-primary;
   }
 }
+
+/* App loader */
+.app-loader {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      color-mix(in oklab, var(--primary) 12%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      color-mix(in oklab, var(--secondary) 10%, transparent),
+      transparent 40%
+    ),
+    var(--background);
+}
+
+.app-loader__panel {
+  width: min(28rem, 100%);
+  border-radius: calc(var(--radius) * 3);
+  border: 1px solid color-mix(in oklab, var(--border) 88%, transparent);
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+  box-shadow: var(--shadow-xl);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.app-loader__mark {
+  position: relative;
+  width: 5.25rem;
+  height: 5.25rem;
+  margin: 0 auto 1.25rem;
+  display: grid;
+  place-items: center;
+}
+
+.app-loader__orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 3px solid color-mix(in oklab, var(--primary) 48%, var(--border));
+  border-top-color: transparent;
+  border-right-color: color-mix(in oklab, var(--primary) 75%, white);
+  animation: app-loader-rotate 1.1s linear infinite;
+}
+
+.app-loader__orbit--delay {
+  inset: 0.5rem;
+  border-width: 2px;
+  border-color: color-mix(in oklab, var(--secondary) 38%, var(--border));
+  border-bottom-color: transparent;
+  animation-duration: 1.6s;
+  animation-direction: reverse;
+}
+
+.app-loader__center {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 40%, transparent);
+  animation: app-loader-pulse 1.6s ease-out infinite;
+}
+
+.app-loader__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  color: var(--foreground);
+}
+
+.app-loader__subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  letter-spacing: var(--tracking-normal);
+  color: color-mix(in oklab, var(--muted-foreground) 85%, var(--foreground));
+}
+
+@keyframes app-loader-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes app-loader-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 35%, transparent);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 20px color-mix(in oklab, var(--primary) 0%, transparent);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent);
+  }
+}
+
+@media (max-width: 640px) {
+  .app-loader__panel {
+    padding: 1.5rem 1.1rem;
+    border-radius: calc(var(--radius) * 2.5);
+  }
+
+  .app-loader__mark {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+}

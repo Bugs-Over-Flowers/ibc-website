@@ -3,9 +3,9 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Loader2, ScanLine } from "lucide-react";
 import { useEffect, useState } from "react";
+import { PaymentStatusBadge } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { RegistrationItem } from "@/lib/validation/registration-management";
 import { useScanQR } from "../../_hooks/useScanQR";
 
@@ -14,15 +14,6 @@ interface CheckInRegistrationTableProps {
   eventId: string;
   registrationList: RegistrationItem[];
 }
-
-const PAYMENT_STYLES = {
-  accepted:
-    "border-[#97C459] bg-[#EAF3DE] text-[#27500A] dark:border-[#3B6D11] dark:bg-[#173404] dark:text-[#C0DD97]",
-  pending:
-    "border-[#EF9F27] bg-[#FAEEDA] text-[#633806] dark:border-[#854F0B] dark:bg-[#412402] dark:text-[#FAC775]",
-  rejected:
-    "border-[#F09595] bg-[#FCEBEB] text-[#791F1F] dark:border-[#A32D2D] dark:bg-[#501313] dark:text-[#F7C1C1]",
-} as const;
 
 const getColumns = ({
   eventDayId,
@@ -58,21 +49,12 @@ const getColumns = ({
   {
     accessorKey: "paymentStatus",
     header: "Payment",
-    cell: ({ row }) => {
-      const paymentProofStatus = row.original
-        .paymentProofStatus as keyof typeof PAYMENT_STYLES;
-
-      return (
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full border px-2 py-0.5 font-medium text-[11px] capitalize",
-            PAYMENT_STYLES[paymentProofStatus] ?? PAYMENT_STYLES.pending,
-          )}
-        >
-          {paymentProofStatus}
-        </span>
-      );
-    },
+    cell: ({ row }) => (
+      <PaymentStatusBadge
+        className="capitalize"
+        status={row.original.paymentProofStatus}
+      />
+    ),
   },
   {
     accessorKey: "people",

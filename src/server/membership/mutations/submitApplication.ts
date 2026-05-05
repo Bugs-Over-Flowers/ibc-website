@@ -1,6 +1,8 @@
 "use server";
 
-import type { ServerFunction } from "@/lib/server/types";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
+import type { AsyncFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   type MembershipApplicationInput,
@@ -15,7 +17,7 @@ type SubmitApplicationOutput = {
   message: string;
 };
 
-export const submitMembershipApplication: ServerFunction<
+export const submitMembershipApplication: AsyncFunction<
   [MembershipApplicationInput],
   SubmitApplicationOutput
 > = async (input) => {
@@ -41,7 +43,7 @@ export const submitMembershipApplication: ServerFunction<
     p_company_details: {
       name: parsed.data.companyName,
       address: parsed.data.companyAddress,
-      sectorId: parsed.data.sectorId,
+      sectorName: parsed.data.sectorName,
       landline: parsed.data.landline,
       mobile: parsed.data.mobileNumber,
       email: parsed.data.emailAddress,
@@ -65,6 +67,7 @@ export const submitMembershipApplication: ServerFunction<
     p_payment_method: parsed.data.paymentMethod === "BPI" ? "BPI" : "ONSITE",
     p_payment_proof_url: parsed.data.paymentProofUrl,
     p_application_member_type: parsed.data.applicationMemberType,
+    p_company_profile_type: parsed.data.companyProfileType,
   });
 
   if (error) {
@@ -102,6 +105,9 @@ export const submitMembershipApplication: ServerFunction<
       emailError,
     );
   }
+
+  updateTag(CACHE_TAGS.applications.all);
+  updateTag(CACHE_TAGS.applications.admin);
 
   return { success: true, data: result, error: null };
 };

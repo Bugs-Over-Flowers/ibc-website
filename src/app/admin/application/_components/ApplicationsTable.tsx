@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { ApplicationsTableRow } from "./ApplicationsTableRow";
@@ -42,12 +43,24 @@ export function ApplicationsTable({
     clearSelection,
     selectedApplicationIds,
     removeApplication,
+    isSelectionLocked,
   } = useSelectedApplicationsStore();
 
   const isSelectable = useCallback(
-    (application: ApplicationsTableProps["applications"][number]) =>
-      application.paymentMethod !== "BPI" ||
-      (application.paymentProofStatus ?? "pending") !== "pending",
+    (application: ApplicationsTableProps["applications"][number]) => {
+      const paymentRequirement = getMembershipPaymentRequirement({
+        applicationMemberType: application.applicationMemberType,
+        applicationType: application.applicationType,
+        previousApplicationMemberType:
+          application.previousApplicationMemberType,
+      });
+
+      return (
+        !paymentRequirement.requiresPayment ||
+        application.paymentMethod !== "BPI" ||
+        (application.paymentProofStatus ?? "pending") !== "pending"
+      );
+    },
     [],
   );
 
@@ -111,6 +124,7 @@ export function ApplicationsTable({
                   aria-label="Select all applications"
                   checked={allSelected}
                   data-indeterminate={someSelected}
+                  disabled={isSelectionLocked}
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>

@@ -2,46 +2,23 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
-import { ArrowDownAZ, ArrowUpZA, Clock, Download } from "lucide-react";
+import { Clock, Download } from "lucide-react";
+import { AdminTableSortHeader } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
-import { exportToExcel } from "@/lib/export/excel";
+import { type ExportEventDetails, exportToExcel } from "@/lib/export/excel";
 import type { CheckInListItem } from "@/lib/validation/check-in/check-in-list";
 import CheckInRowActions from "./CheckInRowActions";
-import RemarksDialog from "./RemarksDialog";
+import ViewRemarkDialog from "./ViewRemarkDialog";
 
 type CheckInListRow = CheckInListItem & { name: string };
 
 interface CheckInTableProps {
-  eventTitle: string;
   checkIns: CheckInListItem[];
   eventDayId: string;
   eventDayLabel: string;
+  eventDetails: ExportEventDetails;
 }
-
-const SortHeader = ({
-  label,
-  sorted,
-  onSort,
-}: {
-  label: string;
-  sorted: "asc" | "desc" | false;
-  onSort: () => void;
-}) => (
-  <Button
-    className="h-auto p-0 font-medium text-[11px] text-muted-foreground uppercase tracking-wider hover:bg-transparent hover:text-foreground"
-    onClick={onSort}
-    type="button"
-    variant="ghost"
-  >
-    {label}
-    {sorted === "asc" ? (
-      <ArrowDownAZ className="ml-1 size-3" />
-    ) : sorted === "desc" ? (
-      <ArrowUpZA className="ml-1 size-3" />
-    ) : null}
-  </Button>
-);
 
 const getCheckInListColumns = (
   eventDayId: string,
@@ -50,7 +27,7 @@ const getCheckInListColumns = (
     accessorKey: "checkInTime",
     sortingFn: "datetime",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="Time"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}
@@ -75,7 +52,7 @@ const getCheckInListColumns = (
   {
     accessorKey: "firstName",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="First name"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}
@@ -85,7 +62,7 @@ const getCheckInListColumns = (
   {
     accessorKey: "lastName",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="Last name"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}
@@ -95,7 +72,7 @@ const getCheckInListColumns = (
   {
     accessorKey: "affiliation",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="Affiliation"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}
@@ -108,7 +85,7 @@ const getCheckInListColumns = (
   {
     accessorKey: "email",
     header: ({ column }) => (
-      <SortHeader
+      <AdminTableSortHeader
         label="Email"
         onSort={() => column.toggleSorting(column.getIsSorted() === "asc")}
         sorted={column.getIsSorted()}
@@ -131,12 +108,10 @@ const getCheckInListColumns = (
     accessorKey: "remarks",
     header: "Remarks",
     cell: ({ row }) => {
-      const { remarks, firstName, lastName } = row.original;
-      if (!remarks) {
-        return <span className="text-muted-foreground/40">-</span>;
-      }
+      const { checkInId, remarks, firstName, lastName } = row.original;
       return (
-        <RemarksDialog
+        <ViewRemarkDialog
+          checkInId={checkInId}
           participantName={`${firstName} ${lastName}`}
           remarks={remarks}
         />
@@ -152,7 +127,9 @@ const getCheckInListColumns = (
         checkInId={row.original.checkInId}
         checkInTime={row.original.checkInTime}
         eventDayId={eventDayId}
+        participantName={`${row.original.firstName} ${row.original.lastName}`}
         registrationId={row.original.registrationId}
+        remarks={row.original.remarks}
       />
     ),
   },
@@ -170,10 +147,10 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
 ];
 
 export default function CheckInTable({
-  eventTitle,
   checkIns,
   eventDayId,
   eventDayLabel,
+  eventDetails,
 }: CheckInTableProps) {
   const tableData: CheckInListRow[] = checkIns.map((c) => ({
     ...c,
@@ -181,10 +158,15 @@ export default function CheckInTable({
   }));
 
   const handleExport = async () => {
+    const sorted = [...tableData].sort(
+      (a, b) =>
+        new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime(),
+    );
     await exportToExcel({
-      data: tableData,
+      data: sorted,
       columns: getExcelColumns(),
-      filename: `${eventTitle}-${eventDayLabel}-CheckIns-${new Date().toISOString().split("T")[0]}.xlsx`,
+      event: eventDetails,
+      filename: `${eventDetails.title}-${eventDayLabel}-CheckIns-${new Date().toISOString().split("T")[0]}.xlsx`,
       sheetName: "Check-In List",
       excludeColumns: ["actions"],
       formatters: {

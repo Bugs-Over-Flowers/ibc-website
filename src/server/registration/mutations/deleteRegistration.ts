@@ -1,8 +1,12 @@
 "use server";
 
-import { updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import {
+  extractStorageObjectPath,
+  normalizeLegacyStoragePath,
+  PAYMENT_PROOFS_BUCKET,
+} from "@/lib/storage/paymentProof";
 import { createActionClient } from "@/lib/supabase/server";
+import { invalidateRegistrationCaches } from "@/server/actions.utils";
 
 export const deleteRegistration = async (registrationId: string) => {
   const supabase = await createActionClient();
@@ -33,17 +37,17 @@ export const deleteRegistration = async (registrationId: string) => {
   // Delete image file from storage
   if (paymentProof) {
     const { data: deletedImage } = await supabase.storage
-      .from("paymentproofs")
-      .remove([paymentProof.path.split(".")[0]]);
+      .from(PAYMENT_PROOFS_BUCKET)
+      .remove([
+        normalizeLegacyStoragePath(
+          extractStorageObjectPath(paymentProof.path, PAYMENT_PROOFS_BUCKET),
+        ),
+      ]);
 
     console.log("deleted image: ", deletedImage);
   }
 
-  updateTag(CACHE_TAGS.registrations.all);
-  updateTag(CACHE_TAGS.registrations.list);
-  updateTag(CACHE_TAGS.registrations.details);
-  updateTag(CACHE_TAGS.registrations.stats);
-  updateTag(CACHE_TAGS.events.registrations);
+  invalidateRegistrationCaches();
 
   console.log("Registration deleted");
 };

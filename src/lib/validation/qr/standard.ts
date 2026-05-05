@@ -55,8 +55,15 @@ const RawCheckInForDateSchema = z.object({
     z.object({
       path: z.string(),
       proofImageId: z.string(),
+      orderIndex: z.number().optional(),
     }),
   ),
+});
+
+const ProofImageSchema = z.object({
+  path: z.string(),
+  proofImageId: z.string(),
+  orderIndex: z.number().optional(),
 });
 
 export const normalizeCheckInForEventDay = (
@@ -74,7 +81,7 @@ export const normalizeCheckInForEventDay = (
         (item) => item.eventDayId === eventDayId,
       ),
     })),
-    proofImage: parsed.proofImage.length > 0 ? parsed.proofImage[0] : null,
+    proofImage: parsed.proofImage,
   };
 };
 
@@ -95,12 +102,7 @@ export const GetCheckInForDateSchema = z
       })
       .nullable(),
     participants: z.array(ParticipantWithCheckInSchema),
-    proofImage: z
-      .object({
-        path: z.string(),
-        proofImageId: z.string(),
-      })
-      .nullable(),
+    proofImage: z.array(ProofImageSchema),
   })
   .transform((data) => ({
     ...data,
@@ -110,3 +112,55 @@ export const GetCheckInForDateSchema = z
   }));
 
 export type GetCheckInForDateSchema = z.infer<typeof GetCheckInForDateSchema>;
+
+export const GetParticipantCheckInForDateSchema = z
+  .object({
+    participant: z.object({
+      participantId: z.string(),
+      participantIdentifier: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      email: z.string(),
+      contactNumber: z.string(),
+      isPrincipal: z.boolean(),
+    }),
+    registration: z.object({
+      registrationId: z.string(),
+      identifier: z.string(),
+      paymentMethod: z.enum(["BPI", "ONSITE"]),
+      paymentProofStatus: PaymentProofStatusEnum,
+      registrationDate: z.string(),
+      note: z.string().nullable(),
+      businessMember: z
+        .object({
+          businessName: z.string(),
+        })
+        .nullable(),
+      nonMemberName: z.string().nullable(),
+    }),
+    event: z.object({
+      eventId: z.string(),
+      eventTitle: z.string().optional(),
+    }),
+    checkIn: z
+      .array(
+        z.object({
+          checkInId: z.string(),
+          checkInTime: z.string(),
+          eventDayId: z.string(),
+          remarks: z.string().nullable(),
+        }),
+      )
+      .default([]),
+    proofImages: z.array(ProofImageSchema).default([]),
+  })
+  .transform((data) => ({
+    ...data,
+    affiliation:
+      data.registration.businessMember?.businessName ||
+      data.registration.nonMemberName,
+  }));
+
+export type GetParticipantCheckInForDateSchema = z.infer<
+  typeof GetParticipantCheckInForDateSchema
+>;

@@ -1,32 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { getPaymentProofSignedUrl } from "@/server/registration/mutations/getPaymentProofSignedUrl";
+import { getPaymentProofSignedUrl } from "@/server/registration/queries/getPaymentProofSignedUrl";
 
 interface UsePaymentProofSignedUrlActionProps {
   open: boolean;
   registrationId: string;
 }
 
+export type SignedProof = {
+  proofImageId: string;
+  signedUrl: string;
+  orderIndex: number;
+  path: string;
+};
+
 export function usePaymentProofSignedUrlAction({
   open,
   registrationId,
 }: UsePaymentProofSignedUrlActionProps) {
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [proofs, setProofs] = useState<SignedProof[]>([]);
   const [isSignedUrlImageError, setIsSignedUrlImageError] = useState(false);
 
   const { execute: fetchSignedUrl, isPending: isFetchingSignedUrl } = useAction(
     tryCatch(getPaymentProofSignedUrl),
     {
-      onSuccess: ({ signedUrl: nextSignedUrl }) => {
-        setSignedUrl(nextSignedUrl);
+      onSuccess: ({ proofs: nextProofs }) => {
+        setProofs(nextProofs);
         setIsSignedUrlImageError(false);
       },
       onError: (error) => {
-        setSignedUrl(null);
+        setProofs([]);
         setIsSignedUrlImageError(false);
         toast.error(error);
       },
@@ -37,22 +44,27 @@ export function usePaymentProofSignedUrlAction({
   const fetchSignedUrlRef = useRef(fetchSignedUrl);
   useEffect(() => {
     fetchSignedUrlRef.current = fetchSignedUrl;
-  });
+  }, [fetchSignedUrl]);
+
+  const refetchSignedUrls = useCallback(() => {
+    setProofs([]);
+    setIsSignedUrlImageError(false);
+    fetchSignedUrlRef.current({ registrationId });
+  }, [registrationId]);
 
   useEffect(() => {
     if (!open) {
       return;
     }
 
-    setSignedUrl(null);
-    setIsSignedUrlImageError(false);
     fetchSignedUrlRef.current({ registrationId });
   }, [open, registrationId]);
 
   return {
-    signedUrl,
+    proofs,
     isSignedUrlImageError,
     setIsSignedUrlImageError,
     isFetchingSignedUrl,
+    refetchSignedUrls,
   };
 }

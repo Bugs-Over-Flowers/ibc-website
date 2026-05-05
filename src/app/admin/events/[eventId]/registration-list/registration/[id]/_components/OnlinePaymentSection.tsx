@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,6 +16,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
@@ -21,24 +31,31 @@ import type { Enums } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
 import { rejectPayment } from "@/server/registration/mutations/rejectPayment";
 import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
+import getStatusColor from "../../_utils/getStatusColor";
 
 type OnlinePaymentSectionProps = {
   paymentProofStatus: Enums<"PaymentProofStatus">;
-  getStatusColor: (status: string) => string;
-  proofImageURL?: string;
+  proofImageURLs?: Array<{ proofImageId: string; signedUrl: string }>;
   registrationId: string;
 };
 
 export default function OnlinePaymentSection({
   registrationId,
   paymentProofStatus,
-  getStatusColor,
-  proofImageURL,
+  proofImageURLs,
 }: OnlinePaymentSectionProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [sendEmailOnReject, setSendEmailOnReject] = useState(true);
   const [pendingAction, setPendingAction] = useState<
     "accepted" | "rejected" | null
   >(null);
+
+  const handleAlertOpenChange = (nextOpen: boolean) => {
+    setIsAlertOpen(nextOpen);
+    if (nextOpen) {
+      setSendEmailOnReject(true);
+    }
+  };
 
   const paymentAction = async (
     registration: string,
@@ -48,7 +65,7 @@ export default function OnlinePaymentSection({
       return verifyPayment(registration);
     }
 
-    return rejectPayment(registration);
+    return rejectPayment(registration, { sendEmail: sendEmailOnReject });
   };
 
   const {
@@ -89,22 +106,43 @@ export default function OnlinePaymentSection({
         ? "Accepted"
         : "Rejected";
 
+  const urls = proofImageURLs ?? [];
+
   return (
-    <>
-      {proofImageURL && (
-        <>
-          <ImageZoom className="relative h-96 w-full touch-none select-none">
-            <Image
-              alt="Proof of Payment Image"
-              className="object-contain"
-              fill
-              src={proofImageURL}
-            />
-          </ImageZoom>
-          <div className="text-neutral-600">click on the image to zoom in</div>
-        </>
+    <div className="space-y-4">
+      {urls.length > 0 && (
+        <div className="space-y-2">
+          <Carousel className="mx-auto w-full max-w-sm">
+            <CarouselContent>
+              {urls.map((item, index) => (
+                <CarouselItem key={item.proofImageId}>
+                  <div className="overflow-hidden rounded-xl border border-border/50 bg-muted/20 p-2">
+                    <ImageZoom className="relative h-80 w-full touch-none select-none rounded-lg bg-background">
+                      <Image
+                        alt={`Proof of Payment ${index + 1}`}
+                        className="object-contain"
+                        fill
+                        src={item.signedUrl}
+                      />
+                    </ImageZoom>
+                  </div>
+                  <p className="mt-1 text-center text-muted-foreground text-xs">
+                    {index + 1} of {urls.length} — Click image to zoom
+                  </p>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            {urls.length > 1 && (
+              <div className="mt-4 flex justify-center gap-2">
+                <CarouselPrevious className="static translate-x-0 translate-y-0" />
+                <CarouselNext className="static translate-x-0 translate-y-0" />
+              </div>
+            )}
+          </Carousel>
+        </div>
       )}
-      <div>
+
+      <div className="flex items-center">
         <Badge
           className={cn(
             "capitalize",
@@ -115,22 +153,27 @@ export default function OnlinePaymentSection({
           {statusBadgeLabel}
         </Badge>
       </div>
-      <div className="flex gap-2">
-        {/* Accepted */}
+
+      <div className="flex flex-wrap gap-2">
         <Button
+          className="min-w-24"
           disabled={
             isPending ||
             optimisticPaymentProofStatus === "accepted" ||
             optimisticPaymentProofStatus === "rejected"
           }
           onClick={() => handleStatusChange("accepted")}
+          size="sm"
         >
           {isVerifyPending ? "Verifying..." : "Accept"}
         </Button>
-        <AlertDialog onOpenChange={setIsAlertOpen} open={isAlertOpen}>
-          {/* Reject Button */}
+
+        <AlertDialog onOpenChange={handleAlertOpenChange} open={isAlertOpen}>
           <AlertDialogTrigger
-            className={buttonVariants({ variant: "destructive" })}
+            className={cn(
+              buttonVariants({ size: "sm", variant: "destructive" }),
+              "min-w-24",
+            )}
             disabled={
               isPending ||
               optimisticPaymentProofStatus === "rejected" ||
@@ -143,10 +186,28 @@ export default function OnlinePaymentSection({
             <AlertDialogHeader>
               <AlertDialogTitle>Reject Payment?</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to reject this payment proof? This action
-                cannot be undone and the user will be notified via email.
+                Are you sure you want to reject these payment proofs? This
+                action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
+            {optimisticPaymentProofStatus === "pending" && (
+              <div className="flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
+                <Checkbox
+                  checked={sendEmailOnReject}
+                  disabled={isRejectPending}
+                  id="send-email-on-reject"
+                  onCheckedChange={(checked) =>
+                    setSendEmailOnReject(checked === true)
+                  }
+                />
+                <label
+                  className="cursor-pointer select-none text-muted-foreground"
+                  htmlFor="send-email-on-reject"
+                >
+                  Send rejection email
+                </label>
+              </div>
+            )}
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
@@ -157,12 +218,16 @@ export default function OnlinePaymentSection({
                   void handleStatusChange("rejected");
                 }}
               >
-                {isRejectPending ? "Rejecting..." : "Reject"}
+                {isRejectPending
+                  ? "Rejecting..."
+                  : sendEmailOnReject
+                    ? "Reject & Email"
+                    : "Reject Without Email"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </>
+    </div>
   );
 }

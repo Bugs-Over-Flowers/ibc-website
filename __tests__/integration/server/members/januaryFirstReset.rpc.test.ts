@@ -38,8 +38,6 @@ const hasDbEnv =
 
 const describeIfDb = hasDbEnv ? describe : describe.skip;
 
-type AdminClient = ReturnType<typeof createAdminClient>;
-
 function createAdminClient() {
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error(
@@ -94,6 +92,7 @@ describe("january_first_reset RPC - error flows", () => {
 
 describeIfDb("january_first_reset RPC - happy flows", () => {
   const createdMemberIds: string[] = [];
+  const createdApplicationIds: string[] = [];
 
   const now = new Date();
   const sixMonthsAgo = new Date(now);
@@ -115,17 +114,23 @@ describeIfDb("january_first_reset RPC - happy flows", () => {
   });
 
   afterEach(async () => {
-    if (createdMemberIds.length === 0) {
-      return;
+    const supabase = await createAdminClient();
+
+    if (createdMemberIds.length > 0) {
+      await supabase
+        .from("BusinessMember")
+        .delete()
+        .in("businessMemberId", [...createdMemberIds]);
+      createdMemberIds.length = 0;
     }
 
-    const supabase = await createAdminClient();
-    await supabase
-      .from("BusinessMember")
-      .delete()
-      .in("businessMemberId", [...createdMemberIds]);
-
-    createdMemberIds.length = 0;
+    if (createdApplicationIds.length > 0) {
+      await supabase
+        .from("Application")
+        .delete()
+        .in("applicationId", [...createdApplicationIds]);
+      createdApplicationIds.length = 0;
+    }
   });
 
   async function createMember(input: {
@@ -138,6 +143,32 @@ describeIfDb("january_first_reset RPC - happy flows", () => {
 
     const id = crypto.randomUUID();
     const suffix = id.slice(0, 8);
+
+    const { data: application, error: appError } = await supabase
+      .from("Application")
+      .insert({
+        applicationMemberType: "corporate",
+        applicationType: "newMember",
+        companyName: `RPC Test ${suffix}`,
+        companyAddress: "Test Address",
+        emailAddress: "test@example.com",
+        identifier: `app-${suffix}`,
+        landline: "(02) 0000-0000",
+        mobileNumber: "09170000000",
+        paymentMethod: "BPI",
+        logoImageURL: "https://example.com/logo.png",
+        websiteURL: "https://example.com",
+      })
+      .select("applicationId")
+      .single();
+
+    if (appError || !application) {
+      throw new Error(
+        `Failed to create test application: ${appError?.message ?? "unknown"}`,
+      );
+    }
+
+    createdApplicationIds.push(application.applicationId);
 
     const { data, error } = await supabase
       .from("BusinessMember")
@@ -155,6 +186,7 @@ describeIfDb("january_first_reset RPC - happy flows", () => {
           : null,
         websiteURL: "https://example.com",
         sectorId: 1,
+        primaryApplicationId: application.applicationId,
       })
       .select("businessMemberId, membershipStatus")
       .single();

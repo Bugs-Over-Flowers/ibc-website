@@ -25,22 +25,30 @@ CASCADE;
 -- =============================================================================
 -- Insert Test Sectors
 -- =============================================================================
-INSERT INTO "Sector" ("sectorName") VALUES
-  ('Technology'),
-  ('Manufacturing'),
-  ('Services'),
-  ('Retail'),
-  ('Healthcare'),
-  ('Finance'),
-  ('Education'),
-  ('Real Estate'),
-  ('Transportation'),
-  ('Hospitality');
+INSERT INTO "public"."Sector" ("sectorId", "sectorName") VALUES
+  (1, 'Accounting'),
+  (2, 'Appraisal'),
+  (3, 'Automotive'),
+  (4, 'Educational Service'),
+  (5, 'Energy Production and Utilities'),
+  (6, 'Financial and Insurance Services'),
+  (7, 'Food Production, Processing and Supply Chain'),
+  (8, 'Healthcare Services and Equipment'),
+  (9, 'Hospitality and Accomodation'),
+  (10, 'Human Resources and Leasing Services'),
+  (11, 'Information, Technology, Creativity and Media'),
+  (12, 'Legal Professional'),
+  (13, 'Management and Business Consulting'),
+  (14, 'Manufacturing'),
+  (15, 'Pawnshop'),
+  (16, 'Real Estate Development and Construction'),
+  (17, 'Retail and Commercial Centers'),
+  (18, 'Shipping, Tourist Transport, Customs Brokerage, and Logistics');
 
 -- Keep identity sequence aligned after explicit sectorId inserts
 SELECT setval(
   pg_get_serial_sequence('"public"."Sector"', 'sectorId'),
-  COALESCE((SELECT MAX("sectorId") FROM "public"."Sector"), 0) + 1,
+  19,
   false
 );
 
@@ -51,7 +59,7 @@ INSERT INTO "public"."Application" (
   "applicationId",
   "identifier",
   "businessMemberId",
-  "sectorId",
+  "sectorName",
   "logoImageURL",
   "applicationType",
   "companyName",
@@ -69,7 +77,7 @@ INSERT INTO "public"."Application" (
     gen_random_uuid(),
     'ibc-app-test001',
     NULL,
-    1,
+    'Information, Technology, Creativity and Media',
     'https://test-company.com/logo.png',
     'newMember',
     'Test Company Inc.',
@@ -87,7 +95,7 @@ INSERT INTO "public"."Application" (
     gen_random_uuid(),
     'ibc-app-test002',
     NULL,
-    2,
+    'Manufacturing',
     'https://sample-corp.com/logo.png',
     'renewal',
     'Sample Corp.',
@@ -218,6 +226,7 @@ INSERT INTO "public"."Event" (
   "eventType",
   "registrationFee",
   "eventHeaderUrl",
+  "eventPoster",
   "publishedAt"
 ) VALUES
   -- CHANGED: Published events now include publishedAt timestamp.
@@ -234,6 +243,7 @@ INSERT INTO "public"."Event" (
     'public',
     1500.00,
     'https://example.com/tech-summit.jpg',
+    'https://example.com/tech-summit-poster.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '1 day'
   ),
   -- CHANGED: Use local Supabase storage image for seeded published event.
@@ -247,7 +257,8 @@ INSERT INTO "public"."Event" (
     'Makati Business Club',
     'private',
     500.00,
-    'http://127.0.0.1:54321/storage/v1/object/public/headerimage/dinagyang.jpeg',
+    'http://127.0.0.1:54321/storage/v1/object/public/headerimage/event-headers/business-networking-night.jpg',
+    'http://127.0.0.1:54321/storage/v1/object/public/headerimage/event-posters/business-networking-night-poster.jpg',
     TIMEZONE('UTC', NOW()) - INTERVAL '2 days'
   ),
   -- CHANGED: Draft event intentionally has no header image and no published timestamp.
@@ -261,6 +272,7 @@ INSERT INTO "public"."Event" (
     'SMX Convention Center',
     null,
     2000.00,
+    NULL,
     NULL,
     NULL
   );
@@ -295,7 +307,7 @@ INSERT INTO auth.users (
   gen_random_uuid(),
   '00000000-0000-0000-0000-000000000000',
   'admin@test.local',
-  extensions.crypt('Test123!@#', extensions.gen_salt('bf')),
+  extensions.crypt('Test123!@#', extensions.gen_salt('bf', 10)),
   NOW(),
   NOW(),
   NOW(),
@@ -311,71 +323,14 @@ INSERT INTO auth.users (
 );
 
 -- =============================================================================
--- Create Business Members
+-- Create Business Members and their primary applications
 -- =============================================================================
-INSERT INTO "public"."BusinessMember" (
-  "sectorId",
-  "logoImageURL",
-  "joinDate",
-  "websiteURL",
-  "businessName",
-  "businessMemberId",
-  "lastPaymentDate",
-  "membershipExpiryDate",
-  "membershipStatus"
-) VALUES
-  (
-   	1,
-    'https://example.com/business1.jpg',
-    NOW(),
-    'https://example.com/business1.com',
-    'Business 1',
-    gen_random_uuid(),
-    NOW(),
-    NOW(),
-    'paid'
-  ),
-  (
-   	2,
-    'https://example.com/business2.jpg',
-    NOW(),
-    'https://example.com/business2.com',
-    'Business Corp.',
-    gen_random_uuid(),
-    NOW(),
-    NOW(),
-    'paid'
-  ),
-  (
-    3,
-    'https://example.com/business3.jpg',
-    NOW(),
-    'https://example.com/business3.com',
-    'Company Ltd.',
-    gen_random_uuid(),
-    NOW(),
-    NOW(),
-    'paid'
-  );
-
--- =============================================================================
--- CHANGED: Ensure every BusinessMember has a primaryApplicationId
--- =============================================================================
-DO $$
-DECLARE
-  members_missing_primary integer;
-BEGIN
-  SELECT COUNT(*) INTO members_missing_primary
-  FROM "BusinessMember"
-  WHERE "primaryApplicationId" IS NULL;
-
-  -- Insert one application per member without a primary application.
-  -- Trigger on "Application" insert updates "BusinessMember"."primaryApplicationId".
-  INSERT INTO "Application" (
+WITH seeded_business_applications AS (
+  INSERT INTO "public"."Application" (
     "applicationId",
     "identifier",
     "businessMemberId",
-    "sectorId",
+    "sectorName",
     "logoImageURL",
     "applicationType",
     "companyName",
@@ -388,29 +343,111 @@ BEGIN
     "applicationMemberType",
     "applicationStatus",
     "paymentProofStatus"
-  )
-  SELECT
+  ) VALUES
+    (
+      gen_random_uuid(),
+      'ibc-app-seed-bm001',
+      NULL,
+      'Information, Technology, Creativity and Media',
+      'https://example.com/business1.jpg',
+      'renewal',
+      'Business 1',
+      'Seed address for Business 1',
+      '02-0000-0000',
+      '+639000000001',
+      'business1.seed@example.com',
+      'BPI',
+      'https://example.com/business1.com',
+      'corporate',
+      'approved',
+      'accepted'
+    ),
+    (
+      gen_random_uuid(),
+      'ibc-app-seed-bm002',
+      NULL,
+      'Manufacturing',
+      'https://example.com/business2.jpg',
+      'renewal',
+      'Business Corp.',
+      'Seed address for Business Corp.',
+      '02-0000-0001',
+      '+639000000002',
+      'businesscorp.seed@example.com',
+      'BPI',
+      'https://example.com/business2.com',
+      'corporate',
+      'approved',
+      'accepted'
+    ),
+    (
+      gen_random_uuid(),
+      'ibc-app-seed-bm003',
+      NULL,
+      'Management and Business Consulting',
+      'https://example.com/business3.jpg',
+      'renewal',
+      'Company Ltd.',
+      'Seed address for Company Ltd.',
+      '02-0000-0002',
+      '+639000000003',
+      'companyltd.seed@example.com',
+      'BPI',
+      'https://example.com/business3.com',
+      'corporate',
+      'approved',
+      'accepted'
+    )
+  RETURNING "applicationId", "companyName"
+)
+INSERT INTO "public"."BusinessMember" (
+  "sectorId",
+  "logoImageURL",
+  "joinDate",
+  "websiteURL",
+  "businessName",
+  "businessMemberId",
+  "lastPaymentDate",
+  "membershipExpiryDate",
+  "membershipStatus",
+  "primaryApplicationId"
+) VALUES
+  (
+    11,
+    'https://example.com/business1.jpg',
+    NOW(),
+    'https://example.com/business1.com',
+    'Business 1',
     gen_random_uuid(),
-    'ibc-app-seed-' || replace(gen_random_uuid()::text, '-', ''),
-    bm."businessMemberId",
-    bm."sectorId",
-    COALESCE(NULLIF(bm."logoImageURL", ''), 'https://example.com/default-business-logo.jpg'),
-    'renewal',
-    bm."businessName",
-    'Seed address for ' || bm."businessName",
-    '02-0000-0000',
-    '+639000000000',
-    lower(replace(bm."businessName", ' ', '.')) || '.seed@example.com',
-    'BPI',
-    bm."websiteURL",
-    'corporate',
-    'approved',
-    'accepted'
-  FROM "BusinessMember" bm
-  WHERE bm."primaryApplicationId" IS NULL;
-
-  RAISE NOTICE 'Business members initially missing primaryApplicationId: %', members_missing_primary;
-END $$;
+    NOW(),
+    NOW(),
+    'paid',
+    (SELECT "applicationId" FROM seeded_business_applications WHERE "companyName" = 'Business 1')
+  ),
+  (
+    14,
+    'https://example.com/business2.jpg',
+    NOW(),
+    'https://example.com/business2.com',
+    'Business Corp.',
+    gen_random_uuid(),
+    NOW(),
+    NOW(),
+    'paid',
+    (SELECT "applicationId" FROM seeded_business_applications WHERE "companyName" = 'Business Corp.')
+  ),
+  (
+    13,
+    'https://example.com/business3.jpg',
+    NOW(),
+    'https://example.com/business3.com',
+    'Company Ltd.',
+    gen_random_uuid(),
+    NOW(),
+    NOW(),
+    'paid',
+    (SELECT "applicationId" FROM seeded_business_applications WHERE "companyName" = 'Company Ltd.')
+  );
 
 -- There should also be data for event days for these events
 

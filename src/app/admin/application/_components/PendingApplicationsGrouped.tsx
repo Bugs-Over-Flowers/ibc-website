@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { ApplicationsTableRow } from "./ApplicationsTableRow";
@@ -21,7 +22,14 @@ interface PendingApplicationsGroupedProps {
 function isSelectableApplication(
   application: PendingApplicationsGroupedProps["applications"][number],
 ): boolean {
+  const paymentRequirement = getMembershipPaymentRequirement({
+    applicationMemberType: application.applicationMemberType,
+    applicationType: application.applicationType,
+    previousApplicationMemberType: application.previousApplicationMemberType,
+  });
+
   return (
+    !paymentRequirement.requiresPayment ||
     application.paymentMethod !== "BPI" ||
     (application.paymentProofStatus ?? "pending") !== "pending"
   );
@@ -112,7 +120,7 @@ const SHARED_COLS = [
 export function PendingApplicationsGrouped({
   applications,
 }: PendingApplicationsGroupedProps) {
-  const { selectedApplicationIds, toggleSelection } =
+  const { selectedApplicationIds, toggleSelection, isSelectionLocked } =
     useSelectedApplicationsStore();
   const { sortedGroups, unscheduled } = useMemo(
     () => groupBySchedule(applications),
@@ -168,7 +176,9 @@ export function PendingApplicationsGrouped({
                           aria-label="Select all in group"
                           checked={allSelected}
                           data-indeterminate={someSelected}
+                          disabled={isSelectionLocked}
                           onCheckedChange={() => {
+                            if (isSelectionLocked) return;
                             if (allSelected) {
                               selectableIds.forEach(toggleSelection);
                             } else {

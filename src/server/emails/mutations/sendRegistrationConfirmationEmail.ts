@@ -19,9 +19,13 @@ interface SendRegistrationConfirmationEmailProps {
   >;
   identifier: string;
   selfName: string;
-  otherParticipants: {
+  selfAffiliation: string;
+  participantIdentifier: string;
+  participants: {
     fullName: string;
     email: string;
+    affiliation: string;
+    participantIdentifier: string;
   }[];
 }
 
@@ -30,9 +34,21 @@ export const sendRegistrationConfirmationEmail = async ({
   eventDetails,
   identifier,
   selfName,
-  otherParticipants,
+  selfAffiliation,
+  participantIdentifier,
+  participants,
 }: SendRegistrationConfirmationEmailProps) => {
-  const qrBuffer = await generateQRBuffer(identifier);
+  const registrationQrBuffer = await generateQRBuffer(identifier);
+  const registrantParticipantQrBuffer = await generateQRBuffer(
+    participantIdentifier,
+  );
+  const participantQrBuffers = await Promise.all(
+    participants.map(async (participant) => ({
+      cid: `participantQrCodeCID-${participant.participantIdentifier}`,
+      filename: `${participant.participantIdentifier}.png`,
+      content: await generateQRBuffer(participant.participantIdentifier),
+    })),
+  );
   const eventDateRange =
     eventDetails.eventStartDate && eventDetails.eventEndDate
       ? `${formatDate(
@@ -49,25 +65,19 @@ export const sendRegistrationConfirmationEmail = async ({
           "MMMM d, yyyy, h:mm a",
           "Asia/Manila",
         );
-  const participants = [
-    {
-      fullName: selfName,
-      email: toEmail,
-    },
-    ...otherParticipants,
-  ];
-
   const html = await render(
     StandardRegistrationConfirmationTemplate({
       eventDetails,
       eventDateRange,
       eventVenue: eventDetails.venue ?? "TBA",
       registrationIdentifier: identifier,
+      participantIdentifier,
       self: {
         email: toEmail,
         fullName: selfName,
+        affiliation: selfAffiliation,
       },
-      otherParticipants: participants.slice(1),
+      participants,
     }),
   );
 
@@ -78,9 +88,15 @@ export const sendRegistrationConfirmationEmail = async ({
     attachments: [
       {
         filename: `${identifier}.png`,
-        content: qrBuffer,
+        content: registrationQrBuffer,
         cid: "qrCodeCID",
       },
+      {
+        filename: `${participantIdentifier}.png`,
+        content: registrantParticipantQrBuffer,
+        cid: "participantQrCodeCID",
+      },
+      ...participantQrBuffers,
     ],
   });
 

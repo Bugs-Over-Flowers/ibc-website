@@ -1,9 +1,6 @@
-import { format } from "date-fns";
 import {
-  ArrowLeft,
   Calendar,
   CheckSquare,
-  ChevronLeft,
   ClipboardList,
   Clock,
   Edit,
@@ -16,6 +13,8 @@ import type { Route } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+
+import BackButton from "@/app/admin/_components/BackButton";
 import { EvaluationQRDownloader } from "@/components/qr/EvaluationQRDownloader";
 import RichTextDisplay from "@/components/RichTextDisplay";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +24,10 @@ import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventStats } from "@/server/events/queries/getEventStats";
 import AddFacebookLinkButton from "./AddFacebookLinkButton";
+import EventScheduleDateTime from "./EventScheduleDateTime";
+
+const EVENT_TIME_ZONE = "Asia/Manila";
+const EVENT_TIME_ZONE_LABEL = "PHT";
 
 export default async function EventDetails({
   params,
@@ -55,13 +58,7 @@ export default async function EventDetails({
               ? eventError
               : "This event could not be loaded. It may have been removed or you may not have access."}
           </p>
-          <Link
-            className="mt-4 flex items-center justify-center gap-1 text-primary transition-colors hover:text-primary/80"
-            href={"/admin/events" as Route}
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Back to Events
-          </Link>
+          <BackButton back label="Back" />
         </div>
       </div>
     );
@@ -87,31 +84,26 @@ export default async function EventDetails({
       label: "Total Registrations",
       value: eventStats.total_registrations,
       colorClass: "text-status-blue",
-      bgClass: "bg-status-blue/10",
     },
     {
       label: "Verified",
       value: eventStats.verified_registrations,
       colorClass: "text-status-green",
-      bgClass: "bg-status-green/10",
     },
     {
       label: "Pending",
       value: eventStats.pending_registrations,
       colorClass: "text-status-orange",
-      bgClass: "bg-status-orange/10",
     },
     {
       label: "Participants",
       value: eventStats.participants,
       colorClass: "text-status-purple",
-      bgClass: "bg-status-purple/10",
     },
     {
       label: "Attended",
       value: eventStats.attended,
       colorClass: "text-status-teal",
-      bgClass: "bg-status-teal/10",
     },
   ];
 
@@ -162,12 +154,27 @@ export default async function EventDetails({
     {
       icon: Calendar,
       label: "Date & Time",
-      primary: event.eventStartDate
-        ? format(new Date(event.eventStartDate), "MMM d, yyyy · hh:mm a")
-        : "TBA",
-      secondary: event.eventEndDate
-        ? `Until ${format(new Date(event.eventEndDate), "MMM d, yyyy · hh:mm a")}`
-        : null,
+      primary: event.eventStartDate ? (
+        <EventScheduleDateTime
+          isoString={event.eventStartDate}
+          timeZone={EVENT_TIME_ZONE}
+        />
+      ) : (
+        "TBA"
+      ),
+      secondary: event.eventEndDate ? (
+        <>
+          Until{" "}
+          <EventScheduleDateTime
+            isoString={event.eventEndDate}
+            timeZone={EVENT_TIME_ZONE}
+          />{" "}
+          ({EVENT_TIME_ZONE_LABEL})
+        </>
+      ) : event.eventStartDate ? (
+        `(${EVENT_TIME_ZONE_LABEL})`
+      ) : null,
+      allowWrap: true,
     },
     {
       icon: MapPin,
@@ -187,18 +194,28 @@ export default async function EventDetails({
     {
       icon: Globe,
       label: "Published",
-      primary: event.publishedAt
-        ? format(new Date(event.publishedAt), "MMM d, yyyy · hh:mm a")
-        : "Not published",
-      secondary: null,
+      primary: event.publishedAt ? (
+        <EventScheduleDateTime
+          isoString={event.publishedAt}
+          timeZone={EVENT_TIME_ZONE}
+        />
+      ) : (
+        "Not published"
+      ),
+      secondary: event.publishedAt ? `(${EVENT_TIME_ZONE_LABEL})` : null,
     },
     {
       icon: Clock,
       label: "Last Updated",
-      primary: event.updatedAt
-        ? format(new Date(event.updatedAt), "MMM d, yyyy · hh:mm a")
-        : "N/A",
-      secondary: null,
+      primary: event.updatedAt ? (
+        <EventScheduleDateTime
+          isoString={event.updatedAt}
+          timeZone={EVENT_TIME_ZONE}
+        />
+      ) : (
+        "N/A"
+      ),
+      secondary: event.updatedAt ? `(${EVENT_TIME_ZONE_LABEL})` : null,
     },
   ];
 
@@ -206,16 +223,7 @@ export default async function EventDetails({
     <div className="space-y-6 pb-8">
       {/* Back Navigation */}
       <div className="flex w-full justify-start">
-        <Button
-          className="justify-start gap-1 bg-transparent px-0 text-primary transition-colors hover:bg-transparent hover:text-primary/80 focus:bg-transparent active:bg-transparent"
-          nativeButton={false}
-          render={
-            <Link href={"/admin/events" as Route}>
-              <ChevronLeft className="h-5 w-5" />
-              Back to Events
-            </Link>
-          }
-        />
+        <BackButton back label="Back" />
       </div>
 
       {/* Hero Card */}
@@ -303,7 +311,14 @@ export default async function EventDetails({
           {/* Meta grid */}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {metaItems.map(
-              ({ icon: Icon, label, primary, secondary, primaryClass }) => (
+              ({
+                icon: Icon,
+                label,
+                primary,
+                secondary,
+                primaryClass,
+                allowWrap,
+              }) => (
                 <div className="flex min-w-0 items-start gap-3" key={label}>
                   <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
                     <Icon className="h-4 w-4 text-muted-foreground" />
@@ -313,12 +328,14 @@ export default async function EventDetails({
                       {label}
                     </p>
                     <p
-                      className={`truncate font-medium text-sm ${primaryClass ?? ""}`}
+                      className={`truncate font-medium text-sm ${primaryClass}`}
                     >
                       {primary}
                     </p>
                     {secondary && (
-                      <p className="truncate text-muted-foreground text-xs">
+                      <p
+                        className={`${allowWrap ? "wrap-break-word leading-tight" : "truncate"} text-muted-foreground text-xs`}
+                      >
                         {secondary}
                       </p>
                     )}
@@ -332,7 +349,7 @@ export default async function EventDetails({
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {statItems.map(({ label, value, colorClass, bgClass }) => (
+        {statItems.map(({ label, value, colorClass }) => (
           <Card
             className="border-border/60 shadow-sm transition-shadow hover:shadow-md"
             key={label}
@@ -342,9 +359,6 @@ export default async function EventDetails({
                 {label}
               </p>
               <div className={`flex items-center gap-2`}>
-                <div
-                  className={`h-2 w-2 rounded-full ${bgClass} ${colorClass} ring-2 ring-current ring-opacity-30`}
-                />
                 <span
                   className={`font-bold text-2xl tabular-nums ${colorClass}`}
                 >

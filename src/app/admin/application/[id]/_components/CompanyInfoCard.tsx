@@ -1,4 +1,4 @@
-import { DetailRow } from "./DetailRow";
+import { DetailRow } from "@/components/detail-row";
 
 interface CompanyInfoCardProps {
   companyName: string;
@@ -27,7 +27,19 @@ export function CompanyInfoCard({
       <div className="grid gap-4 p-6 pt-0">
         <DetailRow label="Company Name" value={companyName} />
         <DetailRow label="Sector" value={sectorName || "N/A"} />
-        <DetailRow label="Website" value={websiteURL} />
+        <DetailRow
+          label="Company Profile"
+          value={
+            <a
+              className="truncate text-primary underline"
+              href={websiteURL || "#"}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {websiteURL || "N/A"}
+            </a>
+          }
+        />
         <DetailRow label="Address" value={companyAddress} />
         <DetailRow label="Application Type" value={applicationType} />
         <DetailRow label="Member Type" value={applicationMemberType} />

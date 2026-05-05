@@ -1,16 +1,23 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import QuickOnsiteRegistrationCard from "@/app/admin/events/check-in/[eventDayId]/_components/quick-registration/QuickOnsiteRegistrationCard";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
 import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
 import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
 import CheckInDataDialog from "./_components/CheckInDataDialog";
+import CheckInPageLoading from "./_components/CheckInPageLoading";
 import EventDayDetails from "./_components/EventDayDetails";
-import QuickOnsiteRegistrationCard from "./_components/QuickOnsiteRegistrationCard";
+import ParticipantCheckInDialog from "./_components/ParticipantCheckInDialog";
 import QRCodeScanner from "./_components/qr-scanning/QRCodeScanner";
 import CheckInRegistrationPanel from "./_components/registration-list/CheckInRegistrationPanel";
-import CheckInPageLoading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Event Check-In | Admin",
+  description: "Scan QR codes and check in event attendees.",
+};
 
 type CheckInPageProps = PageProps<"/admin/events/check-in/[eventDayId]">;
 
@@ -91,6 +98,7 @@ async function CheckInPage({
               eventDayData={{
                 eventTitle: eventDayData.event.eventTitle,
                 eventDate: eventDayData.eventDate,
+                eventId: eventDayData.event.eventId,
                 label: eventDayData.label,
                 venue: eventDayData.event.venue,
               }}
@@ -115,6 +123,10 @@ async function CheckInPage({
         />
       </div>
       <CheckInDataDialog
+        eventId={eventDayData.event.eventId}
+        eventTitle={eventDayData.event.eventTitle}
+      />
+      <ParticipantCheckInDialog
         eventId={eventDayData.event.eventId}
         eventTitle={eventDayData.event.eventTitle}
       />

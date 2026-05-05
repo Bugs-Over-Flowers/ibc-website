@@ -1,19 +1,37 @@
 import { create } from "zustand";
-import type { GetCheckInForDateSchema } from "@/lib/validation/qr/standard";
+import type {
+  GetCheckInForDateSchema,
+  GetParticipantCheckInForDateSchema,
+} from "@/lib/validation/qr/standard";
+
+type ScanType = "registration" | "participant";
 
 type AttendanceStore = {
+  /**
+   * The current scan type
+   */
+  scanType: ScanType | null;
+
   /**
    * Scanned data from QR Code
    */
   scannedData: GetCheckInForDateSchema | null;
+
   /**
    * State for currently selected participants staged for check in
    */
+  participantScanData: GetParticipantCheckInForDateSchema | null;
+
+  /**
+   * a kv store <participantId, boolean> to track selected participants for check in
+   */
   selectedParticipants: Record<string, boolean>;
+
   /**
    * a kv store <participantId, remarkString> to track participant remarks
    */
   editedRemarks: Record<string, string>;
+
   /**
    * Currently selected participant id for remark editing
    */
@@ -22,10 +40,20 @@ type AttendanceStore = {
 
 type AttendanceStoreActions = {
   /**
-   * Function to refetch scanned data
-   * @param refetchFunction The function to refetch the scanned data
+   * Function to set the scanned data and scan type
+   * @param data The scanned data to set
+   * @param type The scan type to set
    */
-  setScannedData: (scannedData: GetCheckInForDateSchema) => void;
+  setScannedData: (
+    data: GetCheckInForDateSchema | GetParticipantCheckInForDateSchema,
+    type: ScanType,
+  ) => void;
+
+  /**
+   * Function to set the payment proof status
+   * @param status The payment proof status to set
+   */
+  setPaymentProofStatus: (status: string) => void;
 
   /**
    * Function to open or close the check-in dialog
@@ -36,7 +64,6 @@ type AttendanceStoreActions = {
   /**
    * Function to toggle the selection of a participant
    * @param participantId The id of the participant to toggle selection for
-   * @param isSelected The new selection state of the participant
    */
   toggleParticipantSelection: (participantId: string) => void;
 
@@ -93,20 +120,64 @@ type AttendanceStoreActions = {
 const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
   (set, get) => ({
     // States
+    scanType: null,
     scannedData: null,
+    participantScanData: null,
     selectedParticipants: {},
     editedRemarks: {},
-    selectedRemarkParticipantId: "",
+    selectedRemarkParticipantId: null,
 
-    // Actions
-    setScannedData: (scannedData: GetCheckInForDateSchema) => {
-      set({ scannedData });
+    setScannedData: (
+      data: GetCheckInForDateSchema | GetParticipantCheckInForDateSchema,
+      type: ScanType,
+    ) => {
+      if (type === "participant") {
+        set({
+          scanType: type,
+          scannedData: null,
+          participantScanData: data as GetParticipantCheckInForDateSchema,
+        });
+      } else {
+        set({
+          scanType: type,
+          scannedData: data as GetCheckInForDateSchema,
+          participantScanData: null,
+        });
+      }
+    },
+
+    setPaymentProofStatus: (status: string) => {
+      set((state) => {
+        if (state.scanType === "participant" && state.participantScanData) {
+          return {
+            participantScanData: {
+              ...state.participantScanData,
+              registration: {
+                ...state.participantScanData.registration,
+                paymentProofStatus: status as
+                  | "pending"
+                  | "accepted"
+                  | "rejected",
+              },
+            },
+          };
+        }
+        if (state.scannedData) {
+          return {
+            scannedData: {
+              ...state.scannedData,
+              paymentProofStatus: status as "pending" | "accepted" | "rejected",
+            },
+          };
+        }
+        return {};
+      });
     },
 
     setCheckInDialogOpen: (isOpen: boolean) => {
       if (!isOpen) {
         get().resetCheckInState();
-        set({ scannedData: null });
+        set({ scannedData: null, participantScanData: null, scanType: null });
       }
     },
 
@@ -167,17 +238,27 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
     getEditingParticipantRemark: (participantId?: string | null) => {
       if (!participantId) return "";
 
-      const participant = get().scannedData?.participants.find(
+      const state = get();
+
+      const registrationParticipant = state.scannedData?.participants.find(
         (p) => p.participantId === participantId,
       );
 
-      if (!participant) return "";
+      if (registrationParticipant) {
+        const editedRemark = state.editedRemarks[participantId];
+        if (editedRemark !== undefined) return editedRemark;
+        return registrationParticipant.checkIn?.remarks || "";
+      }
 
-      // Return edited remark if exists, otherwise return original from checkIn
-      const editedRemark = get().editedRemarks[participantId];
-      if (editedRemark !== undefined) return editedRemark;
+      if (
+        state.participantScanData?.participant.participantId === participantId
+      ) {
+        const editedRemark = state.editedRemarks[participantId];
+        if (editedRemark !== undefined) return editedRemark;
+        return state.participantScanData.checkIn?.[0]?.remarks || "";
+      }
 
-      return participant.checkIn?.remarks || "";
+      return "";
     },
 
     setRemark: (participantId: string, remark: string) => {

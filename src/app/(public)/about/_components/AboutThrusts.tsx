@@ -1,39 +1,53 @@
 "use client";
 
-import { Handshake, Palette, Shield, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
+import { resolveWebsiteContentIcon } from "@/app/(public)/_lib/websiteContentIconMap";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
 
-const thrusts = [
+interface AboutThrustItem {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+const thrusts: AboutThrustItem[] = [
   {
     title: "Policy Advisory & Advocacy",
     description:
       "We are at the forefront of issues concerning the business sector. Iloilo Business Club, Inc. holds membership to various regional and local policy-making bodies to represent and put forth critical agenda to improve planning and development, service delivery and the local business climate.",
-    icon: Shield,
+    icon: "Shield",
   },
   {
     title: "Investment Promotion",
     description:
       "Iloilo Business Club, Inc. is one of the founding business organizations of the Iloilo Economic Development Foundation, Inc. The Club partners with national government agencies, private companies and individuals that assist investors and businesses in locating and growing their business in Iloilo.",
-    icon: TrendingUp,
+    icon: "TrendingUp",
   },
   {
     title: "Tourism, Culture, Heritage & Arts",
     description:
       "To boost efforts to promote the Province and the City of Iloilo as a tourist destination, Iloilo Business Club, Inc. pursues partnerships and roles that provide capacity development for local stakeholders, discover new markets with growth potential, and improve services and facilities.",
-    icon: Palette,
+    icon: "Palette",
   },
   {
     title: "Business Support Services",
     description:
       "Projects and activities of Iloilo Business Club are carefully selected to address the needs of its membership and the business sector in general. Economic data and information from key national government agencies and local government units are accessed for members upon request.",
-    icon: Handshake,
+    icon: "Handshake",
   },
 ];
 
-export function AboutThrusts() {
+interface AboutThrustsProps {
+  thrustsData?: AboutThrustItem[];
+}
+
+export function AboutThrusts({ thrustsData }: AboutThrustsProps) {
+  const resolvedThrusts =
+    thrustsData && thrustsData.length > 0 ? thrustsData : thrusts;
+
   return (
     <section className="bg-card py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -60,8 +74,8 @@ export function AboutThrusts() {
           viewport={{ once: true, margin: "-100px" }}
           whileInView="visible"
         >
-          {thrusts.map((thrust) => {
-            const Icon = thrust.icon;
+          {resolvedThrusts.map((thrust) => {
+            const Icon = resolveWebsiteContentIcon(thrust.icon);
             return (
               <motion.div key={thrust.title} variants={fadeInUp}>
                 <Card className="group relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
@@ -75,9 +89,10 @@ export function AboutThrusts() {
                         {thrust.title}
                       </h3>
                     </div>
-                    <p className="mb-4 text-foreground/80 leading-relaxed">
-                      {thrust.description}
-                    </p>
+                    <RichTextDisplay
+                      className="mb-4 text-foreground/80 leading-relaxed **:text-inherit"
+                      content={thrust.description}
+                    />
                   </CardContent>
                 </Card>
               </motion.div>

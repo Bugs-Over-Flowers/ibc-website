@@ -3,7 +3,6 @@ import {
   Container,
   Head,
   Heading,
-  Hr,
   Html,
   Img,
   Preview,
@@ -94,7 +93,7 @@ export default function ResendQRCode({
           </Text>
 
           <Section style={detailsSection}>
-            <Text style={detailLabel}>Registration Identifier</Text>
+            <Text style={detailLabel}>Group Registration Identifier</Text>
             <Text style={detailValue}>
               <code style={detailValueMono}>{registrationIdentifier}</code>
             </Text>
@@ -114,8 +113,6 @@ export default function ResendQRCode({
           </Section>
 
           <TermsAndConditions />
-
-          <Hr style={hr} />
 
           <Text style={footer}>
             If you have questions, reply to this email and we will be happy to
@@ -178,11 +175,6 @@ const text = {
   fontSize: "16px",
   lineHeight: "26px",
   padding: "0 40px",
-};
-
-const hr = {
-  borderColor: "#e6ebf1",
-  margin: "20px 40px",
 };
 
 const footer = {

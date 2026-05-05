@@ -11,6 +11,7 @@ import {
 } from "@/lib/validation/registration/quickRegistration";
 import { SubmitRegistrationResponseSchema } from "@/lib/validation/registration/standard";
 import { createRegistrationIdentifier } from "@/lib/validation/utils";
+import { invalidateRegistrationCaches } from "@/server/actions.utils";
 
 export async function quickOnsiteRegistrationRPC(
   data: QuickOnsiteRegistrationInput,
@@ -19,9 +20,22 @@ export async function quickOnsiteRegistrationRPC(
 
   const supabase = await createActionClient();
 
-  const registrationIdentifier = createRegistrationIdentifier();
-
   const { memberDetails, registrant, eventId, eventDayId, remark } = parsedData;
+
+  const { data: eventData } = await supabase
+    .from("Event")
+    .select("eventEndDate")
+    .eq("eventId", eventId)
+    .single();
+
+  if (
+    eventData?.eventEndDate &&
+    new Date() > new Date(eventData.eventEndDate)
+  ) {
+    throw new Error("Registration is closed. This event has already ended.");
+  }
+
+  const registrationIdentifier = createRegistrationIdentifier();
 
   const { data: rpcResults, error } = await supabase.rpc(
     "quick_onsite_registration",
@@ -55,12 +69,7 @@ export async function quickOnsiteRegistrationRPC(
     throw new Error("No data returned from quick onsite registration");
   }
 
-  updateTag(CACHE_TAGS.registrations.all);
-  updateTag(CACHE_TAGS.registrations.list);
-  updateTag(CACHE_TAGS.registrations.details);
-  updateTag(CACHE_TAGS.registrations.stats);
-  updateTag(CACHE_TAGS.registrations.event);
-  updateTag(CACHE_TAGS.events.registrations);
+  invalidateRegistrationCaches();
   updateTag(CACHE_TAGS.checkIns.stats);
 
   revalidatePath(`/admin/events/check-in`);

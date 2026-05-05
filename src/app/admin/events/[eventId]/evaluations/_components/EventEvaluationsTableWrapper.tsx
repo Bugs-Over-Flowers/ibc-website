@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import type { ExportEventDetails } from "@/lib/export/excel";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEvaluationsByEventId } from "@/server/evaluation/queries/getAllEvaluations";
 import { getEventById } from "@/server/events/queries/getEventById";
@@ -36,11 +37,18 @@ export async function EventEvaluationsTableWrapper({
     );
   }
 
+  const eventDetails: ExportEventDetails = {
+    title: event.eventTitle,
+    startDate: event.eventStartDate,
+    endDate: event.eventEndDate,
+    venue: event.venue,
+  };
+
   return (
     <EventEvaluationsTable
       evaluations={evaluations}
+      eventDetails={eventDetails}
       eventId={eventId}
-      eventTitle={event.eventTitle}
     />
   );
 }
