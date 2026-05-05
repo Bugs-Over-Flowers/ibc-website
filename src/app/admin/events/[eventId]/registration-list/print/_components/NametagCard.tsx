@@ -15,12 +15,12 @@ export default function NametagCard({
   return (
     <div className="flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-[6mm] border border-neutral-200 bg-white p-[4mm] pt-[3mm]">
       {/* Logo */}
-      <div className="relative h-7 w-20">
+      <div className="relative size-25">
         <Image
           alt="IBC Logo"
           className="object-contain"
           fill
-          sizes="80px"
+          sizes="120px"
           src="/logo/ibc-logo.png"
         />
       </div>
