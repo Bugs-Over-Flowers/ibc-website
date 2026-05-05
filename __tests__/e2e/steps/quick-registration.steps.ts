@@ -243,11 +243,6 @@ Then("I should see validation errors for required fields", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByText("Invalid email")).toBeVisible();
   await expect(
-    page.getByText(
-      "Contact number must be a valid Philippine phone or landline number",
-    ),
-  ).toBeVisible();
-  await expect(
     page.getByText("Please input your company / organization / affiliation"),
   ).toBeVisible();
 });

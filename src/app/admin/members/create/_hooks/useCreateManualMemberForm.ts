@@ -19,6 +19,7 @@ export function useCreateManualMemberForm() {
     defaultValues: {
       companyName: "",
       sectorId: "",
+      companyProfileType: "website",
       companyAddress: "",
       websiteURL: "",
       emailAddress: "",

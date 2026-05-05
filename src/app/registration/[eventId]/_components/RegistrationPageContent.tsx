@@ -98,6 +98,15 @@ export async function RegistrationPageContent({
     return <NotReadyEvent title={eventData.eventTitle} />;
   }
 
+  if (isPastEvent) {
+    return (
+      <NotReadyEvent
+        description="This event has already ended. Registration is closed."
+        title={eventData.eventTitle}
+      />
+    );
+  }
+
   const eventDate = format(
     new Date(eventData.eventStartDate || Date.now()),
     "EEEE, MMMM d, yyyy",

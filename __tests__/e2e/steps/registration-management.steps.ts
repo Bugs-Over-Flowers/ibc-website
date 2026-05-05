@@ -5,6 +5,7 @@ import {
   cleanupAdminRegistrationScenario,
   seedAdminRegistrationScenario,
 } from "../fixtures/adminRegistrationScenario";
+import { loginAsAdmin } from "../fixtures/auth-helpers";
 import createRegistrationWithParticipants from "../helpers/createRegistrationWithParticipants";
 import { createE2EAdminClient } from "../helpers/supabase";
 
@@ -155,9 +156,8 @@ Then(
     await page
       .getByRole("button", { name: "Open payment proof review dialog" })
       .click();
-    await expect(
-      page.getByAltText("Proof of Payment Image").first(),
-    ).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expect(page.getByAltText("Proof 1").first()).toBeVisible();
   },
 );
 
@@ -354,6 +354,8 @@ When(
 
 Then("I should be redirected back to the login page", async ({ page }) => {
   await expect(page).toHaveURL(/\/auth/);
+  await loginAsAdmin(page);
+  await page.context().storageState({ path: "__tests__/e2e/.auth/user.json" });
 });
 
 // ============================================

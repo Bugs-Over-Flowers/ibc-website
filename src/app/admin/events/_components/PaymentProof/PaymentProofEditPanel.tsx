@@ -4,11 +4,16 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation } from "@dnd-kit/react/sortable";
 import { ArrowLeft, Camera, CheckCircle2, Save, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import CameraCapture from "@/app/admin/events/_components/PaymentProof/CameraCapture";
 import PaymentProofReviewItem from "@/app/admin/events/_components/PaymentProof/PaymentProofReviewItem";
 import { usePaymentProofEditor } from "@/app/admin/events/_hooks/usePaymentProofEditor";
 import type { SignedProof } from "@/app/admin/events/_hooks/usePaymentProofSignedUrlAction";
 import { Button } from "@/components/ui/button";
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  isValidImageUploadFile,
+} from "@/lib/fileUpload";
 
 interface PaymentProofEditPanelProps {
   registrationId: string;
@@ -67,7 +72,13 @@ export default function PaymentProofEditPanel({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     if (files.length > 0) {
-      addFiles(files, "file");
+      const validFiles = files.filter(isValidImageUploadFile);
+      if (validFiles.length !== files.length) {
+        toast.error("Only PNG, JPG, and JPEG files under 5MB are accepted.");
+      }
+      if (validFiles.length > 0) {
+        addFiles(validFiles, "file");
+      }
     }
     event.target.value = "";
   };
@@ -120,7 +131,7 @@ export default function PaymentProofEditPanel({
               Add with file
             </Button>
             <input
-              accept="image/*"
+              accept={IMAGE_UPLOAD_ACCEPT_ATTR}
               className="hidden"
               multiple
               onChange={handleFileChange}

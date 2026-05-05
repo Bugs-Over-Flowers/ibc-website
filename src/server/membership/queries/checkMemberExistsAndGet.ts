@@ -18,6 +18,7 @@ type CheckMemberOutput = {
   sectorId?: number;
   websiteURL?: string;
   logoImageURL?: string;
+  companyProfileType?: string | null;
   emailAddress?: string;
   landline?: string;
   mobileNumber?: string;
