@@ -26,8 +26,7 @@ export function LandingBenefitsSection({
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
 
   const handleDeleteCard = (entryKey: string) => {
-    onToggleCardSelected(entryKey, true); // select it
-    onDeleteCardsClick(); // let parent handle dialog
+    onDeleteCardsClick(entryKey);
   };
 
   const editingCard = cards.find((card) => card.entryKey === editingCardKey);

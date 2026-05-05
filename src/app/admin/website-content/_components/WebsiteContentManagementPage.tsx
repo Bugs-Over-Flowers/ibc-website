@@ -135,7 +135,17 @@ export function WebsiteContentManagementPage() {
   const selectedCount = selectedCardEntryKeys.size;
   const isSectionActionDisabled = isSavingSection || isLoadingSection;
 
-  const handleDeleteCardsClick = () => {
+  const handleDeleteCardsClick = (entryKey?: string) => {
+    if (entryKey) {
+      setIsDeleteConfirmOpen(true);
+      if (!selectedCardEntryKeys.has(entryKey) || selectedCount !== 1) {
+        // Replace any existing selection so a card-level trash click deletes only that card.
+        unselectAllCards();
+        toggleCardSelected(entryKey, true);
+      }
+      return;
+    }
+
     if (!isDeleteMode) {
       enterDeleteMode();
       return;

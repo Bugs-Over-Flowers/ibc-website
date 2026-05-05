@@ -41,8 +41,7 @@ export function SecretariatSection({
   });
 
   const handleDeleteCard = (entryKey: string) => {
-    onToggleCardSelected(entryKey, true);
-    onDeleteCardsClick();
+    onDeleteCardsClick(entryKey);
   };
 
   const editingCard = cards.find((c) => c.entryKey === editingCardKey);
