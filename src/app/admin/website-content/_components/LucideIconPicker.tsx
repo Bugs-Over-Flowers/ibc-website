@@ -1,66 +1,6 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import {
-  Activity,
-  Anchor,
-  Award,
-  BarChart3,
-  Bell,
-  BookOpen,
-  Briefcase,
-  Building,
-  Building2,
-  Calendar,
-  CalendarDays,
-  Camera,
-  CheckCircle2,
-  CheckSquare2,
-  CircleDollarSign,
-  ClipboardCheck,
-  Clock3,
-  Cloud,
-  Cog,
-  Compass,
-  Cpu,
-  CreditCard,
-  DollarSign,
-  FileCheck2,
-  FileText,
-  Flag,
-  Gem,
-  Gift,
-  Globe,
-  GraduationCap,
-  Handshake,
-  Heart,
-  Home,
-  IdCard,
-  Landmark,
-  Lightbulb,
-  Mail,
-  MapPin,
-  Megaphone,
-  Palette,
-  Phone,
-  QrCode,
-  Rocket,
-  Search,
-  Shield,
-  Sparkles,
-  Star,
-  Tag,
-  Target,
-  TrendingUp,
-  Trophy,
-  UploadCloud,
-  UserCircle,
-  UserPlus,
-  Users,
-  Wallet,
-  Wrench,
-  Zap,
-} from "lucide-react";
 import { useMemo, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -69,78 +9,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { ICON_OPTIONS, IconOption } from "./icons";
 
 interface LucideIconPickerProps {
   selectedIcon: string;
   onSelect: (iconName: string) => void;
   disabled?: boolean;
 }
-
-interface IconOption {
-  name: string;
-  Icon: LucideIcon;
-}
-
-const ICON_OPTIONS: IconOption[] = [
-  { name: "Activity", Icon: Activity },
-  { name: "Anchor", Icon: Anchor },
-  { name: "Bell", Icon: Bell },
-  { name: "Building", Icon: Building },
-  { name: "BookOpen", Icon: BookOpen },
-  { name: "CalendarDays", Icon: CalendarDays },
-  { name: "Calendar", Icon: Calendar },
-  { name: "Camera", Icon: Camera },
-  { name: "CircleDollarSign", Icon: CircleDollarSign },
-  { name: "Clock3", Icon: Clock3 },
-  { name: "CheckSquare2", Icon: CheckSquare2 },
-  { name: "Cloud", Icon: Cloud },
-  { name: "Compass", Icon: Compass },
-  { name: "CreditCard", Icon: CreditCard },
-  { name: "DollarSign", Icon: DollarSign },
-  { name: "FileCheck2", Icon: FileCheck2 },
-  { name: "FileText", Icon: FileText },
-  { name: "Gift", Icon: Gift },
-  { name: "Home", Icon: Home },
-  { name: "IdCard", Icon: IdCard },
-  { name: "Mail", Icon: Mail },
-  { name: "MapPin", Icon: MapPin },
-  { name: "Phone", Icon: Phone },
-  { name: "QrCode", Icon: QrCode },
-  { name: "Search", Icon: Search },
-  { name: "Tag", Icon: Tag },
-  { name: "UploadCloud", Icon: UploadCloud },
-  { name: "UserCircle", Icon: UserCircle },
-  { name: "UserPlus", Icon: UserPlus },
-  { name: "Zap", Icon: Zap },
-  { name: "Wallet", Icon: Wallet },
-  { name: "Handshake", Icon: Handshake },
-  { name: "TrendingUp", Icon: TrendingUp },
-  { name: "Users", Icon: Users },
-  { name: "Award", Icon: Award },
-  { name: "Globe", Icon: Globe },
-  { name: "Lightbulb", Icon: Lightbulb },
-  { name: "Shield", Icon: Shield },
-  { name: "Palette", Icon: Palette },
-  { name: "Building2", Icon: Building2 },
-  { name: "Target", Icon: Target },
-  { name: "Sparkles", Icon: Sparkles },
-  { name: "Briefcase", Icon: Briefcase },
-  { name: "Rocket", Icon: Rocket },
-  { name: "Trophy", Icon: Trophy },
-  { name: "Star", Icon: Star },
-  { name: "Gem", Icon: Gem },
-  { name: "Landmark", Icon: Landmark },
-  { name: "Megaphone", Icon: Megaphone },
-  { name: "Cpu", Icon: Cpu },
-  { name: "GraduationCap", Icon: GraduationCap },
-  { name: "ClipboardCheck", Icon: ClipboardCheck },
-  { name: "CheckCircle2", Icon: CheckCircle2 },
-  { name: "BarChart3", Icon: BarChart3 },
-  { name: "Cog", Icon: Cog },
-  { name: "Wrench", Icon: Wrench },
-  { name: "Flag", Icon: Flag },
-  { name: "Heart", Icon: Heart },
-];
 
 export function LucideIconPicker({
   selectedIcon,

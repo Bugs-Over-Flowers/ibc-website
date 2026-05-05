@@ -2,9 +2,17 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation, useSortable } from "@dnd-kit/react/sortable";
-import { ArrowLeft, GripVertical, Trash2, User } from "lucide-react";
+import {
+  ArrowLeft,
+  GripVertical,
+  Trash2,
+  UploadCloud,
+  User,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { reorderInList } from "../../_hooks/reorderInList";
@@ -23,10 +31,11 @@ export function BoardOfTrusteesSection({
   onToggleCardSelected,
   onCardFieldChange,
   onCardsReorder,
+  isDeleteMode,
+  selectedCardEntryKeys,
 }: BoardOfTrusteesSectionProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
-
-  usePersonalImageUpload({
+  const { createImageSelectHandler } = usePersonalImageUpload({
     basePath: "website-content/board",
     onUploaded: (entryKey, publicUrl) => {
       onCardFieldChange(entryKey, "imageUrl", publicUrl);
@@ -37,8 +46,7 @@ export function BoardOfTrusteesSection({
     useBoardCardGroups(cards);
 
   const handleDeleteCard = (entryKey: string) => {
-    onToggleCardSelected(entryKey, true);
-    onDeleteCardsClick();
+    onDeleteCardsClick(entryKey);
   };
 
   const editingCard = cards.find((c) => c.entryKey === editingCardKey);
@@ -152,7 +160,17 @@ export function BoardOfTrusteesSection({
             ? "flex h-[340px] w-[260px] flex-col items-center justify-center rounded-3xl bg-card/95 p-8 text-center shadow-xl ring-1 ring-border/50 backdrop-blur-xl"
             : "mx-auto flex h-[300px] w-[220px] flex-col items-center justify-center overflow-hidden rounded-xl border border-border bg-card"
         }`}
-        onClick={() => setEditingCardKey(card.entryKey)}
+        onClick={() => {
+          if (isDeleteMode) {
+            onToggleCardSelected(
+              card.entryKey,
+              !selectedCardEntryKeys.has(card.entryKey),
+            );
+            return;
+          }
+
+          setEditingCardKey(card.entryKey);
+        }}
         ref={ref}
         style={{ opacity: isDragSource ? 0.65 : 1 }}
         type="button"
@@ -204,6 +222,8 @@ export function BoardOfTrusteesSection({
   };
 
   const BoardCardForm = ({ card }: { card: (typeof cards)[number] }) => {
+    const hasImage = card.imageUrl.trim().length > 0;
+
     return (
       <div className="space-y-3">
         <div>
@@ -226,6 +246,89 @@ export function BoardOfTrusteesSection({
             placeholder={placeholders.subtitle}
             value={card.subtitle}
           />
+        </div>
+
+        <div className="space-y-2">
+          <p className="font-medium text-sm">Profile Image</p>
+
+          {hasImage ? (
+            <div className="space-y-4 rounded-xl border border-border/60 bg-background p-4">
+              <div className="mx-auto w-fit">
+                <div className="relative h-24 w-24 overflow-hidden rounded-full border border-border/60 bg-muted/20">
+                  <Image
+                    alt={card.title || "Board member"}
+                    className="object-cover"
+                    fill
+                    src={card.imageUrl}
+                    unoptimized
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center gap-2 text-center">
+                <span className="font-medium text-emerald-700 dark:text-emerald-300">
+                  Image Uploaded Successfully
+                </span>
+                <Badge className="max-w-full" variant="outline">
+                  {card.entryKey}
+                </Badge>
+              </div>
+
+              <label className="block">
+                <input
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  className="hidden"
+                  disabled={isSectionActionDisabled}
+                  onChange={createImageSelectHandler(card.entryKey)}
+                  type="file"
+                />
+                <div className="flex min-h-24 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-muted-foreground/25 border-dashed bg-background p-4 text-center transition-all hover:border-primary hover:bg-primary/5">
+                  <UploadCloud className="h-6 w-6 text-muted-foreground" />
+                  <span className="font-medium text-muted-foreground text-sm">
+                    Replace image
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    Click to choose another file
+                  </span>
+                </div>
+              </label>
+
+              <div className="flex justify-center">
+                <Button
+                  className="h-9 rounded-lg border-destructive/30 px-4 font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  disabled={isSectionActionDisabled}
+                  onClick={() =>
+                    onCardFieldChange(card.entryKey, "imageUrl", "")
+                  }
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  <X className="mr-1 h-4 w-4" />
+                  Remove image
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <label className="block">
+              <input
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                className="hidden"
+                disabled={isSectionActionDisabled}
+                onChange={createImageSelectHandler(card.entryKey)}
+                type="file"
+              />
+              <div className="flex min-h-40 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted-foreground/25 border-dashed bg-background p-6 text-center transition-all hover:border-primary hover:bg-primary/5">
+                <UploadCloud className="h-8 w-8 text-muted-foreground" />
+                <span className="font-medium text-muted-foreground">
+                  Click to upload image
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  PNG, JPG, WEBP up to 5MB
+                </span>
+              </div>
+            </label>
+          )}
         </div>
       </div>
     );
