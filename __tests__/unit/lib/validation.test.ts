@@ -4,7 +4,7 @@ import {
   GetCheckInForDateSchema,
   normalizeCheckInForEventDay,
 } from "@/lib/validation/qr/standard";
-import { phoneSchema } from "@/lib/validation/utils";
+import { phoneOrLandlineSchema } from "@/lib/validation/utils";
 
 // Create a simple email schema for testing
 const emailSchema = z.string().email();
@@ -13,27 +13,52 @@ const emailSchema = z.string().email();
  * Unit tests for validation schemas
  */
 describe("lib/validation/utils", () => {
-  describe("phoneSchema", () => {
-    it("should accept valid Philippine phone numbers", () => {
-      const validNumbers = ["+639171234567", "+639281234567", "09171234567"];
+  describe("phoneOrLandlineSchema", () => {
+    it("should accept valid Philippine phone and landline numbers", () => {
+      const validNumbers = [
+        // Mobile with country code (with and without spaces)
+        "+639171234567",
+        "+63 917 123 4567",
+        "+639281234567",
+        "+63 928 123 4567",
+        // Mobile local
+        "09171234567",
+        "09991234567",
+        // Landline 7-digit
+        "321-1234",
+        "555-6789",
+        // Landline 8-digit
+        "7320-1234",
+        "1234-5678",
+        // Landline with 3-digit area code
+        "033-321-1234",
+        "032-555-6789",
+        // Landline with 2-digit area code (Manila)
+        "02-7320-1234",
+        "02-1234-5678",
+      ];
 
       for (const number of validNumbers) {
-        const result = phoneSchema.safeParse(number);
+        const result = phoneOrLandlineSchema.safeParse(number);
         expect(result.success).toBe(true);
       }
     });
 
-    it("should reject invalid phone numbers", () => {
+    it("should reject invalid phone and landline numbers", () => {
       const invalidNumbers = [
         "+1234567890", // Wrong country code
         "+6391712", // Too short
         "invalid", // Not a number
         "", // Empty string
         "12345", // Random numbers
+        "123-456", // Too few digits
+        "12345-678", // Wrong landline format
+        "033-32-1234", // Wrong area code format
+        "02-732-1234", // Wrong Manila format
       ];
 
       for (const number of invalidNumbers) {
-        const result = phoneSchema.safeParse(number);
+        const result = phoneOrLandlineSchema.safeParse(number);
         expect(result.success).toBe(false);
       }
     });
