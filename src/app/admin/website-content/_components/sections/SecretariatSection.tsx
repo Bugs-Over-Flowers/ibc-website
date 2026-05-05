@@ -2,13 +2,22 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation, useSortable } from "@dnd-kit/react/sortable";
-import { ArrowLeft, GripVertical, Trash2, User } from "lucide-react";
+import {
+  ArrowLeft,
+  GripVertical,
+  Trash2,
+  UploadCloud,
+  User,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { reorderInList } from "../../_hooks/reorderInList";
+import { usePersonalImageUpload } from "../../_hooks/usePersonalImageUpload";
 import type { SecretariatSectionProps } from "../../_types/sectionProps";
 
 export function SecretariatSection({
@@ -20,12 +29,19 @@ export function SecretariatSection({
   onToggleCardSelected,
   onCardFieldChange,
   onCardsReorder,
+  isDeleteMode,
+  selectedCardEntryKeys,
 }: SecretariatSectionProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
+  const { createImageSelectHandler } = usePersonalImageUpload({
+    basePath: "website-content/secretariat",
+    onUploaded: (entryKey, publicUrl) => {
+      onCardFieldChange(entryKey, "imageUrl", publicUrl);
+    },
+  });
 
   const handleDeleteCard = (entryKey: string) => {
-    onToggleCardSelected(entryKey, true);
-    onDeleteCardsClick();
+    onDeleteCardsClick(entryKey);
   };
 
   const editingCard = cards.find((c) => c.entryKey === editingCardKey);
@@ -45,7 +61,6 @@ export function SecretariatSection({
       index,
       group: "secretariat",
     });
-
     return (
       <div
         className="group relative overflow-hidden rounded-md border border-border bg-background"
@@ -65,52 +80,152 @@ export function SecretariatSection({
           <GripVertical className="h-4 w-4" />
         </button>
 
-        {/* IMAGE + TEXT */}
-        <div className="flex flex-col items-center p-4">
-          <div className="relative mb-3 flex aspect-square w-full items-center justify-center rounded-md bg-primary/5">
-            {card.imageUrl ? (
-              <Image
-                alt={`${card.title || "Secretariat member"} preview`}
-                className="h-20 w-20 rounded-md border border-border object-cover"
-                height={80}
-                src={card.imageUrl}
-                unoptimized
-                width={80}
-              />
-            ) : (
+        {/* IMAGE BUTTON */}
+        <button
+          className="relative aspect-square w-full overflow-hidden"
+          onClick={() => {
+            if (isDeleteMode) {
+              onToggleCardSelected(
+                card.entryKey,
+                !selectedCardEntryKeys.has(card.entryKey),
+              );
+              return;
+            }
+            setEditingCardKey(card.entryKey);
+          }}
+          type="button"
+        >
+          {card.imageUrl ? (
+            <Image
+              alt={card.title || "Secretariat member"}
+              className="object-cover"
+              fill
+              src={card.imageUrl}
+              unoptimized
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-primary/5">
               <User className="h-8 w-8 text-primary/30" />
-            )}
-          </div>
+            </div>
+          )}
+        </button>
 
-          <h3 className="font-semibold text-xs">
+        {/* TEXT CONTENT */}
+        <div className="my-2 flex flex-col items-center">
+          <h3 className="font-semibold text-base">
             {card.title || "Secretariat member"}
           </h3>
-          <p className="text-[10px] text-primary">
-            {card.subtitle || "Subtitle"}
-          </p>
+          <p className="text-primary text-xs">{card.subtitle || "Subtitle"}</p>
         </div>
       </div>
     );
   };
 
-  const Form = ({ card }: { card: (typeof cards)[number] }) => (
-    <div className="space-y-3">
-      <Input
-        onChange={(e) =>
-          onCardFieldChange(card.entryKey, "title", e.target.value)
-        }
-        placeholder={placeholders.title}
-        value={card.title}
-      />
-      <Input
-        onChange={(e) =>
-          onCardFieldChange(card.entryKey, "subtitle", e.target.value)
-        }
-        placeholder={placeholders.subtitle}
-        value={card.subtitle}
-      />
-    </div>
-  );
+  const Form = ({ card }: { card: (typeof cards)[number] }) => {
+    const hasImage = card.imageUrl.trim().length > 0;
+
+    return (
+      <div className="space-y-3">
+        <Input
+          onChange={(e) =>
+            onCardFieldChange(card.entryKey, "title", e.target.value)
+          }
+          placeholder={placeholders.title}
+          value={card.title}
+        />
+        <Input
+          onChange={(e) =>
+            onCardFieldChange(card.entryKey, "subtitle", e.target.value)
+          }
+          placeholder={placeholders.subtitle}
+          value={card.subtitle}
+        />
+
+        <div className="space-y-2">
+          <p className="font-medium text-sm">Profile Image</p>
+
+          {hasImage ? (
+            <div className="space-y-4 rounded-xl border border-border/60 bg-background p-4">
+              <div className="mx-auto w-fit">
+                <div className="relative h-24 w-24 overflow-hidden rounded-full border border-border/60 bg-muted/20">
+                  <Image
+                    alt={card.title || "Secretariat member"}
+                    className="object-cover"
+                    fill
+                    src={card.imageUrl}
+                    unoptimized
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center gap-2 text-center">
+                <span className="font-medium text-emerald-700 dark:text-emerald-300">
+                  Image Uploaded Successfully
+                </span>
+                <Badge className="max-w-full" variant="outline">
+                  {card.entryKey}
+                </Badge>
+              </div>
+
+              <label className="block">
+                <input
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  className="hidden"
+                  disabled={isSectionActionDisabled}
+                  onChange={createImageSelectHandler(card.entryKey)}
+                  type="file"
+                />
+                <div className="flex min-h-24 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-muted-foreground/25 border-dashed bg-background p-4 text-center transition-all hover:border-primary hover:bg-primary/5">
+                  <UploadCloud className="h-6 w-6 text-muted-foreground" />
+                  <span className="font-medium text-muted-foreground text-sm">
+                    Replace image
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    Click to choose another file
+                  </span>
+                </div>
+              </label>
+
+              <div className="flex justify-center">
+                <Button
+                  className="h-9 rounded-lg border-destructive/30 px-4 font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  disabled={isSectionActionDisabled}
+                  onClick={() =>
+                    onCardFieldChange(card.entryKey, "imageUrl", "")
+                  }
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  <X className="mr-1 h-4 w-4" />
+                  Remove image
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <label className="block">
+              <input
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                className="hidden"
+                disabled={isSectionActionDisabled}
+                onChange={createImageSelectHandler(card.entryKey)}
+                type="file"
+              />
+              <div className="flex min-h-40 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted-foreground/25 border-dashed bg-background p-6 text-center transition-all hover:border-primary hover:bg-primary/5">
+                <UploadCloud className="h-8 w-8 text-muted-foreground" />
+                <span className="font-medium text-muted-foreground">
+                  Click to upload image
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  PNG, JPG, WEBP up to 5MB
+                </span>
+              </div>
+            </label>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>

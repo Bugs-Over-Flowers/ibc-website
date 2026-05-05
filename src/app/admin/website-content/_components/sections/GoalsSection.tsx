@@ -1,137 +1,16 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import {
-  Activity,
-  Anchor,
-  ArrowLeft,
-  Award,
-  BarChart3,
-  Bell,
-  BookOpen,
-  Briefcase,
-  Building,
-  Building2,
-  Calendar,
-  CalendarDays,
-  Camera,
-  CheckCircle2,
-  CheckSquare2,
-  CircleDollarSign,
-  ClipboardCheck,
-  Clock3,
-  Cloud,
-  Cog,
-  Compass,
-  Cpu,
-  CreditCard,
-  DollarSign,
-  FileCheck2,
-  FileText,
-  Flag,
-  Gem,
-  Gift,
-  Globe,
-  GraduationCap,
-  Handshake,
-  Heart,
-  Home,
-  IdCard,
-  Landmark,
-  Lightbulb,
-  Mail,
-  MapPin,
-  Megaphone,
-  Palette,
-  Phone,
-  QrCode,
-  Rocket,
-  Search,
-  Shield,
-  Sparkles,
-  Star,
-  Tag,
-  Target,
-  Trash2,
-  TrendingUp,
-  Trophy,
-  UploadCloud,
-  UserCircle,
-  UserPlus,
-  Users,
-  Wallet,
-  Wrench,
-  Zap,
-} from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { useState } from "react";
 import RichTextDisplay from "@/components/RichTextDisplay";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { GoalsSectionProps } from "../../_types/sectionProps";
+import { ICON_MAP } from "../icons";
 import { LucideIconPicker } from "../LucideIconPicker";
 import { MarkdownTextarea } from "../RichTextEditorField";
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Activity,
-  Anchor,
-  Award,
-  BarChart3,
-  Bell,
-  BookOpen,
-  Briefcase,
-  Building,
-  Building2,
-  Calendar,
-  CalendarDays,
-  Camera,
-  CheckCircle2,
-  CheckSquare2,
-  CircleDollarSign,
-  ClipboardCheck,
-  Clock3,
-  Cloud,
-  Cog,
-  Compass,
-  Cpu,
-  CreditCard,
-  DollarSign,
-  FileCheck2,
-  FileText,
-  Flag,
-  Gem,
-  Gift,
-  Globe,
-  GraduationCap,
-  Handshake,
-  Heart,
-  Home,
-  IdCard,
-  Landmark,
-  Lightbulb,
-  Mail,
-  MapPin,
-  Megaphone,
-  Palette,
-  Phone,
-  QrCode,
-  Rocket,
-  Search,
-  Shield,
-  Sparkles,
-  Star,
-  Tag,
-  Target,
-  TrendingUp,
-  Trophy,
-  UploadCloud,
-  UserCircle,
-  UserPlus,
-  Users,
-  Wallet,
-  Wrench,
-  Zap,
-};
 
 export function GoalsSection({
   cards,
@@ -141,12 +20,13 @@ export function GoalsSection({
   onDeleteCardsClick,
   onToggleCardSelected,
   onCardFieldChange,
+  isDeleteMode,
+  selectedCardEntryKeys,
 }: GoalsSectionProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
 
   const handleDeleteCard = (entryKey: string) => {
-    onToggleCardSelected(entryKey, true); // select it
-    onDeleteCardsClick(); // let parent handle dialog
+    onDeleteCardsClick(entryKey);
   };
 
   const editingCard = cards.find((card) => card.entryKey === editingCardKey);
@@ -158,7 +38,17 @@ export function GoalsSection({
     return (
       <button
         className="text-left"
-        onClick={() => setEditingCardKey(card.entryKey)}
+        onClick={() => {
+          if (isDeleteMode) {
+            onToggleCardSelected(
+              card.entryKey,
+              !selectedCardEntryKeys.has(card.entryKey),
+            );
+            return;
+          }
+
+          setEditingCardKey(card.entryKey);
+        }}
         type="button"
       >
         <Card className="relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300">

@@ -31,7 +31,7 @@ export interface GoalsSectionProps {
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;
@@ -52,7 +52,7 @@ export interface CompanyThrustsSectionProps {
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;
@@ -73,7 +73,7 @@ export interface BoardOfTrusteesSectionProps {
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;
@@ -95,7 +95,7 @@ export interface SecretariatSectionProps {
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;
@@ -117,7 +117,7 @@ export interface LandingBenefitsSectionProps {
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;

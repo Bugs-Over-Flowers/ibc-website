@@ -14,6 +14,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https:",
       "style-src 'self' 'unsafe-inline' https:",
+      "frame-src 'self' https://www.google.com",
       isProduction
         ? "script-src 'self' 'unsafe-inline' https://unpkg.com"
         : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
