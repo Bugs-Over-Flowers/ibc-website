@@ -8,13 +8,19 @@ import type { EventStatus } from "@/lib/events/eventUtils";
 import {
   type DateRange,
   getDateRangeFromPreset,
+  type PrivacyFilter,
 } from "../../_utils/searchUtils";
 import EventSearchActiveFilters from "./EventSearchActiveFilters";
 import EventSearchDateFilter from "./EventSearchDateFilter";
 import EventSearchInput from "./EventSearchInput";
+import EventSearchPrivacyFilter from "./EventSearchPrivacyFilter";
 import EventSearchStatusFilter from "./EventSearchStatusFilter";
 
-export type { DateRange, FilterOption } from "../../_utils/searchUtils";
+export type {
+  DateRange,
+  FilterOption,
+  PrivacyFilter,
+} from "../../_utils/searchUtils";
 
 import type { DatePreset } from "../../_utils/searchUtils";
 
@@ -23,6 +29,8 @@ interface EventsSearchProps {
   onSearchChange: (query: string) => void;
   statusFilter: EventStatus | "all";
   onStatusChange: (status: EventStatus | "all") => void;
+  privacyFilter?: PrivacyFilter;
+  onPrivacyChange?: (privacy: PrivacyFilter) => void;
   dateRange?: DateRange;
   onDateRangeChange?: (range: DateRange) => void;
 }
@@ -32,6 +40,8 @@ export function EventsSearch({
   onSearchChange,
   statusFilter,
   onStatusChange,
+  privacyFilter = "all",
+  onPrivacyChange = () => {},
   dateRange = {},
   onDateRangeChange = () => {},
 }: EventsSearchProps) {
@@ -55,7 +65,11 @@ export function EventsSearch({
   };
 
   const hasActiveFilters =
-    dateRange?.from || dateRange?.to || statusFilter !== "all" || searchQuery;
+    dateRange?.from ||
+    dateRange?.to ||
+    statusFilter !== "all" ||
+    privacyFilter !== "all" ||
+    searchQuery;
 
   return (
     <motion.div
@@ -91,6 +105,11 @@ export function EventsSearch({
               statusFilter={statusFilter}
             />
 
+            <EventSearchPrivacyFilter
+              onPrivacyChange={onPrivacyChange}
+              privacyFilter={privacyFilter}
+            />
+
             <AnimatePresence>
               {hasActiveFilters && (
                 <motion.div
@@ -105,6 +124,7 @@ export function EventsSearch({
                     onClick={() => {
                       clearDateRange();
                       onStatusChange("all");
+                      onPrivacyChange("all");
                       onSearchChange("");
                     }}
                     variant="ghost"
@@ -121,7 +141,9 @@ export function EventsSearch({
         <EventSearchActiveFilters
           clearDateRange={clearDateRange}
           dateRange={dateRange}
+          onPrivacyChange={onPrivacyChange}
           onStatusChange={onStatusChange}
+          privacyFilter={privacyFilter}
           selectedPreset={selectedPreset}
           statusFilter={statusFilter}
         />

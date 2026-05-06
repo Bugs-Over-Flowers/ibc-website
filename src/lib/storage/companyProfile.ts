@@ -2,7 +2,21 @@ export const COMPANY_PROFILE_BUCKET = "companyprofile";
 
 export function isStorageUrl(url: string | null | undefined): boolean {
   if (!url) return false;
-  return /\.supabase\.co\/storage\//i.test(url);
+  if (/\.supabase\.co\/storage\//i.test(url)) return true;
+  if (/\.(pdf|jpe?g|png|gif|docx?|xlsx?|pptx?)$/i.test(url.trim())) return true;
+  return false;
+}
+
+export function normalizeWebsiteUrl(
+  url: string | null | undefined,
+): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
 }
 
 export function resolveCompanyProfileUrl(url?: string | null): string | null {

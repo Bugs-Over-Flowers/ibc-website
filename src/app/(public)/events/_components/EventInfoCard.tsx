@@ -6,7 +6,7 @@ import type { Tables } from "@/lib/supabase/db.types";
 
 type Event = Tables<"Event">;
 
-import { Calendar, Clock, MapPin, Sparkles } from "lucide-react";
+import { Calendar, Clock, Globe, Lock, MapPin, Sparkles } from "lucide-react";
 import RichTextDisplay from "@/components/RichTextDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,18 @@ export function EventInfoCard({ event }: EventInfoCardProps) {
             <Badge className="border-0 bg-primary text-primary-foreground text-xs">
               <Sparkles className="mr-1 h-3 w-3" />
               Happening Now
+            </Badge>
+          )}
+          {event.eventType === "public" && (
+            <Badge className="border-0 bg-blue-500 text-white text-xs">
+              <Globe className="mr-1 h-3 w-3" />
+              Public
+            </Badge>
+          )}
+          {event.eventType === "private" && (
+            <Badge className="border-0 bg-amber-500 text-white text-xs">
+              <Lock className="mr-1 h-3 w-3" />
+              Private
             </Badge>
           )}
         </div>

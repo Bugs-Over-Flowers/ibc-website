@@ -1,4 +1,4 @@
-import { Calendar, Eye, MapPin, Ticket } from "lucide-react";
+import { Calendar, Eye, MapPin, Ticket, UserCheck, Users } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,9 +11,15 @@ import EventActionsDropdown from "./EventActionsDropdown";
 
 interface EventRowProps {
   event: EventWithStatus;
+  registrationCount?: number;
+  participantCount?: number;
 }
 
-export default function EventRow({ event }: EventRowProps) {
+export default function EventRow({
+  event,
+  registrationCount,
+  participantCount,
+}: EventRowProps) {
   const normalizeUrl = (value?: string | null) => {
     const trimmed = value?.trim();
     return trimmed?.length ? trimmed : null;
@@ -82,21 +88,36 @@ export default function EventRow({ event }: EventRowProps) {
           </h3>
         </Link>
 
-        <div className="flex flex-col gap-1.5">
-          {/* Venue */}
-          <div className="flex items-start gap-1.5 text-muted-foreground text-sm">
-            <MapPin className="mt-px size-3 shrink-0 text-muted-foreground/50" />
-            <span className="line-clamp-1">{event.venue}</span>
+        <div className="flex items-start justify-between gap-3">
+          {/* Left: venue + dates */}
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            {/* Venue */}
+            <div className="flex items-start gap-1.5 text-muted-foreground text-sm">
+              <MapPin className="mt-px size-3 shrink-0 text-muted-foreground/50" />
+              <span className="line-clamp-1">{event.venue}</span>
+            </div>
+
+            {/* Dates */}
+            <div className="flex items-start gap-1.5 text-muted-foreground text-sm">
+              <Calendar className="mt-px size-3 shrink-0 text-muted-foreground/50" />
+              <div className="flex flex-col gap-0.5">
+                <span>{formatFullDateTime(event.eventStartDate)}</span>
+                <span className="text-muted-foreground/50">
+                  {formatFullDateTime(event.eventEndDate)}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Dates */}
-          <div className="flex items-start gap-1.5 text-muted-foreground text-sm">
-            <Calendar className="mt-px size-3 shrink-0 text-muted-foreground/50" />
-            <div className="flex flex-col gap-0.5">
-              <span>{formatFullDateTime(event.eventStartDate)}</span>
-              <span className="text-muted-foreground/50">
-                {formatFullDateTime(event.eventEndDate)}
-              </span>
+          {/* Right: stats */}
+          <div className="flex shrink-0 flex-col items-end gap-1 text-muted-foreground text-xs">
+            <div className="flex items-center gap-1">
+              <Users className="size-3" />
+              <span>{registrationCount ?? 0} registrations</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <UserCheck className="size-3" />
+              <span>{participantCount ?? 0} participants</span>
             </div>
           </div>
         </div>

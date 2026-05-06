@@ -4,7 +4,10 @@ import { Img } from "react-email";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
-import { isStorageUrl } from "@/lib/storage/companyProfile";
+import {
+  isStorageUrl,
+  normalizeWebsiteUrl,
+} from "@/lib/storage/companyProfile";
 import { resolveMemberLogoUrl } from "@/lib/storage/memberLogo";
 import type { Member } from "./MembersList";
 
@@ -67,6 +70,14 @@ export function MembersGrid({ members }: MembersGridProps) {
                       </p>
                     </div>
                   )}
+                  {member.websiteURL && !isStorageUrl(member.websiteURL) && (
+                    <div className="max-w-full">
+                      <p className="truncate text-center text-[11px] text-muted-foreground/60">
+                        {normalizeWebsiteUrl(member.websiteURL) ??
+                          member.websiteURL}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             );
@@ -80,7 +91,10 @@ export function MembersGrid({ members }: MembersGridProps) {
                 {member.websiteURL && !isStorageUrl(member.websiteURL) ? (
                   <a
                     className="block h-full"
-                    href={member.websiteURL}
+                    href={
+                      normalizeWebsiteUrl(member.websiteURL) ??
+                      member.websiteURL
+                    }
                     rel="noopener noreferrer"
                     target="_blank"
                   >

@@ -114,6 +114,9 @@ export function ApplicationsTable({
             <ExportPDFButton application={applications[0]} />
           )}
         </div>
+        <p className="text-muted-foreground text-xs">
+          Double-click a row to open
+        </p>
       </CardHeader>
       <CardContent>
         <Table>
