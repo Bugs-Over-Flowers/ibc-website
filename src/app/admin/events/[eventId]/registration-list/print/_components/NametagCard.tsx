@@ -1,3 +1,4 @@
+import Image from "next/image";
 import IBCLogo from "@/../public/logo/ibc-logo.png";
 import type { ParticipantForPrint } from "@/server/registration/queries/getEventParticipantsForPrint";
 
@@ -14,7 +15,7 @@ export default function NametagCard({
     <div className="flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-[6mm] border border-neutral-200 bg-white p-[4mm] pt-[3mm]">
       {/* Logo */}
       <div className="size-25">
-        {/** biome-ignore lint/performance/noImgElement: Needed for printing */}
+        {/** biome-ignore lint/performance/noImgElement: needed for printing */}
         <img
           alt="IBC Logo"
           className="size-full object-contain"
@@ -37,13 +38,23 @@ export default function NametagCard({
         {participant.affiliation || ""}
       </p>
 
-      {/* Participant Identifier */}
+      {/* QR Code */}
       <div className="flex flex-col items-center gap-1">
-        <p className="font-bold font-mono text-neutral-900 text-sm tracking-widest">
-          {participant.registrationIdentifier}
-        </p>
-        <p className="font-mono text-[7px] text-neutral-400 tracking-wider">
-          PARTICIPANT ID
+        <div className="relative size-[22mm]">
+          {participant.qrDataUrl ? (
+            <Image
+              alt="Check-in QR Code"
+              className="object-contain"
+              fill
+              sizes="88px"
+              src={participant.qrDataUrl}
+            />
+          ) : (
+            <div className="size-full rounded-lg bg-neutral-100" />
+          )}
+        </div>
+        <p className="font-mono text-[8px] text-neutral-400 uppercase tracking-wider">
+          {participant.participantIdentifier}
         </p>
       </div>
 

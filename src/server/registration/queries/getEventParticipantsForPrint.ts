@@ -5,6 +5,7 @@ import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { z } from "zod";
 import { applyRealtime60sCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import { createClient } from "@/lib/supabase/server";
 
 const ParticipantForPrintSchema = z.object({
@@ -13,8 +14,9 @@ const ParticipantForPrintSchema = z.object({
   lastName: z.string(),
   email: z.string(),
   affiliation: z.string(),
-  registrationIdentifier: z.string(),
   registrationId: z.string(),
+  qrDataUrl: z.string(),
+  participantIdentifier: z.string(),
 });
 
 export type ParticipantForPrint = z.infer<typeof ParticipantForPrintSchema>;
@@ -40,6 +42,7 @@ export const getEventParticipantsForPrint = async (
       nonMemberName,
       BusinessMember(businessMemberId,businessName),
       Participant (
+      	participantIdentifier,
         participantId,
         firstName,
         lastName,
@@ -70,10 +73,34 @@ export const getEventParticipantsForPrint = async (
         lastName: p.lastName,
         email: p.email,
         affiliation,
-        registrationIdentifier: registration.identifier,
+        participantIdentifier: p.participantIdentifier,
         registrationId: registration.registrationId,
+        qrDataUrl: "",
       });
     }
+  }
+
+  const qrResults = await Promise.all(
+    participants.map(async (participant) => {
+      try {
+        const buffer = await generateQRBuffer(
+          participant.participantIdentifier,
+        );
+        const base64 = buffer.toString("base64");
+        return {
+          participantId: participant.participantId,
+          qrDataUrl: `data:image/png;base64,${base64}`,
+        };
+      } catch {
+        return { participantId: participant.participantId, qrDataUrl: "" };
+      }
+    }),
+  );
+
+  const qrMap = new Map(qrResults.map((r) => [r.participantId, r.qrDataUrl]));
+
+  for (const participant of participants) {
+    participant.qrDataUrl = qrMap.get(participant.participantId) ?? "";
   }
 
   return ParticipantForPrintSchema.array().parse(participants);
