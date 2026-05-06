@@ -155,6 +155,7 @@ async function DetailContent({
       />
 
       <SlotUtilizationCard
+        eventId={eventId}
         registrationCount={registrations.length}
         sponsoredRegistration={sponsoredRegistration}
       />
