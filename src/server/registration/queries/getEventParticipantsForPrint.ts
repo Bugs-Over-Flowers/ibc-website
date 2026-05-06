@@ -5,7 +5,6 @@ import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { z } from "zod";
 import { applyRealtime60sCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import { generateQRBuffer } from "@/lib/qr/generateQRCode";
 import { createClient } from "@/lib/supabase/server";
 
 const ParticipantForPrintSchema = z.object({
@@ -16,7 +15,6 @@ const ParticipantForPrintSchema = z.object({
   affiliation: z.string(),
   registrationIdentifier: z.string(),
   registrationId: z.string(),
-  qrDataUrl: z.string(),
 });
 
 export type ParticipantForPrint = z.infer<typeof ParticipantForPrintSchema>;
@@ -66,7 +64,6 @@ export const getEventParticipantsForPrint = async (
       "";
 
     for (const p of registration.Participant ?? []) {
-      // Placeholder – QR URLs are generated below in parallel
       participants.push({
         participantId: p.participantId,
         firstName: p.firstName,
@@ -75,33 +72,8 @@ export const getEventParticipantsForPrint = async (
         affiliation,
         registrationIdentifier: registration.identifier,
         registrationId: registration.registrationId,
-        qrDataUrl: "",
       });
     }
-  }
-
-  // Generate QR codes in parallel for all participants
-  const qrResults = await Promise.all(
-    participants.map(async (participant) => {
-      try {
-        const buffer = await generateQRBuffer(
-          participant.registrationIdentifier,
-        );
-        const base64 = buffer.toString("base64");
-        return {
-          participantId: participant.participantId,
-          qrDataUrl: `data:image/png;base64,${base64}`,
-        };
-      } catch {
-        return { participantId: participant.participantId, qrDataUrl: "" };
-      }
-    }),
-  );
-
-  const qrMap = new Map(qrResults.map((r) => [r.participantId, r.qrDataUrl]));
-
-  for (const participant of participants) {
-    participant.qrDataUrl = qrMap.get(participant.participantId) ?? "";
   }
 
   return ParticipantForPrintSchema.array().parse(participants);
