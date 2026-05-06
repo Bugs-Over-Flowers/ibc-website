@@ -52,7 +52,6 @@ import {
   Tag,
   Target,
   TrendingUp,
-  Trophy,
   Trophy as Trophy2,
   UploadCloud,
   UserCircle,

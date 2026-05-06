@@ -1,6 +1,5 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { useState } from "react";
 import RichTextDisplay from "@/components/RichTextDisplay";
