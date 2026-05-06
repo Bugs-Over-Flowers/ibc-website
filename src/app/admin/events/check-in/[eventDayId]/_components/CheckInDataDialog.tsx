@@ -149,7 +149,8 @@ export default function CheckInDataDialog({
             </Link>
           </div>
           <div className="flex gap-2">
-            {scannedData.paymentMethod === "BPI" &&
+            {(scannedData.paymentMethod === "BPI" ||
+              scannedData.paymentMethod === "IMPORTED") &&
               scannedData.proofImage.length > 0 &&
               registrant && (
                 <ProofDialog

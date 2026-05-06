@@ -218,7 +218,7 @@ export default function NametagPrintPage({
       </div>
 
       {/* Hidden print container */}
-      <div className="fixed top-0 left-[-9999px]">
+      <div className="invisible absolute h-0 overflow-hidden">
         <div ref={printRef}>
           <NametagGrid
             eventTitle={eventTitle}

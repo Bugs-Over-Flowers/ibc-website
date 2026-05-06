@@ -14,9 +14,9 @@ const ParticipantForPrintSchema = z.object({
   lastName: z.string(),
   email: z.string(),
   affiliation: z.string(),
-  registrationIdentifier: z.string(),
   registrationId: z.string(),
   qrDataUrl: z.string(),
+  participantIdentifier: z.string(),
 });
 
 export type ParticipantForPrint = z.infer<typeof ParticipantForPrintSchema>;
@@ -42,6 +42,7 @@ export const getEventParticipantsForPrint = async (
       nonMemberName,
       BusinessMember(businessMemberId,businessName),
       Participant (
+      	participantIdentifier,
         participantId,
         firstName,
         lastName,
@@ -66,26 +67,24 @@ export const getEventParticipantsForPrint = async (
       "";
 
     for (const p of registration.Participant ?? []) {
-      // Placeholder – QR URLs are generated below in parallel
       participants.push({
         participantId: p.participantId,
         firstName: p.firstName,
         lastName: p.lastName,
         email: p.email,
         affiliation,
-        registrationIdentifier: registration.identifier,
+        participantIdentifier: p.participantIdentifier,
         registrationId: registration.registrationId,
         qrDataUrl: "",
       });
     }
   }
 
-  // Generate QR codes in parallel for all participants
   const qrResults = await Promise.all(
     participants.map(async (participant) => {
       try {
         const buffer = await generateQRBuffer(
-          participant.registrationIdentifier,
+          participant.participantIdentifier,
         );
         const base64 = buffer.toString("base64");
         return {
