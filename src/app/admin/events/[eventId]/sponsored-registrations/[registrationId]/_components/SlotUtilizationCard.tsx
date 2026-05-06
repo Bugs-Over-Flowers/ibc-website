@@ -37,30 +37,49 @@ export function SlotUtilizationCard({
       tryCatch(async (): Promise<{ success: boolean }> => {
         const numValue = parseInt(maxGuestsInput, 10);
         if (Number.isNaN(numValue) || numValue < 0) {
-          throw new Error("Please enter a valid number");
+          throw new Error("Invalid number");
         }
+        const currentMax = sponsoredRegistration.maxSponsoredGuests ?? 0;
+        const isDecreasing = numValue < currentMax;
+        const oldMax = currentMax;
+
         await updateMaxSponsoredGuests({
           sponsoredRegistrationId:
             sponsoredRegistration.sponsoredRegistrationId,
           eventId,
           maxSponsoredGuests: numValue,
         });
-        return { success: true };
+        return { success: true, isDecreasing, oldMax, newMax: numValue };
       }),
       {
-        onSuccess: () => {
-          toast.success("Max guests updated successfully");
+        onSuccess: (result: { success: boolean; isDecreasing?: boolean; oldMax?: number; newMax?: number }) => {
+          if (result.isDecreasing) {
+            toast.success("Max slots reduced", {
+              description: `Updated from ${result.oldMax} to ${result.newMax} slots. Current usage: ${usedSlots}/${result.newMax}`,
+            });
+          } else {
+            toast.success("Max slots increased", {
+              description: `Updated from ${result.oldMax} to ${result.newMax} slots. Remaining: ${result.newMax! - usedSlots}`,
+            });
+          }
           setIsEditingMaxGuests(false);
           router.refresh();
         },
         onError: (error: unknown) => {
+          let errorMessage = "Failed to update max slots";
+          let errorDescription = "Please try again later";
+
           if (typeof error === "string") {
-            toast.error(error);
+            errorMessage = "Update failed";
+            errorDescription = error;
           } else if (error instanceof Error) {
-            toast.error(error.message);
-          } else {
-            toast.error("Failed to update max guests");
+            errorMessage = "Update failed";
+            errorDescription = error.message;
           }
+
+          toast.error(errorMessage, {
+            description: errorDescription,
+          });
         },
       },
     );
@@ -68,7 +87,9 @@ export function SlotUtilizationCard({
   const handleSaveMaxGuests = async () => {
     const numValue = parseInt(maxGuestsInput, 10);
     if (Number.isNaN(numValue) || numValue < 0) {
-      toast.error("Please enter a valid number");
+      toast.error("Invalid input", {
+        description: "Please enter a valid number greater than or equal to 0",
+      });
       return;
     }
     const currentMax = sponsoredRegistration.maxSponsoredGuests ?? 0;
@@ -76,6 +97,21 @@ export function SlotUtilizationCard({
       setIsEditingMaxGuests(false);
       return;
     }
+
+    // Warn if new max is lower than used count
+    if (numValue < usedSlots) {
+      toast.warning("Slots Below Used Count", {
+        description: `You are setting max slots to ${numValue}, but ${usedSlots} slots are already used. This may cause issues with slot management.`,
+        action: {
+          label: "Continue",
+          onClick: async () => {
+            await updateMaxGuests();
+          },
+        },
+      });
+      return;
+    }
+
     await updateMaxGuests();
   };
 
