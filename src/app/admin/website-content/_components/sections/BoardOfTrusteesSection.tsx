@@ -309,6 +309,7 @@ export function BoardOfTrusteesSection({
   placeholders,
   isSectionActionDisabled,
   isSavingSection,
+  saveSucceededCount,
   onAddCard,
   onDeleteCardsClick,
   onToggleCardSelected,
@@ -341,14 +342,14 @@ export function BoardOfTrusteesSection({
     titleInputRef.current?.focus();
   }, [editingCardKey]);
 
-  const wasSavingRef = useRef(isSavingSection);
+  const prevSaveSucceededCountRef = useRef(saveSucceededCount);
 
   useEffect(() => {
-    if (wasSavingRef.current && !isSavingSection) {
+    if (saveSucceededCount > prevSaveSucceededCountRef.current) {
       setEditingCardKey(null);
     }
-    wasSavingRef.current = isSavingSection;
-  }, [isSavingSection]);
+    prevSaveSucceededCountRef.current = saveSucceededCount;
+  }, [saveSucceededCount]);
   const { registerUploadFunction, unregisterUploadFunction } =
     usePendingUploadsContext();
   const { createImageSelectHandler, uploadPendingImages } =

@@ -165,6 +165,7 @@ export function useWebsiteContentEditor(
   >({});
   const [hasLoadedSectionSummaries, setHasLoadedSectionSummaries] =
     useState(false);
+  const [saveSucceededCount, setSaveSucceededCount] = useState(0);
 
   const getWebsiteContentSectionsSummaryAction = useMemo(
     () => tryCatch(getWebsiteContentSectionsSummary),
@@ -267,6 +268,7 @@ export function useWebsiteContentEditor(
             [activeSection]: result.updatedAt,
           }));
         }
+        setSaveSucceededCount((prev) => prev + 1);
         await loadSectionSummaries();
         toast.success("Website content saved");
       },
@@ -665,6 +667,7 @@ export function useWebsiteContentEditor(
     deleteSelectedCards,
     save,
     isSavingSection,
+    saveSucceededCount,
     isLoadingSection,
     placeholders,
     sectionUpdatedAt,

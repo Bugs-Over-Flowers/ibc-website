@@ -140,6 +140,7 @@ function WebsiteContentManagementPageContent() {
     deleteSelectedCards,
     save,
     isSavingSection,
+    saveSucceededCount,
     isLoadingSection,
     updatedAtBySection,
     cardCountBySection,
@@ -236,7 +237,7 @@ function WebsiteContentManagementPageContent() {
       setIsUploadingImages(false);
     }
 
-    save(finalCards, snapshotForm);
+    await save(finalCards, snapshotForm);
   };
 
   const updatedAtDisplay = (section: SectionKey) => {
@@ -328,6 +329,7 @@ function WebsiteContentManagementPageContent() {
             hasSelectedCards={hasSelectedCards}
             isDeleteMode={isDeleteMode}
             isSavingSection={isSavingSection}
+            saveSucceededCount={saveSucceededCount}
             isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={(group) => addCard(group)}
             onCancelDeleteMode={cancelDeleteMode}
@@ -351,6 +353,7 @@ function WebsiteContentManagementPageContent() {
             hasSelectedCards={hasSelectedCards}
             isDeleteMode={isDeleteMode}
             isSavingSection={isSavingSection}
+            saveSucceededCount={saveSucceededCount}
             isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={() => addCard()}
             onCancelDeleteMode={cancelDeleteMode}

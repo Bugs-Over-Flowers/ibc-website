@@ -242,6 +242,7 @@ export function SecretariatSection({
   placeholders,
   isSectionActionDisabled,
   isSavingSection,
+  saveSucceededCount,
   onAddCard,
   onDeleteCardsClick,
   onToggleCardSelected,
@@ -259,14 +260,14 @@ export function SecretariatSection({
     titleInputRef.current?.focus();
   }, [editingCardKey]);
 
-  const wasSavingRef = useRef(isSavingSection);
+  const prevSaveSucceededCountRef = useRef(saveSucceededCount);
 
   useEffect(() => {
-    if (wasSavingRef.current && !isSavingSection) {
+    if (saveSucceededCount > prevSaveSucceededCountRef.current) {
       setEditingCardKey(null);
     }
-    wasSavingRef.current = isSavingSection;
-  }, [isSavingSection]);
+    prevSaveSucceededCountRef.current = saveSucceededCount;
+  }, [saveSucceededCount]);
 
   useEffect(() => {
     const hasEditingCard = cards.some((c) => c.entryKey === editingCardKey);
