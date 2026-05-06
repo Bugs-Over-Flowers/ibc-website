@@ -6,6 +6,8 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  Globe,
+  Lock,
   MapPin,
 } from "lucide-react";
 import Image from "next/image";
@@ -111,6 +113,19 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
                   </span>
                   Happening Now
                 </Badge>
+
+                {currentEvent.eventType === "public" && (
+                  <Badge className="bg-blue-500 text-white shadow-lg">
+                    <Globe className="mr-1 h-3 w-3" />
+                    Public
+                  </Badge>
+                )}
+                {currentEvent.eventType === "private" && (
+                  <Badge className="bg-amber-500 text-white shadow-lg">
+                    <Lock className="mr-1 h-3 w-3" />
+                    Private
+                  </Badge>
+                )}
 
                 <span className="flex items-center gap-1.5 text-muted-foreground text-sm">
                   <Calendar className="h-4 w-4" />
