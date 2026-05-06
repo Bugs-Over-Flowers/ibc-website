@@ -32,7 +32,7 @@ const RawCheckInForDateSchema = z.object({
   registrationId: z.string(),
   nonMemberName: z.string().nullable(),
   registrationDate: z.string(),
-  paymentMethod: z.enum(["BPI", "ONSITE"]),
+  paymentMethod: z.enum(["BPI", "ONSITE", "IMPORTED"]),
   identifier: z.string(),
   paymentProofStatus: PaymentProofStatusEnum,
   businessMember: z
@@ -93,7 +93,7 @@ export const GetCheckInForDateSchema = z
     registrationId: z.string(),
     nonMemberName: z.string().nullable(),
     registrationDate: z.string(),
-    paymentMethod: z.enum(["BPI", "ONSITE"]),
+    paymentMethod: z.enum(["BPI", "ONSITE", "IMPORTED"]),
     identifier: z.string(),
     paymentProofStatus: PaymentProofStatusEnum,
     businessMember: z
@@ -127,7 +127,7 @@ export const GetParticipantCheckInForDateSchema = z
     registration: z.object({
       registrationId: z.string(),
       identifier: z.string(),
-      paymentMethod: z.enum(["BPI", "ONSITE"]),
+      paymentMethod: z.enum(["BPI", "ONSITE", "IMPORTED"]),
       paymentProofStatus: PaymentProofStatusEnum,
       registrationDate: z.string(),
       note: z.string().nullable(),
