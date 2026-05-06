@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import IBCLogo from "@/../public/logo/ibc-logo.png";
 import type { ParticipantForPrint } from "@/server/registration/queries/getEventParticipantsForPrint";
 
 interface NametagCardProps {
@@ -21,7 +22,7 @@ export default function NametagCard({
           className="object-contain"
           fill
           sizes="120px"
-          src="/logo/ibc-logo.png"
+          src={IBCLogo}
         />
       </div>
 
