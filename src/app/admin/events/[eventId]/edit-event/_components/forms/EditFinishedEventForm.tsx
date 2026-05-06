@@ -77,20 +77,19 @@ export default function EditFinishedEventForm({
                 <div className="space-y-2">
                   <Button
                     className="w-full gap-2 rounded-xl text-sm"
-                    disabled={isSubmitting}
-                    onClick={onCancel}
-                    type="button"
-                    variant="outline"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    className="w-full gap-2 rounded-xl text-sm"
                     disabled={isSubmitting || !isDirty}
                     type="submit"
                   >
                     {isSubmitting ? "Saving..." : "Save Facebook Link"}
                   </Button>
+
+                  <button
+                    className="w-full py-1 text-muted-foreground text-xs transition-colors hover:text-foreground"
+                    onClick={onCancel}
+                    type="button"
+                  >
+                    Cancel and go back
+                  </button>
                 </div>
               )}
             </form.Subscribe>

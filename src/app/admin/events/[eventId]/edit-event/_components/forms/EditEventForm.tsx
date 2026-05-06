@@ -22,6 +22,19 @@ export function EditEventForm({ event }: EditEventFormProps) {
     router.push(`/admin/events/${event.eventId}`);
   };
 
+  const handleSaveDraft = () => {
+    form.setFieldValue("eventType", null);
+    form.handleSubmit();
+  };
+
+  const handlePublishCurrent = () => {
+    const selected = form.state.values.eventType;
+    if (!selected) {
+      return;
+    }
+    form.handleSubmit();
+  };
+
   if (isFinished && !isDraft) {
     return (
       <div className="min-h-screen">
@@ -70,6 +83,8 @@ export function EditEventForm({ event }: EditEventFormProps) {
                 isDraft={isDraft}
                 isPrivatePublished={isPrivatePublished}
                 onCancel={handleCancel}
+                onPublishCurrent={handlePublishCurrent}
+                onSaveDraft={handleSaveDraft}
               />
             </div>
           </form>
