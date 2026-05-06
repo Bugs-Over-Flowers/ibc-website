@@ -11,6 +11,8 @@ import {
 
 export type FilterOption = "all" | "upcoming" | "past";
 
+export type PrivacyFilter = "all" | "public" | "private";
+
 export interface DateRange {
   from?: Date;
   to?: Date;
@@ -33,6 +35,12 @@ export const filterLabels: Record<FilterOption, string> = {
   all: "All Events",
   upcoming: "Upcoming",
   past: "Past Events",
+};
+
+export const privacyFilterLabels: Record<PrivacyFilter, string> = {
+  all: "All Events",
+  public: "Public",
+  private: "Private",
 };
 
 export const datePresetLabels: Record<DatePreset, string> = {

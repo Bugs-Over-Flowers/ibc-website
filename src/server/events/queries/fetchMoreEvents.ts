@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { getBatchRegistrationCounts } from "@/server/registration/queries/getBatchRegistrationCounts";
 import type {
   DateSortOption,
   SortOption,
@@ -25,7 +26,7 @@ export async function fetchMoreEvents({
 }) {
   const cookieStore = await cookies();
 
-  return getAdminEventsPage(cookieStore.getAll(), {
+  const result = await getAdminEventsPage(cookieStore.getAll(), {
     search,
     sort,
     dateSort,
@@ -33,4 +34,23 @@ export async function fetchMoreEvents({
     status,
     cursor,
   });
+
+  const eventIds = result.items.map((e) => e.eventId);
+  const batchCounts = await getBatchRegistrationCounts(
+    cookieStore.getAll(),
+    eventIds,
+  );
+
+  const registrationCounts: Record<string, number> = {};
+  const participantCounts: Record<string, number> = {};
+  for (const [id, counts] of batchCounts) {
+    registrationCounts[id] = counts.registrations;
+    participantCounts[id] = counts.participants;
+  }
+
+  return {
+    ...result,
+    registrationCounts,
+    participantCounts,
+  };
 }

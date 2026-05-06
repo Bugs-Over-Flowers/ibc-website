@@ -15,6 +15,8 @@ interface UseInfiniteEventsProps {
     computedStatus: "draft" | "published" | "finished";
   })[];
   initialNextCursor: string | null;
+  initialRegistrationCounts?: Record<string, number>;
+  initialParticipantCounts?: Record<string, number>;
   search?: string;
   sort?: SortOption;
   dateSort?: DateSortOption;
@@ -25,6 +27,8 @@ interface UseInfiniteEventsProps {
 export function useInfiniteEvents({
   initialEvents,
   initialNextCursor,
+  initialRegistrationCounts,
+  initialParticipantCounts,
   search,
   sort,
   dateSort,
@@ -35,16 +39,29 @@ export function useInfiniteEvents({
   const [nextCursor, setNextCursor] = useState(initialNextCursor);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [registrationCounts, setRegistrationCounts] = useState(
+    initialRegistrationCounts ?? {},
+  );
+  const [participantCounts, setParticipantCounts] = useState(
+    initialParticipantCounts ?? {},
+  );
   const observerTarget = useRef<HTMLDivElement>(null);
 
   // Reset list when initial payload changes (new navigation/search triggers server re-fetch)
   useEffect(() => {
     setEvents(initialEvents);
     setNextCursor(initialNextCursor);
+    setRegistrationCounts(initialRegistrationCounts ?? {});
+    setParticipantCounts(initialParticipantCounts ?? {});
     setHasError(false);
     setIsLoading(false);
     // Only depend on props that the effect uses - parent provides fresh data when filters change
-  }, [initialEvents, initialNextCursor]);
+  }, [
+    initialEvents,
+    initialNextCursor,
+    initialRegistrationCounts,
+    initialParticipantCounts,
+  ]);
 
   // Fetch more events
   const loadMore = useCallback(async () => {
@@ -74,6 +91,18 @@ export function useInfiniteEvents({
 
     setEvents((prev) => [...prev, ...data.items]);
     setNextCursor(data.nextCursor);
+    if (data.registrationCounts) {
+      setRegistrationCounts((prev) => ({
+        ...prev,
+        ...data.registrationCounts,
+      }));
+    }
+    if (data.participantCounts) {
+      setParticipantCounts((prev) => ({
+        ...prev,
+        ...data.participantCounts,
+      }));
+    }
   }, [nextCursor, isLoading, search, sort, dateSort, titleSort, status]);
 
   // Set up intersection observer for infinite scroll
@@ -99,5 +128,12 @@ export function useInfiniteEvents({
     };
   }, [nextCursor, isLoading, loadMore]);
 
-  return { events, isLoading, hasError, observerTarget };
+  return {
+    events,
+    isLoading,
+    hasError,
+    observerTarget,
+    registrationCounts,
+    participantCounts,
+  };
 }

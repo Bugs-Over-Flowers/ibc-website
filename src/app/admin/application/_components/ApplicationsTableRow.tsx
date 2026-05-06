@@ -130,8 +130,11 @@ export function ApplicationsTableRow({
     <TableRow
       className={isHydrated && isSelected ? "bg-primary/5" : ""}
       key={application.applicationId}
+      onDoubleClick={() => {
+        router.push(`/admin/application/${application.applicationId}`);
+      }}
     >
-      <TableCell className="w-12">
+      <TableCell className="w-12" onDoubleClick={(e) => e.stopPropagation()}>
         <Checkbox
           aria-label={`Select ${application.companyName}`}
           checked={isSelected}
@@ -193,7 +196,7 @@ export function ApplicationsTableRow({
                 }
               />
             )}
-          <span>{application.companyName}</span>
+          <span className="truncate">{application.companyName}</span>
         </div>
       </TableCell>
       <TableCell
@@ -228,6 +231,7 @@ export function ApplicationsTableRow({
       </TableCell>
       <TableCell
         className={`${showContact ? "w-[10%]" : "w-[12%]"} pr-4 text-right`}
+        onDoubleClick={(e) => e.stopPropagation()}
       >
         <Button
           aria-label={`Open application ${application.companyName}`}
