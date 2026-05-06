@@ -146,9 +146,16 @@ function WebsiteContentManagementPageContent() {
     hasLoadedSectionSummaries,
   } = useWebsiteContentEditor(activeSection);
 
+  const [editingFooter, setEditingFooter] = useState<
+    { label: string; onClick: () => void } | undefined
+  >(undefined);
+
   const hasSelectedCards = selectedCardEntryKeys.size > 0;
   const selectedCount = selectedCardEntryKeys.size;
   const isSectionActionDisabled = isSavingSection || isLoadingSection;
+  const isSaveDisabled =
+    isSavingSection || isLoadingSection || isDeleteMode || isUploadingImages;
+  const showCloseButton = !editingFooter;
 
   const handleDeleteCardsClick = (entryKey?: string) => {
     if (entryKey) {
@@ -199,14 +206,20 @@ function WebsiteContentManagementPageContent() {
         };
       });
 
-      const hasBlobUrls = finalCards.some((card) =>
-        card.imageUrl.startsWith("blob:"),
-      );
+      const hasPreviewUrls = finalCards.some((card) => {
+        const imageUrl = card.imageUrl.trim().toLowerCase();
+        return imageUrl.startsWith("blob:") || imageUrl.startsWith("data:");
+      });
 
-      if (hasBlobUrls) {
+      if (hasPreviewUrls) {
         console.warn(
           `Images still have preview URLs after upload: ${finalCards
-            .filter((c) => c.imageUrl.startsWith("blob:"))
+            .filter((c) => {
+              const imageUrl = c.imageUrl.trim().toLowerCase();
+              return (
+                imageUrl.startsWith("blob:") || imageUrl.startsWith("data:")
+              );
+            })
             .map((c) => c.entryKey)
             .join(", ")}`,
         );
@@ -321,6 +334,7 @@ function WebsiteContentManagementPageContent() {
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
             onDeleteCardsClick={handleDeleteCardsClick}
+            onRegisterEditingFooter={setEditingFooter}
             onSelectAllCards={selectAllCards}
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
@@ -343,6 +357,7 @@ function WebsiteContentManagementPageContent() {
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
             onDeleteCardsClick={handleDeleteCardsClick}
+            onRegisterEditingFooter={setEditingFooter}
             onSelectAllCards={selectAllCards}
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
@@ -457,6 +472,7 @@ function WebsiteContentManagementPageContent() {
           if (!open) {
             cancelDeleteMode();
             setActiveSection(null);
+            setEditingFooter(undefined);
           }
         }}
         open={!!activeSection}
@@ -466,13 +482,15 @@ function WebsiteContentManagementPageContent() {
           <DialogPrimitive.Viewport className="fixed inset-0 z-50 overflow-hidden p-3 sm:p-6">
             <div className="flex h-full items-center justify-center">
               <DialogPrimitive.Popup className="relative flex max-h-[calc(100vh-6rem)] w-[min(97vw,1550px)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
-                <DialogPrimitive.Close
-                  className="absolute top-4 right-4 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  render={<button type="button" />}
-                >
-                  <XIcon className="h-5 w-5" />
-                  <span className="sr-only">Close</span>
-                </DialogPrimitive.Close>
+                {showCloseButton ? (
+                  <DialogPrimitive.Close
+                    className="absolute top-4 right-4 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    render={<button type="button" />}
+                  >
+                    <XIcon className="h-5 w-5" />
+                    <span className="sr-only">Close</span>
+                  </DialogPrimitive.Close>
+                ) : null}
 
                 <div className="space-y-1.5 border-border border-b px-6 py-5 pr-12 sm:px-7">
                   <DialogPrimitive.Title className="font-bold text-4xl text-foreground">
@@ -515,21 +533,25 @@ function WebsiteContentManagementPageContent() {
 
                 <div className="border-border border-t bg-background px-6 py-4 sm:px-7">
                   <div className="flex flex-wrap items-center justify-end gap-2">
-                    <Button
-                      disabled={
-                        isSavingSection ||
-                        isLoadingSection ||
-                        isDeleteMode ||
-                        isUploadingImages
-                      }
-                      onClick={handleSave}
-                    >
-                      {isUploadingImages
-                        ? "Uploading images..."
-                        : isSavingSection
-                          ? "Saving..."
-                          : "Save Changes"}
-                    </Button>
+                    {editingFooter ? (
+                      <Button
+                        disabled={isSectionActionDisabled}
+                        onClick={() => {
+                          // invoke the section-provided back handler
+                          editingFooter.onClick();
+                        }}
+                      >
+                        {editingFooter.label}
+                      </Button>
+                    ) : (
+                      <Button disabled={isSaveDisabled} onClick={handleSave}>
+                        {isUploadingImages
+                          ? "Uploading images..."
+                          : isSavingSection
+                            ? "Saving..."
+                            : "Save Changes"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </DialogPrimitive.Popup>

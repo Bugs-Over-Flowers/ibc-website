@@ -15,11 +15,6 @@ async function executeUpsertWebsiteContentRow(
   supabase: WebsiteContentSupabaseClient,
   input: UpsertWebsiteContentRowInput,
 ) {
-  // Important: cardPlacement must be updated for all row types (Title, Subtitle, Paragraph)
-  // of the same entryKey to maintain consistent ordering during fetch and sort
-  console.log(
-    `[upsert] section=${input.section} entryKey=${input.entryKey} textType=${input.textType} cardPlacement=${input.cardPlacement}`,
-  );
   const { error } = await supabase.rpc("upsert_website_content", {
     p_section: input.section,
     p_entry_key: input.entryKey,

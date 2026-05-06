@@ -2,14 +2,7 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation, useSortable } from "@dnd-kit/react/sortable";
-import {
-  ArrowLeft,
-  GripVertical,
-  Trash2,
-  UploadCloud,
-  User,
-  X,
-} from "lucide-react";
+import { GripVertical, Trash2, UploadCloud, User, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -256,6 +249,7 @@ export function SecretariatSection({
   onCardsReorder,
   isDeleteMode,
   selectedCardEntryKeys,
+  onRegisterEditingFooter,
 }: SecretariatSectionProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -273,6 +267,22 @@ export function SecretariatSection({
     }
     wasSavingRef.current = isSavingSection;
   }, [isSavingSection]);
+
+  useEffect(() => {
+    const hasEditingCard = cards.some((c) => c.entryKey === editingCardKey);
+    if (hasEditingCard) {
+      onRegisterEditingFooter?.({
+        label: `Back to Secretariats`,
+        onClick: () => setEditingCardKey(null),
+      });
+    } else {
+      onRegisterEditingFooter?.(undefined);
+      if (editingCardKey) {
+        setEditingCardKey(null);
+      }
+    }
+  }, [editingCardKey, cards, onRegisterEditingFooter]);
+
   const { registerUploadFunction, unregisterUploadFunction } =
     usePendingUploadsContext();
   const { createImageSelectHandler, uploadPendingImages } =
@@ -308,19 +318,6 @@ export function SecretariatSection({
     <>
       {editingCard ? (
         <div className="space-y-4">
-          <div className="flex items-center justify-start">
-            <Button
-              className="gap-2"
-              disabled={isSectionActionDisabled}
-              onClick={() => setEditingCardKey(null)}
-              type="button"
-              variant="outline"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Secretariats
-            </Button>
-          </div>
-
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between">
@@ -409,6 +406,8 @@ export function SecretariatSection({
                 cardPlacement: String(i + 1),
               }));
 
+              // eslint-disable-next-line no-console
+              console.debug("Secretariat onDragEnd", { active, over, next });
               onCardsReorder(next);
             }}
           >

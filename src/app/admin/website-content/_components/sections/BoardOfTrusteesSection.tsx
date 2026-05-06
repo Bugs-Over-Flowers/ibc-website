@@ -2,14 +2,7 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortableOperation, useSortable } from "@dnd-kit/react/sortable";
-import {
-  ArrowLeft,
-  GripVertical,
-  Trash2,
-  UploadCloud,
-  User,
-  X,
-} from "lucide-react";
+import { GripVertical, Trash2, UploadCloud, User, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -79,6 +72,7 @@ function SortablePreviewCard({
       }}
       ref={ref}
       style={{ opacity: isDragSource ? 0.65 : 1 }}
+      tabIndex={0}
       type="button"
     >
       <button
@@ -322,9 +316,25 @@ export function BoardOfTrusteesSection({
   onCardsReorder,
   isDeleteMode,
   selectedCardEntryKeys,
+  onRegisterEditingFooter,
 }: BoardOfTrusteesSectionProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const hasEditingCard = cards.some((c) => c.entryKey === editingCardKey);
+    if (hasEditingCard) {
+      onRegisterEditingFooter?.({
+        label: `Back to Board`,
+        onClick: () => setEditingCardKey(null),
+      });
+    } else {
+      onRegisterEditingFooter?.(undefined);
+      if (editingCardKey) {
+        setEditingCardKey(null);
+      }
+    }
+  }, [editingCardKey, cards, onRegisterEditingFooter]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional - refocus on card switch
   useEffect(() => {
@@ -456,6 +466,13 @@ export function BoardOfTrusteesSection({
       cardPlacement: String(index + 1),
     }));
 
+    // eslint-disable-next-line no-console
+    console.debug("BoardOfTrustees handleGroupReorder", {
+      group,
+      activeEntryKey,
+      overEntryKey,
+      nextCards,
+    });
     onCardsReorder(nextCards);
   };
 
@@ -463,15 +480,6 @@ export function BoardOfTrusteesSection({
     <>
       {editingCard ? (
         <div className="space-y-4">
-          <Button
-            className="gap-2"
-            onClick={() => setEditingCardKey(null)}
-            variant="outline"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Board
-          </Button>
-
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between">

@@ -3,6 +3,7 @@
 import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
+import { applyAdmin5mCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 import { websiteContentSectionSchema } from "../schemas";
@@ -34,10 +35,12 @@ async function getWebsiteContentSectionCached(
 ): Promise<WebsiteContentSectionData> {
   "use cache";
 
-  cacheTag(CACHE_TAGS.websiteContent.all);
-  cacheTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[section]);
+  applyAdmin5mCache();
 
   const parsedSection = websiteContentSectionSchema.parse(section);
+
+  cacheTag(CACHE_TAGS.websiteContent.all);
+  cacheTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsedSection]);
   const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase

@@ -22,19 +22,39 @@ const WEBSITE_CONTENT_SECTION_TAG_BY_SECTION = {
   hero_section: CACHE_TAGS.websiteContent.section.heroSection,
 } as const;
 
+function isDisallowedImageUrl(imageUrl: string): boolean {
+  const normalized = imageUrl.trim().toLowerCase();
+  if (normalized.length === 0) {
+    return false;
+  }
+
+  if (normalized.startsWith("blob:") || normalized.startsWith("data:")) {
+    return true;
+  }
+
+  const hasScheme = /^[a-z][a-z\d+.-]*:/i.test(normalized);
+  if (!hasScheme) {
+    return false;
+  }
+
+  return !(
+    normalized.startsWith("http://") || normalized.startsWith("https://")
+  );
+}
+
 export async function saveWebsiteContentSection(
   input: SaveWebsiteContentSectionInput,
 ): Promise<{ updatedAt: string }> {
   const parsed = saveWebsiteContentSectionSchema.parse(input);
 
-  // Validate that no blob: URLs are being saved (security and data integrity check)
+  // Validate that only persisted image URLs are saved, not preview schemes.
   if (parsed.cards) {
-    const blobUrlCards = parsed.cards.filter((card) =>
-      card.imageUrl?.startsWith("blob:"),
+    const invalidImageUrlCards = parsed.cards.filter((card) =>
+      isDisallowedImageUrl(card.imageUrl ?? ""),
     );
-    if (blobUrlCards.length > 0) {
+    if (invalidImageUrlCards.length > 0) {
       throw new Error(
-        `Cannot save section: ${blobUrlCards.length} card(s) have preview-only image URLs. Images may not have uploaded successfully. Please upload images again.`,
+        `Cannot save section: ${invalidImageUrlCards.length} card(s) have invalid image URLs. Images may not have uploaded successfully. Please upload images again.`,
       );
     }
   }

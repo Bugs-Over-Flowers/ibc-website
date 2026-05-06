@@ -85,6 +85,10 @@ export interface BoardOfTrusteesSectionProps {
     value: string,
   ) => void;
   onCardsReorder: (nextCards: WebsiteContentCardState[]) => void;
+  onRegisterEditingFooter?: (footer?: {
+    label: string;
+    onClick: () => void;
+  }) => void;
 }
 
 export interface SecretariatSectionProps {
@@ -108,6 +112,10 @@ export interface SecretariatSectionProps {
     value: string,
   ) => void;
   onCardsReorder: (nextCards: WebsiteContentCardState[]) => void;
+  onRegisterEditingFooter?: (footer?: {
+    label: string;
+    onClick: () => void;
+  }) => void;
 }
 
 export interface LandingBenefitsSectionProps {

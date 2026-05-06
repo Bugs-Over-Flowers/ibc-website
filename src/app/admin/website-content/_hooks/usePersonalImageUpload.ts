@@ -111,7 +111,8 @@ export function usePersonalImageUpload({
     }
 
     const supabase = await createClient();
-    const uploadPromises: Promise<void>[] = [];
+    const uploadPromises: Promise<{ entryKey: string; success: boolean }>[] =
+      [];
     const uploadedImages: UploadedImageMap = {};
 
     for (const [entryKey, { file, oldImageUrl }] of pendingUploads) {
@@ -131,7 +132,7 @@ export function usePersonalImageUpload({
             toast.error(
               `Image upload failed for ${entryKey}: ${uploadError.message}`,
             );
-            return;
+            return { entryKey, success: false };
           }
 
           const {
@@ -160,19 +161,33 @@ export function usePersonalImageUpload({
               );
             }
           }
+
+          return { entryKey, success: true };
         })(),
       );
     }
 
-    await Promise.all(uploadPromises);
-    // Clear pending uploads after successful upload
-    setPendingUploads(new Map());
+    const results = await Promise.all(uploadPromises);
+    const successfulEntryKeys = results
+      .filter((result) => result.success)
+      .map((result) => result.entryKey);
+
+    // Keep failed uploads in state so users can retry them.
+    if (successfulEntryKeys.length > 0) {
+      setPendingUploads((prev) => {
+        const next = new Map(prev);
+        for (const entryKey of successfulEntryKeys) {
+          next.delete(entryKey);
+        }
+        return next;
+      });
+    }
+
     return uploadedImages;
   }, [pendingUploads, basePath, bucketName, onUploaded]);
 
   return {
     createImageSelectHandler,
     uploadPendingImages,
-    pendingUploads: pendingUploads.size > 0,
   };
 }
