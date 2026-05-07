@@ -44,6 +44,16 @@ export async function createManualMember(
     throw new Error("Industry/Sector is required");
   }
 
+  const { data: sectorData, error: sectorLookupError } = await supabase
+    .from("Sector")
+    .select("sectorName")
+    .eq("sectorId", sectorId)
+    .single();
+
+  if (sectorLookupError || !sectorData?.sectorName) {
+    throw new Error("Industry/Sector is required");
+  }
+
   const { data: submitData, error: submitError } = await supabase.rpc(
     "submit_membership_application",
     {
@@ -51,7 +61,7 @@ export async function createManualMember(
       p_company_details: {
         name: parsed.data.companyName,
         address: parsed.data.companyAddress,
-        sectorId,
+        sectorName: sectorData.sectorName,
         landline: parsed.data.landline,
         mobile: parsed.data.mobileNumber,
         email: parsed.data.emailAddress,
