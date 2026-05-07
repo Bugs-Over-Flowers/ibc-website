@@ -3,16 +3,11 @@
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { z } from "zod";
 import { useAppForm } from "@/hooks/_formHooks";
 import tryCatch from "@/lib/server/tryCatch";
 import { zodValidator } from "@/lib/utils";
+import { createSectorSchema } from "@/lib/validation/sector/sectorSchema";
 import { createSector } from "@/server/sectors/mutations";
-
-const createSectorSchema = z.object({
-  sectorName: z.string().min(1, "Sector name is required"),
-});
-
 export const useCreateSectorForm = () => {
   const router = useRouter();
   const form = useAppForm({

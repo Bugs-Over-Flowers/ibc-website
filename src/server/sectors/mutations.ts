@@ -60,6 +60,24 @@ export async function updateSector(input: z.infer<typeof updateSectorSchema>) {
 
   const supabase = await createActionClient();
 
+  // Reject edits that would duplicate another sector name.
+  const safeSectorName = escapeLikeString(parsed.sectorName);
+
+  const { data: existingSectors, error: checkError } = await supabase
+    .from("Sector")
+    .select("sectorId")
+    .ilike("sectorName", safeSectorName)
+    .neq("sectorId", parsed.id)
+    .limit(1);
+
+  if (checkError) {
+    throw new Error(checkError.message);
+  }
+
+  if (existingSectors && existingSectors.length > 0) {
+    throw new Error("Sector with this name already exists");
+  }
+
   const { data, error } = await supabase
     .from("Sector")
     .update({
