@@ -18,7 +18,7 @@ export const websiteContentFormSchema = z.object({
   missionParagraph: z.string(),
   icon: z.string(),
   imageUrl: z.string(),
-  cardPlacement: z.string(),
+  cardPlacement: z.union([z.string(), z.number()]).optional(),
 });
 
 export const websiteContentCardSchema = z.object({
@@ -28,7 +28,7 @@ export const websiteContentCardSchema = z.object({
   paragraph: z.string(),
   icon: z.string(),
   imageUrl: z.string(),
-  cardPlacement: z.string(),
+  cardPlacement: z.union([z.string(), z.number()]).optional(),
   group: z.string().nullable(),
 });
 

@@ -112,6 +112,13 @@ function areCardsEqual(
   });
 }
 
+function normalizeCardPlacements(cards: WebsiteContentCardState[]) {
+  return cards.map((card, index) => ({
+    ...card,
+    cardPlacement: String(index + 1),
+  }));
+}
+
 export function useWebsiteContentEditor(
   activeSection: WebsiteContentSection | null,
 ) {
@@ -125,6 +132,8 @@ export function useWebsiteContentEditor(
   cardsRef.current = cards;
   const formRef = useRef(form);
   formRef.current = form;
+  const activeSectionRef = useRef(activeSection);
+  activeSectionRef.current = activeSection;
   const cardsBeforeDragRef = useRef<WebsiteContentCardState[] | null>(null);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedCardEntryKeys, setSelectedCardEntryKeys] = useState<
@@ -214,41 +223,43 @@ export function useWebsiteContentEditor(
     getWebsiteContentSectionAction,
     {
       onSuccess: (data: WebsiteContentSectionData) => {
+        // Use the ref to avoid stale closures capturing a previous
+        // `activeSection` value when this callback was created.
+        const section = activeSectionRef.current;
         setForm(data.form);
         setCards(data.cards);
         setHasPendingChangesForActiveSection(false);
-        if (activeSection) {
+        if (section) {
           setCachedSectionContentBySection((prev) => ({
             ...prev,
-            [activeSection]: {
+            [section]: {
               form: data.form,
               cards: data.cards,
             },
           }));
           setSavedSectionContentBySection((prev) => ({
             ...prev,
-            [activeSection]: {
+            [section]: {
               form: data.form,
               cards: data.cards,
             },
           }));
-        }
-        if (activeSection) {
+
           setPlaceholdersBySection((prev) => ({
             ...prev,
-            [activeSection]: data.placeholders,
+            [section]: data.placeholders,
           }));
-        }
-        if (activeSection && data.updatedAt) {
-          setUpdatedAtBySection((prev) => ({
-            ...prev,
-            [activeSection]: data.updatedAt,
-          }));
-        }
-        if (activeSection) {
+
+          if (data.updatedAt) {
+            setUpdatedAtBySection((prev) => ({
+              ...prev,
+              [section]: data.updatedAt,
+            }));
+          }
+
           setCardCountBySection((prev) => ({
             ...prev,
-            [activeSection]: data.cards.length,
+            [section]: data.cards.length,
           }));
         }
       },
@@ -262,10 +273,11 @@ export function useWebsiteContentEditor(
     saveWebsiteContentSectionAction,
     {
       onSuccess: async (result: { updatedAt: string }) => {
-        if (activeSection) {
+        const section = activeSectionRef.current;
+        if (section) {
           setUpdatedAtBySection((prev) => ({
             ...prev,
-            [activeSection]: result.updatedAt,
+            [section]: result.updatedAt,
           }));
         }
         setSaveSucceededCount((prev) => prev + 1);
@@ -289,17 +301,7 @@ export function useWebsiteContentEditor(
   loadSectionRef.current = loadSection;
 
   // Log card changes to track when reorders trigger state updates
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.debug("cards changed", {
-      activeSection,
-      cardsLen: cards.length,
-      cards: cards.map((c) => ({
-        entryKey: c.entryKey,
-        placement: c.cardPlacement,
-      })),
-    });
-  }, [cards, activeSection]);
+  useEffect(() => {}, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional - only run on section switch, not on every cache mutation
   useEffect(() => {
@@ -386,6 +388,72 @@ export function useWebsiteContentEditor(
     savedSectionContentBySection,
   ]);
 
+  // Helper to check whether cardPlacement differs between saved snapshot
+  // and current cached/active cards for a given section. Only relevant
+  // for sections that use placements (secretariat, board_of_trustees).
+  const hasCardPlacementChangedForSection = useMemo(
+    () => (section: WebsiteContentSection | null) => {
+      if (!section) return false;
+      if (section !== "board_of_trustees" && section !== "secretariat") {
+        return false;
+      }
+
+      // Prefer the authoritative saved snapshot; if it's not available use the
+      // cached snapshot (this can happen when the hook restores from cache
+      // and hasn't set `savedSectionContentBySection` yet).
+      const saved =
+        savedSectionContentBySection[section] ??
+        cachedSectionContentBySection[section];
+      if (!saved) {
+        return false;
+      }
+
+      // prefer the active in-memory cards when the section is active,
+      // otherwise use the cached snapshot for that section if available
+      const currentCards =
+        activeSection === section
+          ? cards
+          : (cachedSectionContentBySection[section]?.cards ?? saved.cards);
+
+      const savedMap = new Map<string, string>();
+      for (const c of saved.cards) {
+        savedMap.set(c.entryKey, c.cardPlacement);
+      }
+
+      for (const c of currentCards) {
+        const savedPlacement = savedMap.get(c.entryKey);
+        if (
+          savedPlacement !== undefined &&
+          savedPlacement !== c.cardPlacement
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    [
+      activeSection,
+      cards,
+      cachedSectionContentBySection,
+      savedSectionContentBySection,
+    ],
+  );
+
+  const secretariatCardPlacementChanged = useMemo(
+    () => hasCardPlacementChangedForSection("secretariat"),
+    [hasCardPlacementChangedForSection],
+  );
+
+  const boardOfTrusteesCardPlacementChanged = useMemo(
+    () => hasCardPlacementChangedForSection("board_of_trustees"),
+    [hasCardPlacementChangedForSection],
+  );
+
+  // placement-change observability removed in production
+  useEffect(() => {}, []);
+  useEffect(() => {}, []);
+
   const setField = <K extends keyof WebsiteContentFormState>(
     field: K,
     value: WebsiteContentFormState[K],
@@ -456,20 +524,7 @@ export function useWebsiteContentEditor(
     const saved =
       savedSectionContentBySection[activeSection as WebsiteContentSection];
 
-    // Log drag operation
-    // eslint-disable-next-line no-console
-    console.debug("replaceCards drag-drop complete", {
-      activeSection,
-      beforePlacement: cardsBeforeDragRef.current?.map((c) => ({
-        key: c.entryKey,
-        place: c.cardPlacement,
-      })),
-      afterPlacement: nextCards.map((c) => ({
-        key: c.entryKey,
-        place: c.cardPlacement,
-      })),
-      areSame: saved ? areCardsEqual(nextCards, saved.cards) : "no-saved",
-    });
+    // debug logs removed
 
     cardsBeforeDragRef.current = null; // Clear for next drag
 
@@ -625,28 +680,47 @@ export function useWebsiteContentEditor(
     snapshotCards?: WebsiteContentCardState[],
     snapshotForm?: WebsiteContentFormState,
   ) => {
-    if (!activeSection) {
+    const section = activeSectionRef.current;
+    if (!section) {
       return;
     }
 
     const nextForm = snapshotForm ?? formRef.current;
     const nextCards = snapshotCards ?? cardsRef.current;
+    const normalizedCards = normalizeCardPlacements(nextCards);
 
-    await saveSection({
-      section: activeSection,
+    // (previous save snapshot refs removed)
+
+    const result = await saveSection({
+      section,
       form: nextForm,
-      cards: nextCards,
+      cards: normalizedCards,
     });
 
+    if (!result.success) {
+      return result;
+    }
+
+    setCards(normalizedCards);
     setHasPendingChangesForActiveSection(false);
 
     setSavedSectionContentBySection((prev) => ({
       ...prev,
-      [activeSection]: {
+      [section]: {
         form: nextForm,
-        cards: nextCards,
+        cards: normalizedCards,
       },
     }));
+
+    setCachedSectionContentBySection((prev) => ({
+      ...prev,
+      [section]: {
+        form: nextForm,
+        cards: normalizedCards,
+      },
+    }));
+
+    return result;
   };
 
   return {
@@ -676,5 +750,7 @@ export function useWebsiteContentEditor(
     cardCountBySection,
     hasLoadedSectionSummaries,
     hasUnsavedChangesForActiveSection,
+    secretariatCardPlacementChanged,
+    boardOfTrusteesCardPlacementChanged,
   };
 }

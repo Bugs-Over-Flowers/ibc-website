@@ -11,6 +11,123 @@ import { ICON_MAP } from "../icons";
 import { LucideIconPicker } from "../LucideIconPicker";
 import { MarkdownTextarea } from "../RichTextEditorField";
 
+type InternalCard = CompanyThrustsSectionProps["cards"][number];
+
+function CompanyPreviewCard({
+  card,
+  isDeleteMode,
+  selectedCardEntryKeys,
+  onToggleCardSelected,
+  onEdit,
+}: {
+  card: InternalCard;
+  isDeleteMode: boolean;
+  selectedCardEntryKeys: Set<string>;
+  onToggleCardSelected: (entryKey: string, checked: boolean) => void;
+  onEdit: (entryKey: string) => void;
+}) {
+  return (
+    <button
+      className="text-left"
+      onClick={() => {
+        if (isDeleteMode) {
+          onToggleCardSelected(
+            card.entryKey,
+            !selectedCardEntryKeys.has(card.entryKey),
+          );
+          return;
+        }
+        onEdit(card.entryKey);
+      }}
+      type="button"
+    >
+      <Card className="relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300">
+        <div className="absolute top-0 right-0 left-0 h-1 bg-linear-to-r from-primary via-primary/70 to-transparent" />
+        <CardContent className="p-8">
+          <div className="mb-6 flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20 backdrop-blur-sm">
+              {card.icon ? (
+                typeof card.icon === "string" && ICON_MAP[card.icon] ? (
+                  (() => {
+                    const IconComponent = ICON_MAP[card.icon];
+                    return <IconComponent className="h-7 w-7 text-primary" />;
+                  })()
+                ) : (
+                  <span className="text-lg">{card.icon}</span>
+                )
+              ) : null}
+            </div>
+            <h3 className="font-bold text-foreground text-xl">
+              {card.title || "Thrust Title"}
+            </h3>
+          </div>
+          {card.paragraph ? (
+            <RichTextDisplay
+              className="mb-4 text-foreground/80 leading-relaxed **:text-inherit"
+              content={card.paragraph}
+            />
+          ) : (
+            <p className="mb-4 text-foreground/80 leading-relaxed">
+              Thrust description will appear here...
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </button>
+  );
+}
+
+function CompanyThrustCardForm({
+  card,
+  placeholders,
+  onCardFieldChange,
+}: {
+  card: InternalCard;
+  placeholders: CompanyThrustsSectionProps["placeholders"];
+  onCardFieldChange: CompanyThrustsSectionProps["onCardFieldChange"];
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-row gap-4">
+        <div className="pr-1">
+          <LucideIconPicker
+            onSelect={(value) => {
+              onCardFieldChange(card.entryKey, "icon", value);
+            }}
+            selectedIcon={card.icon}
+          />
+        </div>
+
+        <div className="w-full space-y-2">
+          <p className="font-medium text-sm">Thrust Title</p>
+          <Input
+            className="truncate"
+            onChange={(event) => {
+              const value = event.target.value;
+              onCardFieldChange(card.entryKey, "title", value);
+            }}
+            placeholder={placeholders.title || "Policy Advisory & Advocacy"}
+            value={card.title}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <p className="font-medium text-sm">Thrust Paragraph</p>
+        <MarkdownTextarea
+          className="max-h-[150px] overflow-y-auto"
+          onChange={(value) => {
+            onCardFieldChange(card.entryKey, "paragraph", value);
+          }}
+          placeholder={placeholders.paragraph || "Enter thrust description"}
+          rows={4}
+          value={card.paragraph}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function CompanyThrustsSection({
   cards,
   placeholders,
@@ -32,102 +149,6 @@ export function CompanyThrustsSection({
   const editingCardIndex = cards.findIndex(
     (card) => card.entryKey === editingCardKey,
   );
-
-  const PreviewCard = ({ card }: { card: (typeof cards)[number] }) => {
-    return (
-      <button
-        className="text-left"
-        onClick={() => {
-          if (isDeleteMode) {
-            onToggleCardSelected(
-              card.entryKey,
-              !selectedCardEntryKeys.has(card.entryKey),
-            );
-            return;
-          }
-
-          setEditingCardKey(card.entryKey);
-        }}
-        type="button"
-      >
-        <Card className="relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300">
-          <div className="absolute top-0 right-0 left-0 h-1 bg-linear-to-r from-primary via-primary/70 to-transparent" />
-          <CardContent className="p-8">
-            <div className="mb-6 flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20 backdrop-blur-sm">
-                {card.icon ? (
-                  typeof card.icon === "string" && ICON_MAP[card.icon] ? (
-                    (() => {
-                      const IconComponent = ICON_MAP[card.icon];
-                      return <IconComponent className="h-7 w-7 text-primary" />;
-                    })()
-                  ) : (
-                    <span className="text-lg">{card.icon}</span>
-                  )
-                ) : null}
-              </div>
-              <h3 className="font-bold text-foreground text-xl">
-                {card.title || "Thrust Title"}
-              </h3>
-            </div>
-            {card.paragraph ? (
-              <RichTextDisplay
-                className="mb-4 text-foreground/80 leading-relaxed **:text-inherit"
-                content={card.paragraph}
-              />
-            ) : (
-              <p className="mb-4 text-foreground/80 leading-relaxed">
-                Thrust description will appear here...
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </button>
-    );
-  };
-
-  const ThrustCardForm = ({ card }: { card: (typeof cards)[number] }) => {
-    return (
-      <div className="space-y-4">
-        <div className="flex flex-row gap-4">
-          <div className="pr-1">
-            <LucideIconPicker
-              onSelect={(value) => {
-                onCardFieldChange(card.entryKey, "icon", value);
-              }}
-              selectedIcon={card.icon}
-            />
-          </div>
-
-          <div className="w-full space-y-2">
-            <p className="font-medium text-sm">Thrust Title</p>
-            <Input
-              className="truncate"
-              onChange={(event) => {
-                const value = event.target.value;
-                onCardFieldChange(card.entryKey, "title", value);
-              }}
-              placeholder={placeholders.title || "Policy Advisory & Advocacy"}
-              value={card.title}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <p className="font-medium text-sm">Thrust Paragraph</p>
-          <MarkdownTextarea
-            className="max-h-[150px] overflow-y-auto"
-            onChange={(value) => {
-              onCardFieldChange(card.entryKey, "paragraph", value);
-            }}
-            placeholder={placeholders.paragraph || "Enter thrust description"}
-            rows={4}
-            value={card.paragraph}
-          />
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
@@ -164,7 +185,11 @@ export function CompanyThrustsSection({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <ThrustCardForm card={editingCard} />
+                <CompanyThrustCardForm
+                  card={editingCard}
+                  onCardFieldChange={onCardFieldChange}
+                  placeholders={placeholders}
+                />
               </div>
             </div>
 
@@ -222,7 +247,14 @@ export function CompanyThrustsSection({
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {cards.map((card) => (
-              <PreviewCard card={card} key={card.entryKey} />
+              <CompanyPreviewCard
+                card={card}
+                isDeleteMode={isDeleteMode}
+                key={card.entryKey}
+                onEdit={(entryKey) => setEditingCardKey(entryKey)}
+                onToggleCardSelected={onToggleCardSelected}
+                selectedCardEntryKeys={selectedCardEntryKeys}
+              />
             ))}
           </div>
         </div>
