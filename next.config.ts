@@ -112,6 +112,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "ibcwebsite.vercel.app",
       },
+      {
+        protocol: "https",
+        hostname: "zdnfrmxciriinwzmeqwi.supabase.co",
+      },
     ],
     dangerouslyAllowLocalIP: true,
   },
