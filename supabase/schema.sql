@@ -168,6 +168,16 @@ CREATE TYPE "public"."SponsoredRegistrationStatus" AS ENUM (
 ALTER TYPE "public"."SponsoredRegistrationStatus" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."SponsorshipType" AS ENUM (
+    'sponsored',
+    'standard',
+    'none'
+);
+
+
+ALTER TYPE "public"."SponsorshipType" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."WebsiteContentSection" AS ENUM (
     'vision_mission',
     'goals',
@@ -201,7 +211,8 @@ CREATE TYPE "public"."participant_list_item" AS (
 	"affiliation" "text",
 	"registration_date" timestamp with time zone,
 	"registration_id" "uuid",
-	"participant_identifier" "text"
+	"participant_identifier" "text",
+	"payment_proof_status" "text"
 );
 
 
@@ -1456,12 +1467,12 @@ BEGIN
     COALESCE(bm."businessName", r."nonMemberName") AS "affiliation",
     r."registrationDate",
     r."registrationId",
-    p."participantIdentifier"
+    p."participantIdentifier",
+    r."paymentProofStatus"::text AS "payment_proof_status"
   FROM "Participant" p
   JOIN "Registration" r ON p."registrationId" = r."registrationId"
   LEFT JOIN "BusinessMember" bm ON r."businessMemberId" = bm."businessMemberId"
   WHERE r."eventId" = p_event_id
-    AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus"
     AND (
       p_search_text IS NULL
       OR p_search_text = ''
@@ -1528,21 +1539,19 @@ BEGIN
   SELECT COUNT(DISTINCT p."participantId") INTO participants_total
   FROM "Participant" p
   JOIN "Registration" r ON r."registrationId" = p."registrationId"
-  WHERE r."eventId" = p_event_id
-    AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus";
+  WHERE r."eventId" = p_event_id;
 
   SELECT COUNT(DISTINCT ci."participantId") INTO attended_total
   FROM "CheckIn" ci
   JOIN "Participant" p ON p."participantId" = ci."participantId"
   JOIN "Registration" r ON r."registrationId" = p."registrationId"
-  WHERE r."eventId" = p_event_id
-    AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus";
+  WHERE r."eventId" = p_event_id;
 
   SELECT EXISTS(SELECT 1 FROM "EventDay" ed WHERE ed."eventId" = p_event_id)
   INTO has_event_days;
 
   IF has_event_days THEN
-    WITH accepted_checkins AS (
+    WITH all_checkins AS (
       SELECT
         ci."eventDayId",
         ci."participantId"
@@ -1550,7 +1559,6 @@ BEGIN
       JOIN "Participant" p ON p."participantId" = ci."participantId"
       JOIN "Registration" r ON r."registrationId" = p."registrationId"
       WHERE r."eventId" = p_event_id
-        AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus"
     ),
     day_counts AS (
       SELECT
@@ -1559,7 +1567,7 @@ BEGIN
         ed."eventDate" AS day_date,
         COUNT(DISTINCT ac."participantId") AS participants
       FROM "EventDay" ed
-      LEFT JOIN accepted_checkins ac ON ac."eventDayId" = ed."eventDayId"
+      LEFT JOIN all_checkins ac ON ac."eventDayId" = ed."eventDayId"
       WHERE ed."eventId" = p_event_id
       GROUP BY ed."eventDayId", ed."label", ed."eventDate"
     )
@@ -1578,7 +1586,7 @@ BEGIN
     ) INTO days_arr
     FROM day_counts;
   ELSE
-    WITH accepted_checkins AS (
+    WITH all_checkins AS (
       SELECT
         ci."checkInTime"::date AS day_date,
         ci."participantId"
@@ -1586,13 +1594,12 @@ BEGIN
       JOIN "Participant" p ON p."participantId" = ci."participantId"
       JOIN "Registration" r ON r."registrationId" = p."registrationId"
       WHERE r."eventId" = p_event_id
-        AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus"
     ),
     day_counts AS (
       SELECT
         day_date,
         COUNT(DISTINCT "participantId") AS participants
-      FROM accepted_checkins
+      FROM all_checkins
       GROUP BY day_date
     )
     SELECT COALESCE(
@@ -1754,7 +1761,7 @@ BEGIN
     COUNT(DISTINCT r."registrationId")::INTEGER AS "totalRegistrations",
     COUNT(DISTINCT r."registrationId") FILTER (WHERE r."paymentProofStatus" = 'accepted')::INTEGER AS "verifiedRegistrations",
     COUNT(DISTINCT r."registrationId") FILTER (WHERE r."paymentProofStatus" = 'pending')::INTEGER AS "pendingRegistrations",
-    COUNT(p."participantId") FILTER (WHERE r."paymentProofStatus" = 'accepted')::INTEGER AS "totalParticipants"
+    COUNT(p."participantId")::INTEGER AS "totalParticipants"
   INTO v_result
   FROM "Registration" r
   LEFT JOIN "Participant" p ON r."registrationId" = p."registrationId"
@@ -1953,7 +1960,7 @@ ALTER FUNCTION "public"."handle_event_days"() OWNER TO "postgres";
 CREATE OR REPLACE FUNCTION "public"."import_event_registrations"("p_event_id" "uuid", "p_rows" "jsonb", "p_dry_run" boolean DEFAULT false) RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $_$
+    AS $$
 DECLARE
   v_total integer := 0;
   v_valid integer := 0;
@@ -2013,17 +2020,19 @@ BEGIN
     IF v_first_name IS NULL THEN
       v_errors := array_append(v_errors, 'first_name is required');
     END IF;
+
     IF v_last_name IS NULL THEN
       v_errors := array_append(v_errors, 'last_name is required');
     END IF;
+
     IF v_email IS NULL THEN
       v_errors := array_append(v_errors, 'email is required');
-    ELSIF v_email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' THEN
-      v_errors := array_append(v_errors, 'email format is invalid');
     END IF;
+
     IF v_contact_number IS NULL THEN
       v_errors := array_append(v_errors, 'contact_number is required');
     END IF;
+
     IF v_affiliation IS NULL THEN
       v_errors := array_append(v_errors, 'affiliation is required');
     END IF;
@@ -2096,7 +2105,6 @@ BEGIN
 
       INSERT INTO "Registration" (
         "eventId",
-        "businessMemberId",
         "nonMemberName",
         "paymentMethod",
         "paymentProofStatus",
@@ -2106,7 +2114,6 @@ BEGIN
         "sourceSubmissionId"
       ) VALUES (
         p_event_id,
-        NULL,
         v_affiliation,
         'IMPORTED'::"PaymentMethod",
         'accepted'::"PaymentProofStatus",
@@ -2130,8 +2137,8 @@ BEGIN
         TRUE,
         v_first_name,
         v_last_name,
-        v_contact_number,
-        v_email,
+        COALESCE(v_contact_number, ''),
+        COALESCE(v_email, ''),
         v_participant_identifier
       );
 
@@ -2181,7 +2188,7 @@ BEGIN
     'results', v_results
   );
 END;
-$_$;
+$$;
 
 
 ALTER FUNCTION "public"."import_event_registrations"("p_event_id" "uuid", "p_rows" "jsonb", "p_dry_run" boolean) OWNER TO "postgres";
@@ -4141,7 +4148,9 @@ CREATE TABLE IF NOT EXISTS "public"."Registration" (
     "sponsoredRegistrationId" "uuid",
     "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL,
     "note" "text",
-    "sourceSubmissionId" "text"
+    "sourceSubmissionId" "text",
+    "exceededSponsoredSlots" boolean DEFAULT false,
+    "sponsorshipType" "public"."SponsorshipType" DEFAULT 'none'::"public"."SponsorshipType"
 );
 
 
@@ -4299,6 +4308,10 @@ CREATE UNIQUE INDEX "Registration_event_sourceSubmissionId_unique" ON "public"."
 
 
 
+CREATE UNIQUE INDEX "Sector_sectorName_normalized_unique" ON "public"."Sector" USING "btree" ("lower"("btrim"("sectorName")));
+
+
+
 CREATE INDEX "WebsiteContent_is_active_idx" ON "public"."WebsiteContent" USING "btree" ("isActive");
 
 
@@ -4316,6 +4329,10 @@ CREATE INDEX "idx_interview_date" ON "public"."Interview" USING "btree" ("interv
 
 
 CREATE INDEX "idx_interview_status" ON "public"."Interview" USING "btree" ("status");
+
+
+
+CREATE INDEX "idx_registration_exceeded_sponsored_slots" ON "public"."Registration" USING "btree" ("sponsoredRegistrationId", "exceededSponsoredSlots");
 
 
 
@@ -5449,34 +5466,3 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
