@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "bun run --bun next dev --turbopack",
     "dev:test": "dotenvx run -f .env.testing -- bun run dev",
+    "dev:expose": "bun run --bun next dev --turbopack --hostname 0.0.0.0 --port 3000",
     "build": "bun run --bun next build --turbopack",
     "build:test": "dotenvx run -f .env.testing -- bun run build",
     "docker:dev": "docker compose up ibc-dev",
@@ -14,6 +15,7 @@
     "docker:prod": "docker compose up ibc-prod",
     "docker:prodb": "docker compose up ibc-prod --build",
     "start": "bun run --bun next start",
+    "start:expose": "bun run --bun next start --hostname 0.0.0.0 --port 3000",
     "biome:check": "biome check",
     "biome:write": "biome check --write",
     "email:dev": "email dev --dir ./src/lib/resend/templates --port 3050",

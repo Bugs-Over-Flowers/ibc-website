@@ -540,6 +540,7 @@ export type Database = {
         Row: {
           businessMemberId: string | null;
           eventId: string;
+          exceededSponsoredSlots: boolean | null;
           identifier: string;
           nonMemberName: string | null;
           note: string | null;
@@ -550,10 +551,14 @@ export type Database = {
           registrationId: string;
           sourceSubmissionId: string | null;
           sponsoredRegistrationId: string | null;
+          sponsorshipType:
+            | Database["public"]["Enums"]["SponsorshipType"]
+            | null;
         };
         Insert: {
           businessMemberId?: string | null;
           eventId: string;
+          exceededSponsoredSlots?: boolean | null;
           identifier: string;
           nonMemberName?: string | null;
           note?: string | null;
@@ -564,10 +569,14 @@ export type Database = {
           registrationId?: string;
           sourceSubmissionId?: string | null;
           sponsoredRegistrationId?: string | null;
+          sponsorshipType?:
+            | Database["public"]["Enums"]["SponsorshipType"]
+            | null;
         };
         Update: {
           businessMemberId?: string | null;
           eventId?: string;
+          exceededSponsoredSlots?: boolean | null;
           identifier?: string;
           nonMemberName?: string | null;
           note?: string | null;
@@ -578,6 +587,9 @@ export type Database = {
           registrationId?: string;
           sourceSubmissionId?: string | null;
           sponsoredRegistrationId?: string | null;
+          sponsorshipType?:
+            | Database["public"]["Enums"]["SponsorshipType"]
+            | null;
         };
         Relationships: [
           {
@@ -1169,6 +1181,7 @@ export type Database = {
       PaymentProofStatus: "pending" | "accepted" | "rejected";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
       SponsoredRegistrationStatus: "active" | "full" | "disabled";
+      SponsorshipType: "sponsored" | "standard" | "none";
       WebsiteContentSection:
         | "vision_mission"
         | "goals"
@@ -1359,6 +1372,7 @@ export const Constants = {
       PaymentProofStatus: ["pending", "accepted", "rejected"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
       SponsoredRegistrationStatus: ["active", "full", "disabled"],
+      SponsorshipType: ["sponsored", "standard", "none"],
       WebsiteContentSection: [
         "vision_mission",
         "goals",
