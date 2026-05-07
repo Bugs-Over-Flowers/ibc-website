@@ -73,7 +73,11 @@ export function SponsoredRegistrationList({
     });
   };
 
-  const handleToggleStatus = async (id: string, eventId: string, currentStatus: string) => {
+  const handleToggleStatus = async (
+    id: string,
+    eventId: string,
+    currentStatus: string,
+  ) => {
     const toastId = toast.loading("Updating status...");
 
     const { error } = await tryCatch(
@@ -106,7 +110,8 @@ export function SponsoredRegistrationList({
   const handleDeleteClick = (registration: SponsoredRegistrationWithEvent) => {
     if (Number(registration.usedCount) > 0) {
       toast.error("Cannot delete", {
-        description: "This sponsored registration has already been used. Only unused registrations can be deleted.",
+        description:
+          "This sponsored registration has already been used. Only unused registrations can be deleted.",
       });
       return;
     }

@@ -34,7 +34,10 @@ export function SponsoredRegistrationActions({
         sponsoredRegistrationId: sponsoredRegistration.sponsoredRegistrationId,
         eventId,
       });
-      return { success: true, wasActive: sponsoredRegistration.status === "active" };
+      return {
+        success: true,
+        wasActive: sponsoredRegistration.status === "active",
+      };
     }),
     {
       onSuccess: (result: { success: boolean; wasActive: boolean }) => {
@@ -46,7 +49,7 @@ export function SponsoredRegistrationActions({
         router.refresh();
       },
       onError: (error: unknown) => {
-        let errorMessage = "Failed to update status";
+        const errorMessage = "Failed to update status";
         let errorDescription = "Please try again later";
 
         if (typeof error === "string") {
@@ -78,7 +81,7 @@ export function SponsoredRegistrationActions({
         router.push("/admin/sponsored-registration");
       },
       onError: (error: unknown) => {
-        let errorMessage = "Failed to delete";
+        const errorMessage = "Failed to delete";
         let errorDescription = "Please try again later";
 
         if (typeof error === "string") {
