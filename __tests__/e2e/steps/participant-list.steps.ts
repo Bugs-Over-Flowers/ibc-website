@@ -49,7 +49,7 @@ Then(
 // ============================================
 
 // ============================================
-// Scenario: Hide pending and rejected registrations
+// Scenario: Show all participants regardless of payment status
 // ============================================
 
 When("I open the participants tab", async ({ page, scenario }) => {
@@ -57,20 +57,20 @@ When("I open the participants tab", async ({ page, scenario }) => {
 });
 
 Then(
-  "I should not see participants from pending registrations",
+  "I should see participants from pending registrations",
   async ({ page, scenario }) => {
     await expect(
-      page.getByText(scenario.pendingRegistration.affiliation),
-    ).toHaveCount(0);
+      page.getByText(scenario.pendingRegistration.affiliation).first(),
+    ).toBeVisible();
   },
 );
 
 Then(
-  "I should not see participants from rejected registrations",
+  "I should see participants from rejected registrations",
   async ({ page, scenario }) => {
     await expect(
-      page.getByText(scenario.rejectedRegistration.affiliation),
-    ).toHaveCount(0);
+      page.getByText(scenario.rejectedRegistration.affiliation).first(),
+    ).toBeVisible();
   },
 );
 
@@ -116,16 +116,6 @@ Then(
     await expect(
       page.getByText(scenario.pendingRegistration.affiliation).first(),
     ).toBeVisible();
-  },
-);
-
-Then(
-  "the registration's participants should not appear in the participant list",
-  async ({ page, scenario }) => {
-    await openTab(page, scenario.event.eventId, "participants");
-    await expect(
-      page.getByText(scenario.pendingRegistration.affiliation),
-    ).toHaveCount(0);
   },
 );
 

@@ -1,11 +1,11 @@
 Feature: Participant list
 
   @happy
-  Scenario: Hide pending and rejected registrations
+  Scenario: Show all participants regardless of payment status
     Given I am an admin on the registration list page for an event
     When I open the participants tab
-    Then I should not see participants from pending registrations
-    And I should not see participants from rejected registrations
+    Then I should see participants from pending registrations
+    And I should see participants from rejected registrations
 
   @happy
   Scenario: Show participants from accepted registrations
@@ -26,7 +26,7 @@ Feature: Participant list
     Examples:
       | action | visibility | update-count |
       | Accept | appear     | 2            |
-      | Reject | not appear | 1            |
+      | Reject | appear     | 1            |
 
   @happy
   Scenario: Show participant QR code through action button
