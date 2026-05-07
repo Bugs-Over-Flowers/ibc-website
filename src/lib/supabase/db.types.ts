@@ -760,7 +760,6 @@ export type Database = {
         Args: { p_application_type?: string; p_identifier: string };
         Returns: Json;
       };
-
       create_sponsored_registration: {
         Args: {
           p_event_id: string;
@@ -873,7 +872,6 @@ export type Database = {
         };
       };
       get_event_status: { Args: { p_event_id: string }; Returns: Json };
-
       get_registration_list: {
         Args: {
           p_event_id: string;
@@ -919,7 +917,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-
       get_sr_by_event_id: {
         Args: { p_event_id: string };
         Returns: {
