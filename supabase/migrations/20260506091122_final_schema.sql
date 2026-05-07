@@ -24,6 +24,13 @@ COMMENT ON SCHEMA "public" IS 'standard public schema';
 
 
 
+CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
+
+
+
+
+
+
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
 
 
@@ -98,6 +105,16 @@ CREATE TYPE "public"."CompanyMemberType" AS ENUM (
 ALTER TYPE "public"."CompanyMemberType" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."CompanyProfileType" AS ENUM (
+    'image',
+    'document',
+    'website'
+);
+
+
+ALTER TYPE "public"."CompanyProfileType" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."EventType" AS ENUM (
     'public',
     'private'
@@ -158,6 +175,16 @@ CREATE TYPE "public"."SponsoredRegistrationStatus" AS ENUM (
 ALTER TYPE "public"."SponsoredRegistrationStatus" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."SponsorshipType" AS ENUM (
+    'sponsored',
+    'standard',
+    'none'
+);
+
+
+ALTER TYPE "public"."SponsorshipType" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."WebsiteContentSection" AS ENUM (
     'vision_mission',
     'goals',
@@ -190,7 +217,8 @@ CREATE TYPE "public"."participant_list_item" AS (
 	"contact_number" "text",
 	"affiliation" "text",
 	"registration_date" timestamp with time zone,
-	"registration_id" "uuid"
+	"registration_id" "uuid",
+	"participant_identifier" "text"
 );
 
 
@@ -787,6 +815,7 @@ DECLARE
   v_latest_landline text;
   v_latest_mobile_number text;
   v_latest_sector_name text;
+  v_latest_company_profile_type text;
 
   v_resolved_sector_id bigint;
 
@@ -890,7 +919,8 @@ BEGIN
     a."emailAddress",
     a."landline",
     a."mobileNumber",
-    a."sectorName"
+    a."sectorName",
+    a."companyProfileType"::text
   INTO
     v_latest_application_id,
     v_latest_application_member_type,
@@ -898,7 +928,8 @@ BEGIN
     v_latest_email_address,
     v_latest_landline,
     v_latest_mobile_number,
-    v_latest_sector_name
+    v_latest_sector_name,
+    v_latest_company_profile_type
   FROM public."Application" a
   WHERE a."businessMemberId" = v_member_business_member_id
   ORDER BY a."applicationDate" DESC
@@ -988,6 +1019,7 @@ BEGIN
     'mobileNumber', COALESCE(v_latest_mobile_number, ''),
     'websiteURL', COALESCE(v_member_website_url, ''),
     'logoImageURL', COALESCE(v_member_logo_image_url, ''),
+    'companyProfileType', COALESCE(v_latest_company_profile_type, 'website'),
     'sectorId', v_resolved_sector_id,
     'principalRepresentative',
       CASE
@@ -1440,7 +1472,8 @@ BEGIN
     p."contactNumber",
     COALESCE(bm."businessName", r."nonMemberName") AS "affiliation",
     r."registrationDate",
-    r."registrationId"
+    r."registrationId",
+    p."participantIdentifier"
   FROM "Participant" p
   JOIN "Registration" r ON p."registrationId" = r."registrationId"
   LEFT JOIN "BusinessMember" bm ON r."businessMemberId" = bm."businessMemberId"
@@ -1751,6 +1784,29 @@ $$;
 
 ALTER FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") OWNER TO "postgres";
 
+
+CREATE OR REPLACE FUNCTION "public"."get_sector_member_counts"("p_sector_ids" integer[]) RETURNS TABLE("sectorId" integer, "memberCount" integer)
+    LANGUAGE "plpgsql"
+    AS $$
+begin
+  return query
+  select
+    s."sectorId" as "sectorId",
+    count(bm."businessMemberId")::int as "memberCount"
+  from
+    "Sector" as s
+  left join
+    "BusinessMember" as bm on s."sectorId" = bm."sectorId" and bm."membershipStatus" <> 'cancelled'
+  where
+    s."sectorId" = any(p_sector_ids)
+  group by
+    s."sectorId";
+end;
+$$;
+
+
+ALTER FUNCTION "public"."get_sector_member_counts"("p_sector_ids" integer[]) OWNER TO "postgres";
+
 SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
@@ -1937,6 +1993,7 @@ DECLARE
   v_registration_date timestamp with time zone;
   v_registration_id uuid;
   v_identifier text;
+  v_participant_identifier text;
   v_errors text[];
   v_warnings text[];
 BEGIN
@@ -1973,17 +2030,21 @@ BEGIN
     IF v_first_name IS NULL THEN
       v_errors := array_append(v_errors, 'first_name is required');
     END IF;
+
     IF v_last_name IS NULL THEN
       v_errors := array_append(v_errors, 'last_name is required');
     END IF;
+
     IF v_email IS NULL THEN
       v_errors := array_append(v_errors, 'email is required');
     ELSIF v_email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' THEN
       v_errors := array_append(v_errors, 'email format is invalid');
     END IF;
+
     IF v_contact_number IS NULL THEN
       v_errors := array_append(v_errors, 'contact_number is required');
     END IF;
+
     IF v_affiliation IS NULL THEN
       v_errors := array_append(v_errors, 'affiliation is required');
     END IF;
@@ -2052,10 +2113,10 @@ BEGIN
 
     BEGIN
       v_identifier := 'ibc-reg-' || left(replace(gen_random_uuid()::text, '-', ''), 8);
+      v_participant_identifier := 'ibc-par-' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 8);
 
       INSERT INTO "Registration" (
         "eventId",
-        "businessMemberId",
         "nonMemberName",
         "paymentMethod",
         "paymentProofStatus",
@@ -2065,7 +2126,6 @@ BEGIN
         "sourceSubmissionId"
       ) VALUES (
         p_event_id,
-        NULL,
         v_affiliation,
         'IMPORTED'::"PaymentMethod",
         'accepted'::"PaymentProofStatus",
@@ -2082,14 +2142,16 @@ BEGIN
         "firstName",
         "lastName",
         "contactNumber",
-        "email"
+        "email",
+        "participantIdentifier"
       ) VALUES (
         v_registration_id,
         TRUE,
         v_first_name,
         v_last_name,
         v_contact_number,
-        v_email
+        v_email,
+        v_participant_identifier
       );
 
       v_inserted := v_inserted + 1;
@@ -2260,6 +2322,7 @@ CREATE OR REPLACE FUNCTION "public"."quick_onsite_registration"("p_event_day_id"
 DECLARE
   v_registration_id UUID;
   v_participant_id UUID;
+  v_participant_identifier TEXT;
   v_event_day_belongs_to_event BOOLEAN;
 BEGIN
   -- Ensure the event day exists and belongs to the provided event.
@@ -2289,7 +2352,8 @@ BEGIN
     "businessMemberId",
     "nonMemberName",
     "identifier",
-    "registrationDate"
+    "registrationDate",
+    "numberOfParticipants"
   ) VALUES (
     p_event_id,
     'ONSITE',
@@ -2297,9 +2361,12 @@ BEGIN
     CASE WHEN p_member_type = 'member' THEN p_business_member_id ELSE NULL END,
     CASE WHEN p_member_type = 'nonmember' THEN p_non_member_name ELSE NULL END,
     p_identifier,
-    NOW()
+    NOW(),
+    1
   )
   RETURNING "registrationId" INTO v_registration_id;
+
+  v_participant_identifier := 'ibc-par-' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 8);
 
   INSERT INTO "Participant" (
     "registrationId",
@@ -2307,14 +2374,16 @@ BEGIN
     "firstName",
     "lastName",
     "contactNumber",
-    email
+    email,
+    "participantIdentifier"
   ) VALUES (
     v_registration_id,
     TRUE,
     p_registrant->>'firstName',
     p_registrant->>'lastName',
     p_registrant->>'contactNumber',
-    p_registrant->>'email'
+    p_registrant->>'email',
+    v_participant_identifier
   )
   RETURNING "participantId" INTO v_participant_id;
 
@@ -2332,6 +2401,8 @@ BEGIN
 
   RETURN jsonb_build_object(
     'registrationId', v_registration_id,
+    'participantId', v_participant_id,
+    'participantIdentifier', v_participant_identifier,
     'message', 'Registration created successfully'
   );
 END;
@@ -2477,13 +2548,17 @@ $$;
 ALTER FUNCTION "public"."submit_evaluation_form"("p_event_id" "uuid", "p_name" "text", "p_q1_rating" "public"."ratingScale", "p_q2_rating" "public"."ratingScale", "p_q3_rating" "public"."ratingScale", "p_q4_rating" "public"."ratingScale", "p_q5_rating" "public"."ratingScale", "p_q6_rating" "public"."ratingScale", "p_additional_comments" "text", "p_feedback" "text") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid" DEFAULT NULL::"uuid", "p_non_member_name" "text" DEFAULT NULL::"text", "p_payment_method" "text" DEFAULT 'onsite'::"text", "p_payment_path" "text" DEFAULT NULL::"text", "p_registrant" "jsonb" DEFAULT '{}'::"jsonb", "p_note" "text" DEFAULT NULL::"text", "p_other_participants" "jsonb" DEFAULT '[]'::"jsonb") RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid" DEFAULT NULL::"uuid", "p_non_member_name" "text" DEFAULT NULL::"text", "p_payment_method" "text" DEFAULT 'onsite'::"text", "p_payment_paths" "jsonb" DEFAULT '[]'::"jsonb", "p_registrant" "jsonb" DEFAULT '{}'::"jsonb", "p_note" "text" DEFAULT NULL::"text", "p_other_participants" "jsonb" DEFAULT '[]'::"jsonb", "p_sponsored_registration_id" "uuid" DEFAULT NULL::"uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
 DECLARE
   v_registration_id UUID;
   v_payment_proof_status "PaymentProofStatus";
   v_payment_method_enum "PaymentMethod";
+  v_principal_participant_id UUID;
+  v_principal_identifier TEXT;
+  v_all_participants JSONB;
+  v_other_count INTEGER;
 BEGIN
   v_payment_method_enum := (
     CASE
@@ -2499,6 +2574,8 @@ BEGIN
     END
   )::"PaymentProofStatus";
 
+  v_other_count := jsonb_array_length(p_other_participants);
+
   INSERT INTO "Registration" (
     "eventId",
     "paymentMethod",
@@ -2507,7 +2584,9 @@ BEGIN
     "nonMemberName",
     "identifier",
     "note",
-    "registrationDate"
+    "registrationDate",
+    "sponsoredRegistrationId",
+    "numberOfParticipants"
   ) VALUES (
     p_event_id,
     v_payment_method_enum,
@@ -2516,14 +2595,24 @@ BEGIN
     CASE WHEN p_member_type = 'nonmember' THEN p_non_member_name ELSE NULL END,
     p_identifier,
     p_note,
-    NOW()
+    NOW(),
+    p_sponsored_registration_id,
+    v_other_count + 1
   )
   RETURNING "registrationId" INTO v_registration_id;
 
-  IF p_payment_method = 'online' THEN
-    INSERT INTO "ProofImage" (path, "registrationId")
-    VALUES (p_payment_path, v_registration_id);
+  -- Insert multiple proof images with order index
+  IF p_payment_method = 'online' AND jsonb_array_length(p_payment_paths) > 0 THEN
+    INSERT INTO "ProofImage" (path, "registrationId", "orderIndex")
+    SELECT
+      path_item->>'path',
+      v_registration_id,
+      (row_number() OVER ()) - 1
+    FROM jsonb_array_elements(p_payment_paths) AS path_item;
   END IF;
+
+  -- Insert principal participant with generated identifier
+  v_principal_identifier := 'ibc-par-' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 8);
 
   INSERT INTO "Participant" (
     "registrationId",
@@ -2531,50 +2620,73 @@ BEGIN
     "firstName",
     "lastName",
     "contactNumber",
-    email
+    email,
+    "participantIdentifier"
   ) VALUES (
     v_registration_id,
     TRUE,
     p_registrant->>'firstName',
     p_registrant->>'lastName',
     p_registrant->>'contactNumber',
-    p_registrant->>'email'
+    p_registrant->>'email',
+    v_principal_identifier
+  )
+  RETURNING "participantId" INTO v_principal_participant_id;
+
+  v_all_participants := jsonb_build_array(
+    jsonb_build_object(
+      'participantId', v_principal_participant_id,
+      'participantIdentifier', v_principal_identifier
+    )
   );
 
-  IF jsonb_array_length(p_other_participants) > 0 THEN
-    INSERT INTO "Participant" (
-      "registrationId",
-      "isPrincipal",
-      "firstName",
-      "lastName",
-      "contactNumber",
-      email
+  -- Insert additional participants with identifiers
+  IF v_other_count > 0 THEN
+    WITH inserted AS (
+      INSERT INTO "Participant" (
+        "registrationId",
+        "isPrincipal",
+        "firstName",
+        "lastName",
+        "contactNumber",
+        email,
+        "participantIdentifier"
+      )
+      SELECT
+        v_registration_id,
+        FALSE,
+        registrant->>'firstName',
+        registrant->>'lastName',
+        registrant->>'contactNumber',
+        registrant->>'email',
+        'ibc-par-' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 8)
+      FROM jsonb_array_elements(p_other_participants) AS registrant
+      RETURNING "participantId", "participantIdentifier"
     )
-    SELECT
-      v_registration_id,
-      FALSE,
-      registrant->>'firstName',
-      registrant->>'lastName',
-      registrant->>'contactNumber',
-      registrant->>'email'
-    FROM jsonb_array_elements(p_other_participants) AS registrant;
+    SELECT v_all_participants || jsonb_agg(
+      jsonb_build_object(
+        'participantId', "participantId",
+        'participantIdentifier', "participantIdentifier"
+      )
+    )
+    INTO v_all_participants
+    FROM inserted;
   END IF;
 
   RETURN jsonb_build_object(
     'registrationId', v_registration_id,
-    'message', 'Registration created successfully'
+    'message', 'Registration created successfully',
+    'participants', v_all_participants
   );
-
 
 EXCEPTION
   WHEN OTHERS THEN
-    -- If anything fails, the transaction auto-rolls back
     RAISE EXCEPTION 'Registration failed: %', SQLERRM;
 END;
 $$;
 
 
-ALTER FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb") OWNER TO "postgres";
+ALTER FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_paths" "jsonb", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text" DEFAULT NULL::"text") RETURNS "jsonb"
@@ -2772,6 +2884,204 @@ $$;
 
 
 ALTER FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text" DEFAULT NULL::"text", "p_company_profile_type" "text" DEFAULT 'website'::"text") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_application_id uuid;
+  v_identifier text;
+  v_app_type_enum "ApplicationType";
+  v_pay_method_enum "PaymentMethod";
+  v_pay_status_enum "PaymentProofStatus";
+  v_requested_member_type "ApplicationMemberType";
+  v_existing_member_type "ApplicationMemberType";
+  v_requires_payment boolean := true;
+  v_sector_name text;
+  v_business_member_id uuid;
+  v_profile_type "CompanyProfileType";
+  representative jsonb;
+  v_rep_type_text text;
+BEGIN
+  v_application_id := gen_random_uuid();
+  v_identifier := 'ibc-app-' || left(replace(v_application_id::text, '-', ''), 8);
+
+  v_app_type_enum := p_application_type::"ApplicationType";
+  v_requested_member_type := p_application_member_type::"ApplicationMemberType";
+  v_profile_type := COALESCE(p_company_profile_type, 'website')::"CompanyProfileType";
+
+  v_sector_name := NULLIF(btrim(p_company_details->>'sectorName'), '');
+  IF v_sector_name IS NULL THEN
+    RAISE EXCEPTION 'Industry/Sector is required.';
+  END IF;
+
+  IF p_company_details->>'businessMemberId' IS NOT NULL
+     AND btrim(p_company_details->>'businessMemberId') <> '' THEN
+    v_business_member_id := (p_company_details->>'businessMemberId')::uuid;
+  ELSE
+    v_business_member_id := NULL;
+  END IF;
+
+  IF v_app_type_enum IN ('renewal', 'updating') THEN
+    IF v_business_member_id IS NULL THEN
+      RAISE EXCEPTION 'Member ID is required for % applications.', p_application_type;
+    END IF;
+
+    IF NOT EXISTS (
+      SELECT 1 FROM "BusinessMember"
+      WHERE "businessMemberId" = v_business_member_id
+    ) THEN
+      RAISE EXCEPTION 'Member ID % does not exist.', v_business_member_id;
+    END IF;
+  END IF;
+
+  IF v_app_type_enum = 'updating' THEN
+    SELECT a."applicationMemberType"
+    INTO v_existing_member_type
+    FROM public."Application" a
+    WHERE a."businessMemberId" = v_business_member_id
+    ORDER BY a."applicationDate" DESC
+    LIMIT 1;
+
+    IF v_existing_member_type = 'corporate'::"ApplicationMemberType"
+       AND v_requested_member_type = 'personal'::"ApplicationMemberType" THEN
+      RAISE EXCEPTION 'Corporate memberships cannot be downgraded to personal.';
+    END IF;
+
+    v_requires_payment :=
+      v_existing_member_type = 'personal'::"ApplicationMemberType"
+      AND v_requested_member_type = 'corporate'::"ApplicationMemberType";
+  ELSE
+    v_requires_payment := true;
+  END IF;
+
+  v_pay_method_enum := (
+    CASE
+      WHEN v_app_type_enum = 'updating' AND NOT v_requires_payment THEN 'ONSITE'
+      ELSE p_payment_method
+    END
+  )::"PaymentMethod";
+
+  v_pay_status_enum := (
+    CASE
+      WHEN v_pay_method_enum = 'BPI' THEN 'pending'
+      ELSE 'accepted'
+    END
+  )::"PaymentProofStatus";
+
+  IF v_requires_payment
+     AND v_pay_method_enum = 'BPI'
+     AND (p_payment_proof_url IS NULL OR btrim(p_payment_proof_url) = '') THEN
+    RAISE EXCEPTION 'Proof of payment is required for online transactions.';
+  END IF;
+
+  INSERT INTO "Application" (
+    "applicationId",
+    "identifier",
+    "businessMemberId",
+    "sectorName",
+    "logoImageURL",
+    "applicationDate",
+    "applicationType",
+    "companyName",
+    "companyAddress",
+    "landline",
+    "mobileNumber",
+    "emailAddress",
+    "paymentProofStatus",
+    "paymentMethod",
+    "websiteURL",
+    "companyProfileType",
+    "applicationMemberType"
+  )
+  VALUES (
+    v_application_id,
+    v_identifier,
+    v_business_member_id,
+    v_sector_name,
+    p_company_details->>'logoImageURL',
+    NOW(),
+    v_app_type_enum,
+    p_company_details->>'name',
+    p_company_details->>'address',
+    p_company_details->>'landline',
+    p_company_details->>'mobile',
+    p_company_details->>'email',
+    v_pay_status_enum,
+    v_pay_method_enum,
+    p_company_details->>'websiteURL',
+    v_profile_type,
+    v_requested_member_type
+  );
+
+  IF v_requires_payment AND v_pay_method_enum = 'BPI' THEN
+    INSERT INTO "ProofImage" ("applicationId", "path")
+    VALUES (v_application_id, p_payment_proof_url);
+  END IF;
+
+  IF jsonb_array_length(COALESCE(p_representatives, '[]'::jsonb)) > 0 THEN
+    FOR representative IN
+      SELECT * FROM jsonb_array_elements(COALESCE(p_representatives, '[]'::jsonb))
+    LOOP
+      v_rep_type_text := representative->>'memberType';
+
+      INSERT INTO "ApplicationMember" (
+        "applicationId",
+        "companyMemberType",
+        "firstName",
+        "lastName",
+        "mailingAddress",
+        "sex",
+        "nationality",
+        "birthdate",
+        "companyDesignation",
+        "landline",
+        "mobileNumber",
+        "emailAddress"
+      )
+      VALUES (
+        v_application_id,
+        v_rep_type_text::"CompanyMemberType",
+        representative->>'firstName',
+        representative->>'lastName',
+        representative->>'mailingAddress',
+        representative->>'sex',
+        representative->>'nationality',
+        (representative->>'birthdate')::timestamp,
+        representative->>'position',
+        representative->>'landline',
+        representative->>'mobileNumber',
+        representative->>'email'
+      );
+    END LOOP;
+  END IF;
+
+  RETURN jsonb_build_object(
+    'applicationId', v_application_id,
+    'identifier', v_identifier,
+    'applicationType', p_application_type,
+    'businessMemberId', v_business_member_id,
+    'requiresPayment', v_requires_payment,
+    'status', 'success',
+    'message', CASE
+      WHEN v_app_type_enum = 'newMember' THEN 'New membership application submitted successfully.'
+      WHEN v_app_type_enum = 'renewal' THEN 'Membership renewal application submitted successfully.'
+      WHEN v_app_type_enum = 'updating' AND v_requires_payment THEN 'Corporate upgrade request submitted successfully. Upgrade fee: ₱5,000.00'
+      WHEN v_app_type_enum = 'updating' THEN 'Information update request submitted successfully. No payment is required.'
+      ELSE 'Application submitted successfully.'
+    END
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE EXCEPTION 'Application submission failed: %', SQLERRM;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text", "p_company_profile_type" "text") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."toggle_sr_status"("p_sponsored_registration_id" "uuid") RETURNS json
@@ -3667,7 +3977,8 @@ CREATE TABLE IF NOT EXISTS "public"."Application" (
     "applicationStatus" "public"."ApplicationStatus" DEFAULT 'new'::"public"."ApplicationStatus" NOT NULL,
     "interviewId" "uuid",
     "identifier" "text" NOT NULL,
-    "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL
+    "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL,
+    "companyProfileType" "public"."CompanyProfileType" DEFAULT 'website'::"public"."CompanyProfileType" NOT NULL
 );
 
 
@@ -3817,7 +4128,8 @@ CREATE TABLE IF NOT EXISTS "public"."Participant" (
     "lastName" "text" NOT NULL,
     "contactNumber" "text" NOT NULL,
     "email" "text" NOT NULL,
-    "isPrincipal" boolean DEFAULT false NOT NULL
+    "isPrincipal" boolean DEFAULT false NOT NULL,
+    "participantIdentifier" "text" NOT NULL
 );
 
 
@@ -3828,7 +4140,8 @@ CREATE TABLE IF NOT EXISTS "public"."ProofImage" (
     "proofImageId" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "registrationId" "uuid",
     "path" "text" NOT NULL,
-    "applicationId" "uuid"
+    "applicationId" "uuid",
+    "orderIndex" integer DEFAULT 0
 );
 
 
@@ -3847,7 +4160,9 @@ CREATE TABLE IF NOT EXISTS "public"."Registration" (
     "sponsoredRegistrationId" "uuid",
     "paymentProofStatus" "public"."PaymentProofStatus" DEFAULT 'pending'::"public"."PaymentProofStatus" NOT NULL,
     "note" "text",
-    "sourceSubmissionId" "text"
+    "sourceSubmissionId" "text",
+    "exceededSponsoredSlots" boolean DEFAULT false,
+    "sponsorshipType" "public"."SponsorshipType" DEFAULT 'none'::"public"."SponsorshipType"
 );
 
 
@@ -3939,6 +4254,11 @@ ALTER TABLE ONLY "public"."Interview"
 
 
 ALTER TABLE ONLY "public"."Participant"
+    ADD CONSTRAINT "Participant_identifier_key" UNIQUE ("participantIdentifier");
+
+
+
+ALTER TABLE ONLY "public"."Participant"
     ADD CONSTRAINT "Participant_pkey" PRIMARY KEY ("participantId");
 
 
@@ -3992,6 +4312,10 @@ CREATE INDEX "BusinessMember_primaryApplicationId_idx" ON "public"."BusinessMemb
 
 
 
+CREATE INDEX "Participant_participantIdentifier_idx" ON "public"."Participant" USING "btree" ("participantIdentifier");
+
+
+
 CREATE UNIQUE INDEX "Registration_event_sourceSubmissionId_unique" ON "public"."Registration" USING "btree" ("eventId", "sourceSubmissionId") WHERE ("sourceSubmissionId" IS NOT NULL);
 
 
@@ -4013,6 +4337,10 @@ CREATE INDEX "idx_interview_date" ON "public"."Interview" USING "btree" ("interv
 
 
 CREATE INDEX "idx_interview_status" ON "public"."Interview" USING "btree" ("status");
+
+
+
+CREATE INDEX "idx_registration_exceeded_sponsored_slots" ON "public"."Registration" USING "btree" ("sponsoredRegistrationId", "exceededSponsoredSlots");
 
 
 
@@ -4076,11 +4404,6 @@ ALTER TABLE ONLY "public"."Application"
 
 ALTER TABLE ONLY "public"."Application"
     ADD CONSTRAINT "Application_interviewId_fkey" FOREIGN KEY ("interviewId") REFERENCES "public"."Interview"("interviewId") ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-
-ALTER TABLE ONLY "public"."BusinessMember"
-    ADD CONSTRAINT "BusinessMember_primaryApplicationId_fkey" FOREIGN KEY ("primaryApplicationId") REFERENCES "public"."Application"("applicationId") ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 
@@ -4668,6 +4991,9 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
+
+
+
 GRANT ALL ON FUNCTION "public"."approve_membership_application"("p_application_id" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."approve_membership_application"("p_application_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."approve_membership_application"("p_application_id" "uuid") TO "service_role";
@@ -4815,6 +5141,12 @@ GRANT ALL ON FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid"
 
 
 
+GRANT ALL ON FUNCTION "public"."get_sector_member_counts"("p_sector_ids" integer[]) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_sector_member_counts"("p_sector_ids" integer[]) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_sector_member_counts"("p_sector_ids" integer[]) TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "anon";
 GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "authenticated";
 GRANT ALL ON TABLE "public"."SponsoredRegistration" TO "service_role";
@@ -4871,9 +5203,9 @@ GRANT ALL ON FUNCTION "public"."january_first_reset"() TO "service_role";
 
 
 REVOKE ALL ON FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone) TO "anon";
 GRANT ALL ON FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone) TO "service_role";
-GRANT ALL ON FUNCTION "public"."process_membership_statuses"("p_reference_time" timestamp with time zone) TO "anon";
 
 
 
@@ -4907,15 +5239,21 @@ GRANT ALL ON FUNCTION "public"."submit_evaluation_form"("p_event_id" "uuid", "p_
 
 
 
-GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb") TO "anon";
-GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_path" "text", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb") TO "service_role";
+GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_paths" "jsonb", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_paths" "jsonb", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."submit_event_registration"("p_event_id" "uuid", "p_member_type" "text", "p_identifier" "text", "p_business_member_id" "uuid", "p_non_member_name" "text", "p_payment_method" "text", "p_payment_paths" "jsonb", "p_registrant" "jsonb", "p_note" "text", "p_other_participants" "jsonb", "p_sponsored_registration_id" "uuid") TO "service_role";
 
 
 
 GRANT ALL ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text", "p_company_profile_type" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text", "p_company_profile_type" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."submit_membership_application"("p_application_type" "text", "p_company_details" "jsonb", "p_representatives" "jsonb", "p_payment_method" "text", "p_application_member_type" "text", "p_payment_proof_url" "text", "p_company_profile_type" "text") TO "service_role";
 
 
 
@@ -5170,275 +5508,128 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 
 
 
-drop extension if exists "pg_net";
 
-drop policy "Enable insert for all users" on "public"."Participant";
+--
+-- Dumped schema changes for auth and storage
+--
 
-drop policy "Enable read access for all users" on "public"."Participant";
+CREATE POLICY "Admins can delete network logos" ON "storage"."objects" FOR DELETE TO "authenticated" USING (("bucket_id" = 'network-logos'::"text"));
 
-drop policy "Website content is readable by everyone" on "public"."WebsiteContent";
 
 
-  create policy "Enable insert for all users"
-  on "public"."Participant"
-  as permissive
-  for insert
-  to anon, authenticated
-with check (true);
+CREATE POLICY "Admins can update network logos" ON "storage"."objects" FOR UPDATE TO "authenticated" USING (("bucket_id" = 'network-logos'::"text")) WITH CHECK (("bucket_id" = 'network-logos'::"text"));
 
 
 
-  create policy "Enable read access for all users"
-  on "public"."Participant"
-  as permissive
-  for select
-  to anon, authenticated
-using (true);
+CREATE POLICY "Admins can upload network logos" ON "storage"."objects" FOR INSERT TO "authenticated" WITH CHECK (("bucket_id" = 'network-logos'::"text"));
 
 
 
-  create policy "Website content is readable by everyone"
-  on "public"."WebsiteContent"
-  as permissive
-  for select
-  to anon, authenticated
-using (("isActive" = true));
+CREATE POLICY "All can read 1aozmya_0" ON "storage"."objects" FOR SELECT USING (("bucket_id" = 'heroimages'::"text"));
 
 
 
-  create policy "Admins can delete network logos"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to authenticated
-using ((bucket_id = 'network-logos'::text));
+CREATE POLICY "Allow all operations for anyone 11d98ol_0" ON "storage"."objects" FOR INSERT TO "authenticated", "anon" WITH CHECK (("bucket_id" = 'paymentproofs'::"text"));
 
 
 
-  create policy "Admins can update network logos"
-  on "storage"."objects"
-  as permissive
-  for update
-  to authenticated
-using ((bucket_id = 'network-logos'::text))
-with check ((bucket_id = 'network-logos'::text));
+CREATE POLICY "Allow all operations for anyone 11d98ol_1" ON "storage"."objects" FOR SELECT TO "authenticated" USING (("bucket_id" = 'paymentproofs'::"text"));
 
 
 
-  create policy "Admins can upload network logos"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to authenticated
-with check ((bucket_id = 'network-logos'::text));
+CREATE POLICY "Allow all operations for anyone 11d98ol_2" ON "storage"."objects" FOR DELETE TO "authenticated", "anon" USING (("bucket_id" = 'paymentproofs'::"text"));
 
 
 
-  create policy "All can read 1aozmya_0"
-  on "storage"."objects"
-  as permissive
-  for select
-  to public
-using ((bucket_id = 'heroimages'::text));
+CREATE POLICY "Allow all operations for anyone 11d98ol_3" ON "storage"."objects" FOR UPDATE TO "authenticated" USING (("bucket_id" = 'paymentproofs'::"text"));
 
 
 
-  create policy "Allow all operations for anyone 11d98ol_0"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to anon, authenticated
-with check ((bucket_id = 'paymentproofs'::text));
+CREATE POLICY "Authenticated can manage 1aozmya_0" ON "storage"."objects" FOR INSERT TO "authenticated" WITH CHECK (("bucket_id" = 'heroimages'::"text"));
 
 
 
-  create policy "Allow all operations for anyone 11d98ol_1"
-  on "storage"."objects"
-  as permissive
-  for select
-  to anon, authenticated
-using ((bucket_id = 'paymentproofs'::text));
+CREATE POLICY "Authenticated can manage 1aozmya_2" ON "storage"."objects" FOR UPDATE TO "authenticated" USING (("bucket_id" = 'heroimages'::"text"));
 
 
 
-  create policy "Allow all operations for anyone 11d98ol_2"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to anon, authenticated
-using ((bucket_id = 'paymentproofs'::text));
+CREATE POLICY "Authenticated can manage 1aozmya_3" ON "storage"."objects" FOR DELETE TO "authenticated" USING (("bucket_id" = 'heroimages'::"text"));
 
 
 
-  create policy "Allow all operations for anyone 11d98ol_3"
-  on "storage"."objects"
-  as permissive
-  for update
-  to anon, authenticated
-using ((bucket_id = 'paymentproofs'::text));
+CREATE POLICY "Authenticated users can delete company profiles" ON "storage"."objects" FOR DELETE TO "authenticated" USING (("bucket_id" = 'companyprofile'::"text"));
 
 
 
-  create policy "Authenticated can manage 1aozmya_0"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to authenticated
-with check ((bucket_id = 'heroimages'::text));
+CREATE POLICY "Authenticated users can update company profiles" ON "storage"."objects" FOR UPDATE TO "authenticated" USING (("bucket_id" = 'companyprofile'::"text")) WITH CHECK (("bucket_id" = 'companyprofile'::"text"));
 
 
 
-  create policy "Authenticated can manage 1aozmya_2"
-  on "storage"."objects"
-  as permissive
-  for update
-  to authenticated
-using ((bucket_id = 'heroimages'::text));
+CREATE POLICY "Authenticated users can upload company profiles" ON "storage"."objects" FOR INSERT WITH CHECK (("bucket_id" = 'companyprofile'::"text"));
 
 
 
-  create policy "Authenticated can manage 1aozmya_3"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to authenticated
-using ((bucket_id = 'heroimages'::text));
+CREATE POLICY "Company profile is publicly readable" ON "storage"."objects" FOR SELECT USING (("bucket_id" = 'companyprofile'::"text"));
 
 
 
-  create policy "Give anon users access to images in folder 19dgg40_0"
-  on "storage"."objects"
-  as permissive
-  for select
-  to anon
-using (((bucket_id = 'logoimage'::text) AND (lower((storage.foldername(name))[1]) = 'public'::text) AND (auth.role() = 'anon'::text)));
+CREATE POLICY "Give anon users access to images in folder 19dgg40_0" ON "storage"."objects" FOR SELECT TO "anon" USING ((("bucket_id" = 'logoimage'::"text") AND ("lower"(("storage"."foldername"("name"))[1]) = 'public'::"text") AND ("auth"."role"() = 'anon'::"text")));
 
 
 
-  create policy "Network logos are publicly readable"
-  on "storage"."objects"
-  as permissive
-  for select
-  to anon, authenticated
-using ((bucket_id = 'network-logos'::text));
+CREATE POLICY "Network logos are publicly readable" ON "storage"."objects" FOR SELECT TO "authenticated", "anon" USING (("bucket_id" = 'network-logos'::"text"));
 
 
 
-  create policy "allow admins to do operations jqdsdq_0"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to authenticated
-with check ((bucket_id = 'headerimage'::text));
+CREATE POLICY "allow admins to do operations jqdsdq_0" ON "storage"."objects" FOR INSERT TO "authenticated" WITH CHECK (("bucket_id" = 'headerimage'::"text"));
 
 
 
-  create policy "allow admins to do operations jqdsdq_1"
-  on "storage"."objects"
-  as permissive
-  for select
-  to authenticated
-using ((bucket_id = 'headerimage'::text));
+CREATE POLICY "allow admins to do operations jqdsdq_1" ON "storage"."objects" FOR SELECT TO "authenticated" USING (("bucket_id" = 'headerimage'::"text"));
 
 
 
-  create policy "allow admins to do operations jqdsdq_2"
-  on "storage"."objects"
-  as permissive
-  for update
-  to authenticated
-using ((bucket_id = 'headerimage'::text));
+CREATE POLICY "allow admins to do operations jqdsdq_2" ON "storage"."objects" FOR UPDATE TO "authenticated" USING (("bucket_id" = 'headerimage'::"text"));
 
 
 
-  create policy "allow admins to do operations jqdsdq_3"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to authenticated
-using ((bucket_id = 'headerimage'::text));
+CREATE POLICY "allow admins to do operations jqdsdq_3" ON "storage"."objects" FOR DELETE TO "authenticated" USING (("bucket_id" = 'headerimage'::"text"));
 
 
 
-  create policy "allow all operations for admins 19dgg40_0"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to authenticated
-with check ((bucket_id = 'logoimage'::text));
+CREATE POLICY "allow all operations for admins 19dgg40_0" ON "storage"."objects" FOR INSERT TO "authenticated" WITH CHECK (("bucket_id" = 'logoimage'::"text"));
 
 
 
-  create policy "allow all operations for admins 19dgg40_1"
-  on "storage"."objects"
-  as permissive
-  for select
-  to authenticated
-using ((bucket_id = 'logoimage'::text));
+CREATE POLICY "allow all operations for admins 19dgg40_1" ON "storage"."objects" FOR SELECT TO "authenticated" USING (("bucket_id" = 'logoimage'::"text"));
 
 
 
-  create policy "allow all operations for admins 19dgg40_2"
-  on "storage"."objects"
-  as permissive
-  for update
-  to authenticated
-using ((bucket_id = 'logoimage'::text));
+CREATE POLICY "allow all operations for admins 19dgg40_2" ON "storage"."objects" FOR UPDATE TO "authenticated" USING (("bucket_id" = 'logoimage'::"text"));
 
 
 
-  create policy "allow all operations for admins 19dgg40_3"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to authenticated
-using ((bucket_id = 'logoimage'::text));
+CREATE POLICY "allow all operations for admins 19dgg40_3" ON "storage"."objects" FOR DELETE TO "authenticated" USING (("bucket_id" = 'logoimage'::"text"));
 
 
 
-  create policy "insert for all 19dgg40_0"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to public
-with check ((bucket_id = 'logoimage'::text));
+CREATE POLICY "insert for all 19dgg40_0" ON "storage"."objects" FOR INSERT WITH CHECK (("bucket_id" = 'logoimage'::"text"));
 
 
 
-  create policy "personalimage_delete_authenticated"
-  on "storage"."objects"
-  as permissive
-  for delete
-  to authenticated
-using ((bucket_id = 'personalimage'::text));
+CREATE POLICY "personalimage_delete_authenticated" ON "storage"."objects" FOR DELETE TO "authenticated" USING (("bucket_id" = 'personalimage'::"text"));
 
 
 
-  create policy "personalimage_insert_authenticated"
-  on "storage"."objects"
-  as permissive
-  for insert
-  to authenticated
-with check ((bucket_id = 'personalimage'::text));
+CREATE POLICY "personalimage_insert_authenticated" ON "storage"."objects" FOR INSERT TO "authenticated" WITH CHECK (("bucket_id" = 'personalimage'::"text"));
 
 
 
-  create policy "personalimage_select_authenticated"
-  on "storage"."objects"
-  as permissive
-  for select
-  to authenticated
-using ((bucket_id = 'personalimage'::text));
+CREATE POLICY "personalimage_select_authenticated" ON "storage"."objects" FOR SELECT TO "authenticated" USING (("bucket_id" = 'personalimage'::"text"));
 
 
 
-  create policy "personalimage_update_authenticated"
-  on "storage"."objects"
-  as permissive
-  for update
-  to authenticated
-using ((bucket_id = 'personalimage'::text))
-with check ((bucket_id = 'personalimage'::text));
+CREATE POLICY "personalimage_update_authenticated" ON "storage"."objects" FOR UPDATE TO "authenticated" USING (("bucket_id" = 'personalimage'::"text")) WITH CHECK (("bucket_id" = 'personalimage'::"text"));
 
 
 
