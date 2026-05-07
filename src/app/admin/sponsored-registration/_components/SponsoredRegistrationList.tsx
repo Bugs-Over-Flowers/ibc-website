@@ -68,10 +68,12 @@ export function SponsoredRegistrationList({
   const handleCopyLink = (uuid: string, eventId: string) => {
     const link = `${window.location.origin}/events/${eventId}/register?sr=${uuid}`;
     navigator.clipboard.writeText(link);
-    toast.success("Link copied to clipboard!");
+    toast.success("Link copied", {
+      description: "Registration link copied to clipboard",
+    });
   };
 
-  const handleToggleStatus = async (id: string, eventId: string) => {
+  const handleToggleStatus = async (id: string, eventId: string, currentStatus: string) => {
     const toastId = toast.loading("Updating status...");
 
     const { error } = await tryCatch(
@@ -86,19 +88,26 @@ export function SponsoredRegistrationList({
         "[SponsoredRegistrationList] Error toggling status:",
         error,
       );
-      toast.error(`Failed to update status: ${error}`, { id: toastId });
+      toast.error("Failed to update status", {
+        description: String(error),
+        id: toastId,
+      });
       return;
     }
 
-    toast.success("Status updated!", { id: toastId });
+    const newStatus = currentStatus === "active" ? "deactivated" : "activated";
+    toast.success(`Status updated`, {
+      description: `Sponsored registration has been ${newStatus}`,
+      id: toastId,
+    });
     router.refresh();
   };
 
   const handleDeleteClick = (registration: SponsoredRegistrationWithEvent) => {
     if (Number(registration.usedCount) > 0) {
-      toast.error(
-        "Cannot delete this sponsored registration because it has already been used.",
-      );
+      toast.error("Cannot delete", {
+        description: "This sponsored registration has already been used. Only unused registrations can be deleted.",
+      });
       return;
     }
 
@@ -124,12 +133,18 @@ export function SponsoredRegistrationList({
 
     if (error) {
       console.error("[SponsoredRegistrationList] Delete error:", error);
-      toast.error(`Failed to delete: ${error}`, { id: toastId });
+      toast.error("Failed to delete", {
+        description: String(error),
+        id: toastId,
+      });
       setIsDeletingId(null);
       return;
     }
 
-    toast.success("Sponsored registration deleted!", { id: toastId });
+    toast.success("Deleted successfully", {
+      description: `"${deletingRegistration.sponsoredBy}" has been removed`,
+      id: toastId,
+    });
     setOpenDeleteDialog(false);
     setDeletingRegistration(null);
     setIsDeletingId(null);
@@ -167,6 +182,7 @@ export function SponsoredRegistrationList({
               handleToggleStatus(
                 registration.sponsoredRegistrationId,
                 registration.eventId,
+                registration.status,
               )
             }
             onViewDetails={() =>
