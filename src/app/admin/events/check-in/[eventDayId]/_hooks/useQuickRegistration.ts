@@ -74,7 +74,7 @@ const useQuickRegistration = ({
           firstName: parsedValue.firstName,
           lastName: parsedValue.lastName,
           email: parsedValue.email,
-          contactNumber: parsedValue.contactNumber,
+          contactNumber: Number(parsedValue.contactNumber),
         },
 
         remark: parsedValue.remark?.trim() || undefined,

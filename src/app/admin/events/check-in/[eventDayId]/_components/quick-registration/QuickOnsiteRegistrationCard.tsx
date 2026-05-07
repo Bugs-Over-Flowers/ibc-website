@@ -30,7 +30,7 @@ export default function QuickOnsiteRegistrationCard({
   const defaultValues: QuickOnsiteRegistrationForm = {
     member: "nonmember",
     nonMemberName: "",
-    contactNumber: "",
+    contactNumber: "" as unknown as number,
     email: "",
     firstName: "",
     lastName: "",

@@ -17,7 +17,7 @@ const EMPTY_REGISTRANT = {
   firstName: "",
   lastName: "",
   email: "",
-  contactNumber: "",
+  contactNumber: "" as unknown as number,
 } as const;
 
 export default function Step2() {
