@@ -1,5 +1,4 @@
 import { Plus, User, X } from "lucide-react";
-import { useRef } from "react";
 import type { useCreateManualMemberStep2 } from "@/app/admin/members/create/_hooks/useCreateManualMemberStep2";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -10,29 +9,15 @@ interface Step2RepresentativeProps {
 }
 
 export function Step2Representative({ form }: Step2RepresentativeProps) {
-  const representativeKeysRef = useRef(new WeakMap<object, string>());
-
-  const getRepresentativeKey = (representative: object) => {
-    const existingKey = representativeKeysRef.current.get(representative);
-
-    if (existingKey) {
-      return existingKey;
-    }
-
-    const nextKey = crypto.randomUUID();
-    representativeKeysRef.current.set(representative, nextKey);
-    return nextKey;
-  };
-
   return (
     <div className="space-y-6">
       <form.AppField mode="array" name="representatives">
         {(field) => {
           const principalRepresentative = field.state.value[0];
           const hasAlternate = field.state.value.length > 1;
-          const alternateRepresentative = hasAlternate
-            ? field.state.value[1]
-            : null;
+          // const alternateRepresentative = hasAlternate
+          //   ? field.state.value[1]
+          //   : null;
 
           if (!principalRepresentative) {
             return null;

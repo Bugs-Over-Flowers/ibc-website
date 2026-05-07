@@ -115,10 +115,7 @@ export const MembershipApplicationStep2Schema = z
     { message: "Company logo is required", path: ["logoImage"] },
   )
   .superRefine((data, ctx) => {
-    if (
-      data.companyProfileType === "website" &&
-      (!data.websiteURL || !data.websiteURL.trim())
-    ) {
+    if (data.companyProfileType === "website" && !data.websiteURL?.trim()) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Company profile is required",

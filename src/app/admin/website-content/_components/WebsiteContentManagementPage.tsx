@@ -328,8 +328,6 @@ function WebsiteContentManagementPageContent() {
             cards={cards}
             hasSelectedCards={hasSelectedCards}
             isDeleteMode={isDeleteMode}
-            isSavingSection={isSavingSection}
-            saveSucceededCount={saveSucceededCount}
             isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={(group) => addCard(group)}
             onCancelDeleteMode={cancelDeleteMode}
@@ -341,6 +339,7 @@ function WebsiteContentManagementPageContent() {
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            saveSucceededCount={saveSucceededCount}
             selectedCardEntryKeys={selectedCardEntryKeys}
             selectedCount={selectedCount}
           />
@@ -353,7 +352,6 @@ function WebsiteContentManagementPageContent() {
             hasSelectedCards={hasSelectedCards}
             isDeleteMode={isDeleteMode}
             isSavingSection={isSavingSection}
-            saveSucceededCount={saveSucceededCount}
             isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={() => addCard()}
             onCancelDeleteMode={cancelDeleteMode}
@@ -365,6 +363,7 @@ function WebsiteContentManagementPageContent() {
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            saveSucceededCount={saveSucceededCount}
             selectedCardEntryKeys={selectedCardEntryKeys}
             selectedCount={selectedCount}
           />

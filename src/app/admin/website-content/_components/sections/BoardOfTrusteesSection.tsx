@@ -308,7 +308,6 @@ export function BoardOfTrusteesSection({
   cards,
   placeholders,
   isSectionActionDisabled,
-  isSavingSection,
   saveSucceededCount,
   onAddCard,
   onDeleteCardsClick,

@@ -68,7 +68,6 @@ export interface BoardOfTrusteesSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
   isSectionActionDisabled: boolean;
-  isSavingSection: boolean;
   saveSucceededCount: number;
   onAddCard: (group: "featured" | "officers" | "trustees" | "other") => void;
   isDeleteMode: boolean;

@@ -241,7 +241,6 @@ export function SecretariatSection({
   cards,
   placeholders,
   isSectionActionDisabled,
-  isSavingSection,
   saveSucceededCount,
   onAddCard,
   onDeleteCardsClick,
