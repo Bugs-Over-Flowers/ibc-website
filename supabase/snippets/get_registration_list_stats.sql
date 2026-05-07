@@ -21,7 +21,7 @@ BEGIN
         COUNT(distinct r."registrationId")::INTEGER AS "totalRegistrations",
         COUNT(distinct r."registrationId") FILTER (WHERE r."paymentStatus" = 'verified')::INTEGER AS "verifiedRegistrations",
         COUNT(distinct r."registrationId") FILTER (WHERE r."paymentStatus" = 'pending')::INTEGER AS "pendingRegistrations",
-        COUNT(p."participantId") FILTER (where r."paymentStatus" = 'verified')::INTEGER as "totalParticipants"
+        COUNT(p."participantId")::INTEGER as "totalParticipants"
     INTO v_result
     FROM "Registration" r
 
