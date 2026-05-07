@@ -198,7 +198,7 @@ export const useEditEventForm = ({ event }: UseEditEventFormOptions) => {
 
       if (!result.success) {
         toast.error(result.error as string);
-        console.error("Update event failed:", result.error);
+        // console.error("Update event failed:", result.error);
         return;
       }
       console.log("Event updated successfully:", result.data);
