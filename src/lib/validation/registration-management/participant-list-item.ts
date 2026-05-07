@@ -34,7 +34,7 @@ export const ParticipantSchema = z.object({
   participantId: z.string(),
   firstName: z.string(),
   lastName: z.string(),
-  email: z.email(),
+  email: z.string(),
   contactNumber: z.string(),
   isPrincipal: z.boolean(),
 });
@@ -100,7 +100,7 @@ export const ParticipantListRPCSchema = z
     participant_id: z.string(),
     first_name: z.string(),
     last_name: z.string(),
-    email: z.email(),
+    email: z.string(),
     contact_number: z.string(),
     affiliation: z.string(),
     registration_date: z.iso.datetime({ offset: true }),

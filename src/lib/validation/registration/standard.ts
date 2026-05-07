@@ -37,8 +37,8 @@ export const RegistrantDetailsSchema = z
       .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    contactNumber: z.number("Invalid contact number"),
-    email: z.email().trim(),
+    contactNumber: z.string(),
+    email: z.string().trim(),
   })
   .transform((data) => ({
     ...data,

@@ -44,10 +44,7 @@ export default function QuickOnsiteRegistrantSection({
         </quickForm.AppField>
         <quickForm.AppField name="contactNumber">
           {(field) => (
-            <field.NumberField
-              label="Contact Number"
-              placeholder="09XXXXXXXXX"
-            />
+            <field.TextField label="Contact Number" placeholder="09XXXXXXXXX" />
           )}
         </quickForm.AppField>
       </div>

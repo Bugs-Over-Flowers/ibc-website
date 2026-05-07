@@ -63,7 +63,7 @@ export function ParticipantFields({ form, index }: ParticipantFieldsProps) {
               <Label className="text-sm">
                 Contact Number / Telephone Number
               </Label>
-              <field.NumberField
+              <field.TextField
                 className="h-11 rounded-xl"
                 placeholder="09XXXXXXXXX / 0XXXX-XXXX"
               />

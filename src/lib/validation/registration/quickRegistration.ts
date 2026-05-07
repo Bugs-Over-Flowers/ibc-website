@@ -16,8 +16,8 @@ export const QuickOnsiteRegistrantSchema = z
       .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    contactNumber: z.number("Invalid contact number"),
-    email: z.email().trim(),
+    contactNumber: z.string(),
+    email: z.string(),
   })
   .transform((data) => ({
     ...data,
@@ -42,8 +42,8 @@ export const QuickOnsiteRegistrationFormSchema = z
       .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    email: z.email(),
-    contactNumber: z.number("Invalid contact number"),
+    email: z.string(),
+    contactNumber: z.string(),
     remark: z
       .string()
       .max(500, "Remark cannot exceed 500 characters")

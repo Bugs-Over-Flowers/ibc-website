@@ -48,7 +48,7 @@ const initialState: RegistrationStore = {
       registrant: {
         id: crypto.randomUUID(),
         email: "",
-        contactNumber: "" as unknown as number,
+        contactNumber: "",
         firstName: "",
         lastName: "",
       },
