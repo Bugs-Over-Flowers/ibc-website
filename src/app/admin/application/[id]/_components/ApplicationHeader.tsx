@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAction } from "@/hooks/useAction";
+import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
 import { updatePaymentProofStatus } from "@/server/applications/mutations/updatePaymentProofStatus";
@@ -31,6 +32,11 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
   const proofImage = application.ProofImage?.[0];
   const hasProofImage = !!proofImage;
   const isDecisionLocked = paymentProofStatus !== "pending";
+  const paymentRequirement = getMembershipPaymentRequirement({
+    applicationMemberType: application.applicationMemberType,
+    applicationType: application.applicationType,
+    previousApplicationMemberType: application.previousApplicationMemberType,
+  });
 
   const { execute: updateProofStatus, isPending: isUpdatingStatus } = useAction(
     tryCatch(updatePaymentProofStatus),
@@ -51,17 +57,6 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
       status,
     });
   };
-
-  const PERSONAL_REGISTRATION_FEE = 5000;
-  const CORPORATE_REGISTRATION_FEE = 10000;
-  const membershipTypeLabel =
-    application.applicationMemberType === "personal"
-      ? "Personal Membership"
-      : "Corporate Membership";
-  const expectedRegistrationFee =
-    application.applicationMemberType === "corporate"
-      ? CORPORATE_REGISTRATION_FEE
-      : PERSONAL_REGISTRATION_FEE;
 
   return (
     <div className="space-y-5">
@@ -100,13 +95,13 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
         </div>
 
         {/* Payment Proof Section */}
-        {hasProofImage && (
+        {paymentRequirement.requiresPayment && hasProofImage && (
           <PaymentProofModal
             applicationId={application.applicationId}
-            expectedRegistrationFee={expectedRegistrationFee}
+            expectedRegistrationFee={paymentRequirement.expectedAmount}
             isDecisionLocked={isDecisionLocked}
             isUpdatingStatus={isUpdatingStatus}
-            membershipTypeLabel={membershipTypeLabel}
+            membershipTypeLabel={paymentRequirement.membershipTypeLabel}
             onDecision={handleDecision}
             onProofReplaced={({ paymentProofStatus }) => {
               setPaymentProofStatus(paymentProofStatus);

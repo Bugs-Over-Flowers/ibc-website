@@ -2,10 +2,12 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
-
-type MembershipStatus = Database["public"]["Enums"]["MembershipStatus"];
+import { sendMembershipStatusNotifications } from "@/server/members/mutations/sendMembershipStatusNotifications";
+import type {
+  MemberStatusTransition,
+  MembershipStatus,
+} from "@/server/members/types";
 
 interface UpdateMembershipStatusInput {
   memberIds: string[];
@@ -27,15 +29,55 @@ export async function updateMembershipStatus(
 
   const supabase = await createActionClient();
 
+  const { data: beforeRows, error: beforeError } = await supabase
+    .from("BusinessMember")
+    .select("businessMemberId,businessName,membershipStatus")
+    .in("businessMemberId", memberIds);
+
+  if (beforeError) {
+    throw new Error(
+      `Failed to load current member statuses: ${beforeError.message}`,
+    );
+  }
+
   const { data, error } = await supabase
     .from("BusinessMember")
     .update({ membershipStatus: status })
     .in("businessMemberId", memberIds)
-    .select("businessMemberId");
+    .select("businessMemberId,businessName,membershipStatus");
 
   if (error) {
     throw new Error(`Failed to update membership status: ${error.message}`);
   }
+
+  const beforeMap = new Map(
+    (beforeRows ?? []).map((row) => [row.businessMemberId, row]),
+  );
+
+  const transitions: MemberStatusTransition[] = (data ?? [])
+    .map((row) => {
+      const before = beforeMap.get(row.businessMemberId);
+      if (!before?.membershipStatus || !row.membershipStatus) {
+        return null;
+      }
+
+      if (before.membershipStatus === row.membershipStatus) {
+        return null;
+      }
+
+      return {
+        businessMemberId: row.businessMemberId,
+        businessName: row.businessName,
+        previousStatus: before.membershipStatus,
+        currentStatus: row.membershipStatus,
+      } satisfies MemberStatusTransition;
+    })
+    .filter((row): row is MemberStatusTransition => row !== null);
+
+  const notificationSummary = await sendMembershipStatusNotifications(
+    supabase,
+    transitions,
+  );
 
   updateTag(CACHE_TAGS.members.all);
   updateTag(CACHE_TAGS.members.admin);
@@ -47,5 +89,6 @@ export async function updateMembershipStatus(
     success: true,
     updatedCount: data.length,
     message: `Successfully updated ${data.length} member(s) to ${status}`,
+    emailSummary: notificationSummary,
   };
 }

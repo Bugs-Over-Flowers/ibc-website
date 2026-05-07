@@ -1,9 +1,6 @@
 import "server-only";
 
-import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { applyAdmin5mCache } from "@/lib/cache/profiles";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,11 +28,6 @@ export type EvaluationWithEventRpc = {
 export async function getAllEvaluationsRpc(
   requestCookies: RequestCookie[],
 ): Promise<EvaluationWithEventRpc[]> {
-  "use cache";
-  applyAdmin5mCache();
-  cacheTag(CACHE_TAGS.evaluations.all);
-  cacheTag(CACHE_TAGS.evaluations.admin);
-
   const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase.rpc("get_all_evaluations");
@@ -51,11 +43,6 @@ export async function getEvaluationsByEventId(
   requestCookies: RequestCookie[],
   eventId: string,
 ): Promise<EvaluationWithEventRpc[]> {
-  "use cache";
-  applyAdmin5mCache();
-  cacheTag(CACHE_TAGS.evaluations.all);
-  cacheTag(CACHE_TAGS.evaluations.admin);
-
   const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase.rpc("get_evaluations_by_event", {

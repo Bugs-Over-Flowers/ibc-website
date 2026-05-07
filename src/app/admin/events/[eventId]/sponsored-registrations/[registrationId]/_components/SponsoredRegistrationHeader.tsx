@@ -35,39 +35,66 @@ export function SponsoredRegistrationHeader({
 
   const { execute: updateSponsorName, isPending: isUpdatingSponsorName } =
     useAction(
-      tryCatch(async (): Promise<{ success: boolean }> => {
-        await updateSRSponsorName({
-          sponsoredRegistrationId:
-            sponsoredRegistration.sponsoredRegistrationId,
-          eventId,
-          sponsoredBy: sponsorName.trim(),
-        });
-        return { success: true };
-      }),
+      tryCatch(
+        async (): Promise<{
+          success: boolean;
+          oldName: string;
+          newName: string;
+        }> => {
+          const oldName = sponsoredRegistration.sponsoredBy;
+          await updateSRSponsorName({
+            sponsoredRegistrationId:
+              sponsoredRegistration.sponsoredRegistrationId,
+            eventId,
+            sponsoredBy: sponsorName.trim(),
+          });
+          return { success: true, oldName, newName: sponsorName.trim() };
+        },
+      ),
       {
-        onSuccess: () => {
-          toast.success("Sponsor name updated successfully");
+        onSuccess: (result: {
+          success: boolean;
+          oldName: string;
+          newName: string;
+        }) => {
+          toast.success("Sponsor name updated", {
+            description: `Changed from "${result.oldName}" to "${result.newName}"`,
+          });
           setIsEditingSponsorName(false);
           router.refresh();
         },
         onError: (error: unknown) => {
+          const errorMessage = "Failed to update sponsor name";
+          let errorDescription = "Please try again later";
+
           if (typeof error === "string") {
-            toast.error(error);
+            errorDescription = error;
           } else if (error instanceof Error) {
-            toast.error(error.message);
-          } else {
-            toast.error("Failed to update sponsor name");
+            errorDescription = error.message;
           }
+
+          toast.error(errorMessage, {
+            description: errorDescription,
+          });
         },
       },
     );
 
   const handleSaveSponsorName = async () => {
-    if (!sponsorName.trim()) {
-      toast.error("Sponsor name cannot be empty");
+    const trimmedName = sponsorName.trim();
+    if (!trimmedName) {
+      toast.error("Validation error", {
+        description: "Sponsor name cannot be empty",
+      });
       return;
     }
-    if (sponsorName.trim() === sponsoredRegistration.sponsoredBy) {
+    if (trimmedName.length > 255) {
+      toast.error("Validation error", {
+        description: "Sponsor name must be 255 characters or less",
+      });
+      return;
+    }
+    if (trimmedName === sponsoredRegistration.sponsoredBy) {
       setIsEditingSponsorName(false);
       return;
     }

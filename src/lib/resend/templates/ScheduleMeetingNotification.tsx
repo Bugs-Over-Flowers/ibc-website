@@ -56,7 +56,7 @@ export default function MeetingNotificationEmail({
       .replace(/\{INTERVIEW_VENUE\}/g, interviewVenue);
 
     if (!hasDatePlaceholder && !hasVenuePlaceholder) {
-      processed = `${processed}<p><strong>Interview Details:</strong></p><p>Date &amp; Time: ${interviewDate}</p><p>Venue: ${interviewVenue}</p>`;
+      processed = `${processed}<p><strong>Interview Details:</strong></p><p>Date &amp; Time: <strong>${interviewDate}</strong></p><p>Venue: <strong>${interviewVenue}</strong></p>`;
     }
 
     return sanitizeEmailRichText(processed);

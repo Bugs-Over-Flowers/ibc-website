@@ -24,6 +24,7 @@ export async function loginAsAdmin(page: Page) {
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
   const testEmail = process.env.TEST_EMAIL;
   const testPassword = process.env.TEST_PASSWORD;
 

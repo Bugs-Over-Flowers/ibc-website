@@ -1,9 +1,9 @@
 "use server";
 
-import type { ServerFunction } from "@/lib/server/types";
+import type { AsyncFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 
-export const logout: ServerFunction<[undefined], boolean> = async () => {
+export const logout: AsyncFunction<[undefined], boolean> = async () => {
   const supabase = await createActionClient();
   const { error } = await supabase.auth.signOut();
 

@@ -14,18 +14,14 @@ interface UseVerifyPaymentProofProps {
 export function useVerifyPaymentProof({
   paymentProofStatus,
 }: UseVerifyPaymentProofProps) {
-  const scannedData = useAttendanceStore((state) => state.scannedData);
-  const setScannedData = useAttendanceStore((state) => state.setScannedData);
+  const setPaymentProofStatus = useAttendanceStore(
+    (state) => state.setPaymentProofStatus,
+  );
 
   return useOptimisticAction(tryCatch(verifyPayment), paymentProofStatus, {
     optimisticUpdate: (_prev, _registrationId) => "accepted" as const,
     onSuccess: () => {
-      if (scannedData) {
-        setScannedData({
-          ...scannedData,
-          paymentProofStatus: "accepted",
-        });
-      }
+      setPaymentProofStatus("accepted");
 
       toast.success("Payment proof accepted");
     },

@@ -15,7 +15,7 @@ export async function getFeaturedMembers(cookieStore: RequestCookie[]) {
 
   const supabase = await createClient(cookieStore);
   // Get current date in Philippines timezone
-  const now = new Date().toLocaleDateString("en-CA", {
+  const now = new Date().toLocaleDateString("en-PH", {
     timeZone: "Asia/Manila",
   });
 

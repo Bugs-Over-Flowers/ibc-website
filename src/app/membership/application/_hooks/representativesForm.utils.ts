@@ -34,18 +34,23 @@ const emptyAlternateRepresentative: Representative = {
 export function getNormalizedRepresentatives(
   representatives?: Representative[],
 ): Representative[] {
-  return [
+  const result: Representative[] = [
     {
       ...emptyPrincipalRepresentative,
       ...(representatives?.[0] ?? {}),
       companyMemberType: "principal",
     },
-    {
-      ...emptyAlternateRepresentative,
-      ...(representatives?.[1] ?? {}),
-      companyMemberType: "alternate",
-    },
   ];
+
+  if (representatives && representatives.length > 1) {
+    result.push({
+      ...emptyAlternateRepresentative,
+      ...(representatives[1] ?? {}),
+      companyMemberType: "alternate",
+    });
+  }
+
+  return result;
 }
 
 export function enforceRepresentativeOrder(

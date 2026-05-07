@@ -4,9 +4,11 @@ import {
   Building2,
   Calendar,
   FileText,
+  Globe,
   HandCoins,
   LayoutDashboard,
   MessageSquareDiff,
+  Network,
   Users,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -48,6 +50,16 @@ const menuItems = [
     title: "Sectors",
     icon: Building2,
     href: "/admin/manage-sector",
+  },
+  {
+    title: "Networks",
+    icon: Network,
+    href: "/admin/networks",
+  },
+  {
+    title: "Website Content",
+    icon: Globe,
+    href: "/admin/website-content",
   },
 ];
 

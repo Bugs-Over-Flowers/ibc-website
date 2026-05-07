@@ -2,11 +2,20 @@
 
 import { Eye, Target } from "lucide-react";
 import { motion } from "motion/react";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
 
-export function AboutVisionMission() {
+interface AboutVisionMissionProps {
+  visionParagraph?: string;
+  missionParagraph?: string;
+}
+
+export function AboutVisionMission({
+  visionParagraph,
+  missionParagraph,
+}: AboutVisionMissionProps) {
   return (
     <section className="py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -19,14 +28,20 @@ export function AboutVisionMission() {
         >
           <motion.div variants={fadeInUp}>
             <VisionMissionCard
-              description="To build and catalyze a sustainable business community which will expand the frontiers of growth and development in the region."
+              description={
+                visionParagraph ??
+                "To build and catalyze a sustainable business community which will expand the frontiers of growth and development in the region."
+              }
               icon={Eye}
               title="Our Vision"
             />
           </motion.div>
           <motion.div variants={fadeInUp}>
             <VisionMissionCard
-              description="As a socially & environmentally responsible business community, generate optimum benefits to stakeholders through policy advisory & advocacy; vital support services & trade; tourism and investment promotion."
+              description={
+                missionParagraph ??
+                "As a socially & environmentally responsible business community, generate optimum benefits to stakeholders through policy advisory & advocacy; vital support services & trade; tourism and investment promotion."
+              }
               icon={Target}
               title="Our Mission"
             />
@@ -57,9 +72,10 @@ const VisionMissionCard = ({
         </div>
         <h3 className="font-bold text-3xl text-foreground">{title}</h3>
       </div>
-      <p className="mb-4 text-foreground/80 text-xl leading-relaxed">
-        {description}
-      </p>
+      <RichTextDisplay
+        className="mb-4 text-foreground/80 text-xl leading-relaxed **:text-inherit"
+        content={description}
+      />
     </CardContent>
   </Card>
 );

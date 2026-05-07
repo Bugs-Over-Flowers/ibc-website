@@ -2,6 +2,8 @@ import { create } from "zustand";
 
 interface SelectedApplicationsState {
   selectedApplicationIds: Set<string>;
+  isSelectionLocked: boolean;
+  setSelectionLocked: (isLocked: boolean) => void;
   toggleSelection: (applicationId: string) => void;
   selectAll: (applicationIds: string[]) => void;
   clearSelection: () => void;
@@ -12,8 +14,15 @@ interface SelectedApplicationsState {
 export const useSelectedApplicationsStore = create<SelectedApplicationsState>(
   (set, get) => ({
     selectedApplicationIds: new Set(),
+    isSelectionLocked: false,
+
+    setSelectionLocked: (isLocked: boolean) => {
+      set({ isSelectionLocked: isLocked });
+    },
 
     toggleSelection: (applicationId: string) => {
+      if (get().isSelectionLocked) return;
+
       set((state) => {
         const newSet = new Set(state.selectedApplicationIds);
         if (newSet.has(applicationId)) {
@@ -26,6 +35,7 @@ export const useSelectedApplicationsStore = create<SelectedApplicationsState>(
     },
 
     selectAll: (applicationIds: string[]) => {
+      if (get().isSelectionLocked) return;
       set({ selectedApplicationIds: new Set(applicationIds) });
     },
 

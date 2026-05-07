@@ -11,6 +11,10 @@
   "chat.tools.terminal.autoApprove": {
     "bun": true,
     "ForEach-Object": true,
-    "Set-Content": true
+    "Set-Content": true,
+    "Resolve-Path": true,
+    "New-Object": true,
+    "Test-Path": true,
+    "ConvertFrom-Json": true
   }
 }

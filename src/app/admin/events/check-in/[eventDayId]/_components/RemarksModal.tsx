@@ -1,7 +1,7 @@
 "use client";
 
 import { revalidateLogic } from "@tanstack/react-form";
-import { useEffect, useEffectEvent } from "react";
+import { useEffect } from "react";
 import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,14 @@ export default function RemarksModal() {
 
   const setRemark = useAttendanceStore((state) => state.setRemark);
   const scannedData = useAttendanceStore((state) => state.scannedData);
+  const participantScanData = useAttendanceStore(
+    (state) => state.participantScanData,
+  );
+
+  const participantName =
+    scannedData?.participants.find(
+      (p) => p.participantId === selectedRemarkParticipantId,
+    )?.firstName ?? participantScanData?.participant.firstName;
 
   const form = useAppForm({
     defaultValues: {
@@ -47,31 +55,20 @@ export default function RemarksModal() {
     },
   });
 
-  const handleSetInitialState = useEffectEvent(
-    (selectedRemarkParticipantId: string | null) => {
-      if (selectedRemarkParticipantId !== "") {
-        form.reset();
-      }
-    },
-  );
-
   useEffect(() => {
-    if (selectedRemarkParticipantId !== "") {
-      handleSetInitialState(selectedRemarkParticipantId);
-    }
-  }, [selectedRemarkParticipantId]);
+    if (!selectedRemarkParticipantId) return;
+
+    form.reset({
+      remark: getEditingParticipantRemark(selectedRemarkParticipantId),
+    });
+  }, [getEditingParticipantRemark, form, selectedRemarkParticipantId]);
 
   return (
     <Dialog open={!!selectedRemarkParticipantId}>
       <DialogContent className="max-w-sm gap-0 p-0" showCloseButton={false}>
         <div className="border-b px-5 py-4">
           <DialogTitle className="font-medium text-base">
-            Remarks -{" "}
-            {
-              scannedData?.participants.find(
-                (p) => p.participantId === selectedRemarkParticipantId,
-              )?.firstName
-            }
+            Remarks - {participantName}
           </DialogTitle>
           <p className="mt-0.5 text-muted-foreground text-xs">
             Add a note for this participant's check-in.

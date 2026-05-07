@@ -98,6 +98,15 @@ export const useMembershipStep2 = () => {
         defaultApplicationDataStep2.logoImageURL,
       );
     }
+    if (
+      defaultApplicationDataStep2.companyProfileType !==
+      currentValues.companyProfileType
+    ) {
+      form.setFieldValue(
+        "companyProfileType",
+        defaultApplicationDataStep2.companyProfileType,
+      );
+    }
   }, [defaultApplicationDataStep2, form]);
 
   return form;

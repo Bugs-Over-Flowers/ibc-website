@@ -1,6 +1,7 @@
 import type { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { useFieldContext } from "@/hooks/_formHooks";
+import { IMAGE_UPLOAD_ACCEPT_ATTR } from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
@@ -29,7 +30,7 @@ function ImageField({
     <Field className={cn("grid gap-2", className)} data-invalid={isInvalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
       <Input
-        accept="image/*"
+        accept={IMAGE_UPLOAD_ACCEPT_ATTR}
         className="cursor-pointer"
         id={field.name}
         multiple={multiple}

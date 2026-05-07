@@ -119,7 +119,7 @@ export function MembershipApplicationForm({
     form: step4Form,
     goBack: step4GoBack,
     applicationData,
-  } = useMembershipStep4();
+  } = useMembershipStep4({ sectors });
 
   const scrollToTop = () => {
     requestAnimationFrame(() => {

@@ -6,10 +6,7 @@ const sponsoredRegistrationBase = {
     .string()
     .min(1, "Sponsor name is required")
     .max(255, "Sponsor name too long"),
-  feeDeduction: z
-    .number()
-    .min(0, "Fee deduction cannot be negative")
-    .max(1500, "Fee deduction cannot exceed ₱1500"),
+  feeDeduction: z.number().min(0, "Fee deduction cannot be negative"),
   maxSponsoredGuests: z
     .number()
     .int("Must be a whole number")
@@ -20,7 +17,9 @@ const sponsoredRegistrationBase = {
 export const createSRFormSchema = z.object({
   eventId: z.string().min(1, "Please select an event"),
   ...sponsoredRegistrationBase,
-  feeDeduction: z.coerce.number("Please input a valid number").min(0).max(1500),
+  feeDeduction: z.coerce
+    .number("Please input a valid number")
+    .min(0, "Fee deduction cannot be negative"),
   maxSponsoredGuests: z.coerce
     .number("Please input a valid number")
     .int()

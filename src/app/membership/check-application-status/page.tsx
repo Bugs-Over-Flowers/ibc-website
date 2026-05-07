@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ApplicationStatusForm } from "./_components/ApplicationStatusForm";
 import { BackButton } from "./_components/BackButton";
+
+export const metadata: Metadata = {
+  title: "Check Application Status",
+  description:
+    "Track your membership application progress and interview schedule.",
+};
 
 function FormSkeleton() {
   return (

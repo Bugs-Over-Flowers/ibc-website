@@ -2,6 +2,7 @@ import type { Database } from "@/lib/supabase/db.types";
 import { createE2EAdminClient } from "../helpers/supabase";
 
 type EventInsert = Database["public"]["Tables"]["Event"]["Insert"];
+type ApplicationInsert = Database["public"]["Tables"]["Application"]["Insert"];
 type BusinessMemberInsert =
   Database["public"]["Tables"]["BusinessMember"]["Insert"];
 
@@ -16,6 +17,7 @@ export interface E2ETestData {
   businessMember?: {
     businessMemberId: string;
     businessName: string;
+    applicationId: string;
   };
 }
 
@@ -70,29 +72,52 @@ export async function seedE2ERegistrationData(
     throw new Error(`Failed to seed event: ${eventError.message}`);
   }
 
-  let businessMember:
-    | {
-        businessMemberId: string;
-        businessName: string;
-      }
-    | undefined;
+  let businessMember: E2ETestData["businessMember"] | undefined;
 
   // Create business member if requested (for member registration tests)
   if (options?.createBusinessMember) {
+    const applicationData: ApplicationInsert = {
+      applicationType: "newMember",
+      applicationMemberType: "corporate",
+      companyName: `E2E Test Company ${timestamp}`,
+      companyAddress: "E2E Test Address",
+      landline: "(02) 0000-0000",
+      mobileNumber: "09170000000",
+      emailAddress: "member@example.com",
+      paymentMethod: "BPI",
+      websiteURL: "https://e2e-test.local",
+      logoImageURL: "https://picsum.photos/200/200",
+      identifier: `e2e-app-${timestamp}`,
+      paymentProofStatus: "accepted",
+      applicationStatus: "approved",
+    };
+
+    const { data: application, error: applicationError } = await supabase
+      .from("Application")
+      .insert(applicationData)
+      .select("applicationId")
+      .single();
+
+    if (applicationError || !application) {
+      throw new Error(
+        `Failed to seed application: ${applicationError?.message ?? "unknown"}`,
+      );
+    }
+
     const memberData: BusinessMemberInsert = {
       businessName: `E2E Test Company ${timestamp}`,
       identifier: `e2e-${timestamp}`,
       sectorId: 1,
       websiteURL: "https://e2e-test.local",
       logoImageURL: "https://picsum.photos/200/200",
-      joinDate: new Date().toISOString(),
+      joinDate: new Date().toISOString().split("T")[0],
       membershipStatus: "paid",
       lastPaymentDate: new Date().toISOString(),
       featuredExpirationDate: null,
       membershipExpiryDate: new Date(
         Date.now() + 365 * 24 * 60 * 60 * 1000,
       ).toISOString(),
-      primaryApplicationId: null,
+      primaryApplicationId: application.applicationId,
     };
 
     const { data: member, error: memberError } = await supabase
@@ -108,6 +133,7 @@ export async function seedE2ERegistrationData(
     businessMember = {
       businessMemberId: member.businessMemberId,
       businessName: member.businessName,
+      applicationId: member.primaryApplicationId,
     };
   }
 

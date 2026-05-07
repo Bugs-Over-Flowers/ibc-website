@@ -35,6 +35,7 @@ interface RegistrationStoreActions {
   clearSponsorInfo: () => void;
   resetStore: () => void;
 }
+
 const initialState: RegistrationStore = {
   step: 1,
   eventDetails: null,
@@ -55,9 +56,10 @@ const initialState: RegistrationStore = {
     },
     step3: {
       paymentMethod: "onsite",
-    },
+    } as StandardRegistrationSchema["step3"],
     step4: {
       termsAndConditions: false,
+      note: undefined,
     },
   },
   sponsorUuid: undefined,
@@ -116,13 +118,17 @@ const useRegistrationStore = create<
       partialize: (state) => {
         const { registrationData, ...rest } = state;
 
-        // Exclude paymentProof from step3
         const sanitizedRegistrationData = registrationData
           ? {
               ...registrationData,
               step3: registrationData.step3
                 ? {
                     paymentMethod: registrationData.step3.paymentMethod,
+                  }
+                : undefined,
+              step4: registrationData.step4
+                ? {
+                    note: registrationData.step4.note,
                   }
                 : undefined,
             }

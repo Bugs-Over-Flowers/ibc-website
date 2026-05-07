@@ -3,66 +3,36 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import writeXlsxFile from "write-excel-file/browser";
 
+type CellValue = string | number | boolean | Date | null | undefined;
+
+export interface ExportEventDetails {
+  title: string;
+  dayLabel?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  venue?: string | null;
+}
+
 export interface ExportToExcelOptions<TData> {
-  /**
-   * The data to export
-   */
   data: TData[];
-  /**
-   * Column definitions from TanStack Table
-   */
   columns: ColumnDef<TData>[];
-  /**
-   * Name of the Excel file (without extension)
-   * If not provided, defaults to "export_YYYY-MM-DD"
-   */
+  event: ExportEventDetails;
   filename?: string;
-  /**
-   * Name of the worksheet tab
-   * Defaults to "Sheet1"
-   */
   sheetName?: string;
-  /**
-   * Column keys to exclude from export (e.g., ["actions", "id"])
-   * Defaults to ["actions"]
-   */
   excludeColumns?: string[];
-  /**
-   * Custom formatters for specific column keys
-   * Key is the accessorKey, value is a function that transforms the cell value
-   */
   formatters?: Partial<
     Record<keyof TData, (value: unknown, row: TData) => string | number>
   >;
-  /**
-   * Custom column widths (in characters)
-   * Defaults to 20 for all columns
-   */
   columnWidths?: number[];
 }
 
-/**
- * Exports data to Excel format using TanStack Table column definitions.
- *
- * @param options - Configuration options for the export
- * @returns Promise that resolves when export is complete
- *
- * @example
- * ```ts
- * await exportToExcel({
- *   data: participantList,
- *   columns: participantListColumns,
- *   filename: "participants",
- *   excludeColumns: ["actions"],
- * });
- * ```
- */
 export async function exportToExcel<TData extends Record<string, unknown>>(
   options: ExportToExcelOptions<TData>,
 ): Promise<void> {
   const {
     data,
     columns,
+    event,
     filename,
     sheetName = "Sheet1",
     excludeColumns = ["actions"],
@@ -71,74 +41,177 @@ export async function exportToExcel<TData extends Record<string, unknown>>(
   } = options;
 
   try {
-    // Filter out excluded columns and ensure they have accessor keys
-    const exportableColumns = columns.filter((col) => {
-      if (!("accessorKey" in col)) return false;
-      const key = col.accessorKey as string;
-      return !excludeColumns.includes(key);
-    });
+    const exportableColumns = columns.flatMap((col) => {
+      if (!("accessorKey" in col) || col.accessorKey == null) {
+        return [];
+      }
 
-    // Create schema for write-excel-file
-    const schema = exportableColumns.map((col, index) => {
-      const key = (col as { accessorKey: string }).accessorKey as keyof TData;
-      const header =
-        typeof col.header === "string" ? col.header : (key as string);
+      const key = String(col.accessorKey);
+      if (excludeColumns.includes(key)) {
+        return [];
+      }
 
-      return {
-        column: header,
-        width: columnWidths?.[index] ?? 20,
-        type: String,
-        value: (row: TData) => {
-          const value = row[key];
-
-          // Use custom formatter if available
-          const keyString = String(key);
-          if (keyString in formatters) {
-            const formatter = (
-              formatters as Record<
-                string,
-                (value: unknown, row: TData) => string | number
-              >
-            )[keyString];
-            if (formatter) {
-              return String(formatter(value, row));
-            }
-          }
-
-          // Default formatting
-          if (value === null || value === undefined) {
-            return "";
-          }
-
-          // Handle dates
-          if (value instanceof Date) {
-            return value.toLocaleDateString();
-          }
-
-          // Handle date strings (ISO format)
-          if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
-            const date = new Date(value);
-            if (!Number.isNaN(date.getTime())) {
-              return date.toLocaleDateString();
-            }
-          }
-
-          // Return as-is for other types
-          return String(value);
+      return [
+        {
+          key,
+          header: typeof col.header === "string" ? col.header : key,
         },
-      };
+      ];
     });
 
-    // Generate filename
-    const finalFilename =
-      filename ?? `export_${new Date().toISOString().split("T")[0]}.xlsx`;
+    const totalColumns = exportableColumns.length;
+    if (totalColumns === 0) {
+      return;
+    }
 
-    // Write file
-    await writeXlsxFile(data, {
-      schema,
-      fileName: finalFilename,
+    const formattersByKey = formatters as Record<
+      string,
+      (value: unknown, row: TData) => string | number
+    >;
+
+    const getCellValue = (row: TData, key: string): CellValue => {
+      const value = row[key as keyof TData];
+
+      const formatter = formattersByKey[key];
+      if (formatter) {
+        return formatter(value, row);
+      }
+
+      if (value === null || value === undefined) {
+        return "";
+      }
+
+      if (value instanceof Date) {
+        return value.toLocaleDateString();
+      }
+
+      if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+        const date = new Date(value);
+        if (!Number.isNaN(date.getTime())) {
+          return date.toLocaleDateString();
+        }
+      }
+
+      return value as CellValue;
+    };
+
+    const subtitle:
+      | { type: "plain"; value: string }
+      | { type: "labeled"; label: string; value: string }
+      | null = event.dayLabel
+      ? { type: "plain", value: event.dayLabel }
+      : (() => {
+          if (!event.startDate && !event.endDate) {
+            return null;
+          }
+          const start = event.startDate
+            ? new Date(event.startDate).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })
+            : null;
+          const end = event.endDate
+            ? new Date(event.endDate).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })
+            : null;
+          if (start && end) {
+            return start === end
+              ? { type: "labeled", label: "Date", value: start }
+              : { type: "labeled", label: "Dates", value: `${start} — ${end}` };
+          }
+          return {
+            type: "labeled",
+            label: "Date",
+            value: (start ?? end) || "",
+          };
+        })();
+
+    const renderLabeledRow = (label: string, value: string) => [
+      { value: label, fontWeight: "bold" as const },
+      ...(totalColumns > 1
+        ? [{ value, span: totalColumns - 1, align: "left" as const }]
+        : []),
+    ];
+
+    const exportType = sheetName !== "Sheet1" ? sheetName : "Export";
+    const generatedAt = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const sheetData = [
+      // Row 1: Event title
+      [
+        {
+          value: event.title,
+          fontWeight: "bold" as const,
+          fontSize: 20,
+          span: totalColumns,
+        },
+      ],
+      // Row 2: Subtitle (day label or date range)
+      ...(subtitle
+        ? [
+            subtitle.type === "plain"
+              ? [{ value: subtitle.value, span: totalColumns }]
+              : renderLabeledRow(subtitle.label, subtitle.value),
+          ]
+        : []),
+      // Row 3: Venue (if present)
+      ...(event.venue ? [renderLabeledRow("Venue", event.venue)] : []),
+      // Row 4: Export type
+      [
+        {
+          value: exportType,
+          fontWeight: "bold" as const,
+          fontSize: 14,
+          span: totalColumns,
+        },
+      ],
+      // Row 5: Generated timestamp
+      [
+        {
+          value: `Generated: ${generatedAt}`,
+          span: totalColumns,
+        },
+      ],
+      // Row 6: Empty spacer
+      new Array(totalColumns).fill(null),
+      // Column headers (styled: dark blue + bold)
+      exportableColumns.map((column) => ({
+        value: column.header,
+        fontWeight: "bold",
+        backgroundColor: "#b8cbd9",
+      })),
+      // Data rows
+      ...data.map((row) =>
+        exportableColumns.map((column) => getCellValue(row, column.key)),
+      ),
+    ];
+
+    const sheetColumns = exportableColumns.map((_, index) => ({
+      width: columnWidths?.[index] ?? 20,
+    }));
+
+    const finalFilename = filename
+      ? filename.endsWith(".xlsx")
+        ? filename
+        : `${filename}.xlsx`
+      : `export_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+    const workbook = writeXlsxFile(sheetData, {
       sheet: sheetName,
+      columns: sheetColumns,
     });
+
+    await workbook.toFile(finalFilename);
   } catch (error) {
     console.error("Failed to export to Excel:", error);
     throw error;

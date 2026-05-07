@@ -7,23 +7,13 @@ import { replacePaymentProofAndAccept } from "@/server/registration/mutations/re
 import useAttendanceStore from "./useAttendanceStore";
 
 export function useReplacePaymentProof() {
-  const scannedData = useAttendanceStore((state) => state.scannedData);
-  const setScannedData = useAttendanceStore((state) => state.setScannedData);
+  const setPaymentProofStatus = useAttendanceStore(
+    (state) => state.setPaymentProofStatus,
+  );
 
   return useAction(tryCatch(replacePaymentProofAndAccept), {
     onSuccess: (data) => {
-      if (scannedData) {
-        setScannedData({
-          ...scannedData,
-          paymentProofStatus: "accepted",
-          proofImage: scannedData.proofImage
-            ? {
-                ...scannedData.proofImage,
-                path: data.path,
-              }
-            : null,
-        });
-      }
+      setPaymentProofStatus("accepted");
 
       toast.success(data.message);
     },

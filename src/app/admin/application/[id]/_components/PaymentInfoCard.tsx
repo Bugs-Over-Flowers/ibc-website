@@ -1,17 +1,23 @@
+import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
-import { DetailRow } from "./DetailRow";
 
 interface PaymentInfoCardProps {
+  requiresPayment?: boolean;
   paymentMethod: string;
   paymentProofStatus: string;
   applicationDate: Date;
 }
 
 export function PaymentInfoCard({
+  requiresPayment = true,
   paymentMethod,
   paymentProofStatus,
   applicationDate,
 }: PaymentInfoCardProps) {
+  if (!requiresPayment) {
+    return null;
+  }
+
   const normalizedStatus = paymentProofStatus.toLowerCase();
   const statusClassName =
     normalizedStatus === "accepted"

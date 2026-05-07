@@ -1,4 +1,5 @@
 import { ChevronLeft } from "lucide-react";
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +8,11 @@ import { DataTable } from "@/components/DataTable";
 import { getMembersBySector } from "@/server/members/queries/getMembersBySector";
 import { columns } from "./_components/columns";
 import Loading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Sector Members | Admin",
+  description: "View members assigned to this sector.",
+};
 
 async function SectorMembersContent({ sectorId }: { sectorId: number }) {
   const cookieStore = await cookies();

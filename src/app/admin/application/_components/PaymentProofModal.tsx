@@ -23,7 +23,11 @@ import {
 } from "@/components/ui/dialog";
 import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import { useAction } from "@/hooks/useAction";
-import { isValidImageUploadFile } from "@/lib/fileUpload";
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  isValidImageUploadFile,
+} from "@/lib/fileUpload";
+import { MEMBERSHIP_FEES } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import { uploadPaymentProof } from "@/lib/storage/uploadPaymentProof";
 import type { Enums } from "@/lib/supabase/db.types";
@@ -45,9 +49,6 @@ interface PaymentProofModalProps {
   }) => void;
   trigger?: React.ReactElement;
 }
-
-const PERSONAL_FEE = 5000;
-const CORPORATE_FEE = 10000;
 
 const STATUS_CONFIG = {
   accepted: {
@@ -98,7 +99,11 @@ export function PaymentProofModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const status = STATUS_CONFIG[paymentProofStatus] ?? STATUS_CONFIG.pending;
   const { Icon } = status;
-  const isPersonal = expectedRegistrationFee === PERSONAL_FEE;
+  const isCorporateUpgrade =
+    expectedRegistrationFee === MEMBERSHIP_FEES.corporateUpgrade &&
+    membershipTypeLabel.toLowerCase().includes("upgrade");
+  const isPersonal =
+    !isCorporateUpgrade && expectedRegistrationFee === MEMBERSHIP_FEES.personal;
   const canReplaceProof =
     paymentProofStatus === "rejected" || paymentProofStatus === "accepted";
 
@@ -228,7 +233,9 @@ export function PaymentProofModal({
                 ₱{expectedRegistrationFee.toLocaleString()}
               </span>
               <span className="text-muted-foreground text-xs">
-                Required for {membershipTypeLabel.toLowerCase()} membership
+                {isCorporateUpgrade
+                  ? "Required for personal to corporate upgrade"
+                  : `Required for ${membershipTypeLabel.toLowerCase()} membership`}
               </span>
             </div>
 
@@ -259,7 +266,7 @@ export function PaymentProofModal({
                       isPersonal && "text-[#185FA5] dark:text-[#85B7EB]",
                     )}
                   >
-                    ₱{PERSONAL_FEE.toLocaleString()}
+                    ₱{MEMBERSHIP_FEES.personal.toLocaleString()}
                   </span>
                 </div>
                 <div
@@ -275,7 +282,7 @@ export function PaymentProofModal({
                         "font-medium text-[#0C447C] dark:text-[#B5D4F4]",
                     )}
                   >
-                    Corporate
+                    {isCorporateUpgrade ? "Corporate Upgrade" : "Corporate"}
                   </span>
                   <span
                     className={cn(
@@ -283,7 +290,11 @@ export function PaymentProofModal({
                       !isPersonal && "text-[#185FA5] dark:text-[#85B7EB]",
                     )}
                   >
-                    ₱{CORPORATE_FEE.toLocaleString()}
+                    ₱
+                    {(isCorporateUpgrade
+                      ? MEMBERSHIP_FEES.corporateUpgrade
+                      : MEMBERSHIP_FEES.corporate
+                    ).toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -343,7 +354,7 @@ export function PaymentProofModal({
             {canReplaceProof ? (
               <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                 <input
-                  accept="image/png,image/jpeg,image/jpg"
+                  accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                   className="hidden"
                   onChange={(event) => {
                     const file = event.target.files?.[0] ?? null;

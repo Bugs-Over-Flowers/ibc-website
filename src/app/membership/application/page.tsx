@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { MembershipApplicationPageContent } from "./_components/MembershipApplicationPageContent";
 import Loading from "./loading";
+
+export const metadata: Metadata = {
+  title: "Membership Application",
+  description: "Apply for IBC membership.",
+};
 
 export default function MembershipApplicationPage() {
   return (

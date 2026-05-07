@@ -1,48 +1,19 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import {
+  extractStorageObjectPath,
+  normalizeLegacyStoragePath,
+  PAYMENT_PROOFS_BUCKET,
+} from "@/lib/storage/paymentProof";
 import { createActionClient } from "@/lib/supabase/server";
-
-const PAYMENT_PROOFS_BUCKET = "paymentproofs";
+import { invalidateRegistrationCaches } from "@/server/actions.utils";
 
 const replacePaymentProofAndAcceptSchema = z.object({
   registrationId: z.string().min(1),
   uploadedPath: z.string().min(1),
 });
-
-function extractPaymentProofPath(path: string): string {
-  const trimmedPath = path.trim();
-
-  if (trimmedPath === "") {
-    throw new Error("Payment proof path is empty");
-  }
-
-  if (trimmedPath.startsWith("http://") || trimmedPath.startsWith("https://")) {
-    const url = new URL(trimmedPath);
-    const marker = `/${PAYMENT_PROOFS_BUCKET}/`;
-    const markerIndex = url.pathname.indexOf(marker);
-
-    if (markerIndex < 0) {
-      throw new Error("Invalid payment proof URL");
-    }
-
-    const extractedPath = url.pathname.slice(markerIndex + marker.length);
-
-    if (!extractedPath) {
-      throw new Error("Invalid payment proof URL path");
-    }
-
-    return extractedPath;
-  }
-
-  return trimmedPath;
-}
-
-function normalizeLegacyPaymentProofPath(path: string): string {
-  return path.replace(/\.[A-Za-z0-9]+$/, "");
-}
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -79,10 +50,11 @@ export async function replacePaymentProofAndAccept(input: {
   const oldPath = existingProof?.path;
   const previousPaymentProofStatus = registration.paymentProofStatus;
 
-  const normalizedUploadedPath = extractPaymentProofPath(uploadedPath);
-  const normalizedNewPath = normalizeLegacyPaymentProofPath(
-    normalizedUploadedPath,
+  const normalizedUploadedPath = extractStorageObjectPath(
+    uploadedPath,
+    PAYMENT_PROOFS_BUCKET,
   );
+  const normalizedNewPath = normalizeLegacyStoragePath(normalizedUploadedPath);
   let proofMutation: "updated" | "inserted" | null = null;
   let insertedProofImageId: string | null = null;
 
@@ -203,13 +175,12 @@ export async function replacePaymentProofAndAccept(input: {
   }
 
   if (oldPath) {
-    const normalizedOldPath = normalizeLegacyPaymentProofPath(
-      extractPaymentProofPath(oldPath),
+    const normalizedOldPath = normalizeLegacyStoragePath(
+      extractStorageObjectPath(oldPath, PAYMENT_PROOFS_BUCKET),
     );
 
     if (
-      normalizedOldPath !==
-      normalizeLegacyPaymentProofPath(normalizedUploadedPath)
+      normalizedOldPath !== normalizeLegacyStoragePath(normalizedUploadedPath)
     ) {
       const { error: removeOldImageError } = await supabase.storage
         .from(PAYMENT_PROOFS_BUCKET)
@@ -224,16 +195,7 @@ export async function replacePaymentProofAndAccept(input: {
     }
   }
 
-  updateTag(CACHE_TAGS.registrations.all);
-  updateTag(CACHE_TAGS.registrations.list);
-  updateTag(CACHE_TAGS.registrations.details);
-  updateTag(CACHE_TAGS.registrations.stats);
-  updateTag(CACHE_TAGS.registrations.event);
-  updateTag(CACHE_TAGS.events.registrations);
-
-  if (registration?.eventId) {
-    updateTag(CACHE_TAGS.events.registrations);
-  }
+  invalidateRegistrationCaches();
 
   if (registration?.eventId) {
     const eventId = registration.eventId;

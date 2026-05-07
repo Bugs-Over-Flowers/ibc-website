@@ -37,7 +37,7 @@ import { useSubmitRegistration } from "./useSubmitRegistration";
  *
  * @returns TanStack Form instance configured for Step 4 submission
  */
-export const useRegistrationStep4 = () => {
+export const useRegistrationStep4 = (affiliation: string) => {
   const router = useRouter();
 
   const registrationData = useRegistrationStore(
@@ -81,14 +81,38 @@ export const useRegistrationStep4 = () => {
 
       if (!data) return;
 
-      const { returnedRegistrationId, returnedRegistrationIdentifier } = data;
+      const {
+        returnedRegistrationId,
+        returnedRegistrationIdentifier,
+        participants,
+      } = data;
+
+      // Map participant identifiers to actual participant data
+      const allPeople = [
+        registrationData.step2.registrant,
+        ...(registrationData.step2.otherParticipants ?? []),
+      ];
+      const participantsWithIds = participants.map(
+        (
+          p: { participantId: string; participantIdentifier: string },
+          index: number,
+        ) => ({
+          fullName:
+            `${allPeople[index]?.firstName ?? ""} ${allPeople[index]?.lastName ?? ""}`.trim(),
+          email: allPeople[index]?.email ?? "",
+          affiliation,
+          participantIdentifier: p.participantIdentifier,
+          isPrincipal: index === 0,
+        }),
+      );
 
       // ========== PHASE 2: Send Email (with rollback on failure) ==========
       const { error: sendEmailError } = await sendEmail(
         returnedRegistrationId,
         returnedRegistrationIdentifier,
+        participantsWithIds,
+        affiliation,
       );
-      // Note: If email fails, the registration will be deleted inside useSendRegistrationEmail
       if (sendEmailError) return;
 
       // ========== SUCCESS: Navigate to confirmation page ==========

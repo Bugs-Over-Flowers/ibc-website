@@ -9,102 +9,104 @@ DECLARE
   pending_regs bigint := 0;
   participants_total bigint := 0;
   attended_total bigint := 0;
-  day_rec record;
   days_arr jsonb := '[]'::jsonb;
-  day_obj jsonb;
-  participants_day bigint;
-  attended_day bigint;
   has_event_days boolean;
 BEGIN
-  -- Overall registration counts
-  SELECT COUNT(*) INTO total_regs 
-  FROM "Registration" r 
+  SELECT
+    COUNT(*)::bigint,
+    COUNT(*) FILTER (
+      WHERE r."paymentProofStatus" = 'accepted'::"PaymentProofStatus"
+    )::bigint,
+    COUNT(*) FILTER (
+      WHERE r."paymentProofStatus" = 'pending'::"PaymentProofStatus"
+    )::bigint
+  INTO total_regs, verified_regs, pending_regs
+  FROM "Registration" r
   WHERE r."eventId" = p_event_id;
 
-  SELECT COUNT(*) INTO verified_regs 
-  FROM "Registration" r 
-  WHERE r."eventId" = p_event_id 
-    AND lower(coalesce(r."paymentStatus"::text, '')) = 'verified';
-
-  SELECT COUNT(*) INTO pending_regs 
-  FROM "Registration" r 
-  WHERE r."eventId" = p_event_id 
-    AND lower(coalesce(r."paymentStatus"::text, '')) = 'pending';
-
-  -- Total participants registered for this event
   SELECT COUNT(DISTINCT p."participantId") INTO participants_total
   FROM "Participant" p
   JOIN "Registration" r ON p."registrationId" = r."registrationId"
-  WHERE r."eventId" = p_event_id;
+  WHERE r."eventId" = p_event_id
+    AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus";
 
-  -- Total unique participants who attended at least one day (have a check-in record)
   SELECT COUNT(DISTINCT ci."participantId") INTO attended_total
   FROM "CheckIn" ci
   JOIN "Participant" p ON p."participantId" = ci."participantId"
   JOIN "Registration" r ON r."registrationId" = p."registrationId"
-  WHERE r."eventId" = p_event_id;
+  WHERE r."eventId" = p_event_id
+    AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus";
 
-  -- Check if explicit event_days exist for this event
   SELECT EXISTS(SELECT 1 FROM "EventDay" ed WHERE ed."eventId" = p_event_id) INTO has_event_days;
 
   IF has_event_days THEN
-    FOR day_rec IN
-      SELECT ed."eventDayId" AS day_id, ed."label" AS day_label, ed."dayDate" AS day_date
-      FROM "EventDay" ed
-      WHERE ed."eventId" = p_event_id
-      ORDER BY ed."dayDate", ed."eventDayId"
-    LOOP
-      -- Participants who checked in on this day
-      SELECT COUNT(DISTINCT ci."participantId") INTO participants_day
-      FROM "CheckIn" ci
-      JOIN "Participant" p ON p."participantId" = ci."participantId"
-      JOIN "Registration" r ON r."registrationId" = p."registrationId"
-      WHERE r."eventId" = p_event_id 
-        AND ci."eventDayId" = day_rec.day_id;
-
-      -- For attended, we count the same as participants_day since CheckIn means attended
-      attended_day := participants_day;
-
-      day_obj := jsonb_build_object(
-        'day_id', day_rec.day_id,
-        'day_label', coalesce(day_rec.day_label, to_char(day_rec.day_date, 'YYYY-MM-DD')),
-        'day_date', day_rec.day_date,
-        'participants', coalesce(participants_day, 0),
-        'attended', coalesce(attended_day, 0)
-      );
-
-      days_arr := days_arr || jsonb_build_array(day_obj);
-    END LOOP;
-  ELSE
-    -- Fallback: aggregate by CheckIn date when no EventDay rows exist
-    FOR day_rec IN
-      SELECT (ci."date"::date) AS day_date
+    WITH accepted_checkins AS (
+      SELECT
+        ci."eventDayId",
+        ci."participantId"
       FROM "CheckIn" ci
       JOIN "Participant" p ON p."participantId" = ci."participantId"
       JOIN "Registration" r ON r."registrationId" = p."registrationId"
       WHERE r."eventId" = p_event_id
-      GROUP BY ci."date"::date
-      ORDER BY ci."date"::date
-    LOOP
-      SELECT COUNT(DISTINCT ci."participantId") INTO participants_day
+        AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus"
+    ),
+    day_counts AS (
+      SELECT
+        ed."eventDayId" AS day_id,
+        ed."label" AS day_label,
+        ed."eventDate" AS day_date,
+        COUNT(DISTINCT ac."participantId") AS participants
+      FROM "EventDay" ed
+      LEFT JOIN accepted_checkins ac ON ac."eventDayId" = ed."eventDayId"
+      WHERE ed."eventId" = p_event_id
+      GROUP BY ed."eventDayId", ed."label", ed."eventDate"
+    )
+    SELECT COALESCE(
+      jsonb_agg(
+        jsonb_build_object(
+          'day_id', day_id,
+          'day_label', coalesce(day_label, to_char(day_date, 'YYYY-MM-DD')),
+          'day_date', day_date,
+          'participants', participants,
+          'attended', participants
+        )
+        ORDER BY day_date, day_id
+      ),
+      '[]'::jsonb
+    ) INTO days_arr
+    FROM day_counts;
+  ELSE
+    WITH accepted_checkins AS (
+      SELECT
+        ci."date"::date AS day_date,
+        ci."participantId"
       FROM "CheckIn" ci
       JOIN "Participant" p ON p."participantId" = ci."participantId"
       JOIN "Registration" r ON r."registrationId" = p."registrationId"
-      WHERE r."eventId" = p_event_id 
-        AND ci."date"::date = day_rec.day_date;
-
-      attended_day := participants_day;
-
-      day_obj := jsonb_build_object(
-        'day_id', null,
-        'day_label', to_char(day_rec.day_date, 'YYYY-MM-DD'),
-        'day_date', day_rec.day_date,
-        'participants', coalesce(participants_day, 0),
-        'attended', coalesce(attended_day, 0)
-      );
-
-      days_arr := days_arr || jsonb_build_array(day_obj);
-    END LOOP;
+      WHERE r."eventId" = p_event_id
+        AND r."paymentProofStatus" = 'accepted'::"PaymentProofStatus"
+    ),
+    day_counts AS (
+      SELECT
+        day_date,
+        COUNT(DISTINCT "participantId") AS participants
+      FROM accepted_checkins
+      GROUP BY day_date
+    )
+    SELECT COALESCE(
+      jsonb_agg(
+        jsonb_build_object(
+          'day_id', null,
+          'day_label', to_char(day_date, 'YYYY-MM-DD'),
+          'day_date', day_date,
+          'participants', participants,
+          'attended', participants
+        )
+        ORDER BY day_date
+      ),
+      '[]'::jsonb
+    ) INTO days_arr
+    FROM day_counts;
   END IF;
 
   RETURN jsonb_build_object(

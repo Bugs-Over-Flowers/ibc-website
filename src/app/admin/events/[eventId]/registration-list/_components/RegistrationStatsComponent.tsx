@@ -71,7 +71,10 @@ export default function RegistrationListStats({
               {label}
             </div>
             <div>
-              <p className={`font-medium text-3xl leading-none ${valueClass}`}>
+              <p
+                className={`font-medium text-3xl leading-none ${valueClass}`}
+                data-testid={`registration-stats-${label.toLowerCase().replace(/\s+/g, "-")}`}
+              >
                 {value}
               </p>
               {progress !== undefined && (

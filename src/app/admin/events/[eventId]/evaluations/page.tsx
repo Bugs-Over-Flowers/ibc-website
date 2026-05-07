@@ -1,10 +1,16 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+import BackButton from "@/app/admin/_components/BackButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
-import BackButton from "../_components/BackButton";
 import { EventEvaluationsTableWrapper } from "./_components/EventEvaluationsTableWrapper";
+
+export const metadata: Metadata = {
+  title: "Event Evaluations | Admin",
+  description: "View participant feedback and evaluations for this event.",
+};
 
 type EventEvaluationsPageProps =
   PageProps<"/admin/events/[eventId]/evaluations">;

@@ -11,9 +11,13 @@ import {
 
 interface NotReadyEventProps {
   title: string;
+  description?: string;
 }
 
-export default function NotReadyEvent({ title }: NotReadyEventProps) {
+export default function NotReadyEvent({
+  title,
+  description,
+}: NotReadyEventProps) {
   return (
     <Empty>
       <EmptyHeader>
@@ -22,7 +26,8 @@ export default function NotReadyEvent({ title }: NotReadyEventProps) {
         </EmptyMedia>
         <EmptyTitle>{title}</EmptyTitle>
         <EmptyDescription>
-          This event is not ready for registration yet. Please check back later.
+          {description ??
+            "This event is not ready for registration yet. Please check back later."}
         </EmptyDescription>
       </EmptyHeader>
       <Link href={"/events"}>

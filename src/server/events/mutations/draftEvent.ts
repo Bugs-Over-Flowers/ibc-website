@@ -2,14 +2,14 @@
 
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import type { ServerFunction } from "@/lib/server/types";
+import type { AsyncFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   type DraftEventInput,
   draftEventServerSchema,
 } from "@/lib/validation/event/createEventSchema";
 
-export const draftEvent: ServerFunction<
+export const draftEvent: AsyncFunction<
   [DraftEventInput],
   { eventId: string }
 > = async (input) => {

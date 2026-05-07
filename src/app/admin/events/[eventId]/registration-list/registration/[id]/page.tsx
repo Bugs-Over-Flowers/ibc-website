@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import tryCatch from "@/lib/server/tryCatch";
 import { getRegistrationData } from "@/server/registration/queries/getRegistrationData";
 import RegistrationDetails from "./_components/RegistrationDetails";
+
+export const metadata: Metadata = {
+  title: "Registration Details | Admin",
+  description: "View individual registration and participant information.",
+};
 
 type RegistrationPageParams =
   PageProps<"/admin/events/[eventId]/registration-list/registration/[id]">["params"];
@@ -37,13 +43,18 @@ async function RegistrationDetailsPage({
   );
 
   if (!success) {
-    return <div>{error}</div>;
+    throw new Error(error);
   }
+
   if (registration.event.eventType === null) {
-    return (
-      <div>This event is still not available. Please come back later.</div>
+    throw new Error(
+      "This event is still not available. Please come back later.",
     );
   }
 
-  return <RegistrationDetails data={registration} />;
+  return (
+    <div className="space-y-6">
+      <RegistrationDetails data={registration} />
+    </div>
+  );
 }

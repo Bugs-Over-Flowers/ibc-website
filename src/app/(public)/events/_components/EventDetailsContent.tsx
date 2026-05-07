@@ -1,16 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ExternalLink, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { FacebookIcon } from "@/components/icons/SocialIcons";
 import { Button } from "@/components/ui/button";
 import { staggerContainer } from "@/lib/animations/stagger";
 import { getEventStatus } from "@/lib/events/eventUtils";
 import type { Tables } from "@/lib/supabase/db.types";
 import { EventInfoCard } from "./EventInfoCard";
 import EventRegistrationCard from "./EventRegistrationCard";
+import { FacebookEventLink } from "./FacebookEventLink";
 
 type Event = Tables<"Event">;
 
@@ -21,31 +21,6 @@ interface EventDetailsContentProps {
 export function EventDetailsContent({ event }: EventDetailsContentProps) {
   const router = useRouter();
   const status = getEventStatus(event.eventStartDate, event.eventEndDate);
-  const safeFacebookLink = (() => {
-    const rawLink = event.facebookLink?.trim();
-    if (!rawLink) {
-      return null;
-    }
-
-    try {
-      const parsed = new URL(rawLink);
-      const isHttpProtocol =
-        parsed.protocol === "https:" || parsed.protocol === "http:";
-      const hostname = parsed.hostname.toLowerCase();
-      const isFacebookDomain =
-        hostname === "fb.me" ||
-        hostname === "facebook.com" ||
-        hostname.endsWith(".facebook.com");
-
-      if (!isHttpProtocol || !isFacebookDomain) {
-        return null;
-      }
-
-      return parsed.toString();
-    } catch {
-      return null;
-    }
-  })();
 
   const handleEvaluationClick = () => {
     router.push(`/evaluation?eventId=${event.eventId}` as Route);
@@ -84,20 +59,7 @@ export function EventDetailsContent({ event }: EventDetailsContentProps) {
                 Submit Feedback
               </Button>
 
-              {safeFacebookLink && (
-                <a
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-foreground transition-colors hover:border-primary/30 hover:bg-accent"
-                  href={safeFacebookLink}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <FacebookIcon className="h-5 w-5 text-[#1877F2]" />
-                  <span className="flex-1 font-medium">
-                    Event Facebook Link
-                  </span>
-                  <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
-                </a>
-              )}
+              <FacebookEventLink url={event.facebookLink} />
             </div>
           )}
         </div>

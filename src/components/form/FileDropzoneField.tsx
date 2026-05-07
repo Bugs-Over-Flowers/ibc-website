@@ -2,6 +2,7 @@ import { UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 import { useFieldContext } from "@/hooks/_formHooks";
+import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_SIZE } from "@/lib/fileUpload";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
@@ -91,15 +92,18 @@ const FilePreview = ({
   );
 };
 
+const getFileSignature = (file: File) =>
+  `${file.name}-${file.size}-${file.lastModified}-${file.type}`;
+
 function FileDropzoneField({
   label,
   description,
   className,
   dropzoneClassName,
   multiple = false,
-  accept = { "image/*": [] },
+  accept = IMAGE_UPLOAD_ACCEPT,
   maxFiles,
-  maxSize,
+  maxSize = IMAGE_UPLOAD_MAX_SIZE,
   layout = "grid",
   previewGridClassName,
   previewItemClassName,
@@ -110,10 +114,22 @@ function FileDropzoneField({
   const files = field.state.value || [];
 
   const handleDrop = (acceptedFiles: File[]) => {
+    const seen = new Set(files.map(getFileSignature));
+    const uniqueAcceptedFiles: File[] = [];
+
+    for (const file of acceptedFiles) {
+      const signature = getFileSignature(file);
+      if (seen.has(signature)) continue;
+      seen.add(signature);
+      uniqueAcceptedFiles.push(file);
+    }
+
+    if (uniqueAcceptedFiles.length === 0) return;
+
     if (multiple) {
-      field.handleChange([...files, ...acceptedFiles]);
+      field.handleChange([...files, ...uniqueAcceptedFiles]);
     } else {
-      field.handleChange(acceptedFiles);
+      field.handleChange(uniqueAcceptedFiles);
     }
   };
 

@@ -7,9 +7,15 @@
  * Uses Suspense with skeleton fallback to stream the history content
  * while the cached RPC query resolves.
  */
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ApplicationHistoryContent } from "./_components/ApplicationHistoryContent";
 import ApplicationHistoryPageSkeleton from "./loading";
+
+export const metadata: Metadata = {
+  title: "Application History | Admin",
+  description: "View all past membership applications for this member.",
+};
 
 interface PageProps {
   params: Promise<{ id: string }>;

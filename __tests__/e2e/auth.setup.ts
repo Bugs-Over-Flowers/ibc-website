@@ -1,8 +1,7 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test as setup } from "@playwright/test";
-import { createClient } from "@supabase/supabase-js";
 import { config as dotenvConfig } from "dotenv";
 import { createE2EAdminClient } from "./helpers/supabase";
 
@@ -18,33 +17,15 @@ const __dirname = dirname(__filename);
  */
 export const AUTH_STATE_PATH = join(__dirname, ".auth", "user.json");
 
-/**
- * Derive the Supabase cookie name the same way @supabase/ssr does.
- * For local dev (http://127.0.0.1:54321) this produces "sb-127-auth-token".
- */
-function getSupabaseCookieName(supabaseUrl: string): string {
-  const hostname = new URL(supabaseUrl).hostname.split(".")[0];
-  return `sb-${hostname}-auth-token`;
-}
-
-setup("authenticate", async () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+setup("authenticate", async ({ page }) => {
   const testEmail = process.env.TEST_EMAIL;
   const testPassword = process.env.TEST_PASSWORD;
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-    );
-  }
   if (!testEmail || !testPassword) {
     throw new Error("Missing TEST_EMAIL or TEST_PASSWORD");
   }
 
-  // ── 1. Ensure the test user exists with correct credentials (no MFA) ──
+  // Ensure the test user exists with the correct credentials.
   const adminClient = createE2EAdminClient();
 
   const { data: existingUsers } = await adminClient.auth.admin.listUsers();
@@ -68,55 +49,13 @@ setup("authenticate", async () => {
     }
   }
 
-  // ── 2. Sign in via Supabase API (bypasses MFA entirely) ──────────────
-  const anonClient = createClient(supabaseUrl, supabaseAnonKey);
+  await page.goto("/auth");
+  await page.getByLabel("Email").fill(testEmail);
+  await page.getByLabel("Password").fill(testPassword);
+  await page.getByRole("button", { name: "Login" }).click();
 
-  const { data: signInData, error: signInError } =
-    await anonClient.auth.signInWithPassword({
-      email: testEmail,
-      password: testPassword,
-    });
-
-  if (signInError || !signInData.session) {
-    throw new Error(
-      `Failed to sign in: ${signInError?.message ?? "No session returned"}`,
-    );
-  }
-
-  const session = signInData.session;
-
-  // ── 3. Build Playwright storage state (no browser launch needed) ─────
-  const cookieName = getSupabaseCookieName(supabaseUrl);
-  const cookieValue = JSON.stringify({
-    access_token: session.access_token,
-    refresh_token: session.refresh_token,
-    expires_at: session.expires_at,
-    expires_in: session.expires_in,
-    token_type: session.token_type,
-    type: "bearer",
-    user: session.user,
-  });
-
-  const storageState = {
-    cookies: [
-      {
-        name: cookieName,
-        value: encodeURIComponent(cookieValue),
-        domain: "localhost",
-        path: "/",
-        expires: session.expires_at ?? -1,
-        httpOnly: false,
-        secure: false,
-        sameSite: "Lax" as const,
-      },
-    ],
-    origins: [],
-  };
+  await page.waitForURL(/\/(admin|auth\/mfa-setup|auth\/mfa-verify)/);
 
   await mkdir(dirname(AUTH_STATE_PATH), { recursive: true });
-  await writeFile(
-    AUTH_STATE_PATH,
-    JSON.stringify(storageState, null, 2),
-    "utf-8",
-  );
+  await page.context().storageState({ path: AUTH_STATE_PATH });
 });

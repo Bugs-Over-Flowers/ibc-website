@@ -127,12 +127,12 @@ export default function RegistrationSearchAndFilter() {
           }}
           value={selectedPaymentStatus}
         >
-          <SelectTrigger className="h-9 w-full bg-background text-xs">
+          <SelectTrigger className="h-9 w-full bg-background text-xs capitalize">
             <SelectValue placeholder="Payment status" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Payment status</SelectLabel>
+              <SelectLabel>Payment Status</SelectLabel>
               {PaymentProofStatusFilterOptions.map((status) => (
                 <SelectItem
                   className="text-sm capitalize"

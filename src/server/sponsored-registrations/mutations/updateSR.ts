@@ -83,3 +83,48 @@ export async function updateSRSponsorName(
 
   return data;
 }
+
+const updateMaxSponsoredGuestsSchema = z.object({
+  sponsoredRegistrationId: z.string().uuid("Invalid ID format"),
+  eventId: z.string().uuid("Invalid Event ID format"),
+  maxSponsoredGuests: z
+    .number()
+    .int("Must be a whole number")
+    .min(0, "Max guests must be at least 0"),
+});
+
+type UpdateMaxSponsoredGuestsInput = z.infer<
+  typeof updateMaxSponsoredGuestsSchema
+>;
+
+export async function updateMaxSponsoredGuests(
+  input: UpdateMaxSponsoredGuestsInput,
+): Promise<SponsoredRegistration> {
+  const parsed = updateMaxSponsoredGuestsSchema.parse(input);
+
+  const supabase = await createActionClient();
+
+  const { data, error } = await supabase
+    .from("SponsoredRegistration")
+    .update({ maxSponsoredGuests: parsed.maxSponsoredGuests })
+    .eq("sponsoredRegistrationId", parsed.sponsoredRegistrationId)
+    .select()
+    .single();
+
+  if (error || !data) {
+    throw new Error(
+      `Failed to update max sponsored guests: ${error?.message || "Unknown error"}`,
+    );
+  }
+
+  updateTag(CACHE_TAGS.sponsoredRegistrations.all);
+  updateTag(CACHE_TAGS.sponsoredRegistrations.admin);
+
+  revalidatePath(
+    `/admin/events/${parsed.eventId}/sponsored-registrations`,
+    "page",
+  );
+  revalidatePath("/admin/sponsored-registration", "page");
+
+  return data;
+}

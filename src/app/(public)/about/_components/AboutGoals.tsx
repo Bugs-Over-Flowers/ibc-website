@@ -1,53 +1,59 @@
 "use client";
 
-import {
-  Building2,
-  Globe,
-  Palette,
-  Shield,
-  TrendingUp,
-  Users,
-} from "lucide-react";
 import { motion } from "motion/react";
+import { resolveWebsiteContentIcon } from "@/app/(public)/_lib/websiteContentIconMap";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
 
-const goals = [
+interface AboutGoalItem {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+const goals: AboutGoalItem[] = [
   {
-    icon: TrendingUp,
+    icon: "TrendingUp",
     title: "Increase Trailblazer Companies",
     description: "Increase by 5% the number of trailblazer companies in Iloilo",
   },
   {
-    icon: Shield,
+    icon: "Shield",
     title: "Policy Advocacy",
     description: "Support policy advocacy agenda for business development",
   },
   {
-    icon: Users,
+    icon: "Users",
     title: "Community Development",
     description: "Support development of community/business clusters",
   },
   {
-    icon: Globe,
+    icon: "Globe",
     title: "Network & Forums",
     description: "Network to relevant and applicable forums",
   },
   {
-    icon: Building2,
+    icon: "Building2",
     title: "Sustainable Investment",
     description:
       "Increased capacity for sustainable investment, trade & tourism development",
   },
   {
-    icon: Palette,
+    icon: "Palette",
     title: "Environmental Protection",
     description: "Promote environmental protection policies",
   },
 ];
 
-export function AboutGoals() {
+interface AboutGoalsProps {
+  goalsData?: AboutGoalItem[];
+}
+
+export function AboutGoals({ goalsData }: AboutGoalsProps) {
+  const resolvedGoals = goalsData && goalsData.length > 0 ? goalsData : goals;
+
   return (
     <section className="py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -73,8 +79,8 @@ export function AboutGoals() {
           viewport={{ once: true, margin: "-100px" }}
           whileInView="visible"
         >
-          {goals.map((goal) => {
-            const Icon = goal.icon;
+          {resolvedGoals.map((goal) => {
+            const Icon = resolveWebsiteContentIcon(goal.icon);
             return (
               <motion.div key={goal.title} variants={fadeInUp}>
                 <Card className="group relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
@@ -88,9 +94,10 @@ export function AboutGoals() {
                     <h3 className="mb-3 font-bold text-foreground text-xl">
                       {goal.title}
                     </h3>
-                    <p className="mb-4 text-foreground/80 leading-relaxed">
-                      {goal.description}
-                    </p>
+                    <RichTextDisplay
+                      className="mb-4 text-foreground/80 leading-relaxed"
+                      content={goal.description}
+                    />
                   </CardContent>
                 </Card>
               </motion.div>

@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp } from "@/lib/animations/fade";
 import { staggerContainer } from "@/lib/animations/stagger";
 import type { Tables } from "@/lib/supabase/db.types";
+import { FacebookEventLink } from "./FacebookEventLink";
 
 type Event = Tables<"Event">;
 
@@ -58,6 +59,8 @@ export default function EventRegistrationCard({
               >
                 Register for This Event
               </Link>
+
+              <FacebookEventLink url={event.facebookLink} />
             </div>
           </CardContent>
         </Card>

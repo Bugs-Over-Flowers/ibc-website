@@ -2,6 +2,7 @@
 
 import { format } from "date-fns";
 import { CalendarIcon, Clock } from "lucide-react";
+import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -57,7 +58,7 @@ export default function FormCalendar({
     field.handleChange(newDate);
   };
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const time = e.target.value;
     if (!time) return;
     const [hours, minutes] = time.split(":").map(Number);
@@ -107,10 +108,12 @@ export default function FormCalendar({
               selected={field.state.value}
               timeZone={timeZone}
             />
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
+
+            {/* Time section with accent border to make it stand out */}
+            <div className="flex items-center gap-2 rounded-md border border-primary/50 bg-primary/5 p-2 shadow-sm">
+              <Clock className="h-4 w-4 text-primary" />
               <Input
-                className="flex-1"
+                className="flex-1 border-primary bg-background"
                 onChange={handleTimeChange}
                 type="time"
                 value={

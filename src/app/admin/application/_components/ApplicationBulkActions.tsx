@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, LayoutGrid, XCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsS
 type ConfirmMode = "approve" | "reject" | null;
 
 export default function BulkActions() {
-  const { selectedApplicationIds, clearSelection } =
+  const { selectedApplicationIds, clearSelection, setSelectionLocked } =
     useSelectedApplicationsStore();
 
   const { bulkApprove, bulkReject, isPending } = useBulkActions(() => {
@@ -21,6 +21,14 @@ export default function BulkActions() {
 
   const selectedCount = selectedApplicationIds.size;
   const hasSelection = selectedCount > 0;
+
+  useEffect(() => {
+    setSelectionLocked(isPending);
+
+    return () => {
+      setSelectionLocked(false);
+    };
+  }, [isPending, setSelectionLocked]);
 
   const handleConfirm = async () => {
     if (confirmMode === "approve") await bulkApprove(selectedApplicationIds);
@@ -74,7 +82,8 @@ export default function BulkActions() {
                 </p>
               </div>
               <button
-                className="text-muted-foreground text-xs underline underline-offset-2 transition-colors hover:text-foreground"
+                className="text-muted-foreground text-xs underline underline-offset-2 transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={confirmMode !== null || isPending}
                 onClick={clearSelection}
                 type="button"
               >

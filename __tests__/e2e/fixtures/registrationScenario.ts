@@ -8,6 +8,7 @@ export type SeededStandardRegistrationData = {
   member: {
     businessMemberId: string;
     businessName: string;
+    applicationId: string;
   };
 };
 
@@ -145,13 +146,15 @@ export async function cleanupStandardRegistrationScenarioData(
     }
   }
 
-  const { error: eventDeleteError } = await supabase
-    .from("Event")
+  const { error: applicationDeleteError } = await supabase
+    .from("Application")
     .delete()
-    .in("eventId", eventIds);
+    .eq("applicationId", data.member.applicationId);
 
-  if (eventDeleteError) {
-    throw new Error(`Failed to cleanup events: ${eventDeleteError.message}`);
+  if (applicationDeleteError) {
+    throw new Error(
+      `Failed to cleanup application: ${applicationDeleteError.message}`,
+    );
   }
 
   const { error: memberDeleteError } = await supabase
@@ -163,5 +166,14 @@ export async function cleanupStandardRegistrationScenarioData(
     throw new Error(
       `Failed to cleanup business member: ${memberDeleteError.message}`,
     );
+  }
+
+  const { error: eventDeleteError } = await supabase
+    .from("Event")
+    .delete()
+    .in("eventId", eventIds);
+
+  if (eventDeleteError) {
+    throw new Error(`Failed to cleanup events: ${eventDeleteError.message}`);
   }
 }

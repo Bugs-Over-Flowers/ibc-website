@@ -6,6 +6,11 @@
       "sourceType": "github",
       "computedHash": "749a9b0adb2a83cc3bf9ef96f9abdb2ba2173d182b9975f7c795b084f33693df"
     },
+    "e2e-testing-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "37ea37e42a81c926ebd81924691a15fb657df7c8a52b863c34967e5ab99cdc22"
+    },
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",
@@ -25,6 +30,21 @@
       "source": "vercel-labs/next-skills",
       "sourceType": "github",
       "computedHash": "a94b83ddcd2ff1c30722577f693b1bfe32f2e1a83abdd6c08c2d6cc6753b53c8"
+    },
+    "playwright-bdd-gherkin-syntax": {
+      "source": "thebushidocollective/han",
+      "sourceType": "github",
+      "computedHash": "a70cde008482ca9b4c7074267b0afde6a67beb2e992be130db2e43a9a202d839"
+    },
+    "playwright-best-practices": {
+      "source": "currents-dev/playwright-best-practices-skill",
+      "sourceType": "github",
+      "computedHash": "320eaf861e3a0a923bfaad0726cb311a3fe30093378f8d26c89b9c5ae5c42b35"
+    },
+    "playwright-generate-test": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "computedHash": "8f963da3e25f705ff39755b8b990f20da0c0320cb86ac83fcc4d2d4eca91f6e4"
     },
     "programmatic-seo": {
       "source": "coreyhaines31/marketingskills",

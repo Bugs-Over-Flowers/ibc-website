@@ -383,7 +383,7 @@ export function SponsoredRegistrationFilter({
           {/* Clear Filters */}
           {hasActiveFilters && (
             <Button
-              className="h-10 gap-2 rounded-xl text-xs sm:w-auto"
+              className="h-12 gap-2 rounded-xl text-xs sm:w-auto"
               onClick={handleClearAllFilters}
               variant="destructive"
             >

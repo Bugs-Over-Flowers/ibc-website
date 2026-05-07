@@ -1,7 +1,5 @@
 import "server-only";
 
-export { sendViaNodemailer } from "./sendViaNodemailer";
-export { sendViaResend } from "./sendViaResend";
 export type { EmailAttachment, EmailOptions, EmailProvider } from "./types";
 
 import type { EmailOptions, EmailProvider } from "./types";
@@ -13,6 +11,10 @@ const getProvider = (): EmailProvider => {
 };
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
+  if (process.env.MOCK_EMAILS === "true") {
+    return;
+  }
+
   const provider = getProvider();
 
   if (provider === "nodemailer") {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { getEventDays } from "@/server/events/mutations/getEventDays";
+import type { getEventDays } from "@/server/events/queries/getEventDays";
 import CheckInListStats from "./CheckInListStats";
 import DraftEventEmptyComponent from "./DraftEventEmptyComponent";
 

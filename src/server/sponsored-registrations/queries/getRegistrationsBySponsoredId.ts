@@ -1,26 +1,11 @@
 import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import type { Database, Json } from "@/lib/supabase/db.types";
+import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
 type Registration = Database["public"]["Tables"]["Registration"]["Row"];
 type Participant = Database["public"]["Tables"]["Participant"]["Row"];
-
-type RpcRow = {
-  registrationId: string;
-  eventId: string;
-  businessMemberId: string | null;
-  sponsoredRegistrationId: string | null;
-  nonMemberName: string | null;
-  numberOfParticipants: number | null;
-  paymentStatus: "pending" | "verified";
-  paymentMethod: "BPI" | "ONSITE";
-  paymentProofStatus: "pending" | "rejected" | "accepted";
-  registrationDate: string;
-  identifier: string;
-  participants: Json;
-};
 
 export type RegistrationWithParticipants = Registration & {
   participants: Participant[];
@@ -32,15 +17,23 @@ export async function getRegistrationsBySponsoredId(
 ): Promise<RegistrationWithParticipants[]> {
   const supabase = await createClient(requestCookies);
 
-  const { data, error } = await supabase.rpc(
-    "get_registrations_by_sponsored_id",
-    {
-      p_sponsored_registration_id: sponsoredRegistrationId,
-    },
-  );
+  const { data, error } = await supabase
+    .from("Registration")
+    .select(`
+      *,
+      Participant (
+        participantId,
+        firstName,
+        lastName,
+        email,
+        contactNumber,
+        isPrincipal
+      )
+    `)
+    .eq("sponsoredRegistrationId", sponsoredRegistrationId);
 
   if (error) {
-    console.error("RPC Error:", error);
+    console.error("Supabase Error:", error);
     throw new Error(`Failed to fetch registrations: ${error.message}`);
   }
 
@@ -49,21 +42,7 @@ export async function getRegistrationsBySponsoredId(
   }
 
   return data.map((row) => ({
-    registrationId: row.registrationId,
-    eventId: row.eventId,
-    businessMemberId: row.businessMemberId,
-    sponsoredRegistrationId: row.sponsoredRegistrationId,
-    nonMemberName: row.nonMemberName,
-    numberOfParticipants: row.numberOfParticipants,
-    paymentStatus: (row as RpcRow).paymentStatus,
-    paymentMethod: row.paymentMethod,
-    paymentProofStatus: row.paymentProofStatus,
-    registrationDate: row.registrationDate,
-    identifier: row.identifier,
-    participants: Array.isArray(row.participants)
-      ? (row.participants as Participant[])
-      : (JSON.parse(
-          typeof row.participants === "string" ? row.participants : "[]",
-        ) as Participant[]),
-  })) as RegistrationWithParticipants[];
+    ...row,
+    participants: (row.Participant as Participant[]) || [],
+  })) as unknown as RegistrationWithParticipants[];
 }

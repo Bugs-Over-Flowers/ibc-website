@@ -7,6 +7,7 @@ import {
   type SortOption,
   type TitleSortOption,
 } from "@/server/events/queries/getAdminEventsPage";
+import { getBatchRegistrationCounts } from "@/server/registration/queries/getBatchRegistrationCounts";
 import CreateEventButton from "./_components/CreateEventButton";
 import EventFilters from "./_components/EventFilters";
 import EventTable from "./_components/EventTable";
@@ -41,6 +42,19 @@ async function EventsPageContent({
     status: sp.status,
   });
 
+  const eventIds = items.map((e) => e.eventId);
+  const batchCounts = await getBatchRegistrationCounts(
+    cookieStore.getAll(),
+    eventIds,
+  );
+
+  const initialRegistrationCounts: Record<string, number> = {};
+  const initialParticipantCounts: Record<string, number> = {};
+  for (const [id, counts] of batchCounts) {
+    initialRegistrationCounts[id] = counts.registrations;
+    initialParticipantCounts[id] = counts.participants;
+  }
+
   const tableKey = JSON.stringify([
     sp.search ?? "",
     sp.status ?? "",
@@ -67,6 +81,8 @@ async function EventsPageContent({
         dateSort={sp.dateSort as DateSortOption}
         initialEvents={items}
         initialNextCursor={nextCursor}
+        initialParticipantCounts={initialParticipantCounts}
+        initialRegistrationCounts={initialRegistrationCounts}
         key={tableKey}
         search={sp.search}
         sort={sp.sort as SortOption}

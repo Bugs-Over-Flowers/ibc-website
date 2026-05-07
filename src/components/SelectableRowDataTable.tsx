@@ -26,6 +26,7 @@ import {
 interface SelectableRowDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  getRowId?: (originalRow: TData, index: number) => string;
   paginationControls?: {
     position: "top" | "bottom";
     render: React.ReactNode;
@@ -39,6 +40,7 @@ interface SelectableRowDataTableProps<TData, TValue> {
 export function SelectableRowDataTable<TData, TValue>({
   columns,
   data,
+  getRowId,
   paginationControls,
   children,
   rowSelection,
@@ -50,6 +52,7 @@ export function SelectableRowDataTable<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
+    getRowId,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),

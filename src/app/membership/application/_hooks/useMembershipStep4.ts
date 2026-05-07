@@ -4,17 +4,27 @@ import { v4 as uuidv4 } from "uuid";
 import { useAppForm } from "@/hooks/_formHooks";
 import useMembershipApplicationStore from "@/hooks/membershipApplication.store";
 import tryCatch from "@/lib/server/tryCatch";
+import { COMPANY_PROFILE_BUCKET } from "@/lib/storage/companyProfile";
 import { createClient } from "@/lib/supabase/client";
 import { zodValidator } from "@/lib/utils";
-import { validateFileType } from "@/lib/validation/fileTypes";
+import {
+  validateFileType,
+  validateProfileFileType,
+} from "@/lib/validation/fileTypes";
 import { MembershipApplicationStep4Schema } from "@/lib/validation/membership/application";
 import { submitMembershipApplication } from "@/server/membership/mutations/submitApplication";
+import { upsertSector } from "@/server/membership/mutations/upsertSector";
 
 interface UseMembershipStep4Props {
+  sectors?: Array<{
+    sectorId: number;
+    sectorName: string;
+  }>;
   onSuccess?: () => void;
 }
 
 export const useMembershipStep4 = ({
+  sectors = [],
   onSuccess,
 }: UseMembershipStep4Props = {}) => {
   const router = useRouter();
@@ -61,7 +71,28 @@ export const useMembershipStep4 = ({
             throw new Error("Invalid application data");
           }
 
-          const refinedValue = parsed.data;
+          let refinedValue = parsed.data;
+
+          const existingApplicationMemberType =
+            applicationData.step1.existingApplicationMemberType;
+          const isUpdateInfo =
+            applicationData.step1.applicationType === "updating";
+          const isCorporateUpgrade =
+            isUpdateInfo &&
+            existingApplicationMemberType === "personal" &&
+            refinedValue.applicationMemberType === "corporate";
+
+          if (isUpdateInfo && !isCorporateUpgrade) {
+            refinedValue = {
+              ...refinedValue,
+              applicationMemberType:
+                existingApplicationMemberType ??
+                refinedValue.applicationMemberType,
+              paymentMethod: "ONSITE",
+              paymentProof: undefined,
+              paymentProofUrl: "",
+            };
+          }
 
           setApplicationData({
             step4: refinedValue,
@@ -69,6 +100,7 @@ export const useMembershipStep4 = ({
 
           let paymentProofUrl = refinedValue.paymentProofUrl;
           let logoImageURL = applicationData.step2.logoImageURL;
+          let websiteURL = applicationData.step2.websiteURL ?? "";
 
           const supabase = await createClient();
 
@@ -79,7 +111,7 @@ export const useMembershipStep4 = ({
             );
             if (!isValidLogoType) {
               throw new Error(
-                "Invalid logo file type. Only JPEG, PNG, and PDF files are allowed.",
+                "Invalid logo file type. Only JPEG and PNG files are allowed.",
               );
             }
 
@@ -110,7 +142,7 @@ export const useMembershipStep4 = ({
             );
             if (!isValidProofType) {
               throw new Error(
-                "Invalid payment proof file type. Only JPEG, PNG, and PDF files are allowed.",
+                "Invalid payment proof file type. Only JPEG and PNG files are allowed.",
               );
             }
 
@@ -134,9 +166,51 @@ export const useMembershipStep4 = ({
             paymentProofUrl = publicUrlData.publicUrl;
           }
 
+          // Upload company profile file if provided
+          if (
+            applicationData.step2.companyProfileType === "file" &&
+            applicationData.step2.companyProfileFile instanceof File
+          ) {
+            const isValidProfileType = await validateProfileFileType(
+              applicationData.step2.companyProfileFile,
+            );
+            if (!isValidProfileType) {
+              throw new Error(
+                "Invalid company profile file type. Only JPEG, PNG, and PDF files are allowed.",
+              );
+            }
+
+            const createUUID = uuidv4();
+            const file = applicationData.step2.companyProfileFile;
+            const fileExt = file.name.split(".").pop();
+            const fileName = `profile-${createUUID}.${fileExt}`;
+
+            const { data, error: uploadError } = await supabase.storage
+              .from(COMPANY_PROFILE_BUCKET)
+              .upload(fileName, file);
+
+            if (uploadError) {
+              throw new Error(
+                `Company profile upload failed: ${uploadError.message}`,
+              );
+            }
+
+            websiteURL = data.path;
+          }
+
           if (!logoImageURL) {
             throw new Error("Company logo is required");
           }
+
+          // Resolve company profile type from UI format to DB format
+          const companyProfileType =
+            applicationData.step2.companyProfileType === "file"
+              ? applicationData.step2.companyProfileFile?.type.startsWith(
+                  "image/",
+                )
+                ? ("image" as const)
+                : ("document" as const)
+              : ("website" as const);
 
           // Use the verified businessMemberId (UUID) for renewal/updating applications.
           // This is a returned FK value, while checks are based on Business Member Identifier.
@@ -145,14 +219,33 @@ export const useMembershipStep4 = ({
               ? undefined
               : storedBusinessMemberId || verifiedBusinessMemberId;
 
+          const sectorId = applicationData.step2.sectorId;
+          const isNumericSectorId = /^\d+$/.test(sectorId);
+
+          const selectedSectorName = isNumericSectorId
+            ? (sectors.find(
+                (sector) => String(sector.sectorId) === String(sectorId),
+              )?.sectorName ?? "")
+            : sectorId;
+
+          if (!selectedSectorName) {
+            throw new Error("Industry/Sector is required");
+          }
+
+          // Persist new custom sector to the DB
+          if (!isNumericSectorId && sectorId.trim()) {
+            tryCatch(upsertSector(sectorId.trim()));
+          }
+
           const res = await submitMembershipApplication({
             applicationType: applicationData.step1.applicationType,
             applicationMemberType: refinedValue.applicationMemberType,
             businessMemberId,
             companyName: applicationData.step2.companyName,
             companyAddress: applicationData.step2.companyAddress,
-            sectorId: Number(applicationData.step2.sectorId),
-            websiteURL: applicationData.step2.websiteURL,
+            sectorName: selectedSectorName,
+            websiteURL,
+            companyProfileType,
             emailAddress: applicationData.step2.emailAddress,
             landline: applicationData.step2.landline,
             mobileNumber: applicationData.step2.mobileNumber,

@@ -2,7 +2,7 @@
 
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import type { ServerFunction } from "@/lib/server/types";
+import type { AsyncFunction } from "@/lib/server/types";
 import type { Database } from "@/lib/supabase/db.types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
@@ -10,7 +10,7 @@ import {
   publishEventServerSchema,
 } from "@/lib/validation/event/createEventSchema";
 
-export const publishEvent: ServerFunction<
+export const publishEvent: AsyncFunction<
   [PublishEventInput],
   { eventId: string }
 > = async (input) => {

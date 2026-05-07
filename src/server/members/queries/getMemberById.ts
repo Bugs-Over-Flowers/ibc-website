@@ -1,7 +1,8 @@
 import "server-only";
 
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { applyAdmin5mCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
@@ -16,7 +17,7 @@ export async function getMemberById(
   requestCookies: RequestCookie[],
 ): Promise<MemberIdentity> {
   "use cache";
-  cacheLife("admin5m");
+  applyAdmin5mCache();
   cacheTag(CACHE_TAGS.members.all);
   cacheTag(CACHE_TAGS.members.admin);
 

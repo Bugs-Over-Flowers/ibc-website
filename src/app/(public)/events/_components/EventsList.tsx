@@ -3,16 +3,16 @@
 import { motion } from "framer-motion";
 import { Calendar } from "lucide-react";
 import { useMemo, useState } from "react";
+import type { PrivacyFilter } from "@/app/(public)/events/_utils/searchUtils";
 import { staggerContainer } from "@/lib/animations/stagger";
+import type { EventStatus } from "@/lib/events/eventUtils";
 import { getEventCategory } from "@/lib/events/eventUtils";
 import type { Tables } from "@/lib/supabase/db.types";
 import { EventCard } from "./EventCard";
-import { EventsSearch } from "./EventSearch";
 import { FeaturedEventList } from "./FeaturedEventList";
+import { EventsSearch } from "./search/EventSearch";
 
 type Event = Tables<"Event">;
-
-import type { EventStatus } from "@/lib/events/eventUtils";
 
 type FilterOption = "all" | EventStatus;
 
@@ -28,6 +28,7 @@ interface EventsListProps {
 export function EventsList({ events }: EventsListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<FilterOption>("all");
+  const [privacyFilter, setPrivacyFilter] = useState<PrivacyFilter>("all");
   const [dateRange, setDateRange] = useState<DateRange>({});
 
   const { ongoingEvents, filteredEvents } = useMemo(() => {
@@ -54,13 +55,19 @@ export function EventsList({ events }: EventsListProps) {
       return true;
     });
 
+    // Filter by privacy (public/private)
+    const privacyFiltered = dateFiltered.filter((event) => {
+      if (privacyFilter === "all") return true;
+      return event.eventType === privacyFilter;
+    });
+
     // Separate ongoing events (for featured card)
-    const ongoing = dateFiltered.filter(
+    const ongoing = privacyFiltered.filter(
       (e) => getEventCategory(e) === "ongoing",
     );
 
     // Filter remaining events based on dropdown selection
-    let remaining = dateFiltered.filter(
+    let remaining = privacyFiltered.filter(
       (e) => getEventCategory(e) !== "ongoing",
     );
 
@@ -92,7 +99,7 @@ export function EventsList({ events }: EventsListProps) {
     });
 
     return { ongoingEvents: ongoing, filteredEvents: remaining };
-  }, [events, searchQuery, filter, dateRange]);
+  }, [events, searchQuery, filter, privacyFilter, dateRange]);
 
   const EmptyState = () => (
     <motion.div
@@ -167,8 +174,10 @@ export function EventsList({ events }: EventsListProps) {
           <EventsSearch
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
+            onPrivacyChange={setPrivacyFilter}
             onSearchChange={setSearchQuery}
             onStatusChange={setFilter}
+            privacyFilter={privacyFilter}
             searchQuery={searchQuery}
             statusFilter={filter}
           />

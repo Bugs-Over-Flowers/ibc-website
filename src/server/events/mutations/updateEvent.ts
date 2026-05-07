@@ -2,7 +2,7 @@
 
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import type { ServerFunction } from "@/lib/server/types";
+import type { AsyncFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import {
   type EditDraftEventInput,
@@ -27,7 +27,7 @@ const isPublishedEventTypeLockedError = (
 ): boolean =>
   Boolean(errorMessage?.includes(PUBLISHED_EVENT_TYPE_LOCKED_ERROR));
 
-export const updateEvent: ServerFunction<
+export const updateEvent: AsyncFunction<
   [UpdateEventInput, boolean],
   UpdateEventResponse
 > = async (input, isDraft) => {

@@ -1,10 +1,10 @@
 "use server";
 
-import type { ServerFunction } from "@/lib/server/types";
+import type { AsyncFunction } from "@/lib/server/types";
 import { createActionClient } from "@/lib/supabase/server";
 import { LoginSchema } from "@/lib/validation/authentication/login";
 
-export const login: ServerFunction<
+export const login: AsyncFunction<
   [LoginSchema],
   { mfaRequired: boolean; emailVerified: boolean }
 > = async (input) => {

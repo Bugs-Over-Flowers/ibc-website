@@ -51,16 +51,25 @@ export function MembershipGuidelines({
           Data Privacy Act of 2012 and its Implementing Rules and Regulations
           ("Act")
         </a>
-        , you hereby give your consent and unequivocally: (1) Agree in the
-        collection, storage, organization, process, erasure or destruction of
-        your personal information, by Iloilo Business Club, Inc., for purposes
-        of updating your membership records, as well as to be used as reference
-        for future events, within two years from the date of your submission.
-        (2) Affirm all your rights under the Act, including your right to
-        access, rectify and withdraw the information you have provided. (3)
-        Allow Iloilo Business Club, Inc. to collect, store, organize, process,
-        erase and destruct your personal information in a manner which it think
-        is best to protect its confidentiality.
+        , you hereby give your consent and unequivocally:
+        <ol className="mt-2 list-decimal space-y-1.5 pl-5">
+          <li>
+            Agree to the collection, storage, organization, processing, erasure,
+            or destruction of your personal information by Iloilo Business Club,
+            Inc. for purposes of updating your membership records, as well as
+            for use as reference for future events, within two years from the
+            date of your submission.
+          </li>
+          <li>
+            Affirm all your rights under the Act, including your right to
+            access, rectify, and withdraw the information you have provided.
+          </li>
+          <li>
+            Allow Iloilo Business Club, Inc. to collect, store, organize,
+            process, erase, and destroy your personal information in a manner
+            which it deems best to protect its confidentiality.
+          </li>
+        </ol>
       </li>
     </ul>
   );

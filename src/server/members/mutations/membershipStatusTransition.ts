@@ -1,29 +1,186 @@
 "use server";
 
-import { createActionClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { sendMembershipStatusNotifications } from "@/server/members/mutations/sendMembershipStatusNotifications";
+import type {
+  MemberStatusTransition,
+  MembershipStatus,
+} from "@/server/members/types";
+
+type MemberSnapshot = {
+  businessMemberId: string;
+  businessName: string;
+  membershipStatus: MembershipStatus | null;
+};
+
+async function applyMembershipStatusFallback(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  referenceTime: Date,
+) {
+  const currentYear = Number(
+    new Intl.DateTimeFormat("en-PH", {
+      timeZone: "Asia/Manila",
+      year: "numeric",
+    }).format(referenceTime),
+  );
+  const nextYearStart = new Date(`${currentYear + 1}-01-01T00:00:00+08:00`);
+
+  const { error: unpaidError } = await supabase
+    .from("BusinessMember")
+    .update({ membershipStatus: "cancelled" })
+    .not("membershipExpiryDate", "is", null)
+    .lt("membershipExpiryDate", referenceTime.toISOString())
+    .eq("membershipStatus", "unpaid");
+
+  if (unpaidError) {
+    throw new Error(
+      `Failed to apply cancelled-member fallback: ${unpaidError.message}`,
+    );
+  }
+
+  const { error: paidError } = await supabase
+    .from("BusinessMember")
+    .update({
+      membershipStatus: "unpaid",
+      membershipExpiryDate: nextYearStart.toISOString(),
+    })
+    .not("membershipExpiryDate", "is", null)
+    .lt("membershipExpiryDate", referenceTime.toISOString())
+    .eq("membershipStatus", "paid");
+
+  if (paidError) {
+    throw new Error(
+      `Failed to apply unpaid-member fallback: ${paidError.message}`,
+    );
+  }
+}
+
+function buildTransitions(
+  beforeRows: MemberSnapshot[],
+  afterRows: MemberSnapshot[],
+) {
+  const beforeMap = new Map(
+    beforeRows.map((row) => [row.businessMemberId, row]),
+  );
+
+  return afterRows
+    .map((row) => {
+      const before = beforeMap.get(row.businessMemberId);
+      if (!before?.membershipStatus || !row.membershipStatus) {
+        return null;
+      }
+
+      if (before.membershipStatus === row.membershipStatus) {
+        return null;
+      }
+
+      return {
+        businessMemberId: row.businessMemberId,
+        businessName: row.businessName,
+        previousStatus: before.membershipStatus,
+        currentStatus: row.membershipStatus,
+      } satisfies MemberStatusTransition;
+    })
+    .filter((row): row is MemberStatusTransition => row !== null);
+}
+
+async function processAndNotify(referenceTime: Date) {
+  const supabase = await createAdminClient();
+
+  const { data: beforeRows, error: beforeError } = await supabase
+    .from("BusinessMember")
+    .select("businessMemberId,businessName,membershipStatus")
+    .not("membershipExpiryDate", "is", null)
+    .lt("membershipExpiryDate", referenceTime.toISOString())
+    .in("membershipStatus", ["paid", "unpaid"]);
+
+  if (beforeError) {
+    throw new Error(
+      `Failed to load members before transition: ${beforeError.message}`,
+    );
+  }
+
+  const { error: transitionError } = await supabase.rpc(
+    "process_membership_statuses",
+    {
+      p_reference_time: referenceTime.toISOString(),
+    },
+  );
+
+  const rpcMissingSchemaCache =
+    transitionError?.message?.includes(
+      "Could not find the function public.process_membership_statuses",
+    ) ?? false;
+
+  if (transitionError && !rpcMissingSchemaCache) {
+    throw new Error(
+      `Failed to process membership statuses: ${transitionError.message}`,
+    );
+  }
+
+  if (rpcMissingSchemaCache) {
+    await applyMembershipStatusFallback(supabase, referenceTime);
+  }
+
+  const targetIds = (beforeRows ?? []).map((row) => row.businessMemberId);
+  if (targetIds.length === 0) {
+    return {
+      updatedCount: 0,
+      emailSummary: {
+        transitionedCount: 0,
+        attemptedEmails: 0,
+        sentEmails: 0,
+        failedEmails: 0,
+      },
+    };
+  }
+
+  const { data: afterRows, error: afterError } = await supabase
+    .from("BusinessMember")
+    .select("businessMemberId,businessName,membershipStatus")
+    .in("businessMemberId", targetIds);
+
+  if (afterError) {
+    throw new Error(
+      `Failed to load members after transition: ${afterError.message}`,
+    );
+  }
+
+  const transitions = buildTransitions(beforeRows ?? [], afterRows ?? []);
+
+  const emailSummary = await sendMembershipStatusNotifications(
+    supabase,
+    transitions,
+  );
+
+  return {
+    updatedCount: transitions.length,
+    emailSummary,
+  };
+}
 
 /**
  * Reset member statuses on January 1st.
  * Intended for scheduled execution.
  */
 export async function resetMemberStatuses() {
-  const supabase = await createActionClient();
+  const currentYear = Number(
+    new Intl.DateTimeFormat("en-PH", {
+      timeZone: "Asia/Manila",
+      year: "numeric",
+    }).format(new Date()),
+  );
+  const referenceTime = new Date(`${currentYear}-01-01T00:00:00+08:00`);
 
-  // Delegate yearly reset logic to the database function.
-  const { error } = await supabase.rpc("january_first_reset");
-
-  if (error) {
-    throw new Error(`Failed to reset member statuses: ${error.message}`);
-  }
-
-  const currentYear = new Date().getFullYear();
+  const result = await processAndNotify(referenceTime);
 
   return {
     success: true,
     message: `Member statuses reset for ${currentYear}`,
-    updatedCount: 0,
+    updatedCount: result.updatedCount,
+    emailSummary: result.emailSummary,
     details:
-      "Membership transitions were processed via january_first_reset RPC.",
+      "Membership transitions were processed and notifications were sent directly from ApplicationMember emails.",
   };
 }
 
@@ -31,24 +188,16 @@ export async function resetMemberStatuses() {
  * Process membership transitions up to a deadline.
  */
 export async function updateCancelledMembers(deadlineDate: Date) {
-  const supabase = await createActionClient();
-
   const deadlineDateString = deadlineDate.toISOString().split("T")[0];
 
-  // Delegate status processing to the database function for a specific reference time.
-  const { error } = await supabase.rpc("process_membership_statuses", {
-    p_reference_time: deadlineDate.toISOString(),
-  });
-
-  if (error) {
-    throw new Error(`Failed to update cancelled members: ${error.message}`);
-  }
+  const result = await processAndNotify(deadlineDate);
 
   return {
     success: true,
     message: "Cancelled members updated successfully",
     deadline: deadlineDateString,
-    updatedCount: 0,
-    details: `Membership transitions were processed up to reference time ${deadlineDate.toISOString()}.`,
+    updatedCount: result.updatedCount,
+    emailSummary: result.emailSummary,
+    details: `Membership transitions were processed and notifications were sent up to reference time ${deadlineDate.toISOString()}.`,
   };
 }

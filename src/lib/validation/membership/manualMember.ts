@@ -11,12 +11,11 @@ export const ManualMemberSchema = z
     sectorId: z
       .string({ message: "Industry/Sector is required" })
       .min(1, "Industry/Sector is required"),
+    companyProfileType: z.enum(["image", "document", "website"]),
     companyAddress: z
       .string({ message: "Company address is required" })
       .min(1, "Company address is required"),
-    websiteURL: z
-      .string({ message: "Company website is required" })
-      .min(1, "Company website is required"),
+    websiteURL: z.string().optional(),
     emailAddress: z.email("Company email is required"),
     landline: z.string().min(1, "Landline is required"),
     mobileNumber: phoneSchema,
@@ -27,9 +26,10 @@ export const ManualMemberSchema = z
     membershipStatus: z.enum(["paid", "unpaid", "cancelled"]),
     representatives: z
       .array(ApplicationMemberSchema)
-      .length(
+      .min(1, "At least one representative is required")
+      .max(
         2,
-        "Exactly two representatives are required: one principal and one alternate",
+        "Maximum of two representatives allowed: one principal and one alternate",
       ),
   })
   .transform((data) => ({
