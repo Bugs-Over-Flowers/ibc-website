@@ -1,5 +1,12 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Calendar, ClipboardList, MapPin } from "lucide-react";
+import {
+  ArrowRight,
+  Calendar,
+  ClipboardList,
+  Globe,
+  Lock,
+  MapPin,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { getStatusBadge } from "@/components/BadgeEvents";
@@ -52,6 +59,18 @@ export function EventCard({ event, index }: EventCardProps) {
               />
               <div className="absolute top-4 left-4 flex gap-2">
                 {getStatusBadge(status)}
+                {event.eventType === "public" && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-500 px-2.5 py-0.5 font-medium text-white text-xs shadow-lg">
+                    <Globe className="h-3 w-3" />
+                    Public
+                  </span>
+                )}
+                {event.eventType === "private" && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-0.5 font-medium text-white text-xs shadow-lg">
+                    <Lock className="h-3 w-3" />
+                    Private
+                  </span>
+                )}
               </div>
             </div>
 

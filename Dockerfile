@@ -7,6 +7,7 @@ RUN bun install --frozen-lockfile
 
 FROM base AS development
 ENV NODE_ENV=development
+ENV HOSTNAME="0.0.0.0"
 COPY . .
 EXPOSE 3000
 CMD ["bun", "run", "dev"]
@@ -24,6 +25,9 @@ RUN bun run build
 FROM oven/bun:1 AS prod
 WORKDIR /app
 ENV NODE_ENV=production
+
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=3000
 
 # Copy the standalone output (contains server.js and minimal node_modules)
 COPY --from=builder /app/.next/standalone ./

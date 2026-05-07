@@ -1,11 +1,7 @@
 "use server";
 
-import { cacheTag } from "next/cache";
-import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { applyRealtime60sCache } from "@/lib/cache/profiles";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import { signPaymentProofUrl } from "@/lib/storage/signedUrls";
 import { createClient } from "@/lib/supabase/server";
 
@@ -18,27 +14,12 @@ export async function getPaymentProofSignedUrl(input: {
 }) {
   const parsed = getPaymentProofSignedUrlInputSchema.parse(input);
   const cookieStore = await cookies();
-
-  return getCachedPaymentProofSignedUrl(
-    cookieStore.getAll(),
-    parsed.registrationId,
-  );
-}
-
-async function getCachedPaymentProofSignedUrl(
-  requestCookies: RequestCookie[],
-  registrationId: string,
-) {
-  "use cache";
-  applyRealtime60sCache();
-  cacheTag(CACHE_TAGS.registrations.details);
-
-  const supabase = await createClient(requestCookies);
+  const supabase = await createClient(cookieStore.getAll());
 
   const { data: registration, error: registrationError } = await supabase
     .from("Registration")
-    .select("paymentMethod, ProofImage(path)")
-    .eq("registrationId", registrationId)
+    .select("paymentMethod, ProofImage(path, proofImageId, orderIndex)")
+    .eq("registrationId", parsed.registrationId)
     .single();
 
   if (registrationError || !registration) {
@@ -49,19 +30,37 @@ async function getCachedPaymentProofSignedUrl(
     throw new Error("Payment proof is only available for BPI payments");
   }
 
-  const rawProofPath = registration.ProofImage?.[0]?.path;
+  const proofs = (registration.ProofImage ?? [])
+    .filter((proof) => proof.path)
+    .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
 
-  if (!rawProofPath) {
+  if (proofs.length === 0) {
     throw new Error("No payment proof uploaded for this registration");
   }
 
-  const signedUrl = await signPaymentProofUrl(supabase, rawProofPath);
-
-  if (!signedUrl) {
-    throw new Error("Failed to generate payment proof URL");
-  }
-
   return {
-    signedUrl,
+    proofs: (
+      await Promise.all(
+        proofs.map(async (proof) => {
+          const signedUrl = await signPaymentProofUrl(supabase, proof.path);
+
+          if (!signedUrl) {
+            return null;
+          }
+
+          return {
+            proofImageId: proof.proofImageId,
+            signedUrl,
+            orderIndex: proof.orderIndex ?? 0,
+            path: proof.path,
+          };
+        }),
+      )
+    ).filter(Boolean) as Array<{
+      proofImageId: string;
+      signedUrl: string;
+      orderIndex: number;
+      path: string;
+    }>,
   };
 }

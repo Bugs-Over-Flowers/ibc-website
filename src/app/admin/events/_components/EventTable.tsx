@@ -22,6 +22,8 @@ import EventRow from "./EventContainer/EventRow";
 interface EventTableProps {
   initialEvents: EventWithStatus[];
   initialNextCursor: string | null;
+  initialRegistrationCounts?: Record<string, number>;
+  initialParticipantCounts?: Record<string, number>;
   search?: string;
   sort?: SortOption;
   dateSort?: DateSortOption;
@@ -32,15 +34,25 @@ interface EventTableProps {
 export default function EventTable({
   initialEvents,
   initialNextCursor,
+  initialRegistrationCounts,
+  initialParticipantCounts,
   search,
   sort,
   dateSort,
   titleSort,
   status,
 }: EventTableProps) {
-  const { events, isLoading, observerTarget } = useInfiniteEvents({
+  const {
+    events,
+    isLoading,
+    observerTarget,
+    registrationCounts,
+    participantCounts,
+  } = useInfiniteEvents({
     initialEvents,
     initialNextCursor,
+    initialRegistrationCounts,
+    initialParticipantCounts,
     search,
     sort,
     dateSort,
@@ -73,7 +85,12 @@ export default function EventTable({
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
         {events.map((ev) => (
-          <EventRow event={ev} key={ev.eventId} />
+          <EventRow
+            event={ev}
+            key={ev.eventId}
+            participantCount={participantCounts?.[ev.eventId]}
+            registrationCount={registrationCounts?.[ev.eventId]}
+          />
         ))}
       </div>
 

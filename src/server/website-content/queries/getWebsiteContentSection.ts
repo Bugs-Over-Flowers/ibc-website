@@ -1,6 +1,10 @@
 "use server";
 
+import { cacheTag } from "next/cache";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
+import { applyAdmin5mCache } from "@/lib/cache/profiles";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createClient } from "@/lib/supabase/server";
 import { websiteContentSectionSchema } from "../schemas";
 import {
@@ -12,12 +16,32 @@ import {
   type WebsiteContentSectionData,
 } from "../types";
 
-export async function getWebsiteContentSection(
+const WEBSITE_CONTENT_SECTION_TAG_BY_SECTION: Record<
+  WebsiteContentSection,
+  string
+> = {
+  vision_mission: CACHE_TAGS.websiteContent.section.visionMission,
+  goals: CACHE_TAGS.websiteContent.section.goals,
+  company_thrusts: CACHE_TAGS.websiteContent.section.companyThrusts,
+  board_of_trustees: CACHE_TAGS.websiteContent.section.boardOfTrustees,
+  secretariat: CACHE_TAGS.websiteContent.section.secretariat,
+  landing_page_benefits: CACHE_TAGS.websiteContent.section.landingPageBenefits,
+  hero_section: CACHE_TAGS.websiteContent.section.heroSection,
+};
+
+async function getWebsiteContentSectionCached(
+  requestCookies: RequestCookie[],
   section: WebsiteContentSection,
 ): Promise<WebsiteContentSectionData> {
+  "use cache";
+
+  applyAdmin5mCache();
+
   const parsedSection = websiteContentSectionSchema.parse(section);
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore.getAll());
+
+  cacheTag(CACHE_TAGS.websiteContent.all);
+  cacheTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsedSection]);
+  const supabase = await createClient(requestCookies);
 
   const { data, error } = await supabase
     .from("WebsiteContent")
@@ -155,4 +179,11 @@ export async function getWebsiteContentSection(
       updatedAt: latestUpdatedAt,
     };
   }
+}
+
+export async function getWebsiteContentSection(
+  section: WebsiteContentSection,
+): Promise<WebsiteContentSectionData> {
+  const cookieStore = await cookies();
+  return getWebsiteContentSectionCached(cookieStore.getAll(), section);
 }

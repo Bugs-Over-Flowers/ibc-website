@@ -12,10 +12,10 @@ import type { MemberFilterInput } from "@/lib/validation/application/application
 type MemberWithSector =
   Database["public"]["Tables"]["BusinessMember"]["Row"] & {
     Sector: Database["public"]["Tables"]["Sector"]["Row"];
-    Application: {
+    Application: Array<{
       applicationId: string;
       applicationStatus: string;
-    } | null;
+    }>;
   };
 
 export async function getMembers(

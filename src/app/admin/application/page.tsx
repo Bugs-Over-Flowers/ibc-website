@@ -25,19 +25,15 @@ export default async function ApplicationsPage() {
         | "rejected"
         | undefined;
 
-      const isInterviewType =
-        app.applicationType === "newMember" ||
-        app.applicationType === "renewal";
-      const isUpdatingType = app.applicationType === "updating";
+      const isInterviewType = app.applicationType === "newMember";
+      const isUpdatingType =
+        app.applicationType === "renewal" || app.applicationType === "updating";
 
       if (status === "new") {
         if (isInterviewType) {
           acc.interview.new += 1;
           if (app.applicationType === "newMember") {
             acc.interview.typeBreakdown.new.newMember += 1;
-          }
-          if (app.applicationType === "renewal") {
-            acc.interview.typeBreakdown.new.renewal += 1;
           }
         }
         if (isUpdatingType) {
@@ -49,18 +45,12 @@ export default async function ApplicationsPage() {
           if (app.applicationType === "newMember") {
             acc.interview.typeBreakdown.pending.newMember += 1;
           }
-          if (app.applicationType === "renewal") {
-            acc.interview.typeBreakdown.pending.renewal += 1;
-          }
         }
       } else if (status === "approved" || status === "rejected") {
         if (isInterviewType) {
           acc.interview.finished += 1;
           if (app.applicationType === "newMember") {
             acc.interview.typeBreakdown.finished.newMember += 1;
-          }
-          if (app.applicationType === "renewal") {
-            acc.interview.typeBreakdown.finished.renewal += 1;
           }
         }
         if (isUpdatingType) {
@@ -76,9 +66,9 @@ export default async function ApplicationsPage() {
         pending: 0,
         finished: 0,
         typeBreakdown: {
-          new: { newMember: 0, renewal: 0 },
-          pending: { newMember: 0, renewal: 0 },
-          finished: { newMember: 0, renewal: 0 },
+          new: { newMember: 0 },
+          pending: { newMember: 0 },
+          finished: { newMember: 0 },
         },
       },
       updating: { new: 0, finished: 0 },

@@ -27,6 +27,50 @@ export const useCreateManualMemberStep3 = () => {
         return;
       }
 
+      // Upload company profile file if provided
+      let websiteURL = memberData.step1.websiteURL;
+      let companyProfileType: "image" | "document" | "website" = "website";
+
+      if (
+        memberData.step1.companyProfileType === "file" &&
+        memberData.step1.companyProfileFile instanceof File
+      ) {
+        const profileFile = memberData.step1.companyProfileFile;
+        companyProfileType = profileFile.type.startsWith("image/")
+          ? "image"
+          : "document";
+
+        const { error: uploadError, data: uploadedPath } = await tryCatch(
+          (async () => {
+            const { v4: uuidv4 } = await import("uuid");
+            const { createClient } = await import("@/lib/supabase/client");
+            const { COMPANY_PROFILE_BUCKET } = await import(
+              "@/lib/storage/companyProfile"
+            );
+            const supabase = await createClient();
+            const fileExt = profileFile.name.split(".").pop();
+            const fileName = `profile-${uuidv4()}.${fileExt}`;
+
+            const { data, error: uploadError } = await supabase.storage
+              .from(COMPANY_PROFILE_BUCKET)
+              .upload(fileName, profileFile);
+
+            if (uploadError) throw uploadError;
+
+            return data.path;
+          })(),
+        );
+
+        if (uploadError) {
+          toast.error(uploadError);
+          return;
+        }
+
+        if (uploadedPath) {
+          websiteURL = uploadedPath;
+        }
+      }
+
       // Upload company logo if provided
       let logoImageURL: string | File | null = memberData.step1.logoImageURL;
       if (logoImageURL instanceof File && logoImageURL.size > 0) {
@@ -67,6 +111,8 @@ export const useCreateManualMemberStep3 = () => {
         representatives: transformedRepresentatives,
         logoImageURL: typeof logoImageURL === "string" ? logoImageURL : "",
         companyName: titleCase(memberData.step1.companyName).trim(),
+        companyProfileType,
+        websiteURL,
       };
 
       const { error, data } = await tryCatch(createManualMember(combinedData));

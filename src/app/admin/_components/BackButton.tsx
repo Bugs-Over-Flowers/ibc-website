@@ -9,22 +9,34 @@ type BackButtonProps =
       eventId: string;
       href?: never;
       label?: string;
+      back?: never;
     }
   | {
       eventId?: never;
       href: Route;
       label?: string;
+      back?: never;
+    }
+  | {
+      eventId?: never;
+      href?: never;
+      label?: string;
+      back: true;
     };
 
 export default function BackButton(props: BackButtonProps) {
   const router = useRouter();
   const label = props.label ?? "Back to Event";
-  const href: Route =
-    "eventId" in props
-      ? (`/admin/events/${props.eventId}` as Route)
-      : props.href;
 
   const handleClick = () => {
+    if ("back" in props) {
+      router.back();
+      return;
+    }
+    const href: Route =
+      "eventId" in props
+        ? (`/admin/events/${props.eventId}` as Route)
+        : props.href;
     router.push(href);
   };
 

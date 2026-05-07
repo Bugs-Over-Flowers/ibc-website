@@ -23,21 +23,23 @@ const defaultSubmitMeta: CreateEventSubmitMeta = {
   submitMode: "selected",
 };
 
+const defaultValues = {
+  eventTitle: "",
+  description: "",
+  eventStartDate: undefined as Date | undefined,
+  eventEndDate: undefined as Date | undefined,
+  venue: "",
+  facebookLink: "",
+  registrationFee: 0,
+  eventType: null as "public" | "private" | null,
+  eventImage: [] as File[],
+  eventPoster: [] as File[],
+};
+
 export const useCreateEventForm = () => {
   const router = useRouter();
   const form = useAppForm({
-    defaultValues: {
-      eventTitle: "",
-      description: "",
-      eventStartDate: undefined as Date | undefined,
-      eventEndDate: undefined as Date | undefined,
-      venue: "",
-      facebookLink: "",
-      registrationFee: 0,
-      eventType: null as "public" | "private" | null,
-      eventImage: [] as File[],
-      eventPoster: [] as File[],
-    },
+    defaultValues,
 
     validationLogic: revalidateLogic(),
     onSubmitMeta: defaultSubmitMeta,
@@ -177,6 +179,7 @@ export const useCreateEventForm = () => {
           : "Event created successfully!";
 
       toast.success(message);
+      form.reset(defaultValues);
       router.push("/admin/events");
     },
   });

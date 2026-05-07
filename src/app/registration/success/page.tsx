@@ -37,6 +37,11 @@ async function SuccessPage() {
           You have not registered recently (for the past 14 days). Please
           register first.
         </p>
+        <p className="max-w-xl text-muted-foreground text-sm">
+          Attendee QR codes are sent by email after a successful registration,
+          so this page only appears when we still have your recent registration
+          identifier saved.
+        </p>
         <Link href={"/events"}>
           <Button>Go to Events</Button>
         </Link>

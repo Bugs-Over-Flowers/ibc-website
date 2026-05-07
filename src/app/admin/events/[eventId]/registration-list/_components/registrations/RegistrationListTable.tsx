@@ -97,7 +97,10 @@ export default function RegistrationListTable({
       accessorKey: "paymentProofStatus",
       header: "Payment Status",
       cell: ({ row }) => (
-        <PaymentStatusBadge status={row.original.paymentProofStatus} />
+        <PaymentStatusBadge
+          data-testid={"payment-status-badge"}
+          status={row.original.paymentProofStatus}
+        />
       ),
     },
     {

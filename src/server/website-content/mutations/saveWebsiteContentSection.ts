@@ -22,10 +22,43 @@ const WEBSITE_CONTENT_SECTION_TAG_BY_SECTION = {
   hero_section: CACHE_TAGS.websiteContent.section.heroSection,
 } as const;
 
+function isDisallowedImageUrl(imageUrl: string): boolean {
+  const normalized = imageUrl.trim().toLowerCase();
+  if (normalized.length === 0) {
+    return false;
+  }
+
+  if (normalized.startsWith("blob:") || normalized.startsWith("data:")) {
+    return true;
+  }
+
+  const hasScheme = /^[a-z][a-z\d+.-]*:/i.test(normalized);
+  if (!hasScheme) {
+    return false;
+  }
+
+  return !(
+    normalized.startsWith("http://") || normalized.startsWith("https://")
+  );
+}
+
 export async function saveWebsiteContentSection(
   input: SaveWebsiteContentSectionInput,
 ): Promise<{ updatedAt: string }> {
   const parsed = saveWebsiteContentSectionSchema.parse(input);
+
+  // Validate that only persisted image URLs are saved, not preview schemes.
+  if (parsed.cards) {
+    const invalidImageUrlCards = parsed.cards.filter((card) =>
+      isDisallowedImageUrl(card.imageUrl ?? ""),
+    );
+    if (invalidImageUrlCards.length > 0) {
+      throw new Error(
+        `Cannot save section: ${invalidImageUrlCards.length} card(s) have invalid image URLs. Images may not have uploaded successfully. Please upload images again.`,
+      );
+    }
+  }
+
   const rowsToUpsert: UpsertWebsiteContentRowInput[] = [];
   const retainedEntryKeys: string[] = [];
 
@@ -98,23 +131,36 @@ export async function saveWebsiteContentSection(
         });
       }
 
-      rowsToUpsert.push({
-        section: parsed.section,
-        entryKey: card.entryKey,
-        textType: "Paragraph",
-        textValue: card.paragraph,
-        icon: card.icon || null,
-        imageUrl: card.imageUrl || null,
-        cardPlacement: placementValue,
-        group: card.group,
-      });
+      if (
+        parsed.section !== "board_of_trustees" &&
+        parsed.section !== "secretariat"
+      ) {
+        rowsToUpsert.push({
+          section: parsed.section,
+          entryKey: card.entryKey,
+          textType: "Paragraph",
+          textValue: card.paragraph,
+          icon: card.icon || null,
+          imageUrl: card.imageUrl || null,
+          cardPlacement: placementValue,
+          group: card.group,
+        });
+      }
     }
   }
 
+  // Upsert all rows with new card placement
   await upsertWebsiteContentRows(rowsToUpsert);
 
+  // Soft delete entries that are no longer retained
   await deleteWebsiteContentEntriesBySection(parsed.section, retainedEntryKeys);
 
+  // CRITICAL: Invalidate cache BEFORE returning to client, so next fetch gets fresh data
+  updateTag(CACHE_TAGS.websiteContent.all);
+  updateTag(CACHE_TAGS.websiteContent.public);
+  updateTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsed.section]);
+
+  // Revalidate paths after cache invalidation
   revalidatePath("/", "page");
   revalidatePath("/about", "page");
   revalidatePath("/events", "page");
@@ -122,9 +168,7 @@ export async function saveWebsiteContentSection(
   revalidatePath("/networks", "page");
   revalidatePath("/contact", "page");
   revalidatePath("/admin/website-content", "page");
-  updateTag(CACHE_TAGS.websiteContent.all);
-  updateTag(CACHE_TAGS.websiteContent.public);
-  updateTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsed.section]);
 
-  return { updatedAt: new Date().toISOString() };
+  const updatedAt = new Date().toISOString();
+  return { updatedAt };
 }

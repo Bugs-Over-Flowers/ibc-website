@@ -5,7 +5,11 @@ import { AdminSidebarHeader } from "./SidebarHeader";
 import { AdminSidebarMenu } from "./SidebarMenu";
 import { AdminSidebarSecondary } from "./SidebarSecondary";
 
-export function AdminSidebar() {
+type AdminSidebarProps = {
+  email: string | null;
+};
+
+export function AdminSidebar({ email }: AdminSidebarProps) {
   const { isMobile, setOpenMobile } = useSidebar();
 
   const handleNavigate = () => {
@@ -16,7 +20,7 @@ export function AdminSidebar() {
 
   return (
     <Sidebar className="sidebar-custom h-screen select-none border-r bg-white">
-      <AdminSidebarHeader />
+      <AdminSidebarHeader email={email} />
       <SidebarContent className="px-3 py-4">
         <AdminSidebarMenu onNavigate={handleNavigate} />
         <AdminSidebarSecondary onNavigate={handleNavigate} />

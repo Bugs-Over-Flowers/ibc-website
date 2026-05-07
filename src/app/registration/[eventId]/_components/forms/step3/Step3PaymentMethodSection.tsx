@@ -15,8 +15,8 @@ export default function Step3PaymentMethodSection({
     <form.AppField
       listeners={{
         onChange: () => {
-          if (form.getFieldValue("paymentProof")) {
-            form.resetField("paymentProof");
+          if (form.getFieldValue("paymentProofs")) {
+            form.resetField("paymentProofs");
           }
         },
       }}

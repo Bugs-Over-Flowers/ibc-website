@@ -22,6 +22,7 @@ export default function Step4TermsSection({ form }: Step4TermsSectionProps) {
               <Checkbox
                 aria-invalid={isInvalid}
                 checked={field.state.value}
+                className={"mt-0.5 self-start"}
                 id={field.name}
                 name={field.name}
                 onBlur={field.handleBlur}
@@ -31,7 +32,9 @@ export default function Step4TermsSection({ form }: Step4TermsSectionProps) {
               />
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm">I have read and agree to the</span>
+                  <label className="text-sm" htmlFor={field.name}>
+                    I have read and agree to the
+                  </label>
                   <TermsAndConditions
                     customAcceptButton={(closeTermsAndConditions) => (
                       <Button

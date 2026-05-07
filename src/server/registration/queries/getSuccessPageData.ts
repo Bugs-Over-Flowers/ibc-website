@@ -12,7 +12,6 @@ export const getSuccessPageData = async (
     registrationIdentifier: string;
   },
 ) => {
-  // validate the registration identifier
   const parsedIdentifier = RegistrationIdentifier.safeParse(
     registrationIdentifier,
   );
@@ -46,17 +45,20 @@ export const getSuccessPageData = async (
     throw new Error("No event found");
   }
 
-  const { data: registrant } = await supabase
+  const { data: participants } = await supabase
     .from("Participant")
-    .select("firstName, lastName, email")
+    .select("firstName, lastName, email, participantIdentifier, isPrincipal")
     .eq("registrationId", registrationDetails.registrationId)
-    .eq("isPrincipal", true)
-
-    .maybeSingle()
     .throwOnError();
 
-  if (!registrationDetails || !registrant) {
-    throw new Error("No event found");
+  if (!participants || participants.length === 0) {
+    throw new Error("No participants found");
+  }
+
+  const registrant = participants.find((p) => p.isPrincipal);
+
+  if (!registrant) {
+    throw new Error("No registrant found");
   }
 
   const affiliation = registrationDetails.businessMemberId
@@ -70,5 +72,11 @@ export const getSuccessPageData = async (
     name: `${registrant.firstName} ${registrant.lastName}`,
     // biome-ignore lint/style/noNonNullAssertion: affiliation will be not null at this point
     affiliation: affiliation!,
+    participants: participants.map((p) => ({
+      name: `${p.firstName} ${p.lastName}`,
+      email: p.email,
+      participantIdentifier: p.participantIdentifier,
+      isPrincipal: p.isPrincipal,
+    })),
   };
 };

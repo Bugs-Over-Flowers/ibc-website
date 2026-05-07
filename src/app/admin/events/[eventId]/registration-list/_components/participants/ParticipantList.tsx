@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import type { ExportEventDetails } from "@/lib/export/excel";
 import tryCatch from "@/lib/server/tryCatch";
 import type { RegistrationListPageProps } from "@/lib/types/route";
 import { parseStringParam } from "@/lib/utils";
@@ -6,10 +7,12 @@ import { getEventParticipantList } from "@/server/registration/queries/getEventP
 import ParticipantListTable from "./ParticipantListTable";
 
 export default async function ParticipantList({
-  eventTitle,
+  eventDetails,
   params,
   searchParams,
-}: RegistrationListPageProps & { eventTitle: string }) {
+}: RegistrationListPageProps & {
+  eventDetails: ExportEventDetails;
+}) {
   const { eventId } = await params;
   const { part_q } = await searchParams;
   const cookieStore = await cookies();
@@ -30,7 +33,7 @@ export default async function ParticipantList({
   }
   return (
     <ParticipantListTable
-      eventTitle={eventTitle}
+      eventDetails={eventDetails}
       participantList={participantList.data}
     />
   );

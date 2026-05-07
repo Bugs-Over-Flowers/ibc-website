@@ -12,9 +12,9 @@ export type ApplicationTab = "new" | "pending" | "finished";
 export type ApplicationGroup = "interview" | "updating";
 
 type InterviewTypeBreakdown = {
-  new: { newMember: number; renewal: number };
-  pending: { newMember: number; renewal: number };
-  finished: { newMember: number; renewal: number };
+  new: { newMember: number };
+  pending: { newMember: number };
+  finished: { newMember: number };
 };
 
 interface ApplicationsTabsProps {
@@ -39,8 +39,8 @@ interface ApplicationsTabsProps {
 }
 
 const GROUP_OPTIONS: { value: ApplicationGroup; label: string }[] = [
-  { value: "interview", label: "New Member & Renewal" },
-  { value: "updating", label: "Update Information" },
+  { value: "interview", label: "New Members" },
+  { value: "updating", label: "Renewal & Updates" },
 ];
 
 export default function ApplicationsTabs({

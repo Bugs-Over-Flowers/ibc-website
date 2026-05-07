@@ -54,39 +54,31 @@ export const useSubmitRegistration = () => {
 
   return useAction(
     tryCatch(async (registrationData: StandardRegistrationSchema) => {
-      // Validate eventId exists
       if (!eventDetails?.eventId) {
         throw new Error("Event ID is missing");
       }
 
       const { step3 } = registrationData;
 
-      /**
-       * PAYMENT PROOF UPLOAD FLOW
-       *
-       * For online payments:
-       * 1. Upload File to Supabase storage
-       * 2. Receive storage path for database
-       *
-       * For onsite payments:
-       * - Skip upload, no proof required
-       */
-      let paymentProofPath: string | undefined;
-      if (step3.paymentMethod === "online" && step3.paymentProof) {
-        paymentProofPath = await uploadPaymentProof(step3.paymentProof);
+      let paymentProofPaths: string[] = [];
+      if (step3.paymentMethod === "online" && step3.paymentProofs) {
+        paymentProofPaths = await Promise.all(
+          step3.paymentProofs.map((file) => uploadPaymentProof(file)),
+        );
       }
 
-      // Submit registration with appropriate payment data
       const {
         rpcResults: { registrationId },
         identifier,
+        participants,
       } = await submitRegistrationRPC({
         eventId: eventDetails.eventId,
         step1: registrationData.step1,
         step2: registrationData.step2,
-        step3: paymentProofPath
-          ? { paymentMethod: "online", path: paymentProofPath }
-          : { paymentMethod: "onsite" },
+        step3:
+          paymentProofPaths.length > 0
+            ? { paymentMethod: "online", paths: paymentProofPaths }
+            : { paymentMethod: "onsite" },
         step4: registrationData.step4,
         sponsoredRegistrationId: sponsoredRegistrationId || null,
       });
@@ -96,6 +88,7 @@ export const useSubmitRegistration = () => {
       return {
         returnedRegistrationId: registrationId,
         returnedRegistrationIdentifier: identifier,
+        participants: participants ?? [],
       };
     }),
     {

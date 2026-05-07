@@ -2,26 +2,12 @@ import { cookies } from "next/headers";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import tryCatch from "@/lib/server/tryCatch";
+import {
+  isStorageUrl,
+  normalizeWebsiteUrl,
+} from "@/lib/storage/companyProfile";
 import { resolveMemberLogoUrl } from "@/lib/storage/memberLogo";
 import { getFeaturedMembers } from "@/server/members/queries/getFeaturedMembers";
-
-function normalizeWebsiteUrl(url: string | null): string | null {
-  if (!url) {
-    return null;
-  }
-
-  const trimmed = url.trim();
-
-  if (!trimmed) {
-    return null;
-  }
-
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    return trimmed;
-  }
-
-  return `https://${trimmed}`;
-}
 
 function toSafeImageSrc(src: string | null): string | null {
   if (!src) {
@@ -69,51 +55,64 @@ export default async function FeaturedMembersSection() {
               resolveMemberLogoUrl(member.logoImageURL),
             );
 
-            const logo = (
-              <div className="relative mb-5 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-muted/50 p-3">
-                {resolvedLogoURL ? (
-                  <Image
-                    alt={member.businessName}
-                    className="object-contain"
-                    fill
-                    sizes="128px"
-                    src={resolvedLogoURL}
-                  />
-                ) : (
-                  <span className="font-bold text-3xl text-muted-foreground">
-                    {member.businessName.charAt(0)}
-                  </span>
+            const isClickable =
+              normalizedWebsiteURL && !isStorageUrl(normalizedWebsiteURL);
+
+            const cardContent = (
+              <CardContent className="flex h-full flex-col items-center justify-center px-4 py-5 text-center">
+                <div className="relative mb-5 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-muted/50 p-3">
+                  {resolvedLogoURL ? (
+                    <Image
+                      alt={member.businessName}
+                      className="object-contain"
+                      fill
+                      sizes="128px"
+                      src={resolvedLogoURL}
+                    />
+                  ) : (
+                    <span className="font-bold text-3xl text-muted-foreground">
+                      {member.businessName.charAt(0)}
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="line-clamp-2 font-semibold text-base group-hover:text-primary">
+                  {member.businessName}
+                </h3>
+                <p className="mt-2 line-clamp-2 text-muted-foreground text-xs">
+                  {member.Sector?.sectorName}
+                </p>
+                {isClickable && (
+                  <p className="mt-1 max-w-full truncate text-[11px] text-muted-foreground/60">
+                    {normalizedWebsiteURL}
+                  </p>
                 )}
-              </div>
+              </CardContent>
             );
 
             return (
-              <Card
-                className="group h-full min-h-[280px] w-[280px] overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg"
-                key={member.businessMemberId}
-              >
-                <CardContent className="flex h-full flex-col items-center justify-center p-8 text-center">
-                  {normalizedWebsiteURL ? (
-                    <a
-                      aria-label={`Visit ${member.businessName} website`}
-                      href={normalizedWebsiteURL}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      {logo}
-                    </a>
-                  ) : (
-                    logo
-                  )}
-
-                  <h3 className="line-clamp-2 font-semibold text-base group-hover:text-primary">
-                    {member.businessName}
-                  </h3>
-                  <p className="mt-2 line-clamp-1 text-muted-foreground text-sm">
-                    {member.Sector?.sectorName}
-                  </p>
-                </CardContent>
-              </Card>
+              <>
+                {isClickable ? (
+                  <a
+                    aria-label={`Visit ${member.businessName} website`}
+                    href={normalizedWebsiteURL}
+                    key={member.businessMemberId}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <Card className="group h-[320px] w-[280px] overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
+                      {cardContent}
+                    </Card>
+                  </a>
+                ) : (
+                  <Card
+                    className="group h-[320px] w-[280px] overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg"
+                    key={member.businessMemberId}
+                  >
+                    {cardContent}
+                  </Card>
+                )}
+              </>
             );
           })}
         </div>

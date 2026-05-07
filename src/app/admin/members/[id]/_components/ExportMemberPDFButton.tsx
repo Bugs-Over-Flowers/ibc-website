@@ -529,7 +529,7 @@ export default function ExportMemberPDFButton({
         ${infoRow("Business Name", member.businessName ?? "N/A")}
         ${infoRow("Member Identifier", member.identifier ?? "N/A")}
         ${infoRow("Industry / Sector", member.sectorName ?? "N/A")}
-        ${infoRow("Website", member.websiteURL ?? "N/A")}
+        ${infoRow("Company Profile", latestApplication?.companyProfileType === "image" || latestApplication?.companyProfileType === "document" ? `Uploaded ${latestApplication.companyProfileType}` : (member.websiteURL ?? "N/A"))}
         <tr>
           <td class="info-label">Membership Status</td>
           <td class="info-value">${statusChip(member.membershipStatus)}</td>

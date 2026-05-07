@@ -8,12 +8,15 @@ import tryCatch from "@/lib/server/tryCatch";
 import { zodValidator } from "@/lib/utils";
 import { createSectorSchema } from "@/lib/validation/sector/sectorSchema";
 import { createSector } from "@/server/sectors/mutations";
+
+const defaultValues = {
+  sectorName: "",
+};
+
 export const useCreateSectorForm = () => {
   const router = useRouter();
   const form = useAppForm({
-    defaultValues: {
-      sectorName: "",
-    },
+    defaultValues,
     validators: {
       onSubmit: zodValidator(createSectorSchema),
     },
@@ -33,10 +36,10 @@ export const useCreateSectorForm = () => {
       }
 
       toast.success("Sector created successfully!");
-      form.reset({
-        sectorName: "",
-      });
-      router.push("/admin/manage-sector" as Route);
+      form.reset(defaultValues);
+      setTimeout(() => {
+        router.push("/admin/manage-sector" as Route);
+      }, 0);
     },
   });
 

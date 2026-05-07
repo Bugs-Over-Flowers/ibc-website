@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Eye } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Eye, XCircle } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { useAction } from "@/hooks/useAction";
 import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
+import { cn } from "@/lib/utils";
 import { updatePaymentProofStatus } from "@/server/applications/mutations/updatePaymentProofStatus";
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
@@ -129,8 +130,11 @@ export function ApplicationsTableRow({
     <TableRow
       className={isHydrated && isSelected ? "bg-primary/5" : ""}
       key={application.applicationId}
+      onDoubleClick={() => {
+        router.push(`/admin/application/${application.applicationId}`);
+      }}
     >
-      <TableCell className="w-12">
+      <TableCell className="w-12" onDoubleClick={(e) => e.stopPropagation()}>
         <Checkbox
           aria-label={`Select ${application.companyName}`}
           checked={isSelected}
@@ -145,32 +149,54 @@ export function ApplicationsTableRow({
         className={showContact ? "w-[22%] font-medium" : "w-[24%] font-medium"}
       >
         <div className="flex items-center gap-2">
-          {isPaymentProofPending && hasProofImage && (
-            <PaymentProofModal
-              applicationId={application.applicationId}
-              expectedRegistrationFee={paymentRequirement.expectedAmount}
-              isDecisionLocked={paymentProofStatus !== "pending"}
-              isUpdatingStatus={isUpdatingStatus}
-              membershipTypeLabel={paymentRequirement.membershipTypeLabel}
-              onDecision={handleDecision}
-              onProofReplaced={() => {
-                router.refresh();
-              }}
-              paymentProofStatus={paymentProofStatus}
-              proofImagePath={proofImage.path}
-              trigger={
-                <button
-                  aria-label="Check payment proof"
-                  className="inline-flex size-[18px] items-center justify-center rounded-full bg-status-orange/10 text-status-red transition-colors hover:bg-status-red/20"
-                  title="Check Payment Proof"
-                  type="button"
-                >
-                  <AlertTriangle className="size-3" />
-                </button>
-              }
-            />
-          )}
-          <span>{application.companyName}</span>
+          {paymentRequirement.requiresPayment &&
+            application.paymentMethod === "BPI" &&
+            hasProofImage && (
+              <PaymentProofModal
+                applicationId={application.applicationId}
+                expectedRegistrationFee={paymentRequirement.expectedAmount}
+                isDecisionLocked={paymentProofStatus !== "pending"}
+                isUpdatingStatus={isUpdatingStatus}
+                membershipTypeLabel={paymentRequirement.membershipTypeLabel}
+                onDecision={handleDecision}
+                onProofReplaced={() => {
+                  router.refresh();
+                }}
+                paymentProofStatus={paymentProofStatus}
+                proofImagePath={proofImage.path}
+                trigger={
+                  <button
+                    aria-label="Check payment proof"
+                    className={cn(
+                      "inline-flex size-[18px] items-center justify-center rounded-full transition-colors",
+                      paymentProofStatus === "accepted" &&
+                        "bg-status-green/10 text-status-green hover:bg-status-green/20",
+                      paymentProofStatus === "rejected" &&
+                        "bg-status-red/10 text-status-red hover:bg-status-red/20",
+                      paymentProofStatus === "pending" &&
+                        "bg-status-orange/10 text-status-red hover:bg-status-red/20",
+                    )}
+                    title={
+                      paymentProofStatus === "accepted"
+                        ? "Approved"
+                        : paymentProofStatus === "rejected"
+                          ? "Rejected"
+                          : "Check Payment Proof"
+                    }
+                    type="button"
+                  >
+                    {paymentProofStatus === "accepted" ? (
+                      <CheckCircle2 className="size-3" />
+                    ) : paymentProofStatus === "rejected" ? (
+                      <XCircle className="size-3" />
+                    ) : (
+                      <AlertTriangle className="size-3" />
+                    )}
+                  </button>
+                }
+              />
+            )}
+          <span className="truncate">{application.companyName}</span>
         </div>
       </TableCell>
       <TableCell
@@ -205,6 +231,7 @@ export function ApplicationsTableRow({
       </TableCell>
       <TableCell
         className={`${showContact ? "w-[10%]" : "w-[12%]"} pr-4 text-right`}
+        onDoubleClick={(e) => e.stopPropagation()}
       >
         <Button
           aria-label={`Open application ${application.companyName}`}

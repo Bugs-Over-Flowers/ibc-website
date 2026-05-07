@@ -1,16 +1,14 @@
 import { CreditCard } from "lucide-react";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
+import PaymentProofGrid from "../PaymentProofGrid";
 import { RegistrationPaymentSummary } from "../RegistrationPayment";
 
 interface Step4PaymentReviewSectionProps {
   baseFee: number;
   participantCount: number;
   paymentMethod: string;
-  paymentProofName?: string;
-  proofPreview: string | null;
+  proofPreviews: string[];
   sponsorDiscountPerParticipant?: number;
   sponsoredBy?: string | null;
 }
@@ -19,12 +17,12 @@ export default function Step4PaymentReviewSection({
   baseFee,
   participantCount,
   paymentMethod,
-  paymentProofName,
-  proofPreview,
+  proofPreviews,
   sponsorDiscountPerParticipant,
   sponsoredBy,
 }: Step4PaymentReviewSectionProps) {
-  const showPaymentProof = paymentMethod === "online" && paymentProofName;
+  const showPaymentProof =
+    paymentMethod === "online" && proofPreviews.length > 0;
 
   return (
     <Card className="rounded-2xl border border-border/50 bg-background">
@@ -63,29 +61,9 @@ export default function Step4PaymentReviewSection({
         {showPaymentProof ? (
           <div className="mt-4 rounded-xl border border-border/50 bg-background p-4">
             <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-              Payment Proof
+              Payment Proofs ({proofPreviews.length})
             </p>
-            <div className="flex flex-col items-start gap-2">
-              {proofPreview ? (
-                <ImageZoom className="block">
-                  <div className="relative h-24 w-24 overflow-hidden rounded-md border border-border/60 bg-muted/20">
-                    <Image
-                      alt="Payment proof preview"
-                      className="object-contain p-0.5"
-                      fill
-                      src={proofPreview}
-                      unoptimized
-                    />
-                  </div>
-                </ImageZoom>
-              ) : null}
-              <span className="font-medium text-green-600">
-                Proof Uploaded Successfully
-              </span>
-              <Badge className="mt-1 max-w-full" variant="outline">
-                {paymentProofName}
-              </Badge>
-            </div>
+            <PaymentProofGrid previews={proofPreviews} readOnly />
           </div>
         ) : null}
       </CardContent>

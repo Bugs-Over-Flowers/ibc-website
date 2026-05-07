@@ -120,8 +120,15 @@ async function RegistrationPage({
             fallback={<RegistrationTableSkeleton variant="participants" />}
           >
             <ParticipantList
-              eventTitle={
-                eventDetails.success ? eventDetails.data.eventTitle : "Event"
+              eventDetails={
+                eventDetails.success
+                  ? {
+                      title: eventDetails.data.eventTitle,
+                      startDate: eventDetails.data.eventStartDate,
+                      endDate: eventDetails.data.eventEndDate,
+                      venue: eventDetails.data.venue,
+                    }
+                  : { title: "Event" }
               }
               params={params}
               searchParams={searchParams}

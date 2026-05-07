@@ -19,10 +19,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html className={inter.variable} lang="en" suppressHydrationWarning>
       <head>
-        <Script
-          src="https://unpkg.com/react-scan/dist/auto.global.js"
-          strategy="afterInteractive"
-        />
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            src="https://unpkg.com/react-scan/dist/auto.global.js"
+            strategy="afterInteractive"
+          />
+        )}
       </head>
       <body
         className={`${inter.variable} font-sans antialiased`}

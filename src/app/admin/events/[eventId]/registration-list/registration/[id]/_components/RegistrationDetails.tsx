@@ -9,8 +9,6 @@ import {
   StickyNote,
   Users,
 } from "lucide-react";
-import type { Route } from "next";
-import { useParams } from "next/navigation";
 import BackButton from "@/app/admin/_components/BackButton";
 import RegistrationRowActions from "@/app/admin/events/[eventId]/registration-list/_components/registrations/RegistrationRowActions";
 import OnlinePaymentSection from "@/app/admin/events/[eventId]/registration-list/registration/[id]/_components/OnlinePaymentSection";
@@ -19,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { getRegistrationData } from "@/server/registration/queries/getRegistrationData";
+import getStatusColor from "../../_utils/getStatusColor";
 
 interface RegistrationDetailsProps {
   data: Awaited<ReturnType<typeof getRegistrationData>>;
@@ -68,31 +67,14 @@ function formatStatusLabel(status: string): string {
 export default function RegistrationDetails({
   data,
 }: RegistrationDetailsProps) {
-  const { eventId } = useParams();
   const participantsCount = data.otherParticipants.length + 1;
   const paymentProofStatus = data.paymentProofStatus ?? "pending";
   const sectionCardClass = "rounded-2xl border border-border/50 bg-background";
   const sectionContentClass = "space-y-6 px-6";
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "accepted":
-        return "bg-green-500/15 text-green-700 hover:bg-green-500/25 border-green-200";
-      case "pending":
-        return "bg-yellow-500/15 text-yellow-700 hover:bg-yellow-500/25 border-yellow-200";
-      case "rejected":
-        return "bg-red-500/15 text-red-700 hover:bg-red-500/25 border-red-200";
-      default:
-        return "bg-slate-100 text-slate-700 border-slate-200";
-    }
-  };
-
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6">
-      <BackButton
-        href={`/admin/events/${eventId as string}/registration-list` as Route}
-        label="Back to Registration List"
-      />
+      <BackButton back label="Back" />
 
       <div className="space-y-6 rounded-2xl border border-border/50 bg-background p-6 shadow-sm">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
@@ -197,18 +179,22 @@ export default function RegistrationDetails({
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               <ParticipantCard
+                affiliation={data.affiliation}
                 contactNumber={data.registrant.contactNumber}
                 email={data.registrant.email}
                 fullName={`${data.registrant.firstName} ${data.registrant.lastName}`}
                 key={data.registrant.participantId}
+                participantIdentifier={data.registrant.participantIdentifier}
                 registrant={data.registrant.isPrincipal}
               />
               {data.otherParticipants.map((participant) => (
                 <ParticipantCard
+                  affiliation={data.affiliation}
                   contactNumber={participant.contactNumber}
                   email={participant.email}
                   fullName={`${participant.firstName} ${participant.lastName}`}
                   key={participant.participantId}
+                  participantIdentifier={participant.participantIdentifier}
                   registrant={participant.isPrincipal}
                 />
               ))}
@@ -236,16 +222,13 @@ export default function RegistrationDetails({
                   </span>
                 </div>
 
-                {data.signedUrl &&
-                  typeof data.signedUrl === "string" &&
-                  data.signedUrl.trim() !== "" && (
-                    <OnlinePaymentSection
-                      getStatusColor={getStatusColor}
-                      paymentProofStatus={paymentProofStatus}
-                      proofImageURL={data.signedUrl.trim()}
-                      registrationId={data.registrationId}
-                    />
-                  )}
+                {data.signedUrls && data.signedUrls.length > 0 && (
+                  <OnlinePaymentSection
+                    paymentProofStatus={paymentProofStatus}
+                    proofImageURLs={data.signedUrls}
+                    registrationId={data.registrationId}
+                  />
+                )}
               </div>
             </CardContent>
           </Card>

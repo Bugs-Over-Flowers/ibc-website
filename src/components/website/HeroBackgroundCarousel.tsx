@@ -15,7 +15,7 @@ export function HeroBackgroundCarousel({
   images,
   alt,
   opacityClass = "opacity-20",
-  intervalMs = 6000,
+  intervalMs = 5000,
 }: HeroBackgroundCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const imageSet = useMemo(

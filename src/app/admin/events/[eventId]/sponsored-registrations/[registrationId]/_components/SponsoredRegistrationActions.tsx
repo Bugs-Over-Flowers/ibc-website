@@ -29,57 +29,70 @@ export function SponsoredRegistrationActions({
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const { execute: toggleStatus, isPending: isTogglingStatus } = useAction(
-    tryCatch(async (): Promise<{ success: boolean }> => {
+    tryCatch(async (): Promise<{ success: boolean; wasActive: boolean }> => {
       await updateSRStatus({
         sponsoredRegistrationId: sponsoredRegistration.sponsoredRegistrationId,
         eventId,
       });
-      return { success: true };
+      return {
+        success: true,
+        wasActive: sponsoredRegistration.status === "active",
+      };
     }),
     {
-      onSuccess: () => {
-        toast.success(
-          `Sponsored registration ${
-            sponsoredRegistration.status === "active"
-              ? "deactivated"
-              : "activated"
-          }`,
-        );
+      onSuccess: (result: { success: boolean; wasActive: boolean }) => {
+        const newStatus = result.wasActive ? "Deactivated" : "Activated";
+        const action = result.wasActive ? "deactivated" : "activated";
+        toast.success(`${newStatus} successfully`, {
+          description: `Sponsored registration is now ${action}. Link ${result.wasActive ? "is no longer" : "is now"} accepting registrations.`,
+        });
         router.refresh();
       },
       onError: (error: unknown) => {
+        const errorMessage = "Failed to update status";
+        let errorDescription = "Please try again later";
+
         if (typeof error === "string") {
-          toast.error(error);
+          errorDescription = error;
         } else if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error("Failed to toggle status");
+          errorDescription = error.message;
         }
+
+        toast.error(errorMessage, {
+          description: errorDescription,
+        });
       },
     },
   );
 
   const { execute: deleteRegistration, isPending: isDeleting } = useAction(
-    tryCatch(async (): Promise<{ success: boolean }> => {
+    tryCatch(async (): Promise<{ success: boolean; sponsorName: string }> => {
       await deleteSR({
         sponsoredRegistrationId: sponsoredRegistration.sponsoredRegistrationId,
         eventId,
       });
-      return { success: true };
+      return { success: true, sponsorName: sponsoredRegistration.sponsoredBy };
     }),
     {
-      onSuccess: () => {
-        toast.success("Sponsored registration deleted successfully");
+      onSuccess: (result: { success: boolean; sponsorName: string }) => {
+        toast.success("Deleted successfully", {
+          description: `Sponsored registration from "${result.sponsorName}" has been removed.`,
+        });
         router.push("/admin/sponsored-registration");
       },
       onError: (error: unknown) => {
+        const errorMessage = "Failed to delete";
+        let errorDescription = "Please try again later";
+
         if (typeof error === "string") {
-          toast.error(error);
+          errorDescription = error;
         } else if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error("Failed to delete sponsored registration");
+          errorDescription = error.message;
         }
+
+        toast.error(errorMessage, {
+          description: errorDescription,
+        });
       },
     },
   );

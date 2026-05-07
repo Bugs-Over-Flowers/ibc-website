@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import type { ExportEventDetails } from "@/lib/export/excel";
 import tryCatch from "@/lib/server/tryCatch";
 import { getCheckInList } from "@/server/check-in/queries/getCheckInList";
 import CheckInTable from "./CheckInTable";
@@ -7,12 +8,12 @@ import ErrorCheckInList from "./ErrorCheckInList";
 
 export default async function CheckInListContent({
   eventDayId,
-  eventTitle,
   eventDayLabel,
+  eventDetails,
 }: {
   eventDayId: string;
-  eventTitle: string;
   eventDayLabel: string;
+  eventDetails: ExportEventDetails;
 }) {
   const cookieStore = await cookies();
   const checkInListResult = await tryCatch(
@@ -34,7 +35,7 @@ export default async function CheckInListContent({
       checkIns={checkIns}
       eventDayId={eventDayId}
       eventDayLabel={eventDayLabel}
-      eventTitle={eventTitle}
+      eventDetails={eventDetails}
     />
   );
 }

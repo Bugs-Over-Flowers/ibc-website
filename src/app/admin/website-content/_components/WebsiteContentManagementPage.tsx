@@ -12,6 +12,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  PendingUploadsProvider,
+  usePendingUploadsContext,
+} from "../_context/PendingUploadsContext";
 import { useWebsiteContentEditor } from "../_hooks/useWebsiteContentEditor";
 import { BoardOfTrusteesSection } from "./sections/BoardOfTrusteesSection";
 import { CompanyThrustsSection } from "./sections/CompanyThrustsSection";
@@ -104,7 +110,17 @@ const sectionCards = [
 ];
 
 export function WebsiteContentManagementPage() {
+  return (
+    <PendingUploadsProvider>
+      <WebsiteContentManagementPageContent />
+    </PendingUploadsProvider>
+  );
+}
+
+function WebsiteContentManagementPageContent() {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const { uploadAllPendingImages } = usePendingUploadsContext();
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const {
     form,
@@ -124,17 +140,35 @@ export function WebsiteContentManagementPage() {
     deleteSelectedCards,
     save,
     isSavingSection,
+    saveSucceededCount,
     isLoadingSection,
     updatedAtBySection,
     cardCountBySection,
     hasLoadedSectionSummaries,
   } = useWebsiteContentEditor(activeSection);
 
+  const [editingFooter, setEditingFooter] = useState<
+    { label: string; onClick: () => void } | undefined
+  >(undefined);
+
   const hasSelectedCards = selectedCardEntryKeys.size > 0;
   const selectedCount = selectedCardEntryKeys.size;
   const isSectionActionDisabled = isSavingSection || isLoadingSection;
+  const isSaveDisabled =
+    isSavingSection || isLoadingSection || isDeleteMode || isUploadingImages;
+  const showCloseButton = !editingFooter;
 
-  const handleDeleteCardsClick = () => {
+  const handleDeleteCardsClick = (entryKey?: string) => {
+    if (entryKey) {
+      setIsDeleteConfirmOpen(true);
+      if (!selectedCardEntryKeys.has(entryKey) || selectedCount !== 1) {
+        // Replace any existing selection so a card-level trash click deletes only that card.
+        unselectAllCards();
+        toggleCardSelected(entryKey, true);
+      }
+      return;
+    }
+
     if (!isDeleteMode) {
       enterDeleteMode();
       return;
@@ -152,9 +186,63 @@ export function WebsiteContentManagementPage() {
     [activeSection],
   );
 
+  const handleSave = async () => {
+    const snapshotForm = form;
+    const snapshotCards = cards;
+    let finalCards = snapshotCards;
+
+    setIsUploadingImages(true);
+    try {
+      const uploadedImages = await uploadAllPendingImages();
+      finalCards = snapshotCards.map((card) => {
+        const publicUrl = uploadedImages[card.entryKey];
+
+        if (!publicUrl) {
+          return card;
+        }
+
+        return {
+          ...card,
+          imageUrl: publicUrl,
+        };
+      });
+
+      const hasPreviewUrls = finalCards.some((card) => {
+        const imageUrl = card.imageUrl.trim().toLowerCase();
+        return imageUrl.startsWith("blob:") || imageUrl.startsWith("data:");
+      });
+
+      if (hasPreviewUrls) {
+        console.warn(
+          `Images still have preview URLs after upload: ${finalCards
+            .filter((c) => {
+              const imageUrl = c.imageUrl.trim().toLowerCase();
+              return (
+                imageUrl.startsWith("blob:") || imageUrl.startsWith("data:")
+              );
+            })
+            .map((c) => c.entryKey)
+            .join(", ")}`,
+        );
+        toast.error(
+          "Image upload is taking too long. Please check your connection and try again.",
+        );
+        return;
+      }
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      toast.error("Failed to upload images. Please try again.");
+      return;
+    } finally {
+      setIsUploadingImages(false);
+    }
+
+    await save(finalCards, snapshotForm);
+  };
+
   const updatedAtDisplay = (section: SectionKey) => {
     if (!hasLoadedSectionSummaries) {
-      return "Loading...";
+      return null;
     }
 
     const updatedAt = updatedAtBySection[section];
@@ -167,7 +255,7 @@ export function WebsiteContentManagementPage() {
 
   const savedCardsDisplay = (section: SectionKey) => {
     if (!hasLoadedSectionSummaries) {
-      return "Loading...";
+      return null;
     }
 
     return String(cardCountBySection[section] ?? 0);
@@ -246,10 +334,12 @@ export function WebsiteContentManagementPage() {
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
             onDeleteCardsClick={handleDeleteCardsClick}
+            onRegisterEditingFooter={setEditingFooter}
             onSelectAllCards={selectAllCards}
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            saveSucceededCount={saveSucceededCount}
             selectedCardEntryKeys={selectedCardEntryKeys}
             selectedCount={selectedCount}
           />
@@ -261,16 +351,19 @@ export function WebsiteContentManagementPage() {
             cards={cards}
             hasSelectedCards={hasSelectedCards}
             isDeleteMode={isDeleteMode}
+            isSavingSection={isSavingSection}
             isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={() => addCard()}
             onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
             onDeleteCardsClick={handleDeleteCardsClick}
+            onRegisterEditingFooter={setEditingFooter}
             onSelectAllCards={selectAllCards}
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            saveSucceededCount={saveSucceededCount}
             selectedCardEntryKeys={selectedCardEntryKeys}
             selectedCount={selectedCount}
           />
@@ -325,6 +418,9 @@ export function WebsiteContentManagementPage() {
         {sectionCards.map((section) => {
           const Icon = section.icon;
 
+          const savedCardsValue = savedCardsDisplay(section.key);
+          const updatedAtValue = updatedAtDisplay(section.key);
+
           return (
             <button
               className="group text-left"
@@ -350,8 +446,22 @@ export function WebsiteContentManagementPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2 text-muted-foreground text-sm">
-                  <p>Saved cards: {savedCardsDisplay(section.key)}</p>
-                  <p>Updated: {updatedAtDisplay(section.key)}</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>Saved cards:</span>
+                    {savedCardsValue ? (
+                      <span className="tabular-nums">{savedCardsValue}</span>
+                    ) : (
+                      <Skeleton className="h-4 w-10" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>Updated:</span>
+                    {updatedAtValue ? (
+                      <span className="truncate">{updatedAtValue}</span>
+                    ) : (
+                      <Skeleton className="h-4 w-28" />
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </button>
@@ -364,22 +474,25 @@ export function WebsiteContentManagementPage() {
           if (!open) {
             cancelDeleteMode();
             setActiveSection(null);
+            setEditingFooter(undefined);
           }
         }}
         open={!!activeSection}
       >
         <DialogPrimitive.Portal>
           <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/35 backdrop-blur-[2px]" />
-          <DialogPrimitive.Viewport className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6">
-            <div className="flex min-h-full items-start justify-center py-3">
-              <DialogPrimitive.Popup className="relative flex max-h-[calc(100vh-2rem)] w-[min(97vw,1550px)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
-                <DialogPrimitive.Close
-                  className="absolute top-4 right-4 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  render={<button type="button" />}
-                >
-                  <XIcon className="h-5 w-5" />
-                  <span className="sr-only">Close</span>
-                </DialogPrimitive.Close>
+          <DialogPrimitive.Viewport className="fixed inset-0 z-50 overflow-hidden p-3 sm:p-6">
+            <div className="flex h-full items-center justify-center">
+              <DialogPrimitive.Popup className="relative flex max-h-[calc(100vh-6rem)] w-[min(97vw,1550px)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
+                {showCloseButton ? (
+                  <DialogPrimitive.Close
+                    className="absolute top-4 right-4 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    render={<button type="button" />}
+                  >
+                    <XIcon className="h-5 w-5" />
+                    <span className="sr-only">Close</span>
+                  </DialogPrimitive.Close>
+                ) : null}
 
                 <div className="space-y-1.5 border-border border-b px-6 py-5 pr-12 sm:px-7">
                   <DialogPrimitive.Title className="font-bold text-4xl text-foreground">
@@ -393,9 +506,27 @@ export function WebsiteContentManagementPage() {
                 <div className="flex-1 overflow-y-auto px-6 py-5 sm:px-7">
                   <div className="space-y-4">
                     {isLoadingSection ? (
-                      <p className="text-muted-foreground text-sm">
-                        Loading content...
-                      </p>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Skeleton className="h-5 w-40" />
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-4 w-5/6" />
+                        </div>
+                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                          <div className="space-y-3 rounded-lg border p-4">
+                            <div className="flex items-center justify-between">
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-8 w-8 rounded-md" />
+                            </div>
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-40 w-full rounded-xl" />
+                          </div>
+                          <div className="flex items-center justify-center rounded-lg border p-4">
+                            <Skeleton className="h-[220px] w-[180px] rounded-md" />
+                          </div>
+                        </div>
+                      </div>
                     ) : (
                       renderActiveForm()
                     )}
@@ -404,14 +535,25 @@ export function WebsiteContentManagementPage() {
 
                 <div className="border-border border-t bg-background px-6 py-4 sm:px-7">
                   <div className="flex flex-wrap items-center justify-end gap-2">
-                    <Button
-                      disabled={
-                        isSavingSection || isLoadingSection || isDeleteMode
-                      }
-                      onClick={save}
-                    >
-                      {isSavingSection ? "Saving..." : "Save Changes"}
-                    </Button>
+                    {editingFooter ? (
+                      <Button
+                        disabled={isSectionActionDisabled}
+                        onClick={() => {
+                          // invoke the section-provided back handler
+                          editingFooter.onClick();
+                        }}
+                      >
+                        {editingFooter.label}
+                      </Button>
+                    ) : (
+                      <Button disabled={isSaveDisabled} onClick={handleSave}>
+                        {isUploadingImages
+                          ? "Uploading images..."
+                          : isSavingSection
+                            ? "Saving..."
+                            : "Save Changes"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </DialogPrimitive.Popup>

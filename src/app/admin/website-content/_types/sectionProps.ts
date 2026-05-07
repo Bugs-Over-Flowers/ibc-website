@@ -31,7 +31,7 @@ export interface GoalsSectionProps {
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;
@@ -52,7 +52,7 @@ export interface CompanyThrustsSectionProps {
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;
@@ -68,12 +68,13 @@ export interface BoardOfTrusteesSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
   isSectionActionDisabled: boolean;
+  saveSucceededCount: number;
   onAddCard: (group: "featured" | "officers" | "trustees" | "other") => void;
   isDeleteMode: boolean;
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;
@@ -84,18 +85,24 @@ export interface BoardOfTrusteesSectionProps {
     value: string,
   ) => void;
   onCardsReorder: (nextCards: WebsiteContentCardState[]) => void;
+  onRegisterEditingFooter?: (footer?: {
+    label: string;
+    onClick: () => void;
+  }) => void;
 }
 
 export interface SecretariatSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
   isSectionActionDisabled: boolean;
+  isSavingSection: boolean;
+  saveSucceededCount: number;
   onAddCard: () => void;
   isDeleteMode: boolean;
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;
@@ -106,6 +113,10 @@ export interface SecretariatSectionProps {
     value: string,
   ) => void;
   onCardsReorder: (nextCards: WebsiteContentCardState[]) => void;
+  onRegisterEditingFooter?: (footer?: {
+    label: string;
+    onClick: () => void;
+  }) => void;
 }
 
 export interface LandingBenefitsSectionProps {
@@ -117,7 +128,7 @@ export interface LandingBenefitsSectionProps {
   hasSelectedCards: boolean;
   selectedCount: number;
   selectedCardEntryKeys: Set<string>;
-  onDeleteCardsClick: () => void;
+  onDeleteCardsClick: (entryKey?: string) => void;
   onCancelDeleteMode: () => void;
   onSelectAllCards: () => void;
   onUnselectAllCards: () => void;

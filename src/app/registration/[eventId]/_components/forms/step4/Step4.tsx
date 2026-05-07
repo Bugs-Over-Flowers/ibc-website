@@ -19,7 +19,6 @@ interface Step4Props {
 }
 
 export default function Step4({ members }: Step4Props) {
-  const form = useRegistrationStep4();
   const setStep = useRegistrationStore((state) => state.setStep);
   const eventDetails = useRegistrationStore((state) => state.eventDetails);
   const sponsorFeeDeduction = useRegistrationStore(
@@ -29,39 +28,56 @@ export default function Step4({ members }: Step4Props) {
   const registrationData = useRegistrationStore(
     (state) => state.registrationData,
   );
-  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [proofPreviews, setProofPreviews] = useState<string[]>([]);
 
   const step1Data = registrationData.step1;
   const step2Data = registrationData.step2;
   const step3Data = registrationData.step3;
 
-  const memberName = useMemo(() => {
+  const affiliation = useMemo(() => {
     if (step1Data.member === "member") {
-      return members.find(
-        (m) => m.businessMemberId === step1Data.businessMemberId,
-      )?.businessName;
+      return (
+        members.find((m) => m.businessMemberId === step1Data.businessMemberId)
+          ?.businessName ?? ""
+      );
     }
     return step1Data.nonMemberName;
   }, [members, step1Data]);
 
+  const setRegistrationData = useRegistrationStore(
+    (state) => state.setRegistrationData,
+  );
+
+  const form = useRegistrationStep4(affiliation);
+
   const participantCount = 1 + (step2Data.otherParticipants?.length ?? 0);
   const baseFee = eventDetails?.registrationFee ?? 0;
-  const selectedPaymentProof =
-    step3Data.paymentMethod === "online" ? step3Data.paymentProof : undefined;
+  const selectedPaymentProofs =
+    step3Data.paymentMethod === "online" ? step3Data.paymentProofs : [];
   const registrationTypeLabel =
     step1Data.member === "member" ? "Corporate Member" : "Non-member";
 
   useEffect(() => {
-    if (!selectedPaymentProof) {
-      setProofPreview(null);
-      return;
-    }
+    const urls = (selectedPaymentProofs ?? []).map((f) =>
+      f?.type?.startsWith("image/") ? URL.createObjectURL(f) : "",
+    );
+    setProofPreviews(urls);
+    return () => {
+      for (const u of urls) {
+        if (u) URL.revokeObjectURL(u);
+      }
+    };
+  }, [selectedPaymentProofs]);
 
-    const previewUrl = URL.createObjectURL(selectedPaymentProof);
-    setProofPreview(previewUrl);
-
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [selectedPaymentProof]);
+  const onBack = async () => {
+    setStep(3);
+    setRegistrationData({
+      step4: {
+        note: form.state.values.note,
+        termsAndConditions: false,
+      },
+    });
+  };
 
   const onSubmit = (e?: React.SubmitEvent) => {
     if (e) {
@@ -89,7 +105,7 @@ export default function Step4({ members }: Step4Props) {
 
           <Step4RegistrantReviewSection
             memberLabel={registrationTypeLabel}
-            memberName={memberName}
+            memberName={affiliation}
             otherParticipants={step2Data.otherParticipants}
             registrant={step2Data.registrant}
           />
@@ -98,8 +114,7 @@ export default function Step4({ members }: Step4Props) {
             baseFee={baseFee}
             participantCount={participantCount}
             paymentMethod={step3Data.paymentMethod}
-            paymentProofName={selectedPaymentProof?.name}
-            proofPreview={proofPreview}
+            proofPreviews={proofPreviews}
             sponsorDiscountPerParticipant={sponsorFeeDeduction}
             sponsoredBy={sponsoredBy}
           />
@@ -111,7 +126,7 @@ export default function Step4({ members }: Step4Props) {
         <CardFooter className="flex flex-col-reverse gap-3 border-border/50 border-t px-0 pt-6 pb-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <Button
             className="w-full rounded-xl sm:w-auto"
-            onClick={() => setStep(3)}
+            onClick={onBack}
             size="lg"
             type="button"
             variant="ghost"

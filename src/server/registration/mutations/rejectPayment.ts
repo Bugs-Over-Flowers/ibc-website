@@ -5,8 +5,16 @@ import { createActionClient } from "@/lib/supabase/server";
 import { invalidateRegistrationCaches } from "@/server/actions.utils";
 import { sendRejectProofOfPayment } from "@/server/emails/mutations/sendRejectProofOfPayment";
 
-export const rejectPayment = async (registrationId: string) => {
+type RejectPaymentOptions = {
+  sendEmail?: boolean;
+};
+
+export const rejectPayment = async (
+  registrationId: string,
+  options: RejectPaymentOptions = {},
+) => {
   const supabase = await createActionClient();
+  const sendEmail = options.sendEmail ?? true;
 
   // 1. Fetch registration details including event title and principal participant
   const { data: registration, error: fetchError } = await supabase
@@ -35,12 +43,10 @@ export const rejectPayment = async (registrationId: string) => {
 
   const principal = participants.find((p) => p.isPrincipal);
 
-  if (!principal?.email) {
-    throw new Error("Principal registrant email not found");
-  }
-
   const eventTitle = registration.event?.eventTitle || "Event";
-  const registrantName = `${principal.firstName} ${principal.lastName}`;
+  const registrantName = principal
+    ? `${principal.firstName} ${principal.lastName}`
+    : "Registrant";
   const eventId = registration.eventId;
   const sponsoredRegistrationId = registration.sponsoredRegistrationId;
 
@@ -56,16 +62,22 @@ export const rejectPayment = async (registrationId: string) => {
     throw new Error(updateError.message);
   }
 
-  // 4. Send Rejection Email
-  try {
-    await sendRejectProofOfPayment({
-      toEmail: principal.email,
-      eventTitle,
-      registrantName,
-    });
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw new Error("Failed to process rejection email");
+  // 4. Send Rejection Email when requested
+  if (sendEmail) {
+    if (!principal?.email) {
+      throw new Error("Principal registrant email not found");
+    }
+
+    try {
+      await sendRejectProofOfPayment({
+        toEmail: principal.email,
+        eventTitle,
+        registrantName,
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      throw new Error("Failed to process rejection email");
+    }
   }
 
   invalidateRegistrationCaches();
@@ -83,5 +95,7 @@ export const rejectPayment = async (registrationId: string) => {
     revalidatePath("/admin/sponsored-registration", "page");
   }
 
-  return "Payment rejected and email sent.";
+  return sendEmail
+    ? "Payment rejected and email sent."
+    : "Payment rejected without sending an email.";
 };

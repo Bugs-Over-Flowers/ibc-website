@@ -1,7 +1,11 @@
 import "server-only";
 
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { signLogoUrl, signPaymentProofUrl } from "@/lib/storage/signedUrls";
+import {
+  signCompanyProfileUrl,
+  signLogoUrl,
+  signPaymentProofUrl,
+} from "@/lib/storage/signedUrls";
 import { createClient } from "@/lib/supabase/server";
 import type { ApplicationWithMembers } from "@/lib/types/application";
 
@@ -63,12 +67,13 @@ export async function getApplicationDetailsById(
       }
     : undefined;
 
-  const applicationWithSignedLogo = {
+  const applicationWithSignedAssets = {
     ...data,
     logoImageURL: await signLogoUrl(supabase, data.logoImageURL),
+    websiteURL: await signCompanyProfileUrl(supabase, data.websiteURL),
     previousApplicationMemberType,
     ProofImage: signedProofImage ? [signedProofImage] : [],
   };
 
-  return applicationWithSignedLogo as ApplicationWithMembers;
+  return applicationWithSignedAssets as ApplicationWithMembers;
 }

@@ -102,8 +102,8 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
             <div class="label">Sector:</div>
             <div class="value">${application.sectorName || "N/A"}</div>
 
-            <div class="label">Website:</div>
-            <div class="value">${application.websiteURL}</div>
+            <div class="label">Company Profile:</div>
+            <div class="value">${application.companyProfileType === "image" || application.companyProfileType === "document" ? `<i>Uploaded ${application.companyProfileType}</i>` : application.websiteURL}</div>
 
             <div class="label">Address:</div>
             <div class="value">${application.companyAddress}</div>

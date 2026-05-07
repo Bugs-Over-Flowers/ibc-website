@@ -13,6 +13,77 @@ type MemberSnapshot = {
   membershipStatus: MembershipStatus | null;
 };
 
+async function applyMembershipStatusFallback(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  referenceTime: Date,
+) {
+  const currentYear = Number(
+    new Intl.DateTimeFormat("en-PH", {
+      timeZone: "Asia/Manila",
+      year: "numeric",
+    }).format(referenceTime),
+  );
+  const nextYearStart = new Date(`${currentYear + 1}-01-01T00:00:00+08:00`);
+
+  const { error: unpaidError } = await supabase
+    .from("BusinessMember")
+    .update({ membershipStatus: "cancelled" })
+    .not("membershipExpiryDate", "is", null)
+    .lt("membershipExpiryDate", referenceTime.toISOString())
+    .eq("membershipStatus", "unpaid");
+
+  if (unpaidError) {
+    throw new Error(
+      `Failed to apply cancelled-member fallback: ${unpaidError.message}`,
+    );
+  }
+
+  const { error: paidError } = await supabase
+    .from("BusinessMember")
+    .update({
+      membershipStatus: "unpaid",
+      membershipExpiryDate: nextYearStart.toISOString(),
+    })
+    .not("membershipExpiryDate", "is", null)
+    .lt("membershipExpiryDate", referenceTime.toISOString())
+    .eq("membershipStatus", "paid");
+
+  if (paidError) {
+    throw new Error(
+      `Failed to apply unpaid-member fallback: ${paidError.message}`,
+    );
+  }
+}
+
+function buildTransitions(
+  beforeRows: MemberSnapshot[],
+  afterRows: MemberSnapshot[],
+) {
+  const beforeMap = new Map(
+    beforeRows.map((row) => [row.businessMemberId, row]),
+  );
+
+  return afterRows
+    .map((row) => {
+      const before = beforeMap.get(row.businessMemberId);
+      if (!before?.membershipStatus || !row.membershipStatus) {
+        return null;
+      }
+
+      if (before.membershipStatus === row.membershipStatus) {
+        return null;
+      }
+
+      return {
+        businessMemberId: row.businessMemberId,
+        businessName: row.businessName,
+        previousStatus: before.membershipStatus,
+        currentStatus: row.membershipStatus,
+      } satisfies MemberStatusTransition;
+    })
+    .filter((row): row is MemberStatusTransition => row !== null);
+}
+
 async function processAndNotify(referenceTime: Date) {
   const supabase = await createAdminClient();
 
@@ -36,10 +107,19 @@ async function processAndNotify(referenceTime: Date) {
     },
   );
 
-  if (transitionError) {
+  const rpcMissingSchemaCache =
+    transitionError?.message?.includes(
+      "Could not find the function public.process_membership_statuses",
+    ) ?? false;
+
+  if (transitionError && !rpcMissingSchemaCache) {
     throw new Error(
       `Failed to process membership statuses: ${transitionError.message}`,
     );
+  }
+
+  if (rpcMissingSchemaCache) {
+    await applyMembershipStatusFallback(supabase, referenceTime);
   }
 
   const targetIds = (beforeRows ?? []).map((row) => row.businessMemberId);
@@ -66,29 +146,7 @@ async function processAndNotify(referenceTime: Date) {
     );
   }
 
-  const beforeMap = new Map(
-    (beforeRows ?? []).map((row) => [row.businessMemberId, row]),
-  );
-
-  const transitions: MemberStatusTransition[] = (afterRows ?? [])
-    .map((row: MemberSnapshot) => {
-      const before = beforeMap.get(row.businessMemberId);
-      if (!before?.membershipStatus || !row.membershipStatus) {
-        return null;
-      }
-
-      if (before.membershipStatus === row.membershipStatus) {
-        return null;
-      }
-
-      return {
-        businessMemberId: row.businessMemberId,
-        businessName: row.businessName,
-        previousStatus: before.membershipStatus,
-        currentStatus: row.membershipStatus,
-      } satisfies MemberStatusTransition;
-    })
-    .filter((row): row is MemberStatusTransition => row !== null);
+  const transitions = buildTransitions(beforeRows ?? [], afterRows ?? []);
 
   const emailSummary = await sendMembershipStatusNotifications(
     supabase,

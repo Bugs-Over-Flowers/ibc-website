@@ -1,7 +1,7 @@
 import {
-  ArrowLeft,
   Calendar,
   CheckSquare,
+  ChevronLeft,
   ClipboardList,
   Clock,
   Edit,
@@ -15,7 +15,6 @@ import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 
-import BackButton from "@/app/admin/_components/BackButton";
 import { EvaluationQRDownloader } from "@/components/qr/EvaluationQRDownloader";
 import RichTextDisplay from "@/components/RichTextDisplay";
 import { Badge } from "@/components/ui/badge";
@@ -59,13 +58,16 @@ export default async function EventDetails({
               ? eventError
               : "This event could not be loaded. It may have been removed or you may not have access."}
           </p>
-          <Link
-            className="mt-4 flex items-center justify-center gap-1 text-primary transition-colors hover:text-primary/80"
-            href={"/admin/events" as Route}
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Back to Events
-          </Link>
+          <Button
+            nativeButton={false}
+            render={
+              <Link href={"/admin/events"}>
+                <ChevronLeft className="h-5 w-5" />
+                Back
+              </Link>
+            }
+            variant={"ghost"}
+          />
         </div>
       </div>
     );
@@ -230,7 +232,16 @@ export default async function EventDetails({
     <div className="space-y-6 pb-8">
       {/* Back Navigation */}
       <div className="flex w-full justify-start">
-        <BackButton href={"/admin/events" as Route} label="Back to Events" />
+        <Button
+          nativeButton={false}
+          render={
+            <Link href={"/admin/events"}>
+              <ChevronLeft className="h-5 w-5" />
+              Back
+            </Link>
+          }
+          variant={"ghost"}
+        />
       </div>
 
       {/* Hero Card */}
@@ -341,7 +352,7 @@ export default async function EventDetails({
                     </p>
                     {secondary && (
                       <p
-                        className={`${allowWrap ? "break-words leading-tight" : "truncate"} text-muted-foreground text-xs`}
+                        className={`${allowWrap ? "wrap-break-word leading-tight" : "truncate"} text-muted-foreground text-xs`}
                       >
                         {secondary}
                       </p>
