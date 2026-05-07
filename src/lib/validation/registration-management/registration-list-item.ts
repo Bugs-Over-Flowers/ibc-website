@@ -35,7 +35,7 @@ const PaymentProofStatus = Constants.public.Enums.PaymentProofStatus;
  * Pattern: Define inline for page-specific needs
  */
 const RegistrationListRegistrantSchema = z.object({
-  email: z.email(),
+  email: z.string(),
   firstName: z.string(),
   lastName: z.string(),
 });
