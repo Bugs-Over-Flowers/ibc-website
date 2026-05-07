@@ -14,6 +14,7 @@ export const CheckInListItemSchema = z.object({
   registrationId: z.uuid(),
   affiliation: z.string(),
   identifier: z.string(),
+  paymentProofStatus: z.string(),
 });
 
 export const CheckInListSchema = z.array(CheckInListItemSchema);

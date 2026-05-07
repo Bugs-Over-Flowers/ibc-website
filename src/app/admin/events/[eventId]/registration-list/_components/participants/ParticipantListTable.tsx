@@ -6,6 +6,7 @@ import { Download } from "lucide-react";
 import {
   AdminTableDateSortHeader,
   AdminTableSortHeader,
+  PaymentStatusBadge,
 } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { IdentifierDisplay } from "@/components/IdentifierDisplay";
@@ -114,6 +115,14 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
     },
   },
   {
+    accessorKey: "paymentProofStatus",
+    header: "Status",
+    cell: ({ row }) => {
+      const { paymentProofStatus } = row.original;
+      return <PaymentStatusBadge status={paymentProofStatus} />;
+    },
+  },
+  {
     accessorKey: "actions",
     header: "",
     enableHiding: false,
@@ -149,6 +158,7 @@ const getExcelColumns = (): ColumnDef<Record<string, unknown>>[] => [
   { accessorKey: "email", header: "Email" },
   { accessorKey: "contactNumber", header: "Contact Number" },
   { accessorKey: "participantIdentifier", header: "Participant ID" },
+  { accessorKey: "paymentProofStatus", header: "Payment Status" },
 ];
 
 export default function ParticipantListTable({
@@ -170,6 +180,7 @@ export default function ParticipantListTable({
       email: row.email,
       contactNumber: row.contactNumber,
       participantIdentifier: row.participantIdentifier ?? "",
+      paymentProofStatus: row.paymentProofStatus,
     }));
 
     await exportToExcel({
@@ -183,7 +194,7 @@ export default function ParticipantListTable({
         registrationDate: (value) =>
           format(new Date(String(value)), "MMM d, yyyy"),
       },
-      columnWidths: [18, 12, 22, 16, 16, 28, 18, 22],
+      columnWidths: [18, 12, 22, 16, 16, 28, 18, 22, 16],
     });
   };
   return (
