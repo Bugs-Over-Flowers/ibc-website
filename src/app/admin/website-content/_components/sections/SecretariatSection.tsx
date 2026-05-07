@@ -19,7 +19,7 @@ import type {
   WebsiteContentFormState,
 } from "@/server/website-content/types";
 import { usePendingUploadsContext } from "../../_context/PendingUploadsContext";
-import { reorderInList } from "../../_hooks/reorderInList";
+import { reorderByIndex } from "../../_hooks/reorderInList";
 import { usePersonalImageUpload } from "../../_hooks/usePersonalImageUpload";
 import type { SecretariatSectionProps } from "../../_types/sectionProps";
 
@@ -394,20 +394,19 @@ export function SecretariatSection({
               if (event.canceled || !isSortableOperation(event.operation))
                 return;
 
-              const active = String(event.operation.source?.id);
-              const over = String(event.operation.target?.id);
+              const source = event.operation.source;
+              if (!source) return;
 
-              if (!active || !over || active === over) return;
+              const { initialIndex, index } = source;
 
-              const reordered = reorderInList(cards, active, over);
+              if (initialIndex === index) return;
+
+              const reordered = reorderByIndex(cards, initialIndex, index);
 
               const next = reordered.map((c, i) => ({
                 ...c,
                 cardPlacement: String(i + 1),
               }));
-
-              // eslint-disable-next-line no-console
-              console.debug("Secretariat onDragEnd", { active, over, next });
               onCardsReorder(next);
             }}
           >

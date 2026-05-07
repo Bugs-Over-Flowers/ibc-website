@@ -42,6 +42,19 @@ function isDisallowedImageUrl(imageUrl: string): boolean {
   );
 }
 
+function toPlacementValue(value: string | number | undefined): number | null {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric < 1) {
+    return null;
+  }
+
+  return Math.trunc(numeric);
+}
+
 export async function saveWebsiteContentSection(
   input: SaveWebsiteContentSectionInput,
 ): Promise<{ updatedAt: string }> {
@@ -80,9 +93,9 @@ export async function saveWebsiteContentSection(
     });
   } else if (parsed.section === "hero_section") {
     for (const card of parsed.cards) {
-      const placementValue = card.cardPlacement
-        ? Number(card.cardPlacement)
-        : null;
+      retainedEntryKeys.push(card.entryKey);
+
+      const placementValue = toPlacementValue(card.cardPlacement);
 
       rowsToUpsert.push({
         section: parsed.section,
@@ -99,9 +112,7 @@ export async function saveWebsiteContentSection(
     for (const card of parsed.cards) {
       retainedEntryKeys.push(card.entryKey);
 
-      const placementValue = card.cardPlacement
-        ? Number(card.cardPlacement)
-        : null;
+      const placementValue = toPlacementValue(card.cardPlacement);
 
       rowsToUpsert.push({
         section: parsed.section,

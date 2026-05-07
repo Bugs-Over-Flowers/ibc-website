@@ -50,9 +50,11 @@ export async function upsertWebsiteContentRows(
 
   const supabase = await createActionClient();
 
-  await Promise.all(
-    inputs.map((input) => executeUpsertWebsiteContentRow(supabase, input)),
-  );
+  // Execute writes deterministically to avoid same-entryKey row races
+  // between multiple textType upserts in the same batch.
+  for (const input of inputs) {
+    await executeUpsertWebsiteContentRow(supabase, input);
+  }
 }
 
 export async function deleteWebsiteContentEntriesBySection(
