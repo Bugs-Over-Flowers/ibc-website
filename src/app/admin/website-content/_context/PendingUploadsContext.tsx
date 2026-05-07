@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useRef } from "react";
 
-type UploadFunction = () => Promise<void>;
+type UploadedImageMap = Record<string, string>;
+type UploadFunction = () => Promise<UploadedImageMap>;
 
 interface PendingUploadsContextType {
   registerUploadFunction: (
@@ -11,7 +12,7 @@ interface PendingUploadsContextType {
     uploadFn: UploadFunction,
   ) => void;
   unregisterUploadFunction: (sectionKey: string) => void;
-  uploadAllPendingImages: () => Promise<void>;
+  uploadAllPendingImages: () => Promise<UploadedImageMap>;
   hasPendingUploads: () => boolean;
 }
 
@@ -37,7 +38,12 @@ export function PendingUploadsProvider({ children }: { children: ReactNode }) {
     const uploadPromises = Array.from(uploadFunctionsRef.current.values()).map(
       (uploadFn) => uploadFn(),
     );
-    await Promise.all(uploadPromises);
+    const results = await Promise.all(uploadPromises);
+
+    return results.reduce<UploadedImageMap>((accumulator, uploadedImages) => {
+      Object.assign(accumulator, uploadedImages);
+      return accumulator;
+    }, {} as UploadedImageMap);
   }, []);
 
   const hasPendingUploads = useCallback(
