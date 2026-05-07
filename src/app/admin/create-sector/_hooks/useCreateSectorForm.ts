@@ -3,22 +3,20 @@
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { z } from "zod";
 import { useAppForm } from "@/hooks/_formHooks";
 import tryCatch from "@/lib/server/tryCatch";
 import { zodValidator } from "@/lib/utils";
+import { createSectorSchema } from "@/lib/validation/sector/sectorSchema";
 import { createSector } from "@/server/sectors/mutations";
 
-const createSectorSchema = z.object({
-  sectorName: z.string().min(1, "Sector name is required"),
-});
+const defaultValues = {
+  sectorName: "",
+};
 
 export const useCreateSectorForm = () => {
   const router = useRouter();
   const form = useAppForm({
-    defaultValues: {
-      sectorName: "",
-    },
+    defaultValues,
     validators: {
       onSubmit: zodValidator(createSectorSchema),
     },
@@ -38,10 +36,10 @@ export const useCreateSectorForm = () => {
       }
 
       toast.success("Sector created successfully!");
-      form.reset({
-        sectorName: "",
-      });
-      router.push("/admin/manage-sector" as Route);
+      form.reset(defaultValues);
+      setTimeout(() => {
+        router.push("/admin/manage-sector" as Route);
+      }, 0);
     },
   });
 
