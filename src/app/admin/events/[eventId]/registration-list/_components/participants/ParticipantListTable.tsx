@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format, formatDate } from "date-fns";
 import { Download } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import {
   AdminTableDateSortHeader,
   AdminTableSortHeader,
@@ -165,6 +166,8 @@ export default function ParticipantListTable({
   participantList,
   eventDetails,
 }: ParticipantListProps) {
+  const router = useRouter();
+  const params = useParams<{ eventId: string }>();
   const handleExport = async (data: ParticipantListItem[]) => {
     const sorted = [...data].sort(
       (a, b) =>
@@ -221,6 +224,11 @@ export default function ParticipantListTable({
         columns={participantListColumns}
         data={participantList}
         enableClearSorting
+        onRowDoubleClick={(row) =>
+          router.push(
+            `/admin/events/${params.eventId}/registration-list/registration/${row.registrationId}`,
+          )
+        }
       />
     </div>
   );

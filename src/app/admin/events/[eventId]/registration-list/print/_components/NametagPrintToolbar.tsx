@@ -1,7 +1,9 @@
 "use client";
 
-import { CheckSquare, Printer, Square } from "lucide-react";
+import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface NametagPrintToolbarProps {
   allSelected: boolean;
@@ -23,24 +25,12 @@ export default function NametagPrintToolbar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3">
       <div className="flex items-center gap-3">
-        <Button
-          className="gap-2"
-          onClick={handleToggleAll}
-          type="button"
-          variant="outline"
-        >
-          {allSelected ? (
-            <>
-              <Square className="size-4" />
-              Deselect All
-            </>
-          ) : (
-            <>
-              <CheckSquare className="size-4" />
-              Select All
-            </>
-          )}
-        </Button>
+        <Checkbox
+          checked={allSelected}
+          id="select-all"
+          onCheckedChange={handleToggleAll}
+        />
+        <Label htmlFor="select-all">Select All</Label>
         <span className="text-muted-foreground text-sm tabular-nums">
           {selectedCount} / {totalCount} selected
         </span>

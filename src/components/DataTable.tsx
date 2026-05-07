@@ -35,6 +35,8 @@ interface DataTableProps<TData, TValue> {
   tableHeaderClassName?: string;
   children?: (table: TableType<TData>) => React.ReactNode;
   enablePagination?: boolean;
+  onRowDoubleClick?: (row: TData) => void;
+  rowClassName?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -47,6 +49,8 @@ export function DataTable<TData, TValue>({
   tableHeaderClassName,
   children,
   enablePagination = false,
+  onRowDoubleClick,
+  rowClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -115,8 +119,17 @@ export function DataTable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
+                  className={cn(
+                    onRowDoubleClick && "cursor-pointer",
+                    rowClassName,
+                  )}
                   data-state={row.getIsSelected() && "selected"}
                   key={row.id}
+                  onDoubleClick={
+                    onRowDoubleClick
+                      ? () => onRowDoubleClick(row.original)
+                      : undefined
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

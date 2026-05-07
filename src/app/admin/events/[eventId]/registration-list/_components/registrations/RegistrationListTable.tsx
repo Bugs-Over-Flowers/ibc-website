@@ -2,6 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
+import { useParams, useRouter } from "next/navigation";
 import {
   AdminTableDateSortHeader,
   AdminTableSortHeader,
@@ -21,6 +22,8 @@ export default function RegistrationListTable({
   registrationList,
   eventTitle,
 }: RegistrationListProps) {
+  const router = useRouter();
+  const params = useParams<{ eventId: string }>();
   const registrationListColumns = (
     eventTitle: string,
   ): ColumnDef<RegistrationItem>[] => [
@@ -155,6 +158,11 @@ export default function RegistrationListTable({
         columns={registrationListColumns(eventTitle)}
         data={registrationList}
         enableClearSorting
+        onRowDoubleClick={(row) =>
+          router.push(
+            `/admin/events/${params.eventId}/registration-list/registration/${row.registrationId}`,
+          )
+        }
       />
     </div>
   );
