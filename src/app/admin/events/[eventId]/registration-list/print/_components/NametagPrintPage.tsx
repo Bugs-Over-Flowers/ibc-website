@@ -58,7 +58,7 @@ export default function NametagPrintPage({
         p.firstName.toLowerCase().includes(q) ||
         p.lastName.toLowerCase().includes(q) ||
         p.affiliation.toLowerCase().includes(q) ||
-        p.registrationIdentifier.toLowerCase().includes(q),
+        p.participantIdentifier.toLowerCase().includes(q),
     );
   }, [participants, deferredSearch]);
 
@@ -203,7 +203,7 @@ export default function NametagPrintPage({
                           <p className="text-muted-foreground text-xs">
                             {participant.affiliation || "No affiliation"} ·{" "}
                             <span className="font-mono tracking-wide">
-                              {participant.registrationIdentifier}
+                              {participant.participantIdentifier}
                             </span>
                           </p>
                         </div>
