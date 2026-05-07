@@ -108,6 +108,10 @@ const nextConfig: NextConfig = {
         port: "54321",
         pathname: "/storage/v1/object/**",
       },
+      {
+        protocol: "https",
+        hostname: "ibcwebsite.vercel.app",
+      },
     ],
     dangerouslyAllowLocalIP: true,
   },
