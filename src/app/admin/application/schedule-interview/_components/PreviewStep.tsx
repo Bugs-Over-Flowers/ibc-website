@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ApplicationBadgeList } from "./ApplicationBadgeList";
 
-const INTERVIEW_DETAILS_TEMPLATE = `<p><strong>Interview Details:</strong></p><p>Date &amp; Time: {INTERVIEW_DATE}</p><p>Venue: {INTERVIEW_VENUE}</p>`;
+const INTERVIEW_DETAILS_TEMPLATE = `<p><strong>Interview Details:</strong></p><p>Date &amp; Time: <strong>{INTERVIEW_DATE}</strong></p><p>Venue: <strong>{INTERVIEW_VENUE}</strong></p>`;
 
 interface Application {
   applicationId: string;
