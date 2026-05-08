@@ -168,7 +168,7 @@ export default function CheckInRegistrationFilters() {
           type="button"
           variant="ghost"
         >
-          Clear filters
+          Clear
         </Button>
       ) : null}
     </div>
