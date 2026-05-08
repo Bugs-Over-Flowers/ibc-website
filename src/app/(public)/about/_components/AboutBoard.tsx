@@ -70,7 +70,6 @@ const secretariat: MemberCard[] = [
     subtitle: "Administrative Officer",
     group: null,
   },
-  { title: "Joel Germino", subtitle: "General Services", group: null },
 ];
 
 interface AboutBoardProps {

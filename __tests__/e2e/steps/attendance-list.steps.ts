@@ -342,6 +342,41 @@ Then("the dialog should show the remark text", async ({ page }) => {
 });
 
 // ============================================
+// Scenario: Expected participants includes all payment status types
+// ============================================
+
+Given(
+  "I am on the attendance list page with accepted, pending, and rejected participants",
+  async ({ page }) => {
+    const scenario = await seedAttendanceListScenario({
+      participantCount: 4,
+      pendingParticipantCount: 3,
+      rejectedParticipantCount: 3,
+      eventDayCount: 1,
+      checkInDistribution: { 0: 10 },
+    });
+
+    await page.goto(`/admin/events/${scenario.event.eventId}/check-in-list`);
+    await page.waitForLoadState("networkidle");
+  },
+);
+
+Then(
+  "I should see payment status badges for each payment status type",
+  async ({ page }) => {
+    await expect(
+      page.getByRole("cell", { name: "pending" }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("cell", { name: "rejected" }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("cell", { name: "accepted" }).first(),
+    ).toBeVisible();
+  },
+);
+
+// ============================================
 // Scenario: View attendance list with various check-in rates
 // ============================================
 
