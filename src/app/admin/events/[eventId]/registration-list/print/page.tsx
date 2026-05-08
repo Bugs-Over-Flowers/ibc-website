@@ -1,9 +1,7 @@
-import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import Link from "next/link";
+import { cookies, headers } from "next/headers";
 import { Suspense } from "react";
-import { Button } from "@/components/ui/button";
+import BackNavigation from "@/app/admin/_components/BackNavigation";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventParticipantsForPrint } from "@/server/registration/queries/getEventParticipantsForPrint";
@@ -30,6 +28,12 @@ export default function PrintNametagsPageWrapper({ params }: PrintPageProps) {
 async function PrintNametagsPage({ params }: PrintPageProps) {
   const { eventId } = await params;
   const cookieStore = await cookies();
+  const headersList = await headers();
+  const referer = headersList.get("referer");
+  const previousPath = referer
+    ? new URL(referer).pathname.replace(/\/+$/, "")
+    : "";
+  const showBack = previousPath !== "/admin/events";
 
   const [eventDetails, participants] = await Promise.all([
     tryCatch(getEventById(cookieStore.getAll(), { id: eventId })),
@@ -38,16 +42,7 @@ async function PrintNametagsPage({ params }: PrintPageProps) {
 
   return (
     <div className="space-y-6">
-      <Button
-        nativeButton={false}
-        render={
-          <Link href={`/admin/events/${eventId}/registration-list`}>
-            <ChevronLeft />
-            Back
-          </Link>
-        }
-        variant={"ghost"}
-      />
+      <BackNavigation showBack={showBack} />
 
       <div>
         <h1 className="font-bold text-3xl text-foreground">

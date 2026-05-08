@@ -1,6 +1,9 @@
 "use client";
 
+import { Scan } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { getEventDays } from "@/server/events/queries/getEventDays";
 import CheckInListStats from "./CheckInListStats";
@@ -40,17 +43,25 @@ export default function CheckInListTabWrapper({
       />
 
       <Tabs onValueChange={setActiveTab} value={activeTab}>
-        <TabsList className="h-9 gap-1 rounded-lg bg-muted p-1">
-          {tabs.map((eventDay) => (
-            <TabsTrigger
-              className="rounded-md px-4 text-sm data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none"
-              key={eventDay.eventDayId}
-              value={eventDay.eventDayId}
-            >
-              {eventDay.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="flex items-center justify-between gap-4">
+          <TabsList className="h-9 gap-1 rounded-lg bg-muted p-1">
+            {tabs.map((eventDay) => (
+              <TabsTrigger
+                className="rounded-md px-4 text-sm data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                key={eventDay.eventDayId}
+                value={eventDay.eventDayId}
+              >
+                {eventDay.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <Link href={`/admin/events/check-in/${activeTab}`}>
+            <Button>
+              <Scan className="mr-1.5 h-4 w-4" />
+              Scan Participants
+            </Button>
+          </Link>
+        </div>
         {children}
       </Tabs>
     </div>

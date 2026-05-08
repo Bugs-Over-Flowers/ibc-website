@@ -1,4 +1,4 @@
-import { Calendar, ExternalLink, MapPin, Tag } from "lucide-react";
+import { Calendar, ExternalLink, List, MapPin, Tag } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/events/eventUtils";
@@ -38,7 +38,19 @@ export default function EventDayDetails({
             Event details for this check-in session
           </p>
         </div>
-        <div className="">
+        <div className="flex items-center gap-1.5">
+          <Button
+            nativeButton={false}
+            render={
+              <Link
+                href={`/admin/events/${eventDayData.eventId}/check-in-list`}
+              >
+                <List />
+              </Link>
+            }
+            size={"sm"}
+            variant={"outline"}
+          />
           <Button
             nativeButton={false}
             render={

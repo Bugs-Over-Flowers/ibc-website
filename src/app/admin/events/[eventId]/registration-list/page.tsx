@@ -1,9 +1,9 @@
 import { Printer } from "lucide-react";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
-import BackButton from "@/app/admin/_components/BackButton";
+import BackNavigation from "@/app/admin/_components/BackNavigation";
 import { Button } from "@/components/ui/button";
 import { TabsContent } from "@/components/ui/tabs";
 import tryCatch from "@/lib/server/tryCatch";
@@ -39,21 +39,18 @@ export default function RegistrationPageWrapper({
   );
 }
 
-async function BackButtonWrapper({
-  params,
-}: {
-  params: RegistrationListPageProps["params"];
-}) {
-  const { eventId } = await params;
-  return <BackButton eventId={eventId} />;
-}
-
 async function RegistrationPage({
   params,
   searchParams,
 }: RegistrationListPageProps) {
   const { eventId } = await params;
   const cookieStore = await cookies();
+  const headersList = await headers();
+  const referer = headersList.get("referer");
+  const previousPath = referer
+    ? new URL(referer).pathname.replace(/\/+$/, "")
+    : "";
+  const showBack = previousPath !== "/admin/events";
 
   const [eventDetails, registrationStats] = await Promise.all([
     tryCatch(getEventById(cookieStore.getAll(), { id: eventId })),
@@ -62,7 +59,7 @@ async function RegistrationPage({
 
   return (
     <div className="space-y-6">
-      <BackButtonWrapper params={params} />
+      <BackNavigation showBack={showBack} />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
