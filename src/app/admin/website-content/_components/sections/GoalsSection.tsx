@@ -11,6 +11,122 @@ import { ICON_MAP } from "../icons";
 import { LucideIconPicker } from "../LucideIconPicker";
 import { MarkdownTextarea } from "../RichTextEditorField";
 
+type InternalCard = GoalsSectionProps["cards"][number];
+
+function GoalsPreviewCard({
+  card,
+  isDeleteMode,
+  selectedCardEntryKeys,
+  onToggleCardSelected,
+  onEdit,
+}: {
+  card: InternalCard;
+  isDeleteMode: boolean;
+  selectedCardEntryKeys: Set<string>;
+  onToggleCardSelected: (entryKey: string, checked: boolean) => void;
+  onEdit: (entryKey: string) => void;
+}) {
+  return (
+    <button
+      className="text-left"
+      onClick={() => {
+        if (isDeleteMode) {
+          onToggleCardSelected(
+            card.entryKey,
+            !selectedCardEntryKeys.has(card.entryKey),
+          );
+          return;
+        }
+        onEdit(card.entryKey);
+      }}
+      type="button"
+    >
+      <Card className="relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300">
+        <div className="absolute top-0 right-0 left-0 h-1 bg-linear-to-r from-transparent via-primary to-transparent" />
+        <CardContent className="flex flex-col items-center p-8 text-center">
+          <div className="mb-6 flex items-center justify-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20 backdrop-blur-sm">
+              {card.icon ? (
+                typeof card.icon === "string" && ICON_MAP[card.icon] ? (
+                  (() => {
+                    const IconComponent = ICON_MAP[card.icon];
+                    return <IconComponent className="h-7 w-7 text-primary" />;
+                  })()
+                ) : (
+                  <span className="text-lg">{card.icon}</span>
+                )
+              ) : null}
+            </div>
+          </div>
+          <h3 className="mb-3 font-bold text-foreground text-xl">
+            {card.title || "Goal Title"}
+          </h3>
+          {card.paragraph ? (
+            <RichTextDisplay
+              className="mb-4 text-foreground/80 leading-relaxed"
+              content={card.paragraph}
+            />
+          ) : (
+            <p className="mb-4 text-foreground/80 leading-relaxed">
+              Goal description will appear here...
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </button>
+  );
+}
+
+function GoalCardForm({
+  card,
+  placeholders,
+  onCardFieldChange,
+}: {
+  card: InternalCard;
+  placeholders: GoalsSectionProps["placeholders"];
+  onCardFieldChange: GoalsSectionProps["onCardFieldChange"];
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-row gap-4">
+        <div className="pr-1">
+          <LucideIconPicker
+            onSelect={(value) => {
+              onCardFieldChange(card.entryKey, "icon", value);
+            }}
+            selectedIcon={card.icon}
+          />
+        </div>
+
+        <div className="w-full space-y-2">
+          <p className="font-medium text-sm">Goal Title</p>
+          <Input
+            className="truncate"
+            onChange={(e) => {
+              onCardFieldChange(card.entryKey, "title", e.target.value);
+            }}
+            placeholder={placeholders.title || "Increase Trailblazer Companies"}
+            value={card.title}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <p className="font-medium text-sm">Goal Paragraph</p>
+        <MarkdownTextarea
+          className="max-h-[150px] overflow-y-auto"
+          onChange={(value) => {
+            onCardFieldChange(card.entryKey, "paragraph", value);
+          }}
+          placeholder={placeholders.paragraph || "Enter goal description"}
+          rows={4}
+          value={card.paragraph}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function GoalsSection({
   cards,
   placeholders,
@@ -32,103 +148,6 @@ export function GoalsSection({
   const editingCardIndex = cards.findIndex(
     (card) => card.entryKey === editingCardKey,
   );
-
-  const PreviewCard = ({ card }: { card: (typeof cards)[number] }) => {
-    return (
-      <button
-        className="text-left"
-        onClick={() => {
-          if (isDeleteMode) {
-            onToggleCardSelected(
-              card.entryKey,
-              !selectedCardEntryKeys.has(card.entryKey),
-            );
-            return;
-          }
-
-          setEditingCardKey(card.entryKey);
-        }}
-        type="button"
-      >
-        <Card className="relative h-full overflow-hidden border-0 bg-card/95 shadow-xl ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300">
-          <div className="absolute top-0 right-0 left-0 h-1 bg-linear-to-r from-transparent via-primary to-transparent" />
-          <CardContent className="flex flex-col items-center p-8 text-center">
-            <div className="mb-6 flex items-center justify-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20 backdrop-blur-sm">
-                {card.icon ? (
-                  typeof card.icon === "string" && ICON_MAP[card.icon] ? (
-                    (() => {
-                      const IconComponent = ICON_MAP[card.icon];
-                      return <IconComponent className="h-7 w-7 text-primary" />;
-                    })()
-                  ) : (
-                    <span className="text-lg">{card.icon}</span>
-                  )
-                ) : null}
-              </div>
-            </div>
-            <h3 className="mb-3 font-bold text-foreground text-xl">
-              {card.title || "Goal Title"}
-            </h3>
-            {card.paragraph ? (
-              <RichTextDisplay
-                className="mb-4 text-foreground/80 leading-relaxed"
-                content={card.paragraph}
-              />
-            ) : (
-              <p className="mb-4 text-foreground/80 leading-relaxed">
-                Goal description will appear here...
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </button>
-    );
-  };
-
-  const GoalCardForm = ({ card }: { card: (typeof cards)[number] }) => {
-    return (
-      <div className="space-y-4">
-        <div className="flex flex-row gap-4">
-          <div className="pr-1">
-            <LucideIconPicker
-              onSelect={(value) => {
-                onCardFieldChange(card.entryKey, "icon", value);
-              }}
-              selectedIcon={card.icon}
-            />
-          </div>
-
-          <div className="w-full space-y-2">
-            <p className="font-medium text-sm">Goal Title</p>
-            <Input
-              className="truncate"
-              onChange={(e) => {
-                onCardFieldChange(card.entryKey, "title", e.target.value);
-              }}
-              placeholder={
-                placeholders.title || "Increase Trailblazer Companies"
-              }
-              value={card.title}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <p className="font-medium text-sm">Goal Paragraph</p>
-          <MarkdownTextarea
-            className="max-h-[150px] overflow-y-auto"
-            onChange={(value) => {
-              onCardFieldChange(card.entryKey, "paragraph", value);
-            }}
-            placeholder={placeholders.paragraph || "Enter goal description"}
-            rows={4}
-            value={card.paragraph}
-          />
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
@@ -165,7 +184,11 @@ export function GoalsSection({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <GoalCardForm card={editingCard} />
+                <GoalCardForm
+                  card={editingCard}
+                  onCardFieldChange={onCardFieldChange}
+                  placeholders={placeholders}
+                />
               </div>
             </div>
 
@@ -223,7 +246,14 @@ export function GoalsSection({
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {cards.map((card) => (
-              <PreviewCard card={card} key={card.entryKey} />
+              <GoalsPreviewCard
+                card={card}
+                isDeleteMode={isDeleteMode}
+                key={card.entryKey}
+                onEdit={(entryKey) => setEditingCardKey(entryKey)}
+                onToggleCardSelected={onToggleCardSelected}
+                selectedCardEntryKeys={selectedCardEntryKeys}
+              />
             ))}
           </div>
         </div>

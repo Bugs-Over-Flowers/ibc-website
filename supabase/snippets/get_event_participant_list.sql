@@ -10,7 +10,9 @@ create type participant_list_item as (
   contact_number TEXT,
   affiliation TEXT,
   registration_date TIMESTAMP with time zone,
-  registration_id UUID
+  registration_id UUID,
+  participant_identifier TEXT,
+  payment_proof_status TEXT
 );
 
 create or replace function get_event_participant_list (
@@ -39,7 +41,9 @@ BEGIN
     -- It prioritizes the linked Business Member name; if null, falls back to nonMemberName
     COALESCE(bm."businessName", r."nonMemberName") AS "affiliation",
     r."registrationDate",
-    r."registrationId"
+    r."registrationId",
+    p."participantIdentifier",
+    r."paymentProofStatus"::text AS "payment_proof_status"
   FROM
     "Participant" p
 
@@ -54,9 +58,7 @@ BEGIN
   -- Filter the event that is needed
   WHERE
     r."eventId" = p_event_id
-    -- 1. Payment Status is verified
-    AND r."paymentStatus" = 'verified'::"PaymentStatus"
-    -- 2. Filter by Search Text (if provided) across Name, Email, or Company
+    -- Filter by Search Text (if provided) across Name, Email, or Company
     AND (
       -- return everything if no search text or empty
       p_search_text IS NULL

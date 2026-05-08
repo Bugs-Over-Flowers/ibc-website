@@ -25,16 +25,16 @@ export default function NametagCard({
 
       {/* Name */}
       <div className="-mt-1 flex flex-col items-center text-center">
-        <p className="max-w-full truncate font-bold text-lg text-neutral-900 uppercase leading-tight">
+        <p className="max-w-full font-bold text-lg text-neutral-900 uppercase leading-tight">
           {participant.firstName}
         </p>
-        <p className="max-w-full truncate font-bold text-lg text-neutral-900 uppercase leading-tight">
+        <p className="max-w-full font-bold text-lg text-neutral-900 uppercase leading-tight">
           {participant.lastName}
         </p>
       </div>
 
       {/* Affiliation */}
-      <p className="-mt-0.5 max-w-full truncate font-medium text-neutral-500 text-xs capitalize">
+      <p className="-mt-0.5 max-w-full px-5 text-center font-medium text-neutral-500 text-xs capitalize">
         {participant.affiliation || ""}
       </p>
 

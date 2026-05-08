@@ -126,8 +126,8 @@ export default function ParticipantCheckInDialog({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 break-words">
+              <User className="h-5 w-5 shrink-0" />
               {participant.firstName} {participant.lastName}
             </DialogTitle>
             <DialogDescription>Participant check-in details</DialogDescription>
@@ -138,11 +138,11 @@ export default function ParticipantCheckInDialog({
             <div className="space-y-3 rounded-lg border border-border/50 bg-muted/20 p-4">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Building2 className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{affiliation}</span>
+                <span className="break-words">{affiliation}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Mail className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{participant.email}</span>
+                <span className="break-words">{participant.email}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Phone className="h-3.5 w-3.5 shrink-0" />

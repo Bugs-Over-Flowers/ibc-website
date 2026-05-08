@@ -3,7 +3,10 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
 import { Clock, Download } from "lucide-react";
-import { AdminTableSortHeader } from "@/app/admin/events/_components/table/AdminTableControls";
+import {
+  AdminTableSortHeader,
+  PaymentStatusBadge,
+} from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
 import { type ExportEventDetails, exportToExcel } from "@/lib/export/excel";
@@ -105,6 +108,16 @@ const getCheckInListColumns = (
     ),
   },
   {
+    accessorKey: "paymentProofStatus",
+    header: "Payment",
+    cell: ({ row }) => (
+      <PaymentStatusBadge
+        className="capitalize"
+        status={row.original.paymentProofStatus}
+      />
+    ),
+  },
+  {
     accessorKey: "remarks",
     header: "Remarks",
     cell: ({ row }) => {
@@ -143,6 +156,7 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
   { accessorKey: "lastName", header: "Last Name" },
   { accessorKey: "email", header: "Email Address" },
   { accessorKey: "contactNumber", header: "Phone Number" },
+  { accessorKey: "paymentProofStatus", header: "Payment Status" },
   { accessorKey: "remarks", header: "Remarks" },
 ];
 

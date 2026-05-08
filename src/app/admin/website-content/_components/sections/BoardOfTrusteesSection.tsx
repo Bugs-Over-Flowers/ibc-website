@@ -18,7 +18,7 @@ import type {
   WebsiteContentFormState,
 } from "@/server/website-content/types";
 import { usePendingUploadsContext } from "../../_context/PendingUploadsContext";
-import { reorderInList } from "../../_hooks/reorderInList";
+import { reorderByIndex } from "../../_hooks/reorderInList";
 import { useBoardCardGroups } from "../../_hooks/useBoardCardGroups";
 import { usePersonalImageUpload } from "../../_hooks/usePersonalImageUpload";
 import type { BoardOfTrusteesSectionProps } from "../../_types/sectionProps";
@@ -77,10 +77,9 @@ function SortablePreviewCard({
     >
       <button
         aria-label="Drag card"
-        className="absolute top-3 right-3 cursor-grab rounded-md border border-border bg-background/80 p-1 text-muted-foreground active:cursor-grabbing"
+        className="absolute top-3 right-3 cursor-grab rounded-md border border-border bg-background/80 p-1 text-muted-foreground hover:bg-background/90 active:cursor-grabbing"
         onClick={(e) => e.stopPropagation()}
         ref={handleRef}
-        tabIndex={0}
         type="button"
       >
         <GripVertical className="h-4 w-4" />
@@ -408,13 +407,13 @@ export function BoardOfTrusteesSection({
         onDragEnd={(event) => {
           if (event.canceled || !isSortableOperation(event.operation)) return;
 
-          const activeEntryKey = String(event.operation.source?.id);
-          const overEntryKey = String(event.operation.target?.id ?? "");
+          const source = event.operation.source;
+          if (!source) return;
 
-          if (!activeEntryKey || !overEntryKey) return;
-          if (activeEntryKey === overEntryKey) return;
+          const { initialIndex, index } = source;
+          if (initialIndex === index) return;
 
-          handleGroupReorder(group, activeEntryKey, overEntryKey);
+          handleGroupReorder(group, initialIndex, index);
         }}
       >
         <div className={containerClassName}>
@@ -436,8 +435,8 @@ export function BoardOfTrusteesSection({
   );
   const handleGroupReorder = (
     group: BoardGroup,
-    activeEntryKey: string,
-    overEntryKey: string,
+    fromIndex: number,
+    toIndex: number,
   ) => {
     const groupOrder: BoardGroup[] = [
       "featured",
@@ -453,11 +452,7 @@ export function BoardOfTrusteesSection({
       other: [...otherCards],
     };
 
-    grouped[group] = reorderInList(
-      grouped[group],
-      activeEntryKey,
-      overEntryKey,
-    );
+    grouped[group] = reorderByIndex(grouped[group], fromIndex, toIndex);
 
     const merged = groupOrder.flatMap((g) => grouped[g]);
 
@@ -466,13 +461,6 @@ export function BoardOfTrusteesSection({
       cardPlacement: String(index + 1),
     }));
 
-    // eslint-disable-next-line no-console
-    console.debug("BoardOfTrustees handleGroupReorder", {
-      group,
-      activeEntryKey,
-      overEntryKey,
-      nextCards,
-    });
     onCardsReorder(nextCards);
   };
 

@@ -11,6 +11,118 @@ import { ICON_MAP } from "../icons";
 import { LucideIconPicker } from "../LucideIconPicker";
 import { MarkdownTextarea } from "../RichTextEditorField";
 
+type InternalCard = LandingBenefitsSectionProps["cards"][number];
+
+function LandingBenefitsPreviewCard({
+  card,
+  isDeleteMode,
+  selectedCardEntryKeys,
+  onToggleCardSelected,
+  onEdit,
+}: {
+  card: InternalCard;
+  isDeleteMode: boolean;
+  selectedCardEntryKeys: Set<string>;
+  onToggleCardSelected: (entryKey: string, checked: boolean) => void;
+  onEdit: (entryKey: string) => void;
+}) {
+  return (
+    <button
+      className="text-left"
+      onClick={() => {
+        if (isDeleteMode) {
+          onToggleCardSelected(
+            card.entryKey,
+            !selectedCardEntryKeys.has(card.entryKey),
+          );
+          return;
+        }
+        onEdit(card.entryKey);
+      }}
+      type="button"
+    >
+      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm ring-1 ring-border/50 backdrop-blur-sm transition-all duration-300">
+        <div className="mb-5 inline-flex rounded-xl bg-primary/10 p-3">
+          {card.icon ? (
+            typeof card.icon === "string" && ICON_MAP[card.icon] ? (
+              (() => {
+                const IconComponent = ICON_MAP[card.icon];
+                return <IconComponent className="h-6 w-6 text-primary" />;
+              })()
+            ) : (
+              <span className="text-lg">{card.icon}</span>
+            )
+          ) : null}
+        </div>
+        <h3 className="mb-3 font-semibold text-foreground text-xl">
+          {card.title || "Benefit Title"}
+        </h3>
+        {card.paragraph ? (
+          <RichTextDisplay
+            className="text-muted-foreground leading-relaxed **:text-inherit"
+            content={card.paragraph}
+          />
+        ) : (
+          <p className="text-muted-foreground leading-relaxed">
+            Benefit description will appear here...
+          </p>
+        )}
+      </div>
+    </button>
+  );
+}
+
+function BenefitCardForm({
+  card,
+  placeholders,
+  onCardFieldChange,
+}: {
+  card: InternalCard;
+  placeholders: LandingBenefitsSectionProps["placeholders"];
+  onCardFieldChange: LandingBenefitsSectionProps["onCardFieldChange"];
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-row gap-4">
+        <div className="pr-1">
+          <LucideIconPicker
+            onSelect={(value) => {
+              onCardFieldChange(card.entryKey, "icon", value);
+            }}
+            selectedIcon={card.icon}
+          />
+        </div>
+
+        <div className="w-full space-y-2">
+          <p className="font-medium text-sm">Benefit Title</p>
+          <Input
+            className="truncate"
+            onChange={(event) => {
+              const value = event.target.value;
+              onCardFieldChange(card.entryKey, "title", value);
+            }}
+            placeholder={placeholders.title || "Business Networking"}
+            value={card.title}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <p className="font-medium text-sm">Benefit Paragraph</p>
+        <MarkdownTextarea
+          className="max-h-[150px] overflow-y-auto"
+          onChange={(value) => {
+            onCardFieldChange(card.entryKey, "paragraph", value);
+          }}
+          placeholder={placeholders.paragraph || "Enter benefit description"}
+          rows={4}
+          value={card.paragraph}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function LandingBenefitsSection({
   cards,
   placeholders,
@@ -32,97 +144,6 @@ export function LandingBenefitsSection({
   const editingCardIndex = cards.findIndex(
     (card) => card.entryKey === editingCardKey,
   );
-
-  const PreviewCard = ({ card }: { card: (typeof cards)[number] }) => {
-    return (
-      <button
-        className="text-left"
-        onClick={() => {
-          if (isDeleteMode) {
-            onToggleCardSelected(
-              card.entryKey,
-              !selectedCardEntryKeys.has(card.entryKey),
-            );
-            return;
-          }
-
-          setEditingCardKey(card.entryKey);
-        }}
-        type="button"
-      >
-        <div className="rounded-2xl border border-border bg-card p-8 shadow-sm ring-1 ring-border/50 backdrop-blur-sm transition-all duration-300">
-          <div className="mb-5 inline-flex rounded-xl bg-primary/10 p-3">
-            {card.icon ? (
-              typeof card.icon === "string" && ICON_MAP[card.icon] ? (
-                (() => {
-                  const IconComponent = ICON_MAP[card.icon];
-                  return <IconComponent className="h-6 w-6 text-primary" />;
-                })()
-              ) : (
-                <span className="text-lg">{card.icon}</span>
-              )
-            ) : null}
-          </div>
-          <h3 className="mb-3 font-semibold text-foreground text-xl">
-            {card.title || "Benefit Title"}
-          </h3>
-          {card.paragraph ? (
-            <RichTextDisplay
-              className="text-muted-foreground leading-relaxed **:text-inherit"
-              content={card.paragraph}
-            />
-          ) : (
-            <p className="text-muted-foreground leading-relaxed">
-              Benefit description will appear here...
-            </p>
-          )}
-        </div>
-      </button>
-    );
-  };
-
-  const BenefitCardForm = ({ card }: { card: (typeof cards)[number] }) => {
-    return (
-      <div className="space-y-4">
-        <div className="flex flex-row gap-4">
-          <div className="pr-1">
-            <LucideIconPicker
-              onSelect={(value) => {
-                onCardFieldChange(card.entryKey, "icon", value);
-              }}
-              selectedIcon={card.icon}
-            />
-          </div>
-
-          <div className="w-full space-y-2">
-            <p className="font-medium text-sm">Benefit Title</p>
-            <Input
-              className="truncate"
-              onChange={(event) => {
-                const value = event.target.value;
-                onCardFieldChange(card.entryKey, "title", value);
-              }}
-              placeholder={placeholders.title || "Business Networking"}
-              value={card.title}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <p className="font-medium text-sm">Benefit Paragraph</p>
-          <MarkdownTextarea
-            className="max-h-[150px] overflow-y-auto"
-            onChange={(value) => {
-              onCardFieldChange(card.entryKey, "paragraph", value);
-            }}
-            placeholder={placeholders.paragraph || "Enter benefit description"}
-            rows={4}
-            value={card.paragraph}
-          />
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
@@ -159,7 +180,11 @@ export function LandingBenefitsSection({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <BenefitCardForm card={editingCard} />
+                <BenefitCardForm
+                  card={editingCard}
+                  onCardFieldChange={onCardFieldChange}
+                  placeholders={placeholders}
+                />
               </div>
             </div>
 
@@ -214,7 +239,14 @@ export function LandingBenefitsSection({
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {cards.map((card) => (
-              <PreviewCard card={card} key={card.entryKey} />
+              <LandingBenefitsPreviewCard
+                card={card}
+                isDeleteMode={isDeleteMode}
+                key={card.entryKey}
+                onEdit={(entryKey) => setEditingCardKey(entryKey)}
+                onToggleCardSelected={onToggleCardSelected}
+                selectedCardEntryKeys={selectedCardEntryKeys}
+              />
             ))}
           </div>
         </div>

@@ -1203,6 +1203,7 @@ export type Database = {
         registration_date: string | null;
         registration_id: string | null;
         participant_identifier: string | null;
+        payment_proof_status: string | null;
       };
       registration_details_result: {
         registration_details: Json | null;
