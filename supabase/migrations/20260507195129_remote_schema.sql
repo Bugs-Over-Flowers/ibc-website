@@ -1,15 +1,9 @@
 drop extension if exists "pg_net";
-
 drop policy "Enable insert for all users" on "public"."Participant";
-
 drop policy "Enable read access for all users" on "public"."Participant";
-
 drop policy "Website content is readable by everyone" on "public"."WebsiteContent";
-
 CREATE UNIQUE INDEX "Sector_sectorName_normalized_unique" ON public."Sector" USING btree (lower(btrim("sectorName")));
-
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.import_event_registrations(p_event_id uuid, p_rows jsonb, p_dry_run boolean DEFAULT false)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -243,67 +237,43 @@ BEGIN
     'results', v_results
   );
 END;
-$function$
-;
-
-
-  create policy "Enable insert for all users"
+$function$;
+create policy "Enable insert for all users"
   on "public"."Participant"
   as permissive
   for insert
   to anon, authenticated
 with check (true);
-
-
-
-  create policy "Enable read access for all users"
+create policy "Enable read access for all users"
   on "public"."Participant"
   as permissive
   for select
   to anon, authenticated
 using (true);
-
-
-
-  create policy "Website content is readable by everyone"
+create policy "Website content is readable by everyone"
   on "public"."WebsiteContent"
   as permissive
   for select
   to anon, authenticated
 using (("isActive" = true));
-
-
 drop policy "Allow all operations for anyone 11d98ol_0" on "storage"."objects";
-
 drop policy "Allow all operations for anyone 11d98ol_2" on "storage"."objects";
-
 drop policy "Network logos are publicly readable" on "storage"."objects";
-
-
-  create policy "Allow all operations for anyone 11d98ol_0"
+create policy "Allow all operations for anyone 11d98ol_0"
   on "storage"."objects"
   as permissive
   for insert
   to anon, authenticated
 with check ((bucket_id = 'paymentproofs'::text));
-
-
-
-  create policy "Allow all operations for anyone 11d98ol_2"
+create policy "Allow all operations for anyone 11d98ol_2"
   on "storage"."objects"
   as permissive
   for delete
   to anon, authenticated
 using ((bucket_id = 'paymentproofs'::text));
-
-
-
-  create policy "Network logos are publicly readable"
+create policy "Network logos are publicly readable"
   on "storage"."objects"
   as permissive
   for select
   to anon, authenticated
 using ((bucket_id = 'network-logos'::text));
-
-
-
