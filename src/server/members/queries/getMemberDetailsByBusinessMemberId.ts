@@ -88,6 +88,14 @@ export async function getMemberDetailsByBusinessMemberId(
     throw new Error("Failed to fetch member details: Member not found");
   }
 
+  const primaryApplicationId = member.primaryApplicationId;
+
+  if (!primaryApplicationId) {
+    throw new Error(
+      "Failed to fetch member details: Primary application not found",
+    );
+  }
+
   const { data: latestApplication, error: latestApplicationError } =
     await supabase
       .from("Application")
@@ -119,7 +127,7 @@ export async function getMemberDetailsByBusinessMemberId(
         )
       `,
       )
-      .eq("applicationId", member.primaryApplicationId)
+      .eq("applicationId", primaryApplicationId)
       .maybeSingle();
 
   if (latestApplicationError) {
