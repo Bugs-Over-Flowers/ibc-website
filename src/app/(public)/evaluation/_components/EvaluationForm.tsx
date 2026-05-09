@@ -125,7 +125,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
             <div className="space-y-1.5 pt-1 sm:space-y-2 sm:pt-2 md:space-y-3">
               {dateDisplay && (
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <CalendarDays className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" />
+                  <CalendarDays className="h-5 w-5 shrink-0 text-primary sm:h-5 sm:w-5" />
                   <span className="font-medium text-foreground text-xs sm:text-sm">
                     {dateDisplay}
                   </span>
@@ -133,7 +133,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               )}
               {timeDisplay && (
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <Clock className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" />
+                  <Clock className="h-5 w-5 shrink-0 text-primary sm:h-5 sm:w-5" />
                   <span className="font-medium text-foreground text-xs sm:text-sm">
                     {timeDisplay}
                   </span>
@@ -141,7 +141,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
               )}
               {eventData.venue && (
                 <div className="flex items-start gap-2 sm:gap-3">
-                  <MapPin className="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5 lg:mt-0.5" />
+                  <MapPin className="h-5 w-5 shrink-0 text-primary sm:h-5 sm:w-5 lg:mt-0.5" />
                   <span className="font-medium text-foreground text-xs sm:text-sm">
                     {eventData.venue}
                   </span>
@@ -156,7 +156,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       <section className="rounded-lg border border-border bg-card p-3 sm:rounded-lg sm:p-4 md:rounded-xl md:p-5 lg:rounded-xl lg:p-6">
         <div className="mb-3 flex items-start gap-2 sm:mb-4 md:mb-5 lg:mb-6">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9 md:h-10 md:w-10">
-            <User className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
+            <User className="h-5 w-5 text-primary sm:h-5 sm:w-5 md:h-5 md:w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-foreground text-sm sm:text-base">
@@ -183,7 +183,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
         <div className="mb-4 flex flex-col items-start justify-between gap-2 sm:mb-5 sm:gap-3 md:mb-6 lg:mb-8 lg:flex-row lg:items-center">
           <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9 md:h-10 md:w-10">
-              <Star className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
+              <Star className="h-5 w-5 text-primary sm:h-5 sm:w-5 md:h-5 md:w-5" />
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-semibold text-foreground text-sm sm:text-base">
@@ -241,7 +241,7 @@ export function EvaluationForm({ eventId, eventData }: EvaluationFormProps) {
       <section className="rounded-lg border border-border bg-card p-3 sm:rounded-lg sm:p-4 md:rounded-xl md:p-5 lg:rounded-xl lg:p-6">
         <div className="mb-3 flex items-start gap-2 sm:mb-4 md:mb-5 lg:mb-6">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9 md:h-10 md:w-10">
-            <MessageSquare className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
+            <MessageSquare className="h-5 w-5 text-primary sm:h-5 sm:w-5 md:h-5 md:w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-foreground text-sm sm:text-base">

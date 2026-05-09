@@ -1,8 +1,8 @@
 import { TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Suspense } from "react";
-import BackButton from "@/app/admin/_components/BackButton";
+import BackNavigation from "@/app/admin/_components/BackNavigation";
 import {
   Empty,
   EmptyDescription,
@@ -37,20 +37,10 @@ export default function CheckInPageWrapper({
   return (
     <div className="space-y-6">
       <Suspense fallback={<CheckInListPageLoading />}>
-        <BackButtonWrapper params={params} />
         <CheckInPage params={params} />
       </Suspense>
     </div>
   );
-}
-
-async function BackButtonWrapper({
-  params,
-}: {
-  params: CheckInPageWrapperProps["params"];
-}) {
-  const { eventId } = await params;
-  return <BackButton eventId={eventId} />;
 }
 
 async function CheckInPage({
@@ -59,6 +49,12 @@ async function CheckInPage({
   params: CheckInPageWrapperProps["params"];
 }) {
   const { eventId } = await params;
+  const headersList = await headers();
+  const referer = headersList.get("referer");
+  const previousPath = referer
+    ? new URL(referer).pathname.replace(/\/+$/, "")
+    : "";
+  const showBack = previousPath !== "/admin/events";
 
   // Fetch event days
   const result = await tryCatch(getEventDays({ eventId }));
@@ -133,6 +129,7 @@ async function CheckInPage({
 
   return (
     <div className="flex flex-col gap-5">
+      <BackNavigation showBack={showBack} />
       <div>
         <h1 className="font-semibold text-2xl text-foreground">
           {event.eventTitle} - check-in list

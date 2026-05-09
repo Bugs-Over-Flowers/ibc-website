@@ -1,15 +1,9 @@
-import { ArrowRight, Calendar, Clock, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { cookies } from "next/headers";
-import Image from "next/image";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  formatDate,
-  formatTime,
-  getEventCategory,
-} from "@/lib/events/eventUtils";
 import { getPublicEvents } from "@/server/events/queries/getPublicEvents";
+import { FeaturedEventCard } from "./FeaturedEventCard";
 export default async function FeaturedEventsSection() {
   const events = await getPublicEvents((await cookies()).getAll(), {});
   const now = new Date();
@@ -73,58 +67,9 @@ export default async function FeaturedEventsSection() {
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
           {upcomingEvents.map((event) => (
-            <Link
-              className="group block h-full"
-              href={`/events/${event.eventId}`}
-              key={event.eventId}
-            >
-              <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-shadow hover:shadow-lg">
-                <div
-                  className="relative w-full overflow-hidden rounded-xl"
-                  style={{ aspectRatio: "1 / 1" }}
-                >
-                  <Image
-                    alt={event.eventTitle || "Event"}
-                    className="object-contain"
-                    fill
-                    priority
-                    sizes="(max-width: 1600px) 100vw, 1600px"
-                    src={
-                      event.eventPoster || "/images/backgrounds/placeholder.jpg"
-                    }
-                  />
-                  {getEventCategory(event) === "ongoing" && (
-                    <Badge className="absolute top-4 left-4 bg-green-500 text-white hover:bg-green-600">
-                      <span className="mr-1.5 h-2 w-2 animate-pulse rounded-full bg-white" />
-                      Happening Now
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex flex-1 flex-col p-5">
-                  <h3 className="mb-2 line-clamp-2 font-semibold text-foreground text-lg transition-colors group-hover:text-primary">
-                    {event.eventTitle}
-                  </h3>
-                  <div className="mt-auto space-y-2 pt-4">
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                      <Calendar className="h-4 w-4 text-primary" />
-                      <span>{formatDate(event.eventStartDate)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      <span className="truncate">{event.venue}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                      <Clock className="h-4 w-4 text-primary" />
-                      <span className="truncate">
-                        {formatTime(event.eventStartDate, event.eventEndDate)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
+            <FeaturedEventCard event={event} key={event.eventId} />
           ))}
         </div>
       </div>
