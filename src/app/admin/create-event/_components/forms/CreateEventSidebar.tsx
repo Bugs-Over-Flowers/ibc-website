@@ -197,9 +197,11 @@ export default function CreateEventSidebar({
                           {eventType === "private" ? "Private" : "Public"}
                         </Badge>
                         <p className="font-bold text-primary text-sm">
-                          {Number(fee) > 0
-                            ? `PHP ${Number(fee).toLocaleString()}`
-                            : "Free"}
+                          {fee == null
+                            ? "Fee not set"
+                            : Number(fee) > 0
+                              ? `PHP ${Number(fee).toLocaleString()}`
+                              : "Free"}
                         </p>
                       </div>
                     </div>
@@ -260,14 +262,16 @@ export default function CreateEventSidebar({
                         <span
                           className={cn(
                             "tabular-nums",
-                            Number(fee) === 0
+                            fee == null || Number(fee) === 0
                               ? "font-medium text-[#27500A] text-sm dark:text-[#9FE1CB]"
                               : "font-medium text-base text-foreground",
                           )}
                         >
-                          {Number(fee) === 0
-                            ? "Free"
-                            : `₱${Number(fee).toLocaleString()}`}
+                          {fee == null
+                            ? "Fee not set"
+                            : Number(fee) === 0
+                              ? "Free"
+                              : `₱${Number(fee).toLocaleString()}`}
                         </span>
                       </div>
 

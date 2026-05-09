@@ -71,7 +71,7 @@ export const draftEventServerSchema = z
     eventEndDate: eventEndDateSchema,
     venue: z.preprocess(
       (val) => (val === "" ? undefined : val),
-      venueSchema.optional(),
+      z.string().optional(),
     ),
     registrationFee: z.number().optional(),
     eventImage: z.string().url().optional().nullable(),
