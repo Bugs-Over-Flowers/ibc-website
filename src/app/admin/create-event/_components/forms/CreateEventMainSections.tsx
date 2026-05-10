@@ -144,7 +144,13 @@ export default function CreateEventMainSections({
           </form.AppField>
 
           <form.AppField name="registrationFee">
-            {(field) => <field.NumberField label="Registration Fee *" />}
+            {(field) => (
+              <field.NumberField
+                description="Leave blank until you're ready to set a fee. Enter 0 only for a truly free event."
+                label="Registration Fee *"
+                placeholder="Enter fee"
+              />
+            )}
           </form.AppField>
         </CardContent>
       </Card>

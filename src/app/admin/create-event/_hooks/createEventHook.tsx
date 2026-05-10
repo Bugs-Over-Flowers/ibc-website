@@ -30,7 +30,7 @@ const defaultValues = {
   eventEndDate: undefined as Date | undefined,
   venue: "",
   facebookLink: "",
-  registrationFee: 0,
+  registrationFee: undefined as number | undefined,
   eventType: null as "public" | "private" | null,
   eventImage: [] as File[],
   eventPoster: [] as File[],
@@ -58,6 +58,15 @@ export const useCreateEventForm = () => {
     onSubmit: async ({ value, meta }) => {
       let headerUrl: string | null | undefined = null;
       let posterUrl: string | null | undefined = null;
+      const resolvedEventType =
+        meta.submitMode === "draft"
+          ? null
+          : meta.submitMode === "public"
+            ? "public"
+            : meta.submitMode === "private"
+              ? "private"
+              : value.eventType;
+
       let supabaseClient: Awaited<ReturnType<typeof createClient>> | null =
         null;
 
@@ -135,7 +144,7 @@ export const useCreateEventForm = () => {
         posterUrl = url;
       }
 
-      if (!posterUrl) {
+      if (resolvedEventType !== null && !posterUrl) {
         toast.error("Poster image is required.");
         return;
       }
@@ -145,15 +154,6 @@ export const useCreateEventForm = () => {
         trimmedFacebookLink && trimmedFacebookLink.length > 0
           ? trimmedFacebookLink
           : undefined;
-
-      const resolvedEventType =
-        meta.submitMode === "draft"
-          ? null
-          : meta.submitMode === "public"
-            ? "public"
-            : meta.submitMode === "private"
-              ? "private"
-              : value.eventType;
 
       const payload = {
         ...value,

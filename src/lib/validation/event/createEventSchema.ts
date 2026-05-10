@@ -12,15 +12,15 @@ import {
 
 const draftEventClientSchema = z.object({
   eventTitle: eventTitleSchema,
-  description: z.string(),
+  description: z.string().optional(),
   eventStartDate: eventStartDateSchema,
   eventEndDate: eventEndDateSchema,
-  venue: z.string(),
+  venue: z.string().optional(),
   registrationFee: z.number().optional(),
   eventImage: z.array(z.instanceof(File)).optional(),
-  eventPoster: z.array(z.instanceof(File)).min(1, "Poster image is required"),
+  eventPoster: z.array(z.instanceof(File)).optional(),
   eventType: z.literal(null),
-  facebookLink: facebookLinkClientSchema,
+  facebookLink: facebookLinkClientSchema.optional(),
 });
 
 const publishedEventClientSchema = z.object({
@@ -68,16 +68,16 @@ export const draftEventServerSchema = z
       z.string().optional(),
     ),
     eventStartDate: eventStartDateSchema,
-    eventEndDate: eventEndDateSchema.optional(),
+    eventEndDate: eventEndDateSchema,
     venue: z.preprocess(
       (val) => (val === "" ? undefined : val),
-      venueSchema.optional(),
+      z.string().optional(),
     ),
     registrationFee: z.number().optional(),
     eventImage: z.string().url().optional().nullable(),
-    eventPoster: z.string().url({ message: "Poster image is required" }),
+    eventPoster: z.string().url().optional().nullable(),
     eventType: z.literal(null),
-    facebookLink: facebookLinkServerSchema,
+    facebookLink: facebookLinkServerSchema.optional(),
   })
   .refine(eventDateRangeRefinement, eventDateRangeRefinementOptions);
 
