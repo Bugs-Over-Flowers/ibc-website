@@ -201,7 +201,7 @@ export default function EditEventMainSections({
                     className="block font-medium text-foreground text-sm"
                     htmlFor="event-header"
                   >
-                    Event Header <span className="text-destructive">*</span>
+                    Event Header
                   </label>
                   <button
                     className={cn(
@@ -311,7 +311,7 @@ export default function EditEventMainSections({
                     className="block font-medium text-foreground text-sm"
                     htmlFor="event-poster"
                   >
-                    Event Poster <span className="text-destructive">*</span>
+                    Event Poster
                   </label>
                   <button
                     className={cn(
