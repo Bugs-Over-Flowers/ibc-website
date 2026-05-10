@@ -41,10 +41,23 @@ export const submitRegistrationRPC = async (data: ServerRegistrationSchema) => {
 
   const supabase = await createActionClient();
 
-  const registrationIdentifier = createRegistrationIdentifier();
-
   const { step1, step3, eventId, step2, sponsoredRegistrationId, step4 } =
     parsedData;
+
+  const { data: eventData } = await supabase
+    .from("Event")
+    .select("eventEndDate")
+    .eq("eventId", eventId)
+    .single();
+
+  if (
+    eventData?.eventEndDate &&
+    new Date() > new Date(eventData.eventEndDate)
+  ) {
+    throw new Error("Registration is closed. This event has already ended.");
+  }
+
+  const registrationIdentifier = createRegistrationIdentifier();
 
   const paymentPaths: string[] =
     step3.paymentMethod === "online" ? step3.paths : [];

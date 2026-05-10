@@ -26,6 +26,19 @@ export async function saveWebsiteContentSection(
   input: SaveWebsiteContentSectionInput,
 ): Promise<{ updatedAt: string }> {
   const parsed = saveWebsiteContentSectionSchema.parse(input);
+
+  // Validate that no blob: URLs are being saved (security and data integrity check)
+  if (parsed.cards) {
+    const blobUrlCards = parsed.cards.filter((card) =>
+      card.imageUrl?.startsWith("blob:"),
+    );
+    if (blobUrlCards.length > 0) {
+      throw new Error(
+        `Cannot save section: ${blobUrlCards.length} card(s) have preview-only image URLs. Images may not have uploaded successfully. Please upload images again.`,
+      );
+    }
+  }
+
   const rowsToUpsert: UpsertWebsiteContentRowInput[] = [];
   const retainedEntryKeys: string[] = [];
 

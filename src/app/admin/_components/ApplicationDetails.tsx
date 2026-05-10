@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import BackButton from "@/app/admin/_components/BackButton";
+import { CompanyProfileDisplay } from "@/components/CompanyProfileDisplay";
 import { DetailRow } from "@/components/detail-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -162,14 +163,12 @@ function MemberReviewDetails({
                 value={application.sectorName || "N/A"}
               />
               <DetailRow
-                label="Website"
+                label="Company Profile"
                 value={
-                  <span
-                    className="block max-w-[220px] truncate"
-                    title={application.websiteURL || "N/A"}
-                  >
-                    {application.websiteURL || "N/A"}
-                  </span>
+                  <CompanyProfileDisplay
+                    companyProfileType={application.companyProfileType}
+                    websiteURL={application.websiteURL}
+                  />
                 }
               />
             </div>

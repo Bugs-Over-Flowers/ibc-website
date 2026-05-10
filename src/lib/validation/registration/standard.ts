@@ -1,7 +1,11 @@
 import z from "zod";
 import { ImageUploadFileSchema } from "@/lib/fileUpload";
 import { titleCase } from "@/lib/utils";
-import { MemberTypeEnum, PaymentMethodEnum } from "../utils";
+import {
+  MemberTypeEnum,
+  PaymentMethodEnum,
+  phoneOrLandlineSchema,
+} from "../utils";
 
 export const StandardRegistrationStep1Schema = z.discriminatedUnion("member", [
   z.object({
@@ -37,7 +41,7 @@ export const RegistrantDetailsSchema = z
       .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    contactNumber: z.string("Please input your contact number").trim(),
+    contactNumber: phoneOrLandlineSchema,
     email: z.email().trim(),
   })
   .transform((data) => ({

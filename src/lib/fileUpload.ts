@@ -32,3 +32,25 @@ export type ImageUploadFile = z.infer<typeof ImageUploadFileSchema>;
 export function isValidImageUploadFile(file: File): boolean {
   return ImageUploadFileSchema.safeParse(file).success;
 }
+
+export const PROFILE_UPLOAD_ALLOWED_MIME_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "application/pdf",
+];
+
+const PROFILE_UPLOAD_ALLOWED_MIME_TYPE_SET = new Set(
+  PROFILE_UPLOAD_ALLOWED_MIME_TYPES,
+);
+
+export const PROFILE_UPLOAD_ACCEPT_ATTR =
+  "image/png,image/jpeg,.png,.jpg,.jpeg,application/pdf,.pdf";
+
+export const ProfileUploadFileSchema = z
+  .file()
+  .max(IMAGE_UPLOAD_MAX_SIZE, "File size must be less than 5MB")
+  .refine(
+    (file) => PROFILE_UPLOAD_ALLOWED_MIME_TYPE_SET.has(file.type),
+    "Only PNG, JPG, JPEG, and PDF files are allowed.",
+  );

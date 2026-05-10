@@ -29,9 +29,11 @@ export type SeededAdminRegistrationScenario = {
     affiliation: string;
     participantIds: string[];
     participantIdentifiers: string[];
+    participantEmails: string[];
     firstParticipantId: string;
     secondParticipantId: string;
     firstParticipantIdentifier: string;
+    firstParticipantEmail: string;
   };
   member?: {
     businessMemberId: string;
@@ -232,10 +234,12 @@ export async function seedAdminRegistrationScenario(
       affiliation: acceptedRegistration.affiliation,
       participantIds: acceptedRegistration.participantIds,
       participantIdentifiers: acceptedRegistration.participantIdentifiers,
+      participantEmails: acceptedRegistration.participantEmails,
       firstParticipantId: acceptedRegistration.participantIds[0],
       secondParticipantId: acceptedRegistration.participantIds[1],
       firstParticipantIdentifier:
         acceptedRegistration.participantIdentifiers[0],
+      firstParticipantEmail: acceptedRegistration.participantEmails[0],
     },
     member,
   };

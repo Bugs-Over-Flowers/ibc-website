@@ -47,6 +47,7 @@ const createRegistrationWithParticipants = async (
   // fill up the registration with participants, then get the participant Ids and identifiers to be used later.
   const participantIds: string[] = [];
   const participantIdentifiers: string[] = [];
+  const participantEmails: string[] = [];
 
   for (let index = 0; index < actualParticipantCount; index++) {
     const parIdentifier = createParticipantIdentifier();
@@ -73,6 +74,7 @@ const createRegistrationWithParticipants = async (
 
     participantIds.push(participant.participantId);
     participantIdentifiers.push(parIdentifier);
+    participantEmails.push(`${suffix}-${index + 1}@example.com`);
 
     // if the payment proof status is pending AND payment method is BPI, seed a proof image
     // Onsite payments don't require proof images
@@ -111,6 +113,7 @@ const createRegistrationWithParticipants = async (
     affiliation,
     participantIds,
     participantIdentifiers,
+    participantEmails,
   };
 };
 

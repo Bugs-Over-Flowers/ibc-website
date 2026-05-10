@@ -4,6 +4,8 @@ export interface CreateManualMemberData {
   step1: {
     companyName: string;
     sectorId: string;
+    companyProfileType: "file" | "website";
+    companyProfileFile?: File;
     companyAddress: string;
     websiteURL: string;
     emailAddress: string;
@@ -49,6 +51,7 @@ const initialData: CreateManualMemberData = {
   step1: {
     companyName: "",
     sectorId: "",
+    companyProfileType: "website",
     companyAddress: "",
     websiteURL: "",
     emailAddress: "",
@@ -72,19 +75,6 @@ const initialData: CreateManualMemberData = {
         mobileNumber: "",
         landline: "",
         companyMemberType: "principal",
-      },
-      {
-        firstName: "",
-        lastName: "",
-        emailAddress: "",
-        companyDesignation: "",
-        birthdate: new Date(),
-        sex: "male",
-        nationality: "",
-        mailingAddress: "",
-        mobileNumber: "",
-        landline: "",
-        companyMemberType: "alternate",
       },
     ],
   },

@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar as CalendarIcon, Filter, X } from "lucide-react";
+import { Calendar as CalendarIcon, Filter, Globe, Lock, X } from "lucide-react";
 import type { EventStatus } from "@/lib/events/eventUtils";
 import {
   type DatePreset,
@@ -10,14 +10,18 @@ import {
   datePresetLabels,
   type FilterOption,
   filterLabels,
+  type PrivacyFilter,
+  privacyFilterLabels,
 } from "../../_utils/searchUtils";
 
 interface EventSearchActiveFiltersProps {
   dateRange: DateRange;
   selectedPreset: DatePreset;
   statusFilter: EventStatus | "all";
+  privacyFilter?: PrivacyFilter;
   clearDateRange: () => void;
   onStatusChange: (status: EventStatus | "all") => void;
+  onPrivacyChange?: (privacy: PrivacyFilter) => void;
 }
 
 function getDateRangeLabel(dateRange: DateRange) {
@@ -37,11 +41,16 @@ export default function EventSearchActiveFilters({
   dateRange,
   selectedPreset,
   statusFilter,
+  privacyFilter = "all",
   clearDateRange,
   onStatusChange,
+  onPrivacyChange = () => {},
 }: EventSearchActiveFiltersProps) {
   const hasActiveFilters =
-    dateRange?.from || dateRange?.to || statusFilter !== "all";
+    dateRange?.from ||
+    dateRange?.to ||
+    statusFilter !== "all" ||
+    privacyFilter !== "all";
 
   return (
     <AnimatePresence mode="wait">
@@ -92,6 +101,29 @@ export default function EventSearchActiveFilters({
                 <button
                   className="ml-1 rounded-full p-0.5 transition-colors hover:bg-primary/20"
                   onClick={() => onStatusChange("all")}
+                  type="button"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </motion.span>
+            )}
+            {privacyFilter !== "all" && (
+              <motion.span
+                animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-sm"
+                initial={{ opacity: 0, scale: 0.8 }}
+                key="privacy-filter"
+                transition={{ duration: 0.2 }}
+              >
+                {privacyFilter === "public" ? (
+                  <Globe className="h-3 w-3" />
+                ) : (
+                  <Lock className="h-3 w-3" />
+                )}
+                {privacyFilterLabels[privacyFilter]}
+                <button
+                  className="ml-1 rounded-full p-0.5 transition-colors hover:bg-primary/20"
+                  onClick={() => onPrivacyChange("all")}
                   type="button"
                 >
                   <X className="h-3 w-3" />

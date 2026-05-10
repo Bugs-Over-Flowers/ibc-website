@@ -36,11 +36,42 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
     (member) => member.companyMemberType === "alternate",
   );
 
-  if (!principalRepresentative || !alternateRepresentative) {
+  if (!principalRepresentative) {
     notFound();
   }
 
   // 2. Prepare data for form
+  const representatives: Array<{
+    applicationMemberId: string;
+    firstName: string;
+    lastName: string;
+    emailAddress: string;
+    mobileNumber: string;
+    landline: string;
+    mailingAddress: string;
+    companyDesignation: string;
+    companyMemberType: "principal" | "alternate";
+    birthdate: string;
+    nationality: string;
+    sex: "male" | "female";
+  }> = [
+    {
+      ...principalRepresentative,
+      companyMemberType: "principal" as const,
+      sex: principalRepresentative.sex as "male" | "female",
+      mobileNumber: principalRepresentative.mobileNumber,
+    },
+  ];
+
+  if (alternateRepresentative) {
+    representatives.push({
+      ...alternateRepresentative,
+      companyMemberType: "alternate" as const,
+      sex: alternateRepresentative.sex as "male" | "female",
+      mobileNumber: alternateRepresentative.mobileNumber,
+    });
+  }
+
   const memberData = {
     memberId: memberDetails.businessMemberId,
     applicationId: latestApplication.applicationId,
@@ -48,8 +79,10 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
     // Business Information
     businessName: memberDetails.businessName,
     websiteURL: memberDetails.websiteURL || "",
+    logoImageURL: memberDetails.logoImageURL ?? undefined,
     sectorId: memberDetails.sectorId?.toString() ?? "",
     companyAddress: latestApplication.companyAddress || "",
+    companyProfileType: latestApplication.companyProfileType,
 
     // Contact Information
     emailAddress: latestApplication.emailAddress || "",
@@ -57,20 +90,7 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
     mobileNumber: latestApplication.mobileNumber,
 
     // Applicant Representatives
-    representatives: [
-      {
-        ...principalRepresentative,
-        companyMemberType: "principal" as const,
-        sex: principalRepresentative.sex as "male" | "female",
-        mobileNumber: principalRepresentative.mobileNumber,
-      },
-      {
-        ...alternateRepresentative,
-        companyMemberType: "alternate" as const,
-        sex: alternateRepresentative.sex as "male" | "female",
-        mobileNumber: alternateRepresentative.mobileNumber,
-      },
-    ],
+    representatives,
 
     // Membership Details
     membershipStatus: memberDetails.membershipStatus as

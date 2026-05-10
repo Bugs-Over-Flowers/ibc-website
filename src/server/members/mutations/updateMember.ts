@@ -67,6 +67,7 @@ export async function updateMember(input: UpdateMemberInput) {
       mobileNumber,
       websiteURL,
       sectorName: selectedSector.sectorName,
+      companyProfileType: input.companyProfileType,
     })
     .eq("applicationId", applicationId);
 
@@ -109,6 +110,21 @@ export async function updateMember(input: UpdateMemberInput) {
     }
   }
 
+  // If only principal is provided, delete any orphaned alternate
+  if (representatives.length === 1) {
+    const { error: deleteError } = await supabase
+      .from("ApplicationMember")
+      .delete()
+      .eq("applicationId", applicationId)
+      .eq("companyMemberType", "alternate");
+
+    if (deleteError) {
+      throw new Error(
+        `Failed to remove orphaned alternate: ${JSON.stringify(deleteError)}`,
+      );
+    }
+  }
+
   const representativePayload = representatives.map((representative) => ({
     ...(representative.applicationMemberId
       ? { applicationMemberId: representative.applicationMemberId }
@@ -139,8 +155,8 @@ export async function updateMember(input: UpdateMemberInput) {
     );
   }
 
-  if (!upsertedRepresentatives || upsertedRepresentatives.length !== 2) {
-    throw new Error("Failed to persist both application representatives");
+  if (!upsertedRepresentatives || upsertedRepresentatives.length === 0) {
+    throw new Error("Failed to persist application representatives");
   }
 
   updateTag(CACHE_TAGS.applications.all);

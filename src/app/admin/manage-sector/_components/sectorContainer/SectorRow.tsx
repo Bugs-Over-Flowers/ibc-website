@@ -1,7 +1,7 @@
 import { Building2 } from "lucide-react";
 import { cookies } from "next/headers";
 import { getSectors } from "@/server/sectors/queries";
-import SectorActionsDropdown from "./SectorActionsDropdown";
+import SectorRowItem from "./SectorRowItem";
 
 export default async function SectorRow({ search }: { search?: string }) {
   const cookieStore = await cookies();
@@ -40,28 +40,12 @@ export default async function SectorRow({ search }: { search?: string }) {
 
       <ul className="divide-y">
         {sectors.map((sector) => (
-          <li
-            className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-muted/40"
+          <SectorRowItem
             key={sector.sectorId}
-          >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Building2 className="h-4 w-4" />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium text-foreground text-sm">
-                {sector.sectorName}
-              </p>
-              <p className="text-muted-foreground text-xs">
-                ID: {sector.sectorId}
-              </p>
-            </div>
-
-            <SectorActionsDropdown
-              sectorId={sector.sectorId}
-              sectorName={sector.sectorName}
-            />
-          </li>
+            memberCount={sector.memberCount}
+            sectorId={sector.sectorId}
+            sectorName={sector.sectorName}
+          />
         ))}
       </ul>
     </div>

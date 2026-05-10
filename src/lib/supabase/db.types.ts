@@ -7,30 +7,10 @@ export type Json =
   | Json[];
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5";
   };
   public: {
     Tables: {
@@ -44,6 +24,7 @@ export type Database = {
           businessMemberId: string | null;
           companyAddress: string;
           companyName: string;
+          companyProfileType: Database["public"]["Enums"]["CompanyProfileType"];
           emailAddress: string;
           identifier: string;
           interviewId: string | null;
@@ -64,6 +45,7 @@ export type Database = {
           businessMemberId?: string | null;
           companyAddress: string;
           companyName: string;
+          companyProfileType?: Database["public"]["Enums"]["CompanyProfileType"];
           emailAddress: string;
           identifier: string;
           interviewId?: string | null;
@@ -84,6 +66,7 @@ export type Database = {
           businessMemberId?: string | null;
           companyAddress?: string;
           companyName?: string;
+          companyProfileType?: Database["public"]["Enums"]["CompanyProfileType"];
           emailAddress?: string;
           identifier?: string;
           interviewId?: string | null;
@@ -936,6 +919,13 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      get_sector_member_counts: {
+        Args: { p_sector_ids: number[] };
+        Returns: {
+          memberCount: number;
+          sectorId: number;
+        }[];
+      };
       get_sponsored_registration_by_id: {
         Args: { registration_id: string };
         Returns: {
@@ -1070,17 +1060,30 @@ export type Database = {
         };
         Returns: Json;
       };
-      submit_membership_application: {
-        Args: {
-          p_application_member_type: string;
-          p_application_type: string;
-          p_company_details: Json;
-          p_payment_method: string;
-          p_payment_proof_url?: string;
-          p_representatives: Json;
-        };
-        Returns: Json;
-      };
+      submit_membership_application:
+        | {
+            Args: {
+              p_application_member_type: string;
+              p_application_type: string;
+              p_company_details: Json;
+              p_payment_method: string;
+              p_payment_proof_url?: string;
+              p_representatives: Json;
+            };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_application_member_type: string;
+              p_application_type: string;
+              p_company_details: Json;
+              p_company_profile_type?: string;
+              p_payment_method: string;
+              p_payment_proof_url?: string;
+              p_representatives: Json;
+            };
+            Returns: Json;
+          };
       toggle_sr_status: {
         Args: { p_sponsored_registration_id: string };
         Returns: Json;
@@ -1158,6 +1161,7 @@ export type Database = {
       ApplicationStatus: "new" | "pending" | "approved" | "rejected";
       ApplicationType: "newMember" | "updating" | "renewal";
       CompanyMemberType: "principal" | "alternate";
+      CompanyProfileType: "image" | "document" | "website";
       EventType: "public" | "private";
       InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
       MembershipStatus: "paid" | "unpaid" | "cancelled";
@@ -1341,15 +1345,13 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],
       ApplicationStatus: ["new", "pending", "approved", "rejected"],
       ApplicationType: ["newMember", "updating", "renewal"],
       CompanyMemberType: ["principal", "alternate"],
+      CompanyProfileType: ["image", "document", "website"],
       EventType: ["public", "private"],
       InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
       MembershipStatus: ["paid", "unpaid", "cancelled"],

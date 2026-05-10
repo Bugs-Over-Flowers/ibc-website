@@ -4,7 +4,8 @@ import { cacheTag } from "next/cache";
 import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { applyAdmin5mCache } from "@/lib/cache/profiles";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import { signLogoUrl } from "@/lib/storage/signedUrls";
+import { signCompanyProfileUrl, signLogoUrl } from "@/lib/storage/signedUrls";
+import type { Database } from "@/lib/supabase/db.types";
 import { createClient } from "@/lib/supabase/server";
 
 export type MemberDetailsByBusinessMemberId = {
@@ -28,6 +29,9 @@ export type MemberDetailsByBusinessMemberId = {
     applicationDate: string;
     applicationStatus: string;
     paymentProofStatus: string;
+    companyProfileType:
+      | Database["public"]["Enums"]["CompanyProfileType"]
+      | null;
     members: Array<{
       applicationMemberId: string;
       firstName: string;
@@ -98,6 +102,7 @@ export async function getMemberDetailsByBusinessMemberId(
         applicationDate,
         applicationStatus,
         paymentProofStatus,
+        companyProfileType,
         ApplicationMember(
           applicationMemberId,
           firstName,
@@ -133,7 +138,7 @@ export async function getMemberDetailsByBusinessMemberId(
     businessName: member.businessName,
     identifier: member.identifier,
     sectorId: member.sectorId,
-    websiteURL: member.websiteURL,
+    websiteURL: await signCompanyProfileUrl(supabase, member.websiteURL),
     logoImageURL: await signLogoUrl(supabase, member.logoImageURL),
     joinDate: member.joinDate,
     membershipStatus: member.membershipStatus,
@@ -150,6 +155,7 @@ export async function getMemberDetailsByBusinessMemberId(
           applicationDate: latestApplication.applicationDate,
           applicationStatus: latestApplication.applicationStatus,
           paymentProofStatus: latestApplication.paymentProofStatus,
+          companyProfileType: latestApplication.companyProfileType,
           members: latestApplication.ApplicationMember ?? [],
         }
       : null,

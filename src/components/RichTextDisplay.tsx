@@ -41,9 +41,10 @@ function RichTextDisplay({ content, className }: RichTextDisplayProps) {
     <div
       className={cn(
         "prose prose-sm dark:prose-invert max-w-none",
-        "prose-p:my-2 prose-p:leading-relaxed",
-        "prose-ol:my-2 prose-ul:my-2",
-        "prose-li:my-0.5",
+        "[&_p]:my-2 [&_p]:leading-relaxed",
+        "[&_ol]:my-2 [&_ul]:my-2",
+        "[&_li]:my-0.5",
+        "[&_p:empty]:min-h-[1.5em]",
         className,
       )}
       dangerouslySetInnerHTML={{ __html: sanitizedContent }}

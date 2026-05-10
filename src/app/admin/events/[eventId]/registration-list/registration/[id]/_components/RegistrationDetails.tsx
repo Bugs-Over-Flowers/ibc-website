@@ -9,8 +9,6 @@ import {
   StickyNote,
   Users,
 } from "lucide-react";
-import type { Route } from "next";
-import { useParams } from "next/navigation";
 import BackButton from "@/app/admin/_components/BackButton";
 import RegistrationRowActions from "@/app/admin/events/[eventId]/registration-list/_components/registrations/RegistrationRowActions";
 import OnlinePaymentSection from "@/app/admin/events/[eventId]/registration-list/registration/[id]/_components/OnlinePaymentSection";
@@ -69,7 +67,6 @@ function formatStatusLabel(status: string): string {
 export default function RegistrationDetails({
   data,
 }: RegistrationDetailsProps) {
-  const { eventId } = useParams();
   const participantsCount = data.otherParticipants.length + 1;
   const paymentProofStatus = data.paymentProofStatus ?? "pending";
   const sectionCardClass = "rounded-2xl border border-border/50 bg-background";
@@ -77,10 +74,7 @@ export default function RegistrationDetails({
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6">
-      <BackButton
-        href={`/admin/events/${eventId as string}/registration-list` as Route}
-        label="Back to Registration List"
-      />
+      <BackButton back label="Back" />
 
       <div className="space-y-6 rounded-2xl border border-border/50 bg-background p-6 shadow-sm">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">

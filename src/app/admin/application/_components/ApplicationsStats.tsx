@@ -14,7 +14,6 @@ interface ApplicationsStatsProps {
       ApplicationTab,
       {
         newMember: number;
-        renewal: number;
       }
     >
   > | null;
@@ -69,7 +68,7 @@ export default function ApplicationsStats({
     .filter((item) => availableTabs.includes(item.tab))
     .map((item) =>
       item.tab === "finished" && group === "updating"
-        ? { ...item, label: "Finished Updates" }
+        ? { ...item, label: "Completed" }
         : item,
     );
 
@@ -135,8 +134,7 @@ export default function ApplicationsStats({
                     </p>
                     {group === "interview" && tabBreakdown && (
                       <p className="text-[11px] text-muted-foreground">
-                        New Member: {tabBreakdown.newMember} | Renewal:{" "}
-                        {tabBreakdown.renewal}
+                        New Member: {tabBreakdown.newMember}
                       </p>
                     )}
                     <p

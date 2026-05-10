@@ -54,7 +54,7 @@ function StandaloneRichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "min-h-[200px] w-full bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-h1:text-xl prose-h2:text-lg prose-h3:text-base",
+          "min-h-[200px] w-full bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none prose prose-sm max-w-none dark:prose-invert [&_p]:my-1 [&_p:empty]:min-h-[1.5em] [&_ul]:my-1 [&_ol]:my-1 prose-h1:text-xl prose-h2:text-lg prose-h3:text-base",
       },
     },
   });

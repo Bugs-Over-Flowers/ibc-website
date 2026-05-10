@@ -13,6 +13,17 @@ import { useState } from "react";
 import PaymentProofEditPanel from "@/app/admin/events/_components/PaymentProof/PaymentProofEditPanel";
 import { usePaymentProofDecisionActions } from "@/app/admin/events/_hooks/usePaymentProofDecisionActions";
 import { usePaymentProofSignedUrlAction } from "@/app/admin/events/_hooks/usePaymentProofSignedUrlAction";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -85,6 +96,7 @@ export default function PaymentProofReviewDialog({
   onStatusChange,
 }: PaymentProofReviewDialogProps) {
   const [mode, setMode] = useState<"view" | "edit">("view");
+  const [isAcceptConfirmOpen, setIsAcceptConfirmOpen] = useState(false);
   const [sendEmailOnReject, setSendEmailOnReject] = useState(
     page !== "check-in",
   );
@@ -122,7 +134,6 @@ export default function PaymentProofReviewDialog({
     });
 
   const isAnyActionPending = isFetchingSignedUrl || isAccepting || isRejecting;
-  const isDecisionLocked = paymentProofStatus !== "pending";
   const statusConfig = getStatusConfig(paymentProofStatus);
 
   return (
@@ -245,7 +256,7 @@ export default function PaymentProofReviewDialog({
             </Button>
             <Button
               className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
-              disabled={isAnyActionPending || isDecisionLocked}
+              disabled={isAnyActionPending || paymentProofStatus !== "pending"}
               onClick={() => rejectProof()}
               variant="outline"
             >
@@ -256,14 +267,52 @@ export default function PaymentProofReviewDialog({
                   ? "Reject & Email"
                   : "Reject Without Email"}
             </Button>
-            <Button
-              className="bg-green-700 hover:bg-green-800"
-              disabled={isAnyActionPending || isDecisionLocked}
-              onClick={() => acceptProof()}
-            >
-              <CheckCircle2 className="size-3.5" />
-              {isAccepting ? "Accepting..." : "Accept"}
-            </Button>
+            {paymentProofStatus === "rejected" ? (
+              <AlertDialog
+                onOpenChange={setIsAcceptConfirmOpen}
+                open={isAcceptConfirmOpen}
+              >
+                <AlertDialogTrigger
+                  render={
+                    <Button
+                      className="bg-green-700 hover:bg-green-800"
+                      disabled={isAnyActionPending}
+                    />
+                  }
+                >
+                  <CheckCircle2 className="size-3.5" />
+                  {isAccepting ? "Accepting..." : "Accept"}
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Re-accept payment proof?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This registration was previously rejected. Are you sure
+                      you want to accept it?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => acceptProof()}>
+                      Yes, accept
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              <Button
+                className="bg-green-700 hover:bg-green-800"
+                disabled={
+                  isAnyActionPending || paymentProofStatus === "accepted"
+                }
+                onClick={() => acceptProof()}
+              >
+                <CheckCircle2 className="size-3.5" />
+                {isAccepting ? "Accepting..." : "Accept"}
+              </Button>
+            )}
           </DialogFooter>
         )}
       </DialogContent>

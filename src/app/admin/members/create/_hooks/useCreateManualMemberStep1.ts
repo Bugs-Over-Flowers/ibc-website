@@ -15,6 +15,8 @@ export const useCreateManualMemberStep1 = () => {
   const defaultValues = memberData.step1 || {
     companyName: "",
     sectorId: "",
+    companyProfileType: "website" as const,
+    companyProfileFile: undefined,
     companyAddress: "",
     websiteURL: "",
     emailAddress: "",

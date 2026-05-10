@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { ImageUploadFileSchema } from "@/lib/fileUpload";
+import {
+  ImageUploadFileSchema,
+  ProfileUploadFileSchema,
+} from "@/lib/fileUpload";
 import { titleCase } from "@/lib/utils";
 import { phoneSchema } from "../utils";
 
@@ -87,19 +90,15 @@ export const MembershipApplicationStep2Schema = z
     companyName: z
       .string({ message: "Company name is required" })
       .min(1, "Company name is required"),
-    sectorId: z.union([z.string(), z.number()]).refine(
-      (val) => {
-        const num = typeof val === "string" ? Number.parseInt(val, 10) : val;
-        return !Number.isNaN(num) && num > 0;
-      },
-      { message: "Industry/Sector is required" },
-    ),
+    sectorId: z
+      .string({ message: "Industry/Sector is required" })
+      .min(1, "Industry/Sector is required"),
+    companyProfileType: z.enum(["file", "website"]),
+    companyProfileFile: ProfileUploadFileSchema.optional(),
+    websiteURL: z.string().optional(),
     companyAddress: z
       .string({ message: "Company address is required" })
       .min(1, "Company address is required"),
-    websiteURL: z
-      .string({ message: "Company profile is required" })
-      .min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),
     landline: z.string().min(1, "Landline is required"),
     mobileNumber: phoneSchema,
@@ -115,6 +114,29 @@ export const MembershipApplicationStep2Schema = z
     },
     { message: "Company logo is required", path: ["logoImage"] },
   )
+  .superRefine((data, ctx) => {
+    if (
+      data.companyProfileType === "website" &&
+      (!data.websiteURL || !data.websiteURL.trim())
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Company profile is required",
+        path: ["websiteURL"],
+      });
+    }
+    if (
+      data.companyProfileType === "file" &&
+      (!data.websiteURL || data.websiteURL.trim().length === 0) &&
+      !data.companyProfileFile
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Company profile file is required",
+        path: ["companyProfileFile"],
+      });
+    }
+  })
   .transform((data) => ({
     ...data,
     companyName: titleCase(data.companyName).trim(),
@@ -127,9 +149,10 @@ export type MembershipApplicationStep2Schema = z.infer<
 export const MembershipApplicationStep3Schema = z.object({
   representatives: z
     .array(ApplicationMemberSchema)
-    .length(
+    .min(1, "At least one representative is required")
+    .max(
       2,
-      "Exactly two representatives are required: one principal and one alternate",
+      "Maximum of two representatives allowed: one principal and one alternate",
     ),
 });
 
@@ -171,6 +194,7 @@ export const MembershipApplicationSchema = z
     sectorName: z
       .string({ message: "Industry/Sector is required" })
       .min(1, "Industry/Sector is required"),
+    companyProfileType: z.enum(["image", "document", "website"]),
     companyAddress: z.string().min(1, "Company address is required"),
     websiteURL: z.string().min(1, "Company profile is required"),
     emailAddress: z.email("Email address is required"),
@@ -181,9 +205,10 @@ export const MembershipApplicationSchema = z
       .min(1, "Company logo is required"),
     representatives: z
       .array(ApplicationMemberSchema)
-      .length(
+      .min(1, "At least one representative is required")
+      .max(
         2,
-        "Exactly two representatives are required: one principal and one alternate",
+        "Maximum of two representatives allowed: one principal and one alternate",
       ),
     paymentMethod: MembershipPaymentMethodEnum,
     paymentProofUrl: z.string().optional(),

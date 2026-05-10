@@ -2,6 +2,8 @@ import { fileTypeFromBuffer } from "file-type";
 import {
   IMAGE_UPLOAD_ALLOWED_MIME_TYPES,
   ImageUploadFileSchema,
+  PROFILE_UPLOAD_ALLOWED_MIME_TYPES,
+  ProfileUploadFileSchema,
 } from "@/lib/fileUpload";
 
 /**
@@ -26,6 +28,32 @@ export const validateFileType = async (file: File): Promise<boolean> => {
 
     return IMAGE_UPLOAD_ALLOWED_MIME_TYPES.includes(
       fileType.mime as (typeof IMAGE_UPLOAD_ALLOWED_MIME_TYPES)[number],
+    );
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Validates profile file type (including PDF) both by MIME type and actual file content
+ * @param file - The file to validate
+ * @returns Promise<boolean> - True if file type is allowed
+ */
+export const validateProfileFileType = async (file: File): Promise<boolean> => {
+  try {
+    if (!ProfileUploadFileSchema.safeParse(file).success) {
+      return false;
+    }
+
+    const buffer = await file.arrayBuffer();
+    const fileType = await fileTypeFromBuffer(buffer);
+
+    if (!fileType) {
+      return false;
+    }
+
+    return PROFILE_UPLOAD_ALLOWED_MIME_TYPES.includes(
+      fileType.mime as (typeof PROFILE_UPLOAD_ALLOWED_MIME_TYPES)[number],
     );
   } catch {
     return false;

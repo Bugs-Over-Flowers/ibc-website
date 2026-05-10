@@ -2,6 +2,7 @@
 
 import { Info, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FieldError } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -68,7 +69,13 @@ function PaymentProofsFieldInner({
   const addFiles = useCallback(
     (nextFiles: File[]) => {
       const validFiles = nextFiles.filter(isValidImageUploadFile);
-      if (validFiles.length === 0) return;
+      if (validFiles.length === 0) {
+        toast.error("Only PNG, JPG, and JPEG files under 5MB are accepted.");
+        return;
+      }
+      if (validFiles.length !== nextFiles.length) {
+        toast.error("Only PNG, JPG, and JPEG files under 5MB are accepted.");
+      }
 
       field.handleChange(mergeUniqueFiles(files, validFiles));
     },
@@ -86,7 +93,7 @@ function PaymentProofsFieldInner({
   return (
     <div className="space-y-3">
       <Label className="font-semibold text-foreground text-sm">
-        Upload Proof of Payment *
+        Upload Payment Proofs *
       </Label>
 
       <Alert className="rounded-xl border-amber-500/30 bg-amber-50 dark:bg-amber-500/10">
@@ -123,6 +130,7 @@ function PaymentProofsFieldInner({
             setDragActive(false);
             addFiles(acceptedFiles);
           }}
+          onError={(error) => toast.error(error.message)}
           src={undefined}
         >
           <div className="flex w-full flex-col items-center justify-center gap-1 text-center">

@@ -67,6 +67,7 @@ export const submitMembershipApplication: AsyncFunction<
     p_payment_method: parsed.data.paymentMethod === "BPI" ? "BPI" : "ONSITE",
     p_payment_proof_url: parsed.data.paymentProofUrl,
     p_application_member_type: parsed.data.applicationMemberType,
+    p_company_profile_type: parsed.data.companyProfileType,
   });
 
   if (error) {
