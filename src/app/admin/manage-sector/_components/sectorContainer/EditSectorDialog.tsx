@@ -1,5 +1,6 @@
 "use client";
 
+import { Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,14 +32,21 @@ export default function EditSectorDialog({
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Sector</DialogTitle>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Package className="h-5 w-5 text-primary" />
+            <DialogTitle className="text-xl">Edit Sector</DialogTitle>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            Update the sector name and details.
+          </p>
         </DialogHeader>
-        <div className="py-4">
+
+        <div className="py-6">
           <formContext.Provider value={form}>
             <form
-              className="space-y-4"
+              className="space-y-6"
               onSubmit={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -54,7 +62,7 @@ export default function EditSectorDialog({
                 )}
               </form.AppField>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <Button
                   onClick={() => onOpenChange(false)}
                   type="button"

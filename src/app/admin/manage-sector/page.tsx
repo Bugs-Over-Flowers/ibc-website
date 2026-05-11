@@ -19,9 +19,11 @@ const page = async ({
 }) => {
   const sp = await searchParams;
   return (
-    <Suspense fallback={<SectorManagementPageSkeleton />}>
-      <SectorContent search={sp.search} />
-    </Suspense>
+    <div className="space-y-6 px-2">
+      <Suspense fallback={<SectorManagementPageSkeleton />}>
+        <SectorContent search={sp.search} />
+      </Suspense>
+    </div>
   );
 };
 

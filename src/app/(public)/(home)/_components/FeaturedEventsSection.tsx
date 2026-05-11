@@ -16,15 +16,33 @@ export default async function FeaturedEventsSection() {
   const sixMonthsFromNow = new Date();
   sixMonthsFromNow.setMonth(now.getMonth() + 6);
 
+  // Separate ongoing and upcoming events
+  const ongoingEvents = (events || []).filter((event) => {
+    if (!event.eventStartDate) return false;
+    const eventDate = new Date(event.eventStartDate);
+    const eventEndDate = event.eventEndDate
+      ? new Date(event.eventEndDate)
+      : new Date(eventDate);
+    eventEndDate.setHours(23, 59, 59, 999);
+    return now >= eventDate && now <= eventEndDate;
+  });
+
   const upcomingEvents = (events || [])
     .filter((event) => {
       if (!event.eventStartDate) return false;
       const eventDate = new Date(event.eventStartDate);
-      return eventDate >= now && eventDate <= sixMonthsFromNow;
+      return (
+        eventDate > now &&
+        eventDate <= sixMonthsFromNow &&
+        !ongoingEvents.some((ongoing) => ongoing.eventId === event.eventId)
+      );
     })
-    .slice(0, 3);
+    .slice(0, 3 - ongoingEvents.length);
 
-  if (!upcomingEvents || upcomingEvents.length === 0) {
+  // Combine ongoing first, then upcoming
+  const featuredEvents = [...ongoingEvents, ...upcomingEvents].slice(0, 3);
+
+  if (!featuredEvents || featuredEvents.length === 0) {
     return (
       <section className="bg-card py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -74,7 +92,7 @@ export default async function FeaturedEventsSection() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {upcomingEvents.map((event) => (
+          {featuredEvents.map((event) => (
             <Link
               className="group block h-full"
               href={`/events/${event.eventId}`}
