@@ -76,17 +76,6 @@ export function EvaluationCard({
     goToDetails();
   };
 
-  const handleCardKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (isSelectionMode) {
-      return;
-    }
-
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      goToDetails();
-    }
-  };
-
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     const { error, success } = await tryCatch(
