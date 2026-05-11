@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getEventCategory } from "@/lib/events/eventUtils";
 import { getPublicEvents } from "@/server/events/queries/getPublicEvents";
 import { FeaturedEventCard } from "./FeaturedEventCard";
 export default async function FeaturedEventsSection() {
@@ -13,6 +14,9 @@ export default async function FeaturedEventsSection() {
   const upcomingEvents = (events || [])
     .filter((event) => {
       if (!event.eventStartDate) return false;
+      const category = getEventCategory(event);
+      // Include both "happening now" (ongoing) and upcoming events
+      if (category === "ongoing") return true;
       const eventDate = new Date(event.eventStartDate);
       return eventDate >= now && eventDate <= sixMonthsFromNow;
     })
