@@ -105,14 +105,14 @@ export function SlotUtilizationCard({
 
     // Warn if new max is lower than used count
     if (numValue < usedSlots) {
-      toast.warning("Slots Below Used Count", {
-        description: `You are setting max slots to ${numValue}, but ${usedSlots} slots are already used. This may cause issues with slot management.`,
-        action: {
-          label: "Continue",
-          onClick: async () => {
-            await updateMaxGuests();
-          },
-        },
+      toast.error("Slots Below Used Count", {
+        description: `You are setting max slots to ${numValue}, but ${usedSlots} slots are already used.`,
+        // action: {
+        //   label: "Continue",
+        //   onClick: async () => {
+        //     await updateMaxGuests();
+        //   },
+        // },
       });
       return;
     }
