@@ -9,7 +9,7 @@ export const CheckInListItemSchema = z.object({
   participantId: z.uuid(),
   firstName: z.string(),
   lastName: z.string(),
-  email: z.email(),
+  email: z.string(),
   contactNumber: z.string(),
   registrationId: z.uuid(),
   affiliation: z.string(),

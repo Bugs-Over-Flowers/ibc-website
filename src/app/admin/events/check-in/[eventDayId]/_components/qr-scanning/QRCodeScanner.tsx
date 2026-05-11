@@ -1,6 +1,8 @@
 "use client";
 import { type IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
+import { SquareCenterlineDashedHorizontal } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   ParticipantIdentifier,
@@ -15,6 +17,7 @@ interface QRCodeScannerProps {
 
 export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
   const { eventDayId } = useParams<{ eventDayId: string }>();
+  const [mirrored, setMirrored] = useState(false);
 
   const { execute: scanQRData, isPending: scanPending } = useScanQR({
     eventId,
@@ -57,9 +60,20 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
           paused={isCameraPaused}
           styles={{
             container: { width: "100%", height: "100%" },
-            video: { objectFit: "cover" },
+            video: {
+              objectFit: "cover",
+              ...(mirrored && { transform: "scaleX(-1)" }),
+            },
           }}
         />
+        <button
+          aria-label={mirrored ? "Unmirror camera" : "Mirror camera"}
+          className="absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full border border-white/20 bg-black/50 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/70 hover:text-white"
+          onClick={() => setMirrored((p) => !p)}
+          type="button"
+        >
+          <SquareCenterlineDashedHorizontal size={16} />
+        </button>
         <div className="absolute inset-x-0 bottom-0 flex justify-center pb-4">
           <div
             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-medium text-xs backdrop-blur-sm ${
@@ -86,9 +100,13 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
           QR code scanner
         </span>
         <span className="text-muted-foreground text-xs">
-          {scanType === "participant"
-            ? "Participant QR detected"
-            : "Point camera at QR code"}
+          {mirrored
+            ? scanType === "participant"
+              ? "Participant QR detected"
+              : "Mirrored — point camera at QR code"
+            : scanType === "participant"
+              ? "Participant QR detected"
+              : "Point camera at QR code"}
         </span>
       </div>
     </div>

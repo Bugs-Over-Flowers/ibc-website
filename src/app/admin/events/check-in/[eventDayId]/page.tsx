@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Suspense } from "react";
+import BackNavigation from "@/app/admin/_components/BackNavigation";
 import QuickOnsiteRegistrationCard from "@/app/admin/events/check-in/[eventDayId]/_components/quick-registration/QuickOnsiteRegistrationCard";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
@@ -46,6 +47,12 @@ async function CheckInPage({
 }) {
   const cookieStore = await cookies();
   const { eventDayId } = await params;
+  const headersList = await headers();
+  const referer = headersList.get("referer");
+  const previousPath = referer
+    ? new URL(referer).pathname.replace(/\/+$/, "")
+    : "";
+  const showBack = previousPath !== "/admin/events";
 
   const parsedSearchParams = await searchParams;
   const searchQuery = parseStringParam(parsedSearchParams.check_q);
@@ -90,6 +97,7 @@ async function CheckInPage({
 
   return (
     <>
+      <BackNavigation showBack={showBack} />
       <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
         <div className="flex flex-col gap-4">
           <QRCodeScanner eventId={eventDayData.event.eventId} />

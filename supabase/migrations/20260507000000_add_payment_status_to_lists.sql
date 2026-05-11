@@ -1,6 +1,5 @@
 ALTER TYPE "public"."participant_list_item"
   ADD ATTRIBUTE "payment_proof_status" "text";
-
 CREATE OR REPLACE FUNCTION "public"."get_event_participant_list"("p_event_id" "uuid", "p_search_text" "text" DEFAULT NULL::"text") RETURNS SETOF "public"."participant_list_item"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     AS $$
@@ -63,7 +62,6 @@ BEGIN
     r."registrationDate" DESC;
 END;
 $$;
-
 -- Update get_registration_list_stats to count all participants regardless of payment status
 CREATE OR REPLACE FUNCTION "public"."get_registration_list_stats"("p_event_id" "uuid") RETURNS "public"."registration_stats"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
@@ -84,7 +82,6 @@ BEGIN
   RETURN v_result;
 END;
 $$;
-
 -- Update get_event_status to count all participants regardless of payment status
 CREATE OR REPLACE FUNCTION "public"."get_event_status"("p_event_id" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE

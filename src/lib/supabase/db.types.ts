@@ -760,11 +760,6 @@ export type Database = {
         Args: { p_application_type?: string; p_identifier: string };
         Returns: Json;
       };
-      check_membership_expiry: { Args: never; Returns: undefined };
-      compute_primary_application_id: {
-        Args: { p_member_id: string };
-        Returns: string;
-      };
       create_sponsored_registration: {
         Args: {
           p_event_id: string;
@@ -804,23 +799,6 @@ export type Database = {
           q5_rating: Database["public"]["Enums"]["ratingScale"];
           q6_rating: Database["public"]["Enums"]["ratingScale"];
           venue: string;
-        }[];
-      };
-      get_all_sponsored_registrations: {
-        Args: never;
-        Returns: {
-          created_at: string;
-          event_end_date: string;
-          event_id: string;
-          event_name: string;
-          event_start_date: string;
-          max_sponsored_guests: number;
-          sponsored_by: string;
-          sponsored_registration_id: string;
-          status: string;
-          updated_at: string;
-          used_count: number;
-          uuid: string;
         }[];
       };
       get_all_sponsored_registrations_with_event: {
@@ -894,19 +872,6 @@ export type Database = {
         };
       };
       get_event_status: { Args: { p_event_id: string }; Returns: Json };
-      get_events_for_select: {
-        Args: never;
-        Returns: {
-          event_end_date: string;
-          event_id: string;
-          event_start_date: string;
-          event_title: string;
-        }[];
-      };
-      get_member_primary_application: {
-        Args: { p_member_id: string };
-        Returns: string;
-      };
       get_registration_list: {
         Args: {
           p_event_id: string;
@@ -931,13 +896,6 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      get_sector_member_counts: {
-        Args: { p_sector_ids: number[] };
-        Returns: {
-          memberCount: number;
-          sectorId: number;
-        }[];
-      };
       get_sponsored_registration_by_id: {
         Args: { registration_id: string };
         Returns: {
@@ -958,35 +916,6 @@ export type Database = {
           isOneToOne: false;
           isSetofReturn: true;
         };
-      };
-      get_sponsored_registration_by_uuid: {
-        Args: { p_uuid: string };
-        Returns: {
-          createdAt: string;
-          eventId: string;
-          feeDeduction: number;
-          maxSponsoredGuests: number;
-          sponsoredBy: string;
-          sponsoredRegistrationId: string;
-          status: Database["public"]["Enums"]["SponsoredRegistrationStatus"];
-          updatedAt: string;
-          usedCount: number;
-          uuid: string;
-        }[];
-      };
-      get_sponsored_registrations_with_details: {
-        Args: { p_event_id: string };
-        Returns: {
-          created_at: string;
-          event_id: string;
-          id: string;
-          registration_email: string;
-          registration_id: string;
-          sponsor_id: string;
-          sponsor_name: string;
-          status: string;
-          updated_at: string;
-        }[];
       };
       get_sr_by_event_id: {
         Args: { p_event_id: string };
@@ -1013,13 +942,11 @@ export type Database = {
         Args: { p_dry_run?: boolean; p_event_id: string; p_rows: Json };
         Returns: Json;
       };
-      is_admin_user: { Args: never; Returns: boolean };
       january_first_reset: { Args: never; Returns: undefined };
       process_membership_statuses: {
         Args: { p_reference_time?: string };
         Returns: undefined;
       };
-      publish_event: { Args: { p_event_id: string }; Returns: undefined };
       quick_onsite_registration: {
         Args: {
           p_business_member_id?: string;
@@ -1072,30 +999,18 @@ export type Database = {
         };
         Returns: Json;
       };
-      submit_membership_application:
-        | {
-            Args: {
-              p_application_member_type: string;
-              p_application_type: string;
-              p_company_details: Json;
-              p_payment_method: string;
-              p_payment_proof_url?: string;
-              p_representatives: Json;
-            };
-            Returns: Json;
-          }
-        | {
-            Args: {
-              p_application_member_type: string;
-              p_application_type: string;
-              p_company_details: Json;
-              p_company_profile_type?: string;
-              p_payment_method: string;
-              p_payment_proof_url?: string;
-              p_representatives: Json;
-            };
-            Returns: Json;
-          };
+      submit_membership_application: {
+        Args: {
+          p_application_member_type: string;
+          p_application_type: string;
+          p_company_details: Json;
+          p_company_profile_type?: string;
+          p_payment_method: string;
+          p_payment_proof_url?: string;
+          p_representatives: Json;
+        };
+        Returns: Json;
+      };
       toggle_sr_status: {
         Args: { p_sponsored_registration_id: string };
         Returns: Json;
@@ -1113,24 +1028,6 @@ export type Database = {
           p_start_date?: string;
           p_title?: string;
           p_venue?: string;
-        };
-        Returns: Json;
-      };
-      update_member_with_representatives: {
-        Args: {
-          p_application_id: string;
-          p_business_name: string;
-          p_company_address: string;
-          p_email_address: string;
-          p_join_date?: string;
-          p_landline: string;
-          p_member_id: string;
-          p_membership_expiry_date?: string;
-          p_membership_status?: Database["public"]["Enums"]["MembershipStatus"];
-          p_mobile_number: string;
-          p_representatives?: Json;
-          p_sector_id: number;
-          p_website_url?: string;
         };
         Returns: Json;
       };

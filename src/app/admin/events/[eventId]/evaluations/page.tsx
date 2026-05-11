@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Suspense } from "react";
-import BackButton from "@/app/admin/_components/BackButton";
+import BackNavigation from "@/app/admin/_components/BackNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
@@ -20,22 +20,12 @@ export default function EventEvaluationsPage({
 }: EventEvaluationsPageProps) {
   return (
     <div className="space-y-6">
-      <BackButtonWrapper params={params} />
       <Suspense fallback={<EventEvaluationsPageSkeleton />}>
         <EventHeader params={params} />
         <EventEvaluationsTableWrapper params={params} />
       </Suspense>
     </div>
   );
-}
-
-async function BackButtonWrapper({
-  params,
-}: {
-  params: EventEvaluationsPageProps["params"];
-}) {
-  const { eventId } = await params;
-  return <BackButton eventId={eventId} />;
 }
 
 async function EventHeader({
@@ -45,20 +35,29 @@ async function EventHeader({
 }) {
   const { eventId } = await params;
   const requestCookies = (await cookies()).getAll();
+  const headersList = await headers();
+  const referer = headersList.get("referer");
+  const previousPath = referer
+    ? new URL(referer).pathname.replace(/\/+$/, "")
+    : "";
+  const showBack = previousPath !== "/admin/events";
   const { data: event } = await tryCatch(
     getEventById(requestCookies, { id: eventId }),
   );
 
   return (
-    <div>
-      <div className="space-y-0">
-        <h1 className="font-bold text-2xl text-foreground">
-          {event?.eventTitle || "Evaluations"}
-        </h1>
+    <div className="space-y-6">
+      <BackNavigation showBack={showBack} />
+      <div>
+        <div className="space-y-0">
+          <h1 className="font-bold text-2xl text-foreground">
+            {event?.eventTitle || "Evaluations"}
+          </h1>
+        </div>
+        <p className="max-w-5xl text-muted-foreground text-sm">
+          View, sort, and export event feedback.
+        </p>
       </div>
-      <p className="max-w-5xl text-muted-foreground text-sm">
-        View, sort, and export event feedback.
-      </p>
     </div>
   );
 }

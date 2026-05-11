@@ -13,7 +13,6 @@ export const draftEvent: AsyncFunction<
   [DraftEventInput],
   { eventId: string }
 > = async (input) => {
-  console.log("Server Action draftEvent received:", input);
   const result = draftEventServerSchema.safeParse(input);
 
   if (!result.success) {
@@ -31,14 +30,14 @@ export const draftEvent: AsyncFunction<
     .from("Event")
     .insert({
       eventTitle: data.eventTitle,
-      description: data.description,
+      description: data.description ?? null,
       eventStartDate: data.eventStartDate.toISOString(),
-      eventEndDate: data.eventEndDate?.toISOString(),
-      venue: data.venue,
+      eventEndDate: data.eventEndDate.toISOString(),
+      venue: data.venue ?? null,
       registrationFee: data.registrationFee ?? 0,
       eventType: null, // Force eventType to null for drafts
-      eventHeaderUrl: data.eventImage,
-      eventPoster: data.eventPoster,
+      eventHeaderUrl: data.eventImage ?? null,
+      eventPoster: data.eventPoster ?? null,
       facebookLink: data.facebookLink ?? null,
     })
     .select("eventId")

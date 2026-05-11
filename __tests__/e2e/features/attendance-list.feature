@@ -78,6 +78,16 @@ Feature: Attendance List
       | 20           | 20         | 100                |
       | 23           | 30         | 77                 |
 
+  @happy
+  Scenario: Expected participants includes all payment status types
+    Given I am on the attendance list page with accepted, pending, and rejected participants
+    Then I should see the check-in stats showing:
+      | label                 | value |
+      | Expected participants | 10    |
+      | Checked in - Day 1    | 10    |
+      | Attendance rate       | 100%  |
+    And I should see payment status badges for each payment status type
+
   @sad
   Scenario: Show error when event does not exist
     Given I navigate to non-existent event attendance page

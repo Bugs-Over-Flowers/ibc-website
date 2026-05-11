@@ -150,7 +150,7 @@ export default function BulkActions() {
               variant="outline"
             >
               <CheckCircle2 className="size-3.5" />
-              Approve all
+              Approve
             </Button>
             <Button
               className="h-9 w-full gap-1.5 border-[#F09595] bg-[#FCEBEB] text-[#791F1F] hover:bg-[#F7C1C1] dark:border-[#A32D2D] dark:bg-[#791F1F] dark:text-[#F7C1C1] dark:hover:bg-[#A32D2D]"
@@ -161,7 +161,7 @@ export default function BulkActions() {
               variant="outline"
             >
               <XCircle className="size-3.5" />
-              Reject all
+              Reject
             </Button>
           </div>
         )}
