@@ -53,6 +53,11 @@ export async function approveApplication(input: ApplicationDecisionInput) {
     throw new Error(`Failed to fetch application: ${fetchError?.message}`);
   }
 
+  // Check if application has already been approved
+  if (application.businessMemberId) {
+    throw new Error("Application has already been approved");
+  }
+
   const recipientEmail =
     application.emailAddress ||
     application.ApplicationMember?.[0]?.emailAddress;

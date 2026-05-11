@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowUpDown,
   CheckCircle2,
   ChevronDown,
   Filter,
@@ -24,12 +25,18 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 type StatusOption = "all" | "active" | "unpaid" | "cancelled";
+type SortOption = "joinDate-desc" | "businessName-asc";
 
 const statusLabels: Record<StatusOption, string> = {
   all: "All Status",
   active: "Paid",
   unpaid: "Unpaid",
   cancelled: "Cancelled",
+};
+
+const sortLabels: Record<SortOption, string> = {
+  "joinDate-desc": "Newest",
+  "businessName-asc": "Name A-Z",
 };
 
 interface MemberFiltersProps {
@@ -43,6 +50,8 @@ export default function MemberFilters({ sectors }: MemberFiltersProps) {
   const currentStatus = (searchParams.get("status") || "all") as StatusOption;
   const currentSector = searchParams.get("sectorName") || "all";
   const currentSearch = searchParams.get("search") || "";
+  const currentSort = (searchParams.get("sort") ||
+    "joinDate-desc") as SortOption;
 
   const updateFilter = useCallback(
     (key: string, value: string | null) => {
@@ -68,18 +77,6 @@ export default function MemberFilters({ sectors }: MemberFiltersProps) {
     debounceMs: 400,
   });
 
-  const _removeFilter = (key: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.delete(key);
-
-    if (key === "search") {
-      setSearchValue("");
-    }
-
-    const qs = params.toString();
-    router.push(qs ? (`?${qs}` as Route) : ("/admin/members" as Route));
-  };
-
   const clearFilters = () => {
     setSearchValue("");
     router.push("/admin/members" as Route);
@@ -88,7 +85,8 @@ export default function MemberFilters({ sectors }: MemberFiltersProps) {
   const hasActiveFilters =
     currentStatus !== "all" ||
     (currentSector && currentSector !== "all") ||
-    currentSearch;
+    currentSearch ||
+    currentSort !== "joinDate-desc";
 
   const statusOptions: StatusOption[] = [
     "all",
@@ -190,6 +188,58 @@ export default function MemberFilters({ sectors }: MemberFiltersProps) {
                   onClick={() => updateFilter("status", status)}
                 >
                   {statusLabels[status]}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Sort Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "inline-flex h-12 min-w-[160px] items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-4 transition-all hover:border-primary/30 hover:bg-background",
+                currentSort !== "joinDate-desc" &&
+                  "border-primary/40 bg-primary/5",
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <ArrowUpDown
+                  className={cn(
+                    "h-4 w-4",
+                    currentSort !== "joinDate-desc"
+                      ? "text-primary"
+                      : "text-muted-foreground/70",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-sm",
+                    currentSort !== "joinDate-desc"
+                      ? "text-foreground"
+                      : "text-muted-foreground/70",
+                  )}
+                >
+                  {sortLabels[currentSort]}
+                </span>
+              </div>
+              <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-[180px] rounded-xl border-border/50 bg-card p-1 shadow-2xl"
+            >
+              {(Object.keys(sortLabels) as SortOption[]).map((sort) => (
+                <DropdownMenuItem
+                  className={cn(
+                    "cursor-pointer rounded-lg text-sm transition-colors",
+                    currentSort === sort
+                      ? "bg-primary/10 font-medium text-primary"
+                      : "hover:bg-muted/50",
+                  )}
+                  key={sort}
+                  onClick={() => updateFilter("sort", sort)}
+                >
+                  {sortLabels[sort]}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
