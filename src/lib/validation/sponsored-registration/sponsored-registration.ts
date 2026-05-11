@@ -19,7 +19,7 @@ export const createSRFormSchema = z.object({
   ...sponsoredRegistrationBase,
   feeDeduction: z.coerce
     .number("Please input a valid number")
-    .min(0, "Fee deduction cannot be negative"),
+    .min(1, "There must be at least some fee deduction"),
   maxSponsoredGuests: z.coerce
     .number("Please input a valid number")
     .int()
