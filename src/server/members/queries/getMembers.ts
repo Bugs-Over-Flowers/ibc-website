@@ -38,8 +38,7 @@ export async function getMembers(
       Application(applicationId, applicationStatus)
     `,
     )
-    .neq("Application.applicationStatus", "rejected")
-    .order("joinDate", { ascending: false });
+    .neq("Application.applicationStatus", "rejected");
 
   if (filters?.status && filters.status !== "all") {
     query = query.eq("membershipStatus", filters.status);
@@ -50,7 +49,15 @@ export async function getMembers(
   }
 
   if (filters?.search) {
-    query = query.ilike("businessName", `%${filters.search}%`);
+    query = query.or(
+      `businessName.ilike.%${filters.search}%,identifier.ilike.%${filters.search}%`,
+    );
+  }
+
+  if (filters?.sort === "businessName-asc") {
+    query = query.order("businessName", { ascending: true });
+  } else {
+    query = query.order("joinDate", { ascending: false });
   }
 
   const { data, error } = await query;

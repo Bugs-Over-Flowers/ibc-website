@@ -22,7 +22,7 @@ function NumberField({
   max,
   step,
 }: NumberFieldProps) {
-  const field = useFieldContext<number>();
+  const field = useFieldContext<number | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
@@ -36,7 +36,12 @@ function NumberField({
         min={min}
         name={field.name}
         onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(e.target.valueAsNumber)}
+        onChange={(e) => {
+          const nextValue = e.target.value;
+          field.handleChange(
+            nextValue === "" ? undefined : e.target.valueAsNumber,
+          );
+        }}
         onFocus={(e) => e.target.select()}
         placeholder={placeholder}
         step={step}

@@ -25,6 +25,7 @@ export const memberFilterSchema = z.object({
     .optional(),
   sectorName: z.string().optional(),
   search: z.string().optional(),
+  sort: z.enum(["joinDate-desc", "businessName-asc"]).optional(),
 });
 
 export type ScheduleMeetingInput = z.infer<typeof scheduleMeetingSchema>;
