@@ -1,6 +1,5 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -9,7 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ICON_OPTIONS, IconOption } from "./icons";
+import { ICON_OPTIONS } from "./icons";
 
 interface LucideIconPickerProps {
   selectedIcon: string;

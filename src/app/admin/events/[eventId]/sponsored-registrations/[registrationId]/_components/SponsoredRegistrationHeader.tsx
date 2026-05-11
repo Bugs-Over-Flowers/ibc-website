@@ -35,18 +35,28 @@ export function SponsoredRegistrationHeader({
 
   const { execute: updateSponsorName, isPending: isUpdatingSponsorName } =
     useAction(
-      tryCatch(async (): Promise<{ success: boolean; oldName: string; newName: string }> => {
-        const oldName = sponsoredRegistration.sponsoredBy;
-        await updateSRSponsorName({
-          sponsoredRegistrationId:
-            sponsoredRegistration.sponsoredRegistrationId,
-          eventId,
-          sponsoredBy: sponsorName.trim(),
-        });
-        return { success: true, oldName, newName: sponsorName.trim() };
-      }),
+      tryCatch(
+        async (): Promise<{
+          success: boolean;
+          oldName: string;
+          newName: string;
+        }> => {
+          const oldName = sponsoredRegistration.sponsoredBy;
+          await updateSRSponsorName({
+            sponsoredRegistrationId:
+              sponsoredRegistration.sponsoredRegistrationId,
+            eventId,
+            sponsoredBy: sponsorName.trim(),
+          });
+          return { success: true, oldName, newName: sponsorName.trim() };
+        },
+      ),
       {
-        onSuccess: (result: { success: boolean; oldName: string; newName: string }) => {
+        onSuccess: (result: {
+          success: boolean;
+          oldName: string;
+          newName: string;
+        }) => {
           toast.success("Sponsor name updated", {
             description: `Changed from "${result.oldName}" to "${result.newName}"`,
           });
@@ -54,7 +64,7 @@ export function SponsoredRegistrationHeader({
           router.refresh();
         },
         onError: (error: unknown) => {
-          let errorMessage = "Failed to update sponsor name";
+          const errorMessage = "Failed to update sponsor name";
           let errorDescription = "Please try again later";
 
           if (typeof error === "string") {

@@ -4,7 +4,6 @@ import {
   StandardRegistrationStep1Schema,
   SubmitRegistrationResponseSchema,
 } from "@/lib/validation/registration/standard";
-import { phoneOrLandlineSchema } from "@/lib/validation/utils";
 
 export const QuickOnsiteRegistrantSchema = z
   .object({
@@ -17,8 +16,11 @@ export const QuickOnsiteRegistrantSchema = z
       .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    contactNumber: phoneOrLandlineSchema,
-    email: z.email().trim(),
+    contactNumber: z
+      .string()
+      .trim()
+      .min(1, "Please input a contact number or enter NA"),
+    email: z.string().trim().min(1, "Please input an email or enter NA"),
   })
   .transform((data) => ({
     ...data,
@@ -43,8 +45,11 @@ export const QuickOnsiteRegistrationFormSchema = z
       .string("Please input your last name")
       .min(2, "Last name must be at least 2 characters")
       .max(100),
-    email: z.email(),
-    contactNumber: phoneOrLandlineSchema,
+    email: z.string().trim().min(1, "Please input an email or enter NA"),
+    contactNumber: z
+      .string()
+      .trim()
+      .min(1, "Please input a contact number or enter NA"),
     remark: z
       .string()
       .max(500, "Remark cannot exceed 500 characters")

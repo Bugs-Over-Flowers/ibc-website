@@ -22,19 +22,52 @@ const WEBSITE_CONTENT_SECTION_TAG_BY_SECTION = {
   hero_section: CACHE_TAGS.websiteContent.section.heroSection,
 } as const;
 
+function isDisallowedImageUrl(imageUrl: string): boolean {
+  const normalized = imageUrl.trim().toLowerCase();
+  if (normalized.length === 0) {
+    return false;
+  }
+
+  if (normalized.startsWith("blob:") || normalized.startsWith("data:")) {
+    return true;
+  }
+
+  const hasScheme = /^[a-z][a-z\d+.-]*:/i.test(normalized);
+  if (!hasScheme) {
+    return false;
+  }
+
+  return !(
+    normalized.startsWith("http://") || normalized.startsWith("https://")
+  );
+}
+
+function toPlacementValue(value: string | number | undefined): number | null {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric < 1) {
+    return null;
+  }
+
+  return Math.trunc(numeric);
+}
+
 export async function saveWebsiteContentSection(
   input: SaveWebsiteContentSectionInput,
 ): Promise<{ updatedAt: string }> {
   const parsed = saveWebsiteContentSectionSchema.parse(input);
 
-  // Validate that no blob: URLs are being saved (security and data integrity check)
+  // Validate that only persisted image URLs are saved, not preview schemes.
   if (parsed.cards) {
-    const blobUrlCards = parsed.cards.filter((card) =>
-      card.imageUrl?.startsWith("blob:"),
+    const invalidImageUrlCards = parsed.cards.filter((card) =>
+      isDisallowedImageUrl(card.imageUrl ?? ""),
     );
-    if (blobUrlCards.length > 0) {
+    if (invalidImageUrlCards.length > 0) {
       throw new Error(
-        `Cannot save section: ${blobUrlCards.length} card(s) have preview-only image URLs. Images may not have uploaded successfully. Please upload images again.`,
+        `Cannot save section: ${invalidImageUrlCards.length} card(s) have invalid image URLs. Images may not have uploaded successfully. Please upload images again.`,
       );
     }
   }
@@ -60,9 +93,9 @@ export async function saveWebsiteContentSection(
     });
   } else if (parsed.section === "hero_section") {
     for (const card of parsed.cards) {
-      const placementValue = card.cardPlacement
-        ? Number(card.cardPlacement)
-        : null;
+      retainedEntryKeys.push(card.entryKey);
+
+      const placementValue = toPlacementValue(card.cardPlacement);
 
       rowsToUpsert.push({
         section: parsed.section,
@@ -79,9 +112,7 @@ export async function saveWebsiteContentSection(
     for (const card of parsed.cards) {
       retainedEntryKeys.push(card.entryKey);
 
-      const placementValue = card.cardPlacement
-        ? Number(card.cardPlacement)
-        : null;
+      const placementValue = toPlacementValue(card.cardPlacement);
 
       rowsToUpsert.push({
         section: parsed.section,
@@ -111,23 +142,36 @@ export async function saveWebsiteContentSection(
         });
       }
 
-      rowsToUpsert.push({
-        section: parsed.section,
-        entryKey: card.entryKey,
-        textType: "Paragraph",
-        textValue: card.paragraph,
-        icon: card.icon || null,
-        imageUrl: card.imageUrl || null,
-        cardPlacement: placementValue,
-        group: card.group,
-      });
+      if (
+        parsed.section !== "board_of_trustees" &&
+        parsed.section !== "secretariat"
+      ) {
+        rowsToUpsert.push({
+          section: parsed.section,
+          entryKey: card.entryKey,
+          textType: "Paragraph",
+          textValue: card.paragraph,
+          icon: card.icon || null,
+          imageUrl: card.imageUrl || null,
+          cardPlacement: placementValue,
+          group: card.group,
+        });
+      }
     }
   }
 
+  // Upsert all rows with new card placement
   await upsertWebsiteContentRows(rowsToUpsert);
 
+  // Soft delete entries that are no longer retained
   await deleteWebsiteContentEntriesBySection(parsed.section, retainedEntryKeys);
 
+  // CRITICAL: Invalidate cache BEFORE returning to client, so next fetch gets fresh data
+  updateTag(CACHE_TAGS.websiteContent.all);
+  updateTag(CACHE_TAGS.websiteContent.public);
+  updateTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsed.section]);
+
+  // Revalidate paths after cache invalidation
   revalidatePath("/", "page");
   revalidatePath("/about", "page");
   revalidatePath("/events", "page");
@@ -135,9 +179,7 @@ export async function saveWebsiteContentSection(
   revalidatePath("/networks", "page");
   revalidatePath("/contact", "page");
   revalidatePath("/admin/website-content", "page");
-  updateTag(CACHE_TAGS.websiteContent.all);
-  updateTag(CACHE_TAGS.websiteContent.public);
-  updateTag(WEBSITE_CONTENT_SECTION_TAG_BY_SECTION[parsed.section]);
 
-  return { updatedAt: new Date().toISOString() };
+  const updatedAt = new Date().toISOString();
+  return { updatedAt };
 }

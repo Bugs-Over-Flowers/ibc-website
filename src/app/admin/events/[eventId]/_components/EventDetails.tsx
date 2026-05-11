@@ -11,11 +11,10 @@ import {
   Users,
 } from "lucide-react";
 import type { Route } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
-
-import BackButton from "@/app/admin/_components/BackButton";
+import BackNavigation from "@/app/admin/_components/BackNavigation";
 import { EvaluationQRDownloader } from "@/components/qr/EvaluationQRDownloader";
 import RichTextDisplay from "@/components/RichTextDisplay";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +24,7 @@ import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventStats } from "@/server/events/queries/getEventStats";
 import AddFacebookLinkButton from "./AddFacebookLinkButton";
+import CheckInButton from "./CheckInButton";
 import EventScheduleDateTime from "./EventScheduleDateTime";
 
 const EVENT_TIME_ZONE = "Asia/Manila";
@@ -38,6 +38,12 @@ export default async function EventDetails({
   const { eventId } = await params;
   const cookieStore = await cookies();
   const requestCookies = cookieStore.getAll();
+  const headersList = await headers();
+  const referer = headersList.get("referer");
+  const previousPath = referer
+    ? new URL(referer).pathname.replace(/\/+$/, "")
+    : "";
+  const showBack = previousPath !== "/admin/events";
 
   const { data: event, error: eventError } = await tryCatch(
     getEventById(requestCookies, { id: eventId }),
@@ -233,16 +239,7 @@ export default async function EventDetails({
     <div className="space-y-6 pb-8">
       {/* Back Navigation */}
       <div className="flex w-full justify-start">
-        <Button
-          nativeButton={false}
-          render={
-            <Link href={"/admin/events"}>
-              <ChevronLeft className="h-5 w-5" />
-              Back
-            </Link>
-          }
-          variant={"ghost"}
-        />
+        <BackNavigation showBack={showBack} />
       </div>
 
       {/* Hero Card */}
@@ -289,6 +286,7 @@ export default async function EventDetails({
                   eventId={eventId}
                   eventTitle={event.eventTitle}
                 />
+                {!isDraft && <CheckInButton eventId={eventId} />}
                 {showEditButton && (
                   <Link href={`/admin/events/${eventId}/edit-event` as Route}>
                     <Button

@@ -31,9 +31,9 @@ export function Step3Representatives({ form }: StepProps) {
         {(field) => {
           const principalRepresentative = field.state.value[0];
           const hasAlternate = field.state.value.length > 1;
-          const alternateRepresentative = hasAlternate
-            ? field.state.value[1]
-            : null;
+          // const alternateRepresentative = hasAlternate
+          //   ? field.state.value[1]
+          //   : null;
 
           if (!principalRepresentative) {
             return null;

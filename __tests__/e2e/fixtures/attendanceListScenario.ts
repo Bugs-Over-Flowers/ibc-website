@@ -45,6 +45,8 @@ export interface SeededAttendanceListScenario {
 
 export interface AttendanceListSeedOptions {
   participantCount?: number;
+  pendingParticipantCount?: number;
+  rejectedParticipantCount?: number;
   eventDayCount?: number;
   checkInDistribution?: {
     [eventDayIndex: number]: number;
@@ -64,6 +66,8 @@ export async function seedAttendanceListScenario(
 
   const timestamp = Date.now();
   const participantCount = options.participantCount ?? 10;
+  const pendingParticipantCount = options.pendingParticipantCount ?? 0;
+  const rejectedParticipantCount = options.rejectedParticipantCount ?? 0;
   const eventDayCount = options.eventDayCount ?? 2;
   const paymentMethod = options.paymentMethod ?? "BPI";
 
@@ -139,8 +143,8 @@ export async function seedAttendanceListScenario(
     }
   }
 
-  // Create multiple registrations if needed for >10 participants, but only return the first one to maintain test scenario contract
-  const multiRegData = await createMultipleRegistrationsWithParticipants(
+  // Create accepted registrations
+  const acceptedData = await createMultipleRegistrationsWithParticipants(
     supabase,
     { eventId: event.eventId },
     "accepted",
@@ -149,12 +153,51 @@ export async function seedAttendanceListScenario(
     null,
   );
 
-  // For backward compatibility, store ALL registrations in a separate property
-  // but return only the first one in the main registrations array
-  const allRegistrations = multiRegData.registrations;
-  const acceptedRegistration = allRegistrations[0];
-  const participantIds = multiRegData.participantIds;
-  const allRegistrationIds = allRegistrations.map((r) => r.registrationId);
+  // Create pending registrations if requested
+  let pendingData:
+    | Awaited<ReturnType<typeof createMultipleRegistrationsWithParticipants>>
+    | undefined;
+  if (pendingParticipantCount > 0) {
+    pendingData = await createMultipleRegistrationsWithParticipants(
+      supabase,
+      { eventId: event.eventId },
+      "pending",
+      pendingParticipantCount,
+      paymentMethod,
+      null,
+    );
+  }
+
+  // Create rejected registrations if requested
+  let rejectedData:
+    | Awaited<ReturnType<typeof createMultipleRegistrationsWithParticipants>>
+    | undefined;
+  if (rejectedParticipantCount > 0) {
+    rejectedData = await createMultipleRegistrationsWithParticipants(
+      supabase,
+      { eventId: event.eventId },
+      "rejected",
+      rejectedParticipantCount,
+      paymentMethod,
+      null,
+    );
+  }
+
+  // Combine all participant IDs for check-in creation
+  const allParticipantIds = [
+    ...acceptedData.participantIds,
+    ...(pendingData?.participantIds ?? []),
+    ...(rejectedData?.participantIds ?? []),
+  ];
+
+  // Combine all registration IDs for cleanup
+  const allRegistrationIds = [
+    ...acceptedData.registrations.map((r) => r.registrationId),
+    ...(pendingData?.registrations.map((r) => r.registrationId) ?? []),
+    ...(rejectedData?.registrations.map((r) => r.registrationId) ?? []),
+  ];
+
+  const acceptedRegistration = acceptedData.registrations[0];
   const checkInDistribution = options.checkInDistribution ?? {
     0: participantCount,
     1: 0,
@@ -175,9 +218,6 @@ export async function seedAttendanceListScenario(
     }
 
     checkInCounts[eventDay.eventDayId] = count;
-
-    // Flatten all participant IDs from all registrations for check-in creation
-    const allParticipantIds = multiRegData.participantIds;
 
     for (let i = 0; i < count; i++) {
       const participantId = allParticipantIds[i];
@@ -245,7 +285,8 @@ export async function seedAttendanceListScenario(
     }
   }
 
-  const totalExpected = participantCount;
+  const totalExpected =
+    participantCount + pendingParticipantCount + rejectedParticipantCount;
 
   return {
     event,
@@ -256,7 +297,7 @@ export async function seedAttendanceListScenario(
         identifier: acceptedRegistration.identifier,
         affiliation: acceptedRegistration.affiliation,
         paymentProofStatus: "accepted" as const,
-        participantIds,
+        participantIds: acceptedData.participantIds,
       },
     ],
     checkIns,
@@ -264,7 +305,6 @@ export async function seedAttendanceListScenario(
       totalExpected,
       checkInCounts,
     },
-    // Include ALL registration IDs for cleanup
     allRegistrationIds,
   };
 }

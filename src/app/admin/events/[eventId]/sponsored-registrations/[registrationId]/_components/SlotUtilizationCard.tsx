@@ -34,7 +34,7 @@ export function SlotUtilizationCard({
 
   const { execute: updateMaxGuests, isPending: isUpdatingMaxGuests } =
     useAction(
-      tryCatch(async (): Promise<{ success: boolean }> => {
+      tryCatch(async () => {
         const numValue = parseInt(maxGuestsInput, 10);
         if (Number.isNaN(numValue) || numValue < 0) {
           throw new Error("Invalid number");
@@ -52,14 +52,19 @@ export function SlotUtilizationCard({
         return { success: true, isDecreasing, oldMax, newMax: numValue };
       }),
       {
-        onSuccess: (result: { success: boolean; isDecreasing?: boolean; oldMax?: number; newMax?: number }) => {
+        onSuccess: (result: {
+          success: boolean;
+          isDecreasing?: boolean;
+          oldMax?: number;
+          newMax?: number;
+        }) => {
           if (result.isDecreasing) {
             toast.success("Max slots reduced", {
               description: `Updated from ${result.oldMax} to ${result.newMax} slots. Current usage: ${usedSlots}/${result.newMax}`,
             });
           } else {
             toast.success("Max slots increased", {
-              description: `Updated from ${result.oldMax} to ${result.newMax} slots. Remaining: ${result.newMax! - usedSlots}`,
+              description: `Updated from ${result.oldMax} to ${result.newMax} slots. Remaining: ${result.newMax ? result.newMax - usedSlots : 0}`,
             });
           }
           setIsEditingMaxGuests(false);

@@ -1,25 +1,4 @@
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1
-    FROM pg_enum e
-    JOIN pg_type t ON e.enumtypid = t.oid
-    JOIN pg_namespace n ON t.typnamespace = n.oid
-    WHERE n.nspname = 'public'
-      AND t.typname = 'PaymentMethod'
-      AND e.enumlabel = 'IMPORTED'
-  ) THEN
-    ALTER TYPE "public"."PaymentMethod" ADD VALUE 'IMPORTED';
-  END IF;
-END
-$$;
-
-ALTER TABLE "public"."Registration"
-ADD COLUMN IF NOT EXISTS "sourceSubmissionId" text;
-
-CREATE UNIQUE INDEX IF NOT EXISTS "Registration_event_sourceSubmissionId_unique"
-ON "public"."Registration" ("eventId", "sourceSubmissionId")
-WHERE "sourceSubmissionId" IS NOT NULL;
+-- Remove email format regex validation from import. All fields still required but accept any format.
 
 CREATE OR REPLACE FUNCTION "public"."import_event_registrations"(
   "p_event_id" uuid,
@@ -52,6 +31,7 @@ DECLARE
   v_registration_date timestamp with time zone;
   v_registration_id uuid;
   v_identifier text;
+  v_participant_identifier text;
   v_errors text[];
   v_warnings text[];
 BEGIN
@@ -95,8 +75,6 @@ BEGIN
 
     IF v_email IS NULL THEN
       v_errors := array_append(v_errors, 'email is required');
-    ELSIF v_email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' THEN
-      v_errors := array_append(v_errors, 'email format is invalid');
     END IF;
 
     IF v_contact_number IS NULL THEN
@@ -171,6 +149,7 @@ BEGIN
 
     BEGIN
       v_identifier := 'ibc-reg-' || left(replace(gen_random_uuid()::text, '-', ''), 8);
+      v_participant_identifier := 'ibc-par-' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 8);
 
       INSERT INTO "Registration" (
         "eventId",
@@ -199,14 +178,16 @@ BEGIN
         "firstName",
         "lastName",
         "contactNumber",
-        "email"
+        "email",
+        "participantIdentifier"
       ) VALUES (
         v_registration_id,
         TRUE,
         v_first_name,
         v_last_name,
-        v_contact_number,
-        v_email
+        COALESCE(v_contact_number, ''),
+        COALESCE(v_email, ''),
+        v_participant_identifier
       );
 
       v_inserted := v_inserted + 1;
@@ -256,7 +237,3 @@ BEGIN
   );
 END;
 $$;
-
-GRANT ALL ON FUNCTION "public"."import_event_registrations"(uuid, jsonb, boolean) TO anon;
-GRANT ALL ON FUNCTION "public"."import_event_registrations"(uuid, jsonb, boolean) TO authenticated;
-GRANT ALL ON FUNCTION "public"."import_event_registrations"(uuid, jsonb, boolean) TO service_role;

@@ -481,26 +481,41 @@ export default function ImportRegistrationsDialog({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {result.results.slice(0, 50).map((entry) => (
-                        <TableRow key={`${entry.rowNumber}-${entry.status}`}>
-                          <TableCell>{entry.rowNumber}</TableCell>
-                          <TableCell className="uppercase">
-                            {entry.status}
-                          </TableCell>
-                          <TableCell className="max-w-[420px] whitespace-normal text-xs">
-                            {entry.errors?.join("; ") ||
-                              entry.warnings?.join("; ") ||
-                              entry.sourceSubmissionId ||
-                              "-"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {result.results
+                        .filter(
+                          (r) =>
+                            r.status === "invalid" || r.status === "failed",
+                        )
+                        .map((entry) => (
+                          <TableRow key={`${entry.rowNumber}-${entry.status}`}>
+                            <TableCell>{entry.rowNumber}</TableCell>
+                            <TableCell className="uppercase">
+                              {entry.status}
+                            </TableCell>
+                            <TableCell className="max-w-[420px] whitespace-normal text-xs">
+                              {entry.errors?.join("; ") ||
+                                entry.warnings?.join("; ") ||
+                                entry.sourceSubmissionId ||
+                                "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 </div>
-                {result.results.length > 50 && (
+                {result.results.filter(
+                  (r) => r.status === "invalid" || r.status === "failed",
+                ).length === 0 &&
+                  result.total > 0 && (
+                    <p className="text-muted-foreground text-xs">
+                      All rows valid. No issues found.
+                    </p>
+                  )}
+                {result.results.some(
+                  (r) => r.status === "invalid" || r.status === "failed",
+                ) && (
                   <p className="text-muted-foreground text-xs">
-                    Showing first 50 row results.
+                    Showing rows with errors only.
                   </p>
                 )}
               </div>

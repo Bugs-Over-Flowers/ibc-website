@@ -140,15 +140,23 @@ function WebsiteContentManagementPageContent() {
     deleteSelectedCards,
     save,
     isSavingSection,
+    saveSucceededCount,
     isLoadingSection,
     updatedAtBySection,
     cardCountBySection,
     hasLoadedSectionSummaries,
   } = useWebsiteContentEditor(activeSection);
 
+  const [editingFooter, setEditingFooter] = useState<
+    { label: string; onClick: () => void } | undefined
+  >(undefined);
+
   const hasSelectedCards = selectedCardEntryKeys.size > 0;
   const selectedCount = selectedCardEntryKeys.size;
   const isSectionActionDisabled = isSavingSection || isLoadingSection;
+  const isSaveDisabled =
+    isSavingSection || isLoadingSection || isDeleteMode || isUploadingImages;
+  const showCloseButton = !editingFooter;
 
   const handleDeleteCardsClick = (entryKey?: string) => {
     if (entryKey) {
@@ -179,25 +187,40 @@ function WebsiteContentManagementPageContent() {
   );
 
   const handleSave = async () => {
+    const snapshotForm = form;
+    const snapshotCards = cards;
+    let finalCards = snapshotCards;
+
     setIsUploadingImages(true);
     try {
-      await uploadAllPendingImages();
+      const uploadedImages = await uploadAllPendingImages();
+      finalCards = snapshotCards.map((card) => {
+        const publicUrl = uploadedImages[card.entryKey];
 
-      // Poll for state updates: wait until blob URLs are gone or timeout after 5 seconds
-      let hasBlobUrls = true;
-      let attempts = 0;
-      const maxAttempts = 50; // 50 * 100ms = 5000ms max wait
+        if (!publicUrl) {
+          return card;
+        }
 
-      while (hasBlobUrls && attempts < maxAttempts) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        hasBlobUrls = cards.some((card) => card.imageUrl.startsWith("blob:"));
-        attempts++;
-      }
+        return {
+          ...card,
+          imageUrl: publicUrl,
+        };
+      });
 
-      if (hasBlobUrls) {
+      const hasPreviewUrls = finalCards.some((card) => {
+        const imageUrl = card.imageUrl.trim().toLowerCase();
+        return imageUrl.startsWith("blob:") || imageUrl.startsWith("data:");
+      });
+
+      if (hasPreviewUrls) {
         console.warn(
-          `Images still have preview URLs after timeout: ${cards
-            .filter((c) => c.imageUrl.startsWith("blob:"))
+          `Images still have preview URLs after upload: ${finalCards
+            .filter((c) => {
+              const imageUrl = c.imageUrl.trim().toLowerCase();
+              return (
+                imageUrl.startsWith("blob:") || imageUrl.startsWith("data:")
+              );
+            })
             .map((c) => c.entryKey)
             .join(", ")}`,
         );
@@ -214,7 +237,7 @@ function WebsiteContentManagementPageContent() {
       setIsUploadingImages(false);
     }
 
-    save();
+    await save(finalCards, snapshotForm);
   };
 
   const updatedAtDisplay = (section: SectionKey) => {
@@ -311,10 +334,12 @@ function WebsiteContentManagementPageContent() {
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
             onDeleteCardsClick={handleDeleteCardsClick}
+            onRegisterEditingFooter={setEditingFooter}
             onSelectAllCards={selectAllCards}
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            saveSucceededCount={saveSucceededCount}
             selectedCardEntryKeys={selectedCardEntryKeys}
             selectedCount={selectedCount}
           />
@@ -326,16 +351,19 @@ function WebsiteContentManagementPageContent() {
             cards={cards}
             hasSelectedCards={hasSelectedCards}
             isDeleteMode={isDeleteMode}
+            isSavingSection={isSavingSection}
             isSectionActionDisabled={isSectionActionDisabled}
             onAddCard={() => addCard()}
             onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
             onCardsReorder={replaceCards}
             onDeleteCardsClick={handleDeleteCardsClick}
+            onRegisterEditingFooter={setEditingFooter}
             onSelectAllCards={selectAllCards}
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
             placeholders={placeholders}
+            saveSucceededCount={saveSucceededCount}
             selectedCardEntryKeys={selectedCardEntryKeys}
             selectedCount={selectedCount}
           />
@@ -446,6 +474,7 @@ function WebsiteContentManagementPageContent() {
           if (!open) {
             cancelDeleteMode();
             setActiveSection(null);
+            setEditingFooter(undefined);
           }
         }}
         open={!!activeSection}
@@ -455,13 +484,15 @@ function WebsiteContentManagementPageContent() {
           <DialogPrimitive.Viewport className="fixed inset-0 z-50 overflow-hidden p-3 sm:p-6">
             <div className="flex h-full items-center justify-center">
               <DialogPrimitive.Popup className="relative flex max-h-[calc(100vh-6rem)] w-[min(97vw,1550px)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
-                <DialogPrimitive.Close
-                  className="absolute top-4 right-4 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  render={<button type="button" />}
-                >
-                  <XIcon className="h-5 w-5" />
-                  <span className="sr-only">Close</span>
-                </DialogPrimitive.Close>
+                {showCloseButton ? (
+                  <DialogPrimitive.Close
+                    className="absolute top-4 right-4 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    render={<button type="button" />}
+                  >
+                    <XIcon className="h-5 w-5" />
+                    <span className="sr-only">Close</span>
+                  </DialogPrimitive.Close>
+                ) : null}
 
                 <div className="space-y-1.5 border-border border-b px-6 py-5 pr-12 sm:px-7">
                   <DialogPrimitive.Title className="font-bold text-4xl text-foreground">
@@ -504,21 +535,25 @@ function WebsiteContentManagementPageContent() {
 
                 <div className="border-border border-t bg-background px-6 py-4 sm:px-7">
                   <div className="flex flex-wrap items-center justify-end gap-2">
-                    <Button
-                      disabled={
-                        isSavingSection ||
-                        isLoadingSection ||
-                        isDeleteMode ||
-                        isUploadingImages
-                      }
-                      onClick={handleSave}
-                    >
-                      {isUploadingImages
-                        ? "Uploading images..."
-                        : isSavingSection
-                          ? "Saving..."
-                          : "Save Changes"}
-                    </Button>
+                    {editingFooter ? (
+                      <Button
+                        disabled={isSectionActionDisabled}
+                        onClick={() => {
+                          // invoke the section-provided back handler
+                          editingFooter.onClick();
+                        }}
+                      >
+                        {editingFooter.label}
+                      </Button>
+                    ) : (
+                      <Button disabled={isSaveDisabled} onClick={handleSave}>
+                        {isUploadingImages
+                          ? "Uploading images..."
+                          : isSavingSection
+                            ? "Saving..."
+                            : "Save Changes"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </DialogPrimitive.Popup>

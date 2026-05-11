@@ -45,8 +45,7 @@ export default function CheckInRegistrationFilters() {
   }, [searchParams]);
 
   const [searchQuery, setSearchQuery] = useState(searchQueryParam);
-  const hasActiveFilters =
-    searchQueryParam.trim() !== "" || selectedPaymentStatus !== "all";
+  const hasActiveFilters = selectedPaymentStatus !== "all";
 
   useEffect(() => {
     setSearchQuery(searchQueryParam);
@@ -95,6 +94,10 @@ export default function CheckInRegistrationFilters() {
             <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               className="h-9 bg-background pr-8 pl-8 text-sm"
+              onBlur={(event) => {
+                setSearchQuery(event.target.value);
+                updateSearchParams(event.target.value, selectedPaymentStatus);
+              }}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Identifier, name, or affiliation"
               value={searchQuery}
@@ -161,14 +164,13 @@ export default function CheckInRegistrationFilters() {
         <Button
           className="h-9 md:ml-auto"
           onClick={() => {
-            setSearchQuery("");
             updateSearchParams("", "all");
           }}
           size="sm"
           type="button"
           variant="ghost"
         >
-          Clear filters
+          Clear Filters
         </Button>
       ) : null}
     </div>

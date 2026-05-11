@@ -68,6 +68,7 @@ export interface BoardOfTrusteesSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
   isSectionActionDisabled: boolean;
+  saveSucceededCount: number;
   onAddCard: (group: "featured" | "officers" | "trustees" | "other") => void;
   isDeleteMode: boolean;
   hasSelectedCards: boolean;
@@ -84,12 +85,18 @@ export interface BoardOfTrusteesSectionProps {
     value: string,
   ) => void;
   onCardsReorder: (nextCards: WebsiteContentCardState[]) => void;
+  onRegisterEditingFooter?: (footer?: {
+    label: string;
+    onClick: () => void;
+  }) => void;
 }
 
 export interface SecretariatSectionProps {
   cards: WebsiteContentCardState[];
   placeholders: WebsiteContentFormState;
   isSectionActionDisabled: boolean;
+  isSavingSection: boolean;
+  saveSucceededCount: number;
   onAddCard: () => void;
   isDeleteMode: boolean;
   hasSelectedCards: boolean;
@@ -106,6 +113,10 @@ export interface SecretariatSectionProps {
     value: string,
   ) => void;
   onCardsReorder: (nextCards: WebsiteContentCardState[]) => void;
+  onRegisterEditingFooter?: (footer?: {
+    label: string;
+    onClick: () => void;
+  }) => void;
 }
 
 export interface LandingBenefitsSectionProps {

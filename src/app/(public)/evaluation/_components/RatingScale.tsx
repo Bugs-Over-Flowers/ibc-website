@@ -111,7 +111,7 @@ export function RatingScale({
                 />
                 <option.Icon
                   className={cn(
-                    "h-4 w-4 transition-transform duration-150 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7 xl:h-8 xl:w-8",
+                    "h-5 w-5 transition-transform duration-150 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7 xl:h-8 xl:w-8",
                     isSelected
                       ? cn(option.color, "scale-110")
                       : cn(option.colorMuted, "group-hover:scale-105"),

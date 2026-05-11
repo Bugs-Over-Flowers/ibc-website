@@ -3,11 +3,14 @@ import { getMembers } from "@/server/members/queries/getMembers";
 import { EmptyMembersState } from "./EmptyMembersState";
 import { MembersTable } from "./MembersTable";
 
+type MemberSortOption = "joinDate-desc" | "businessName-asc";
+
 interface PageProps {
   searchParams: Promise<{
     status?: string;
     sectorName?: string;
     search?: string;
+    sort?: MemberSortOption;
   }>;
 }
 
@@ -26,6 +29,7 @@ export default async function MembersList({ searchParams }: PageProps) {
     status,
     sectorName: params.sectorName,
     search: params.search,
+    sort: params.sort,
   };
 
   const members = await getMembers(cookieStore.getAll(), filters);

@@ -50,9 +50,12 @@ export function ParticipantFields({ form, index }: ParticipantFieldsProps) {
               <Label className="text-sm">Email Address</Label>
               <field.TextField
                 className="h-11 rounded-xl"
-                placeholder="juan.delacruz@example.com"
-                type="email"
+                placeholder="juan.delacruz@example.com or NA"
+                type="text"
               />
+              <p className="text-muted-foreground text-xs">
+                If there is no email address, enter NA.
+              </p>
             </div>
           )}
         </form.AppField>
@@ -65,8 +68,11 @@ export function ParticipantFields({ form, index }: ParticipantFieldsProps) {
               </Label>
               <field.TextField
                 className="h-11 rounded-xl"
-                placeholder="09XXXXXXXXX / 0XXXX-XXXX"
+                placeholder="09XXXXXXXXX / 0XXXX-XXXX or NA"
               />
+              <p className="text-muted-foreground text-xs">
+                If there is no contact number, enter NA.
+              </p>
             </div>
           )}
         </form.AppField>

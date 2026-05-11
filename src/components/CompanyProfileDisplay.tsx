@@ -22,7 +22,6 @@ function detectProfileTypeFromURL(url: string): CompanyProfileType {
 export function CompanyProfileDisplay({
   websiteURL,
   companyProfileType,
-  fileName,
 }: CompanyProfileDisplayProps) {
   if (!websiteURL) return <span>N/A</span>;
 

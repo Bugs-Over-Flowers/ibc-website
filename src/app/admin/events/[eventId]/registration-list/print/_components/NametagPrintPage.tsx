@@ -1,14 +1,24 @@
 "use client";
 
-import { Search, Users } from "lucide-react";
+import { ArrowDown, ArrowUpDown, Search, Users } from "lucide-react";
 import {
   useCallback,
   useDeferredValue,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { useReactToPrint } from "react-to-print";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { ParticipantForPrint } from "@/server/registration/queries/getEventParticipantsForPrint";
 import NametagGrid from "./NametagGrid";
 import NametagPrintToolbar from "./NametagPrintToolbar";
@@ -32,6 +42,12 @@ function groupByAffiliation(participants: ParticipantForPrint[]) {
   return map;
 }
 
+const sortKeys = [
+  { value: "firstName", label: "First Name" },
+  { value: "lastName", label: "Last Name" },
+  { value: "affiliation", label: "Affiliation" },
+];
+
 export default function NametagPrintPage({
   eventTitle,
   participants,
@@ -41,6 +57,10 @@ export default function NametagPrintPage({
   );
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
+  const [sortKey, setSortKey] =
+    useState<(typeof sortKeys)[number]["value"]>("firstName");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
 
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -51,16 +71,32 @@ export default function NametagPrintPage({
   });
 
   const filteredParticipants = useMemo(() => {
+    let list = participants;
+
     const q = deferredSearch.trim().toLowerCase();
-    if (!q) return participants;
-    return participants.filter(
-      (p) =>
-        p.firstName.toLowerCase().includes(q) ||
-        p.lastName.toLowerCase().includes(q) ||
-        p.affiliation.toLowerCase().includes(q) ||
-        p.registrationIdentifier.toLowerCase().includes(q),
-    );
-  }, [participants, deferredSearch]);
+    if (q) {
+      list = list.filter(
+        (p) =>
+          p.firstName.toLowerCase().includes(q) ||
+          p.lastName.toLowerCase().includes(q) ||
+          p.affiliation.toLowerCase().includes(q) ||
+          p.participantIdentifier.toLowerCase().includes(q),
+      );
+    }
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    list = [...list].sort((a, b) => {
+      const cmp =
+        sortKey === "firstName"
+          ? a.firstName.localeCompare(b.firstName)
+          : sortKey === "lastName"
+            ? a.lastName.localeCompare(b.lastName)
+            : a.affiliation.localeCompare(b.affiliation);
+      return cmp * dir;
+    });
+
+    return list;
+  }, [participants, deferredSearch, sortKey, sortDir]);
 
   const selectedParticipants = useMemo(
     () => participants.filter((p) => selectedIds.has(p.participantId)),
@@ -111,6 +147,12 @@ export default function NametagPrintPage({
     [participants],
   );
 
+  useEffect(() => {
+    const handleScroll = () => setShowScrollBtn(window.scrollY > 400);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const allSelected = selectedIds.size === participants.length;
   const noneSelected = selectedIds.size === 0;
 
@@ -133,16 +175,41 @@ export default function NametagPrintPage({
         totalCount={participants.length}
       />
 
-      {/* Search */}
-      <div className="relative print:hidden">
-        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          className="w-full rounded-lg border border-border bg-card py-2 pr-4 pl-9 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, affiliation, or identifier..."
-          type="text"
-          value={search}
-        />
+      {/* Search + Sort */}
+      <div className="flex items-center gap-2 print:hidden">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, affiliation, or identifier..."
+            type="text"
+            value={search}
+          />
+        </div>
+        <Select
+          onValueChange={(v) => setSortKey(v as typeof sortKey)}
+          value={sortKey}
+        >
+          <SelectTrigger className="h-9 w-[140px]">
+            <SelectValue>
+              {sortKeys.find((k) => k.value === sortKey)?.label}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="firstName">First Name</SelectItem>
+            <SelectItem value="lastName">Last Name</SelectItem>
+            <SelectItem value="affiliation">Affiliation</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          aria-label={`Sort ${sortDir === "asc" ? "descending" : "ascending"}`}
+          onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+          size="icon"
+          variant="outline"
+        >
+          <ArrowUpDown className="size-4" />
+        </Button>
       </div>
 
       {/* Selection list (screen only) */}
@@ -203,7 +270,7 @@ export default function NametagPrintPage({
                           <p className="text-muted-foreground text-xs">
                             {participant.affiliation || "No affiliation"} ·{" "}
                             <span className="font-mono tracking-wide">
-                              {participant.registrationIdentifier}
+                              {participant.participantIdentifier}
                             </span>
                           </p>
                         </div>
@@ -218,7 +285,7 @@ export default function NametagPrintPage({
       </div>
 
       {/* Hidden print container */}
-      <div className="fixed top-0 left-[-9999px]">
+      <div className="invisible absolute h-0 overflow-hidden">
         <div ref={printRef}>
           <NametagGrid
             eventTitle={eventTitle}
@@ -228,7 +295,7 @@ export default function NametagPrintPage({
       </div>
 
       {/* Preview grid (screen only) */}
-      <div className="print:hidden">
+      <div className="print:hidden" id="nametag-preview">
         {noneSelected ? (
           <div className="rounded-xl border border-border border-dashed bg-muted/30 p-8 text-center">
             <Users className="mx-auto mb-3 size-8 text-muted-foreground/50" />
@@ -255,6 +322,22 @@ export default function NametagPrintPage({
           </div>
         )}
       </div>
+
+      {/* Scroll-to-preview FAB */}
+      {showScrollBtn && !noneSelected && (
+        <Button
+          aria-label="Scroll to preview"
+          className="fixed right-6 bottom-6 z-50 size-12 rounded-full shadow-lg print:hidden"
+          onClick={() =>
+            document
+              .getElementById("nametag-preview")
+              ?.scrollIntoView({ behavior: "smooth" })
+          }
+          size="icon"
+        >
+          <ArrowDown className="size-5" />
+        </Button>
+      )}
     </div>
   );
 }

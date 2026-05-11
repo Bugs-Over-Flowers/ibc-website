@@ -15,6 +15,9 @@ export default function TicketCard({
   cid,
   identifier,
 }: TicketCardProps) {
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(cid)) {
+    throw new Error(`Invalid CID: "${cid}"`);
+  }
   return (
     <Section style={ticketContainer}>
       <Section style={qrBox}>
