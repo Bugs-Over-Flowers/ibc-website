@@ -1,11 +1,17 @@
 "use client";
 
-import { ClipboardList, Trash2 } from "lucide-react";
+import {
+  CheckSquare2,
+  ClipboardList,
+  Square,
+  Trash2,
+  Users,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import tryCatch from "@/lib/server/tryCatch";
 import { deleteEvaluation } from "@/server/evaluation/mutations/deleteEvaluation";
 import type { EvaluationWithEventRpc } from "@/server/evaluation/queries/getAllEvaluations";
@@ -29,6 +35,7 @@ export function EvaluationList({
   const [isDeleting, setIsDeleting] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for infinite scroll
@@ -66,6 +73,21 @@ export function EvaluationList({
   }, [displayedCount, evaluations.length, pageSize, isLoadingMore]);
 
   const displayed = evaluations.slice(0, displayedCount);
+  const allSelected =
+    displayed.length > 0 && selectedIds.size === displayed.length;
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  const clearSelectionAndMode = () => {
+    setSelectedIds(new Set());
+    setIsSelectionMode(false);
+  };
+
+  const enableSelectionMode = () => {
+    setIsSelectionMode(true);
+  };
 
   const handleSelectEvaluation = (evaluation: EvaluationWithEventRpc) => {
     const newSelected = new Set(selectedIds);
@@ -78,13 +100,13 @@ export function EvaluationList({
   };
 
   const handleSelectAll = () => {
-    let newSelected: Set<string>;
-    if (selectedIds.size === displayed.length) {
-      newSelected = new Set();
-    } else {
-      newSelected = new Set(displayed.map((e) => e.evaluation_id));
+    if (allSelected) {
+      clearSelection();
+      return;
     }
-    setSelectedIds(newSelected);
+
+    setSelectedIds(new Set(displayed.map((e) => e.evaluation_id)));
+    setIsSelectionMode(true);
   };
 
   const handleDeleteSelected = async () => {
@@ -123,6 +145,7 @@ export function EvaluationList({
     setIsDeleting(false);
     setSelectedIds(new Set());
     setOpenDeleteDialog(false);
+    setIsSelectionMode(false);
 
     if (errorCount > 0) {
       toast.error(
@@ -155,42 +178,74 @@ export function EvaluationList({
     <>
       <div className="flex flex-col gap-4">
         {/* Header Row with Controls */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="font-medium text-muted-foreground text-sm">
             {evaluations.length} evaluation
             {evaluations.length !== 1 ? "s" : ""} found
+            {selectedIds.size > 0 && `, ${selectedIds.size} selected`}
           </div>
-          {displayed.length > 0 && (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5">
-                <Checkbox
-                  checked={
-                    displayed.length > 0 &&
-                    selectedIds.size === displayed.length
-                  }
-                  onCheckedChange={handleSelectAll}
-                />
-                <span className="text-muted-foreground text-xs">
-                  {selectedIds.size === 0
-                    ? "Select all on page"
-                    : `${selectedIds.size} evaluation${selectedIds.size !== 1 ? "s" : ""} selected`}
-                </span>
-              </div>
-              {selectedIds.size > 0 && (
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            {!isSelectionMode ? (
+              <Button
+                className="h-10 w-full rounded-xl border border-border bg-card/80 text-foreground transition-all hover:border-primary/30 hover:bg-background sm:w-auto"
+                onClick={enableSelectionMode}
+                size="sm"
+                variant="outline"
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Select Evaluations
+              </Button>
+            ) : (
+              <>
                 <Button
-                  disabled={isDeleting}
-                  onClick={handleDeleteSelected}
+                  className="h-10 w-full rounded-xl border border-border bg-card/80 text-foreground transition-all hover:border-primary/30 hover:bg-background sm:w-auto"
+                  onClick={handleSelectAll}
                   size="sm"
-                  variant="destructive"
+                  variant="outline"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  {isDeleting ? "Deleting..." : "Delete"}
+                  {allSelected ? (
+                    <Square className="mr-2 h-4 w-4" />
+                  ) : (
+                    <CheckSquare2 className="mr-2 h-4 w-4" />
+                  )}
+                  {allSelected ? "Unselect All" : "Select All"}
                 </Button>
-              )}
-            </div>
-          )}
+
+                <Button
+                  className="h-10 w-full rounded-xl border border-border bg-card/80 text-foreground transition-all hover:border-primary/30 hover:bg-background sm:w-auto"
+                  onClick={clearSelectionAndMode}
+                  size="sm"
+                  variant="outline"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
+      {isSelectionMode ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-card/80 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="font-medium text-muted-foreground text-sm">
+            Choose evaluations and delete them.
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              disabled={isDeleting || selectedIds.size === 0}
+              onClick={handleDeleteSelected}
+              size="sm"
+              variant="destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              {isDeleting ? "Deleting..." : "Delete Selected"}
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-3 gap-4">
         {displayed.map((evaluation) => (
@@ -198,9 +253,10 @@ export function EvaluationList({
             backEventId={backEventId}
             evaluation={evaluation}
             isSelected={selectedIds.has(evaluation.evaluation_id)}
+            isSelectionMode={isSelectionMode}
             key={evaluation.evaluation_id}
             onSelect={handleSelectEvaluation}
-            showCheckbox={true}
+            showCheckbox={isSelectionMode}
           />
         ))}
       </div>

@@ -18,6 +18,7 @@ import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 
 interface EvaluationCardProps {
   evaluation: EvaluationWithEventRpc;
+  isSelectionMode: boolean;
   isSelected: boolean;
   onSelect: (evaluation: EvaluationWithEventRpc) => void;
   showCheckbox?: boolean;
@@ -26,6 +27,7 @@ interface EvaluationCardProps {
 
 export function EvaluationCard({
   evaluation,
+  isSelectionMode,
   isSelected,
   onSelect,
   showCheckbox,
@@ -64,6 +66,25 @@ export function EvaluationCard({
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
     goToDetails();
+  };
+
+  const handleCardClick = () => {
+    if (isSelectionMode) {
+      return;
+    }
+
+    goToDetails();
+  };
+
+  const handleCardKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isSelectionMode) {
+      return;
+    }
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      goToDetails();
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -120,8 +141,13 @@ export function EvaluationCard({
         </div>
 
         <button
-          className="w-full cursor-pointer text-left"
-          onClick={goToDetails}
+          aria-disabled={isSelectionMode}
+          className={cn(
+            "w-full text-left",
+            isSelectionMode ? "cursor-default" : "cursor-pointer",
+          )}
+          onClick={handleCardClick}
+          tabIndex={isSelectionMode ? undefined : 0}
           type="button"
         >
           <div className="flex flex-col gap-5 p-5">
@@ -134,6 +160,7 @@ export function EvaluationCard({
                     checked={isSelected}
                     onCheckedChange={() => onSelect(evaluation)}
                     onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
                   />
                 </div>
               )}
