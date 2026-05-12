@@ -51,38 +51,44 @@ export function ContactForm() {
 
     setIsLoading(true);
 
-    const emailBody = `
-New Contact Form Submission
-──────────────────────────
+    // Create email body with proper line breaks for Gmail compatibility
+    const emailBodyLines = [
+      formData.message,
+      "",
+      "──────────────────────────",
+      "",
+      "Contact Information:",
+      "",
+      `Name: ${formData.firstName} ${formData.lastName}`,
+      `Email: ${formData.email}`,
+      `Phone: ${formData.phone || "N/A"}`,
+      `Company/Organization: ${formData.company || "N/A"}`,
+      "",
+      `Inquiry Type: ${inquiryType}`,
+      `Submitted: ${new Date().toLocaleString()}`,
+      "",
+      "──────────────────────────",
+      "Sent via Website Contact Form",
+    ];
+    const emailBody = emailBodyLines.join("\n");
 
-Name:
-${formData.firstName} ${formData.lastName}
+    // Create subject with company name if available
+    const companyPart = formData.company ? ` | ${formData.company}` : "";
+    const subject = `Contact Form Inquiry | ${inquiryType}${companyPart}`;
 
-Email:
-${formData.email}
-
-Phone:
-${formData.phone || "N/A"}
-
-Company / Organization:
-${formData.company || "N/A"}
-
-Inquiry Type:
-${inquiryType}
-
-Message:
-${formData.message}
-
-Submitted On:
-${new Date().toLocaleString()}
-
-──────────────────────────
-Sent via Website Contact Form
-    `.trim();
     // Change email here to change recipient (should be placed in .env.local for production)
-    const mailto = `mailto:${process.env.NEXT_PUBLIC_EMAIL_MESSAGE_RECIPIENT}?subject=${encodeURIComponent(`Contact Form Inquiry — ${inquiryType}`)}&body=${encodeURIComponent(emailBody)}`;
+    const recipientEmail =
+      process.env.NEXT_PUBLIC_EMAIL_MESSAGE_RECIPIENT || "";
 
-    window.location.href = mailto;
+    if (!recipientEmail) {
+      console.error("Email recipient not configured");
+      return;
+    }
+
+    // Open Gmail compose with pre-filled fields
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(recipientEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+
+    window.open(gmailUrl, "_blank");
 
     setFormData({
       firstName: "",
