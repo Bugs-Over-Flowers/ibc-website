@@ -7,10 +7,8 @@ import type {
   SaveWebsiteContentSectionInput,
   UpsertWebsiteContentRowInput,
 } from "../types";
-import {
-  deleteWebsiteContentEntriesBySection,
-  upsertWebsiteContentRows,
-} from "./upsertWebsiteContentRow";
+import { deleteWebsiteContentEntriesBySection } from "./deleteWebsiteContentEntriesBySection";
+import { upsertWebsiteContentRows } from "./upsertWebsiteContentRow";
 
 const WEBSITE_CONTENT_SECTION_TAG_BY_SECTION = {
   vision_mission: CACHE_TAGS.websiteContent.section.visionMission,

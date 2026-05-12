@@ -95,7 +95,7 @@ function SortableCard({
         )}
       </button>
 
-      <div className="my-2 flex flex-col items-center">
+      <div className="my-2 flex w-full flex-col items-center px-2 text-center">
         <h3 className="font-semibold text-base">
           {card.title || "Secretariat member"}
         </h3>
@@ -141,7 +141,7 @@ function CardForm({
         onChange={(e) =>
           onCardFieldChange(card.entryKey, "title", e.target.value)
         }
-        placeholder={placeholders.title}
+        placeholder={placeholders.title || "Enter text"}
         ref={titleInputRef}
         value={card.title}
       />
@@ -149,7 +149,7 @@ function CardForm({
         onChange={(e) =>
           onCardFieldChange(card.entryKey, "subtitle", e.target.value)
         }
-        placeholder={placeholders.subtitle}
+        placeholder={placeholders.subtitle || "Enter text"}
         value={card.subtitle}
       />
 

@@ -15,59 +15,35 @@ type BoardGroup = "featured" | "officers" | "trustees" | "other";
 
 const boardOfTrustees: MemberCard[] = [
   {
-    title: "Juan Jose Jamora III",
-    subtitle: "Chairman Emeritus",
+    title: "",
+    subtitle: "",
     group: "featured",
   },
-  { title: "Ma. Luisa Segovia", subtitle: "President", group: "featured" },
-  { title: "Herminio Maravilla", subtitle: "Chairman", group: "officers" },
-  {
-    title: "Jose Paolo Treñas",
-    subtitle: "Vice President",
-    group: "officers",
-  },
-  {
-    title: "Allen Son Tan",
-    subtitle: "Corporate Secretary",
-    group: "officers",
-  },
-  { title: "Phillipp Chua", subtitle: "Treasurer", group: "officers" },
-  {
-    title: "Atty. George Que",
-    subtitle: "Legal Counsel",
-    group: "officers",
-  },
-  { title: "Francis De la Cruz", subtitle: "Trustee", group: "trustees" },
-  { title: "Jose Hautea, Jr.", subtitle: "Trustee", group: "trustees" },
-  {
-    title: "Philip Joel Lataquin",
-    subtitle: "Trustee",
-    group: "trustees",
-  },
-  { title: "Jose Layson, Jr.", subtitle: "Trustee", group: "trustees" },
-  { title: "Arsenio Rafael III", subtitle: "Trustee", group: "trustees" },
-  {
-    title: "Atty. Fritzie Diez-Treñas",
-    subtitle: "Trustee",
-    group: "trustees",
-  },
-  {
-    title: "Engr. Terence Uygongco",
-    subtitle: "Trustee",
-    group: "trustees",
-  },
-  { title: "Anatole Dan Viray", subtitle: "Trustee", group: "trustees" },
+  { title: "", subtitle: "", group: "featured" },
+  { title: "", subtitle: "", group: "officers" },
+  { title: "", subtitle: "", group: "officers" },
+  { title: "", subtitle: "", group: "officers" },
+  { title: "", subtitle: "", group: "officers" },
+  { title: "", subtitle: "", group: "officers" },
+  { title: "", subtitle: "", group: "trustees" },
+  { title: "", subtitle: "", group: "trustees" },
+  { title: "", subtitle: "", group: "trustees" },
+  { title: "", subtitle: "", group: "trustees" },
+  { title: "", subtitle: "", group: "trustees" },
+  { title: "", subtitle: "", group: "trustees" },
+  { title: "", subtitle: "", group: "trustees" },
+  { title: "", subtitle: "", group: "trustees" },
 ];
 
 const secretariat: MemberCard[] = [
   {
-    title: "Herminia Ore",
-    subtitle: "Finance, Marketing, and Promotion",
+    title: "",
+    subtitle: "",
     group: null,
   },
   {
-    title: "Clea Angela Drilon",
-    subtitle: "Administrative Officer",
+    title: "",
+    subtitle: "",
     group: null,
   },
 ];
@@ -75,6 +51,28 @@ const secretariat: MemberCard[] = [
 interface AboutBoardProps {
   boardCards?: MemberCard[];
   secretariatCards?: MemberCard[];
+}
+
+function getBoardFallbackTitle(member: MemberCard, index: number) {
+  const normalized = member.group?.trim().toLowerCase();
+
+  if (normalized === "featured") {
+    return `Featured Member ${index + 1}`;
+  }
+
+  if (normalized === "officer" || normalized === "officers") {
+    return `Officer ${index + 1}`;
+  }
+
+  if (normalized === "trustee" || normalized === "trustees") {
+    return `Trustee ${index + 1}`;
+  }
+
+  return `Board Member ${index + 1}`;
+}
+
+function getSecretariatFallbackTitle(index: number) {
+  return `Secretariat Member ${index + 1}`;
 }
 
 export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
@@ -178,10 +176,10 @@ export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
                   )}
                 </div>
                 <h3 className="mb-2 font-bold text-foreground text-lg">
-                  {member.title}
+                  {member.title || getBoardFallbackTitle(member, index)}
                 </h3>
                 <p className="font-medium text-base text-primary">
-                  {member.subtitle}
+                  {member.subtitle || "Position/Title"}
                 </p>
               </motion.div>
             ))}
@@ -213,9 +211,11 @@ export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
                   )}
                 </div>
                 <h3 className="mb-2 font-semibold text-base text-foreground">
-                  {member.title}
+                  {member.title || getBoardFallbackTitle(member, index)}
                 </h3>
-                <p className="text-primary text-xs">{member.subtitle}</p>
+                <p className="text-primary text-xs">
+                  {member.subtitle || "Position/Title"}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -302,9 +302,11 @@ export function AboutBoard({ boardCards, secretariatCards }: AboutBoardProps) {
                 </div>
                 <div className="p-5 text-center">
                   <h3 className="font-semibold text-foreground">
-                    {member.title}
+                    {member.title || getSecretariatFallbackTitle(index)}
                   </h3>
-                  <p className="text-primary text-sm">{member.subtitle}</p>
+                  <p className="text-primary text-sm">
+                    {member.subtitle || "Position/Title"}
+                  </p>
                 </div>
               </motion.div>
             ))}

@@ -92,16 +92,10 @@ async function getWebsiteContentSectionCached(
       paragraph: form.missionParagraph,
     };
 
-    const placeholders = {
-      ...emptyWebsiteContentForm,
-      visionParagraph: form.visionParagraph,
-      missionParagraph: form.missionParagraph,
-    };
-
     return {
       form,
       cards: [visionCard, missionCard],
-      placeholders,
+      placeholders: { ...emptyWebsiteContentForm },
       updatedAt: latestUpdatedAt,
     };
   } else {
@@ -159,23 +153,10 @@ async function getWebsiteContentSectionCached(
       form.cardPlacement = firstCard.cardPlacement;
     }
 
-    const firstCard = cards[0];
-    const placeholders = firstCard
-      ? {
-          ...emptyWebsiteContentForm,
-          title: firstCard.title,
-          subtitle: firstCard.subtitle,
-          paragraph: firstCard.paragraph,
-          icon: firstCard.icon,
-          imageUrl: firstCard.imageUrl,
-          cardPlacement: firstCard.cardPlacement,
-        }
-      : { ...emptyWebsiteContentForm };
-
     return {
       form,
       cards,
-      placeholders,
+      placeholders: { ...emptyWebsiteContentForm },
       updatedAt: latestUpdatedAt,
     };
   }

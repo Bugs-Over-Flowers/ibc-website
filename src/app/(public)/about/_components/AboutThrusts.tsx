@@ -13,40 +13,12 @@ interface AboutThrustItem {
   icon: string;
 }
 
-const thrusts: AboutThrustItem[] = [
-  {
-    title: "Policy Advisory & Advocacy",
-    description:
-      "We are at the forefront of issues concerning the business sector. Iloilo Business Club, Inc. holds membership to various regional and local policy-making bodies to represent and put forth critical agenda to improve planning and development, service delivery and the local business climate.",
-    icon: "Shield",
-  },
-  {
-    title: "Investment Promotion",
-    description:
-      "Iloilo Business Club, Inc. is one of the founding business organizations of the Iloilo Economic Development Foundation, Inc. The Club partners with national government agencies, private companies and individuals that assist investors and businesses in locating and growing their business in Iloilo.",
-    icon: "TrendingUp",
-  },
-  {
-    title: "Tourism, Culture, Heritage & Arts",
-    description:
-      "To boost efforts to promote the Province and the City of Iloilo as a tourist destination, Iloilo Business Club, Inc. pursues partnerships and roles that provide capacity development for local stakeholders, discover new markets with growth potential, and improve services and facilities.",
-    icon: "Palette",
-  },
-  {
-    title: "Business Support Services",
-    description:
-      "Projects and activities of Iloilo Business Club are carefully selected to address the needs of its membership and the business sector in general. Economic data and information from key national government agencies and local government units are accessed for members upon request.",
-    icon: "Handshake",
-  },
-];
-
 interface AboutThrustsProps {
   thrustsData?: AboutThrustItem[];
 }
 
 export function AboutThrusts({ thrustsData }: AboutThrustsProps) {
-  const resolvedThrusts =
-    thrustsData && thrustsData.length > 0 ? thrustsData : thrusts;
+  const resolvedThrusts = thrustsData ?? [];
 
   return (
     <section className="bg-card py-24">
@@ -85,7 +57,7 @@ export function AboutThrusts({ thrustsData }: AboutThrustsProps) {
                       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
                         <Icon className="h-7 w-7 text-primary" />
                       </div>
-                      <h3 className="font-bold text-foreground text-xl">
+                      <h3 className="wrap-break-word min-w-0 flex-1 font-bold text-foreground text-xl leading-tight">
                         {thrust.title}
                       </h3>
                     </div>
