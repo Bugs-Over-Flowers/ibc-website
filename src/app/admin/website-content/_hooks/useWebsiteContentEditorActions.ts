@@ -9,6 +9,7 @@ import type {
 } from "@/server/website-content/types";
 import {
   defaultCardsBySection,
+  normalizeCardPlacements,
   type WebsiteContentSectionSnapshotsBySection,
 } from "./websiteContentEditor.utils";
 
@@ -154,10 +155,7 @@ export function useWebsiteContentEditorActions({
     const filtered = cards.filter(
       (card) => !selectedCardEntryKeys.has(card.entryKey),
     );
-    const nextCards = filtered.map((card, index) => ({
-      ...card,
-      cardPlacement: String(index + 1),
-    }));
+    const nextCards = normalizeCardPlacements(filtered, activeSection);
 
     setCards(nextCards);
     updateCachedSection(form, nextCards);

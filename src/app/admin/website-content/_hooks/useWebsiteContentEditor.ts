@@ -191,6 +191,8 @@ export function useWebsiteContentEditor(
 
       if (!result.success) {
         toast.error(result.error);
+        setForm(emptyForm);
+        setCards([]);
         setIsLoadingSection(false);
         return;
       }
@@ -247,7 +249,7 @@ export function useWebsiteContentEditor(
 
     const nextForm = snapshotForm ?? formRef.current;
     const nextCards = snapshotCards ?? cardsRef.current;
-    const normalizedCards = normalizeCardPlacements(nextCards);
+    const normalizedCards = normalizeCardPlacements(nextCards, section);
 
     // (previous save snapshot refs removed)
 

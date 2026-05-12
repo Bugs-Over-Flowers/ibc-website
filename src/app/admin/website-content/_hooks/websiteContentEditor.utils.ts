@@ -54,59 +54,28 @@ export const defaultCardsBySection: Partial<
   },
 };
 
-function toComparableForm(form: WebsiteContentFormState) {
-  return {
-    title: form.title,
-    subtitle: form.subtitle,
-    paragraph: form.paragraph,
-    visionParagraph: form.visionParagraph,
-    missionParagraph: form.missionParagraph,
-    icon: form.icon,
-    imageUrl: form.imageUrl,
-    cardPlacement: form.cardPlacement,
-  };
-}
-
-function toComparableCard(card: WebsiteContentCardState) {
-  return {
-    entryKey: card.entryKey,
-    title: card.title,
-    subtitle: card.subtitle,
-    paragraph: card.paragraph,
-    icon: card.icon,
-    imageUrl: card.imageUrl,
-    cardPlacement: card.cardPlacement,
-    group: card.group,
-  };
-}
-
-export function areFormsEqual(
-  left: WebsiteContentFormState,
-  right: WebsiteContentFormState,
+export function normalizeCardPlacements(
+  cards: WebsiteContentCardState[],
+  section?: WebsiteContentSection,
 ) {
-  return (
-    JSON.stringify(toComparableForm(left)) ===
-    JSON.stringify(toComparableForm(right))
-  );
-}
+  // For hero_section, normalize placements within each group separately (1-5 per group)
+  // This ensures carousel slots remain valid on reload
+  if (section === "hero_section") {
+    const placementsByGroup: Map<string | null, number> = new Map();
 
-export function areCardsEqual(
-  left: WebsiteContentCardState[],
-  right: WebsiteContentCardState[],
-) {
-  if (left.length !== right.length) {
-    return false;
+    return cards.map((card) => {
+      const group = card.group;
+      const currentPlacement = (placementsByGroup.get(group) || 0) + 1;
+      placementsByGroup.set(group, currentPlacement);
+
+      return {
+        ...card,
+        cardPlacement: String(currentPlacement),
+      };
+    });
   }
 
-  return left.every((card, index) => {
-    return (
-      JSON.stringify(toComparableCard(card)) ===
-      JSON.stringify(toComparableCard(right[index]))
-    );
-  });
-}
-
-export function normalizeCardPlacements(cards: WebsiteContentCardState[]) {
+  // For other sections, normalize sequentially across all cards (1-N)
   return cards.map((card, index) => ({
     ...card,
     cardPlacement: String(index + 1),
