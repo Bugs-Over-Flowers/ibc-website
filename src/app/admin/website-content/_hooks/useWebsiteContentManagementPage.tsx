@@ -217,6 +217,7 @@ export function useWebsiteContentManagementPage() {
             onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
             onDeleteCardsClick={handleDeleteCardsClick}
+            onRegisterEditingFooter={setEditingFooter}
             onSelectAllCards={selectAllCards}
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
@@ -237,6 +238,7 @@ export function useWebsiteContentManagementPage() {
             onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
             onDeleteCardsClick={handleDeleteCardsClick}
+            onRegisterEditingFooter={setEditingFooter}
             onSelectAllCards={selectAllCards}
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}
@@ -304,6 +306,7 @@ export function useWebsiteContentManagementPage() {
             onCancelDeleteMode={cancelDeleteMode}
             onCardFieldChange={setCardField}
             onDeleteCardsClick={handleDeleteCardsClick}
+            onRegisterEditingFooter={setEditingFooter}
             onSelectAllCards={selectAllCards}
             onToggleCardSelected={toggleCardSelected}
             onUnselectAllCards={unselectAllCards}

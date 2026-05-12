@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowLeft, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import RichTextDisplay from "@/components/RichTextDisplay";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,12 +58,12 @@ function GoalsPreviewCard({
               ) : null}
             </div>
           </div>
-          <h3 className="mb-3 font-bold text-foreground text-xl">
+          <h3 className="wrap-break-word mb-3 w-full max-w-full font-bold text-foreground text-xl leading-tight">
             {card.title || "Goal Title"}
           </h3>
           {card.paragraph ? (
             <RichTextDisplay
-              className="mb-4 text-foreground/80 leading-relaxed"
+              className="mb-4 w-full max-w-full text-foreground/80 leading-relaxed"
               content={card.paragraph}
             />
           ) : (
@@ -105,7 +105,7 @@ function GoalCardForm({
             onChange={(e) => {
               onCardFieldChange(card.entryKey, "title", e.target.value);
             }}
-            placeholder={placeholders.title || "Increase Trailblazer Companies"}
+            placeholder={placeholders.title || "Enter text"}
             value={card.title}
           />
         </div>
@@ -137,12 +137,31 @@ export function GoalsSection({
   onCardFieldChange,
   isDeleteMode,
   selectedCardEntryKeys,
+  onRegisterEditingFooter,
 }: GoalsSectionProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
 
   const handleDeleteCard = (entryKey: string) => {
     onDeleteCardsClick(entryKey);
   };
+
+  useEffect(() => {
+    const hasEditingCard = cards.some(
+      (card) => card.entryKey === editingCardKey,
+    );
+
+    if (hasEditingCard) {
+      onRegisterEditingFooter?.({
+        label: `Back to Goals`,
+        onClick: () => setEditingCardKey(null),
+      });
+    } else {
+      onRegisterEditingFooter?.(undefined);
+      if (editingCardKey) {
+        setEditingCardKey(null);
+      }
+    }
+  }, [editingCardKey, cards, onRegisterEditingFooter]);
 
   const editingCard = cards.find((card) => card.entryKey === editingCardKey);
   const editingCardIndex = cards.findIndex(
@@ -153,18 +172,6 @@ export function GoalsSection({
     <>
       {editingCard ? (
         <div className="space-y-4">
-          <div className="flex items-center justify-start">
-            <Button
-              className="gap-2"
-              disabled={isSectionActionDisabled}
-              onClick={() => setEditingCardKey(null)}
-              type="button"
-              variant="outline"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Goals
-            </Button>
-          </div>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Left side - Edit form */}
             <div className="rounded-lg border border-border p-4">
@@ -214,12 +221,12 @@ export function GoalsSection({
                         ))}
                     </div>
                   </div>
-                  <h3 className="mb-3 font-bold text-foreground text-xl">
+                  <h3 className="wrap-break-word mb-3 w-full max-w-full font-bold text-foreground text-xl leading-tight">
                     {editingCard.title || "Goal Title"}
                   </h3>
                   {editingCard.paragraph ? (
                     <RichTextDisplay
-                      className="mb-4 text-foreground/80 leading-relaxed"
+                      className="mb-4 w-full max-w-full text-foreground/80 leading-relaxed"
                       content={editingCard.paragraph}
                     />
                   ) : (

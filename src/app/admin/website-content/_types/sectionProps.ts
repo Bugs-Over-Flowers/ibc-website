@@ -41,6 +41,10 @@ export interface GoalsSectionProps {
     field: keyof WebsiteContentCardState,
     value: string,
   ) => void;
+  onRegisterEditingFooter?: (footer?: {
+    label: string;
+    onClick: () => void;
+  }) => void;
 }
 
 export interface CompanyThrustsSectionProps {
@@ -62,6 +66,10 @@ export interface CompanyThrustsSectionProps {
     field: keyof WebsiteContentCardState,
     value: string,
   ) => void;
+  onRegisterEditingFooter?: (footer?: {
+    label: string;
+    onClick: () => void;
+  }) => void;
 }
 
 export interface BoardOfTrusteesSectionProps {
@@ -138,6 +146,10 @@ export interface LandingBenefitsSectionProps {
     field: keyof WebsiteContentCardState,
     value: string,
   ) => void;
+  onRegisterEditingFooter?: (footer?: {
+    label: string;
+    onClick: () => void;
+  }) => void;
 }
 
 export interface HeroSectionCarouselProps {

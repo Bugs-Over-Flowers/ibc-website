@@ -28,29 +28,28 @@ export const defaultCardsBySection: Partial<
   Record<WebsiteContentSection, Partial<WebsiteContentCardState>>
 > = {
   goals: {
-    title: "Define a new organizational goal",
-    paragraph:
-      "Describe what this goal is about, why it matters, and how it will be achieved.",
+    title: "",
+    paragraph: "",
     icon: "Target",
   },
   company_thrusts: {
-    title: "Enter thrust title",
-    paragraph: "Describe the company thrust and its strategic importance.",
+    title: "",
+    paragraph: "",
     icon: "Rocket",
   },
   landing_page_benefits: {
-    title: "Enter benefit title",
-    paragraph: "Explain the benefit and its value proposition.",
+    title: "",
+    paragraph: "",
     icon: "Sparkles",
   },
   board_of_trustees: {
-    title: "Board member name",
-    subtitle: "Position/Title",
+    title: "",
+    subtitle: "",
     imageUrl: "",
   },
   secretariat: {
-    title: "Staff member name",
-    subtitle: "Position/Title",
+    title: "",
+    subtitle: "",
     imageUrl: "",
   },
 };
