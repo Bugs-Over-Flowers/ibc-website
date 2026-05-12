@@ -159,7 +159,7 @@ function BoardCardForm({
           onChange={(e) =>
             onCardFieldChange(card.entryKey, "title", e.target.value)
           }
-          placeholder={placeholders.title}
+          placeholder={placeholders.title || "Enter text"}
           ref={titleInputRef}
           value={card.title}
         />
@@ -171,7 +171,7 @@ function BoardCardForm({
           onChange={(e) =>
             onCardFieldChange(card.entryKey, "subtitle", e.target.value)
           }
-          placeholder={placeholders.subtitle}
+          placeholder={placeholders.subtitle || "Enter text"}
           value={card.subtitle}
         />
       </div>

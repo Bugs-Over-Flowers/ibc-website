@@ -70,7 +70,9 @@ const VisionMissionCard = ({
         <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
           <Icon className="h-12 w-12 text-primary" />
         </div>
-        <h3 className="font-bold text-3xl text-foreground">{title}</h3>
+        <h3 className="wrap-break-word min-w-0 flex-1 font-bold text-3xl text-foreground leading-tight">
+          {title}
+        </h3>
       </div>
       <RichTextDisplay
         className="mb-4 text-foreground/80 text-xl leading-relaxed **:text-inherit"

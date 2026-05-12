@@ -92,7 +92,7 @@ export function FeaturesSection({ featuresData }: FeaturesSectionProps) {
                 <div className="mb-5 inline-flex rounded-xl bg-primary/10 p-3 transition-colors group-hover:bg-primary/20 dark:bg-primary/20 dark:group-hover:bg-primary/30">
                   <Icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="mb-3 font-semibold text-foreground text-xl">
+                <h3 className="wrap-break-word mb-3 font-semibold text-foreground text-xl leading-tight">
                   {feature.title}
                 </h3>
                 <RichTextDisplay

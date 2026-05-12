@@ -102,6 +102,11 @@ type AttendanceStoreActions = {
   resetCheckInState: () => void;
 
   /**
+   * Function to reset the current scan session
+   */
+  resetScanSession: () => void;
+
+  /**
    * Function to set the selected remark participant id
    * @param participantId The id of the participant to set as the selected remark participant
    */
@@ -176,8 +181,7 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
 
     setCheckInDialogOpen: (isOpen: boolean) => {
       if (!isOpen) {
-        get().resetCheckInState();
-        set({ scannedData: null, participantScanData: null, scanType: null });
+        get().resetScanSession();
       }
     },
 
@@ -277,6 +281,17 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
       set({
         selectedParticipants: {},
         editedRemarks: {},
+      });
+    },
+
+    resetScanSession: () => {
+      set({
+        scanType: null,
+        scannedData: null,
+        participantScanData: null,
+        selectedParticipants: {},
+        editedRemarks: {},
+        selectedRemarkParticipantId: null,
       });
     },
   }),

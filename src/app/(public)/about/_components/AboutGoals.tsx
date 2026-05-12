@@ -13,46 +13,12 @@ interface AboutGoalItem {
   description: string;
 }
 
-const goals: AboutGoalItem[] = [
-  {
-    icon: "TrendingUp",
-    title: "Increase Trailblazer Companies",
-    description: "Increase by 5% the number of trailblazer companies in Iloilo",
-  },
-  {
-    icon: "Shield",
-    title: "Policy Advocacy",
-    description: "Support policy advocacy agenda for business development",
-  },
-  {
-    icon: "Users",
-    title: "Community Development",
-    description: "Support development of community/business clusters",
-  },
-  {
-    icon: "Globe",
-    title: "Network & Forums",
-    description: "Network to relevant and applicable forums",
-  },
-  {
-    icon: "Building2",
-    title: "Sustainable Investment",
-    description:
-      "Increased capacity for sustainable investment, trade & tourism development",
-  },
-  {
-    icon: "Palette",
-    title: "Environmental Protection",
-    description: "Promote environmental protection policies",
-  },
-];
-
 interface AboutGoalsProps {
   goalsData?: AboutGoalItem[];
 }
 
 export function AboutGoals({ goalsData }: AboutGoalsProps) {
-  const resolvedGoals = goalsData && goalsData.length > 0 ? goalsData : goals;
+  const resolvedGoals = goalsData ?? [];
 
   return (
     <section className="py-24">
@@ -91,11 +57,11 @@ export function AboutGoals({ goalsData }: AboutGoalsProps) {
                         <Icon className="h-7 w-7 text-primary" />
                       </div>
                     </div>
-                    <h3 className="mb-3 font-bold text-foreground text-xl">
+                    <h3 className="wrap-break-word mb-3 w-full max-w-full font-bold text-foreground text-xl leading-tight">
                       {goal.title}
                     </h3>
                     <RichTextDisplay
-                      className="mb-4 text-foreground/80 leading-relaxed"
+                      className="mb-4 w-full max-w-full text-foreground/80 leading-relaxed"
                       content={goal.description}
                     />
                   </CardContent>
