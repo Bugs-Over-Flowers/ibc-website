@@ -21,10 +21,10 @@ export async function createNetwork(
   const payload: NetworkInsert = {
     organization: parsed.organization,
     about: parsed.about,
-    location_type: parsed.locationType,
-    representative_name: parsed.representativeName,
-    representative_position: parsed.representativePosition,
-    logo_url: parsed.logoUrl,
+    locationType: parsed.locationType,
+    representativeName: parsed.representativeName,
+    representativePosition: parsed.representativePosition,
+    logoUrl: parsed.logoUrl,
   };
 
   const supabase = await createActionClient();
