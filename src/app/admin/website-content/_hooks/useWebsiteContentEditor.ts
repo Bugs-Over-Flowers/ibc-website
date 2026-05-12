@@ -47,7 +47,10 @@ export function useWebsiteContentEditor(
   >({});
   const [hasLoadedSectionSummaries, setHasLoadedSectionSummaries] =
     useState(false);
+  const [isLoadingSection, setIsLoadingSection] = useState(false);
   const [saveSucceededCount, setSaveSucceededCount] = useState(0);
+  const lastRequestedSectionRef = useRef<WebsiteContentSection | null>(null);
+  const loadSectionRequestIdRef = useRef(0);
 
   const getWebsiteContentSectionsSummaryAction = useMemo(
     () => tryCatch(getWebsiteContentSectionsSummary),
@@ -92,48 +95,6 @@ export function useWebsiteContentEditor(
     },
   );
 
-  const { execute: loadSection, isPending: isLoadingSection } = useAction(
-    getWebsiteContentSectionAction,
-    {
-      onSuccess: (data: WebsiteContentSectionData) => {
-        // Use the ref to avoid stale closures capturing a previous
-        // `activeSection` value when this callback was created.
-        const section = activeSectionRef.current;
-        setForm(data.form);
-        setCards(data.cards);
-        if (section) {
-          setCachedSectionContentBySection((prev) => ({
-            ...prev,
-            [section]: {
-              form: data.form,
-              cards: data.cards,
-            },
-          }));
-
-          setPlaceholdersBySection((prev) => ({
-            ...prev,
-            [section]: data.placeholders,
-          }));
-
-          if (data.updatedAt) {
-            setUpdatedAtBySection((prev) => ({
-              ...prev,
-              [section]: data.updatedAt,
-            }));
-          }
-
-          setCardCountBySection((prev) => ({
-            ...prev,
-            [section]: data.cards.length,
-          }));
-        }
-      },
-      onError: (error) => {
-        toast.error(error);
-      },
-    },
-  );
-
   const { execute: saveSection, isPending: isSavingSection } = useAction(
     saveWebsiteContentSectionAction,
     {
@@ -162,23 +123,81 @@ export function useWebsiteContentEditor(
     void loadSectionSummariesRef.current();
   }, []);
 
-  const loadSectionRef = useRef(loadSection);
-  loadSectionRef.current = loadSection;
+  const applyLoadedSectionData = (
+    section: WebsiteContentSection,
+    data: WebsiteContentSectionData,
+  ) => {
+    setForm(data.form);
+    setCards(data.cards);
+    setCachedSectionContentBySection((prev) => ({
+      ...prev,
+      [section]: {
+        form: data.form,
+        cards: data.cards,
+      },
+    }));
+
+    setPlaceholdersBySection((prev) => ({
+      ...prev,
+      [section]: data.placeholders,
+    }));
+
+    if (data.updatedAt) {
+      setUpdatedAtBySection((prev) => ({
+        ...prev,
+        [section]: data.updatedAt,
+      }));
+    }
+
+    setCardCountBySection((prev) => ({
+      ...prev,
+      [section]: data.cards.length,
+    }));
+  };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional - only run on section switch, not on every cache mutation
   useEffect(() => {
+    const requestId = loadSectionRequestIdRef.current + 1;
+    loadSectionRequestIdRef.current = requestId;
+
     if (!activeSection) {
+      lastRequestedSectionRef.current = null;
+      setIsLoadingSection(false);
       return;
     }
+
+    lastRequestedSectionRef.current = activeSection;
 
     const cachedSection = cachedSectionContentBySection[activeSection];
     if (cachedSection) {
       setForm(cachedSection.form);
       setCards(cachedSection.cards);
+      setIsLoadingSection(false);
       return;
     }
 
-    void loadSectionRef.current(activeSection);
+    setIsLoadingSection(true);
+
+    void (async () => {
+      const result = await getWebsiteContentSectionAction(activeSection);
+
+      if (requestId !== loadSectionRequestIdRef.current) {
+        return;
+      }
+
+      if (lastRequestedSectionRef.current !== activeSection) {
+        return;
+      }
+
+      if (!result.success) {
+        toast.error(result.error);
+        setIsLoadingSection(false);
+        return;
+      }
+
+      applyLoadedSectionData(activeSection, result.data);
+      setIsLoadingSection(false);
+    })();
   }, [activeSection]);
 
   const sectionUpdatedAt = useMemo(() => {

@@ -30,8 +30,12 @@ export function getHeroSectionImages(
     return [];
   }
 
-  return sectionData.cards
-    .filter((card) => card.group === page && card.imageUrl.trim().length > 0)
+  const filteredCards = sectionData.cards.filter(
+    (card) => card.group === page && card.imageUrl.trim().length > 0,
+  );
+
+  return filteredCards
+    .slice()
     .sort((a, b) => {
       const aPlacement = a.cardPlacement
         ? Number(a.cardPlacement)
