@@ -25,11 +25,11 @@ export function mapNetworkRow(row: NetworkRow): Network {
     id: row.id,
     organization: row.organization,
     about: row.about,
-    locationType: row.location_type,
-    representativeName: row.representative_name,
-    representativePosition: row.representative_position,
-    logoUrl: row.logo_url,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    locationType: row.locationType,
+    representativeName: row.representativeName,
+    representativePosition: row.representativePosition,
+    logoUrl: row.logoUrl,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
