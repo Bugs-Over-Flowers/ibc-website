@@ -119,13 +119,10 @@ const FormDateTimePicker: React.FC<FormDateTimePickerProps> = ({
                   return date < new Date("1900-01-01");
                 }}
                 endMonth={computedEndMonth}
-                fromYear={1900}
-                initialFocus
                 mode="single"
                 onSelect={handleDateSelect}
                 selected={dateValue}
                 startMonth={computedStartMonth}
-                toYear={2100}
               />
             </PopoverContent>
           </Popover>
