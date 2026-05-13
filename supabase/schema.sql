@@ -3132,7 +3132,7 @@ CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigge
     LANGUAGE "plpgsql"
     AS $$
 begin
-  new.updated_at = now();
+  new."updatedAt" = now();
   return new;
 end;
 $$;
