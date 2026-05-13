@@ -4,7 +4,6 @@ import {
   ChevronLeft,
   ClipboardList,
   Clock,
-  Edit,
   Globe,
   MapPin,
   Star,
@@ -15,7 +14,6 @@ import { cookies, headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import BackNavigation from "@/app/admin/_components/BackNavigation";
-import { EvaluationQRDownloader } from "@/components/qr/EvaluationQRDownloader";
 import RichTextDisplay from "@/components/RichTextDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,8 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import tryCatch from "@/lib/server/tryCatch";
 import { getEventById } from "@/server/events/queries/getEventById";
 import { getEventStats } from "@/server/events/queries/getEventStats";
-import AddFacebookLinkButton from "./AddFacebookLinkButton";
-import CheckInButton from "./CheckInButton";
+import EventActionsDropdown from "./EventActionsDropdown";
 import EventScheduleDateTime from "./EventScheduleDateTime";
 
 const EVENT_TIME_ZONE = "Asia/Manila";
@@ -262,7 +259,7 @@ export default async function EventDetails({
 
           {/* Overlaid title + badge for visual polish */}
           <div className="absolute right-0 bottom-0 left-0 p-5 sm:p-6">
-            <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="flex items-end justify-between gap-3">
               <div className="space-y-1.5">
                 <Badge
                   className="font-medium text-xs uppercase tracking-wide"
@@ -276,50 +273,37 @@ export default async function EventDetails({
                   {event.eventTitle}
                 </h1>
               </div>
+
               {/* Action buttons on the image */}
-              <div className="flex shrink-0 items-center gap-2">
-                <AddFacebookLinkButton
-                  eventId={eventId}
-                  facebookLink={event.facebookLink}
-                />
-                <EvaluationQRDownloader
-                  eventId={eventId}
-                  eventTitle={event.eventTitle}
-                />
-                {!isDraft && <CheckInButton eventId={eventId} />}
-                {showEditButton && (
-                  <Link href={`/admin/events/${eventId}/edit-event` as Route}>
-                    <Button
-                      className="border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
-                      size="sm"
-                      variant="outline"
-                    >
-                      <Edit className="mr-1.5 h-3.5 w-3.5" />
-                      Edit
-                    </Button>
-                  </Link>
-                )}
-              </div>
             </div>
           </div>
         </div>
 
         <CardContent className="space-y-6 p-5 sm:p-6">
           {/* Event ID + Description */}
-          <div className="space-y-3">
-            <p className="font-mono text-muted-foreground/70 text-xs tracking-wide">
-              ID: {event.eventId}
-            </p>
-            {event.description ? (
-              <RichTextDisplay
-                className="max-w-3xl text-muted-foreground text-sm leading-relaxed"
-                content={event.description}
-              />
-            ) : (
-              <p className="text-muted-foreground text-sm italic">
-                No description available.
+          <div className="flex">
+            <div className="w-full space-y-3">
+              <p className="font-mono text-muted-foreground/70 text-xs tracking-wide">
+                ID: {event.eventId}
               </p>
-            )}
+              {event.description ? (
+                <RichTextDisplay
+                  className="max-w-3xl text-muted-foreground text-sm leading-relaxed"
+                  content={event.description}
+                />
+              ) : (
+                <p className="text-muted-foreground text-sm italic">
+                  No description available.
+                </p>
+              )}
+            </div>
+            <EventActionsDropdown
+              eventId={eventId}
+              eventTitle={event.eventTitle}
+              facebookLink={event.facebookLink}
+              isDraft={isDraft}
+              showEditButton={showEditButton}
+            />
           </div>
 
           {/* Divider */}
