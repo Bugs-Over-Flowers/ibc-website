@@ -1,6 +1,6 @@
 "use client";
 import { type IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
-import { SquareCenterlineDashedHorizontal } from "lucide-react";
+import { RotateCcw, SquareCenterlineDashedHorizontal } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ interface QRCodeScannerProps {
 export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
   const { eventDayId } = useParams<{ eventDayId: string }>();
   const [mirrored, setMirrored] = useState(false);
+  const [scannerKey, setScannerKey] = useState(0);
 
   const { execute: scanQRData, isPending: scanPending } = useScanQR({
     eventId,
@@ -28,9 +29,17 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
   const participantScanData = useAttendanceStore(
     (state) => state.participantScanData,
   );
+  const resetScanSession = useAttendanceStore(
+    (state) => state.resetScanSession,
+  );
 
   const isCameraPaused =
     scanPending || scannedData !== null || participantScanData !== null;
+
+  const handleResetCamera = () => {
+    resetScanSession();
+    setScannerKey((k) => k + 1);
+  };
 
   const handleScan = async (detectedCodes: IDetectedBarcode[]) => {
     if (scanPending || detectedCodes.length === 0) return;
@@ -56,6 +65,7 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
         <Scanner
           components={{ finder: false, onOff: true }}
           formats={["qr_code"]}
+          key={scannerKey}
           onScan={handleScan}
           paused={isCameraPaused}
           styles={{
@@ -73,6 +83,15 @@ export default function QRCodeScanner({ eventId }: QRCodeScannerProps) {
           type="button"
         >
           <SquareCenterlineDashedHorizontal size={16} />
+        </button>
+        <button
+          aria-label="Reset camera"
+          className="absolute top-3 left-3 z-10 flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-3 py-1.5 text-white/80 text-xs backdrop-blur-sm transition-colors hover:bg-black/70 hover:text-white"
+          onClick={handleResetCamera}
+          type="button"
+        >
+          <RotateCcw size={14} />
+          Reset Camera
         </button>
         <div className="absolute inset-x-0 bottom-0 flex justify-center pb-4">
           <div

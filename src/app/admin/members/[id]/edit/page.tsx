@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import BackButton from "@/app/admin/_components/BackButton";
 import tryCatch from "@/lib/server/tryCatch";
 import { getAllSectors } from "@/server/members/queries/getAllSectors";
 import { getMemberDetailsByBusinessMemberId } from "@/server/members/queries/getMemberDetailsByBusinessMemberId";
 import { EditMemberForm } from "./_components/EditMemberForm";
+import EditMemberLoading from "./loading";
 
 export const metadata: Metadata = {
   title: "Edit Member | Admin",
@@ -105,8 +108,28 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <EditMemberForm member={memberData} sectors={sectors} />
+    <div className="pb-8">
+      <div className="px-4 pt-8 pb-24 text-primary-foreground sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <BackButton href="/admin/members" label="Back to Members" />
+          </div>
+
+          <h1 className="mb-4 font-extrabold text-4xl text-foreground tracking-tight md:text-5xl">
+            Edit Member
+          </h1>
+          <p className="max-w-2xl font-medium text-foreground/90 text-lg leading-relaxed">
+            Update the member and application information using the same guided
+            workflow.
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto -mt-16 max-w-4xl px-4 sm:px-6 lg:px-8">
+        <Suspense fallback={<EditMemberLoading />}>
+          <EditMemberForm member={memberData} sectors={sectors} />
+        </Suspense>
+      </div>
     </div>
   );
 }

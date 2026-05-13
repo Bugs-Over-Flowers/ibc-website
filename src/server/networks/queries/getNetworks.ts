@@ -33,7 +33,7 @@ export async function getNetworks(
   const { data, error } = await supabase
     .from("Networks")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("createdAt", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch networks: ${error.message}`);

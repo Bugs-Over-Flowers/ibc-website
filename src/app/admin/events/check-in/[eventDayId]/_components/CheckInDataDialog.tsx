@@ -12,7 +12,7 @@ import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
 import { useCheckIn } from "../_hooks/useCheckIn";
 import CheckInTable from "./CheckInTable";
-import ProofDialog from "./proofResubmit/ProofDialog";
+import ProofDialog from "./ProofDialog";
 
 interface CheckInDataDialogProps {
   eventId: string;

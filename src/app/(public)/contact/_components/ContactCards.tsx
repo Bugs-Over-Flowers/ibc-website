@@ -25,7 +25,7 @@ const contactInfo = [
     icon: Clock,
     title: "Office Hours",
     details: [
-      "Monday - Friday: 8:00 AM - 5:00 PM",
+      "Monday - Friday: 8:00 AM - 6:00 PM",
       "Saturday: 9:00 AM - 12:00 PM",
     ],
   },

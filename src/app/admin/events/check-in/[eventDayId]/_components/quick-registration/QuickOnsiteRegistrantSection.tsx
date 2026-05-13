@@ -35,16 +35,29 @@ export default function QuickOnsiteRegistrantSection({
       <div className="grid gap-3 sm:grid-cols-2">
         <quickForm.AppField name="email">
           {(field) => (
-            <field.TextField
-              label="Email Address"
-              placeholder="juan.delacruz@example.com"
-              type="email"
-            />
+            <div className="space-y-2">
+              <field.TextField
+                label="Email Address"
+                placeholder="juan.delacruz@example.com or NA"
+                type="text"
+              />
+              <p className="text-muted-foreground text-xs">
+                If there is no email address, enter NA.
+              </p>
+            </div>
           )}
         </quickForm.AppField>
         <quickForm.AppField name="contactNumber">
           {(field) => (
-            <field.TextField label="Contact Number" placeholder="09XXXXXXXXX" />
+            <div className="space-y-2">
+              <field.TextField
+                label="Contact Number"
+                placeholder="09XXXXXXXXX or NA"
+              />
+              <p className="text-muted-foreground text-xs">
+                If there is no contact number, enter NA.
+              </p>
+            </div>
           )}
         </quickForm.AppField>
       </div>

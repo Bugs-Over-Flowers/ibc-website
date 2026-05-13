@@ -91,7 +91,6 @@ export default function EventSearchDateFilter({
             <Calendar
               className="pointer-events-auto p-3"
               disabled={(date) => date > today}
-              initialFocus
               mode="single"
               onSelect={(date) =>
                 onDateRangeChange({ ...dateRange, from: date })

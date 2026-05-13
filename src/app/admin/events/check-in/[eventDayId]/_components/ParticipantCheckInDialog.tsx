@@ -83,6 +83,7 @@ export default function ParticipantCheckInDialog({
         setCheckInDialogOpen(false);
       },
       onError: (error) => {
+        toast.error(`Failed to check in participant: ${error}`);
         console.error(error);
       },
     },
@@ -126,7 +127,7 @@ export default function ParticipantCheckInDialog({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 break-words">
+            <DialogTitle className="wrap-break-words flex items-center gap-2">
               <User className="h-5 w-5 shrink-0" />
               {participant.firstName} {participant.lastName}
             </DialogTitle>
@@ -138,11 +139,11 @@ export default function ParticipantCheckInDialog({
             <div className="space-y-3 rounded-lg border border-border/50 bg-muted/20 p-4">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Building2 className="h-3.5 w-3.5 shrink-0" />
-                <span className="break-words">{affiliation}</span>
+                <span className="wrap-break-words">{affiliation}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Mail className="h-3.5 w-3.5 shrink-0" />
-                <span className="break-words">{participant.email}</span>
+                <span className="wrap-break-words">{participant.email}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Phone className="h-3.5 w-3.5 shrink-0" />

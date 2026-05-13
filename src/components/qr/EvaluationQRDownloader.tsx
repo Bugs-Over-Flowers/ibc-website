@@ -28,13 +28,24 @@ interface EvaluationQRDownloaderProps {
   eventId: string;
   eventTitle: string;
   triggerClassName?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }
 
 export function EvaluationQRDownloader({
   eventId,
   eventTitle,
   triggerClassName,
+  open: controlledOpen,
+  onOpenChange,
+  hideTrigger = false,
 }: EvaluationQRDownloaderProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
+  const setIsOpen =
+    isControlled && onOpenChange ? onOpenChange : setInternalOpen;
   const ref = useRef<HTMLDivElement | null>(null);
   const [as, setAs] = useState<"image" | "pdf">("image");
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
@@ -91,15 +102,17 @@ export function EvaluationQRDownloader({
   };
 
   return (
-    <Dialog>
-      <DialogTrigger
-        render={
-          <Button className={triggerClassName} variant="outline">
-            <QrCode className="mr-2 h-4 w-4" />
-            Evaluation QR Code
-          </Button>
-        }
-      />
+    <Dialog onOpenChange={setIsOpen} open={isOpen}>
+      {!hideTrigger && (
+        <DialogTrigger
+          render={
+            <Button className={triggerClassName} variant="outline">
+              <QrCode className="mr-2 h-4 w-4" />
+              Evaluation QR Code
+            </Button>
+          }
+        />
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Evaluation Form QR Code</DialogTitle>

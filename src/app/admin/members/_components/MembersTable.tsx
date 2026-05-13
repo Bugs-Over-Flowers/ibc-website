@@ -97,6 +97,7 @@ export function MembersTable({ members }: MembersTableProps) {
     handleSelectMember,
     handleSelectAll,
     clearSelection,
+    clearSelectionAndMode,
     enableSelectionMode,
     handleUpdateStatus,
     isPending,
@@ -148,7 +149,7 @@ export function MembersTable({ members }: MembersTableProps) {
 
               <Button
                 className="h-10 w-full rounded-xl border border-border bg-card/80 text-foreground transition-all hover:border-primary/30 hover:bg-background sm:w-auto"
-                onClick={clearSelection}
+                onClick={clearSelectionAndMode}
                 size="sm"
                 variant="outline"
               >

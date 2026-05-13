@@ -5,7 +5,7 @@ import PaymentProofReviewDialog from "@/app/admin/events/_components/PaymentProo
 import { Button } from "@/components/ui/button";
 import type { GetCheckInForDateSchema } from "@/lib/validation/qr/standard";
 import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
-import useAttendanceStore from "../../_hooks/useAttendanceStore";
+import useAttendanceStore from "../_hooks/useAttendanceStore";
 
 interface ProofDialogProps {
   paymentProofStatus: GetCheckInForDateSchema["paymentProofStatus"];

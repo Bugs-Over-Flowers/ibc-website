@@ -40,7 +40,8 @@ function RichTextDisplay({ content, className }: RichTextDisplayProps) {
   return (
     <div
       className={cn(
-        "prose prose-sm dark:prose-invert max-w-none",
+        "prose prose-sm dark:prose-invert wrap-break-word max-w-none",
+        "[&_*]:wrap-break-word",
         "[&_p]:my-2 [&_p]:leading-relaxed",
         "[&_ol]:my-2 [&_ul]:my-2",
         "[&_li]:my-0.5",

@@ -19,13 +19,23 @@ import { updateFacebookLink } from "@/server/events/mutations/updateFacebookLink
 type AddFacebookLinkButtonProps = {
   eventId: string;
   facebookLink?: string | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 };
 
 export default function AddFacebookLinkButton({
   eventId,
   facebookLink,
+  open: controlledOpen,
+  onOpenChange,
+  hideTrigger = false,
 }: AddFacebookLinkButtonProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
+  const setIsOpen =
+    isControlled && onOpenChange ? onOpenChange : setInternalOpen;
   const [linkValue, setLinkValue] = useState(facebookLink ?? "");
 
   const { execute, isPending } = useAction(updateFacebookLink, {
@@ -58,9 +68,15 @@ export default function AddFacebookLinkButton({
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} variant="outline">
-        Add Facebook Link
-      </Button>
+      {!hideTrigger && (
+        <Button
+          className="w-full"
+          onClick={() => setIsOpen(true)}
+          variant="outline"
+        >
+          Add Facebook Link
+        </Button>
+      )}
       <Dialog onOpenChange={setIsOpen} open={isOpen}>
         <DialogContent>
           <DialogHeader>
