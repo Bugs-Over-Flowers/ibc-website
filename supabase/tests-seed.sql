@@ -85,7 +85,7 @@ BEGIN
   RAISE NOTICE '📡 Seeding Networks for G3...';
 END $$;
 
-INSERT INTO "public"."Networks" ("id", "organization", "about", "location_type", "representative_name", "representative_position", "logo_url")
+INSERT INTO "public"."Networks" ("id", "organization", "about", "locationType", "representativeName", "representativePosition", "logoUrl")
 VALUES
   (
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01',

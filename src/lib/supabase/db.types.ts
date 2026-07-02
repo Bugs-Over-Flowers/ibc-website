@@ -443,36 +443,36 @@ export type Database = {
       Networks: {
         Row: {
           about: string;
-          created_at: string;
+          createdAt: string;
           id: string;
-          location_type: string;
-          logo_url: string | null;
+          locationType: string;
+          logoUrl: string | null;
           organization: string;
-          representative_name: string;
-          representative_position: string;
-          updated_at: string;
+          representativeName: string;
+          representativePosition: string;
+          updatedAt: string;
         };
         Insert: {
           about: string;
-          created_at?: string;
+          createdAt?: string;
           id?: string;
-          location_type: string;
-          logo_url?: string | null;
+          locationType: string;
+          logoUrl?: string | null;
           organization: string;
-          representative_name: string;
-          representative_position: string;
-          updated_at?: string;
+          representativeName: string;
+          representativePosition: string;
+          updatedAt?: string;
         };
         Update: {
           about?: string;
-          created_at?: string;
+          createdAt?: string;
           id?: string;
-          location_type?: string;
-          logo_url?: string | null;
+          locationType?: string;
+          logoUrl?: string | null;
           organization?: string;
-          representative_name?: string;
-          representative_position?: string;
-          updated_at?: string;
+          representativeName?: string;
+          representativePosition?: string;
+          updatedAt?: string;
         };
         Relationships: [];
       };
