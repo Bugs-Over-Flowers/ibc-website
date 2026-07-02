@@ -3,25 +3,28 @@ import { Check } from "lucide-react";
 import useRegistrationStore from "@/hooks/registration.store";
 import { cn } from "@/lib/utils";
 
-const STEPS = [
-  {
-    label: "Member Type",
-  },
-  {
-    label: "Participants",
-  },
-  {
-    label: "Payment",
-  },
-  {
-    label: "Review",
-  },
+const PAID_STEPS = [
+  { label: "Member Type" },
+  { label: "Participants" },
+  { label: "Payment" },
+  { label: "Review" },
+];
+
+const FREE_STEPS = [
+  { label: "Member Type" },
+  { label: "Participants" },
+  { label: "Review" },
 ];
 
 export default function Stepper() {
   const currentStep = useRegistrationStore((state) => state.step);
+  const eventDetails = useRegistrationStore((state) => state.eventDetails);
 
-  const progressWidth = ((currentStep - 1) / (STEPS.length - 1)) * 100;
+  const isFreeEvent = (eventDetails?.registrationFee ?? 0) === 0;
+  const steps = isFreeEvent ? FREE_STEPS : PAID_STEPS;
+  const displayStep = isFreeEvent && currentStep === 4 ? 3 : currentStep;
+
+  const progressWidth = ((displayStep - 1) / (steps.length - 1)) * 100;
 
   return (
     <div className="mb-6 w-full sm:mb-8">
@@ -32,10 +35,10 @@ export default function Stepper() {
           style={{ width: `${progressWidth}%` }}
         />
 
-        {STEPS.map((step, index) => {
+        {steps.map((step, index) => {
           const stepNumber = index + 1;
-          const isCompleted = currentStep > stepNumber;
-          const isActive = currentStep === stepNumber;
+          const isCompleted = displayStep > stepNumber;
+          const isActive = displayStep === stepNumber;
 
           return (
             <div className="flex flex-col items-center" key={step.label}>
@@ -55,7 +58,7 @@ export default function Stepper() {
                 role="img"
               >
                 {isCompleted ? (
-                  <Check className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <Check className="h-4 w-4 sm:h-5 sm:h-5" />
                 ) : (
                   stepNumber
                 )}

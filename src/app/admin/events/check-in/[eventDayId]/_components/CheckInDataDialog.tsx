@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
 import { useCheckIn } from "../_hooks/useCheckIn";
+import AcceptPaymentButton from "./AcceptPaymentButton";
 import CheckInTable from "./CheckInTable";
 import ProofDialog from "./ProofDialog";
 
@@ -149,8 +150,14 @@ export default function CheckInDataDialog({
             </Link>
           </div>
           <div className="flex gap-2">
-            {(scannedData.paymentMethod === "BPI" ||
-              scannedData.paymentMethod === "IMPORTED") &&
+            {scannedData.paymentMethod === "ONSITE" && (
+              <AcceptPaymentButton
+                paymentMethod={scannedData.paymentMethod}
+                paymentProofStatus={scannedData.paymentProofStatus}
+                registrationId={scannedData.registrationId}
+              />
+            )}
+            {scannedData.paymentMethod === "BPI" &&
               scannedData.proofImage.length > 0 &&
               registrant && (
                 <ProofDialog

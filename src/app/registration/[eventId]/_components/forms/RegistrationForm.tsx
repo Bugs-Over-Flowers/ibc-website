@@ -33,6 +33,7 @@ export default function RegistrationForm({
   const setEventDetails = useRegistrationStore(
     (state) => state.setEventDetails,
   );
+  const setStep = useRegistrationStore((state) => state.setStep);
   const resetStore = useRegistrationStore((state) => state.resetStore);
   const setSponsorInfo = useRegistrationStore((state) => state.setSponsorInfo);
   const clearSponsorInfo = useRegistrationStore(
@@ -86,6 +87,12 @@ export default function RegistrationForm({
         Loading Registration Form...
       </div>
     );
+  }
+
+  const isFreeEvent = (eventDetails.registrationFee ?? 0) === 0;
+
+  if (isFreeEvent && step === 3) {
+    setStep(4);
   }
 
   return (

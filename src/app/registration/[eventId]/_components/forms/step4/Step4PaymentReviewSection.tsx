@@ -48,11 +48,11 @@ export default function Step4PaymentReviewSection({
             Payment Method
           </span>
           <Badge className="font-medium text-sm capitalize" variant="outline">
-            {paymentMethod}
+            {baseFee === 0 ? "Free event" : paymentMethod}
           </Badge>
         </div>
 
-        {paymentMethod === "onsite" ? (
+        {paymentMethod === "onsite" && baseFee > 0 ? (
           <p className="text-muted-foreground text-sm">
             Onsite payments do not require a proof of payment upload.
           </p>

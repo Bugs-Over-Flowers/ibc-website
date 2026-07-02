@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createActionClient } from "@/lib/supabase/server";
 import { invalidateRegistrationCaches } from "@/server/actions.utils";
 
@@ -21,6 +22,7 @@ export const verifyPayment = async (registrationId: string) => {
   }
 
   invalidateRegistrationCaches();
+  updateTag(CACHE_TAGS.checkIns.eventDay);
 
   if (updatedRegistration?.eventId) {
     revalidatePath(
