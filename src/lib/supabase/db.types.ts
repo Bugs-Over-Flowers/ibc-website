@@ -7,10 +7,30 @@ export type Json =
   | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5";
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
   public: {
     Tables: {
@@ -32,7 +52,7 @@ export type Database = {
           logoImageURL: string;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
-          paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
+          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           sectorName: string | null;
           websiteURL: string;
         };
@@ -53,7 +73,7 @@ export type Database = {
           logoImageURL: string;
           mobileNumber: string;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
-          paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
+          paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           sectorName?: string | null;
           websiteURL: string;
         };
@@ -74,7 +94,7 @@ export type Database = {
           logoImageURL?: string;
           mobileNumber?: string;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
-          paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
+          paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           sectorName?: string | null;
           websiteURL?: string;
         };
@@ -423,36 +443,36 @@ export type Database = {
       Networks: {
         Row: {
           about: string;
-          createdAt: string;
+          created_at: string;
           id: string;
-          locationType: string;
-          logoUrl: string | null;
+          location_type: string;
+          logo_url: string | null;
           organization: string;
-          representativeName: string;
-          representativePosition: string;
-          updatedAt: string;
+          representative_name: string;
+          representative_position: string;
+          updated_at: string;
         };
         Insert: {
           about: string;
-          createdAt?: string;
+          created_at?: string;
           id?: string;
-          locationType: string;
-          logoUrl?: string | null;
+          location_type: string;
+          logo_url?: string | null;
           organization: string;
-          representativeName: string;
-          representativePosition: string;
-          updatedAt?: string;
+          representative_name: string;
+          representative_position: string;
+          updated_at?: string;
         };
         Update: {
           about?: string;
-          createdAt?: string;
+          created_at?: string;
           id?: string;
-          locationType?: string;
-          logoUrl?: string | null;
+          location_type?: string;
+          logo_url?: string | null;
           organization?: string;
-          representativeName?: string;
-          representativePosition?: string;
-          updatedAt?: string;
+          representative_name?: string;
+          representative_position?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -546,7 +566,7 @@ export type Database = {
           note: string | null;
           numberOfParticipants: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
-          paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
+          paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
           registrationDate: string;
           registrationId: string;
           sourceSubmissionId: string | null;
@@ -564,7 +584,7 @@ export type Database = {
           note?: string | null;
           numberOfParticipants?: number | null;
           paymentMethod: Database["public"]["Enums"]["PaymentMethod"];
-          paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
+          paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           registrationDate?: string;
           registrationId?: string;
           sourceSubmissionId?: string | null;
@@ -582,7 +602,7 @@ export type Database = {
           note?: string | null;
           numberOfParticipants?: number | null;
           paymentMethod?: Database["public"]["Enums"]["PaymentMethod"];
-          paymentProofStatus?: Database["public"]["Enums"]["PaymentProofStatus"];
+          paymentStatus?: Database["public"]["Enums"]["PaymentStatus"];
           registrationDate?: string;
           registrationId?: string;
           sourceSubmissionId?: string | null;
@@ -875,7 +895,7 @@ export type Database = {
       get_registration_list: {
         Args: {
           p_event_id: string;
-          p_payment_proof_status?: Database["public"]["Enums"]["PaymentProofStatus"];
+          p_payment_proof_status?: Database["public"]["Enums"]["PaymentStatus"];
           p_search_text?: string;
         };
         Returns: Database["public"]["CompositeTypes"]["registration_list_item"][];
@@ -1075,7 +1095,7 @@ export type Database = {
       InterviewStatus: "scheduled" | "completed" | "cancelled" | "rescheduled";
       MembershipStatus: "paid" | "unpaid" | "cancelled";
       PaymentMethod: "BPI" | "ONSITE" | "IMPORTED";
-      PaymentProofStatus: "pending" | "accepted" | "rejected";
+      PaymentStatus: "pending" | "accepted" | "rejected";
       ratingScale: "poor" | "fair" | "good" | "veryGood" | "excellent";
       SponsoredRegistrationStatus: "active" | "full" | "disabled";
       SponsorshipType: "sponsored" | "standard" | "none";
@@ -1115,7 +1135,7 @@ export type Database = {
         affiliation: string | null;
         registration_date: string | null;
         payment_proof_status:
-          | Database["public"]["Enums"]["PaymentProofStatus"]
+          | Database["public"]["Enums"]["PaymentStatus"]
           | null;
         payment_method: Database["public"]["Enums"]["PaymentMethod"] | null;
         business_member_id: string | null;
@@ -1256,6 +1276,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       ApplicationMemberType: ["corporate", "personal"],
@@ -1267,7 +1290,7 @@ export const Constants = {
       InterviewStatus: ["scheduled", "completed", "cancelled", "rescheduled"],
       MembershipStatus: ["paid", "unpaid", "cancelled"],
       PaymentMethod: ["BPI", "ONSITE", "IMPORTED"],
-      PaymentProofStatus: ["pending", "accepted", "rejected"],
+      PaymentStatus: ["pending", "accepted", "rejected"],
       ratingScale: ["poor", "fair", "good", "veryGood", "excellent"],
       SponsoredRegistrationStatus: ["active", "full", "disabled"],
       SponsorshipType: ["sponsored", "standard", "none"],
