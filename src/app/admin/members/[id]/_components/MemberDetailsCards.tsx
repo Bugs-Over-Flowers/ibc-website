@@ -107,14 +107,10 @@ export function MemberDetailsCards({ member }: MemberDetailsCardsProps) {
               value={latestApplication?.companyAddress || "N/A"}
             />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <DetailRow
                 label="Application Status"
                 value={toLabel(latestApplication?.applicationStatus ?? null)}
-              />
-              <DetailRow
-                label="Payment Proof Status"
-                value={toLabel(latestApplication?.paymentProofStatus ?? null)}
               />
               <DetailRow
                 label="Submitted"

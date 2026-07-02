@@ -115,11 +115,7 @@ export function MembershipApplicationForm({
   const step1Form = useMembershipStep1();
   const step2Form = useMembershipStep2();
   const step3Form = useMembershipStep3();
-  const {
-    form: step4Form,
-    goBack: step4GoBack,
-    applicationData,
-  } = useMembershipStep4({ sectors });
+  const { form: step4Form, applicationData } = useMembershipStep4({ sectors });
 
   const scrollToTop = () => {
     requestAnimationFrame(() => {
@@ -336,10 +332,7 @@ export function MembershipApplicationForm({
           <div className="mt-8 flex flex-col-reverse gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
             <Button
               className="w-full rounded-xl sm:w-auto"
-              onClick={() => {
-                step4GoBack();
-                scrollToTop();
-              }}
+              onClick={() => handleBack(4)}
               size="lg"
               type="button"
               variant="ghost"

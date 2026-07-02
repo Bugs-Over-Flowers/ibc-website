@@ -146,7 +146,11 @@ export function ApplicationsTableRow({
         />
       </TableCell>
       <TableCell
-        className={showContact ? "w-[22%] font-medium" : "w-[24%] font-medium"}
+        className={
+          showContact
+            ? "w-[22%] min-w-0 font-medium"
+            : "w-[24%] min-w-0 font-medium"
+        }
       >
         <div className="flex items-center gap-2">
           {paymentRequirement.requiresPayment &&
@@ -200,9 +204,11 @@ export function ApplicationsTableRow({
         </div>
       </TableCell>
       <TableCell
-        className={showContact ? "w-[24%] max-w-56" : "w-[34%] max-w-64"}
+        className={
+          showContact ? "w-[24%] min-w-0 max-w-56" : "w-[34%] min-w-0 max-w-64"
+        }
       >
-        <div className="line-clamp-2 truncate text-sm">
+        <div className="truncate text-sm">
           {application.sectorName || "N/A"}
         </div>
       </TableCell>

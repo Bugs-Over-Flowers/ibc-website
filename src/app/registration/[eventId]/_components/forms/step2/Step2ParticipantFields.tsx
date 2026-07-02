@@ -49,7 +49,7 @@ export function ParticipantFields({ form, index }: ParticipantFieldsProps) {
             <div className="space-y-2">
               <Label className="text-sm">Email Address</Label>
               <field.TextField
-                className="h-11 rounded-xl"
+                inputClassName="h-11 rounded-xl"
                 placeholder="juan.delacruz@example.com or NA"
                 type="text"
               />
@@ -67,7 +67,7 @@ export function ParticipantFields({ form, index }: ParticipantFieldsProps) {
                 Contact Number / Telephone Number
               </Label>
               <field.TextField
-                className="h-11 rounded-xl"
+                inputClassName="h-11 rounded-xl"
                 placeholder="09XXXXXXXXX / 0XXXX-XXXX or NA"
               />
               <p className="text-muted-foreground text-xs">

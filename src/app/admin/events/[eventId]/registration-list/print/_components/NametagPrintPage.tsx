@@ -52,7 +52,10 @@ export default function NametagPrintPage({
   eventTitle,
   participants,
 }: NametagPrintPageProps) {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(
+    // new Set(participants.map((p) => p.participantId)),
+    new Set(),
+  );
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [sortKey, setSortKey] =

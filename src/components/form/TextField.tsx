@@ -8,6 +8,7 @@ interface TextFieldProps {
   label?: React.ReactNode;
   description?: string;
   className?: string;
+  inputClassName?: string;
   placeholder?: string;
   type?: React.HTMLInputTypeAttribute;
   disabled?: boolean;
@@ -18,6 +19,7 @@ function TextField({
   label,
   description,
   className,
+  inputClassName,
   placeholder,
   type = "text",
   disabled,
@@ -33,6 +35,7 @@ function TextField({
         aria-invalid={isInvalid}
         autoCapitalize="on"
         autoComplete="off"
+        className={inputClassName}
         data-invalid={isInvalid}
         disabled={disabled}
         id={field.name}

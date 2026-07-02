@@ -40,7 +40,6 @@ export const useMembershipStep4 = ({
   const resetMemberValidationRateLimit = useMembershipApplicationStore(
     (state) => state.resetMemberValidationRateLimit,
   );
-  const setStep = useMembershipApplicationStore((state) => state.setStep);
   const resetStore = useMembershipApplicationStore((state) => state.resetStore);
 
   // Get the verified businessMemberId (UUID) returned from identifier validation
@@ -299,9 +298,5 @@ export const useMembershipStep4 = ({
     },
   });
 
-  const goBack = () => {
-    setStep(3);
-  };
-
-  return { form, goBack, applicationData };
+  return { form, applicationData };
 };
