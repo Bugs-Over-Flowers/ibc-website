@@ -24,7 +24,7 @@ export const getParticipantCheckInData = async (
           registrationId,
           identifier,
           paymentMethod,
-          paymentProofStatus,
+          paymentStatus,
           registrationDate,
           note,
           businessMember:BusinessMember(businessName),
@@ -52,6 +52,13 @@ export const getParticipantCheckInData = async (
     .eq("registrationId", data.registration.registrationId)
     .order("orderIndex", { ascending: true, nullsFirst: false });
 
+  const { data: principal } = await supabase
+    .from("Participant")
+    .select("firstName, lastName, email")
+    .eq("registrationId", data.registration.registrationId)
+    .eq("isPrincipal", true)
+    .maybeSingle();
+
   const normalizedData = {
     participant: {
       participantId: data.participantId,
@@ -64,6 +71,7 @@ export const getParticipantCheckInData = async (
     },
     registration: data.registration,
     event: data.registration.event,
+    registrant: principal ?? null,
     checkIn: (data.checkIn ?? []).filter(
       (ci: { eventDayId: string }) => ci.eventDayId === eventDayId,
     ),
@@ -80,7 +88,7 @@ export const getParticipantCheckInData = async (
 
   let message: string | undefined;
 
-  if (parsedData.registration.paymentProofStatus === "pending") {
+  if (parsedData.registration.paymentStatus === "pending") {
     message = "The registration payment is still pending.";
   }
 

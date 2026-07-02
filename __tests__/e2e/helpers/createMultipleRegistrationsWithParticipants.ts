@@ -8,7 +8,7 @@ import type { createE2EAdminClient } from "./supabase";
  *
  * @param supabase - Supabase admin client
  * @param event - Event object containing eventId
- * @param paymentProofStatus - Payment status for all registrations
+ * @param paymentStatus - Payment status for all registrations
  * @param totalParticipantCount - Total number of participants needed across all registrations
  * @param paymentMethod - Payment method to use
  * @param note - Optional note for registrations
@@ -17,7 +17,7 @@ import type { createE2EAdminClient } from "./supabase";
 async function createMultipleRegistrationsWithParticipants(
   supabase: ReturnType<typeof createE2EAdminClient>,
   event: { eventId: string },
-  paymentProofStatus: "pending" | "rejected" | "accepted",
+  paymentStatus: "pending" | "rejected" | "accepted",
   totalParticipantCount = 1,
   paymentMethod: Database["public"]["Enums"]["PaymentMethod"] = "BPI",
   note: string | null = null,
@@ -36,7 +36,7 @@ async function createMultipleRegistrationsWithParticipants(
     const registration = await createRegistrationWithParticipants(
       supabase,
       event,
-      paymentProofStatus,
+      paymentStatus,
       10, // 10 participants per registration
       paymentMethod,
       note,
@@ -53,7 +53,7 @@ async function createMultipleRegistrationsWithParticipants(
     const registration = await createRegistrationWithParticipants(
       supabase,
       event,
-      paymentProofStatus,
+      paymentStatus,
       remainder, // Remainder participants
       paymentMethod,
       note,
@@ -70,7 +70,7 @@ async function createMultipleRegistrationsWithParticipants(
     const registration = await createRegistrationWithParticipants(
       supabase,
       event,
-      paymentProofStatus,
+      paymentStatus,
       totalParticipantCount,
       paymentMethod,
       note,

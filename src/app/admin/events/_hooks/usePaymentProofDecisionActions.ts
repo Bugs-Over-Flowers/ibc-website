@@ -4,11 +4,11 @@ import { toast } from "sonner";
 import {
   getNextStatus,
   getResultMessage,
-  type PaymentProofStatus,
+  type PaymentStatus,
 } from "@/app/admin/events/_hooks/paymentProofReviewHelpers";
 import { useAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
-import { updateRegistrationPaymentProofStatus } from "@/server/registration/mutations/updateRegistrationPaymentProofStatus";
+import { updateRegistrationPaymentStatus } from "@/server/registration/mutations/updateRegistrationPaymentStatus";
 
 interface UsePaymentProofDecisionActionsProps {
   registrationData: {
@@ -20,8 +20,8 @@ interface UsePaymentProofDecisionActionsProps {
   sendEmailOnReject?: boolean;
   onAcceptAction?: (registrationId: string) => Promise<unknown>;
   onRejectAction?: (registrationId: string) => Promise<unknown>;
-  onStatusChange?: (status: PaymentProofStatus) => void;
-  onStatusResolved: (status: PaymentProofStatus) => void;
+  onStatusChange?: (status: PaymentStatus) => void;
+  onStatusResolved: (status: PaymentStatus) => void;
 }
 
 export function usePaymentProofDecisionActions({
@@ -36,11 +36,11 @@ export function usePaymentProofDecisionActions({
     tryCatch(async () =>
       onAcceptAction
         ? onAcceptAction(registrationData.registrationId)
-        : updateRegistrationPaymentProofStatus({
+        : updateRegistrationPaymentStatus({
             eventTitle: registrationData.eventTitle,
             registrationId: registrationData.registrationId,
             status: "accepted",
-            sendEmail: sendEmailOnReject ?? true,
+            sendEmail: sendEmailOnReject === true,
             toEmail: registrationData.registrantEmail,
             registrantName: registrationData.registrantName,
           }),
@@ -62,11 +62,11 @@ export function usePaymentProofDecisionActions({
     tryCatch(async () =>
       onRejectAction
         ? onRejectAction(registrationData.registrationId)
-        : updateRegistrationPaymentProofStatus({
+        : updateRegistrationPaymentStatus({
             eventTitle: registrationData.eventTitle,
             registrationId: registrationData.registrationId,
             status: "rejected",
-            sendEmail: sendEmailOnReject ?? true,
+            sendEmail: sendEmailOnReject === true,
             toEmail: registrationData.registrantEmail,
             registrantName: registrationData.registrantName,
           }),

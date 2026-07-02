@@ -10,8 +10,7 @@ import type { Database } from "@/lib/supabase/db.types";
 type RegistrationWithParticipants =
   Database["public"]["Tables"]["Registration"]["Row"] & {
     participants: Database["public"]["Tables"]["Participant"]["Row"][];
-    paymentStatus?: string;
-    paymentProofStatus?: "pending" | "rejected" | "accepted";
+    paymentStatus?: "pending" | "rejected" | "accepted";
   };
 
 interface RegisteredGuestsTableProps {
@@ -130,7 +129,7 @@ export function RegisteredGuestsTable({
                     <td className="px-4 py-3 text-sm">
                       {(() => {
                         const displayStatus =
-                          registration.paymentProofStatus ||
+                          registration.paymentStatus ||
                           registration.paymentStatus;
 
                         return (

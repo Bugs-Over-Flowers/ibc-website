@@ -70,7 +70,8 @@ export default function Step4({ members }: Step4Props) {
   }, [selectedPaymentProofs]);
 
   const onBack = async () => {
-    setStep(3);
+    const isFreeEvent = (eventDetails?.registrationFee ?? 0) === 0;
+    setStep(isFreeEvent ? 2 : 3);
     setRegistrationData({
       step4: {
         note: form.state.values.note,

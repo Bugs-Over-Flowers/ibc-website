@@ -6,7 +6,7 @@ import {
   getNextStatus,
   getResultMessage,
   getResultPath,
-  type PaymentProofStatus,
+  type PaymentStatus,
 } from "@/app/admin/events/_hooks/paymentProofReviewHelpers";
 import tryCatch from "@/lib/server/tryCatch";
 import { uploadPaymentProof } from "@/lib/storage/uploadPaymentProof";
@@ -18,9 +18,9 @@ interface UseReplacePaymentProofActionProps {
     registrationId: string;
     uploadedPath: string;
   }) => Promise<unknown>;
-  onStatusChange?: (status: PaymentProofStatus) => void;
+  onStatusChange?: (status: PaymentStatus) => void;
   onProofPathChange?: (path: string) => void;
-  onStatusResolved: (status: PaymentProofStatus) => void;
+  onStatusResolved: (status: PaymentStatus) => void;
   onCompleted: () => void;
 }
 

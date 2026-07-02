@@ -13,7 +13,7 @@ import { useAction } from "@/hooks/useAction";
 import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import type { Enums } from "@/lib/supabase/db.types";
-import { updatePaymentProofStatus } from "@/server/applications/mutations/updatePaymentProofStatus";
+import { updatePaymentStatus } from "@/server/applications/mutations/updatePaymentStatus";
 import type { getApplicationDetailsById } from "@/server/applications/queries/getApplicationDetailsById";
 import ExportPDFButton from "../../_components/ExportPDFButton";
 import { PaymentProofModal } from "../../_components/PaymentProofModal";
@@ -24,14 +24,14 @@ interface ApplicationHeaderProps {
 
 export function ApplicationHeader({ application }: ApplicationHeaderProps) {
   const [imageError, setImageError] = useState(false);
-  const [paymentProofStatus, setPaymentProofStatus] = useState<
-    Enums<"PaymentProofStatus">
-  >(application.paymentProofStatus ?? "pending");
+  const [paymentStatus, setPaymentStatus] = useState<Enums<"PaymentStatus">>(
+    application.paymentStatus ?? "pending",
+  );
   const router = useRouter();
   const showImage = application.logoImageURL && !imageError;
   const proofImage = application.ProofImage?.[0];
   const hasProofImage = !!proofImage;
-  const isDecisionLocked = paymentProofStatus !== "pending";
+  const isDecisionLocked = paymentStatus !== "pending";
   const paymentRequirement = getMembershipPaymentRequirement({
     applicationMemberType: application.applicationMemberType,
     applicationType: application.applicationType,
@@ -39,10 +39,10 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
   });
 
   const { execute: updateProofStatus, isPending: isUpdatingStatus } = useAction(
-    tryCatch(updatePaymentProofStatus),
+    tryCatch(updatePaymentStatus),
     {
       onSuccess: (data) => {
-        setPaymentProofStatus(data.status);
+        setPaymentStatus(data.status);
         router.refresh();
       },
       onError: (error) => {
@@ -107,11 +107,11 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
             isUpdatingStatus={isUpdatingStatus}
             membershipTypeLabel={paymentRequirement.membershipTypeLabel}
             onDecision={handleDecision}
-            onProofReplaced={({ paymentProofStatus }) => {
-              setPaymentProofStatus(paymentProofStatus);
+            onProofReplaced={({ paymentStatus }) => {
+              setPaymentStatus(paymentStatus);
               router.refresh();
             }}
-            paymentProofStatus={paymentProofStatus}
+            paymentStatus={paymentStatus}
             proofImagePath={proofImage.path}
           />
         )}

@@ -72,7 +72,7 @@ export async function quickOnsiteRegistrationRPC(
   invalidateRegistrationCaches();
   updateTag(CACHE_TAGS.checkIns.stats);
 
-  revalidatePath(`/admin/events/check-in`);
+  revalidatePath(`/admin/events/check-in/${eventDayId}`, "page");
 
   const validatedResponse = SubmitRegistrationResponseSchema.parse(rpcResults);
 

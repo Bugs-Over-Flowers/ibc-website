@@ -11,20 +11,15 @@ interface SendRegistrationConfirmationEmailProps {
   toEmail: string;
   registrationId: string;
   eventId: string;
-  qrData: string;
 }
 
 export const resendQRCode = async ({
   toEmail,
   registrationId,
   eventId,
-  qrData,
 }: SendRegistrationConfirmationEmailProps) => {
-  const qrBuffer = await generateQRBuffer(qrData);
-
   const supabase = await createActionClient();
 
-  // get event details
   const { data: eventDetails } = await supabase
     .from("Event")
     .select(
@@ -64,10 +59,11 @@ export const resendQRCode = async ({
           "Asia/Manila",
         );
 
-  // get registration details
   const { data: participants } = await supabase
     .from("Participant")
-    .select("firstName, lastName, email, isPrincipal, participantId")
+    .select(
+      "firstName, lastName, email, isPrincipal, participantId, participantIdentifier",
+    )
     .eq("registrationId", registrationId)
     .throwOnError();
 
@@ -75,7 +71,6 @@ export const resendQRCode = async ({
     throw new Error("Participants not found");
   }
 
-  // get the registrant details
   const registrantDetails = participants.find(
     (participant) => participant.isPrincipal,
   );
@@ -84,21 +79,34 @@ export const resendQRCode = async ({
     throw new Error("Registrant details not found");
   }
 
+  const attachments = await Promise.all(
+    participants.map(async (participant) => ({
+      filename: `${participant.participantIdentifier}.png`,
+      content: await generateQRBuffer(participant.participantIdentifier),
+      cid:
+        participant.participantIdentifier ===
+        registrantDetails.participantIdentifier
+          ? "participantQrCodeCID"
+          : `participantQrCodeCID-${participant.participantIdentifier}`,
+    })),
+  );
+
   const html = await render(
     ResendQRCodeTemplate({
       eventDetails,
       eventDateRange,
       eventVenue: eventDetails.venue ?? "TBA",
-      registrationIdentifier: qrData,
       self: {
         email: toEmail,
         fullName: `${registrantDetails.firstName} ${registrantDetails.lastName}`,
+        participantIdentifier: registrantDetails.participantIdentifier,
       },
-      otherParticipants: participants
+      participants: participants
         .filter((participant) => !participant.isPrincipal)
         .map((participant) => ({
           email: participant.email,
           fullName: `${participant.firstName} ${participant.lastName}`,
+          participantIdentifier: participant.participantIdentifier,
         })),
     }),
   );
@@ -107,16 +115,9 @@ export const resendQRCode = async ({
     to: toEmail,
     subject: `Resend QR Code for ${eventDetails.eventTitle}`,
     html,
-    attachments: [
-      {
-        filename: `${qrData}.png`,
-        content: qrBuffer,
-        cid: "qrCodeCID",
-      },
-    ],
+    attachments,
   });
 
-  // change the email if does not match participant email
   if (toEmail !== registrantDetails.email) {
     await supabase
       .from("Participant")
@@ -124,9 +125,5 @@ export const resendQRCode = async ({
       .eq("participantId", registrantDetails.participantId)
       .throwOnError();
   }
-  // updateTag(CACHE_TAGS.registrations.details);
-  // updateTag(CACHE_TAGS.registrations.list);
-  // updateTag(CACHE_TAGS.registrations.event);
-  // updateTag(CACHE_TAGS.events.registrations);
   revalidatePath("/admin/events/[eventId]/registration-list", "page");
 };

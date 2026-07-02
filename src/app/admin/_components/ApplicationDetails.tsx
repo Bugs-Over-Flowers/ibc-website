@@ -410,12 +410,12 @@ function MemberReviewDetails({
                 value={
                   <Badge
                     className={getPaymentStatusClasses(
-                      application.paymentProofStatus,
+                      application.paymentStatus,
                     )}
                     variant="secondary"
                   >
                     {toPascalCaseWithSpaces(
-                      application.paymentProofStatus || "Pending",
+                      application.paymentStatus || "Pending",
                     )}
                   </Badge>
                 }

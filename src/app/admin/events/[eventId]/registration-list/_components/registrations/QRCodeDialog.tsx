@@ -41,7 +41,6 @@ export default function QRCodeDialog({
     email,
     registrationId,
     eventId,
-    registrationIdentifier,
   });
 
   const [qrURL, setQRURL] = useState<string>("");
@@ -73,6 +72,12 @@ export default function QRCodeDialog({
               <strong className="font-medium text-foreground">
                 {registrationIdentifier}
               </strong>
+              <br />
+              <span className="mt-1 block text-muted-foreground text-xs">
+                Resending sends one participant pass per person under this
+                registration. The registration identifier is shown for reference
+                only and is not used as a check-in QR.
+              </span>
             </DialogDescription>
           </DialogHeader>
 

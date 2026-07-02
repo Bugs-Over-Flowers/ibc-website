@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,9 @@ import { cn } from "@/lib/utils";
 import { checkInParticipants } from "@/server/events/mutations/checkInParticipants";
 import { updateCheckInRemarks } from "@/server/events/mutations/updateCheckInRemarks";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
+import { useScanQR } from "../_hooks/useScanQR";
+import AcceptPaymentButton from "./AcceptPaymentButton";
+import ProofDialog from "./ProofDialog";
 import RemarksModal from "./RemarksModal";
 
 interface ParticipantCheckInDialogProps {
@@ -39,9 +42,11 @@ interface ParticipantCheckInDialogProps {
 
 export default function ParticipantCheckInDialog({
   eventId,
-  eventTitle: _eventTitle,
+  eventTitle,
 }: ParticipantCheckInDialogProps) {
   const { eventDayId } = useParams<{ eventDayId: string }>();
+  const router = useRouter();
+  const { execute: scanParticipant } = useScanQR({ eventId });
 
   const scanType = useAttendanceStore((s) => s.scanType);
   const participantScanData = useAttendanceStore((s) => s.participantScanData);
@@ -81,6 +86,7 @@ export default function ParticipantCheckInDialog({
           `Check-in successful${participantScanData ? ` for ${participantScanData.participant.firstName} ${participantScanData.participant.lastName}` : ""}`,
         );
         setCheckInDialogOpen(false);
+        router.refresh();
       },
       onError: (error) => {
         toast.error(`Failed to check in participant: ${error}`);
@@ -91,8 +97,14 @@ export default function ParticipantCheckInDialog({
 
   if (scanType !== "participant" || !participantScanData) return null;
 
-  const { participant, registration, checkIn, affiliation } =
-    participantScanData;
+  const {
+    participant,
+    registration,
+    checkIn,
+    affiliation,
+    registrant,
+    proofImages,
+  } = participantScanData;
 
   const isCheckedIn = checkIn && checkIn.length > 0;
   const checkInRecord = isCheckedIn ? checkIn[0] : null;
@@ -111,9 +123,9 @@ export default function ParticipantCheckInDialog({
     : "bg-gray-500/15 text-gray-700 border-gray-200";
 
   const paymentStatusColor =
-    registration.paymentProofStatus === "accepted"
+    registration.paymentStatus === "accepted"
       ? "bg-green-500/15 text-green-700 border-green-200"
-      : registration.paymentProofStatus === "pending"
+      : registration.paymentStatus === "pending"
         ? "bg-yellow-500/15 text-yellow-700 border-yellow-200"
         : "bg-red-500/15 text-red-700 border-red-200";
 
@@ -174,7 +186,7 @@ export default function ParticipantCheckInDialog({
                 className={cn("capitalize", paymentStatusColor)}
                 variant="outline"
               >
-                {registration.paymentProofStatus}
+                {registration.paymentStatus}
               </Badge>
             </div>
 
@@ -218,6 +230,30 @@ export default function ParticipantCheckInDialog({
                 <MessageSquare className="h-4 w-4" />
                 {checkInRecord?.remarks ? "Edit Remark" : "Add Remark"}
               </Button>
+
+              {registration.paymentMethod === "BPI" &&
+                proofImages.length > 0 &&
+                registrant && (
+                  <ProofDialog
+                    eventTitle={eventTitle}
+                    onAfterAccept={async () => {
+                      await scanParticipant(
+                        participant.participantIdentifier,
+                        eventDayId,
+                      );
+                    }}
+                    paymentStatus={registration.paymentStatus}
+                    registrantEmail={registrant.email}
+                    registrantName={`${registrant.firstName} ${registrant.lastName}`}
+                    registrationId={registration.registrationId}
+                  />
+                )}
+
+              <AcceptPaymentButton
+                paymentMethod={registration.paymentMethod}
+                paymentStatus={registration.paymentStatus}
+                registrationId={registration.registrationId}
+              />
             </div>
 
             {/* Check-in Button */}

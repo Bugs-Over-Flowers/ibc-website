@@ -88,7 +88,7 @@ export const updatePaymentProofSet = async (
   if (accept) {
     await supabase
       .from("Registration")
-      .update({ paymentProofStatus: "accepted" })
+      .update({ paymentStatus: "accepted" })
       .eq("registrationId", registrationId);
   }
 

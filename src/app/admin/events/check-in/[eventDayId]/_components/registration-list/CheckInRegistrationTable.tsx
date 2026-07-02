@@ -52,7 +52,7 @@ const getColumns = ({
     cell: ({ row }) => (
       <PaymentStatusBadge
         className="capitalize"
-        status={row.original.paymentProofStatus}
+        status={row.original.paymentStatus}
       />
     ),
   },
@@ -124,6 +124,10 @@ export default function CheckInRegistrationTable({
         scanQRData: handleScanQR,
       })}
       data={registrationList}
+      onRowDoubleClick={(row) => {
+        if (isPending) return;
+        handleScanQR(row.registrationIdentifier, eventDayId);
+      }}
       tableContainerClassName="rounded-none border-0"
       tableHeaderClassName="bg-muted/20"
     />

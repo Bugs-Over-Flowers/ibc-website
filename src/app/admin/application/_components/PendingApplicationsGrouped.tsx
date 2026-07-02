@@ -31,7 +31,7 @@ function isSelectableApplication(
   return (
     !paymentRequirement.requiresPayment ||
     application.paymentMethod !== "BPI" ||
-    (application.paymentProofStatus ?? "pending") !== "pending"
+    (application.paymentStatus ?? "pending") !== "pending"
   );
 }
 

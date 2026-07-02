@@ -116,11 +116,11 @@ export const participantListColumns: ColumnDef<ParticipantListItem>[] = [
     },
   },
   {
-    accessorKey: "paymentProofStatus",
+    accessorKey: "paymentStatus",
     header: "Status",
     cell: ({ row }) => {
-      const { paymentProofStatus } = row.original;
-      return <PaymentStatusBadge status={paymentProofStatus} />;
+      const { paymentStatus } = row.original;
+      return <PaymentStatusBadge status={paymentStatus} />;
     },
   },
   {
@@ -159,7 +159,7 @@ const getExcelColumns = (): ColumnDef<Record<string, unknown>>[] => [
   { accessorKey: "email", header: "Email" },
   { accessorKey: "contactNumber", header: "Contact Number" },
   { accessorKey: "participantIdentifier", header: "Participant ID" },
-  { accessorKey: "paymentProofStatus", header: "Payment Status" },
+  { accessorKey: "paymentStatus", header: "Payment Status" },
 ];
 
 export default function ParticipantListTable({
@@ -183,7 +183,7 @@ export default function ParticipantListTable({
       email: row.email,
       contactNumber: row.contactNumber,
       participantIdentifier: row.participantIdentifier ?? "",
-      paymentProofStatus: row.paymentProofStatus,
+      paymentStatus: row.paymentStatus,
     }));
 
     await exportToExcel({

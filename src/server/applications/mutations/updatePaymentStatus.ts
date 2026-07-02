@@ -6,15 +6,15 @@ import { createActionClient } from "@/lib/supabase/server";
 
 export type PaymentProofDecision = "accepted" | "rejected";
 
-type UpdatePaymentProofStatusInput = {
+type UpdatePaymentStatusInput = {
   applicationId: string;
   status: PaymentProofDecision;
 };
 
-export async function updatePaymentProofStatus({
+export async function updatePaymentStatus({
   applicationId,
   status,
-}: UpdatePaymentProofStatusInput) {
+}: UpdatePaymentStatusInput) {
   const supabase = await createActionClient();
 
   // verifying the application is an online (BPI) payment and actually has a proof image.
@@ -36,12 +36,12 @@ export async function updatePaymentProofStatus({
     throw new Error("Cannot accept payment proof without an uploaded image");
   }
 
-  const paymentProofStatus: Enums<"PaymentProofStatus"> = status;
+  const paymentStatus: Enums<"PaymentStatus"> = status;
 
   const { error } = await supabase
     .from("Application")
     .update({
-      paymentProofStatus,
+      paymentStatus,
     })
     .eq("applicationId", applicationId);
 

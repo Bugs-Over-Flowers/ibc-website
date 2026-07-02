@@ -48,7 +48,7 @@ async function createBusinessMemberWithStatus(
     websiteURL: "https://e2e-test.local",
     logoImageURL: "https://picsum.photos/200/200",
     identifier: `e2e-app-${options.identifierSuffix}-${timestamp}`,
-    paymentProofStatus: "accepted",
+    paymentStatus: "accepted",
     applicationStatus: "approved",
   };
 

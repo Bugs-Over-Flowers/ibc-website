@@ -175,7 +175,7 @@ export async function seedAdminRegistrationScenario(
         websiteURL: "https://e2e-test.local",
         logoImageURL: "https://picsum.photos/200/200",
         identifier: `e2e-member-app-${timestamp}`,
-        paymentProofStatus: "accepted",
+        paymentStatus: "accepted",
         applicationStatus: "approved",
       })
       .select("applicationId")

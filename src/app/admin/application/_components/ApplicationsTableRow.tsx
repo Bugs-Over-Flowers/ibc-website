@@ -14,7 +14,7 @@ import { useAction } from "@/hooks/useAction";
 import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import tryCatch from "@/lib/server/tryCatch";
 import { cn } from "@/lib/utils";
-import { updatePaymentProofStatus } from "@/server/applications/mutations/updatePaymentProofStatus";
+import { updatePaymentStatus } from "@/server/applications/mutations/updatePaymentStatus";
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { toPascalCaseWithSpaces } from "../_utils/formatters";
@@ -96,11 +96,11 @@ export function ApplicationsTableRow({
     applicationType: application.applicationType,
     previousApplicationMemberType: application.previousApplicationMemberType,
   });
-  const paymentProofStatus = application.paymentProofStatus ?? "pending";
+  const paymentStatus = application.paymentStatus ?? "pending";
   const isPaymentProofPending =
     paymentRequirement.requiresPayment &&
     application.paymentMethod === "BPI" &&
-    paymentProofStatus === "pending";
+    paymentStatus === "pending";
   const isSelectionDisabled = isPaymentProofPending || isSelectionLocked;
   const formattedAppliedDate = formatAppliedDate(application.applicationDate);
 
@@ -108,7 +108,7 @@ export function ApplicationsTableRow({
   const hasProofImage = !!proofImage;
 
   const { execute: updateProofStatus, isPending: isUpdatingStatus } = useAction(
-    tryCatch(updatePaymentProofStatus),
+    tryCatch(updatePaymentStatus),
     {
       onSuccess: () => {
         router.refresh();
@@ -159,39 +159,39 @@ export function ApplicationsTableRow({
               <PaymentProofModal
                 applicationId={application.applicationId}
                 expectedRegistrationFee={paymentRequirement.expectedAmount}
-                isDecisionLocked={paymentProofStatus !== "pending"}
+                isDecisionLocked={paymentStatus !== "pending"}
                 isUpdatingStatus={isUpdatingStatus}
                 membershipTypeLabel={paymentRequirement.membershipTypeLabel}
                 onDecision={handleDecision}
                 onProofReplaced={() => {
                   router.refresh();
                 }}
-                paymentProofStatus={paymentProofStatus}
+                paymentStatus={paymentStatus}
                 proofImagePath={proofImage.path}
                 trigger={
                   <button
                     aria-label="Check payment proof"
                     className={cn(
                       "inline-flex size-[18px] items-center justify-center rounded-full transition-colors",
-                      paymentProofStatus === "accepted" &&
+                      paymentStatus === "accepted" &&
                         "bg-status-green/10 text-status-green hover:bg-status-green/20",
-                      paymentProofStatus === "rejected" &&
+                      paymentStatus === "rejected" &&
                         "bg-status-red/10 text-status-red hover:bg-status-red/20",
-                      paymentProofStatus === "pending" &&
+                      paymentStatus === "pending" &&
                         "bg-status-orange/10 text-status-red hover:bg-status-red/20",
                     )}
                     title={
-                      paymentProofStatus === "accepted"
+                      paymentStatus === "accepted"
                         ? "Approved"
-                        : paymentProofStatus === "rejected"
+                        : paymentStatus === "rejected"
                           ? "Rejected"
                           : "Check Payment Proof"
                     }
                     type="button"
                   >
-                    {paymentProofStatus === "accepted" ? (
+                    {paymentStatus === "accepted" ? (
                       <CheckCircle2 className="size-3" />
-                    ) : paymentProofStatus === "rejected" ? (
+                    ) : paymentStatus === "rejected" ? (
                       <XCircle className="size-3" />
                     ) : (
                       <AlertTriangle className="size-3" />

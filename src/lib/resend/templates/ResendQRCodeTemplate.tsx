@@ -11,6 +11,7 @@ import {
 } from "react-email";
 import type { RegistrationStoreEventDetails } from "@/hooks/registration.store";
 import TermsAndConditions from "../components/TermsAndConditions";
+import TicketCard from "../components/TicketCard";
 
 interface ResendQRCodeProps {
   eventDetails: Pick<
@@ -19,14 +20,15 @@ interface ResendQRCodeProps {
   >;
   eventDateRange: string;
   eventVenue: string;
-  registrationIdentifier: string;
   self: {
     fullName: string;
     email: string;
+    participantIdentifier: string;
   };
-  otherParticipants?: {
+  participants?: {
     fullName: string;
     email: string;
+    participantIdentifier: string;
   }[];
 }
 
@@ -34,8 +36,7 @@ export default function ResendQRCode({
   eventDetails,
   eventDateRange,
   eventVenue,
-  registrationIdentifier,
-  otherParticipants,
+  participants,
   self,
 }: ResendQRCodeProps) {
   if (!eventDetails.eventHeaderUrl) {
@@ -43,10 +44,7 @@ export default function ResendQRCode({
   }
 
   const previewString = `Resend Sign-in QR Code for ${eventDetails.eventTitle}`;
-  const otherParticipantsString =
-    otherParticipants &&
-    otherParticipants.length > 0 &&
-    ` and the following participants`;
+  const hasOthers = participants && participants.length > 0;
 
   return (
     <Html>
@@ -63,8 +61,9 @@ export default function ResendQRCode({
           <Heading style={h1}>QR Code for Sign In</Heading>
 
           <Text style={text}>
-            Your QR Code for Sign In to{" "}
-            <strong>{eventDetails.eventTitle}</strong> has been resent to you.
+            Your QR Code{hasOthers ? "s" : ""} for Sign In to{" "}
+            <strong>{eventDetails.eventTitle}</strong>{" "}
+            {hasOthers ? "have" : "has"} been resent to you.
           </Text>
 
           <Section style={detailsSection}>
@@ -76,36 +75,38 @@ export default function ResendQRCode({
             <Text style={detailValue}>{eventVenue}</Text>
           </Section>
 
-          <Section style={{ textAlign: "center", margin: "32px 0" }}>
-            {/** biome-ignore lint/performance/noImgElement: using react-email */}
-            <img
-              alt="Check-in QR Code"
-              height="300"
-              src="cid:qrCodeCID"
-              style={{ maxWidth: "300px", margin: "0 auto" }}
-              width="300"
-            />
-          </Section>
-
           <Text style={text}>
-            Please keep a copy of the QR code for you {otherParticipantsString}{" "}
-            to sign in to the event.
+            Please keep a copy of the QR code{hasOthers ? "s" : ""} below to
+            sign in to the event.
           </Text>
 
+          <Section style={{ textAlign: "center", margin: "32px 0" }}>
+            <TicketCard
+              cid="participantQrCodeCID"
+              email={self.email}
+              identifier={self.participantIdentifier}
+              subtitle={self.email}
+              title={self.fullName}
+            />
+            {participants?.map((participant) => (
+              <TicketCard
+                cid={`participantQrCodeCID-${participant.participantIdentifier}`}
+                email={participant.email}
+                identifier={participant.participantIdentifier}
+                key={participant.participantIdentifier}
+                subtitle={participant.email}
+                title={participant.fullName}
+              />
+            ))}
+          </Section>
+
           <Section style={detailsSection}>
-            <Text style={detailLabel}>Group Registration Identifier</Text>
-            <Text style={detailValue}>
-              <code style={detailValueMono}>{registrationIdentifier}</code>
-            </Text>
-            <Text style={detailLabel}>
-              Participants under this registration
-            </Text>
+            <Text style={detailLabel}>People under this registration</Text>
             <Text style={detailValue}>
               • {self.fullName} ({self.email}) - <strong>Registrant</strong>
             </Text>
-            {otherParticipants &&
-              otherParticipants.length > 0 &&
-              otherParticipants.map((participant) => (
+            {hasOthers &&
+              participants.map((participant) => (
                 <Text key={participant.email} style={detailValue}>
                   • {participant.fullName} ({participant.email})
                 </Text>
@@ -137,14 +138,22 @@ ResendQRCode.PreviewProps = {
   },
   eventDateRange: "January 20, 2024, 12:00 PM to January 25, 2024, 8:00 PM",
   eventVenue: "Grand Ballroom, Iloilo Convention Center",
-  registrationIdentifier: "IBC-REG-2026-0001",
-  otherParticipants: [
-    { fullName: "John Doe", email: "john.doe@example.com" },
-    { fullName: "Jane Smith", email: "jane.smith@example.com" },
+  participants: [
+    {
+      fullName: "John Doe",
+      email: "john.doe@example.com",
+      participantIdentifier: "ibc-par-e5f6g7h8",
+    },
+    {
+      fullName: "Jane Smith",
+      email: "jane.smith@example.com",
+      participantIdentifier: "ibc-par-i9j0k1l2",
+    },
   ],
   self: {
     fullName: "Alice Johnson",
     email: "alice.johnson@example.com",
+    participantIdentifier: "ibc-par-a1b2c3d4",
   },
 };
 
@@ -206,9 +215,4 @@ const detailValue = {
   fontSize: "16px",
   fontWeight: "500",
   margin: "0 0 8px 0",
-};
-
-const detailValueMono = {
-  fontFamily:
-    'ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace',
 };

@@ -71,7 +71,7 @@ INSERT INTO "public"."Application" (
   "websiteURL",
   "applicationMemberType",
   "applicationStatus",
-  "paymentProofStatus"
+  "paymentStatus"
 ) VALUES
   (
     gen_random_uuid(),
@@ -342,7 +342,7 @@ WITH seeded_business_applications AS (
     "websiteURL",
     "applicationMemberType",
     "applicationStatus",
-    "paymentProofStatus"
+    "paymentStatus"
   ) VALUES
     (
       gen_random_uuid(),

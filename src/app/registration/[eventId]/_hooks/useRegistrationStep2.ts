@@ -15,6 +15,7 @@ export const useRegistrationStep2 = () => {
   const setRegistrationData = useRegistrationStore(
     (state) => state.setRegistrationData,
   );
+  const eventDetails = useRegistrationStore((state) => state.eventDetails);
 
   const defaultRegistrationDataStep2 = useRegistrationStore(
     (state) => state.registrationData?.step2,
@@ -55,8 +56,17 @@ export const useRegistrationStep2 = () => {
     onSubmit: async ({ value, meta }) => {
       const refinedValue = StandardRegistrationStep2Schema.parse(value);
 
+      const isFreeEvent = (eventDetails?.registrationFee ?? 0) === 0;
+
       if (meta.nextStep) {
-        setStep(3);
+        setStep(isFreeEvent ? 4 : 3);
+        if (isFreeEvent) {
+          setRegistrationData({
+            step2: refinedValue,
+            step3: { paymentMethod: "onsite" },
+          });
+          return;
+        }
       } else {
         setStep(1);
       }

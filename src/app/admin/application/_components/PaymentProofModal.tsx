@@ -37,14 +37,14 @@ import { replaceApplicationPaymentProofAndAccept } from "@/server/applications/m
 interface PaymentProofModalProps {
   applicationId: string;
   proofImagePath: string;
-  paymentProofStatus: Enums<"PaymentProofStatus">;
+  paymentStatus: Enums<"PaymentStatus">;
   membershipTypeLabel: string;
   expectedRegistrationFee: number;
   isUpdatingStatus: boolean;
   isDecisionLocked: boolean;
   onDecision: (status: "accepted" | "rejected") => void;
   onProofReplaced?: (input: {
-    paymentProofStatus: Enums<"PaymentProofStatus">;
+    paymentStatus: Enums<"PaymentStatus">;
     proofImagePath: string;
   }) => void;
   trigger?: React.ReactElement;
@@ -83,7 +83,7 @@ const STATUS_CONFIG = {
 export function PaymentProofModal({
   applicationId,
   proofImagePath,
-  paymentProofStatus,
+  paymentStatus,
   membershipTypeLabel,
   expectedRegistrationFee,
   isUpdatingStatus,
@@ -97,7 +97,7 @@ export function PaymentProofModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const status = STATUS_CONFIG[paymentProofStatus] ?? STATUS_CONFIG.pending;
+  const status = STATUS_CONFIG[paymentStatus] ?? STATUS_CONFIG.pending;
   const { Icon } = status;
   const isCorporateUpgrade =
     expectedRegistrationFee === MEMBERSHIP_FEES.corporateUpgrade &&
@@ -105,14 +105,14 @@ export function PaymentProofModal({
   const isPersonal =
     !isCorporateUpgrade && expectedRegistrationFee === MEMBERSHIP_FEES.personal;
   const canReplaceProof =
-    paymentProofStatus === "rejected" || paymentProofStatus === "accepted";
+    paymentStatus === "rejected" || paymentStatus === "accepted";
 
   const { execute: replaceProof, isPending: isReplacingProof } = useAction(
     tryCatch(replaceApplicationPaymentProofAndAccept),
     {
       onSuccess: (data) => {
         onProofReplaced?.({
-          paymentProofStatus: data.paymentProofStatus,
+          paymentStatus: data.paymentStatus,
           proofImagePath: data.proofImagePath,
         });
         toast.success("Payment proof updated and accepted.");

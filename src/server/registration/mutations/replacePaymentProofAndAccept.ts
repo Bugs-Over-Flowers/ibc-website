@@ -31,7 +31,7 @@ export async function replacePaymentProofAndAccept(input: {
   const { data: registration, error: registrationError } = await supabase
     .from("Registration")
     .select(
-      "eventId, paymentMethod, sponsoredRegistrationId, paymentProofStatus, ProofImage(proofImageId, path)",
+      "eventId, paymentMethod, sponsoredRegistrationId, paymentStatus, ProofImage(proofImageId, path)",
     )
     .eq("registrationId", registrationId)
     .single();
@@ -48,7 +48,7 @@ export async function replacePaymentProofAndAccept(input: {
 
   const existingProof = registration.ProofImage?.[0];
   const oldPath = existingProof?.path;
-  const previousPaymentProofStatus = registration.paymentProofStatus;
+  const previousPaymentStatus = registration.paymentStatus;
 
   const normalizedUploadedPath = extractStorageObjectPath(
     uploadedPath,
@@ -105,7 +105,7 @@ export async function replacePaymentProofAndAccept(input: {
 
     const { error: statusUpdateError } = await supabase
       .from("Registration")
-      .update({ paymentProofStatus: "accepted" })
+      .update({ paymentStatus: "accepted" })
       .eq("registrationId", registrationId);
 
     if (statusUpdateError) {
@@ -151,12 +151,12 @@ export async function replacePaymentProofAndAccept(input: {
       );
     }
 
-    if (previousPaymentProofStatus !== "accepted") {
+    if (previousPaymentStatus !== "accepted") {
       const { error: revertRegistrationStatusError } = await supabase
         .from("Registration")
-        .update({ paymentProofStatus: previousPaymentProofStatus })
+        .update({ paymentStatus: previousPaymentStatus })
         .eq("registrationId", registrationId)
-        .eq("paymentProofStatus", "accepted");
+        .eq("paymentStatus", "accepted");
 
       if (revertRegistrationStatusError) {
         compensationErrors.push(

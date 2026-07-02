@@ -4,21 +4,21 @@ import { Badge } from "@/components/ui/badge";
 interface PaymentInfoCardProps {
   requiresPayment?: boolean;
   paymentMethod: string;
-  paymentProofStatus: string;
+  paymentStatus: string;
   applicationDate: Date;
 }
 
 export function PaymentInfoCard({
   requiresPayment = true,
   paymentMethod,
-  paymentProofStatus,
+  paymentStatus,
   applicationDate,
 }: PaymentInfoCardProps) {
   if (!requiresPayment) {
     return null;
   }
 
-  const normalizedStatus = paymentProofStatus.toLowerCase();
+  const normalizedStatus = paymentStatus.toLowerCase();
   const statusClassName =
     normalizedStatus === "accepted"
       ? "bg-status-green"
@@ -44,7 +44,7 @@ export function PaymentInfoCard({
                 normalizedStatus === "accepted" ? "default" : "secondary"
               }
             >
-              {paymentProofStatus}
+              {paymentStatus}
             </Badge>
           }
         />

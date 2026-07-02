@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import type { PaymentProofStatusEnum } from "@/lib/validation/utils";
+import type { PaymentStatusEnum } from "@/lib/validation/utils";
 import useAttendanceStore from "../_hooks/useAttendanceStore";
 import { useCheckIn } from "../_hooks/useCheckIn";
+import AcceptPaymentButton from "./AcceptPaymentButton";
 import CheckInTable from "./CheckInTable";
 import ProofDialog from "./ProofDialog";
 
@@ -117,10 +118,8 @@ export default function CheckInDataDialog({
               {scannedData.identifier}
             </code>
           </div>
-          {scannedData.paymentProofStatus !== "accepted" && (
-            <PaymentStatusNotice
-              paymentProofStatus={scannedData.paymentProofStatus}
-            />
+          {scannedData.paymentStatus !== "accepted" && (
+            <PaymentStatusNotice paymentStatus={scannedData.paymentStatus} />
           )}
         </div>
 
@@ -149,13 +148,19 @@ export default function CheckInDataDialog({
             </Link>
           </div>
           <div className="flex gap-2">
-            {(scannedData.paymentMethod === "BPI" ||
-              scannedData.paymentMethod === "IMPORTED") &&
+            {scannedData.paymentMethod === "ONSITE" && (
+              <AcceptPaymentButton
+                paymentMethod={scannedData.paymentMethod}
+                paymentStatus={scannedData.paymentStatus}
+                registrationId={scannedData.registrationId}
+              />
+            )}
+            {scannedData.paymentMethod === "BPI" &&
               scannedData.proofImage.length > 0 &&
               registrant && (
                 <ProofDialog
                   eventTitle={eventTitle}
-                  paymentProofStatus={scannedData.paymentProofStatus}
+                  paymentStatus={scannedData.paymentStatus}
                   registrantEmail={registrant.email}
                   registrantName={`${registrant.firstName} ${registrant.lastName}`}
                   registrationId={scannedData.registrationId}
@@ -185,11 +190,11 @@ export default function CheckInDataDialog({
 }
 
 function PaymentStatusNotice({
-  paymentProofStatus,
+  paymentStatus,
 }: {
-  paymentProofStatus: (typeof PaymentProofStatusEnum.options)[number];
+  paymentStatus: (typeof PaymentStatusEnum.options)[number];
 }) {
-  const isPending = paymentProofStatus === "pending";
+  const isPending = paymentStatus === "pending";
 
   return (
     <div

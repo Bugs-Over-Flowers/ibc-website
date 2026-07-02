@@ -23,6 +23,7 @@ export async function deleteCheckInRemark(
 
   updateTag(CACHE_TAGS.checkIns.all);
   updateTag(CACHE_TAGS.checkIns.list);
+  updateTag(CACHE_TAGS.checkIns.stats);
   updateTag(CACHE_TAGS.checkIns.eventDay);
   updateTag(CACHE_TAGS.events.checkIns);
 

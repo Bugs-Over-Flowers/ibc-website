@@ -72,7 +72,7 @@ export async function replaceApplicationPaymentProofAndAccept(input: {
 
   const { error: statusUpdateError } = await supabase
     .from("Application")
-    .update({ paymentProofStatus: "accepted" })
+    .update({ paymentStatus: "accepted" })
     .eq("applicationId", applicationId);
 
   if (statusUpdateError) {
@@ -113,7 +113,7 @@ export async function replaceApplicationPaymentProofAndAccept(input: {
   );
 
   return {
-    paymentProofStatus: "accepted" as const,
+    paymentStatus: "accepted" as const,
     proofImagePath: signedProofImage ?? normalizedUploadedPath,
   };
 }

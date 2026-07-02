@@ -21,12 +21,11 @@ interface StandardRegistrationConfirmationTemplateProps {
   >;
   eventDateRange: string;
   eventVenue: string;
-  registrationIdentifier: string;
-  participantIdentifier: string;
   self: {
     fullName: string;
     email: string;
     affiliation: string;
+    participantIdentifier: string;
   };
   participants?: {
     fullName: string;
@@ -40,8 +39,6 @@ export default function StandardRegistrationConfirmationTemplate({
   eventDetails,
   eventDateRange,
   eventVenue,
-  registrationIdentifier,
-  participantIdentifier,
   participants,
   self,
 }: StandardRegistrationConfirmationTemplateProps) {
@@ -80,35 +77,22 @@ export default function StandardRegistrationConfirmationTemplate({
           </Section>
 
           <Text style={text}>
-            Here are the check-in QR codes for everyone under this registration.
-            Please present the appropriate QR code at the event entrance.
+            Here are the individual check-in QR passes for everyone under this
+            registration. Please present the appropriate QR code at the event
+            entrance.
           </Text>
-
-          <Hr style={hr} />
-
-          <Text style={text}>Registration QR Code</Text>
-          <Text style={subtext}>
-            Use this code to check in multiple people during the event.
-          </Text>
-          <TicketCard
-            cid="qrCodeCID"
-            email={self.email}
-            identifier={registrationIdentifier}
-            subtitle={self.fullName}
-            title={self.affiliation}
-          />
 
           <Hr style={hr} />
 
           <Heading style={h2}>Individual Passes</Heading>
           <Text style={subtext}>
-            Use these to check in individual participants.
+            Use these to check in each person at the event entrance.
           </Text>
 
           <TicketCard
             cid="participantQrCodeCID"
             email={self.email}
-            identifier={participantIdentifier}
+            identifier={self.participantIdentifier}
             subtitle={self.affiliation}
             title={self.fullName}
           />
@@ -150,8 +134,6 @@ StandardRegistrationConfirmationTemplate.PreviewProps = {
   },
   eventDateRange: "January 20, 2024, 12:00 PM to January 25, 2024, 8:00 PM",
   eventVenue: "Grand Ballroom, Iloilo Convention Center",
-  registrationIdentifier: "ibc-reg-a1b2c3d4",
-  participantIdentifier: "ibc-par-a1b2c3d4",
   participants: [
     {
       fullName: "John Doe",
@@ -170,6 +152,7 @@ StandardRegistrationConfirmationTemplate.PreviewProps = {
     fullName: "Alice Johnson",
     email: "alice.johnson@example.com",
     affiliation: "Acme Corp",
+    participantIdentifier: "ibc-par-a1b2c3d4",
   },
 };
 

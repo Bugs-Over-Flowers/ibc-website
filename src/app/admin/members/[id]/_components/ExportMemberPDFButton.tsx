@@ -607,7 +607,7 @@ export default function ExportMemberPDFButton({
         </tr>
         <tr>
           <td class="info-label">Payment Proof Status</td>
-          <td class="info-value">${statusChip(latestApplication?.paymentProofStatus)}</td>
+          <td class="info-value">${statusChip(latestApplication?.paymentStatus)}</td>
         </tr>
         ${infoRow("Company Address", latestApplication?.companyAddress ?? "N/A")}
         ${infoRow("Email Address", latestApplication?.emailAddress ?? "N/A")}

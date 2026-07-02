@@ -18,7 +18,7 @@ export default async function RegistrationList({
     getEventRegistrationList(cookieStore.getAll(), {
       eventId,
       searchString: parseStringParam(reg_q),
-      paymentProofStatus: parseStringParam(reg_paymentStatus),
+      paymentStatus: parseStringParam(reg_paymentStatus),
     }),
   );
 

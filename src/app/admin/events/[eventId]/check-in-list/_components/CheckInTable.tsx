@@ -2,13 +2,15 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
-import { Clock, Download } from "lucide-react";
+import { Clock, Download, Search, X } from "lucide-react";
+import { useDeferredValue, useMemo, useState } from "react";
 import {
   AdminTableSortHeader,
   PaymentStatusBadge,
 } from "@/app/admin/events/_components/table/AdminTableControls";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { type ExportEventDetails, exportToExcel } from "@/lib/export/excel";
 import type { CheckInListItem } from "@/lib/validation/check-in/check-in-list";
 import CheckInRowActions from "./CheckInRowActions";
@@ -108,12 +110,12 @@ const getCheckInListColumns = (
     ),
   },
   {
-    accessorKey: "paymentProofStatus",
+    accessorKey: "paymentStatus",
     header: "Payment",
     cell: ({ row }) => (
       <PaymentStatusBadge
         className="capitalize"
-        status={row.original.paymentProofStatus}
+        status={row.original.paymentStatus}
       />
     ),
   },
@@ -156,7 +158,7 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
   { accessorKey: "lastName", header: "Last Name" },
   { accessorKey: "email", header: "Email Address" },
   { accessorKey: "contactNumber", header: "Phone Number" },
-  { accessorKey: "paymentProofStatus", header: "Payment Status" },
+  { accessorKey: "paymentStatus", header: "Payment Status" },
   { accessorKey: "remarks", header: "Remarks" },
 ];
 
@@ -166,13 +168,33 @@ export default function CheckInTable({
   eventDayLabel,
   eventDetails,
 }: CheckInTableProps) {
-  const tableData: CheckInListRow[] = checkIns.map((c) => ({
-    ...c,
-    name: `${c.firstName} ${c.lastName}`,
-  }));
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
+
+  const tableData: CheckInListRow[] = useMemo(
+    () =>
+      checkIns.map((c) => ({
+        ...c,
+        name: `${c.firstName} ${c.lastName}`,
+      })),
+    [checkIns],
+  );
+
+  const filteredTableData = useMemo(() => {
+    const q = deferredSearch.trim().toLowerCase();
+    if (!q) return tableData;
+    return tableData.filter(
+      (c) =>
+        c.firstName.toLowerCase().includes(q) ||
+        c.lastName.toLowerCase().includes(q) ||
+        c.name.toLowerCase().includes(q) ||
+        c.identifier.toLowerCase().includes(q) ||
+        c.affiliation.toLowerCase().includes(q),
+    );
+  }, [tableData, deferredSearch]);
 
   const handleExport = async () => {
-    const sorted = [...tableData].sort(
+    const sorted = [...filteredTableData].sort(
       (a, b) =>
         new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime(),
     );
@@ -189,11 +211,15 @@ export default function CheckInTable({
     });
   };
 
+  const searchActive = deferredSearch.trim().length > 0;
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <span className="rounded-full border border-border bg-muted/50 px-3 py-1 text-muted-foreground text-xs">
-          {checkIns.length}{" "}
+          {searchActive
+            ? `${filteredTableData.length} / ${checkIns.length}`
+            : checkIns.length}{" "}
           {checkIns.length === 1 ? "participant" : "participants"} checked in
         </span>
         <Button
@@ -206,9 +232,27 @@ export default function CheckInTable({
           Export to Excel
         </Button>
       </div>
+      <div className="relative">
+        <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          className="h-9 bg-background pr-8 pl-8 text-sm"
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search by name, identifier, or affiliation..."
+          value={search}
+        />
+        {search !== "" && (
+          <button
+            className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            onClick={() => setSearch("")}
+            type="button"
+          >
+            <X className="size-3.5" />
+          </button>
+        )}
+      </div>
       <DataTable
         columns={getCheckInListColumns(eventDayId)}
-        data={tableData}
+        data={filteredTableData}
         enableClearSorting
       />
     </div>

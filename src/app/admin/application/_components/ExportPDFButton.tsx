@@ -89,7 +89,7 @@ export default function ExportPDFButton({ application }: ExportPDFButtonProps) {
     const appStatusLabel = toTitleCase(appStatus);
     const appStatusStyle = statusColor(appStatus);
 
-    const paymentStatus = application.paymentProofStatus ?? "pending";
+    const paymentStatus = application.paymentStatus ?? "pending";
     const paymentStatusLabel = toTitleCase(paymentStatus);
     const paymentStatusStyle = statusColor(paymentStatus);
 

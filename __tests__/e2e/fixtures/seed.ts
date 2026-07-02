@@ -88,7 +88,7 @@ export async function seedE2ERegistrationData(
       websiteURL: "https://e2e-test.local",
       logoImageURL: "https://picsum.photos/200/200",
       identifier: `e2e-app-${timestamp}`,
-      paymentProofStatus: "accepted",
+      paymentStatus: "accepted",
       applicationStatus: "approved",
     };
 

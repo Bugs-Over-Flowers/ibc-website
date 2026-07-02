@@ -54,7 +54,7 @@ export const rejectPayment = async (
   const { error: updateError } = await supabase
     .from("Registration")
     .update({
-      paymentProofStatus: "rejected",
+      paymentStatus: "rejected",
     })
     .eq("registrationId", registrationId);
 

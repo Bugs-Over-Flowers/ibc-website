@@ -23,13 +23,13 @@ import {
 interface SelectableApplication {
   applicationId: string;
   paymentMethod: string | null;
-  paymentProofStatus: string | null;
+  paymentStatus: string | null;
 }
 
 function isSelectable(application: SelectableApplication): boolean {
   return (
     application.paymentMethod !== "BPI" ||
-    (application.paymentProofStatus ?? "pending") !== "pending"
+    (application.paymentStatus ?? "pending") !== "pending"
   );
 }
 
@@ -38,7 +38,7 @@ describe("isSelectable (ApplicationsTable)", () => {
   it("should be selectable when payment method is ONSITE", () => {
     const app = createMockApplication({
       paymentMethod: "ONSITE",
-      paymentProofStatus: undefined,
+      paymentStatus: undefined,
     });
 
     expect(isSelectable(app)).toBe(true);
@@ -48,7 +48,7 @@ describe("isSelectable (ApplicationsTable)", () => {
   it("should be selectable when BPI with accepted proof", () => {
     const app = createMockApplication({
       paymentMethod: "BPI",
-      paymentProofStatus: "accepted",
+      paymentStatus: "accepted",
     });
 
     expect(isSelectable(app)).toBe(true);
@@ -58,7 +58,7 @@ describe("isSelectable (ApplicationsTable)", () => {
   it("should be selectable when BPI with rejected proof", () => {
     const app = createMockApplication({
       paymentMethod: "BPI",
-      paymentProofStatus: "rejected",
+      paymentStatus: "rejected",
     });
 
     expect(isSelectable(app)).toBe(true);
@@ -68,7 +68,7 @@ describe("isSelectable (ApplicationsTable)", () => {
   it("should NOT be selectable when BPI with pending proof", () => {
     const app = createMockApplication({
       paymentMethod: "BPI",
-      paymentProofStatus: "pending",
+      paymentStatus: "pending",
     });
 
     expect(isSelectable(app)).toBe(false);
@@ -78,7 +78,7 @@ describe("isSelectable (ApplicationsTable)", () => {
   it("should NOT be selectable when BPI with null proof status", () => {
     const app = createMockApplication({
       paymentMethod: "BPI",
-      paymentProofStatus: undefined,
+      paymentStatus: undefined,
     });
 
     expect(isSelectable(app)).toBe(false);
@@ -88,7 +88,7 @@ describe("isSelectable (ApplicationsTable)", () => {
   it("should be selectable when payment method is null", () => {
     const app = createMockApplication({
       paymentMethod: undefined,
-      paymentProofStatus: undefined,
+      paymentStatus: undefined,
     });
 
     expect(isSelectable(app)).toBe(true);
@@ -108,7 +108,7 @@ describe("Select All toggle logic", () => {
   it("should only return selectable application IDs", () => {
     const selectableIds = getSelectableIds(mockApplications);
 
-    // app-002 has paymentMethod: "BPI" and paymentProofStatus: "pending"
+    // app-002 has paymentMethod: "BPI" and paymentStatus: "pending"
     // so it should NOT be included
     expect(selectableIds).not.toContain("app-002");
     expect(selectableIds).toContain("app-001");
@@ -164,12 +164,12 @@ describe("Select All toggle logic", () => {
       createMockApplication({
         applicationId: "a1",
         paymentMethod: "BPI",
-        paymentProofStatus: "pending",
+        paymentStatus: "pending",
       }),
       createMockApplication({
         applicationId: "a2",
         paymentMethod: "BPI",
-        paymentProofStatus: undefined,
+        paymentStatus: undefined,
       }),
     ];
 
@@ -186,10 +186,10 @@ describe("Select All toggle logic", () => {
 describe("Payment proof warning indicator", () => {
   function isPaymentProofPending(
     paymentMethod: string | null,
-    paymentProofStatus: string | null,
+    paymentStatus: string | null,
   ): boolean {
     return (
-      paymentMethod === "BPI" && (paymentProofStatus ?? "pending") === "pending"
+      paymentMethod === "BPI" && (paymentStatus ?? "pending") === "pending"
     );
   }
 

@@ -31,7 +31,7 @@ export type MemberDetailsByBusinessMemberId = {
     mobileNumber: string | null;
     applicationDate: string;
     applicationStatus: string;
-    paymentProofStatus: string;
+    paymentStatus: string;
     companyProfileType:
       | Database["public"]["Enums"]["CompanyProfileType"]
       | null;
@@ -115,7 +115,7 @@ export async function getMemberDetailsByBusinessMemberId(
         mobileNumber,
         applicationDate,
         applicationStatus,
-        paymentProofStatus,
+        paymentStatus,
         companyProfileType,
         ApplicationMember(
           applicationMemberId,
@@ -171,7 +171,7 @@ export async function getMemberDetailsByBusinessMemberId(
           mobileNumber: latestApplication.mobileNumber,
           applicationDate: latestApplication.applicationDate,
           applicationStatus: latestApplication.applicationStatus,
-          paymentProofStatus: latestApplication.paymentProofStatus,
+          paymentStatus: latestApplication.paymentStatus,
           companyProfileType: latestApplication.companyProfileType,
           members: latestApplication.ApplicationMember ?? [],
         }

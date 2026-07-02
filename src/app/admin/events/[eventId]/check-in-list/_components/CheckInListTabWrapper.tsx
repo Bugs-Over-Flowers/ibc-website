@@ -3,10 +3,10 @@
 import { Scan } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import CheckInListStats from "@/app/admin/events/_components/CheckInListStats";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { getEventDays } from "@/server/events/queries/getEventDays";
-import CheckInListStats from "./CheckInListStats";
 import DraftEventEmptyComponent from "./DraftEventEmptyComponent";
 
 interface CheckInListTabWrapperProps {

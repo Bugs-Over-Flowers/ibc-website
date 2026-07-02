@@ -1,6 +1,6 @@
 import type { Enums } from "@/lib/supabase/db.types";
 
-const getStatusColor = (status: Enums<"PaymentProofStatus">) => {
+const getStatusColor = (status: Enums<"PaymentStatus">) => {
   switch (status.toLowerCase()) {
     case "accepted":
       return "bg-green-500/15 text-green-700 hover:bg-green-500/25 border-green-200";
