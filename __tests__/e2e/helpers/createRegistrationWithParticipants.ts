@@ -9,7 +9,7 @@ import type { createE2EAdminClient } from "./supabase";
 const createRegistrationWithParticipants = async (
   supabase: ReturnType<typeof createE2EAdminClient>,
   event: { eventId: string },
-  paymentProofStatus: "pending" | "rejected" | "accepted",
+  paymentStatus: "pending" | "rejected" | "accepted",
   participantCount = 1,
   paymentMethod: Database["public"]["Enums"]["PaymentMethod"] = "BPI",
   note: string | null = null,
@@ -18,8 +18,8 @@ const createRegistrationWithParticipants = async (
   const actualParticipantCount = Math.min(participantCount, 10);
 
   const timestamp = Date.now();
-  const suffix = `${paymentProofStatus}-${timestamp}`;
-  const affiliation = `${paymentProofStatus} affiliation ${timestamp}`;
+  const suffix = `${paymentStatus}-${timestamp}`;
+  const affiliation = `${paymentStatus} affiliation ${timestamp}`;
 
   // Create an event registration
   const { data: registration, error: registrationError } = await supabase
@@ -30,7 +30,7 @@ const createRegistrationWithParticipants = async (
       businessMemberId: null,
       nonMemberName: affiliation,
       paymentMethod,
-      paymentProofStatus,
+      paymentStatus,
       registrationDate: new Date().toISOString(),
       numberOfParticipants: actualParticipantCount,
       note,
@@ -56,7 +56,7 @@ const createRegistrationWithParticipants = async (
       .from("Participant")
       .insert({
         registrationId: registration.registrationId,
-        firstName: `${paymentProofStatus}-${index + 1}`,
+        firstName: `${paymentStatus}-${index + 1}`,
         lastName: "Tester",
         email: `${suffix}-${index + 1}@example.com`,
         contactNumber: "09170000000",
@@ -78,7 +78,7 @@ const createRegistrationWithParticipants = async (
 
     // if the payment proof status is pending AND payment method is BPI, seed a proof image
     // Onsite payments don't require proof images
-    if (paymentProofStatus === "pending" && paymentMethod === "BPI") {
+    if (paymentStatus === "pending" && paymentMethod === "BPI") {
       const proofPath = `reg-${crypto.randomUUID()}`;
 
       // Insert into the storage

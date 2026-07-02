@@ -40,7 +40,7 @@ export const CheckInDayParticipantListItemSchema = z.object({
   registrationDate: z.iso.datetime({ offset: true }),
   registrationId: z.string(),
   participantIdentifier: z.string().optional(),
-  paymentProofStatus: z.string(),
+  paymentStatus: z.string(),
   checkedIn: z.boolean(),
   checkInTime: z.iso.datetime({ offset: true }).optional(),
 });

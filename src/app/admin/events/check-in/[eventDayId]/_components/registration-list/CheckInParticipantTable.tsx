@@ -74,12 +74,12 @@ const getColumns = ({
       ),
   },
   {
-    accessorKey: "paymentProofStatus",
+    accessorKey: "paymentStatus",
     header: "Payment",
     cell: ({ row }) => (
       <PaymentStatusBadge
         className="capitalize"
-        status={row.original.paymentProofStatus}
+        status={row.original.paymentStatus}
       />
     ),
   },

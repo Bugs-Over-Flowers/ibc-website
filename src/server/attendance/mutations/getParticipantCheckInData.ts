@@ -24,7 +24,7 @@ export const getParticipantCheckInData = async (
           registrationId,
           identifier,
           paymentMethod,
-          paymentProofStatus,
+          paymentStatus,
           registrationDate,
           note,
           businessMember:BusinessMember(businessName),
@@ -88,7 +88,7 @@ export const getParticipantCheckInData = async (
 
   let message: string | undefined;
 
-  if (parsedData.registration.paymentProofStatus === "pending") {
+  if (parsedData.registration.paymentStatus === "pending") {
     message = "The registration payment is still pending.";
   }
 

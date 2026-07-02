@@ -59,7 +59,7 @@ async function CheckInPage({
 
   const parsedSearchParams = await searchParams;
   const searchQuery = parseStringParam(parsedSearchParams.check_q);
-  const paymentProofStatus = parseStringParam(
+  const paymentStatus = parseStringParam(
     parsedSearchParams.check_paymentStatus,
   );
   const participantSearch = parseStringParam(parsedSearchParams.check_pq);
@@ -86,7 +86,7 @@ async function CheckInPage({
     await tryCatch(
       getEventRegistrationList(cookieStore.getAll(), {
         eventId: eventDayData.event.eventId,
-        paymentProofStatus,
+        paymentStatus,
         searchString: searchQuery,
       }),
     );

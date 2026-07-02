@@ -34,14 +34,14 @@ import { verifyPayment } from "@/server/registration/mutations/verifyPayment";
 import getStatusColor from "../../_utils/getStatusColor";
 
 type OnlinePaymentSectionProps = {
-  paymentProofStatus: Enums<"PaymentProofStatus">;
+  paymentStatus: Enums<"PaymentStatus">;
   proofImageURLs?: Array<{ proofImageId: string; signedUrl: string }>;
   registrationId: string;
 };
 
 export default function OnlinePaymentSection({
   registrationId,
-  paymentProofStatus,
+  paymentStatus,
   proofImageURLs,
 }: OnlinePaymentSectionProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -70,9 +70,9 @@ export default function OnlinePaymentSection({
 
   const {
     execute: updatePaymentStatus,
-    optimistic: optimisticPaymentProofStatus,
+    optimistic: optimisticPaymentStatus,
     isPending,
-  } = useOptimisticAction(tryCatch(paymentAction), paymentProofStatus, {
+  } = useOptimisticAction(tryCatch(paymentAction), paymentStatus, {
     optimisticUpdate: (_prev, _registrationId, nextStatus) => nextStatus,
   });
 
@@ -100,9 +100,9 @@ export default function OnlinePaymentSection({
   const isRejectPending = isPending && pendingAction === "rejected";
   const statusBadgeLabel = isVerifyPending
     ? "Verifying..."
-    : optimisticPaymentProofStatus === "pending"
+    : optimisticPaymentStatus === "pending"
       ? "Pending Review"
-      : optimisticPaymentProofStatus === "accepted"
+      : optimisticPaymentStatus === "accepted"
         ? "Accepted"
         : "Rejected";
 
@@ -144,10 +144,7 @@ export default function OnlinePaymentSection({
 
       <div className="flex items-center">
         <Badge
-          className={cn(
-            "capitalize",
-            getStatusColor(optimisticPaymentProofStatus),
-          )}
+          className={cn("capitalize", getStatusColor(optimisticPaymentStatus))}
           variant="outline"
         >
           {statusBadgeLabel}
@@ -159,8 +156,8 @@ export default function OnlinePaymentSection({
           className="min-w-24"
           disabled={
             isPending ||
-            optimisticPaymentProofStatus === "accepted" ||
-            optimisticPaymentProofStatus === "rejected"
+            optimisticPaymentStatus === "accepted" ||
+            optimisticPaymentStatus === "rejected"
           }
           onClick={() => handleStatusChange("accepted")}
           size="sm"
@@ -176,8 +173,8 @@ export default function OnlinePaymentSection({
             )}
             disabled={
               isPending ||
-              optimisticPaymentProofStatus === "rejected" ||
-              optimisticPaymentProofStatus === "accepted"
+              optimisticPaymentStatus === "rejected" ||
+              optimisticPaymentStatus === "accepted"
             }
           >
             {isRejectPending ? "Rejecting..." : "Reject"}
@@ -190,7 +187,7 @@ export default function OnlinePaymentSection({
                 action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            {optimisticPaymentProofStatus === "pending" && (
+            {optimisticPaymentStatus === "pending" && (
               <div className="flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
                 <Checkbox
                   checked={sendEmailOnReject}

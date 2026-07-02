@@ -30,18 +30,16 @@ export const MemberTypeEnum = z.enum(["member", "nonmember"]);
 
 export const PaymentMethodEnum = z.enum(["online", "onsite"]);
 
-const PAYMENT_PROOF_STATUSES = Constants.public.Enums.PaymentProofStatus;
+const PAYMENT_PROOF_STATUSES = Constants.public.Enums.PaymentStatus;
 
-export const PaymentProofStatusEnum = z.enum(PAYMENT_PROOF_STATUSES);
+export const PaymentStatusEnum = z.enum(PAYMENT_PROOF_STATUSES);
 
-export const PaymentProofStatusFilterOptions = [
+export const PaymentStatusFilterOptions = [
   "all",
   ...PAYMENT_PROOF_STATUSES,
 ] as const;
 
-export const PaymentProofStatusFilterEnum = z.enum(
-  PaymentProofStatusFilterOptions,
-);
+export const PaymentStatusFilterEnum = z.enum(PaymentStatusFilterOptions);
 
 export const Base64_32BitString = z
   .string()

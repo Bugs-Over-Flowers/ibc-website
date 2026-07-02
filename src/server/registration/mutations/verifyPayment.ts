@@ -11,7 +11,7 @@ export const verifyPayment = async (registrationId: string) => {
   const { data: updatedRegistration, error } = await supabase
     .from("Registration")
     .update({
-      paymentProofStatus: "accepted",
+      paymentStatus: "accepted",
     })
     .eq("registrationId", registrationId)
     .select("eventId, sponsoredRegistrationId")

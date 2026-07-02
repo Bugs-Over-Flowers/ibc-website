@@ -7,13 +7,13 @@ import { replacePaymentProofAndAccept } from "@/server/registration/mutations/re
 import useAttendanceStore from "./useAttendanceStore";
 
 export function useReplacePaymentProof() {
-  const setPaymentProofStatus = useAttendanceStore(
-    (state) => state.setPaymentProofStatus,
+  const setPaymentStatus = useAttendanceStore(
+    (state) => state.setPaymentStatus,
   );
 
   return useAction(tryCatch(replacePaymentProofAndAccept), {
     onSuccess: (data) => {
-      setPaymentProofStatus("accepted");
+      setPaymentStatus("accepted");
 
       toast.success(data.message);
     },

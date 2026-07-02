@@ -68,7 +68,7 @@ export default function RegistrationDetails({
   data,
 }: RegistrationDetailsProps) {
   const participantsCount = data.otherParticipants.length + 1;
-  const paymentProofStatus = data.paymentProofStatus ?? "pending";
+  const paymentStatus = data.paymentStatus ?? "pending";
   const sectionCardClass = "rounded-2xl border border-border/50 bg-background";
   const sectionContentClass = "space-y-6 px-6";
 
@@ -105,11 +105,11 @@ export default function RegistrationDetails({
             <Badge
               className={cn(
                 "px-4 py-2 font-semibold text-sm",
-                getStatusColor(paymentProofStatus),
+                getStatusColor(paymentStatus),
               )}
               variant="outline"
             >
-              {formatStatusLabel(paymentProofStatus)}
+              {formatStatusLabel(paymentStatus)}
             </Badge>
 
             <RegistrationRowActions
@@ -119,7 +119,7 @@ export default function RegistrationDetails({
                 email: data.registrant.email,
                 registrationId: data.registrationId,
                 paymentMethod: data.paymentMethod,
-                paymentProofStatus: data.paymentProofStatus,
+                paymentStatus: data.paymentStatus,
                 registrantName: `${data.registrant.firstName} ${data.registrant.lastName}`,
               }}
               eventTitle={data.event.eventTitle}
@@ -224,7 +224,7 @@ export default function RegistrationDetails({
 
                 {data.signedUrls && data.signedUrls.length > 0 && (
                   <OnlinePaymentSection
-                    paymentProofStatus={paymentProofStatus}
+                    paymentStatus={paymentStatus}
                     proofImageURLs={data.signedUrls}
                     registrationId={data.registrationId}
                   />

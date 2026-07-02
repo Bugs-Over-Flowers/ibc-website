@@ -306,7 +306,7 @@ BEGIN
   ---------------------------------------------------------------------------
 
   -- BM7 Initial App (newMember, approved)
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     v_app_bm7_init,
     'ibc-app-testa1201',
@@ -327,7 +327,7 @@ BEGIN
   );
 
   -- BM7 Renewal App (renewal, approved)
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     v_app_bm7_renewal,
     'ibc-app-testa1202',
@@ -348,7 +348,7 @@ BEGIN
   );
 
   -- BM7 Update App (updating, rejected — for "various approval statuses")
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     v_app_bm7_update,
     'ibc-app-testa1203',
@@ -373,7 +373,7 @@ BEGIN
   ---------------------------------------------------------------------------
 
   -- App-BM1: Paid member, corporate, approved
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     v_app_bm1_id,
     'ibc-app-testbm01',
@@ -394,7 +394,7 @@ BEGIN
   );
 
   -- App-BM2: Cancelled member, corporate, approved
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     v_app_bm2_id,
     'ibc-app-testbm02',
@@ -415,7 +415,7 @@ BEGIN
   );
 
   -- App-BM3: Paid member, PERSONAL type, approved (for G9 personal → corporate)
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     v_app_bm3_id,
     'ibc-app-testbm03',
@@ -436,7 +436,7 @@ BEGIN
   );
 
   -- App-BM4: Featured member, corporate, approved
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     v_app_bm4_id,
     'ibc-app-testbm04',
@@ -457,7 +457,7 @@ BEGIN
   );
 
   -- App-BM5: Non-featured member, corporate, approved
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     v_app_bm5_id,
     'ibc-app-testbm05',
@@ -478,7 +478,7 @@ BEGIN
   );
 
   -- App-BM6: Unpaid member, corporate, approved
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     v_app_bm6_id,
     'ibc-app-testbm06',
@@ -688,7 +688,7 @@ END $$;
 -- SECTION: Standalone Applications (Scenarios A5, A6, A7)
 -- =============================================================================
 -- A5: 3 applications with status "new", varying payment methods
--- A6: 2 applications with status "pending", paymentProofStatus "accepted"
+-- A6: 2 applications with status "pending", paymentStatus "accepted"
 -- A7: 3 applications with type "updating", status "pending", linked to BM
 
 DO $$
@@ -705,7 +705,7 @@ BEGIN
   ---------------------------------------------------------------------------
 
   -- A5a: BPI payment, pending proof
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     '33333333-3333-4333-8333-333333333310',
     'ibc-app-testa501',
@@ -726,7 +726,7 @@ BEGIN
   );
 
   -- A5b: BPI payment, pending proof
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     '33333333-3333-4333-8333-333333333311',
     'ibc-app-testa502',
@@ -747,7 +747,7 @@ BEGIN
   );
 
   -- A5c: ONSITE payment (no proof needed)
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     '33333333-3333-4333-8333-333333333312',
     'ibc-app-testa503',
@@ -787,7 +787,7 @@ BEGIN
   -- A6: Pending applications with accepted payment proof (A6 - Accepting/Declining)
   ---------------------------------------------------------------------------
 
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     '33333333-3333-4333-8333-333333333313',
     'ibc-app-testa601',
@@ -807,7 +807,7 @@ BEGIN
     'accepted'
   );
 
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     '33333333-3333-4333-8333-333333333314',
     'ibc-app-testa602',
@@ -845,7 +845,7 @@ BEGIN
   -- A7: Update applications linked to existing BMs (A7 - Update Info Applications)
   ---------------------------------------------------------------------------
 
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     '33333333-3333-4333-8333-333333333315',
     'ibc-app-testa701',
@@ -865,7 +865,7 @@ BEGIN
     'pending'
   );
 
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     '33333333-3333-4333-8333-333333333316',
     'ibc-app-testa702',
@@ -894,7 +894,7 @@ BEGIN
   ---------------------------------------------------------------------------
   -- A7c: Update application — personal → corporate (for G9)
   ---------------------------------------------------------------------------
-  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentProofStatus")
+  INSERT INTO "public"."Application" ("applicationId", "identifier", "businessMemberId", "sectorName", "logoImageURL", "applicationType", "companyName", "companyAddress", "landline", "mobileNumber", "emailAddress", "paymentMethod", "websiteURL", "applicationMemberType", "applicationStatus", "paymentStatus")
   VALUES (
     '33333333-3333-4333-8333-333333333317',
     'ibc-app-testa703',
@@ -976,7 +976,7 @@ BEGIN
   ---------------------------------------------------------------------------
 
   -- Registration A1-1: BPI, pending, with proof image
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "note")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus", "note")
   VALUES (
     v_reg_a101_id, v_event1_id, NULL, 'DTI Iloilo Regional Office',
     TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
@@ -991,7 +991,7 @@ BEGIN
   VALUES ('77777777-7777-4777-8777-777777777711', v_reg_a101_id, 'reg-test-a101');
 
   -- Registration A1-2: BPI, pending, with proof image
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus")
   VALUES (
     v_reg_a102_id, v_event1_id, NULL, 'CHED Region VI',
     TIMEZONE('UTC', NOW()) - INTERVAL '1 day',
@@ -1006,7 +1006,7 @@ BEGIN
   VALUES ('77777777-7777-4777-8777-777777777712', v_reg_a102_id, 'reg-test-a102');
 
   -- Registration A1-3: BPI, pending, with proof image
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus")
   VALUES (
     v_reg_a103_id, v_event1_id, NULL, 'Iloilo Provincial Government',
     TIMEZONE('UTC', NOW()) - INTERVAL '12 hours',
@@ -1025,7 +1025,7 @@ BEGIN
   ---------------------------------------------------------------------------
 
   -- Registration A2-1: Standard attendee (accepted, member, no check-in yet)
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "note")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus", "note")
   VALUES (
     v_reg_a201_id, v_event1_id, v_bm1_id, NULL,
     TIMEZONE('UTC', NOW()) - INTERVAL '5 days',
@@ -1037,7 +1037,7 @@ BEGIN
     ('55555555-5555-4555-8555-555555555506', v_reg_a201_id, 'Juan', 'Dela Cruz', '+639111111111', 'juan.delacruz@acmecorp.test', true, 'ibc-par-55555506');
 
   -- Registration A2-2: Proxy scenario (accepted, member, with proxy note)
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "note")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus", "note")
   VALUES (
     v_reg_a202_id, v_event1_id, v_bm1_id, NULL,
     TIMEZONE('UTC', NOW()) - INTERVAL '4 days',
@@ -1049,7 +1049,7 @@ BEGIN
     ('55555555-5555-4555-8555-555555555507', v_reg_a202_id, 'Sofia', 'Garcia', '+639111111112', 'sofia.garcia@acmecorp.test', true, 'ibc-par-55555507');
 
   -- Registration A2-3: Rejected-then-new-proof (was rejected, now has new proof)
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "note")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus", "note")
   VALUES (
     v_reg_a203_id, v_event1_id, NULL, 'Independent Consultant',
     TIMEZONE('UTC', NOW()) - INTERVAL '3 days',
@@ -1064,7 +1064,7 @@ BEGIN
   VALUES ('77777777-7777-4777-8777-777777777714', v_reg_a203_id, 'reg-test-a101');
 
   -- Registration A2-4: Forgot QR code (accepted, member)
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus")
   VALUES (
     v_reg_a204_id, v_event1_id, NULL, 'Freelance Designer',
     TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
@@ -1076,7 +1076,7 @@ BEGIN
     ('55555555-5555-4555-8555-555555555509', v_reg_a204_id, 'Nina', 'Reyes', '+639505555501', 'nina.reyes@email.test', true, 'ibc-par-55555509');
 
   -- Registration A2-5: Unhandled payment proof (pending)
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "businessMemberId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus")
   VALUES (
     v_reg_a205_id, v_event1_id, NULL, 'Startup Founder',
     TIMEZONE('UTC', NOW()) - INTERVAL '1 day',
@@ -1091,7 +1091,7 @@ BEGIN
   -- Multi-participant registration (group registration - testing 4 pax)
   ---------------------------------------------------------------------------
 
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "note")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus", "note")
   VALUES (
     '44444444-4444-4444-8444-444444444418', v_event1_id, 'Fernandez Family Group',
     TIMEZONE('UTC', NOW()) - INTERVAL '2 days',
@@ -1250,7 +1250,7 @@ BEGIN
   );
 
   -- Create registrations that consumed SR3 slots (usedCount = 3)
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "sponsoredRegistrationId")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus", "sponsoredRegistrationId")
   VALUES
     (
       '44444444-4444-4444-8444-444444444410',
@@ -1324,7 +1324,7 @@ BEGIN
     'active'
   );
 
-  INSERT INTO "public"."Registration" ("registrationId", "eventId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentProofStatus", "sponsoredRegistrationId")
+  INSERT INTO "public"."Registration" ("registrationId", "eventId", "nonMemberName", "registrationDate", "paymentMethod", "identifier", "paymentStatus", "sponsoredRegistrationId")
   VALUES
     (
       v_reg_max1_id,

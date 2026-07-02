@@ -19,7 +19,7 @@ export const getRegistrationData = async (
       `registrationId,
        event:Event(eventId, eventTitle, eventType),
        paymentMethod,
-       paymentProofStatus,
+       paymentStatus,
        registrationDate,
        businessMember:BusinessMember(businessMemberId, businessName),
        nonMemberName,

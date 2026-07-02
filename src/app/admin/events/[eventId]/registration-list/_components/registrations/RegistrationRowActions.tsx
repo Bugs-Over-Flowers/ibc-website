@@ -24,7 +24,7 @@ interface RegistrationRowActionsProps {
     registrationId: string;
     email: string;
     paymentMethod: Enums<"PaymentMethod">;
-    paymentProofStatus: Enums<"PaymentProofStatus">;
+    paymentStatus: Enums<"PaymentStatus">;
     affiliation: string;
     registrantName: string;
   };
@@ -132,7 +132,7 @@ export default function RegistrationRowActions({
 
       {shouldShowPaymentProofAction && (
         <PaymentProofReviewDialog
-          initialPaymentProofStatus={data.paymentProofStatus}
+          initialPaymentStatus={data.paymentStatus}
           onAcceptAction={async (id) => {
             const result = await verifyPayment(id);
             return {

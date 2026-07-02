@@ -18,11 +18,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  PaymentProofStatusFilterEnum,
-  PaymentProofStatusFilterOptions,
+  PaymentStatusFilterEnum,
+  PaymentStatusFilterOptions,
 } from "@/lib/validation/utils";
 
-type PaymentStatusFilter = (typeof PaymentProofStatusFilterOptions)[number];
+type PaymentStatusFilter = (typeof PaymentStatusFilterOptions)[number];
 
 export default function RegistrationSearchAndFilter() {
   const pathname = usePathname();
@@ -37,7 +37,7 @@ export default function RegistrationSearchAndFilter() {
   );
 
   const selectedPaymentStatus = useMemo<PaymentStatusFilter>(() => {
-    const parsedFilter = PaymentProofStatusFilterEnum.safeParse(filter);
+    const parsedFilter = PaymentStatusFilterEnum.safeParse(filter);
 
     if (!parsedFilter.success) {
       return "all";
@@ -117,7 +117,7 @@ export default function RegistrationSearchAndFilter() {
         </span>
         <Select
           onValueChange={(value) => {
-            const parsedFilter = PaymentProofStatusFilterEnum.safeParse(value);
+            const parsedFilter = PaymentStatusFilterEnum.safeParse(value);
 
             if (!parsedFilter.success) {
               return;
@@ -133,7 +133,7 @@ export default function RegistrationSearchAndFilter() {
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Payment Status</SelectLabel>
-              {PaymentProofStatusFilterOptions.map((status) => (
+              {PaymentStatusFilterOptions.map((status) => (
                 <SelectItem
                   className="text-sm capitalize"
                   key={status}

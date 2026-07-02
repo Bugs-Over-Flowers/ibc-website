@@ -97,12 +97,12 @@ export default function RegistrationListTable({
       },
     },
     {
-      accessorKey: "paymentProofStatus",
+      accessorKey: "paymentStatus",
       header: "Payment Status",
       cell: ({ row }) => (
         <PaymentStatusBadge
           data-testid={"payment-status-badge"}
-          status={row.original.paymentProofStatus}
+          status={row.original.paymentStatus}
         />
       ),
     },
@@ -133,7 +133,7 @@ export default function RegistrationListTable({
           data={{
             affiliation: row.original.affiliation,
             registrationIdentifier: row.original.registrationIdentifier,
-            paymentProofStatus: row.original.paymentProofStatus,
+            paymentStatus: row.original.paymentStatus,
             paymentMethod: row.original.paymentMethod,
             email: row.original.registrant.email,
             registrationId: row.original.registrationId,

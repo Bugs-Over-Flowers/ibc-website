@@ -7,22 +7,22 @@ import { useVerifyPaymentProof } from "../_hooks/useVerifyPaymentProof";
 
 interface AcceptPaymentButtonProps {
   paymentMethod: string;
-  paymentProofStatus: string;
+  paymentStatus: string;
   registrationId: string;
   variant?: "default" | "outline" | "ghost";
 }
 
 export default function AcceptPaymentButton({
   paymentMethod,
-  paymentProofStatus,
+  paymentStatus,
   registrationId,
   variant = "outline",
 }: AcceptPaymentButtonProps) {
-  const setPaymentProofStatus = useAttendanceStore(
-    (state) => state.setPaymentProofStatus,
+  const setPaymentStatus = useAttendanceStore(
+    (state) => state.setPaymentStatus,
   );
   const { execute, isPending, optimistic } = useVerifyPaymentProof({
-    paymentProofStatus: paymentProofStatus as never,
+    paymentStatus: paymentStatus as never,
     options: { successMessage: "Onsite payment accepted" },
   });
 
@@ -35,7 +35,7 @@ export default function AcceptPaymentButton({
       className="gap-1.5"
       disabled={isPending}
       onClick={() => {
-        setPaymentProofStatus("accepted");
+        setPaymentStatus("accepted");
         execute(registrationId);
       }}
       size="sm"

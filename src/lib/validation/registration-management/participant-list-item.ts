@@ -14,7 +14,7 @@
  */
 
 import { z } from "zod";
-import { PaymentProofStatusEnum } from "@/lib/validation/utils";
+import { PaymentStatusEnum } from "@/lib/validation/utils";
 
 /**
  * Base Participant Schema
@@ -68,7 +68,7 @@ export const ParticipantListItemSchema = ParticipantSchema.pick({
   registrationDate: z.iso.datetime({ offset: true }),
   registrationId: z.string(),
   participantIdentifier: z.string().optional(),
-  paymentProofStatus: PaymentProofStatusEnum,
+  paymentStatus: PaymentStatusEnum,
 });
 
 export type ParticipantListItem = z.infer<typeof ParticipantListItemSchema>;
@@ -122,7 +122,7 @@ export const ParticipantListRPCSchema = z
         registrationDate: val.registration_date,
         registrationId: val.registration_id,
         participantIdentifier: val.participant_identifier,
-        paymentProofStatus: val.payment_proof_status,
+        paymentStatus: val.payment_proof_status,
       }),
     ),
   );

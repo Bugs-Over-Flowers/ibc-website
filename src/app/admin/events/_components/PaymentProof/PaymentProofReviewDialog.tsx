@@ -45,7 +45,7 @@ import { ImageZoom } from "@/components/ui/shadcn-io/image-zoom";
 import type { Enums } from "@/lib/supabase/db.types";
 import { cn } from "@/lib/utils";
 
-type PaymentProofStatus = Enums<"PaymentProofStatus">;
+type PaymentStatus = Enums<"PaymentStatus">;
 
 interface PaymentProofReviewDialogProps {
   page: "check-in" | "registration-details";
@@ -57,14 +57,14 @@ interface PaymentProofReviewDialogProps {
     registrantName: string;
     registrantEmail: string;
   };
-  initialPaymentProofStatus: PaymentProofStatus;
+  initialPaymentStatus: PaymentStatus;
   trigger?: React.ReactElement;
   onAcceptAction?: (registrationId: string) => Promise<unknown>;
   onRejectAction?: (registrationId: string) => Promise<unknown>;
-  onStatusChange?: (status: PaymentProofStatus) => void;
+  onStatusChange?: (status: PaymentStatus) => void;
 }
 
-function getStatusConfig(status: PaymentProofStatus) {
+function getStatusConfig(status: PaymentStatus) {
   switch (status) {
     case "accepted":
       return {
@@ -89,7 +89,7 @@ export default function PaymentProofReviewDialog({
   open,
   onOpenChange,
   registrationData,
-  initialPaymentProofStatus,
+  initialPaymentStatus,
   trigger,
   onAcceptAction,
   onRejectAction,
@@ -100,9 +100,7 @@ export default function PaymentProofReviewDialog({
   const [sendEmailOnReject, setSendEmailOnReject] = useState(
     page !== "check-in",
   );
-  const [paymentProofStatus, setPaymentProofStatus] = useState(
-    initialPaymentProofStatus,
-  );
+  const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
 
   const handleOpenChangeWrapper = (nextOpen: boolean) => {
     if (nextOpen) {
@@ -130,11 +128,11 @@ export default function PaymentProofReviewDialog({
       onAcceptAction,
       onRejectAction,
       onStatusChange,
-      onStatusResolved: setPaymentProofStatus,
+      onStatusResolved: setPaymentStatus,
     });
 
   const isAnyActionPending = isFetchingSignedUrl || isAccepting || isRejecting;
-  const statusConfig = getStatusConfig(paymentProofStatus);
+  const statusConfig = getStatusConfig(paymentStatus);
 
   return (
     <Dialog onOpenChange={handleOpenChangeWrapper} open={open}>
@@ -157,7 +155,7 @@ export default function PaymentProofReviewDialog({
               variant="outline"
             >
               {statusConfig.icon}
-              {paymentProofStatus}
+              {paymentStatus}
             </Badge>
           </div>
         </div>
@@ -221,7 +219,7 @@ export default function PaymentProofReviewDialog({
 
         {mode === "view" && (
           <DialogFooter className="mt-1 flex-wrap gap-2 border-t pt-4 max-sm:*:w-full">
-            {paymentProofStatus === "pending" && (
+            {paymentStatus === "pending" && (
               <div className="mr-auto flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm">
                 <Checkbox
                   checked={sendEmailOnReject}
@@ -256,7 +254,7 @@ export default function PaymentProofReviewDialog({
             </Button>
             <Button
               className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
-              disabled={isAnyActionPending || paymentProofStatus !== "pending"}
+              disabled={isAnyActionPending || paymentStatus !== "pending"}
               onClick={() => rejectProof()}
               variant="outline"
             >
@@ -267,7 +265,7 @@ export default function PaymentProofReviewDialog({
                   ? "Reject & Email"
                   : "Reject Without Email"}
             </Button>
-            {paymentProofStatus === "rejected" ? (
+            {paymentStatus === "rejected" ? (
               <AlertDialog
                 onOpenChange={setIsAcceptConfirmOpen}
                 open={isAcceptConfirmOpen}
@@ -304,9 +302,7 @@ export default function PaymentProofReviewDialog({
             ) : (
               <Button
                 className="bg-green-700 hover:bg-green-800"
-                disabled={
-                  isAnyActionPending || paymentProofStatus === "accepted"
-                }
+                disabled={isAnyActionPending || paymentStatus === "accepted"}
                 onClick={() => acceptProof()}
               >
                 <CheckCircle2 className="size-3.5" />

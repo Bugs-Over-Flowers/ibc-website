@@ -8,7 +8,7 @@ import useAttendanceStore from "../_hooks/useAttendanceStore";
 import { useVerifyPaymentProof } from "../_hooks/useVerifyPaymentProof";
 
 interface ProofDialogProps {
-  paymentProofStatus: GetCheckInForDateSchema["paymentProofStatus"];
+  paymentStatus: GetCheckInForDateSchema["paymentStatus"];
   registrationId: string;
   eventTitle: string;
   registrantEmail: string;
@@ -17,7 +17,7 @@ interface ProofDialogProps {
 }
 
 export default function ProofDialog({
-  paymentProofStatus,
+  paymentStatus,
   registrationId,
   eventTitle,
   registrantEmail,
@@ -25,17 +25,17 @@ export default function ProofDialog({
   onAfterAccept,
 }: ProofDialogProps) {
   const [open, setOpen] = useState(false);
-  const setPaymentProofStatus = useAttendanceStore(
-    (state) => state.setPaymentProofStatus,
+  const setPaymentStatus = useAttendanceStore(
+    (state) => state.setPaymentStatus,
   );
   const { execute } = useVerifyPaymentProof({
-    paymentProofStatus,
+    paymentStatus,
     options: { successMessage: "Payment accepted" },
   });
 
   return (
     <PaymentProofReviewDialog
-      initialPaymentProofStatus={paymentProofStatus}
+      initialPaymentStatus={paymentStatus}
       onAcceptAction={async (id) => {
         await execute(id);
         if (onAfterAccept) {
@@ -48,7 +48,7 @@ export default function ProofDialog({
       }}
       onOpenChange={setOpen}
       onStatusChange={(status) => {
-        setPaymentProofStatus(status);
+        setPaymentStatus(status);
         return status;
       }}
       open={open}

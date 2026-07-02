@@ -40,7 +40,7 @@ export type ApplicationHistoryItem = {
   landline: string;
   websiteURL: string;
   paymentMethod: Enums<"PaymentMethod">;
-  paymentProofStatus: Enums<"PaymentProofStatus">;
+  paymentStatus: Enums<"PaymentStatus">;
   sectorName: string;
   members: ApplicationHistoryMember[];
 };

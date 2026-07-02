@@ -110,12 +110,12 @@ const getCheckInListColumns = (
     ),
   },
   {
-    accessorKey: "paymentProofStatus",
+    accessorKey: "paymentStatus",
     header: "Payment",
     cell: ({ row }) => (
       <PaymentStatusBadge
         className="capitalize"
-        status={row.original.paymentProofStatus}
+        status={row.original.paymentStatus}
       />
     ),
   },
@@ -158,7 +158,7 @@ const getExcelColumns = (): ColumnDef<CheckInListRow>[] => [
   { accessorKey: "lastName", header: "Last Name" },
   { accessorKey: "email", header: "Email Address" },
   { accessorKey: "contactNumber", header: "Phone Number" },
-  { accessorKey: "paymentProofStatus", header: "Payment Status" },
+  { accessorKey: "paymentStatus", header: "Payment Status" },
   { accessorKey: "remarks", header: "Remarks" },
 ];
 

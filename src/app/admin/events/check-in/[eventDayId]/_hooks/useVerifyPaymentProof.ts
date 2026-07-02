@@ -13,24 +13,24 @@ interface UseVerifyPaymentProofOptions {
 }
 
 interface UseVerifyPaymentProofProps {
-  paymentProofStatus: GetCheckInForDateSchema["paymentProofStatus"];
+  paymentStatus: GetCheckInForDateSchema["paymentStatus"];
   options?: UseVerifyPaymentProofOptions;
 }
 
 export function useVerifyPaymentProof({
-  paymentProofStatus,
+  paymentStatus,
   options,
 }: UseVerifyPaymentProofProps) {
   const router = useRouter();
-  const setPaymentProofStatus = useAttendanceStore(
-    (state) => state.setPaymentProofStatus,
+  const setPaymentStatus = useAttendanceStore(
+    (state) => state.setPaymentStatus,
   );
   const successMessage = options?.successMessage ?? "Payment accepted";
 
-  return useOptimisticAction(tryCatch(verifyPayment), paymentProofStatus, {
+  return useOptimisticAction(tryCatch(verifyPayment), paymentStatus, {
     optimisticUpdate: (_prev, _registrationId) => "accepted" as const,
     onSuccess: () => {
-      setPaymentProofStatus("accepted");
+      setPaymentStatus("accepted");
       router.refresh();
       toast.success(successMessage);
     },

@@ -16,16 +16,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  PaymentProofStatusFilterEnum,
-  PaymentProofStatusFilterOptions,
+  PaymentStatusFilterEnum,
+  PaymentStatusFilterOptions,
 } from "@/lib/validation/utils";
 
-type PaymentStatusFilter = (typeof PaymentProofStatusFilterOptions)[number];
+type PaymentStatusFilter = (typeof PaymentStatusFilterOptions)[number];
 
 function isPaymentStatusFilter(
   value: string | null,
 ): value is PaymentStatusFilter {
-  return PaymentProofStatusFilterEnum.safeParse(value).success;
+  return PaymentStatusFilterEnum.safeParse(value).success;
 }
 
 export default function CheckInRegistrationFilters() {
@@ -146,7 +146,7 @@ export default function CheckInRegistrationFilters() {
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Payment status</SelectLabel>
-              {PaymentProofStatusFilterOptions.map((status) => (
+              {PaymentStatusFilterOptions.map((status) => (
                 <SelectItem
                   className="text-sm capitalize"
                   key={status}

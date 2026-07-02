@@ -7,7 +7,7 @@ import { createActionClient } from "@/lib/supabase/server";
 import { invalidateRegistrationCaches } from "@/server/actions.utils";
 import { sendRejectProofOfPayment } from "@/server/emails/mutations/sendRejectProofOfPayment";
 
-const updateRegistrationPaymentProofStatusSchema = z.object({
+const updateRegistrationPaymentStatusSchema = z.object({
   registrationId: z.string().min(1),
   status: z.enum(["accepted", "rejected"]),
   sendEmail: z.boolean().default(true),
@@ -16,16 +16,16 @@ const updateRegistrationPaymentProofStatusSchema = z.object({
   eventTitle: z.string().min(1),
 });
 
-type UpdateRegistrationPaymentProofStatusInput = z.infer<
-  typeof updateRegistrationPaymentProofStatusSchema
+type UpdateRegistrationPaymentStatusInput = z.infer<
+  typeof updateRegistrationPaymentStatusSchema
 >;
 
 export type PaymentProofDecision = z.infer<
-  typeof updateRegistrationPaymentProofStatusSchema
+  typeof updateRegistrationPaymentStatusSchema
 >["status"];
 
-export async function updateRegistrationPaymentProofStatus(
-  input: UpdateRegistrationPaymentProofStatusInput,
+export async function updateRegistrationPaymentStatus(
+  input: UpdateRegistrationPaymentStatusInput,
 ) {
   const {
     registrationId,
@@ -34,13 +34,13 @@ export async function updateRegistrationPaymentProofStatus(
     toEmail,
     registrantName,
     eventTitle,
-  } = updateRegistrationPaymentProofStatusSchema.parse(input);
+  } = updateRegistrationPaymentStatusSchema.parse(input);
 
   const supabase = await createActionClient();
 
   const { data: registration, error: registrationError } = await supabase
     .from("Registration")
-    .select("paymentMethod, paymentProofStatus, ProofImage(proofImageId)")
+    .select("paymentMethod, paymentStatus, ProofImage(proofImageId)")
     .eq("registrationId", registrationId)
     .single();
 
@@ -52,11 +52,11 @@ export async function updateRegistrationPaymentProofStatus(
     throw new Error("Payment proof updates are only allowed for BPI payments");
   }
 
-  if (registration.paymentProofStatus === "accepted") {
+  if (registration.paymentStatus === "accepted") {
     throw new Error("Payment proof has already been accepted");
   }
 
-  if (registration.paymentProofStatus === "rejected" && status === "rejected") {
+  if (registration.paymentStatus === "rejected" && status === "rejected") {
     throw new Error("Payment proof has already been rejected");
   }
 
@@ -64,11 +64,11 @@ export async function updateRegistrationPaymentProofStatus(
     throw new Error("Cannot accept payment proof without an uploaded image");
   }
 
-  const nextStatus: Enums<"PaymentProofStatus"> = status;
+  const nextStatus: Enums<"PaymentStatus"> = status;
 
   const { error: updateError } = await supabase
     .from("Registration")
-    .update({ paymentProofStatus: nextStatus })
+    .update({ paymentStatus: nextStatus })
     .eq("registrationId", registrationId);
 
   if (updateError) {

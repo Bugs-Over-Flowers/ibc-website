@@ -23,7 +23,7 @@ import { RegistrationIdentifier } from "@/lib/validation/utils";
 // Import enums from generated Supabase types to ensure type safety
 //
 const PaymentMethod = Constants.public.Enums.PaymentMethod;
-const PaymentProofStatus = Constants.public.Enums.PaymentProofStatus;
+const PaymentStatus = Constants.public.Enums.PaymentStatus;
 
 /**
  * Registrant Information (Partial)
@@ -50,7 +50,7 @@ const RegistrationListRegistrantSchema = z.object({
  * - registrationId: UUID primary key
  * - affiliation: Organization/company name
  * - registrationDate: ISO 8601 datetime with timezone offset
- * - paymentProofStatus: Enum (pending, accepted, rejected)
+ * - paymentStatus: Enum (pending, accepted, rejected)
  * - paymentMethod: Enum (onsite, gcash, bank_transfer)
  * - registrant: Nested schema with basic contact info
  * - registrationIdentifier: Unique QR code identifier (format: ibc-reg-XXXXXXXX)
@@ -62,7 +62,7 @@ export const RegistrationDataBaseSchema = z.object({
   registrationId: z.uuid(),
   affiliation: z.string(),
   registrationDate: z.iso.datetime({ offset: true }),
-  paymentProofStatus: z.enum(PaymentProofStatus),
+  paymentStatus: z.enum(PaymentStatus),
   paymentMethod: z.enum(PaymentMethod),
   registrant: RegistrationListRegistrantSchema,
   registrationIdentifier: RegistrationIdentifier,
@@ -150,8 +150,7 @@ export const RegistrationListRPCSchema = z
         registrationId: val.registration_id,
         affiliation: val.affiliation,
         registrationDate: val.registration_date,
-        paymentProofStatus:
-          val.payment_proof_status as Enums<"PaymentProofStatus">,
+        paymentStatus: val.payment_proof_status as Enums<"PaymentStatus">,
         paymentMethod: val.payment_method as Enums<"PaymentMethod">,
         businessMemberId: val.business_member_id,
         businessName: val.business_name,

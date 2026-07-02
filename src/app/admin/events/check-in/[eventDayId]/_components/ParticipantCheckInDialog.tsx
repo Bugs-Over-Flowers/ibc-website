@@ -123,9 +123,9 @@ export default function ParticipantCheckInDialog({
     : "bg-gray-500/15 text-gray-700 border-gray-200";
 
   const paymentStatusColor =
-    registration.paymentProofStatus === "accepted"
+    registration.paymentStatus === "accepted"
       ? "bg-green-500/15 text-green-700 border-green-200"
-      : registration.paymentProofStatus === "pending"
+      : registration.paymentStatus === "pending"
         ? "bg-yellow-500/15 text-yellow-700 border-yellow-200"
         : "bg-red-500/15 text-red-700 border-red-200";
 
@@ -186,7 +186,7 @@ export default function ParticipantCheckInDialog({
                 className={cn("capitalize", paymentStatusColor)}
                 variant="outline"
               >
-                {registration.paymentProofStatus}
+                {registration.paymentStatus}
               </Badge>
             </div>
 
@@ -242,7 +242,7 @@ export default function ParticipantCheckInDialog({
                         eventDayId,
                       );
                     }}
-                    paymentProofStatus={registration.paymentProofStatus}
+                    paymentStatus={registration.paymentStatus}
                     registrantEmail={registrant.email}
                     registrantName={`${registrant.firstName} ${registrant.lastName}`}
                     registrationId={registration.registrationId}
@@ -251,7 +251,7 @@ export default function ParticipantCheckInDialog({
 
               <AcceptPaymentButton
                 paymentMethod={registration.paymentMethod}
-                paymentProofStatus={registration.paymentProofStatus}
+                paymentStatus={registration.paymentStatus}
                 registrationId={registration.registrationId}
               />
             </div>

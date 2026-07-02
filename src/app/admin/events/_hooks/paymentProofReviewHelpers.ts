@@ -1,6 +1,6 @@
 import type { Enums } from "@/lib/supabase/db.types";
 
-export type PaymentProofStatus = Enums<"PaymentProofStatus">;
+export type PaymentStatus = Enums<"PaymentStatus">;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -8,8 +8,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function getNextStatus(
   result: unknown,
-  fallback: PaymentProofStatus,
-): PaymentProofStatus {
+  fallback: PaymentStatus,
+): PaymentStatus {
   if (isRecord(result) && typeof result.status === "string") {
     if (
       result.status === "pending" ||

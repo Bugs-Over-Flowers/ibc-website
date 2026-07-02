@@ -116,8 +116,7 @@ export const useSendRegistrationEmail = () => {
               selfAffiliation,
               eventDetails,
               toEmail: registrantEmail,
-              identifier,
-              participantIdentifier:
+              selfParticipantIdentifier:
                 registrantParticipant?.participantIdentifier ?? identifier,
               participants: participants
                 .filter(

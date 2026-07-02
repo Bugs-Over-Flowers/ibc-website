@@ -53,7 +53,7 @@ type AttendanceStoreActions = {
    * Function to set the payment proof status
    * @param status The payment proof status to set
    */
-  setPaymentProofStatus: (status: string) => void;
+  setPaymentStatus: (status: string) => void;
 
   /**
    * Function to open or close the check-in dialog
@@ -151,7 +151,7 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
       }
     },
 
-    setPaymentProofStatus: (status: string) => {
+    setPaymentStatus: (status: string) => {
       set((state) => {
         if (state.scanType === "participant" && state.participantScanData) {
           return {
@@ -159,10 +159,7 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
               ...state.participantScanData,
               registration: {
                 ...state.participantScanData.registration,
-                paymentProofStatus: status as
-                  | "pending"
-                  | "accepted"
-                  | "rejected",
+                paymentStatus: status as "pending" | "accepted" | "rejected",
               },
             },
           };
@@ -171,7 +168,7 @@ const useAttendanceStore = create<AttendanceStore & AttendanceStoreActions>(
           return {
             scannedData: {
               ...state.scannedData,
-              paymentProofStatus: status as "pending" | "accepted" | "rejected",
+              paymentStatus: status as "pending" | "accepted" | "rejected",
             },
           };
         }

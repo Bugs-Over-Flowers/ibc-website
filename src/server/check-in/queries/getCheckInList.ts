@@ -31,7 +31,7 @@ export async function getCheckInList(
           identifier,
           registrationId,
           nonMemberName,
-          paymentProofStatus,
+          paymentStatus,
           businessMember:BusinessMember (
             businessName
           )
@@ -64,7 +64,7 @@ export async function getCheckInList(
       item.participant.registration.businessMember?.businessName ||
       item.participant.registration.nonMemberName,
     identifier: item.participant.registration.identifier,
-    paymentProofStatus: item.participant.registration.paymentProofStatus,
+    paymentStatus: item.participant.registration.paymentStatus,
   }));
 
   const { data: parsedData, error: parseError } =

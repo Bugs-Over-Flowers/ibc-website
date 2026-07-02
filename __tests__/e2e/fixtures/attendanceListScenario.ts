@@ -31,7 +31,7 @@ export interface SeededAttendanceListScenario {
     registrationId: string;
     identifier: string;
     affiliation: string;
-    paymentProofStatus: Database["public"]["Enums"]["PaymentProofStatus"];
+    paymentStatus: Database["public"]["Enums"]["PaymentStatus"];
     participantIds: string[];
   }>;
   checkIns: CheckInRecord[];
@@ -296,7 +296,7 @@ export async function seedAttendanceListScenario(
         registrationId: acceptedRegistration.registrationId,
         identifier: acceptedRegistration.identifier,
         affiliation: acceptedRegistration.affiliation,
-        paymentProofStatus: "accepted" as const,
+        paymentStatus: "accepted" as const,
         participantIds: acceptedData.participantIds,
       },
     ],

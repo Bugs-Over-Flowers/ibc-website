@@ -52,7 +52,7 @@ const getColumns = ({
     cell: ({ row }) => (
       <PaymentStatusBadge
         className="capitalize"
-        status={row.original.paymentProofStatus}
+        status={row.original.paymentStatus}
       />
     ),
   },

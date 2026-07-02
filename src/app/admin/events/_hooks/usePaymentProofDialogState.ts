@@ -1,26 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { PaymentProofStatus } from "@/app/admin/events/_hooks/paymentProofReviewHelpers";
+import type { PaymentStatus } from "@/app/admin/events/_hooks/paymentProofReviewHelpers";
 
 export type DialogMode = "view" | "camera" | "upload" | "preview";
 export type PreviewSource = "camera" | "upload";
 
 interface UsePaymentProofDialogStateProps {
-  initialPaymentProofStatus: PaymentProofStatus;
+  initialPaymentStatus: PaymentStatus;
   onOpenChange?: (open: boolean) => void;
 }
 
 export function usePaymentProofDialogState({
-  initialPaymentProofStatus,
+  initialPaymentStatus,
   onOpenChange,
 }: UsePaymentProofDialogStateProps) {
   const uploadSubmitRef = useRef<(() => void) | null>(null);
 
   const [mode, setMode] = useState<DialogMode>("view");
-  const [paymentProofStatus, setPaymentProofStatus] = useState(
-    initialPaymentProofStatus,
-  );
+  const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewSource, setPreviewSource] = useState<PreviewSource | null>(
     null,
@@ -29,8 +27,8 @@ export function usePaymentProofDialogState({
 
   // Sync status when prop changes (e.g. dialog reopened with new data)
   useEffect(() => {
-    setPaymentProofStatus(initialPaymentProofStatus);
-  }, [initialPaymentProofStatus]);
+    setPaymentStatus(initialPaymentStatus);
+  }, [initialPaymentStatus]);
 
   // Revoke object URL on cleanup to prevent memory leaks
   useEffect(() => {
@@ -92,8 +90,8 @@ export function usePaymentProofDialogState({
     uploadSubmitRef,
     mode,
     setMode,
-    paymentProofStatus,
-    setPaymentProofStatus,
+    paymentStatus,
+    setPaymentStatus,
     selectedFile,
     previewSource,
     previewUrl,
