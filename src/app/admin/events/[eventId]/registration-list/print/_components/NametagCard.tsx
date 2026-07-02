@@ -1,5 +1,4 @@
 import Image from "next/image";
-import IBCLogo from "@/../public/logo/ibc-logo.png";
 import type { ParticipantForPrint } from "@/server/registration/queries/getEventParticipantsForPrint";
 
 interface NametagCardProps {
@@ -12,56 +11,42 @@ export default function NametagCard({
   participant,
 }: NametagCardProps) {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-[6mm] border border-neutral-200 bg-white p-[4mm] pt-[3mm]">
-      {/* Logo */}
-      <div className="size-25">
-        {/** biome-ignore lint/performance/noImgElement: needed for printing */}
-        <img
-          alt="IBC Logo"
-          className="size-full object-contain"
-          src={IBCLogo.src}
-        />
-      </div>
-
-      {/* Name */}
-      <div className="-mt-1 flex flex-col items-center text-center">
-        <p className="max-w-full font-bold text-lg text-neutral-900 uppercase leading-tight">
-          {participant.firstName}
-        </p>
-        <p className="max-w-full font-bold text-lg text-neutral-900 uppercase leading-tight">
-          {participant.lastName}
-        </p>
-      </div>
-
-      {/* Affiliation */}
-      <p className="-mt-0.5 max-w-full px-5 text-center font-medium text-neutral-500 text-xs capitalize">
-        {participant.affiliation || ""}
-      </p>
-
-      {/* QR Code */}
-      <div className="flex flex-col items-center gap-1">
-        <div className="relative size-[22mm]">
+    <div className="flex h-full w-full items-stretch gap-[2mm] overflow-hidden bg-white p-[2mm]">
+      <div className="flex w-[30mm] flex-col items-center justify-center gap-1">
+        <div className="relative size-[26mm]">
           {participant.qrDataUrl ? (
             <Image
               alt="Check-in QR Code"
               className="object-contain"
               fill
-              sizes="88px"
               src={participant.qrDataUrl}
             />
           ) : (
             <div className="size-full rounded-lg bg-neutral-100" />
           )}
         </div>
-        <p className="font-mono text-[8px] text-neutral-400 uppercase tracking-wider">
+        <p className="font-mono text-[7px] text-neutral-500 tracking-wider">
           {participant.participantIdentifier}
         </p>
       </div>
 
-      {/* Event name */}
-      <p className="max-w-full truncate text-[8px] text-neutral-400 leading-tight">
-        {eventTitle}
-      </p>
+      <div className="flex flex-1 flex-col p-[1mm]">
+        {/** biome-ignore lint/performance/noImgElement: needed for printing */}
+        <img
+          alt="IBC Logo"
+          className="h-[8mm] w-auto self-start object-contain"
+          src="/logo/ibc-logo.png"
+        />
+        <p className="mt-2 max-w-full font-bold text-neutral-900 text-sm leading-tight">
+          {participant.firstName} {participant.lastName}
+        </p>
+        <p className="max-w-full text-[10px] text-neutral-600 leading-tight">
+          {participant.affiliation || ""}
+        </p>
+        <p className="mt-auto max-w-full truncate text-[7px] text-neutral-400 leading-tight">
+          {eventTitle}
+        </p>
+      </div>
     </div>
   );
 }

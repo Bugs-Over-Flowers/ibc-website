@@ -6,7 +6,7 @@ interface NametagGridProps {
   participants: ParticipantForPrint[];
 }
 
-const NAMETAGS_PER_PAGE = 6;
+const NAMETAGS_PER_PAGE = 8;
 
 export default function NametagGrid({
   eventTitle,
@@ -21,7 +21,7 @@ export default function NametagGrid({
     <div className="flex flex-col items-center">
       {pages.map((pageParticipants) => (
         <div
-          className="grid h-[297mm] w-[210mm] break-after-page grid-cols-2 grid-rows-3 gap-[4mm] bg-white p-[10mm] last:break-after-auto"
+          className="grid h-[297mm] w-[210mm] break-after-page grid-cols-2 grid-rows-4 gap-[4mm] bg-white p-[8mm] last:break-after-auto"
           key={pageParticipants[0]?.participantId ?? "empty"}
         >
           {pageParticipants.map((participant) => (
