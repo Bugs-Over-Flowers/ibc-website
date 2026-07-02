@@ -9,7 +9,7 @@ import {
   subDays,
 } from "date-fns";
 
-export type FilterOption = "all" | "upcoming" | "past";
+export type FilterOption = "all" | "upcoming" | "ongoing" | "past";
 
 export type PrivacyFilter = "all" | "public" | "private";
 
@@ -34,6 +34,7 @@ export type DatePreset =
 export const filterLabels: Record<FilterOption, string> = {
   all: "All Events",
   upcoming: "Upcoming",
+  ongoing: "Ongoing",
   past: "Past Events",
 };
 

@@ -5,6 +5,7 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  Home,
   MapPin,
 } from "lucide-react";
 import { motion } from "motion/react";
@@ -24,6 +25,7 @@ interface EventSlideProps {
   onPrev: () => void;
   onNext: () => void;
   onGoTo: (index: number) => void;
+  onGoHome: () => void;
 }
 
 const DOT_IDS = Array.from({ length: 20 }, () => crypto.randomUUID());
@@ -99,6 +101,7 @@ export function EventSlide({
   onPrev,
   onNext,
   onGoTo,
+  onGoHome,
 }: EventSlideProps) {
   return (
     <motion.div
@@ -228,9 +231,15 @@ export function EventSlide({
         <>
           {/* Arrow Buttons */}
           <button
-            aria-label="Previous event"
+            aria-label={currentIndex === 0 ? "Go to home" : "Previous event"}
             className="group absolute top-1/2 left-4 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-background/70 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-border hover:bg-background/90 lg:left-6 lg:h-12 lg:w-12"
-            onClick={onPrev}
+            onClick={() => {
+              if (currentIndex === 0) {
+                onGoHome();
+              } else {
+                onPrev();
+              }
+            }}
             type="button"
           >
             <ChevronLeft className="h-5 w-5 text-foreground transition-transform group-hover:-translate-x-0.5" />
@@ -246,6 +255,19 @@ export function EventSlide({
 
           {/* Progress Dots */}
           <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+            {/* Home Dot */}
+            <button
+              aria-label="Go to home"
+              className="group relative p-1"
+              onClick={onGoHome}
+              type="button"
+            >
+              <div className="flex h-2 w-2 items-center justify-center rounded-full bg-muted-foreground/30 transition-all duration-300 group-hover:bg-muted-foreground/50">
+                <Home className="h-1.5 w-1.5 text-muted-foreground/60" />
+              </div>
+            </button>
+
+            {/* Event Dots */}
             {Array.from({ length: totalEvents }).map((_, index) => (
               <button
                 aria-label={`Go to event ${index + 1}`}

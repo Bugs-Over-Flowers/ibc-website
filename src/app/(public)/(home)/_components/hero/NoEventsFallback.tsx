@@ -1,14 +1,41 @@
 "use client";
 
-import { ArrowRight, Bell, CalendarDays } from "lucide-react";
+import {
+  ArrowRight,
+  Bell,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+} from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 interface NoEventsFallbackProps {
+  direction: number;
   onNavigate: (page: string) => void;
+  onGoHome: () => void;
 }
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? "100%" : "-100%",
+    opacity: 0,
+    scale: 1.02,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? "-100%" : "100%",
+    opacity: 0,
+    scale: 0.98,
+  }),
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,15 +57,21 @@ const itemVariants = {
   },
 };
 
-export function NoEventsFallback({ onNavigate }: NoEventsFallbackProps) {
+export function NoEventsFallback({
+  direction,
+  onNavigate,
+  onGoHome,
+}: NoEventsFallbackProps) {
   return (
     <motion.div
-      animate={{ opacity: 1 }}
+      animate="center"
       className="absolute inset-0"
-      exit={{ opacity: 0 }}
-      initial={{ opacity: 0 }}
+      custom={direction}
+      exit="exit"
+      initial="enter"
       key="no-events"
-      transition={{ duration: 1 }}
+      transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+      variants={slideVariants}
     >
       {/* Background Image with Ken Burns effect */}
       <motion.div
@@ -120,6 +153,38 @@ export function NoEventsFallback({ onNavigate }: NoEventsFallbackProps) {
             </Link>
           </motion.div>
         </motion.div>
+      </div>
+
+      {/* Navigation Controls */}
+      <button
+        aria-label="Go to home"
+        className="group absolute top-1/2 left-4 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-background/70 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-border hover:bg-background/90 lg:left-6 lg:h-12 lg:w-12"
+        onClick={onGoHome}
+        type="button"
+      >
+        <ChevronLeft className="h-5 w-5 text-foreground transition-transform group-hover:-translate-x-0.5" />
+      </button>
+      <button
+        aria-label="Go to home"
+        className="group absolute top-1/2 right-4 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-background/70 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-border hover:bg-background/90 lg:right-6 lg:h-12 lg:w-12"
+        onClick={onGoHome}
+        type="button"
+      >
+        <ChevronRight className="h-5 w-5 text-foreground transition-transform group-hover:translate-x-0.5" />
+      </button>
+
+      {/* Home Dot */}
+      <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+        <button
+          aria-label="Go to home"
+          className="group relative p-1"
+          onClick={onGoHome}
+          type="button"
+        >
+          <div className="flex h-2 w-2 items-center justify-center rounded-full bg-muted-foreground/30 transition-all duration-300 group-hover:bg-muted-foreground/50">
+            <Home className="h-1.5 w-1.5 text-muted-foreground/60" />
+          </div>
+        </button>
       </div>
     </motion.div>
   );

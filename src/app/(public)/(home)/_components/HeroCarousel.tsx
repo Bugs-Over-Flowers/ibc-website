@@ -107,6 +107,13 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
     [currentEventIndex],
   );
 
+  const goHome = useCallback(() => {
+    setDirection(-1);
+    setShowWelcome(true);
+    setCurrentEventIndex(0);
+    cycleCountRef.current = 0;
+  }, []);
+
   return (
     <section
       className="relative h-screen max-h-[950px] min-h-[700px] overflow-hidden"
@@ -130,6 +137,7 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
             event={upcomingEvents[currentEventIndex]}
             isPaused={isPaused}
             key={`event-${currentEventIndex}`}
+            onGoHome={goHome}
             onGoTo={goToEvent}
             onNavigate={handleNavigate}
             onNext={nextEvent}
@@ -137,7 +145,12 @@ export function HeroCarousel({ events }: HeroCarouselProps) {
             totalEvents={upcomingEvents.length}
           />
         ) : (
-          <NoEventsFallback key="no-events" onNavigate={handleNavigate} />
+          <NoEventsFallback
+            direction={direction}
+            key="no-events"
+            onGoHome={goHome}
+            onNavigate={handleNavigate}
+          />
         )}
       </AnimatePresence>
     </section>

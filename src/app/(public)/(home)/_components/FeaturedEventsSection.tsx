@@ -22,7 +22,23 @@ export default async function FeaturedEventsSection() {
     })
     .slice(0, 3);
 
-  if (!upcomingEvents || upcomingEvents.length === 0) {
+  // Fallback to recent past events if no upcoming/ongoing events
+  const displayEvents =
+    upcomingEvents.length > 0
+      ? upcomingEvents
+      : (events || [])
+          .filter((event) => {
+            if (!event.eventStartDate) return false;
+            return getEventCategory(event) === "past";
+          })
+          .sort(
+            (a, b) =>
+              new Date(b.eventStartDate).getTime() -
+              new Date(a.eventStartDate).getTime(),
+          )
+          .slice(0, 3);
+
+  if (!displayEvents || displayEvents.length === 0) {
     return (
       <section className="bg-card py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -44,7 +60,7 @@ export default async function FeaturedEventsSection() {
           </div>
 
           <div className="py-12 text-center text-muted-foreground">
-            No upcoming events.
+            No events found.
           </div>
         </div>
       </section>
@@ -57,7 +73,7 @@ export default async function FeaturedEventsSection() {
         <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <div>
             <h2 className="text-balance font-bold text-3xl text-foreground sm:text-4xl">
-              Featured Events
+              {upcomingEvents.length > 0 ? "Featured Events" : "Recent Events"}
             </h2>
           </div>
           <Link href="/events">
@@ -72,7 +88,7 @@ export default async function FeaturedEventsSection() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
-          {upcomingEvents.map((event) => (
+          {displayEvents.map((event) => (
             <FeaturedEventCard event={event} key={event.eventId} />
           ))}
         </div>

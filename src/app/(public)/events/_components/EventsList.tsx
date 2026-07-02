@@ -66,24 +66,26 @@ export function EventsList({ events }: EventsListProps) {
       (e) => getEventCategory(e) === "ongoing",
     );
 
-    // Filter remaining events based on dropdown selection
-    let remaining = privacyFiltered.filter(
-      (e) => getEventCategory(e) !== "ongoing",
-    );
+    // Include all events in the main grid (ongoing events appear here too)
+    let remaining = [...privacyFiltered];
 
     if (filter === "upcoming") {
       remaining = remaining.filter((e) => getEventCategory(e) === "upcoming");
+    } else if (filter === "ongoing") {
+      remaining = remaining.filter((e) => getEventCategory(e) === "ongoing");
     } else if (filter === "past") {
       remaining = remaining.filter((e) => getEventCategory(e) === "past");
     }
 
-    // Sort: upcoming by date ascending, past by date descending
+    // Sort: ongoing first, then upcoming by date ascending, past by date descending
     remaining.sort((a, b) => {
       const catA = getEventCategory(a);
       const catB = getEventCategory(b);
 
-      // Put upcoming before past in "all" view
+      // Put ongoing first, then upcoming before past in "all" view
       if (filter === "all") {
+        if (catA === "ongoing" && catB !== "ongoing") return -1;
+        if (catA !== "ongoing" && catB === "ongoing") return 1;
         if (catA === "upcoming" && catB === "past") return -1;
         if (catA === "past" && catB === "upcoming") return 1;
       }
@@ -165,9 +167,11 @@ export function EventsList({ events }: EventsListProps) {
           <h2 className="font-bold text-2xl text-foreground md:text-3xl">
             {filter === "upcoming"
               ? "Upcoming Events"
-              : filter === "past"
-                ? "Past Events"
-                : "Explore All Events"}
+              : filter === "ongoing"
+                ? "Ongoing Events"
+                : filter === "past"
+                  ? "Past Events"
+                  : "Explore All Events"}
           </h2>
         </motion.div>
         <div className="mb-12">

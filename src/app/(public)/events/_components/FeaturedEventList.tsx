@@ -17,7 +17,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { slideVariants } from "@/lib/animations/slide";
-import { formatDate } from "@/lib/events/eventUtils";
+import { formatDate, getEventCategory } from "@/lib/events/eventUtils";
 import type { Tables } from "@/lib/supabase/db.types";
 
 interface FeaturedEventListProps {
@@ -106,13 +106,19 @@ export function FeaturedEventList({ events }: FeaturedEventListProps) {
             {/* Content */}
             <div className="w-full flex-1 lg:w-1/2">
               <div className="mb-4 flex items-center gap-3">
-                <Badge className="bg-primary text-primary-foreground shadow-lg">
-                  <span className="relative mr-1.5 flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
-                    <span className="relative h-2 w-2 rounded-full bg-white" />
-                  </span>
-                  Happening Now
-                </Badge>
+                {getEventCategory(currentEvent) === "ongoing" ? (
+                  <Badge className="bg-green-500 text-white shadow-lg">
+                    <span className="relative mr-1.5 flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                      <span className="relative h-2 w-2 rounded-full bg-white" />
+                    </span>
+                    Happening Now
+                  </Badge>
+                ) : (
+                  <Badge className="bg-primary text-primary-foreground shadow-lg">
+                    Upcoming
+                  </Badge>
+                )}
 
                 {currentEvent.eventType === "public" && (
                   <Badge className="bg-blue-500 text-white shadow-lg">
