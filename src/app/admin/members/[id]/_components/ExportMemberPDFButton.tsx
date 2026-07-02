@@ -45,17 +45,39 @@ function statusColor(status?: string | null): string {
   return "#475569";
 }
 
+const applicationTypeLabels: Record<string, string> = {
+  newMember: "New Member",
+  renewal: "Renewal",
+  updating: "Update Info",
+};
+
+const applicationTypeColors: Record<string, string> = {
+  newMember: "background:#05966915;color:#059669;border:1px solid #05966950",
+  renewal: "background:#ea580c15;color:#ea580c;border:1px solid #ea580c50",
+  updating: "background:#2563eb15;color:#2563eb;border:1px solid #2563eb50",
+};
+
+const memberTypeColors: Record<string, string> = {
+  corporate: "background:#0284c5;color:#f0f9ff",
+  personal: "background:#6366f1;color:#f0f9ff",
+};
+
 export default function ExportMemberPDFButton({
   member,
 }: ExportMemberPDFButtonProps) {
   const handleExport = () => {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      alert("Please allow popups to export PDF");
-      return;
-    }
-
     const latestApplication = member.latestApplication;
+    const applicationTypeLabel = latestApplication?.applicationType
+      ? (applicationTypeLabels[latestApplication.applicationType] ??
+        latestApplication.applicationType)
+      : null;
+    const applicationTypeStyle = latestApplication?.applicationType
+      ? (applicationTypeColors[latestApplication.applicationType] ?? "")
+      : "";
+    const memberTypeStyle = latestApplication?.applicationMemberType
+      ? (memberTypeColors[latestApplication.applicationMemberType] ?? "")
+      : "";
+    const memberTypeLabel = latestApplication?.applicationMemberType ?? null;
     const principalRepresentative = latestApplication?.members.find(
       (m) => m.companyMemberType === "principal",
     );
@@ -389,6 +411,16 @@ export default function ExportMemberPDFButton({
     }
     .badge-principal { background: #0284c5; color: #f0f9ff; }
     .badge-alternate { background: #475569; color: #f8fafc; }
+    .badge-type {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
 
     .rep-table { width: 100%; border-collapse: collapse; }
     .rep-table tr:not(:last-child) td { border-bottom: 1px solid #f1f5f9; }
@@ -527,7 +559,21 @@ export default function ExportMemberPDFButton({
     <div class="info-card">
       <table class="info-table">
         ${infoRow("Business Name", member.businessName ?? "N/A")}
-        ${infoRow("Member Identifier", member.identifier ?? "N/A")}
+        <tr>
+          <td class="info-label">Member Identifier</td>
+          <td class="info-value">
+            ${escapeHtml(member.identifier ?? "N/A")}
+            <div style="margin-top:2px;font-size:10px;color:#0369a1;opacity:0.75;">Use this when applying for renewal or updating your information.</div>
+          </td>
+        </tr>
+        ${
+          memberTypeLabel
+            ? `<tr>
+          <td class="info-label">Member Type</td>
+          <td class="info-value"><span class="badge" style="${memberTypeStyle}">${escapeHtml(memberTypeLabel)}</span></td>
+        </tr>`
+            : ""
+        }
         ${infoRow("Industry / Sector", member.sectorName ?? "N/A")}
         ${infoRow("Company Profile", latestApplication?.companyProfileType === "image" || latestApplication?.companyProfileType === "document" ? `Uploaded ${latestApplication.companyProfileType}` : (member.websiteURL ?? "N/A"))}
         <tr>
@@ -545,7 +591,15 @@ export default function ExportMemberPDFButton({
     <div class="section-heading">II &nbsp; Latest Application Details</div>
     <div class="info-card">
       <table class="info-table">
-        ${infoRow("Application Reference No.", latestApplication?.applicationId ?? "N/A")}
+        ${infoRow("Application Identifier", latestApplication?.identifier ?? "N/A")}
+        ${
+          applicationTypeLabel
+            ? `<tr>
+          <td class="info-label">Application Type</td>
+          <td class="info-value"><span class="badge-type" style="${applicationTypeStyle}">${escapeHtml(applicationTypeLabel)}</span></td>
+        </tr>`
+            : ""
+        }
         ${infoRow("Date Submitted", formatDate(latestApplication?.applicationDate ?? null))}
         <tr>
           <td class="info-label">Application Status</td>
@@ -604,12 +658,32 @@ export default function ExportMemberPDFButton({
   </div>
 
 </div>
-<script>window.onload = () => window.print();</script>
 </body>
 </html>`;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.src = url;
+    document.body.appendChild(iframe);
+
+    const cleanup = () => {
+      window.removeEventListener("afterprint", cleanup);
+      iframe.remove();
+      URL.revokeObjectURL(url);
+    };
+
+    iframe.onload = () => {
+      iframe.contentWindow?.print();
+      window.addEventListener("afterprint", cleanup);
+    };
   };
 
   return (

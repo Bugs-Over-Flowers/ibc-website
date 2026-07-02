@@ -95,6 +95,10 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
         </div>
 
         {/* Payment Proof Section */}
+        <div className="shrink-0 self-end lg:self-start">
+          <ExportPDFButton application={application} />
+        </div>
+
         {paymentRequirement.requiresPayment && hasProofImage && (
           <PaymentProofModal
             applicationId={application.applicationId}
@@ -144,7 +148,6 @@ export function ApplicationHeader({ application }: ApplicationHeaderProps) {
                 Application History
               </Button>
             </Link>
-            <ExportPDFButton application={application} />
           </div>
         </div>
       )}

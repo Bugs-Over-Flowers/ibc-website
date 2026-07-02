@@ -14,7 +14,6 @@ import { getMembershipPaymentRequirement } from "@/lib/membership/paymentRules";
 import type { getApplications } from "@/server/applications/queries/getApplications";
 import { useSelectedApplicationsStore } from "../_store/useSelectedApplicationsStore";
 import { ApplicationsTableRow } from "./ApplicationsTableRow";
-import ExportPDFButton from "./ExportPDFButton";
 
 interface ApplicationsTableProps {
   applications: Awaited<ReturnType<typeof getApplications>>;
@@ -101,7 +100,7 @@ export function ApplicationsTable({
   };
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle>
@@ -110,16 +109,13 @@ export function ApplicationsTable({
               ({applications.length})
             </span>
           </CardTitle>
-          {applications.length > 0 && (
-            <ExportPDFButton application={applications[0]} />
-          )}
         </div>
         <p className="text-muted-foreground text-xs">
           Double-click a row to open
         </p>
       </CardHeader>
-      <CardContent>
-        <Table>
+      <CardContent className="min-w-0 p-0">
+        <Table className="w-full table-fixed">
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">
@@ -131,13 +127,19 @@ export function ApplicationsTable({
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
-              <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              <TableHead
+                className={`${showContactColumn ? "w-[22%]" : "w-[24%]"} font-semibold text-muted-foreground text-xs uppercase tracking-wide`}
+              >
                 Company Name
               </TableHead>
-              <TableHead className="w-[24%] font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              <TableHead
+                className={`${showContactColumn ? "w-[24%]" : "w-[34%]"} font-semibold text-muted-foreground text-xs uppercase tracking-wide`}
+              >
                 Sector
               </TableHead>
-              <TableHead className="w-[14%] font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              <TableHead
+                className={`${showContactColumn ? "w-[14%]" : "w-[16%]"} font-semibold text-muted-foreground text-xs uppercase tracking-wide`}
+              >
                 Application Type
               </TableHead>
               {showContactColumn && (
