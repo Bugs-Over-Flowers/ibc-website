@@ -88,8 +88,8 @@ export default function Step3() {
           {(paymentMethod) =>
             paymentMethod === "online" ? (
               <div className="space-y-6">
-                <Step3PaymentProofSection form={form} />
                 <IBCPaymentInfo showHeader={false} />
+                <Step3PaymentProofSection form={form} />
               </div>
             ) : null
           }

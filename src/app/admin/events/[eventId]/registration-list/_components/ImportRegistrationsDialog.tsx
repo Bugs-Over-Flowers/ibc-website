@@ -38,7 +38,6 @@ const REQUIRED_HEADERS = [
   "Company/Organization",
   "First Name",
   "Last Name",
-  "Email",
   "Contact Number",
 ];
 
@@ -154,6 +153,13 @@ export default function ImportRegistrationsDialog({
       throw new Error(`Missing required headers: ${missingHeaders.join(", ")}`);
     }
 
+    const emailHeader = headers.find((h) => h.includes("email"));
+    if (!emailHeader) {
+      throw new Error(
+        "Missing an email column. Expected a header containing 'Email' (e.g. Email, Email Add, Email Address).",
+      );
+    }
+
     if (dataLines.length > IMPORT_REGISTRATIONS_MAX_ROWS) {
       throw new Error(
         `Maximum of ${IMPORT_REGISTRATIONS_MAX_ROWS} rows per import. Received ${dataLines.length}.`,
@@ -175,7 +181,7 @@ export default function ImportRegistrationsDialog({
       return {
         first_name: getValue("First Name"),
         last_name: getValue("Last Name"),
-        email: getValue("Email"),
+        email: values[headers.indexOf(emailHeader)]?.trim() || undefined,
         contact_number: getValue("Contact Number"),
         affiliation: getValue("Company/Organization"),
         note: getValue("Note"),

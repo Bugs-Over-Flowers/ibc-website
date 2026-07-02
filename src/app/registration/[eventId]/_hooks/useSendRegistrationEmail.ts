@@ -105,39 +105,44 @@ export const useSendRegistrationEmail = () => {
           registrantGroup.find((participant) => participant.isPrincipal) ??
           registrantGroup[0];
 
-        // Send registrant confirmation email
-        const { error: registrantError } = await tryCatch(
-          sendRegistrationConfirmationEmail({
-            selfName,
-            selfAffiliation,
-            eventDetails,
-            toEmail: registrantEmail,
-            identifier,
-            participantIdentifier:
-              registrantParticipant?.participantIdentifier ?? identifier,
-            participants: participants
-              .filter(
-                (participant) =>
-                  participant.participantIdentifier !==
-                  registrantParticipant?.participantIdentifier,
-              )
-              .map((participant) => ({
-                fullName: participant.fullName,
-                email: participant.email,
-                affiliation: participant.affiliation,
-                participantIdentifier: participant.participantIdentifier,
-              })),
-          }),
-        );
+        const isValidEmail = (email: string) =>
+          email.includes("@") && email.length > 5;
 
-        if (registrantError) {
-          await deleteRegistration(registrationId);
-          throw new Error(registrantError);
+        // Send registrant confirmation email (skip if email looks invalid, e.g. "NA")
+        if (isValidEmail(registrantEmail)) {
+          const { error: registrantError } = await tryCatch(
+            sendRegistrationConfirmationEmail({
+              selfName,
+              selfAffiliation,
+              eventDetails,
+              toEmail: registrantEmail,
+              identifier,
+              participantIdentifier:
+                registrantParticipant?.participantIdentifier ?? identifier,
+              participants: participants
+                .filter(
+                  (participant) =>
+                    participant.participantIdentifier !==
+                    registrantParticipant?.participantIdentifier,
+                )
+                .map((participant) => ({
+                  fullName: participant.fullName,
+                  email: participant.email,
+                  affiliation: participant.affiliation,
+                  participantIdentifier: participant.participantIdentifier,
+                })),
+            }),
+          );
+
+          if (registrantError) {
+            await deleteRegistration(registrationId);
+            throw new Error(registrantError);
+          }
         }
 
-        // Send individual participant notification emails
+        // Send individual participant notification emails (skip invalid recipients)
         for (const group of Array.from(groupedRecipients.values()).filter(
-          (entry) => !entry.isRegistrant,
+          (entry) => !entry.isRegistrant && isValidEmail(entry.email),
         )) {
           const { error: participantError } = await tryCatch(
             sendParticipantNotificationEmail({

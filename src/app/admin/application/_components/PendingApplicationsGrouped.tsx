@@ -128,8 +128,8 @@ export function PendingApplicationsGrouped({
   );
 
   return (
-    <div className="min-w-0 overflow-x-auto">
-      <div className="min-w-[640px] space-y-5">
+    <div className="min-w-0 overflow-hidden">
+      <div className="space-y-5">
         {sortedGroups.map((group) => {
           const selectableIds = group.applications
             .filter(isSelectableApplication)

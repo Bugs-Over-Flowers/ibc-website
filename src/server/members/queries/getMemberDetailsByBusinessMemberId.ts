@@ -21,6 +21,9 @@ export type MemberDetailsByBusinessMemberId = {
   sectorName: string | null;
   latestApplication: {
     applicationId: string;
+    identifier: string;
+    applicationType: string;
+    applicationMemberType: string;
     sectorName: string | null;
     companyAddress: string | null;
     emailAddress: string | null;
@@ -102,6 +105,9 @@ export async function getMemberDetailsByBusinessMemberId(
       .select(
         `
         applicationId,
+        identifier,
+        applicationType,
+        applicationMemberType,
         sectorName,
         companyAddress,
         emailAddress,
@@ -155,6 +161,9 @@ export async function getMemberDetailsByBusinessMemberId(
     latestApplication: latestApplication
       ? {
           applicationId: latestApplication.applicationId,
+          identifier: latestApplication.identifier,
+          applicationType: latestApplication.applicationType,
+          applicationMemberType: latestApplication.applicationMemberType,
           sectorName: latestApplication.sectorName,
           companyAddress: latestApplication.companyAddress,
           emailAddress: latestApplication.emailAddress,
