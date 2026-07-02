@@ -140,8 +140,15 @@ export const GetParticipantCheckInForDateSchema = z
     }),
     event: z.object({
       eventId: z.string(),
-      eventTitle: z.string().optional(),
+      eventTitle: z.string(),
     }),
+    registrant: z
+      .object({
+        firstName: z.string(),
+        lastName: z.string(),
+        email: z.string(),
+      })
+      .nullable(),
     checkIn: z
       .array(
         z.object({
