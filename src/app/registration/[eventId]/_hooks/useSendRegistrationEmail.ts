@@ -105,6 +105,10 @@ export const useSendRegistrationEmail = () => {
           registrantGroup.find((participant) => participant.isPrincipal) ??
           registrantGroup[0];
 
+        if (!registrantParticipant) {
+          throw new Error("Registrant participant identifier not found.");
+        }
+
         // Send registrant confirmation email
         const { error: registrantError } = await tryCatch(
           sendRegistrationConfirmationEmail({
@@ -112,14 +116,13 @@ export const useSendRegistrationEmail = () => {
             selfAffiliation,
             eventDetails,
             toEmail: registrantEmail,
-            identifier,
-            participantIdentifier:
-              registrantParticipant?.participantIdentifier ?? identifier,
+            selfParticipantIdentifier:
+              registrantParticipant.participantIdentifier,
             participants: participants
               .filter(
                 (participant) =>
                   participant.participantIdentifier !==
-                  registrantParticipant?.participantIdentifier,
+                  registrantParticipant.participantIdentifier,
               )
               .map((participant) => ({
                 fullName: participant.fullName,

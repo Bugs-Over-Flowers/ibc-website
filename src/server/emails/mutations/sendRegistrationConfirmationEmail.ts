@@ -17,10 +17,9 @@ interface SendRegistrationConfirmationEmailProps {
     | "eventStartDate"
     | "venue"
   >;
-  identifier: string;
   selfName: string;
   selfAffiliation: string;
-  participantIdentifier: string;
+  selfParticipantIdentifier: string;
   participants: {
     fullName: string;
     email: string;
@@ -32,15 +31,13 @@ interface SendRegistrationConfirmationEmailProps {
 export const sendRegistrationConfirmationEmail = async ({
   toEmail,
   eventDetails,
-  identifier,
   selfName,
   selfAffiliation,
-  participantIdentifier,
+  selfParticipantIdentifier,
   participants,
 }: SendRegistrationConfirmationEmailProps) => {
-  const registrationQrBuffer = await generateQRBuffer(identifier);
   const registrantParticipantQrBuffer = await generateQRBuffer(
-    participantIdentifier,
+    selfParticipantIdentifier,
   );
   const participantQrBuffers = await Promise.all(
     participants.map(async (participant) => ({
@@ -70,12 +67,11 @@ export const sendRegistrationConfirmationEmail = async ({
       eventDetails,
       eventDateRange,
       eventVenue: eventDetails.venue ?? "TBA",
-      registrationIdentifier: identifier,
-      participantIdentifier,
       self: {
         email: toEmail,
         fullName: selfName,
         affiliation: selfAffiliation,
+        participantIdentifier: selfParticipantIdentifier,
       },
       participants,
     }),
@@ -87,12 +83,7 @@ export const sendRegistrationConfirmationEmail = async ({
     html,
     attachments: [
       {
-        filename: `${identifier}.png`,
-        content: registrationQrBuffer,
-        cid: "qrCodeCID",
-      },
-      {
-        filename: `${participantIdentifier}.png`,
+        filename: `${selfParticipantIdentifier}.png`,
         content: registrantParticipantQrBuffer,
         cid: "participantQrCodeCID",
       },
