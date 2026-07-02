@@ -1,4 +1,5 @@
 import { revalidateLogic } from "@tanstack/react-form";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppForm } from "@/hooks/_formHooks";
 import { useAction } from "@/hooks/useAction";
@@ -32,6 +33,7 @@ const useQuickRegistration = ({
   setDialogOpen,
   eventId,
 }: QuickRegistrationProps) => {
+  const router = useRouter();
   const { execute: quickRegistration } = useAction(
     tryCatch((payload: QuickOnsiteRegistrationInput) =>
       quickOnsiteRegistrationRPC(payload),
@@ -44,6 +46,7 @@ const useQuickRegistration = ({
         toast.success("Registration and check-in complete", {
           description: `${rpcResults.message} ${identifier}`,
         });
+        router.refresh();
       },
     },
   );

@@ -1,4 +1,4 @@
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useOptimisticAction } from "@/hooks/useAction";
 import tryCatch from "@/lib/server/tryCatch";
@@ -69,6 +69,7 @@ interface UseCheckInProps {
 
 export const useCheckIn = ({ eventId }: UseCheckInProps) => {
   const { eventDayId } = useParams<{ eventDayId: string }>();
+  const router = useRouter();
   const scannedData = useAttendanceStore((s) => s.scannedData);
   const clearSelection = useAttendanceStore((s) => s.clearSelection);
   const { execute: scanQRData } = useScanQR({ eventId: eventId });
@@ -137,6 +138,9 @@ export const useCheckIn = ({ eventId }: UseCheckInProps) => {
         if (scannedData) {
           await scanQRData(scannedData.identifier, eventDayId);
         }
+
+        // Refresh the page to update live stats
+        router.refresh();
 
         // Clear selections and edited remarks
         clearSelection();

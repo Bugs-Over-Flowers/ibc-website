@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import { Suspense } from "react";
 import BackNavigation from "@/app/admin/_components/BackNavigation";
+import CheckInListStats from "@/app/admin/events/_components/CheckInListStats";
 import QuickOnsiteRegistrationCard from "@/app/admin/events/check-in/[eventDayId]/_components/quick-registration/QuickOnsiteRegistrationCard";
 import tryCatch from "@/lib/server/tryCatch";
 import { parseStringParam } from "@/lib/utils";
+import { getCheckInStats } from "@/server/check-in/queries/getCheckInStats";
+import { getEventDayParticipantList } from "@/server/check-in/queries/getEventDayParticipantList";
 import { getEventDayDetails } from "@/server/events/queries/getEventDayDetails";
 import { getAllMembers } from "@/server/members/queries/getAllMembers";
 import { getEventRegistrationList } from "@/server/registration/queries/getEventRegistrationList";
@@ -59,6 +62,7 @@ async function CheckInPage({
   const paymentProofStatus = parseStringParam(
     parsedSearchParams.check_paymentStatus,
   );
+  const participantSearch = parseStringParam(parsedSearchParams.check_pq);
 
   const { data: eventDayData } = await tryCatch(
     getEventDayDetails(cookieStore.getAll(), {
@@ -86,6 +90,18 @@ async function CheckInPage({
         searchString: searchQuery,
       }),
     );
+
+  const { data: participantListData } = await tryCatch(
+    getEventDayParticipantList(cookieStore.getAll(), {
+      eventId: eventDayData.event.eventId,
+      eventDayId,
+      searchString: participantSearch,
+    }),
+  );
+
+  const { data: statsData } = await tryCatch(
+    getCheckInStats(cookieStore.getAll(), eventDayData.event.eventId),
+  );
 
   if (!registrationListData || membersError || !membersData) {
     return (
@@ -119,16 +135,26 @@ async function CheckInPage({
           </div>
         </div>
 
-        <CheckInRegistrationPanel
-          errorMessage={
-            registrationListError
-              ? "Failed to load registration list."
-              : undefined
-          }
-          eventDayId={eventDayId}
-          eventId={eventDayData.event.eventId}
-          registrationList={registrationListData}
-        />
+        <div className="flex flex-col gap-4">
+          {statsData && (
+            <CheckInListStats
+              checkedInCount={statsData.checkInCounts[eventDayId] ?? 0}
+              eventDayLabel={eventDayData.label}
+              totalExpected={statsData.totalExpected}
+            />
+          )}
+          <CheckInRegistrationPanel
+            errorMessage={
+              registrationListError
+                ? "Failed to load registration list."
+                : undefined
+            }
+            eventDayId={eventDayId}
+            eventId={eventDayData.event.eventId}
+            participantList={participantListData ?? []}
+            registrationList={registrationListData}
+          />
+        </div>
       </div>
       <CheckInDataDialog
         eventId={eventDayData.event.eventId}

@@ -124,6 +124,10 @@ export default function CheckInRegistrationTable({
         scanQRData: handleScanQR,
       })}
       data={registrationList}
+      onRowDoubleClick={(row) => {
+        if (isPending) return;
+        handleScanQR(row.registrationIdentifier, eventDayId);
+      }}
       tableContainerClassName="rounded-none border-0"
       tableHeaderClassName="bg-muted/20"
     />
